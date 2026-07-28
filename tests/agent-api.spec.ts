@@ -26,7 +26,7 @@ test.describe('Agent API (#7)', () => {
   });
 
   test('schema served at /schema/mockup-document.schema.json', async ({ page }) => {
-    const response = await page.request.get('/adwmock/schema/mockup-document.schema.json');
+    const response = await page.request.get('/protota/schema/mockup-document.schema.json');
     expect(response.status()).toBe(200);
     const schema = await response.json();
     expect(schema.$id).toContain('mockup-document');

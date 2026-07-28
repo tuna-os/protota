@@ -29,7 +29,7 @@ export const PresetGallery: React.FC<Props> = ({ isOpen, onClose }) => {
   const handleLoad = async (id: string) => {
     setLoading(true);
     try {
-      const res = await fetch(`/presets/${id}.mockup.json`);
+      const res = await fetch(`${import.meta.env.BASE_URL}presets/${id}.mockup.json`);
       const payload = await res.json();
       const doc: MockupDocument = payload.document;
       doc.colorScheme = doc.colorScheme || 'auto';

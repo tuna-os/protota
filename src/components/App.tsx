@@ -26,6 +26,17 @@ export const App: React.FC = () => {
   const [showFlows, setShowFlows] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const handleShare = async () => {
+    const json = JSON.stringify(doc);
+    const encoded = btoa(unescape(encodeURIComponent(json)));
+    const url = `${window.location.origin}${window.location.pathname}#doc=${encoded}`;
+    try {
+      await navigator.clipboard.writeText(url);
+    } catch {
+      prompt('Share this URL:', url);
+    }
+  };
+
   const handleExport = async () => {
     await exportDocumentFile(doc);
   };
@@ -108,6 +119,7 @@ export const App: React.FC = () => {
         </button>
         <span style={{ opacity: 0.25 }}>│</span>
         <button className="protota-btn" onClick={handleExport}>💾 Export</button>
+        <button className="protota-btn" onClick={handleShare}>🔗 Share</button>
         <button className="protota-btn" onClick={() => fileInputRef.current?.click()}>📂 Import</button>
         <span style={{ opacity: 0.25 }}>│</span>
         <button

@@ -20,6 +20,7 @@ const initialDocument: MockupDocument = {
   id: 'doc-1',
   title: 'Untitled GNOME App',
   edges: [],
+  colorScheme: 'auto',
   screens: [
     {
       id: 'screen-1',
@@ -248,6 +249,7 @@ interface MockupState {
   deleteNode: (nodeId: string) => void;
   undo: () => void;
   redo: () => void;
+  toggleColorScheme: () => void;
   setShowAddScreenModal: (show: boolean) => void;
 }
 
@@ -393,5 +395,15 @@ export const useMockupStore = create<MockupState>((set, get) => {
     },
 
     setShowAddScreenModal: (show) => set({ showAddScreenModal: show }),
+
+    toggleColorScheme: () => {
+      const next = produce(get().doc, (draft) => {
+        const cycle: Record<string, MockupDocument['colorScheme']> = {
+          auto: 'dark', dark: 'light', light: 'auto',
+        };
+        draft.colorScheme = cycle[draft.colorScheme];
+      });
+      set(pushSnapshot(next));
+    },
   };
 });

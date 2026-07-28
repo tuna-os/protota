@@ -134,6 +134,7 @@ export interface MockupDocument {
   title: string;
   screens: Screen[];
   edges: Array<{ id: string; sourceId: string; targetId: string }>;
+  colorScheme: 'auto' | 'light' | 'dark';
 }
 
 /**

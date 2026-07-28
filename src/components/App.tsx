@@ -7,8 +7,11 @@ import { AddScreenModal } from './AddScreenModal';
 import { exportDocumentFile, importDocumentFile } from '../utils/exportImport';
 
 export const App: React.FC = () => {
-  const { doc, undo, redo, setShowAddScreenModal, showAddScreenModal } =
+  const { doc, undo, redo, setShowAddScreenModal, showAddScreenModal, toggleColorScheme } =
     useMockupStore();
+
+  const themeIcon = doc.colorScheme === 'dark' ? '☀' : doc.colorScheme === 'light' ? '🌙' : '◐';
+  const themeLabel = doc.colorScheme === 'dark' ? 'Light' : doc.colorScheme === 'light' ? 'Auto' : 'Dark';
 
   const [leftOpen, setLeftOpen] = useState(true);
   const [rightOpen, setRightOpen] = useState(true);
@@ -23,7 +26,8 @@ export const App: React.FC = () => {
     if (!file) return;
     try {
       const imported = await importDocumentFile(file);
-      localStorage.setItem('adwaita_mockup_doc_v1', JSON.stringify(imported));
+      imported.colorScheme = imported.colorScheme || 'auto';
+      localStorage.setItem('adwaita_mockup_doc_v2', JSON.stringify(imported));
       window.location.reload();
     } catch (err) {
       alert('Failed to import: ' + (err as Error).message);
@@ -60,6 +64,12 @@ export const App: React.FC = () => {
         <span style={{ opacity: 0.25 }}>│</span>
         <button className="adwmock-btn" onClick={handleExport}>💾 Export</button>
         <button className="adwmock-btn" onClick={() => fileInputRef.current?.click()}>📂 Import</button>
+        <span style={{ opacity: 0.25 }}>│</span>
+        <button
+          className="adwmock-btn"
+          onClick={toggleColorScheme}
+          title={`Theme: ${doc.colorScheme} (click for ${themeLabel})`}
+        >{themeIcon} {themeLabel}</button>
         <input
           ref={fileInputRef}
           type="file"

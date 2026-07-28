@@ -125,7 +125,7 @@ function nodeProps(node: AdwNode): Record<string, string> {
 export const AdwaitaRenderer: React.FC<Props> = ({
   node, screenId, screenWidth, screenHeight,
 }) => {
-  const { selectedNodeId, selectNode, addChildNode } = useMockupStore();
+  const { selectedNodeId, selectNode, addChildNode, doc } = useMockupStore();
   const isSelected = selectedNodeId === node.id;
   const legalAdds = LEGAL_CHILDREN[node.type] || [];
   const elRef = useRef<HTMLElement>(null);
@@ -139,6 +139,13 @@ export const AdwaitaRenderer: React.FC<Props> = ({
 
   const tag = TAG_MAP[node.type] || 'div';
   const attrs = nodeProps(node);
+
+  // Apply theme class to window/dialog roots based on doc colorScheme
+  const isRoot = node.type === 'window' || node.type === 'dialog' ||
+    node.type === 'preferences-dialog';
+  const themeClass = isRoot && doc.colorScheme !== 'auto'
+    ? `theme-${doc.colorScheme}` : '';
+  if (themeClass) attrs['class'] = themeClass;
 
   const children = node.children?.map((child) => (
     <AdwaitaRenderer key={child.id} node={child} screenId={screenId} />

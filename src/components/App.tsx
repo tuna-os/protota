@@ -23,6 +23,7 @@ export const App: React.FC = () => {
   const [showShortcuts, setShowShortcuts] = useState(false);
   const [showPresets, setShowPresets] = useState(false);
   const [showCommandPalette, setShowCommandPalette] = useState(false);
+  const [showFlows, setShowFlows] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleExport = async () => {
@@ -126,6 +127,12 @@ export const App: React.FC = () => {
           className="protota-btn"
           onClick={() => setShowPresets(true)}
         >📦 Presets</button>
+        <span style={{ opacity: 0.25 }}>│</span>
+        <button
+          className={`protota-btn${showFlows ? ' protota-btn--primary' : ''}`}
+          onClick={() => setShowFlows(!showFlows)}
+          data-active={showFlows ? 'true' : undefined}
+        >🔗 Flows</button>
         <input
           ref={fileInputRef}
           type="file"

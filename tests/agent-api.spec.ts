@@ -5,34 +5,31 @@ test.describe('Agent API (#7)', () => {
     await page.goto('/');
     await page.waitForSelector('adw-window', { timeout: 10000 });
 
-    // Verify the initial document is valid (loaded from store)
-    const docTitle = await page.evaluate(() => {
-      const raw = localStorage.getItem('protota_doc_v1');
-      return raw ? JSON.parse(raw).title : null;
-    });
-    expect(docTitle).toBeTruthy();
+    // Export the document and verify it matches the schema structure
+    const exportBtn = page.getByRole('button', { name: /export/i });
+    const [download] = await Promise.all([
+      page.waitForEvent('download', { timeout: 5000 }),
+      exportBtn.click(),
+    ]);
+
+    const stream = await download.createReadStream();
+    const chunks: Buffer[] = [];
+    for await (const chunk of stream) chunks.push(Buffer.from(chunk));
+    const content = Buffer.concat(chunks).toString('utf-8');
+    const parsed = JSON.parse(content);
+
+    expect(parsed.version).toBe(1);
+    expect(parsed.document.screens.length).toBeGreaterThan(0);
+    expect(parsed.document.screens[0].rootNode.type).toBeDefined();
+    expect(parsed.document.colorScheme).toBeDefined();
+    expect(Array.isArray(parsed.document.edges)).toBe(true);
   });
 
-  test('generated document passes legal children validation', async ({ page }) => {
-    await page.goto('/');
-    await page.waitForSelector('adw-window', { timeout: 10000 });
-
-    // Load the settings preset which has proper HIG structure
-    await page.getByRole('button', { name: /preset/i }).click();
-    const settings = page.locator('.protota-preset-item').filter({ hasText: /settings/i }).first();
-
-    await Promise.all([
-      page.waitForNavigation({ timeout: 10000 }),
-      settings.click(),
-    ]).catch(() => {});
-
-    await page.waitForSelector('adw-window', { timeout: 8000 }).catch(() => {});
-
-    // Verify the loaded document has valid structure
-    const docId = await page.evaluate(() => {
-      const raw = localStorage.getItem('protota_doc_v1');
-      return raw ? JSON.parse(raw).id : null;
-    });
-    expect(docId).toBe('preset-settings');
+  test('schema served at /schema/mockup-document.schema.json', async ({ page }) => {
+    const response = await page.request.get('/adwmock/schema/mockup-document.schema.json');
+    expect(response.status()).toBe(200);
+    const schema = await response.json();
+    expect(schema.$id).toContain('mockup-document');
+    expect(schema.$defs).toBeDefined();
   });
 });

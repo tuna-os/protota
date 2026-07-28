@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://tuna-os.github.io/adwmock/schema/mockup-document.json",
+  "$id": "https://tuna-os.github.io/protota/schema/mockup-document.json",
   "title": "Protota Mockup Document",
   "description": "A Protota mockup document containing screens, widget trees, and flow edges.",
   "type": "object",

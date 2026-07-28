@@ -14,7 +14,7 @@ test.describe('Keyboard shortcuts (#14)', () => {
       await expect(page.locator('.selected-outline').first()).toBeVisible({ timeout: 3000 });
 
       // Click an add button to create a child
-      const addBtn = page.locator('.adwmock-add-btn').first();
+      const addBtn = page.locator('.protota-add-btn').first();
       if (await addBtn.isVisible()) {
         await addBtn.click();
 

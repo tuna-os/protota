@@ -44,11 +44,6 @@ describe('MockupBuilder', () => {
     doc.screens[0].rootNode.children![0].children!.push({
       id: 'bad', type: 'button',
     });
-
-    const b = new MockupBuilder('x');
-    const result = (b as any).validate ? null : null;
-    // Recreate builder to validate
-    // Test that the schema catches this
   });
 
   it('generates preferences mockups from high-level description', () => {

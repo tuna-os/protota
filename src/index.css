@@ -1,0 +1,230 @@
+@import url('https://fonts.googleapis.com/css2?family=Cantarell:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+}
+
+/* Bind the Adwaita surface to the document root so chrome matches widgets.
+   The @gjsify/adwaita-web variables (--window-bg-color, --window-fg-color, ...)
+   are defined by the adwaita-web stylesheet. On dark-mode preference or
+   .theme-dark, they flip to the dark palette. */
+#root {
+  background-color: var(--window-bg-color, #fafafb);
+  color: var(--window-fg-color, rgba(0, 0, 6, 0.8));
+  color-scheme: light dark;
+  font-family: 'Cantarell', system-ui, -apple-system, BlinkMacSystemFont,
+    'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ---- Toolbar (headerbar) ---- */
+.adwmock-toolbar {
+  background-color: var(--headerbar-bg-color, #ffffff);
+  color: var(--headerbar-fg-color, rgba(0, 0, 6, 0.8));
+  border-bottom: 1px solid var(--separator-color, rgba(0, 0, 6, 0.1));
+  box-shadow: 0 1px 2px var(--headerbar-shade-color, rgba(0, 0, 6, 0.12));
+}
+
+/* ---- Side panels (layers + inspector) ---- */
+.adwmock-panel {
+  background-color: var(--sidebar-bg-color, #ebebed);
+  border-color: var(--separator-color, rgba(0, 0, 6, 0.1));
+}
+
+.adwmock-panel-header {
+  border-bottom: 1px solid var(--separator-color, rgba(0, 0, 6, 0.1));
+}
+
+/* ---- Canvas ---- */
+.adwmock-canvas {
+  background-color: var(--view-bg-color, #ffffff);
+}
+
+/* ---- Buttons - Adwaita flat/toolbar style ---- */
+.adwmock-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border: none;
+  border-radius: 8px;
+  background: var(--button-bg-color, rgba(0, 0, 6, 0.08));
+  color: var(--window-fg-color, rgba(0, 0, 6, 0.8));
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  user-select: none;
+}
+
+.adwmock-btn:hover {
+  background: var(--button-hover-color, rgba(0, 0, 6, 0.13));
+}
+
+.adwmock-btn:active {
+  background: var(--button-active-color, rgba(0, 0, 6, 0.19));
+}
+
+.adwmock-btn--primary {
+  background: var(--accent-bg-color, #3584e4);
+  color: var(--accent-fg-color, #ffffff);
+}
+
+.adwmock-btn--primary:hover {
+  opacity: 0.9;
+}
+
+.adwmock-btn--destructive {
+  background: var(--destructive-bg-color, #e01b24);
+  color: var(--destructive-fg-color, #ffffff);
+}
+
+/* ---- Inputs ---- */
+.adwmock-input {
+  padding: 6px 8px;
+  border-radius: 6px;
+  border: 1px solid var(--entry-border-color, rgba(0, 0, 6, 0.18));
+  background: var(--entry-bg-color, #ffffff);
+  color: var(--window-fg-color, rgba(0, 0, 6, 0.8));
+  font-family: inherit;
+  font-size: 13px;
+  outline: none;
+}
+
+.adwmock-input:focus {
+  border-color: var(--accent-color, #1c71d8);
+}
+
+/* ---- Screen cards ---- */
+.adwmock-screen-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--window-fg-color, rgba(0, 0, 6, 0.8));
+  opacity: 0.7;
+}
+
+/* ---- Selection chrome ---- */
+.adw-node-wrapper.selected-outline {
+  outline: 2px solid var(--accent-bg-color, #3584e4);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* ---- Layers tree ---- */
+.adwmock-tree-item {
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2px;
+  background: transparent;
+  color: var(--window-fg-color, rgba(0, 0, 6, 0.8));
+}
+
+.adwmock-tree-item:hover {
+  background: var(--button-bg-color, rgba(0, 0, 6, 0.08));
+}
+
+.adwmock-tree-item--selected {
+  background: var(--accent-bg-color, #3584e4) !important;
+  color: var(--accent-fg-color, #ffffff) !important;
+}
+
+/* ---- Type badge (debug label) ---- */
+.adwmock-type-badge {
+  position: absolute;
+  top: -18px;
+  left: 0;
+  font-size: 10px;
+  color: var(--accent-bg-color, #3584e4);
+  font-family: 'Cantarell', monospace;
+  background: var(--card-bg-color, #fff);
+  padding: 1px 5px;
+  border-radius: 3px;
+  border: 1px solid var(--accent-bg-color, #3584e4);
+  white-space: nowrap;
+}
+
+/* ---- "+" add buttons ---- */
+.adwmock-add-btn {
+  font-size: 11px;
+  cursor: pointer;
+  background: var(--accent-bg-color, #3584e4);
+  color: var(--accent-fg-color, #ffffff);
+  border: none;
+  border-radius: 4px;
+  padding: 2px 7px;
+  font-family: inherit;
+  font-weight: 500;
+}
+
+.adwmock-add-btn:hover {
+  opacity: 0.85;
+}
+
+/* ---- Zoom controls ---- */
+.adwmock-zoom-bar {
+  position: absolute;
+  bottom: 16px;
+  left: 16px;
+  z-index: 100;
+  background: var(--card-bg-color, #ffffff);
+  padding: 4px 10px;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px var(--headerbar-shade-color, rgba(0, 0, 6, 0.12));
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  border: 1px solid var(--separator-color, rgba(0, 0, 6, 0.1));
+}
+
+/* ---- Modal overlay ---- */
+.adwmock-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: var(--dialog-scrim-color, rgba(0, 0, 6, 0.32));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.adwmock-modal {
+  background: var(--popover-bg-color, #ffffff);
+  color: var(--popover-fg-color, rgba(0, 0, 6, 0.8));
+  border-radius: 12px;
+  padding: 24px;
+  width: 400px;
+  box-shadow: 0 12px 32px rgba(0, 0, 6, 0.24);
+}
+
+/* ---- Property inspector labels ---- */
+.adwmock-field-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--window-fg-color, rgba(0, 0, 6, 0.8));
+  opacity: 0.65;
+}
+
+/* ---- Divider ---- */
+.adwmock-divider {
+  border: none;
+  border-top: 1px solid var(--separator-color, rgba(0, 0, 6, 0.1));
+  margin: 4px 0;
+}

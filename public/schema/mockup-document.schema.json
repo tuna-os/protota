@@ -1,0 +1,99 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tuna-os.github.io/adwmock/schema/mockup-document.json",
+  "title": "Protota Mockup Document",
+  "description": "A Protota mockup document containing screens, widget trees, and flow edges.",
+  "type": "object",
+  "required": ["version", "document"],
+  "properties": {
+    "version": { "type": "integer", "const": 1 },
+    "exportedAt": { "type": "string", "format": "date-time" },
+    "document": {
+      "type": "object",
+      "required": ["id", "title", "screens", "colorScheme", "edges"],
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "colorScheme": { "type": "string", "enum": ["auto", "light", "dark"] },
+        "edges": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "sourceId", "targetId"],
+            "properties": {
+              "id": { "type": "string" },
+              "sourceId": { "type": "string" },
+              "targetId": { "type": "string" },
+              "triggerNodeId": { "type": "string" },
+              "triggerEvent": { "type": "string", "enum": ["click", "activated", "selected"] },
+              "presentation": { "type": "string", "enum": ["push", "dialog", "popover", "inline"] }
+            }
+          }
+        },
+        "screens": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "title", "type", "width", "height", "rootNode"],
+            "properties": {
+              "id": { "type": "string" },
+              "title": { "type": "string" },
+              "type": {
+                "type": "string",
+                "enum": ["standard", "view-switcher", "preferences", "sidebar", "dialog", "alert-dialog", "about", "status-page", "empty"]
+              },
+              "width": { "type": "number", "minimum": 360 },
+              "height": { "type": "number", "minimum": 200 },
+              "rootNode": { "$ref": "#/$defs/adwNode" }
+            }
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "adwNode": {
+      "type": "object",
+      "required": ["id", "type"],
+      "properties": {
+        "id": { "type": "string" },
+        "type": {
+          "type": "string",
+          "enum": [
+            "window", "preferences-dialog", "dialog", "alert-dialog", "about-dialog",
+            "toolbar-view", "header-bar", "window-title",
+            "view-stack", "view-switcher", "navigation-view", "tab-view", "overlay-split",
+            "clamp", "box", "center-box",
+            "action-row", "switch-row", "combo-row", "spin-row", "button-row",
+            "expander-row", "entry-row", "password-row",
+            "preferences-page", "preferences-group",
+            "button", "split-button", "menu-button", "search-entry",
+            "toggle", "toggle-group", "entry", "switch-widget", "check-button",
+            "status-page", "toast-overlay", "banner", "spinner",
+            "list-box", "flow-box", "label", "inscription"
+          ]
+        },
+        "title": { "type": "string" },
+        "subtitle": { "type": "string" },
+        "description": { "type": "string" },
+        "iconName": { "type": "string" },
+        "placeholder": { "type": "string" },
+        "value": { "type": "string" },
+        "suggested": { "type": "boolean" },
+        "destructive": { "type": "boolean" },
+        "flat": { "type": "boolean" },
+        "circular": { "type": "boolean" },
+        "activatable": { "type": "boolean" },
+        "active": { "type": "boolean" },
+        "min": { "type": "number" },
+        "max": { "type": "number" },
+        "step": { "type": "number" },
+        "options": { "type": "array", "items": { "type": "string" } },
+        "selectedIndex": { "type": "number" },
+        "orientation": { "type": "string", "enum": ["horizontal", "vertical"] },
+        "spacing": { "type": "number" },
+        "children": { "type": "array", "items": { "$ref": "#/$defs/adwNode" } }
+      }
+    }
+  }
+}

@@ -5,6 +5,7 @@ import { ViewportCanvas } from './ViewportCanvas';
 import { InspectorPanel } from './InspectorPanel';
 import { AuditPanel } from './AuditPanel';
 import { PresetGallery } from './PresetGallery';
+import { CommandPalette } from './CommandPalette';
 import { AddScreenModal } from './AddScreenModal';
 import { exportDocumentFile, importDocumentFile } from '../utils/exportImport';
 
@@ -21,6 +22,7 @@ export const App: React.FC = () => {
   const [rightOpen, setRightOpen] = useState(true);
   const [showShortcuts, setShowShortcuts] = useState(false);
   const [showPresets, setShowPresets] = useState(false);
+  const [showCommandPalette, setShowCommandPalette] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleExport = async () => {
@@ -58,6 +60,7 @@ export const App: React.FC = () => {
       if (e.key === 'ArrowUp' && mod && selectedNodeId) { e.preventDefault(); moveNodeUp(selectedNodeId); return; }
       if (e.key === 'ArrowDown' && mod && selectedNodeId) { e.preventDefault(); moveNodeDown(selectedNodeId); return; }
       if (e.key === 'Escape' && showShortcuts) { setShowShortcuts(false); return; }
+      if (e.key === 'Escape' && showCommandPalette) { setShowCommandPalette(false); return; }
       if (e.key === 'Escape') { selectNode(null); return; }
       // Quick-add
       if (e.key === 'b' && !mod && selectedNodeId) { addChildNode(selectedNodeId, 'button'); return; }
@@ -69,11 +72,12 @@ export const App: React.FC = () => {
       if (e.key === '\\' && mod) { e.preventDefault(); setLeftOpen(v => !v); return; }
       if (e.key === ']' && mod) { e.preventDefault(); setRightOpen(v => !v); return; }
       // New screen
+      if (e.key === 'k' && mod) { e.preventDefault(); setShowCommandPalette(true); return; }
       if (e.key === 'n' && mod) { e.preventDefault(); setShowAddScreenModal(true); return; }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [undo, redo, selectedNodeId, deleteNode, moveNodeUp, moveNodeDown, selectNode, addChildNode, showShortcuts]);
+  }, [undo, redo, selectedNodeId, deleteNode, moveNodeUp, moveNodeDown, selectNode, addChildNode, showShortcuts, showCommandPalette]);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
@@ -217,6 +221,11 @@ export const App: React.FC = () => {
       <PresetGallery
         isOpen={showPresets}
         onClose={() => setShowPresets(false)}
+      />
+
+      <CommandPalette
+        isOpen={showCommandPalette}
+        onClose={() => setShowCommandPalette(false)}
       />
 
       {/* Keyboard shortcuts help overlay */}

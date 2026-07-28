@@ -45,6 +45,7 @@ export const ViewportCanvas: React.FC = () => {
   React.useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.code === 'Space') { e.preventDefault(); spaceDown.current = true; }
+      if (e.key === 'Escape') { selectNode(null); }
     };
     const onKeyUp = (e: KeyboardEvent) => {
       if (e.code === 'Space') { spaceDown.current = false; setIsPanning(false); }

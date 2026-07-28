@@ -4,6 +4,7 @@ import { WIDGET_SCHEMAS } from '../schemas/widgetSchemas';
 import type { AdwNode } from '../types/mockup';
 import { findNodeById } from '../utils/treeHelpers';
 import { NodeActions } from './NodeActions';
+import { IconPicker } from './IconPicker';
 
 export const InspectorPanel: React.FC = () => {
   const { doc, selectedNodeId, selectedScreenId, updateNodeProps } = useMockupStore();
@@ -72,12 +73,11 @@ export const InspectorPanel: React.FC = () => {
               />
             )}
             {field.type === 'icon' && (
-              <input
-                type="text"
-                className="protota-input"
+              <IconPicker
                 value={String(value)}
-                placeholder="e.g. edit-find-symbolic"
-                onChange={(e) => updateNodeProps(selectedNode.id, { [field.key]: e.target.value })}
+                onChange={(iconName: string) =>
+                  updateNodeProps(selectedNode.id, { [field.key]: iconName })
+                }
               />
             )}
           </div>

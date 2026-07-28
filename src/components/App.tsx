@@ -8,7 +8,8 @@ import { exportDocumentFile, importDocumentFile } from '../utils/exportImport';
 
 export const App: React.FC = () => {
   const { doc, undo, redo, setShowAddScreenModal, showAddScreenModal, toggleColorScheme,
-    selectedNodeId, deleteNode, moveNodeUp, moveNodeDown, selectNode, addChildNode } =
+    selectedNodeId, deleteNode, moveNodeUp, moveNodeDown, selectNode, addChildNode,
+    lintEnabled, toggleLint, violations } =
     useMockupStore();
 
   const themeIcon = doc.colorScheme === 'dark' ? '☀' : doc.colorScheme === 'light' ? '🌙' : '◐';
@@ -106,6 +107,13 @@ export const App: React.FC = () => {
           onClick={toggleColorScheme}
           title={`Theme: ${doc.colorScheme} (click for ${themeLabel})`}
         >{themeIcon} {themeLabel}</button>
+        <span style={{ opacity: 0.25 }}>│</span>
+        <button
+          className={`protota-btn${lintEnabled ? ' protota-btn--primary' : ''}`}
+          onClick={toggleLint}
+          title={`HIG Lint ${lintEnabled ? 'ON' : 'OFF'} (${violations.length} issues)`}
+          data-active={lintEnabled ? 'true' : undefined}
+        >🔍 Lint{lintEnabled ? ` (${violations.length})` : ''}</button>
         <input
           ref={fileInputRef}
           type="file"

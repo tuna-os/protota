@@ -3,6 +3,8 @@ import { produce } from 'immer';
 import type { MockupDocument, AdwNode, AdwNodeType } from '../types/mockup';
 import type { ScreenTemplateType } from '../types/mockup';
 import { SCREEN_DEFAULTS } from '../types/mockup';
+import type { LintViolation } from '../utils/higLinter';
+import { lintDocument } from '../utils/higLinter';
 import { findNodeLocation } from '../utils/treeHelpers';
 
 const STORAGE_KEY = 'protota_doc_v1';
@@ -239,6 +241,8 @@ interface MockupState {
   history: MockupDocument[];
   historyIndex: number;
   showAddScreenModal: boolean;
+  lintEnabled: boolean;
+  violations: LintViolation[];
 
   selectNode: (nodeId: string | null, screenId?: string) => void;
   updateNodeProps: (nodeId: string, props: Partial<AdwNode>) => void;
@@ -250,6 +254,7 @@ interface MockupState {
   undo: () => void;
   redo: () => void;
   toggleColorScheme: () => void;
+  toggleLint: () => void;
   setShowAddScreenModal: (show: boolean) => void;
 }
 
@@ -266,7 +271,11 @@ export const useMockupStore = create<MockupState>((set, get) => {
     const newHistory = history.slice(0, historyIndex + 1);
     if (newHistory.length >= MAX_HISTORY) newHistory.shift();
     newHistory.push(newDoc);
-    return { doc: newDoc, history: newHistory, historyIndex: newHistory.length - 1 };
+    const result: Partial<MockupState> = { doc: newDoc, history: newHistory, historyIndex: newHistory.length - 1 };
+    if (get().lintEnabled) {
+      result.violations = lintDocument(newDoc);
+    }
+    return result;
   };
 
   return {
@@ -276,6 +285,8 @@ export const useMockupStore = create<MockupState>((set, get) => {
     history: [startDoc],
     historyIndex: 0,
     showAddScreenModal: false,
+    lintEnabled: false,
+    violations: [],
 
     selectNode: (nodeId, screenId) =>
       set({ selectedNodeId: nodeId, selectedScreenId: screenId ?? get().selectedScreenId }),
@@ -404,6 +415,12 @@ export const useMockupStore = create<MockupState>((set, get) => {
         draft.colorScheme = cycle[draft.colorScheme];
       });
       set(pushSnapshot(next));
+    },
+
+    toggleLint: () => {
+      const nextEnabled = !get().lintEnabled;
+      const nextViolations = nextEnabled ? lintDocument(get().doc) : [];
+      set({ lintEnabled: nextEnabled, violations: nextViolations });
     },
   };
 });

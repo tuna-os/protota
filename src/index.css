@@ -228,3 +228,102 @@ html, body, #root {
   border-top: 1px solid var(--separator-color, rgba(0, 0, 6, 0.1));
   margin: 4px 0;
 }
+
+/* ---- Div-only widget types (no custom element available) ---- */
+
+/* Box — directional container. Uses flexbox with Adwaita spacing. */
+.adwmock-div-box {
+  display: flex;
+  flex-direction: column;
+  padding: 6px;
+  gap: 6px;
+}
+.adwmock-div-box[orientation="horizontal"] {
+  flex-direction: row;
+}
+
+/* Center-box — start/center/end layout. Children use nth-child for slots. */
+.adwmock-div-center-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  gap: 6px;
+}
+
+/* Label — Adwaita text styling. */
+.adwmock-div-label {
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--window-fg-color, rgba(0, 0, 6, 0.8));
+  padding: 4px 2px;
+}
+
+/* Inscription — text with ellipsis overflow. */
+.adwmock-div-inscription {
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--window-fg-color, rgba(0, 0, 6, 0.8));
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding: 4px 2px;
+}
+
+/* Search entry — text input styled like GtkSearchEntry. */
+.adwmock-div-search-entry {
+  display: flex;
+  align-items: center;
+  padding: 6px 10px;
+  border-radius: 24px;
+  background: var(--entry-bg-color, #ffffff);
+  border: 1px solid var(--entry-border-color, rgba(0, 0, 6, 0.18));
+  color: var(--window-fg-color, rgba(0, 0, 6, 0.8));
+  font-family: inherit;
+  font-size: 13px;
+}
+.adwmock-div-search-entry::before {
+  content: '🔍';
+  margin-right: 6px;
+  opacity: 0.5;
+  font-size: 12px;
+}
+
+/* Switch (standalone, not SwitchRow) — toggle pill. */
+.adwmock-div-switch-widget {
+  display: inline-block;
+  width: 40px;
+  height: 24px;
+  border-radius: 12px;
+  background: var(--button-bg-color, rgba(0,0,6,0.08));
+  position: relative;
+}
+
+/* Check button — inline checkbox. */
+.adwmock-div-check-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 2px 4px;
+  font-size: 14px;
+}
+.adwmock-div-check-button::before {
+  content: '☐';
+  font-size: 16px;
+  opacity: 0.6;
+}
+.adwmock-div-check-button[active]::before {
+  content: '☑';
+  color: var(--accent-bg-color, #3584e4);
+  opacity: 1;
+}
+
+/* List box — boxed-list container. */
+.adwmock-div-list-box {
+  display: flex;
+  flex-direction: column;
+  background: var(--card-bg-color, #ffffff);
+  border-radius: 10px;
+  border: 1px solid var(--separator-color, rgba(0, 0, 6, 0.1));
+  overflow: hidden;
+}

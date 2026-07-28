@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { useMockupStore } from '../store/mockupStore';
 import { AdwaitaRenderer } from './AdwaitaRenderer';
 
@@ -56,6 +56,20 @@ export const ViewportCanvas: React.FC = () => {
       window.removeEventListener('keydown', onKeyDown);
       window.removeEventListener('keyup', onKeyUp);
     };
+  }, []);
+
+  // Zoom keyboard shortcuts (handled here since zoom state is local)
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if ((e.target as HTMLElement)?.tagName === 'INPUT' ||
+          (e.target as HTMLElement)?.tagName === 'TEXTAREA') return;
+      const mod = e.ctrlKey || e.metaKey;
+      if (e.key === '=' && mod) { e.preventDefault(); setZoom((z) => Math.min(z * 1.1, 2.5)); }
+      if (e.key === '-' && mod) { e.preventDefault(); setZoom((z) => Math.max(z * 0.9, 0.3)); }
+      if (e.key === '0' && mod) { e.preventDefault(); setZoom(1); setPan({ x: 0, y: 0 }); }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
   }, []);
 
   const handleCanvasClick = useCallback(() => selectNode(null), [selectNode]);

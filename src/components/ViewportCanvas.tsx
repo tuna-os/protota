@@ -1,5 +1,6 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { useMockupStore } from '../store/mockupStore';
+// import { BreakpointBar } from "./BreakpointBar";
 import { AdwaitaRenderer } from './AdwaitaRenderer';
 
 export const ViewportCanvas: React.FC = () => {

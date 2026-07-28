@@ -4,11 +4,13 @@ import { LayersPanel } from './LayersPanel';
 import { ViewportCanvas } from './ViewportCanvas';
 import { InspectorPanel } from './InspectorPanel';
 import { AuditPanel } from './AuditPanel';
+import { ContextMenu } from "./ContextMenu";
 import { PresetGallery } from './PresetGallery';
 import { CommandPalette } from './CommandPalette';
 import { AddScreenModal } from './AddScreenModal';
 import { exportDocumentFile, importDocumentFile } from '../utils/exportImport';
 import html2canvas from 'html2canvas';
+import { mockupToBlueprint } from '../utils/blueprint';
 
 const handleExportPNG = async (screenEl: HTMLElement | null) => {
   if (!screenEl) return;
@@ -39,6 +41,7 @@ export const App: React.FC = () => {
   const [showPresets, setShowPresets] = useState(false);
   const [showCommandPalette, setShowCommandPalette] = useState(false);
   const [showFlows, setShowFlows] = useState(false);
+  const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleShare = async () => {
@@ -54,6 +57,22 @@ export const App: React.FC = () => {
 
   const handleExport = async () => {
     await exportDocumentFile(doc);
+  };
+
+  const handleExportBlueprint = () => {
+    const xml = mockupToBlueprint(doc);
+    const blob = new Blob([xml], { type: 'application/xml' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${doc.title.toLowerCase().replace(/\s+/g, '-')}.blp`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleContextMenu = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setContextMenu({ x: e.clientX, y: e.clientY });
   };
 
   const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -107,7 +126,7 @@ export const App: React.FC = () => {
   }, [undo, redo, selectedNodeId, deleteNode, moveNodeUp, moveNodeDown, selectNode, addChildNode, showShortcuts, showCommandPalette]);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh' }} onContextMenu={handleContextMenu}>
       {/* Top Toolbar — themed as an Adwaita headerbar */}
       <header
         className="protota-toolbar"
@@ -138,6 +157,7 @@ export const App: React.FC = () => {
           const el = document.querySelector('adw-window');
           handleExportPNG(el as HTMLElement);
         }}>📸 PNG</button>
+        <button className="protota-btn" onClick={handleExportBlueprint}>📋 BLP</button>
         <button className="protota-btn" onClick={handleShare}>🔗 Share</button>
         <button className="protota-btn" onClick={() => fileInputRef.current?.click()}>📂 Import</button>
         <span style={{ opacity: 0.25 }}>│</span>
@@ -256,6 +276,8 @@ export const App: React.FC = () => {
         onClose={() => setShowAddScreenModal(false)}
       />
 
+      {contextMenu && <ContextMenu x={contextMenu.x} y={contextMenu.y} onClose={() => setContextMenu(null)} />}
+
       <PresetGallery
         isOpen={showPresets}
         onClose={() => setShowPresets(false)}
@@ -343,3 +365,4 @@ const SHORTCUT_GROUPS = [
     ],
   },
 ];
+// Adds context menu after the PresetGallery

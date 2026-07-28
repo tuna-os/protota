@@ -3,6 +3,7 @@ import { useMockupStore } from '../store/mockupStore';
 import { LayersPanel } from './LayersPanel';
 import { ViewportCanvas } from './ViewportCanvas';
 import { InspectorPanel } from './InspectorPanel';
+import { AuditPanel } from './AuditPanel';
 import { AddScreenModal } from './AddScreenModal';
 import { exportDocumentFile, importDocumentFile } from '../utils/exportImport';
 
@@ -198,6 +199,8 @@ export const App: React.FC = () => {
           >◀</button>
         )}
       </div>
+
+      <AuditPanel />
 
       <AddScreenModal
         isOpen={showAddScreenModal}

@@ -8,6 +8,21 @@ import { PresetGallery } from './PresetGallery';
 import { CommandPalette } from './CommandPalette';
 import { AddScreenModal } from './AddScreenModal';
 import { exportDocumentFile, importDocumentFile } from '../utils/exportImport';
+import html2canvas from 'html2canvas';
+
+const handleExportPNG = async (screenEl: HTMLElement | null) => {
+  if (!screenEl) return;
+  const canvas = await html2canvas(screenEl, { scale: 2, backgroundColor: null });
+  canvas.toBlob((blob) => {
+    if (!blob) return;
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'protota-screen.png';
+    a.click();
+    URL.revokeObjectURL(url);
+  });
+};
 
 export const App: React.FC = () => {
   const { doc, undo, redo, setShowAddScreenModal, showAddScreenModal, toggleColorScheme,
@@ -119,6 +134,10 @@ export const App: React.FC = () => {
         </button>
         <span style={{ opacity: 0.25 }}>│</span>
         <button className="protota-btn" onClick={handleExport}>💾 Export</button>
+        <button className="protota-btn" onClick={() => {
+          const el = document.querySelector('adw-window');
+          handleExportPNG(el as HTMLElement);
+        }}>📸 PNG</button>
         <button className="protota-btn" onClick={handleShare}>🔗 Share</button>
         <button className="protota-btn" onClick={() => fileInputRef.current?.click()}>📂 Import</button>
         <span style={{ opacity: 0.25 }}>│</span>

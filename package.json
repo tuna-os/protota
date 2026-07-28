@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@gjsify/adwaita-web": "^0.23.0",
+    "html2canvas": "^1.4.1",
     "immer": "^11.1.15",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",

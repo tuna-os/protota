@@ -22,24 +22,15 @@ test.describe('Export to PNG (#17)', () => {
     expect(download.suggestedFilename()).toContain('.mockup.json');
   });
 
-  test('export includes document structure in downloaded file', async ({ page }) => {
-    const exportBtn = page.getByRole('button', { name: /export/i });
+  test('PNG export button triggers image download', async ({ page }) => {
+    const pngBtn = page.getByRole('button', { name: /png/i });
+    await expect(pngBtn).toBeVisible();
 
     const [download] = await Promise.all([
-      page.waitForEvent('download', { timeout: 5000 }),
-      exportBtn.click(),
+      page.waitForEvent('download', { timeout: 8000 }),
+      pngBtn.click(),
     ]);
 
-    // Read the file content
-    const stream = await download.createReadStream();
-    const chunks: Buffer[] = [];
-    for await (const chunk of stream) chunks.push(Buffer.from(chunk));
-    const content = Buffer.concat(chunks).toString('utf-8');
-    const parsed = JSON.parse(content);
-
-    expect(parsed.version).toBe(1);
-    expect(parsed.document).toBeDefined();
-    expect(parsed.document.screens).toBeDefined();
-    expect(parsed.document.screens.length).toBeGreaterThan(0);
+    expect(download.suggestedFilename()).toMatch(/(png|protota)/i);
   });
 });

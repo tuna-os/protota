@@ -5,7 +5,7 @@ import type { ScreenTemplateType } from '../types/mockup';
 import { SCREEN_DEFAULTS } from '../types/mockup';
 import { findNodeLocation } from '../utils/treeHelpers';
 
-const STORAGE_KEY = 'adwaita_mockup_doc_v2';
+const STORAGE_KEY = 'protota_doc_v1';
 const MAX_HISTORY = 50;
 
 function uid(prefix: string): string {

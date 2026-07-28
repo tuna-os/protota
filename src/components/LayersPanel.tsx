@@ -12,7 +12,7 @@ export const LayersPanel: React.FC = () => {
       <div key={node.id} style={{ marginLeft: `${depth * 14}px` }}>
         <div
           onClick={() => selectNode(node.id)}
-          className={`adwmock-tree-item${isSelected ? ' adwmock-tree-item--selected' : ''}`}
+          className={`protota-tree-item${isSelected ? ' protota-tree-item--selected' : ''}`}
         >
           <span>{node.type.replace('adw-', '')} ({node.title || 'Untitled'})</span>
         </div>
@@ -25,7 +25,7 @@ export const LayersPanel: React.FC = () => {
     <div style={{ padding: '12px' }}>
       {doc.screens.map((screen) => (
         <div key={screen.id} style={{ marginBottom: '16px' }}>
-          <div className="adwmock-screen-label" style={{ marginBottom: '6px' }}>
+          <div className="protota-screen-label" style={{ marginBottom: '6px' }}>
             🖥 {screen.title}
           </div>
           {renderTree(screen.rootNode)}

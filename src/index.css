@@ -30,7 +30,7 @@ html, body, #root {
 }
 
 /* ---- Toolbar (headerbar) ---- */
-.adwmock-toolbar {
+.protota-toolbar {
   background-color: var(--headerbar-bg-color, #ffffff);
   color: var(--headerbar-fg-color, rgba(0, 0, 6, 0.8));
   border-bottom: 1px solid var(--separator-color, rgba(0, 0, 6, 0.1));
@@ -38,22 +38,22 @@ html, body, #root {
 }
 
 /* ---- Side panels (layers + inspector) ---- */
-.adwmock-panel {
+.protota-panel {
   background-color: var(--sidebar-bg-color, #ebebed);
   border-color: var(--separator-color, rgba(0, 0, 6, 0.1));
 }
 
-.adwmock-panel-header {
+.protota-panel-header {
   border-bottom: 1px solid var(--separator-color, rgba(0, 0, 6, 0.1));
 }
 
 /* ---- Canvas ---- */
-.adwmock-canvas {
+.protota-canvas {
   background-color: var(--view-bg-color, #ffffff);
 }
 
 /* ---- Buttons - Adwaita flat/toolbar style ---- */
-.adwmock-btn {
+.protota-btn {
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -70,30 +70,30 @@ html, body, #root {
   user-select: none;
 }
 
-.adwmock-btn:hover {
+.protota-btn:hover {
   background: var(--button-hover-color, rgba(0, 0, 6, 0.13));
 }
 
-.adwmock-btn:active {
+.protota-btn:active {
   background: var(--button-active-color, rgba(0, 0, 6, 0.19));
 }
 
-.adwmock-btn--primary {
+.protota-btn--primary {
   background: var(--accent-bg-color, #3584e4);
   color: var(--accent-fg-color, #ffffff);
 }
 
-.adwmock-btn--primary:hover {
+.protota-btn--primary:hover {
   opacity: 0.9;
 }
 
-.adwmock-btn--destructive {
+.protota-btn--destructive {
   background: var(--destructive-bg-color, #e01b24);
   color: var(--destructive-fg-color, #ffffff);
 }
 
 /* ---- Inputs ---- */
-.adwmock-input {
+.protota-input {
   padding: 6px 8px;
   border-radius: 6px;
   border: 1px solid var(--entry-border-color, rgba(0, 0, 6, 0.18));
@@ -104,12 +104,12 @@ html, body, #root {
   outline: none;
 }
 
-.adwmock-input:focus {
+.protota-input:focus {
   border-color: var(--accent-color, #1c71d8);
 }
 
 /* ---- Screen cards ---- */
-.adwmock-screen-label {
+.protota-screen-label {
   font-size: 13px;
   font-weight: 600;
   color: var(--window-fg-color, rgba(0, 0, 6, 0.8));
@@ -124,7 +124,7 @@ html, body, #root {
 }
 
 /* ---- Layers tree ---- */
-.adwmock-tree-item {
+.protota-tree-item {
   padding: 4px 8px;
   border-radius: 4px;
   cursor: pointer;
@@ -137,17 +137,17 @@ html, body, #root {
   color: var(--window-fg-color, rgba(0, 0, 6, 0.8));
 }
 
-.adwmock-tree-item:hover {
+.protota-tree-item:hover {
   background: var(--button-bg-color, rgba(0, 0, 6, 0.08));
 }
 
-.adwmock-tree-item--selected {
+.protota-tree-item--selected {
   background: var(--accent-bg-color, #3584e4) !important;
   color: var(--accent-fg-color, #ffffff) !important;
 }
 
 /* ---- Type badge (debug label) ---- */
-.adwmock-type-badge {
+.protota-type-badge {
   position: absolute;
   top: -18px;
   left: 0;
@@ -162,7 +162,7 @@ html, body, #root {
 }
 
 /* ---- "+" add buttons ---- */
-.adwmock-add-btn {
+.protota-add-btn {
   font-size: 11px;
   cursor: pointer;
   background: var(--accent-bg-color, #3584e4);
@@ -174,12 +174,12 @@ html, body, #root {
   font-weight: 500;
 }
 
-.adwmock-add-btn:hover {
+.protota-add-btn:hover {
   opacity: 0.85;
 }
 
 /* ---- Zoom controls ---- */
-.adwmock-zoom-bar {
+.protota-zoom-bar {
   position: absolute;
   bottom: 16px;
   left: 16px;
@@ -195,7 +195,7 @@ html, body, #root {
 }
 
 /* ---- Modal overlay ---- */
-.adwmock-modal-backdrop {
+.protota-modal-backdrop {
   position: fixed;
   inset: 0;
   background: var(--dialog-scrim-color, rgba(0, 0, 6, 0.32));
@@ -205,7 +205,7 @@ html, body, #root {
   z-index: 1000;
 }
 
-.adwmock-modal {
+.protota-modal {
   background: var(--popover-bg-color, #ffffff);
   color: var(--popover-fg-color, rgba(0, 0, 6, 0.8));
   border-radius: 12px;
@@ -215,7 +215,7 @@ html, body, #root {
 }
 
 /* ---- Property inspector labels ---- */
-.adwmock-field-label {
+.protota-field-label {
   font-size: 12px;
   font-weight: 600;
   color: var(--window-fg-color, rgba(0, 0, 6, 0.8));
@@ -223,7 +223,7 @@ html, body, #root {
 }
 
 /* ---- Divider ---- */
-.adwmock-divider {
+.protota-divider {
   border: none;
   border-top: 1px solid var(--separator-color, rgba(0, 0, 6, 0.1));
   margin: 4px 0;
@@ -232,18 +232,18 @@ html, body, #root {
 /* ---- Div-only widget types (no custom element available) ---- */
 
 /* Box — directional container. Uses flexbox with Adwaita spacing. */
-.adwmock-div-box {
+.protota-div-box {
   display: flex;
   flex-direction: column;
   padding: 6px;
   gap: 6px;
 }
-.adwmock-div-box[orientation="horizontal"] {
+.protota-div-box[orientation="horizontal"] {
   flex-direction: row;
 }
 
 /* Center-box — start/center/end layout. Children use nth-child for slots. */
-.adwmock-div-center-box {
+.protota-div-center-box {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -252,7 +252,7 @@ html, body, #root {
 }
 
 /* Label — Adwaita text styling. */
-.adwmock-div-label {
+.protota-div-label {
   font-size: 14px;
   line-height: 1.5;
   color: var(--window-fg-color, rgba(0, 0, 6, 0.8));
@@ -260,7 +260,7 @@ html, body, #root {
 }
 
 /* Inscription — text with ellipsis overflow. */
-.adwmock-div-inscription {
+.protota-div-inscription {
   font-size: 14px;
   line-height: 1.5;
   color: var(--window-fg-color, rgba(0, 0, 6, 0.8));
@@ -271,7 +271,7 @@ html, body, #root {
 }
 
 /* Search entry — text input styled like GtkSearchEntry. */
-.adwmock-div-search-entry {
+.protota-div-search-entry {
   display: flex;
   align-items: center;
   padding: 6px 10px;
@@ -282,7 +282,7 @@ html, body, #root {
   font-family: inherit;
   font-size: 13px;
 }
-.adwmock-div-search-entry::before {
+.protota-div-search-entry::before {
   content: '🔍';
   margin-right: 6px;
   opacity: 0.5;
@@ -290,7 +290,7 @@ html, body, #root {
 }
 
 /* Switch (standalone, not SwitchRow) — toggle pill. */
-.adwmock-div-switch-widget {
+.protota-div-switch-widget {
   display: inline-block;
   width: 40px;
   height: 24px;
@@ -300,26 +300,26 @@ html, body, #root {
 }
 
 /* Check button — inline checkbox. */
-.adwmock-div-check-button {
+.protota-div-check-button {
   display: inline-flex;
   align-items: center;
   gap: 8px;
   padding: 2px 4px;
   font-size: 14px;
 }
-.adwmock-div-check-button::before {
+.protota-div-check-button::before {
   content: '☐';
   font-size: 16px;
   opacity: 0.6;
 }
-.adwmock-div-check-button[active]::before {
+.protota-div-check-button[active]::before {
   content: '☑';
   color: var(--accent-bg-color, #3584e4);
   opacity: 1;
 }
 
 /* List box — boxed-list container. */
-.adwmock-div-list-box {
+.protota-div-list-box {
   display: flex;
   flex-direction: column;
   background: var(--card-bg-color, #ffffff);

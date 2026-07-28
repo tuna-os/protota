@@ -152,7 +152,7 @@ export const AdwaitaRenderer: React.FC<Props> = ({
   ));
 
   // Div-only types get Adwaita-styled classes for layout/structure
-  const divClass = DIV_TYPES.has(node.type) ? `adwmock-div-${node.type}` : '';
+  const divClass = DIV_TYPES.has(node.type) ? `protota-div-${node.type}` : '';
 
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -166,7 +166,7 @@ export const AdwaitaRenderer: React.FC<Props> = ({
       style={{ position: 'relative' }}
     >
       {isSelected && (
-        <div className="adwmock-type-badge">{node.type}</div>
+        <div className="protota-type-badge">{node.type}</div>
       )}
 
       {React.createElement(tag, { ref: elRef, ...attrs, className: divClass || undefined },
@@ -182,7 +182,7 @@ export const AdwaitaRenderer: React.FC<Props> = ({
           {legalAdds.map((type) => (
             <button
               key={type}
-              className="adwmock-add-btn"
+              className="protota-add-btn"
               onClick={(e) => { e.stopPropagation(); addChildNode(node.id, type); }}
             >
               + {type.replace(/-/g, ' ')}

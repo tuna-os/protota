@@ -32,7 +32,7 @@ test.describe('Interactive canvas (#10)', () => {
 
   test.describe('Canvas pan and zoom', () => {
     test('canvas renders with overflow hidden for pan/zoom', async ({ page }) => {
-      const canvas = page.locator('.adwmock-canvas');
+      const canvas = page.locator('.protota-canvas');
       await expect(canvas).toBeVisible();
       const overflow = await canvas.evaluate((el) =>
         window.getComputedStyle(el).overflow);
@@ -40,7 +40,7 @@ test.describe('Interactive canvas (#10)', () => {
     });
 
     test('zoom controls are visible', async ({ page }) => {
-      const zoomBar = page.locator('.adwmock-zoom-bar');
+      const zoomBar = page.locator('.protota-zoom-bar');
       await expect(zoomBar).toBeVisible();
 
       // Zoom percentage display
@@ -84,7 +84,7 @@ test.describe('Interactive canvas (#10)', () => {
       await expect(page.locator('.selected-outline').first()).toBeVisible({ timeout: 3000 });
 
       // Add buttons should appear for legal children
-      const addBtn = page.locator('.adwmock-add-btn').first();
+      const addBtn = page.locator('.protota-add-btn').first();
       await expect(addBtn).toBeVisible({ timeout: 3000 });
     });
   });

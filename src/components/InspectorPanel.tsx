@@ -30,25 +30,25 @@ export const InspectorPanel: React.FC = () => {
       <NodeActions nodeId={selectedNode.id} />
 
       <div>
-        <span className="adwmock-field-label" style={{ fontSize: '10px' }}>Widget Type</span>
+        <span className="protota-field-label" style={{ fontSize: '10px' }}>Widget Type</span>
         <div style={{ fontSize: '14px', fontWeight: 700, fontFamily: 'monospace' }}>
           {selectedNode.type}
         </div>
       </div>
 
-      <hr className="adwmock-divider" />
+      <hr className="protota-divider" />
 
       {schema.map((field) => {
         const value = (selectedNode)[field.key] ?? field.defaultValue ?? '';
 
         return (
           <div key={field.key} style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-            <label className="adwmock-field-label">{field.label}</label>
+            <label className="protota-field-label">{field.label}</label>
 
             {field.type === 'string' && (
               <input
                 type="text"
-                className="adwmock-input"
+                className="protota-input"
                 value={String(value)}
                 onChange={(e) => updateNodeProps(selectedNode.id, { [field.key]: e.target.value })}
               />
@@ -66,7 +66,7 @@ export const InspectorPanel: React.FC = () => {
             {field.type === 'number' && (
               <input
                 type="number"
-                className="adwmock-input"
+                className="protota-input"
                 value={Number(value)}
                 onChange={(e) => updateNodeProps(selectedNode.id, { [field.key]: Number(e.target.value) })}
               />
@@ -74,7 +74,7 @@ export const InspectorPanel: React.FC = () => {
             {field.type === 'icon' && (
               <input
                 type="text"
-                className="adwmock-input"
+                className="protota-input"
                 value={String(value)}
                 placeholder="e.g. edit-find-symbolic"
                 onChange={(e) => updateNodeProps(selectedNode.id, { [field.key]: e.target.value })}

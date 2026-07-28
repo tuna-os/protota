@@ -71,8 +71,8 @@ export const AddScreenModal: React.FC<Props> = ({ isOpen, onClose }) => {
   };
 
   return (
-    <div className="adwmock-modal-backdrop" onClick={onClose}>
-      <div className="adwmock-modal" onClick={(e) => e.stopPropagation()} style={{ width: '480px' }}>
+    <div className="protota-modal-backdrop" onClick={onClose}>
+      <div className="protota-modal" onClick={(e) => e.stopPropagation()} style={{ width: '480px' }}>
         <h3 style={{ marginTop: 0 }}>Add Screen — GNOME HIG Template</h3>
         <p style={{ fontSize: '12px', opacity: 0.65, marginBottom: '16px' }}>
           Each template scaffolds a HIG-compliant widget tree. Legal nesting is enforced.
@@ -80,12 +80,12 @@ export const AddScreenModal: React.FC<Props> = ({ isOpen, onClose }) => {
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', margin: '16px 0' }}>
           <div>
-            <label className="adwmock-field-label" style={{ marginBottom: '4px', display: 'block' }}>
+            <label className="protota-field-label" style={{ marginBottom: '4px', display: 'block' }}>
               Screen Title
             </label>
             <input
               type="text"
-              className="adwmock-input"
+              className="protota-input"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               style={{ width: '100%' }}
@@ -93,7 +93,7 @@ export const AddScreenModal: React.FC<Props> = ({ isOpen, onClose }) => {
           </div>
 
           <div>
-            <label className="adwmock-field-label" style={{ marginBottom: '4px', display: 'block' }}>
+            <label className="protota-field-label" style={{ marginBottom: '4px', display: 'block' }}>
               Template
             </label>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', maxHeight: '260px', overflow: 'auto' }}>
@@ -132,8 +132,8 @@ export const AddScreenModal: React.FC<Props> = ({ isOpen, onClose }) => {
         </div>
 
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
-          <button className="adwmock-btn" onClick={onClose}>Cancel</button>
-          <button className="adwmock-btn adwmock-btn--primary" onClick={handleCreate}>
+          <button className="protota-btn" onClick={onClose}>Cancel</button>
+          <button className="protota-btn protota-btn--primary" onClick={handleCreate}>
             Create Screen
           </button>
         </div>

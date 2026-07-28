@@ -1,0 +1,2 @@
+{"type":"goal_created","goalId":"ms4ptg39-vjckd7","objective":"Rename project from adwmock to Protota, then implement all 21 feature issues one at a time in dependency order, each with Playwright tests running in CI. Publish via GitHub Pages at tuna-os.github.io/protota/.","sisyphus":true,"autoContinue":true,"at":"2026-07-28T13:52:24.501Z"}
+{"type":"task_list_set","goalId":"ms4ptg39-vjckd7","taskCount":14,"blockCompletion":false,"at":"2026-07-28T13:52:24.603Z"}

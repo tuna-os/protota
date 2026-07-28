@@ -62,7 +62,7 @@ export const ViewportCanvas: React.FC = () => {
 
   return (
     <div
-      className="adwmock-canvas"
+      className="protota-canvas"
       onWheel={handleWheel}
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
@@ -77,13 +77,13 @@ export const ViewportCanvas: React.FC = () => {
       }}
     >
       {/* Zoom Controls */}
-      <div className="adwmock-zoom-bar">
-        <button className="adwmock-btn" onClick={() => setZoom((z) => Math.max(z - 0.1, 0.3))}>−</button>
+      <div className="protota-zoom-bar">
+        <button className="protota-btn" onClick={() => setZoom((z) => Math.max(z - 0.1, 0.3))}>−</button>
         <span style={{ fontSize: '12px', minWidth: '40px', textAlign: 'center' }}>
           {Math.round(zoom * 100)}%
         </span>
-        <button className="adwmock-btn" onClick={() => setZoom((z) => Math.min(z + 0.1, 2.5))}>+</button>
-        <button className="adwmock-btn" onClick={() => { setZoom(1); setPan({ x: 0, y: 0 }); }}>Reset</button>
+        <button className="protota-btn" onClick={() => setZoom((z) => Math.min(z + 0.1, 2.5))}>+</button>
+        <button className="protota-btn" onClick={() => { setZoom(1); setPan({ x: 0, y: 0 }); }}>Reset</button>
       </div>
 
       {/* Transformable Canvas Surface */}
@@ -99,7 +99,7 @@ export const ViewportCanvas: React.FC = () => {
       >
         {doc.screens.map((screen) => (
           <div key={screen.id} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            <div className="adwmock-screen-label" style={{ marginBottom: '8px' }}>
+            <div className="protota-screen-label" style={{ marginBottom: '8px' }}>
               {screen.title}
             </div>
             <AdwaitaRenderer

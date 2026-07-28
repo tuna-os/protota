@@ -56,7 +56,7 @@ test.describe('Theme toggle (#5)', () => {
 
     // Add a second screen
     await page.getByRole('button', { name: /add screen/i }).click();
-    const dialog = page.locator('.adwmock-modal');
+    const dialog = page.locator('.protota-modal');
     await dialog.locator('input[type="text"]').fill('Second Screen');
     // Select a template (first option is pre-selected: Standard)
     await dialog.getByRole('button', { name: /create screen/i }).click();

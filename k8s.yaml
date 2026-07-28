@@ -2,23 +2,23 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: adwmock
+  name: protota
   namespace: default
   labels:
-    app: adwmock
+    app: protota
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: adwmock
+      app: protota
   template:
     metadata:
       labels:
-        app: adwmock
+        app: protota
     spec:
       containers:
         - name: web
-          image: docker.io/library/adwmock:latest
+          image: docker.io/library/protota:latest
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 80
@@ -48,11 +48,11 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: adwmock-svc
+  name: protota-svc
   namespace: default
 spec:
   selector:
-    app: adwmock
+    app: protota
   ports:
     - port: 80
       targetPort: 80
@@ -60,15 +60,15 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: adwmock
+  name: protota
   namespace: default
 spec:
   defaultBackend:
     service:
-      name: adwmock-svc
+      name: protota-svc
       port:
         number: 80
   ingressClassName: tailscale
   tls:
     - hosts:
-        - adwmock
+        - protota

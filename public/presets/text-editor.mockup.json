@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "exportedAt": "2026-07-28T00:00:00Z",
+  "document": {
+    "id": "preset-text-editor",
+    "title": "GNOME Text Editor",
+    "colorScheme": "auto",
+    "edges": [],
+    "screens": [
+      {
+        "id": "te-main",
+        "title": "Text Editor — Main Window",
+        "type": "standard",
+        "width": 900,
+        "height": 650,
+        "rootNode": {
+          "id": "te-root",
+          "type": "window",
+          "children": [{
+            "id": "te-toolbar",
+            "type": "toolbar-view",
+            "children": [
+              {
+                "id": "te-hdr",
+                "type": "header-bar",
+                "title": "Untitled Document",
+                "children": [
+                  { "id": "te-title", "type": "window-title", "title": "Untitled Document — Text Editor" },
+                  { "id": "te-open", "type": "button", "title": "Open", "iconName": "document-open-symbolic", "flat": true },
+                  { "id": "te-save", "type": "button", "title": "Save", "iconName": "document-save-symbolic", "flat": true },
+                  { "id": "te-menu", "type": "menu-button", "iconName": "open-menu-symbolic", "title": "Main Menu" }
+                ]
+              },
+              {
+                "id": "te-content",
+                "type": "box",
+                "orientation": "vertical",
+                "spacing": 0,
+                "children": [
+                  { "id": "te-label", "type": "label", "title": "Start typing…" }
+                ]
+              }
+            ]
+          }]
+        }
+      }
+    ]
+  },
+  "assets": {}
+}

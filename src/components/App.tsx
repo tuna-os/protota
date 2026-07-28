@@ -4,6 +4,7 @@ import { LayersPanel } from './LayersPanel';
 import { ViewportCanvas } from './ViewportCanvas';
 import { InspectorPanel } from './InspectorPanel';
 import { AuditPanel } from './AuditPanel';
+import { PresetGallery } from './PresetGallery';
 import { AddScreenModal } from './AddScreenModal';
 import { exportDocumentFile, importDocumentFile } from '../utils/exportImport';
 
@@ -19,6 +20,7 @@ export const App: React.FC = () => {
   const [leftOpen, setLeftOpen] = useState(true);
   const [rightOpen, setRightOpen] = useState(true);
   const [showShortcuts, setShowShortcuts] = useState(false);
+  const [showPresets, setShowPresets] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleExport = async () => {
@@ -115,6 +117,11 @@ export const App: React.FC = () => {
           title={`HIG Lint ${lintEnabled ? 'ON' : 'OFF'} (${violations.length} issues)`}
           data-active={lintEnabled ? 'true' : undefined}
         >🔍 Lint{lintEnabled ? ` (${violations.length})` : ''}</button>
+        <span style={{ opacity: 0.25 }}>│</span>
+        <button
+          className="protota-btn"
+          onClick={() => setShowPresets(true)}
+        >📦 Presets</button>
         <input
           ref={fileInputRef}
           type="file"
@@ -205,6 +212,11 @@ export const App: React.FC = () => {
       <AddScreenModal
         isOpen={showAddScreenModal}
         onClose={() => setShowAddScreenModal(false)}
+      />
+
+      <PresetGallery
+        isOpen={showPresets}
+        onClose={() => setShowPresets(false)}
       />
 
       {/* Keyboard shortcuts help overlay */}

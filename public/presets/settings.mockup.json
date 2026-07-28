@@ -1,0 +1,94 @@
+{
+  "version": 1,
+  "exportedAt": "2026-07-28T00:00:00Z",
+  "document": {
+    "id": "preset-settings",
+    "title": "GNOME Settings",
+    "colorScheme": "auto",
+    "edges": [],
+    "screens": [
+      {
+        "id": "settings-main",
+        "title": "Settings — Main",
+        "type": "view-switcher",
+        "width": 900,
+        "height": 660,
+        "rootNode": {
+          "id": "s-root",
+          "type": "window",
+          "children": [{
+            "id": "s-toolbar",
+            "type": "toolbar-view",
+            "children": [
+              {
+                "id": "s-hdr",
+                "type": "header-bar",
+                "children": [
+                  { "id": "s-switcher", "type": "view-switcher" },
+                  { "id": "s-search", "type": "search-entry", "placeholder": "Search Settings…" }
+                ]
+              },
+              {
+                "id": "s-stack",
+                "type": "view-stack",
+                "children": [
+                  {
+                    "id": "s-page-wifi",
+                    "type": "box",
+                    "orientation": "vertical",
+                    "spacing": 18,
+                    "children": [
+                      { "id": "s-wifi-lbl", "type": "label", "title": "Wi-Fi" },
+                      {
+                        "id": "s-wifi-list",
+                        "type": "list-box",
+                        "children": [
+                          { "id": "s-wifi-row1", "type": "action-row", "title": "Home Network", "subtitle": "Connected", "iconName": "network-wireless-symbolic", "activatable": true },
+                          { "id": "s-wifi-row2", "type": "action-row", "title": "Guest Wi-Fi", "subtitle": "Secured", "iconName": "network-wireless-symbolic" }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "id": "s-page-bluetooth",
+                    "type": "box",
+                    "orientation": "vertical",
+                    "spacing": 18,
+                    "children": [
+                      { "id": "s-bt-lbl", "type": "label", "title": "Bluetooth" },
+                      {
+                        "id": "s-bt-list",
+                        "type": "list-box",
+                        "children": [
+                          { "id": "s-bt-row1", "type": "switch-row", "title": "Bluetooth", "subtitle": "Turn on to connect devices", "active": true }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "id": "s-page-display",
+                    "type": "box",
+                    "orientation": "vertical",
+                    "spacing": 18,
+                    "children": [
+                      { "id": "s-disp-lbl", "type": "label", "title": "Displays" },
+                      {
+                        "id": "s-disp-list",
+                        "type": "list-box",
+                        "children": [
+                          { "id": "s-disp-row1", "type": "combo-row", "title": "Resolution", "subtitle": "Select display resolution" },
+                          { "id": "s-disp-row2", "type": "switch-row", "title": "Night Light", "subtitle": "Warmer colors at night", "active": false }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }]
+        }
+      }
+    ]
+  },
+  "assets": {}
+}

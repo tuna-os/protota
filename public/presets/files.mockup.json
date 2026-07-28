@@ -1,0 +1,43 @@
+{
+  "version": 1, "exportedAt": "2026-07-28T00:00:00Z",
+  "document": {
+    "id": "preset-files", "title": "GNOME Files (Nautilus)", "colorScheme": "auto", "edges": [],
+    "screens": [{
+      "id": "files-main", "title": "Files",
+      "type": "sidebar", "width": 1050, "height": 700,
+      "rootNode": {
+        "id": "files-root", "type": "window",
+        "children": [{
+          "id": "files-toolbar", "type": "toolbar-view",
+          "children": [
+            { "id": "files-hdr", "type": "header-bar", "title": "Files", "children": [
+              { "id": "files-back", "type": "button", "title": "Back", "iconName": "go-previous-symbolic", "flat": true },
+              { "id": "files-fwd", "type": "button", "title": "Forward", "iconName": "go-next-symbolic", "flat": true },
+              { "id": "files-search", "type": "search-entry", "placeholder": "Search Files…" },
+              { "id": "files-menu", "type": "menu-button", "iconName": "open-menu-symbolic", "title": "Menu" }
+            ]},
+            { "id": "files-split", "type": "overlay-split", "children": [
+              { "id": "files-sidebar", "type": "list-box", "children": [
+                { "id": "files-home", "type": "action-row", "title": "Home", "iconName": "go-home-symbolic", "activatable": true },
+                { "id": "files-docs", "type": "action-row", "title": "Documents", "iconName": "folder-symbolic", "activatable": true },
+                { "id": "files-dl", "type": "action-row", "title": "Downloads", "iconName": "folder-download-symbolic", "activatable": true },
+                { "id": "files-music", "type": "action-row", "title": "Music", "iconName": "folder-music-symbolic", "activatable": true },
+                { "id": "files-pics", "type": "action-row", "title": "Pictures", "iconName": "folder-symbolic", "activatable": true },
+                { "id": "files-trash", "type": "action-row", "title": "Trash", "iconName": "user-trash-symbolic", "activatable": true }
+              ]},
+              { "id": "files-content", "type": "box", "orientation": "vertical", "spacing": 6, "children": [
+                { "id": "files-path", "type": "label", "title": "/home/user" },
+                { "id": "files-grid", "type": "flow-box", "children": [
+                  { "id": "files-folder1", "type": "button", "title": "Desktop", "iconName": "folder-symbolic", "flat": true },
+                  { "id": "files-folder2", "type": "button", "title": "Projects", "iconName": "folder-symbolic", "flat": true },
+                  { "id": "files-file1", "type": "button", "title": "readme.md", "iconName": "document-edit-symbolic", "flat": true },
+                  { "id": "files-file2", "type": "button", "title": "notes.txt", "iconName": "document-edit-symbolic", "flat": true }
+                ]}
+              ]}
+            ]}
+          ]
+        }]
+      }
+    }]
+  }, "assets": {}
+}

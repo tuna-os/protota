@@ -29,6 +29,27 @@ explicitly reported as a custom-widget boundary.
 5. Add a generic widget, slot, or layout rule only when the source input
    identifies it; rerun the same app and record the percentage change.
 
+## Success criteria
+
+Each source-derived capture records `unresolvedWidgetCoverage` and
+`rawSimilarityCeiling = 1 - unresolvedWidgetCoverage`. The latter is the
+fraction of the native surface for which the generic renderer has source
+evidence; a custom-widget placeholder is never counted as a claimed native
+implementation.
+
+After an app's first source-derived capture, set its CI gate from that
+calibration:
+
+1. `BROADWAY_MIN_SOURCE_RESOLVED_SIMILARITY` gates visual similarity outside
+   custom-widget boundaries.
+2. `BROADWAY_MAX_UNRESOLVED_WIDGET_COVERAGE` gates how much of the surface is
+   still only a declared source boundary.
+3. `BROADWAY_MAX_DIFF_RATIO` remains available for fully source-resolved apps.
+
+An app passes only when its calibrated resolved similarity is met and its
+unresolved coverage is within the agreed maximum. As generic support replaces
+a boundary, the ceiling rises automatically and the coverage gate tightens.
+
 An app is not source-derived merely because a similar preset exists. The
 existing JSON presets remain transitional and are not visual baselines for
 this loop.

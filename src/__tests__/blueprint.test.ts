@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
+import { join } from 'node:path';
 import { blueprintBundleToDocument, blueprintTemplateReferences, blueprintToDocument, blueprintToNode, mockupToBlueprint } from '../utils/blueprint';
 import { importDocumentFile } from '../utils/exportImport';
 import type { MockupDocument } from '../types/mockup';
@@ -133,5 +134,18 @@ describe('Blueprint import', () => {
     expect(imported.screens[0].rootNode.children?.[0]).toMatchObject({
       id: 'body', type: 'custom-widget', title: 'CodeOnlyWidget', heightRequest: 120,
     });
+  });
+
+  it.skipIf(!process.env.OFFICIAL_SOURCE_ROOT)('imports the official Calculator Blueprint bundle without a hand-authored preset', () => {
+    const sourceRoot = process.env.OFFICIAL_SOURCE_ROOT!;
+    const files = readdirSync(sourceRoot)
+      .filter(path => path.endsWith('.blp'))
+      .map(path => ({ path, content: readFileSync(join(sourceRoot, path), 'utf8') }));
+
+    const imported = blueprintBundleToDocument(files, 'math-window.blp', 'GNOME Calculator');
+    expect(imported.screens[0].rootNode).toMatchObject({ type: 'window' });
+    expect(imported.screens[0].rootNode.children).toEqual(expect.arrayContaining([
+      expect.objectContaining({ id: 'math_buttons', type: 'custom-widget', title: 'MathButtons' }),
+    ]));
   });
 });

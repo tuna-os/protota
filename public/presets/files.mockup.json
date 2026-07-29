@@ -70,7 +70,7 @@
                           "children": [
                             { "id": "f-back", "type": "button", "title": "Back", "iconName": "go-previous-symbolic", "flat": true },
                             { "id": "f-fwd", "type": "button", "title": "Forward", "iconName": "go-next-symbolic", "flat": true },
-                            { "id": "f-path", "type": "entry", "value": "🏠 Home", "placeholder": "Search or type a path…" },
+                            { "id": "f-path", "type": "entry", "value": "Home", "placeholder": "Search or type a path…" },
                             { "id": "f-new-folder", "type": "button", "title": "New Folder", "iconName": "folder-new-symbolic", "flat": true },
                             { "id": "f-view-opts", "type": "button", "title": "View Options", "iconName": "view-grid-symbolic", "flat": true }
                           ]

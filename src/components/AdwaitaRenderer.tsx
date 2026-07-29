@@ -251,7 +251,10 @@ export const AdwaitaRenderer: React.FC<Props> = ({
       onClick={handleClick}
       slot={node.slot ?? inheritedSlot}
       className={`adw-node-wrapper${isSelected ? ' selected-outline' : ''} ${divClass}`}
-      style={isSelected ? { position: 'relative' } : { display: 'contents' }}
+      style={{
+        ...(isSelected ? { position: 'relative' } : {}),
+        ...nodeLayout(node),
+      }}
     >
       {isSelected && (
         <div className="protota-type-badge">{node.type}</div>

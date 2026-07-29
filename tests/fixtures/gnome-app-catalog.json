@@ -4,7 +4,10 @@
     "aptPackage": "amberol",
     "command": "amberol",
     "presetId": "amberol",
-    "viewport": { "width": 480, "height": 640 },
+    "viewport": {
+      "width": 480,
+      "height": 640
+    },
     "source": "https://gitlab.gnome.org/World/amberol",
     "sourceImport": {
       "repository": "https://gitlab.gnome.org/World/amberol.git",
@@ -20,7 +23,10 @@
     "aptPackage": "apostrophe",
     "command": "apostrophe",
     "presetId": "apostrophe",
-    "viewport": { "width": 1024, "height": 720 },
+    "viewport": {
+      "width": 1024,
+      "height": 720
+    },
     "source": "https://gitlab.gnome.org/World/apostrophe",
     "sourceImport": {
       "repository": "https://gitlab.gnome.org/World/apostrophe.git",
@@ -36,7 +42,10 @@
     "aptPackage": "authenticator",
     "command": "authenticator",
     "presetId": "authenticator",
-    "viewport": { "width": 900, "height": 650 },
+    "viewport": {
+      "width": 900,
+      "height": 650
+    },
     "source": "https://gitlab.gnome.org/World/Authenticator",
     "sourceImport": {
       "repository": "https://gitlab.gnome.org/World/Authenticator.git",
@@ -52,7 +61,10 @@
     "aptPackage": "gnome-calculator",
     "command": "gnome-calculator",
     "presetId": "calculator",
-    "viewport": { "width": 410, "height": 666 },
+    "viewport": {
+      "width": 410,
+      "height": 666
+    },
     "source": "https://gitlab.gnome.org/GNOME/gnome-calculator",
     "sourceImport": {
       "repository": "https://gitlab.gnome.org/GNOME/gnome-calculator.git",
@@ -68,7 +80,10 @@
     "aptPackage": "decoder",
     "command": "decoder",
     "presetId": "decoder",
-    "viewport": { "width": 900, "height": 650 },
+    "viewport": {
+      "width": 900,
+      "height": 650
+    },
     "source": "https://gitlab.gnome.org/World/Decoder",
     "sourceImport": {
       "repository": "https://gitlab.gnome.org/World/Decoder.git",
@@ -84,7 +99,10 @@
     "aptPackage": "gnome-calendar",
     "command": "gnome-calendar",
     "presetId": "calendar",
-    "viewport": { "width": 1419, "height": 923 },
+    "viewport": {
+      "width": 1419,
+      "height": 923
+    },
     "source": "https://gitlab.gnome.org/GNOME/gnome-calendar",
     "sourceImport": {
       "repository": "https://gitlab.gnome.org/GNOME/gnome-calendar.git",
@@ -100,7 +118,10 @@
     "aptPackage": "gnome-clocks",
     "command": "gnome-clocks",
     "presetId": "clocks",
-    "viewport": { "width": 901, "height": 738 },
+    "viewport": {
+      "width": 901,
+      "height": 738
+    },
     "source": "https://gitlab.gnome.org/GNOME/gnome-clocks",
     "sourceImport": {
       "repository": "https://gitlab.gnome.org/GNOME/gnome-clocks.git",
@@ -116,7 +137,10 @@
     "aptPackage": "gnome-disk-utility",
     "command": "gnome-disks",
     "presetId": "disks",
-    "viewport": { "width": 1156, "height": 823 },
+    "viewport": {
+      "width": 1156,
+      "height": 823
+    },
     "source": "https://gitlab.gnome.org/GNOME/gnome-disk-utility",
     "sourceImport": {
       "repository": "https://gitlab.gnome.org/GNOME/gnome-disk-utility.git",
@@ -132,7 +156,10 @@
     "aptPackage": "nautilus",
     "command": "nautilus --no-desktop",
     "presetId": "files",
-    "viewport": { "width": 1122, "height": 822 },
+    "viewport": {
+      "width": 1122,
+      "height": 822
+    },
     "source": "https://gitlab.gnome.org/GNOME/nautilus",
     "sourceImport": {
       "repository": "https://gitlab.gnome.org/GNOME/nautilus.git",
@@ -148,7 +175,10 @@
     "aptPackage": "gnome-control-center",
     "command": "gnome-control-center",
     "presetId": "settings",
-    "viewport": { "width": 1047, "height": 738 },
+    "viewport": {
+      "width": 1047,
+      "height": 738
+    },
     "source": "https://gitlab.gnome.org/GNOME/gnome-control-center",
     "sourceImport": {
       "repository": "https://gitlab.gnome.org/GNOME/gnome-control-center.git",
@@ -164,7 +194,10 @@
     "aptPackage": "gnome-software",
     "command": "gnome-software --mode=overview",
     "presetId": "software",
-    "viewport": { "width": 1322, "height": 797 },
+    "viewport": {
+      "width": 1322,
+      "height": 797
+    },
     "source": "https://gitlab.gnome.org/GNOME/gnome-software",
     "sourceImport": {
       "repository": "https://gitlab.gnome.org/GNOME/gnome-software.git",
@@ -180,7 +213,10 @@
     "aptPackage": "gnome-text-editor",
     "command": "gnome-text-editor --new-window",
     "presetId": "text-editor",
-    "viewport": { "width": 1074, "height": 824 },
+    "viewport": {
+      "width": 1074,
+      "height": 824
+    },
     "source": "https://gitlab.gnome.org/GNOME/gnome-text-editor",
     "sourceImport": {
       "repository": "https://gitlab.gnome.org/GNOME/gnome-text-editor.git",
@@ -196,7 +232,10 @@
     "aptPackage": "gnome-weather",
     "command": "gnome-weather",
     "presetId": "weather",
-    "viewport": { "width": 881, "height": 667 },
+    "viewport": {
+      "width": 881,
+      "height": 667
+    },
     "source": "https://gitlab.gnome.org/GNOME/gnome-weather",
     "sourceImport": {
       "repository": "https://gitlab.gnome.org/GNOME/gnome-weather.git",
@@ -212,7 +251,10 @@
     "aptPackage": "epiphany-browser",
     "command": "epiphany --new-window",
     "presetId": "web",
-    "viewport": { "width": 1116, "height": 827 },
+    "viewport": {
+      "width": 1116,
+      "height": 827
+    },
     "source": "https://gitlab.gnome.org/GNOME/epiphany",
     "suite": "core",
     "status": "preset",

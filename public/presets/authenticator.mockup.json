@@ -1,9 +1,9 @@
 {
   "version": 1,
-  "exportedAt": "2026-07-29T12:51:31.161Z",
+  "exportedAt": "2026-07-29T13:04:24.058Z",
   "document": {
     "id": "imported-document",
-    "title": "window",
+    "title": "Authenticator",
     "colorScheme": "auto",
     "edges": [],
     "sourceProject": {
@@ -981,7 +981,7 @@
       },
       {
         "id": "imported-screen-4",
-        "title": "window 4",
+        "title": "Authenticator 4",
         "type": "standard",
         "width": 1024,
         "height": 720,

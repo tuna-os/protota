@@ -1,100 +1,1374 @@
 {
   "version": 1,
-  "exportedAt": "2026-07-29T00:00:00Z",
+  "exportedAt": "2026-07-29T13:04:40.151Z",
   "document": {
-    "id": "preset-settings",
-    "title": "GNOME Settings",
+    "id": "imported-document",
+    "title": "Settings",
     "colorScheme": "auto",
     "edges": [],
     "screens": [
       {
-        "id": "settings-main",
-        "title": "Settings — Appearance",
-        "type": "sidebar",
-        "width": 980,
-        "height": 680,
+        "id": "imported-screen-1",
+        "title": "Settings 1",
+        "type": "standard",
+        "width": 1024,
+        "height": 720,
         "rootNode": {
-          "id": "s-root",
+          "id": "imported-14",
           "type": "window",
+          "sourceKey": "cc-window.blp#15",
+          "sourceClass": "Adw.ApplicationWindow",
           "children": [
             {
-              "id": "s-toolbar",
-              "type": "toolbar-view",
+              "id": "break_point",
+              "type": "custom-widget",
+              "sourceKey": "cc-window.blp#16",
+              "sourceClass": "Adw.Breakpoint",
+              "children": [],
+              "title": "Adw.Breakpoint"
+            },
+            {
+              "id": "split_view",
+              "type": "custom-widget",
+              "sourceKey": "cc-window.blp#17",
+              "sourceClass": "Adw.NavigationSplitView",
               "children": [
                 {
-                  "id": "s-hdr",
-                  "type": "header-bar",
-                  "children": [
-                    { "id": "s-search-btn", "type": "button", "title": "Search", "iconName": "edit-find-symbolic", "flat": true },
-                    { "id": "s-title", "type": "window-title", "title": "Appearance" },
-                    { "id": "s-menu", "type": "menu-button", "iconName": "open-menu-symbolic", "title": "Menu" }
-                  ]
-                },
-                {
-                  "id": "s-split",
-                  "type": "overlay-split",
+                  "id": "panel_list_page",
+                  "type": "custom-widget",
+                  "sourceKey": "cc-window.blp#18",
+                  "sourceClass": "Adw.NavigationPage",
                   "children": [
                     {
-                      "id": "s-sidebar",
-                      "type": "list-box",
-                      "children": [
-                        { "id": "s-net", "type": "action-row", "title": "Network", "iconName": "network-wireless-symbolic", "activatable": true },
-                        { "id": "s-bt", "type": "action-row", "title": "Bluetooth", "iconName": "bluetooth-symbolic", "activatable": true },
-                        { "id": "s-disp", "type": "action-row", "title": "Displays", "iconName": "video-display-symbolic", "activatable": true },
-                        { "id": "s-sound", "type": "action-row", "title": "Sound", "iconName": "audio-card-symbolic", "activatable": true },
-                        { "id": "s-power", "type": "action-row", "title": "Power", "iconName": "battery-good-symbolic", "activatable": true },
-                        { "id": "s-multi", "type": "action-row", "title": "Multitasking", "iconName": "view-grid-symbolic", "activatable": true },
-                        { "id": "s-appr", "type": "action-row", "title": "Appearance", "iconName": "preferences-desktop-wallpaper-symbolic", "activatable": true },
-                        { "id": "s-apps", "type": "action-row", "title": "Apps", "iconName": "application-x-executable-symbolic", "activatable": true },
-                        { "id": "s-notif", "type": "action-row", "title": "Notifications", "iconName": "preferences-system-notifications-symbolic", "activatable": true },
-                        { "id": "s-search", "type": "action-row", "title": "Search", "iconName": "edit-find-symbolic", "activatable": true },
-                        { "id": "s-accounts", "type": "action-row", "title": "Online Accounts", "iconName": "user-bookmarks-symbolic", "activatable": true },
-                        { "id": "s-sharing", "type": "action-row", "title": "Sharing", "iconName": "folder-publicshare-symbolic", "activatable": true }
-                      ]
-                    },
-                    {
-                      "id": "s-content",
-                      "type": "box",
-                      "orientation": "vertical",
-                      "spacing": 18,
+                      "id": "imported-19",
+                      "type": "toolbar-view",
+                      "sourceKey": "cc-window.blp#20",
+                      "sourceClass": "Adw.ToolbarView",
                       "children": [
                         {
-                          "id": "s-group-style",
-                          "type": "preferences-group",
-                          "title": "Style",
+                          "id": "imported-21",
+                          "type": "header-bar",
+                          "sourceKey": "cc-window.blp#22",
+                          "sourceClass": "Adw.HeaderBar",
                           "children": [
                             {
-                              "id": "s-toggles",
-                              "type": "toggle-group",
-                              "title": "Appearance Theme",
-                              "children": [
-                                { "id": "s-t-default", "type": "toggle", "title": "Default" },
-                                { "id": "s-t-dark", "type": "toggle", "title": "Dark" }
-                              ]
+                              "id": "search_button",
+                              "type": "toggle",
+                              "sourceKey": "cc-window.blp#23",
+                              "sourceClass": "ToggleButton",
+                              "children": [],
+                              "iconName": "edit-find-symbolic"
+                            },
+                            {
+                              "id": "imported-24",
+                              "type": "menu-button",
+                              "sourceKey": "cc-window.blp#25",
+                              "sourceClass": "MenuButton",
+                              "children": [],
+                              "iconName": "open-menu-symbolic",
+                              "menuModel": "primary_menu",
+                              "primary": true
                             }
                           ]
                         },
                         {
-                          "id": "s-group-bg",
-                          "type": "preferences-group",
-                          "title": "Background",
-                          "description": "+ Add Picture…",
+                          "id": "search_bar",
+                          "type": "custom-widget",
+                          "sourceKey": "cc-window.blp#26",
+                          "sourceClass": "SearchBar",
                           "children": [
-                            { "id": "s-bg-1", "type": "action-row", "title": "Adwaita Default (Blue Mesh)", "iconName": "preferences-desktop-wallpaper-symbolic" },
-                            { "id": "s-bg-2", "type": "action-row", "title": "Vibrant Sunset (Orange)", "iconName": "preferences-desktop-wallpaper-symbolic" },
-                            { "id": "s-bg-3", "type": "action-row", "title": "Dark Waves (Purple)", "iconName": "preferences-desktop-wallpaper-symbolic" }
-                          ]
+                            {
+                              "id": "search_entry",
+                              "type": "custom-widget",
+                              "sourceKey": "cc-window.blp#27",
+                              "sourceClass": "SearchEntry",
+                              "children": [
+                                {
+                                  "id": "imported-28",
+                                  "type": "custom-widget",
+                                  "sourceKey": "cc-window.blp#29",
+                                  "sourceClass": "EventControllerKey",
+                                  "children": [],
+                                  "title": "EventControllerKey"
+                                }
+                              ],
+                              "title": "SearchEntry",
+                              "hexpand": true
+                            }
+                          ],
+                          "title": "SearchBar"
+                        },
+                        {
+                          "id": "imported-30",
+                          "type": "scrolled-window",
+                          "sourceKey": "cc-window.blp#31",
+                          "sourceClass": "ScrolledWindow",
+                          "children": [
+                            {
+                              "id": "panel_list",
+                              "type": "bin",
+                              "sourceKey": "cc-window.blp#32",
+                              "sourceClass": "CcPanelList",
+                              "children": [
+                                {
+                                  "id": "stack",
+                                  "type": "stack",
+                                  "sourceKey": "cc-panel-list.blp#3",
+                                  "sourceClass": "Stack",
+                                  "children": [
+                                    {
+                                      "id": "imported-4",
+                                      "type": "stack-page",
+                                      "sourceKey": "cc-panel-list.blp#5",
+                                      "sourceClass": "StackPage",
+                                      "children": [
+                                        {
+                                          "id": "main_listbox",
+                                          "type": "custom-widget",
+                                          "sourceKey": "cc-panel-list.blp#6",
+                                          "sourceClass": "ListBox",
+                                          "children": [],
+                                          "title": "ListBox",
+                                          "slot": "child"
+                                        }
+                                      ],
+                                      "name": "main"
+                                    },
+                                    {
+                                      "id": "imported-7",
+                                      "type": "stack-page",
+                                      "sourceKey": "cc-panel-list.blp#8",
+                                      "sourceClass": "StackPage",
+                                      "children": [
+                                        {
+                                          "id": "search_listbox",
+                                          "type": "custom-widget",
+                                          "sourceKey": "cc-panel-list.blp#9",
+                                          "sourceClass": "ListBox",
+                                          "children": [
+                                            {
+                                              "id": "imported-10",
+                                              "type": "status-page",
+                                              "sourceKey": "cc-panel-list.blp#11",
+                                              "sourceClass": "Adw.StatusPage",
+                                              "children": [],
+                                              "iconName": "edit-find-symbolic"
+                                            }
+                                          ],
+                                          "title": "ListBox",
+                                          "slot": "child"
+                                        }
+                                      ],
+                                      "name": "search"
+                                    }
+                                  ],
+                                  "vhomogeneous": false,
+                                  "hhomogeneous": true,
+                                  "transitionType": "slide_left_right"
+                                }
+                              ],
+                              "title": "CcPanelList"
+                            }
+                          ],
+                          "hscrollbarPolicy": "never",
+                          "slot": "content"
                         }
-                      ]
+                      ],
+                      "slot": "child"
                     }
-                  ]
+                  ],
+                  "title": "Adw.NavigationPage",
+                  "slot": "sidebar"
+                },
+                {
+                  "id": "imported-33",
+                  "type": "custom-widget",
+                  "sourceKey": "cc-window.blp#34",
+                  "sourceClass": "Adw.NavigationPage",
+                  "children": [
+                    {
+                      "id": "navigation",
+                      "type": "navigation-view",
+                      "sourceKey": "cc-window.blp#35",
+                      "sourceClass": "Adw.NavigationView",
+                      "children": [],
+                      "slot": "child"
+                    }
+                  ],
+                  "title": "Adw.NavigationPage",
+                  "slot": "content"
+                }
+              ],
+              "title": "Adw.NavigationSplitView",
+              "notify": ":",
+              "slot": "content"
+            }
+          ],
+          "defaultWidth": 980,
+          "defaultHeight": 640
+        }
+      }
+    ],
+    "sourceProject": {
+      "files": [
+        {
+          "path": "cc-panel-list.blp",
+          "content": "using Gtk 4.0;\nusing Adw 1;\n\ntemplate $CcPanelList: Adw.Bin {\n  Stack stack {\n    vhomogeneous: false;\n    hhomogeneous: true;\n    transition-type: slide_left_right;\n\n    StackPage {\n      name: \"main\";\n\n      child: ListBox main_listbox {\n        accessibility {\n          label: _(\"Settings categories\");\n        }\n\n        row-activated => $row_activated_cb();\n\n        styles [\n          \"navigation-sidebar\",\n        ]\n      };\n    }\n\n    StackPage {\n      name: \"search\";\n\n      child: ListBox search_listbox {\n        row-activated => $search_row_activated_cb();\n        keynav-failed => $cc_util_keynav_propagate_up();\n\n        styles [\n          \"navigation-sidebar\",\n        ]\n\n        [placeholder]\n        Adw.StatusPage {\n          icon-name: \"edit-find-symbolic\";\n          title: _(\"No Results Found\");\n          description: _(\"Try a different search\");\n\n          styles [\n            \"compact\",\n          ]\n        }\n      };\n    }\n  }\n}\n"
+        },
+        {
+          "path": "cc-panel.blp",
+          "content": "using Gtk 4.0;\nusing Adw 1;\n\ntemplate $CcPanel: Adw.NavigationPage {\n}\n"
+        },
+        {
+          "path": "cc-window.blp",
+          "content": "using Gtk 4.0;\nusing Adw 1;\n\ntemplate $CcWindow: Adw.ApplicationWindow {\n  default-width: 980;\n  default-height: 640;\n\n  Adw.Breakpoint break_point {\n    condition (\"max-width: 550sp\")\n\n    setters {\n      split_view.collapsed: true;\n    }\n  }\n\n  content: Adw.NavigationSplitView split_view {\n    notify::collapsed => $on_split_view_collapsed_changed_cb(template);\n\n    sidebar: Adw.NavigationPage panel_list_page {\n      title: _(\"Settings\");\n\n      child: Adw.ToolbarView {\n        [top]\n        Adw.HeaderBar {\n          ToggleButton search_button {\n            icon-name: \"edit-find-symbolic\";\n\n            /* Translators: this is a verb. */\n            tooltip-text: _(\"Search\");\n          }\n\n          [end]\n          MenuButton {\n            icon-name: \"open-menu-symbolic\";\n            menu-model: primary_menu;\n            primary: true;\n            tooltip-text: _(\"Main Menu\");\n          }\n        }\n\n        [top]\n        SearchBar search_bar {\n          search-mode-enabled: bind search_button.active bidirectional;\n\n          SearchEntry search_entry {\n            hexpand: true;\n            placeholder-text: _(\"Search settings\");\n            activate => $search_entry_activate_cb(template);\n\n            EventControllerKey {\n              key-pressed => $search_entry_key_pressed_cb(template);\n            }\n          }\n        }\n\n        content: ScrolledWindow {\n          hscrollbar-policy: never;\n\n          $CcPanelList panel_list {\n            search-mode: bind search_bar.search-mode-enabled no-sync-create bidirectional;\n            search-query: bind search_entry.text no-sync-create;\n            show-panel => $show_panel_cb(template);\n          }\n        };\n      };\n    };\n\n    content: Adw.NavigationPage {\n      child: Adw.NavigationView navigation {\n      };\n    };\n  };\n}\n\nmenu primary_menu {\n  section {\n    item {\n      label: _(\"_Keyboard Shortcuts\");\n      action: \"app.shortcuts\";\n    }\n\n    item {\n      label: _(\"_Help\");\n      action: \"app.help\";\n    }\n\n    item {\n      label: _(\"_About Settings\");\n      action: \"app.about\";\n    }\n  }\n}\n"
+        },
+        {
+          "path": "shortcuts-dialog.blp",
+          "content": "using Gtk 4.0;\nusing Adw 1;\n\nAdw.ShortcutsDialog shortcuts_dialog {\n  Adw.ShortcutsSection {\n    title: C_(\"shortcuts dialog\", \"General\");\n\n    Adw.ShortcutsItem {\n      accelerator: \"<Control>Q\";\n      title: C_(\"shortcuts dialog\", \"Quit\");\n    }\n\n    Adw.ShortcutsItem {\n      accelerator: \"<Control>F\";\n      title: C_(\"shortcuts dialog\", \"Search\");\n    }\n\n    Adw.ShortcutsItem {\n      action-name: \"app.help\";\n      title: C_(\"shortcuts dialog\", \"Show help\");\n    }\n\n    Adw.ShortcutsItem {\n      action-name: \"app.shortcuts\";\n      title: C_(\"shortcuts dialog\", \"Keyboard shortcuts\");\n    }\n  }\n\n  Adw.ShortcutsSection {\n    title: C_(\"shortcuts dialog\", \"Panels\");\n\n    Adw.ShortcutsItem {\n      accelerator: \"<Alt>Left\";\n      direction: ltr;\n      title: C_(\"shortcuts dialog\", \"Go back to previous panel\");\n    }\n\n    Adw.ShortcutsItem {\n      accelerator: \"<Alt>Right\";\n      direction: rtl;\n      title: C_(\"shortcuts dialog\", \"Go back to previous panel\");\n    }\n  }\n\n  Adw.ShortcutsSection {\n    title: C_(\"shortcuts dialog\", \"Search\");\n\n    Adw.ShortcutsItem {\n      accelerator: \"Escape\";\n      title: C_(\"shortcuts dialog\", \"Cancel search\");\n    }\n  }\n}\n"
+        }
+      ],
+      "roots": [
+        "cc-window.blp#15"
+      ],
+      "widgets": {
+        "cc-panel-list.blp#2": {
+          "key": "cc-panel-list.blp#2",
+          "sourceClass": "Adw.Bin",
+          "sourceId": "imported-1",
+          "sourceKind": "template-root",
+          "origin": {
+            "file": "cc-panel-list.blp",
+            "start": 52,
+            "end": 955
+          },
+          "properties": {},
+          "children": [
+            {
+              "nodeKey": "cc-panel-list.blp#3",
+              "origin": {
+                "file": "cc-panel-list.blp",
+                "start": 64,
+                "end": 953
+              }
+            }
+          ],
+          "resolution": {
+            "kind": "generic-widget",
+            "rendererType": "bin"
+          }
+        },
+        "cc-panel-list.blp#3": {
+          "key": "cc-panel-list.blp#3",
+          "sourceClass": "Stack",
+          "sourceId": "stack",
+          "sourceKind": "object",
+          "origin": {
+            "file": "cc-panel-list.blp",
+            "start": 64,
+            "end": 953
+          },
+          "properties": {
+            "vhomogeneous": {
+              "kind": "scalar",
+              "value": false
+            },
+            "hhomogeneous": {
+              "kind": "scalar",
+              "value": true
+            },
+            "transition-type": {
+              "kind": "scalar",
+              "value": "slide_left_right"
+            }
+          },
+          "children": [
+            {
+              "nodeKey": "cc-panel-list.blp#5",
+              "origin": {
+                "file": "cc-panel-list.blp",
+                "start": 171,
+                "end": 438
+              }
+            },
+            {
+              "nodeKey": "cc-panel-list.blp#8",
+              "origin": {
+                "file": "cc-panel-list.blp",
+                "start": 444,
+                "end": 949
+              }
+            }
+          ],
+          "resolution": {
+            "kind": "generic-widget",
+            "rendererType": "stack"
+          }
+        },
+        "cc-panel-list.blp#5": {
+          "key": "cc-panel-list.blp#5",
+          "sourceClass": "StackPage",
+          "sourceId": "imported-4",
+          "sourceKind": "object",
+          "origin": {
+            "file": "cc-panel-list.blp",
+            "start": 171,
+            "end": 438
+          },
+          "properties": {
+            "name": {
+              "kind": "scalar",
+              "value": "main"
+            },
+            "child": {
+              "kind": "object",
+              "nodeKey": "cc-panel-list.blp#6"
+            }
+          },
+          "children": [
+            {
+              "nodeKey": "cc-panel-list.blp#6",
+              "slot": "child",
+              "origin": {
+                "file": "cc-panel-list.blp",
+                "start": 217,
+                "end": 431
+              }
+            }
+          ],
+          "resolution": {
+            "kind": "generic-widget",
+            "rendererType": "stack-page"
+          }
+        },
+        "cc-panel-list.blp#6": {
+          "key": "cc-panel-list.blp#6",
+          "sourceClass": "ListBox",
+          "sourceId": "main_listbox",
+          "sourceKind": "object",
+          "origin": {
+            "file": "cc-panel-list.blp",
+            "start": 217,
+            "end": 431
+          },
+          "properties": {
+            "styles": {
+              "kind": "array",
+              "values": [
+                {
+                  "kind": "scalar",
+                  "value": "navigation-sidebar"
                 }
               ]
             }
-          ]
+          },
+          "children": [],
+          "resolution": {
+            "kind": "unsupported-widget",
+            "reason": "code-defined-class"
+          }
+        },
+        "cc-panel-list.blp#8": {
+          "key": "cc-panel-list.blp#8",
+          "sourceClass": "StackPage",
+          "sourceId": "imported-7",
+          "sourceKind": "object",
+          "origin": {
+            "file": "cc-panel-list.blp",
+            "start": 444,
+            "end": 949
+          },
+          "properties": {
+            "name": {
+              "kind": "scalar",
+              "value": "search"
+            },
+            "child": {
+              "kind": "object",
+              "nodeKey": "cc-panel-list.blp#9"
+            }
+          },
+          "children": [
+            {
+              "nodeKey": "cc-panel-list.blp#9",
+              "slot": "child",
+              "origin": {
+                "file": "cc-panel-list.blp",
+                "start": 492,
+                "end": 942
+              }
+            }
+          ],
+          "resolution": {
+            "kind": "generic-widget",
+            "rendererType": "stack-page"
+          }
+        },
+        "cc-panel-list.blp#9": {
+          "key": "cc-panel-list.blp#9",
+          "sourceClass": "ListBox",
+          "sourceId": "search_listbox",
+          "sourceKind": "object",
+          "origin": {
+            "file": "cc-panel-list.blp",
+            "start": 492,
+            "end": 942
+          },
+          "properties": {
+            "styles": {
+              "kind": "array",
+              "values": [
+                {
+                  "kind": "scalar",
+                  "value": "navigation-sidebar"
+                }
+              ]
+            }
+          },
+          "children": [
+            {
+              "nodeKey": "cc-panel-list.blp#11",
+              "origin": {
+                "file": "cc-panel-list.blp",
+                "start": 718,
+                "end": 934
+              }
+            }
+          ],
+          "resolution": {
+            "kind": "unsupported-widget",
+            "reason": "code-defined-class"
+          }
+        },
+        "cc-panel-list.blp#11": {
+          "key": "cc-panel-list.blp#11",
+          "sourceClass": "Adw.StatusPage",
+          "sourceId": "imported-10",
+          "sourceKind": "object",
+          "origin": {
+            "file": "cc-panel-list.blp",
+            "start": 718,
+            "end": 934
+          },
+          "properties": {
+            "icon-name": {
+              "kind": "scalar",
+              "value": "edit-find-symbolic"
+            },
+            "title": {
+              "kind": "opaque",
+              "sourceText": "_ \"No Results Found\""
+            },
+            "description": {
+              "kind": "opaque",
+              "sourceText": "_ \"Try a different search\""
+            },
+            "styles": {
+              "kind": "array",
+              "values": [
+                {
+                  "kind": "scalar",
+                  "value": "compact"
+                }
+              ]
+            }
+          },
+          "children": [],
+          "resolution": {
+            "kind": "generic-widget",
+            "rendererType": "status-page"
+          }
+        },
+        "cc-panel.blp#13": {
+          "key": "cc-panel.blp#13",
+          "sourceClass": "Adw.NavigationPage",
+          "sourceId": "imported-12",
+          "sourceKind": "template-root",
+          "origin": {
+            "file": "cc-panel.blp",
+            "start": 48,
+            "end": 70
+          },
+          "properties": {},
+          "children": [],
+          "resolution": {
+            "kind": "unsupported-widget",
+            "reason": "renderer-does-not-support-class"
+          }
+        },
+        "cc-window.blp#15": {
+          "key": "cc-window.blp#15",
+          "sourceClass": "Adw.ApplicationWindow",
+          "sourceId": "imported-14",
+          "sourceKind": "template-root",
+          "origin": {
+            "file": "cc-window.blp",
+            "start": 49,
+            "end": 1769
+          },
+          "properties": {
+            "default-width": {
+              "kind": "scalar",
+              "value": 980
+            },
+            "default-height": {
+              "kind": "scalar",
+              "value": 640
+            },
+            "content": {
+              "kind": "object",
+              "nodeKey": "cc-window.blp#17"
+            }
+          },
+          "children": [
+            {
+              "nodeKey": "cc-window.blp#16",
+              "origin": {
+                "file": "cc-window.blp",
+                "start": 121,
+                "end": 243
+              }
+            },
+            {
+              "nodeKey": "cc-window.blp#17",
+              "slot": "content",
+              "origin": {
+                "file": "cc-window.blp",
+                "start": 256,
+                "end": 1766
+              }
+            }
+          ],
+          "resolution": {
+            "kind": "generic-widget",
+            "rendererType": "window"
+          }
+        },
+        "cc-window.blp#16": {
+          "key": "cc-window.blp#16",
+          "sourceClass": "Adw.Breakpoint",
+          "sourceId": "break_point",
+          "sourceKind": "object",
+          "origin": {
+            "file": "cc-window.blp",
+            "start": 121,
+            "end": 243
+          },
+          "properties": {},
+          "children": [],
+          "resolution": {
+            "kind": "unsupported-widget",
+            "reason": "renderer-does-not-support-class"
+          }
+        },
+        "cc-window.blp#17": {
+          "key": "cc-window.blp#17",
+          "sourceClass": "Adw.NavigationSplitView",
+          "sourceId": "split_view",
+          "sourceKind": "object",
+          "origin": {
+            "file": "cc-window.blp",
+            "start": 256,
+            "end": 1766
+          },
+          "properties": {
+            "notify": {
+              "kind": "scalar",
+              "value": ":"
+            },
+            "sidebar": {
+              "kind": "object",
+              "nodeKey": "cc-window.blp#18"
+            },
+            "content": {
+              "kind": "object",
+              "nodeKey": "cc-window.blp#34"
+            }
+          },
+          "children": [
+            {
+              "nodeKey": "cc-window.blp#18",
+              "slot": "sidebar",
+              "origin": {
+                "file": "cc-window.blp",
+                "start": 379,
+                "end": 1665
+              }
+            },
+            {
+              "nodeKey": "cc-window.blp#34",
+              "slot": "content",
+              "origin": {
+                "file": "cc-window.blp",
+                "start": 1681,
+                "end": 1761
+              }
+            }
+          ],
+          "resolution": {
+            "kind": "unsupported-widget",
+            "reason": "renderer-does-not-support-class"
+          }
+        },
+        "cc-window.blp#18": {
+          "key": "cc-window.blp#18",
+          "sourceClass": "Adw.NavigationPage",
+          "sourceId": "panel_list_page",
+          "sourceKind": "object",
+          "origin": {
+            "file": "cc-window.blp",
+            "start": 379,
+            "end": 1665
+          },
+          "properties": {
+            "title": {
+              "kind": "opaque",
+              "sourceText": "_ \"Settings\""
+            },
+            "child": {
+              "kind": "object",
+              "nodeKey": "cc-window.blp#20"
+            }
+          },
+          "children": [
+            {
+              "nodeKey": "cc-window.blp#20",
+              "slot": "child",
+              "origin": {
+                "file": "cc-window.blp",
+                "start": 458,
+                "end": 1658
+              }
+            }
+          ],
+          "resolution": {
+            "kind": "unsupported-widget",
+            "reason": "renderer-does-not-support-class"
+          }
+        },
+        "cc-window.blp#20": {
+          "key": "cc-window.blp#20",
+          "sourceClass": "Adw.ToolbarView",
+          "sourceId": "imported-19",
+          "sourceKind": "object",
+          "origin": {
+            "file": "cc-window.blp",
+            "start": 458,
+            "end": 1658
+          },
+          "properties": {
+            "content": {
+              "kind": "object",
+              "nodeKey": "cc-window.blp#31"
+            }
+          },
+          "children": [
+            {
+              "nodeKey": "cc-window.blp#22",
+              "origin": {
+                "file": "cc-window.blp",
+                "start": 498,
+                "end": 876
+              }
+            },
+            {
+              "nodeKey": "cc-window.blp#26",
+              "origin": {
+                "file": "cc-window.blp",
+                "start": 900,
+                "end": 1311
+              }
+            },
+            {
+              "nodeKey": "cc-window.blp#31",
+              "slot": "content",
+              "origin": {
+                "file": "cc-window.blp",
+                "start": 1330,
+                "end": 1649
+              }
+            }
+          ],
+          "resolution": {
+            "kind": "generic-widget",
+            "rendererType": "toolbar-view"
+          }
+        },
+        "cc-window.blp#22": {
+          "key": "cc-window.blp#22",
+          "sourceClass": "Adw.HeaderBar",
+          "sourceId": "imported-21",
+          "sourceKind": "object",
+          "origin": {
+            "file": "cc-window.blp",
+            "start": 498,
+            "end": 876
+          },
+          "properties": {},
+          "children": [
+            {
+              "nodeKey": "cc-window.blp#23",
+              "origin": {
+                "file": "cc-window.blp",
+                "start": 524,
+                "end": 662
+              }
+            },
+            {
+              "nodeKey": "cc-window.blp#25",
+              "origin": {
+                "file": "cc-window.blp",
+                "start": 690,
+                "end": 866
+              }
+            }
+          ],
+          "resolution": {
+            "kind": "generic-widget",
+            "rendererType": "header-bar"
+          }
+        },
+        "cc-window.blp#23": {
+          "key": "cc-window.blp#23",
+          "sourceClass": "ToggleButton",
+          "sourceId": "search_button",
+          "sourceKind": "object",
+          "origin": {
+            "file": "cc-window.blp",
+            "start": 524,
+            "end": 662
+          },
+          "properties": {
+            "icon-name": {
+              "kind": "scalar",
+              "value": "edit-find-symbolic"
+            },
+            "tooltip-text": {
+              "kind": "opaque",
+              "sourceText": "_ \"Search\""
+            }
+          },
+          "children": [],
+          "resolution": {
+            "kind": "generic-widget",
+            "rendererType": "toggle"
+          }
+        },
+        "cc-window.blp#25": {
+          "key": "cc-window.blp#25",
+          "sourceClass": "MenuButton",
+          "sourceId": "imported-24",
+          "sourceKind": "object",
+          "origin": {
+            "file": "cc-window.blp",
+            "start": 690,
+            "end": 866
+          },
+          "properties": {
+            "icon-name": {
+              "kind": "scalar",
+              "value": "open-menu-symbolic"
+            },
+            "menu-model": {
+              "kind": "scalar",
+              "value": "primary_menu"
+            },
+            "primary": {
+              "kind": "scalar",
+              "value": true
+            },
+            "tooltip-text": {
+              "kind": "opaque",
+              "sourceText": "_ \"Main Menu\""
+            }
+          },
+          "children": [],
+          "resolution": {
+            "kind": "generic-widget",
+            "rendererType": "menu-button"
+          }
+        },
+        "cc-window.blp#26": {
+          "key": "cc-window.blp#26",
+          "sourceClass": "SearchBar",
+          "sourceId": "search_bar",
+          "sourceKind": "object",
+          "origin": {
+            "file": "cc-window.blp",
+            "start": 900,
+            "end": 1311
+          },
+          "properties": {
+            "search-mode-enabled": {
+              "kind": "binding",
+              "sourceText": "bind search_button.active bidirectional"
+            }
+          },
+          "children": [
+            {
+              "nodeKey": "cc-window.blp#27",
+              "origin": {
+                "file": "cc-window.blp",
+                "start": 1006,
+                "end": 1301
+              }
+            }
+          ],
+          "resolution": {
+            "kind": "unsupported-widget",
+            "reason": "code-defined-class"
+          }
+        },
+        "cc-window.blp#27": {
+          "key": "cc-window.blp#27",
+          "sourceClass": "SearchEntry",
+          "sourceId": "search_entry",
+          "sourceKind": "object",
+          "origin": {
+            "file": "cc-window.blp",
+            "start": 1006,
+            "end": 1301
+          },
+          "properties": {
+            "hexpand": {
+              "kind": "scalar",
+              "value": true
+            },
+            "placeholder-text": {
+              "kind": "opaque",
+              "sourceText": "_ \"Search settings\""
+            }
+          },
+          "children": [
+            {
+              "nodeKey": "cc-window.blp#29",
+              "origin": {
+                "file": "cc-window.blp",
+                "start": 1186,
+                "end": 1289
+              }
+            }
+          ],
+          "resolution": {
+            "kind": "unsupported-widget",
+            "reason": "code-defined-class"
+          }
+        },
+        "cc-window.blp#29": {
+          "key": "cc-window.blp#29",
+          "sourceClass": "EventControllerKey",
+          "sourceId": "imported-28",
+          "sourceKind": "object",
+          "origin": {
+            "file": "cc-window.blp",
+            "start": 1186,
+            "end": 1289
+          },
+          "properties": {},
+          "children": [],
+          "resolution": {
+            "kind": "unsupported-widget",
+            "reason": "code-defined-class"
+          }
+        },
+        "cc-window.blp#31": {
+          "key": "cc-window.blp#31",
+          "sourceClass": "ScrolledWindow",
+          "sourceId": "imported-30",
+          "sourceKind": "object",
+          "origin": {
+            "file": "cc-window.blp",
+            "start": 1330,
+            "end": 1649
+          },
+          "properties": {
+            "hscrollbar-policy": {
+              "kind": "scalar",
+              "value": "never"
+            }
+          },
+          "children": [
+            {
+              "nodeKey": "cc-window.blp#32",
+              "origin": {
+                "file": "cc-window.blp",
+                "start": 1394,
+                "end": 1639
+              }
+            }
+          ],
+          "resolution": {
+            "kind": "generic-widget",
+            "rendererType": "scrolled-window"
+          }
+        },
+        "cc-window.blp#32": {
+          "key": "cc-window.blp#32",
+          "sourceClass": "CcPanelList",
+          "sourceId": "panel_list",
+          "sourceKind": "template-instance",
+          "origin": {
+            "file": "cc-window.blp",
+            "start": 1394,
+            "end": 1639
+          },
+          "properties": {
+            "search-mode": {
+              "kind": "binding",
+              "sourceText": "bind search_bar.search-mode-enabled no-sync-create bidirectional"
+            },
+            "search-query": {
+              "kind": "binding",
+              "sourceText": "bind search_entry.text no-sync-create"
+            }
+          },
+          "children": [],
+          "resolution": {
+            "kind": "expanded-template",
+            "templateKey": "CcPanelList"
+          }
+        },
+        "cc-window.blp#34": {
+          "key": "cc-window.blp#34",
+          "sourceClass": "Adw.NavigationPage",
+          "sourceId": "imported-33",
+          "sourceKind": "object",
+          "origin": {
+            "file": "cc-window.blp",
+            "start": 1681,
+            "end": 1761
+          },
+          "properties": {
+            "child": {
+              "kind": "object",
+              "nodeKey": "cc-window.blp#35"
+            }
+          },
+          "children": [
+            {
+              "nodeKey": "cc-window.blp#35",
+              "slot": "child",
+              "origin": {
+                "file": "cc-window.blp",
+                "start": 1715,
+                "end": 1754
+              }
+            }
+          ],
+          "resolution": {
+            "kind": "unsupported-widget",
+            "reason": "renderer-does-not-support-class"
+          }
+        },
+        "cc-window.blp#35": {
+          "key": "cc-window.blp#35",
+          "sourceClass": "Adw.NavigationView",
+          "sourceId": "navigation",
+          "sourceKind": "object",
+          "origin": {
+            "file": "cc-window.blp",
+            "start": 1715,
+            "end": 1754
+          },
+          "properties": {},
+          "children": [],
+          "resolution": {
+            "kind": "generic-widget",
+            "rendererType": "navigation-view"
+          }
+        },
+        "shortcuts-dialog.blp#36": {
+          "key": "shortcuts-dialog.blp#36",
+          "sourceClass": "Adw.ShortcutsDialog",
+          "sourceId": "shortcuts_dialog",
+          "sourceKind": "object",
+          "origin": {
+            "file": "shortcuts-dialog.blp",
+            "start": 29,
+            "end": 1169
+          },
+          "properties": {},
+          "children": [
+            {
+              "nodeKey": "shortcuts-dialog.blp#38",
+              "origin": {
+                "file": "shortcuts-dialog.blp",
+                "start": 70,
+                "end": 600
+              }
+            },
+            {
+              "nodeKey": "shortcuts-dialog.blp#48",
+              "origin": {
+                "file": "shortcuts-dialog.blp",
+                "start": 604,
+                "end": 978
+              }
+            },
+            {
+              "nodeKey": "shortcuts-dialog.blp#54",
+              "origin": {
+                "file": "shortcuts-dialog.blp",
+                "start": 982,
+                "end": 1167
+              }
+            }
+          ],
+          "resolution": {
+            "kind": "unsupported-widget",
+            "reason": "renderer-does-not-support-class"
+          }
+        },
+        "shortcuts-dialog.blp#38": {
+          "key": "shortcuts-dialog.blp#38",
+          "sourceClass": "Adw.ShortcutsSection",
+          "sourceId": "imported-37",
+          "sourceKind": "object",
+          "origin": {
+            "file": "shortcuts-dialog.blp",
+            "start": 70,
+            "end": 600
+          },
+          "properties": {
+            "title": {
+              "kind": "opaque",
+              "sourceText": "C_ \"shortcuts dialog\""
+            }
+          },
+          "children": [
+            {
+              "nodeKey": "shortcuts-dialog.blp#40",
+              "origin": {
+                "file": "shortcuts-dialog.blp",
+                "start": 144,
+                "end": 247
+              }
+            },
+            {
+              "nodeKey": "shortcuts-dialog.blp#42",
+              "origin": {
+                "file": "shortcuts-dialog.blp",
+                "start": 253,
+                "end": 358
+              }
+            },
+            {
+              "nodeKey": "shortcuts-dialog.blp#44",
+              "origin": {
+                "file": "shortcuts-dialog.blp",
+                "start": 364,
+                "end": 470
+              }
+            },
+            {
+              "nodeKey": "shortcuts-dialog.blp#46",
+              "origin": {
+                "file": "shortcuts-dialog.blp",
+                "start": 476,
+                "end": 596
+              }
+            }
+          ],
+          "resolution": {
+            "kind": "unsupported-widget",
+            "reason": "renderer-does-not-support-class"
+          }
+        },
+        "shortcuts-dialog.blp#40": {
+          "key": "shortcuts-dialog.blp#40",
+          "sourceClass": "Adw.ShortcutsItem",
+          "sourceId": "imported-39",
+          "sourceKind": "object",
+          "origin": {
+            "file": "shortcuts-dialog.blp",
+            "start": 144,
+            "end": 247
+          },
+          "properties": {
+            "accelerator": {
+              "kind": "scalar",
+              "value": "<Control>Q"
+            },
+            "title": {
+              "kind": "opaque",
+              "sourceText": "C_ \"shortcuts dialog\""
+            }
+          },
+          "children": [],
+          "resolution": {
+            "kind": "unsupported-widget",
+            "reason": "renderer-does-not-support-class"
+          }
+        },
+        "shortcuts-dialog.blp#42": {
+          "key": "shortcuts-dialog.blp#42",
+          "sourceClass": "Adw.ShortcutsItem",
+          "sourceId": "imported-41",
+          "sourceKind": "object",
+          "origin": {
+            "file": "shortcuts-dialog.blp",
+            "start": 253,
+            "end": 358
+          },
+          "properties": {
+            "accelerator": {
+              "kind": "scalar",
+              "value": "<Control>F"
+            },
+            "title": {
+              "kind": "opaque",
+              "sourceText": "C_ \"shortcuts dialog\""
+            }
+          },
+          "children": [],
+          "resolution": {
+            "kind": "unsupported-widget",
+            "reason": "renderer-does-not-support-class"
+          }
+        },
+        "shortcuts-dialog.blp#44": {
+          "key": "shortcuts-dialog.blp#44",
+          "sourceClass": "Adw.ShortcutsItem",
+          "sourceId": "imported-43",
+          "sourceKind": "object",
+          "origin": {
+            "file": "shortcuts-dialog.blp",
+            "start": 364,
+            "end": 470
+          },
+          "properties": {
+            "action-name": {
+              "kind": "scalar",
+              "value": "app.help"
+            },
+            "title": {
+              "kind": "opaque",
+              "sourceText": "C_ \"shortcuts dialog\""
+            }
+          },
+          "children": [],
+          "resolution": {
+            "kind": "unsupported-widget",
+            "reason": "renderer-does-not-support-class"
+          }
+        },
+        "shortcuts-dialog.blp#46": {
+          "key": "shortcuts-dialog.blp#46",
+          "sourceClass": "Adw.ShortcutsItem",
+          "sourceId": "imported-45",
+          "sourceKind": "object",
+          "origin": {
+            "file": "shortcuts-dialog.blp",
+            "start": 476,
+            "end": 596
+          },
+          "properties": {
+            "action-name": {
+              "kind": "scalar",
+              "value": "app.shortcuts"
+            },
+            "title": {
+              "kind": "opaque",
+              "sourceText": "C_ \"shortcuts dialog\""
+            }
+          },
+          "children": [],
+          "resolution": {
+            "kind": "unsupported-widget",
+            "reason": "renderer-does-not-support-class"
+          }
+        },
+        "shortcuts-dialog.blp#48": {
+          "key": "shortcuts-dialog.blp#48",
+          "sourceClass": "Adw.ShortcutsSection",
+          "sourceId": "imported-47",
+          "sourceKind": "object",
+          "origin": {
+            "file": "shortcuts-dialog.blp",
+            "start": 604,
+            "end": 978
+          },
+          "properties": {
+            "title": {
+              "kind": "opaque",
+              "sourceText": "C_ \"shortcuts dialog\""
+            }
+          },
+          "children": [
+            {
+              "nodeKey": "shortcuts-dialog.blp#50",
+              "origin": {
+                "file": "shortcuts-dialog.blp",
+                "start": 677,
+                "end": 822
+              }
+            },
+            {
+              "nodeKey": "shortcuts-dialog.blp#52",
+              "origin": {
+                "file": "shortcuts-dialog.blp",
+                "start": 828,
+                "end": 974
+              }
+            }
+          ],
+          "resolution": {
+            "kind": "unsupported-widget",
+            "reason": "renderer-does-not-support-class"
+          }
+        },
+        "shortcuts-dialog.blp#50": {
+          "key": "shortcuts-dialog.blp#50",
+          "sourceClass": "Adw.ShortcutsItem",
+          "sourceId": "imported-49",
+          "sourceKind": "object",
+          "origin": {
+            "file": "shortcuts-dialog.blp",
+            "start": 677,
+            "end": 822
+          },
+          "properties": {
+            "accelerator": {
+              "kind": "scalar",
+              "value": "<Alt>Left"
+            },
+            "direction": {
+              "kind": "scalar",
+              "value": "ltr"
+            },
+            "title": {
+              "kind": "opaque",
+              "sourceText": "C_ \"shortcuts dialog\""
+            }
+          },
+          "children": [],
+          "resolution": {
+            "kind": "unsupported-widget",
+            "reason": "renderer-does-not-support-class"
+          }
+        },
+        "shortcuts-dialog.blp#52": {
+          "key": "shortcuts-dialog.blp#52",
+          "sourceClass": "Adw.ShortcutsItem",
+          "sourceId": "imported-51",
+          "sourceKind": "object",
+          "origin": {
+            "file": "shortcuts-dialog.blp",
+            "start": 828,
+            "end": 974
+          },
+          "properties": {
+            "accelerator": {
+              "kind": "scalar",
+              "value": "<Alt>Right"
+            },
+            "direction": {
+              "kind": "scalar",
+              "value": "rtl"
+            },
+            "title": {
+              "kind": "opaque",
+              "sourceText": "C_ \"shortcuts dialog\""
+            }
+          },
+          "children": [],
+          "resolution": {
+            "kind": "unsupported-widget",
+            "reason": "renderer-does-not-support-class"
+          }
+        },
+        "shortcuts-dialog.blp#54": {
+          "key": "shortcuts-dialog.blp#54",
+          "sourceClass": "Adw.ShortcutsSection",
+          "sourceId": "imported-53",
+          "sourceKind": "object",
+          "origin": {
+            "file": "shortcuts-dialog.blp",
+            "start": 982,
+            "end": 1167
+          },
+          "properties": {
+            "title": {
+              "kind": "opaque",
+              "sourceText": "C_ \"shortcuts dialog\""
+            }
+          },
+          "children": [
+            {
+              "nodeKey": "shortcuts-dialog.blp#56",
+              "origin": {
+                "file": "shortcuts-dialog.blp",
+                "start": 1055,
+                "end": 1163
+              }
+            }
+          ],
+          "resolution": {
+            "kind": "unsupported-widget",
+            "reason": "renderer-does-not-support-class"
+          }
+        },
+        "shortcuts-dialog.blp#56": {
+          "key": "shortcuts-dialog.blp#56",
+          "sourceClass": "Adw.ShortcutsItem",
+          "sourceId": "imported-55",
+          "sourceKind": "object",
+          "origin": {
+            "file": "shortcuts-dialog.blp",
+            "start": 1055,
+            "end": 1163
+          },
+          "properties": {
+            "accelerator": {
+              "kind": "scalar",
+              "value": "Escape"
+            },
+            "title": {
+              "kind": "opaque",
+              "sourceText": "C_ \"shortcuts dialog\""
+            }
+          },
+          "children": [],
+          "resolution": {
+            "kind": "unsupported-widget",
+            "reason": "renderer-does-not-support-class"
+          }
         }
-      }
-    ]
+      },
+      "templates": {
+        "CcPanelList": {
+          "key": "CcPanelList",
+          "className": "Adw.Bin",
+          "rootKey": "cc-panel-list.blp#2",
+          "origin": {
+            "file": "cc-panel-list.blp",
+            "start": 52,
+            "end": 955
+          }
+        },
+        "CcPanel": {
+          "key": "CcPanel",
+          "className": "Adw.NavigationPage",
+          "rootKey": "cc-panel.blp#13",
+          "origin": {
+            "file": "cc-panel.blp",
+            "start": 48,
+            "end": 70
+          }
+        },
+        "CcWindow": {
+          "key": "CcWindow",
+          "className": "Adw.ApplicationWindow",
+          "rootKey": "cc-window.blp#15",
+          "origin": {
+            "file": "cc-window.blp",
+            "start": 49,
+            "end": 1769
+          }
+        }
+      },
+      "diagnostics": []
+    }
   },
   "assets": {}
 }

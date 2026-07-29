@@ -7,6 +7,9 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 1 : undefined,
   reporter: 'html',
+  // Broadway comparisons are review artifacts even when the measurement test
+  // passes; retain their native, Protota, diff, and JSON outputs for CI.
+  preserveOutput: 'always',
   use: {
     baseURL: 'http://localhost:5173',
     trace: 'on-first-retry',

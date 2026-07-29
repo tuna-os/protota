@@ -1,0 +1,67 @@
+{
+  "version": 1,
+  "exportedAt": "2026-07-29T00:00:00Z",
+  "document": {
+    "id": "preset-weather",
+    "title": "GNOME Weather",
+    "colorScheme": "auto",
+    "edges": [],
+    "screens": [
+      {
+        "id": "weather-main",
+        "title": "Weather — Forecast",
+        "type": "standard",
+        "width": 780,
+        "height": 580,
+        "rootNode": {
+          "id": "w-root",
+          "type": "window",
+          "children": [
+            {
+              "id": "w-toolbar",
+              "type": "toolbar-view",
+              "children": [
+                {
+                  "id": "w-hdr",
+                  "type": "header-bar",
+                  "children": [
+                    { "id": "w-search", "type": "search-entry", "placeholder": "Search city or location…" },
+                    { "id": "w-title", "type": "window-title", "title": "London, UK", "subtitle": "Updated 5m ago" },
+                    { "id": "w-menu", "type": "menu-button", "iconName": "open-menu-symbolic", "title": "Menu" }
+                  ]
+                },
+                {
+                  "id": "w-body",
+                  "type": "clamp",
+                  "children": [
+                    {
+                      "id": "w-status",
+                      "type": "status-page",
+                      "title": "21°C · Partly Cloudy",
+                      "description": "High: 24°C  Low: 14°C · Humidity 58% · Wind 12 km/h",
+                      "iconName": "weather-clear-night-symbolic",
+                      "children": [
+                        {
+                          "id": "w-forecast-group",
+                          "type": "preferences-group",
+                          "title": "7-Day Forecast",
+                          "children": [
+                            { "id": "f1", "type": "action-row", "title": "Today", "subtitle": "Partly Cloudy · 24°C / 14°C", "iconName": "weather-clear-night-symbolic" },
+                            { "id": "f2", "type": "action-row", "title": "Thursday", "subtitle": "Sunny · 26°C / 15°C", "iconName": "weather-clear-symbolic" },
+                            { "id": "f3", "type": "action-row", "title": "Friday", "subtitle": "Light Rain · 20°C / 12°C", "iconName": "weather-showers-symbolic" },
+                            { "id": "f4", "type": "action-row", "title": "Saturday", "subtitle": "Thunderstorm · 18°C / 11°C", "iconName": "weather-storm-symbolic" }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "assets": {}
+}

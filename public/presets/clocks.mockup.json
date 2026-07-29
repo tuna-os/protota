@@ -1,0 +1,66 @@
+{
+  "version": 1,
+  "exportedAt": "2026-07-29T00:00:00Z",
+  "document": {
+    "id": "preset-clocks",
+    "title": "GNOME Clocks",
+    "colorScheme": "auto",
+    "edges": [],
+    "screens": [
+      {
+        "id": "clocks-main",
+        "title": "Clocks — World & Alarms",
+        "type": "standard",
+        "width": 800,
+        "height": 580,
+        "rootNode": {
+          "id": "clk-root",
+          "type": "window",
+          "children": [
+            {
+              "id": "clk-toolbar",
+              "type": "toolbar-view",
+              "children": [
+                {
+                  "id": "clk-hdr",
+                  "type": "header-bar",
+                  "children": [
+                    { "id": "clk-add", "type": "button", "title": "New Alarm", "iconName": "list-add-symbolic", "suggested": true },
+                    { "id": "clk-title", "type": "window-title", "title": "World Clocks & Alarms" },
+                    { "id": "clk-menu", "type": "menu-button", "iconName": "open-menu-symbolic", "title": "Menu" }
+                  ]
+                },
+                {
+                  "id": "clk-body",
+                  "type": "clamp",
+                  "children": [
+                    {
+                      "id": "clk-world-group",
+                      "type": "preferences-group",
+                      "title": "World Clocks",
+                      "children": [
+                        { "id": "w1", "type": "action-row", "title": "London, UK", "subtitle": "06:35 AM · Local time (+0h)", "iconName": "preferences-system-time-symbolic" },
+                        { "id": "w2", "type": "action-row", "title": "Tokyo, Japan", "subtitle": "02:35 PM · Tomorrow (+9h)", "iconName": "preferences-system-time-symbolic" },
+                        { "id": "w3", "type": "action-row", "title": "New York, USA", "subtitle": "01:35 AM · Today (-5h)", "iconName": "preferences-system-time-symbolic" }
+                      ]
+                    },
+                    {
+                      "id": "clk-alarms-group",
+                      "type": "preferences-group",
+                      "title": "Active Alarms",
+                      "children": [
+                        { "id": "a1", "type": "switch-row", "title": "07:00 AM", "subtitle": "Weekdays · Morning Standup", "active": true },
+                        { "id": "a2", "type": "switch-row", "title": "08:30 AM", "subtitle": "Weekends · Workout", "active": false }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "assets": {}
+}

@@ -68,7 +68,7 @@ test.describe('GNOME Core app presets (#6)', () => {
   });
 
   test('preset rendering matches snapshot expectations', async ({ page }) => {
-    const presetsToTest = ['calculator', 'settings', 'text-editor', 'files', 'calendar'];
+    const presetsToTest = ['calculator', 'settings', 'text-editor', 'files', 'calendar', 'weather', 'clocks'];
     for (const presetId of presetsToTest) {
       await page.evaluate(async (id) => {
         const res = await fetch(`./presets/${id}.mockup.json`);

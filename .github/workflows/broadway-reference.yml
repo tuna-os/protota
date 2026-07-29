@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
     inputs:
       app:
-        description: Catalog app ID
+        description: Catalog app ID, or all-core for the Core matrix
         required: true
         default: calculator
         type: string
@@ -23,7 +23,7 @@ permissions:
 
 jobs:
   native-reference:
-    if: (github.event_name == 'schedule' && matrix.scheduled) || matrix.app == inputs.app
+    if: (github.event_name == 'schedule' && matrix.scheduled) || inputs.app == 'all-core' || matrix.app == inputs.app
     runs-on: ubuntu-latest
     timeout-minutes: 20
     strategy:

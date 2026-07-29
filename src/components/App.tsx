@@ -9,6 +9,26 @@ import { PresetGallery } from "./PresetGallery";
 import { CommandPalette } from "./CommandPalette";
 import { AddScreenModal } from "./AddScreenModal";
 import { TopBar } from "./TopBar";
+import {
+  sidebarShowSymbolic,
+  goPreviousSymbolic,
+  goNextSymbolic,
+  listAddSymbolic,
+  viewGridSymbolic,
+  sidebarShowRightSymbolic,
+} from "@gjsify/adwaita-icons/actions";
+import { toDataUri } from "@gjsify/adwaita-icons/utils";
+
+const iconStyle = (svg: string): React.CSSProperties => ({
+  display: "inline-block",
+  width: "16px",
+  height: "16px",
+  maskImage: toDataUri(svg),
+  WebkitMaskImage: toDataUri(svg),
+  maskSize: "contain",
+  WebkitMaskSize: "contain",
+  backgroundColor: "currentColor",
+});
 
 export const App: React.FC = () => {
   const {
@@ -193,31 +213,31 @@ export const App: React.FC = () => {
               title="Toggle Layers Panel (Ctrl+\)"
               style={leftOpen ? { backgroundColor: "var(--button-active-color)" } : undefined}
             >
-              <span className="adw-icon adw-icon--sidebar-show"></span>
+              <span style={iconStyle(sidebarShowSymbolic)} />
             </button>
             <TopBar />
           </div>
           {/* End slot: Core actions + Properties toggle */}
           <div slot="end" style={{ display: "flex", gap: "2px", alignItems: "center" }}>
             <button className="adw-button flat" onClick={undo} title="Undo (Ctrl+Z)">
-              <span className="adw-icon adw-icon--go-previous"></span>
+              <span style={iconStyle(goPreviousSymbolic)} />
             </button>
             <button className="adw-button flat" onClick={redo} title="Redo (Ctrl+Shift+Z)">
-              <span className="adw-icon adw-icon--go-next"></span>
+              <span style={iconStyle(goNextSymbolic)} />
             </button>
             <button
               className="adw-button suggested-action"
               onClick={() => setShowAddScreenModal(true)}
               title="Add Screen (Ctrl+N)"
             >
-              <span className="adw-icon adw-icon--list-add"></span>
+              <span style={iconStyle(listAddSymbolic)} />
             </button>
             <button
               className="adw-button flat"
               onClick={() => setShowPresets(true)}
               title="Presets"
             >
-              <span className="adw-icon adw-icon--view-grid"></span>
+              <span style={iconStyle(viewGridSymbolic)} />
             </button>
             <button
               className={`adw-button flat${rightOpen ? " active" : ""}`}
@@ -225,7 +245,7 @@ export const App: React.FC = () => {
               title="Toggle Properties Panel (Ctrl+])"
               style={rightOpen ? { backgroundColor: "var(--button-active-color)" } : undefined}
             >
-              <span className="adw-icon adw-icon--sidebar-show-right"></span>
+              <span style={iconStyle(sidebarShowRightSymbolic)} />
             </button>
           </div>
         </adw-header-bar>

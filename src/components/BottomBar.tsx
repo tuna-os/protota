@@ -1,6 +1,7 @@
 import React from "react";
 import { useMockupStore } from "../store/mockupStore";
 import { computerSymbolic, phoneSymbolic } from "@gjsify/adwaita-icons/devices";
+import { zoomFitBestSymbolic, zoomInSymbolic, zoomOriginalSymbolic, zoomOutSymbolic } from "@gjsify/adwaita-icons/actions";
 import { toDataUri } from "@gjsify/adwaita-icons/utils";
 
 interface BottomBarProps {
@@ -30,10 +31,29 @@ export const BottomBar: React.FC<BottomBarProps> = ({
     <div className="protota-zoom-bar">
       <button
         className="adw-button icon-only flat"
+        onClick={onZoomReset}
+        title="Reset Zoom (Ctrl+0)"
+      >
+        <span
+          className="adw-toolbar-icon"
+          style={{
+            maskImage: toDataUri(zoomOriginalSymbolic),
+            WebkitMaskImage: toDataUri(zoomOriginalSymbolic),
+          }}
+        />
+      </button>
+      <button
+        className="adw-button icon-only flat"
         onClick={onZoomOut}
         title="Zoom Out (Ctrl+-)"
       >
-        <span className="adw-icon adw-icon--list-remove"></span>
+        <span
+          className="adw-toolbar-icon"
+          style={{
+            maskImage: toDataUri(zoomOutSymbolic),
+            WebkitMaskImage: toDataUri(zoomOutSymbolic),
+          }}
+        />
       </button>
       <span
         style={{ fontSize: "var(--font-size-small, 9pt)", minWidth: "40px", textAlign: "center" }}
@@ -45,21 +65,26 @@ export const BottomBar: React.FC<BottomBarProps> = ({
         onClick={onZoomIn}
         title="Zoom In (Ctrl+=)"
       >
-        <span className="adw-icon adw-icon--list-add"></span>
+        <span
+          className="adw-toolbar-icon"
+          style={{
+            maskImage: toDataUri(zoomInSymbolic),
+            WebkitMaskImage: toDataUri(zoomInSymbolic),
+          }}
+        />
       </button>
       <button
-        className="adw-button flat"
+        className="adw-button icon-only flat"
         onClick={onZoomFit}
         title="Fit All Screens"
       >
-        Fit
-      </button>
-      <button
-        className="adw-button flat"
-        onClick={onZoomReset}
-        title="Reset Zoom (Ctrl+0)"
-      >
-        Reset
+        <span
+          className="adw-toolbar-icon"
+          style={{
+            maskImage: toDataUri(zoomFitBestSymbolic),
+            WebkitMaskImage: toDataUri(zoomFitBestSymbolic),
+          }}
+        />
       </button>
       <span style={{ width: '1px', height: '16px', background: 'var(--separator-color, rgba(0,0,6,0.12))', margin: '0 4px' }} />
       <button
@@ -68,15 +93,10 @@ export const BottomBar: React.FC<BottomBarProps> = ({
         title="Toggle Desktop Preview"
       >
         <span
+          className="adw-toolbar-icon"
           style={{
-            display: "inline-block",
-            width: "16px",
-            height: "16px",
             maskImage: toDataUri(computerSymbolic),
             WebkitMaskImage: toDataUri(computerSymbolic),
-            maskSize: "contain",
-            WebkitMaskSize: "contain",
-            backgroundColor: "currentColor",
           }}
         />
         Desktop
@@ -87,15 +107,10 @@ export const BottomBar: React.FC<BottomBarProps> = ({
         title="Toggle Phone Preview"
       >
         <span
+          className="adw-toolbar-icon"
           style={{
-            display: "inline-block",
-            width: "16px",
-            height: "16px",
             maskImage: toDataUri(phoneSymbolic),
             WebkitMaskImage: toDataUri(phoneSymbolic),
-            maskSize: "contain",
-            WebkitMaskSize: "contain",
-            backgroundColor: "currentColor",
           }}
         />
         Phone

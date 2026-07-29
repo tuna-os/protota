@@ -105,6 +105,20 @@ body,
   width: 34px;
 }
 
+/* Toolbar icon — masked SVG icon for button content */
+.adw-button .adw-toolbar-icon {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  mask-size: contain;
+  -webkit-mask-size: contain;
+  mask-repeat: no-repeat;
+  -webkit-mask-repeat: no-repeat;
+  mask-position: center;
+  -webkit-mask-position: center;
+  background-color: currentColor;
+}
+
 /* Circular — round icon button */
 .adw-button.circular {
   padding: 0;

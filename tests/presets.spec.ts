@@ -77,6 +77,9 @@ test.describe('GNOME Core app presets (#6)', () => {
       }, presetId);
       await page.reload();
       await page.waitForSelector('adw-window', { timeout: 10000 });
+      // Deselect any selected node to keep snapshots clean
+      await page.keyboard.press('Escape');
+      await page.waitForTimeout(300);
       const windowEl = page.locator('adw-window');
       await expect(windowEl).toBeVisible();
       // Take snapshot of rendered preset window for visual comparison

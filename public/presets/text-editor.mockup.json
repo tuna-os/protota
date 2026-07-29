@@ -24,23 +24,42 @@
                 {
                   "id": "te-hdr",
                   "type": "header-bar",
-                  "title": "Untitled Document",
                   "children": [
-                    { "id": "te-title", "type": "window-title", "title": "Document.txt", "subtitle": "~/Documents — Text Editor" },
+                    { "id": "te-title", "type": "window-title", "title": "README.md", "subtitle": "~/Downloads" },
+                    { "id": "te-open", "type": "split-button", "title": "Open", "iconName": "document-open-symbolic" },
                     { "id": "te-new", "type": "button", "title": "New Tab", "iconName": "tab-new-symbolic", "flat": true },
-                    { "id": "te-open", "type": "button", "title": "Open", "iconName": "document-open-symbolic", "flat": true },
-                    { "id": "te-save", "type": "button", "title": "Save", "iconName": "document-save-symbolic", "suggested": true },
                     { "id": "te-search", "type": "button", "title": "Search", "iconName": "edit-find-symbolic", "flat": true },
                     { "id": "te-menu", "type": "menu-button", "iconName": "open-menu-symbolic", "title": "Main Menu" }
                   ]
                 },
                 {
-                  "id": "te-content",
-                  "type": "box",
-                  "orientation": "vertical",
-                  "spacing": 0,
+                  "id": "te-tab-view",
+                  "type": "tab-view",
                   "children": [
-                    { "id": "te-label", "type": "label", "title": "1  import { useState } from 'react';\n2  \n3  export function App() {\n4    return <h1>Hello GNOME Text Editor</h1>;\n5  }" }
+                    {
+                      "id": "te-tab-bar",
+                      "type": "box",
+                      "orientation": "horizontal",
+                      "spacing": 6,
+                      "children": [
+                        { "id": "te-tab1", "type": "button", "title": "README.md ✕" },
+                        { "id": "te-tab2", "type": "button", "title": "config.fish", "flat": true },
+                        { "id": "te-tab3", "type": "button", "title": "application.ts", "flat": true }
+                      ]
+                    },
+                    {
+                      "id": "te-content",
+                      "type": "box",
+                      "orientation": "vertical",
+                      "spacing": 0,
+                      "children": [
+                        {
+                          "id": "te-code",
+                          "type": "label",
+                          "title": "# Highscore\n\n<a href=\"https://flathub.org/apps/details/org.gnome.World.Highscore\">\n  <img height=\"51\" alt=\"Download on Flathub\" src=\"flathub-badge.svg\"/>\n</a>\n\nHighscore is a retro gaming application for the GNOME desktop."
+                        }
+                      ]
+                    }
                   ]
                 }
               ]

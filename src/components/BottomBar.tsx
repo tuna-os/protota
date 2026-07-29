@@ -7,6 +7,7 @@ interface BottomBarProps {
   zoom: number;
   onZoomIn: () => void;
   onZoomOut: () => void;
+  onZoomFit: () => void;
   onZoomReset: () => void;
   desktopScreenId: string | null;
   onToggleDesktop: () => void;
@@ -18,6 +19,7 @@ export const BottomBar: React.FC<BottomBarProps> = ({
   zoom,
   onZoomIn,
   onZoomOut,
+  onZoomFit,
   onZoomReset,
   desktopScreenId,
   onToggleDesktop,
@@ -44,6 +46,13 @@ export const BottomBar: React.FC<BottomBarProps> = ({
         title="Zoom In (Ctrl+=)"
       >
         <span className="adw-icon adw-icon--list-add"></span>
+      </button>
+      <button
+        className="adw-button flat"
+        onClick={onZoomFit}
+        title="Fit All Screens"
+      >
+        Fit
       </button>
       <button
         className="adw-button flat"

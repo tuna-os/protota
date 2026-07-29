@@ -271,6 +271,27 @@ export const ViewportCanvas: React.FC = () => {
         zoom={zoom}
         onZoomIn={() => setZoom((z) => Math.min(z + 0.1, 2.5))}
         onZoomOut={() => setZoom((z) => Math.max(z - 0.1, 0.3))}
+        onZoomFit={() => {
+          if (!canvasRef.current || doc.screens.length === 0) return;
+          const canvasW = canvasRef.current.clientWidth;
+          const canvasH = canvasRef.current.clientHeight;
+          const padding = 60;
+          const gap = 40;
+          const totalContentW = doc.screens.reduce((sum, s) => sum + (s.width || 800), 0)
+            + gap * (doc.screens.length - 1)
+            + padding * 2;
+          const maxContentH = Math.max(...doc.screens.map((s) => s.height || 600))
+            + 28 /* label */ + padding * 2;
+          const fitZoom = Math.min(canvasW / totalContentW, canvasH / maxContentH, 1.5);
+          setZoom(fitZoom);
+          const scaledW = totalContentW * fitZoom;
+          const scaledH = maxContentH * fitZoom;
+          const bottomBarH = 48;
+          setPan({
+            x: (canvasW - scaledW) / 2,
+            y: (canvasH - scaledH - bottomBarH) / 2,
+          });
+        }}
         onZoomReset={() => { setZoom(1); setPan({ x: 0, y: 0 }); }}
         desktopScreenId={desktopScreenId}
         onToggleDesktop={() => setDesktopScreenId((prev) => {

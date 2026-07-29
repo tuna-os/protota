@@ -11,8 +11,8 @@
         "id": "files-main",
         "title": "Files — Home",
         "type": "sidebar",
-        "width": 1000,
-        "height": 660,
+        "width": 920,
+        "height": 640,
         "rootNode": {
           "id": "files-root",
           "type": "window",
@@ -22,48 +22,65 @@
               "type": "toolbar-view",
               "children": [
                 {
-                  "id": "files-hdr",
-                  "type": "header-bar",
-                  "children": [
-                    { "id": "files-search-btn", "type": "button", "title": "Search", "iconName": "edit-find-symbolic", "flat": true },
-                    { "id": "files-path-bar", "type": "entry", "value": "🏠 Home", "placeholder": "Search or type a path…" },
-                    { "id": "files-new-folder", "type": "button", "title": "New Folder", "iconName": "folder-new-symbolic", "flat": true },
-                    { "id": "files-view-opts", "type": "button", "title": "View Options", "iconName": "view-grid-symbolic", "flat": true },
-                    { "id": "files-menu", "type": "menu-button", "iconName": "open-menu-symbolic", "title": "Menu" }
-                  ]
-                },
-                {
                   "id": "files-split",
                   "type": "overlay-split",
                   "children": [
                     {
-                      "id": "files-sidebar",
-                      "type": "list-box",
+                      "id": "files-sidebar-panel",
+                      "type": "box",
+                      "orientation": "vertical",
+                      "spacing": 6,
                       "children": [
-                        { "id": "f-home", "type": "action-row", "title": "Home", "iconName": "user-home-symbolic", "activatable": true },
-                        { "id": "f-recent", "type": "action-row", "title": "Recent", "iconName": "document-open-recent-symbolic", "activatable": true },
-                        { "id": "f-starred", "type": "action-row", "title": "Starred", "iconName": "starred-symbolic", "activatable": true },
-                        { "id": "f-net", "type": "action-row", "title": "Network", "iconName": "network-workgroup-symbolic", "activatable": true },
-                        { "id": "f-trash", "type": "action-row", "title": "Trash", "iconName": "user-trash-symbolic", "activatable": true },
-                        { "id": "f-docs", "type": "action-row", "title": "Documents", "iconName": "folder-documents-symbolic", "activatable": true },
-                        { "id": "f-music", "type": "action-row", "title": "Music", "iconName": "folder-music-symbolic", "activatable": true },
-                        { "id": "f-pics", "type": "action-row", "title": "Pictures", "iconName": "folder-pictures-symbolic", "activatable": true },
-                        { "id": "f-vids", "type": "action-row", "title": "Videos", "iconName": "folder-videos-symbolic", "activatable": true },
-                        { "id": "f-dls", "type": "action-row", "title": "Downloads", "iconName": "folder-download-symbolic", "activatable": true }
+                        {
+                          "id": "files-sidebar-hdr",
+                          "type": "header-bar",
+                          "children": [
+                            { "id": "files-sidebar-search", "type": "button", "title": "Search", "iconName": "edit-find-symbolic", "flat": true },
+                            { "id": "files-sidebar-title", "type": "window-title", "title": "Files" },
+                            { "id": "files-sidebar-menu", "type": "menu-button", "iconName": "open-menu-symbolic", "title": "Menu" }
+                          ]
+                        },
+                        {
+                          "id": "files-sidebar-list",
+                          "type": "list-box",
+                          "children": [
+                            { "id": "f-home", "type": "action-row", "title": "Home", "iconName": "user-home-symbolic", "activatable": true },
+                            { "id": "f-recent", "type": "action-row", "title": "Recent", "iconName": "document-open-recent-symbolic", "activatable": true },
+                            { "id": "f-starred", "type": "action-row", "title": "Starred", "iconName": "starred-symbolic", "activatable": true },
+                            { "id": "f-net", "type": "action-row", "title": "Network", "iconName": "network-workgroup-symbolic", "activatable": true },
+                            { "id": "f-trash", "type": "action-row", "title": "Trash", "iconName": "user-trash-symbolic", "activatable": true },
+                            { "id": "f-docs", "type": "action-row", "title": "Documents", "iconName": "folder-documents-symbolic", "activatable": true },
+                            { "id": "f-music", "type": "action-row", "title": "Music", "iconName": "folder-music-symbolic", "activatable": true },
+                            { "id": "f-pics", "type": "action-row", "title": "Pictures", "iconName": "folder-pictures-symbolic", "activatable": true },
+                            { "id": "f-vids", "type": "action-row", "title": "Videos", "iconName": "folder-videos-symbolic", "activatable": true },
+                            { "id": "f-dls", "type": "action-row", "title": "Downloads", "iconName": "folder-download-symbolic", "activatable": true }
+                          ]
+                        }
                       ]
                     },
                     {
-                      "id": "files-content",
+                      "id": "files-main-panel",
                       "type": "box",
                       "orientation": "vertical",
-                      "spacing": 18,
+                      "spacing": 12,
                       "children": [
+                        {
+                          "id": "files-main-hdr",
+                          "type": "header-bar",
+                          "children": [
+                            { "id": "f-back", "type": "button", "title": "Back", "iconName": "go-previous-symbolic", "flat": true },
+                            { "id": "f-fwd", "type": "button", "title": "Forward", "iconName": "go-next-symbolic", "flat": true },
+                            { "id": "f-path", "type": "entry", "value": "🏠 Home", "placeholder": "Search or type a path…" },
+                            { "id": "f-new-folder", "type": "button", "title": "New Folder", "iconName": "folder-new-symbolic", "flat": true },
+                            { "id": "f-view-opts", "type": "button", "title": "View Options", "iconName": "view-grid-symbolic", "flat": true }
+                          ]
+                        },
                         {
                           "id": "files-grid",
                           "type": "flow-box",
                           "children": [
                             { "id": "f-desktop", "type": "button", "title": "Desktop", "iconName": "folder-symbolic", "flat": true },
-                            { "f-docs-folder": "f-docs-f", "type": "button", "title": "Documents", "iconName": "folder-documents-symbolic", "flat": true },
+                            { "id": "f-docs-folder", "type": "button", "title": "Documents", "iconName": "folder-documents-symbolic", "flat": true },
                             { "id": "f-dls-folder", "type": "button", "title": "Downloads", "iconName": "folder-download-symbolic", "flat": true },
                             { "id": "f-music-folder", "type": "button", "title": "Music", "iconName": "folder-music-symbolic", "flat": true },
                             { "id": "f-pics-folder", "type": "button", "title": "Pictures", "iconName": "folder-pictures-symbolic", "flat": true },

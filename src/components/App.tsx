@@ -8,67 +8,20 @@ import { ContextMenu } from "./ContextMenu";
 import { PresetGallery } from './PresetGallery';
 import { CommandPalette } from './CommandPalette';
 import { AddScreenModal } from './AddScreenModal';
-import { exportDocumentFile, importDocumentFile } from '../utils/exportImport';
-import html2canvas from 'html2canvas';
-import { mockupToBlueprint } from '../utils/blueprint';
-
-const handleExportPNG = async (screenEl: HTMLElement | null) => {
-  if (!screenEl) return;
-  const canvas = await html2canvas(screenEl, { scale: 2, backgroundColor: null });
-  canvas.toBlob((blob) => {
-    if (!blob) return;
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'protota-screen.png';
-    a.click();
-    URL.revokeObjectURL(url);
-  });
-};
+import { MenuBar } from './MenuBar';
 
 export const App: React.FC = () => {
-  const { doc, undo, redo, setShowAddScreenModal, showAddScreenModal, toggleColorScheme,
-    selectedNodeId, deleteNode, moveNodeUp, moveNodeDown, selectNode, addChildNode,
-    lintEnabled, toggleLint, violations } =
+  const { doc, undo, redo, setShowAddScreenModal, showAddScreenModal,
+    selectedNodeId, deleteNode, moveNodeUp, moveNodeDown, selectNode, addChildNode } =
     useMockupStore();
-
-  const themeIcon = doc.colorScheme === 'dark' ? '☀' : doc.colorScheme === 'light' ? '🌙' : '◐';
-  const themeLabel = doc.colorScheme === 'dark' ? 'Light' : doc.colorScheme === 'light' ? 'Auto' : 'Dark';
 
   const [leftOpen, setLeftOpen] = useState(true);
   const [rightOpen, setRightOpen] = useState(true);
   const [showShortcuts, setShowShortcuts] = useState(false);
   const [showPresets, setShowPresets] = useState(false);
   const [showCommandPalette, setShowCommandPalette] = useState(false);
-  const [showFlows, setShowFlows] = useState(false);
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const handleShare = async () => {
-    const json = JSON.stringify(doc);
-    const encoded = btoa(unescape(encodeURIComponent(json)));
-    const url = `${window.location.origin}${window.location.pathname}#doc=${encoded}`;
-    try {
-      await navigator.clipboard.writeText(url);
-    } catch {
-      prompt('Share this URL:', url);
-    }
-  };
-
-  const handleExport = async () => {
-    await exportDocumentFile(doc);
-  };
-
-  const handleExportBlueprint = () => {
-    const xml = mockupToBlueprint(doc);
-    const blob = new Blob([xml], { type: 'application/xml' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${doc.title.toLowerCase().replace(/\s+/g, '-')}.blp`;
-    a.click();
-    URL.revokeObjectURL(url);
-  };
 
   const handleContextMenu = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -127,71 +80,44 @@ export const App: React.FC = () => {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh' }} onContextMenu={handleContextMenu}>
-      {/* Top Toolbar — themed as an Adwaita headerbar */}
-      <header
-        className="protota-toolbar"
-        style={{
-          minHeight: '48px',
-          display: 'flex',
-          alignItems: 'center',
-          padding: '0 12px',
-          gap: '6px',
-          flexShrink: 0,
-        }}
-      >
-        <strong style={{ marginRight: '8px', fontSize: '14px' }}>
-          Protota
-        </strong>
-        <button className="protota-btn" onClick={undo}>↩ Undo</button>
-        <button className="protota-btn" onClick={redo}>↪ Redo</button>
-        <span style={{ opacity: 0.25 }}>│</span>
-        <button
-          className="protota-btn protota-btn--primary"
-          onClick={() => setShowAddScreenModal(true)}
-        >
-          + Add Screen
-        </button>
-        <span style={{ opacity: 0.25 }}>│</span>
-        <button className="protota-btn" onClick={handleExport}>💾 Export</button>
-        <button className="protota-btn" onClick={() => {
-          const el = document.querySelector('adw-window');
-          handleExportPNG(el as HTMLElement);
-        }}>📸 PNG</button>
-        <button className="protota-btn" onClick={handleExportBlueprint}>📋 BLP</button>
-        <button className="protota-btn" onClick={handleShare}>🔗 Share</button>
-        <button className="protota-btn" onClick={() => fileInputRef.current?.click()}>📂 Import</button>
-        <span style={{ opacity: 0.25 }}>│</span>
-        <button
-          className="protota-btn"
-          onClick={toggleColorScheme}
-          title={`Theme: ${doc.colorScheme} (click for ${themeLabel})`}
-        >{themeIcon} {themeLabel}</button>
-        <span style={{ opacity: 0.25 }}>│</span>
-        <button
-          className={`protota-btn${lintEnabled ? ' protota-btn--primary' : ''}`}
-          onClick={toggleLint}
-          title={`HIG Lint ${lintEnabled ? 'ON' : 'OFF'} (${violations.length} issues)`}
-          data-active={lintEnabled ? 'true' : undefined}
-        >🔍 Lint{lintEnabled ? ` (${violations.length})` : ''}</button>
-        <span style={{ opacity: 0.25 }}>│</span>
-        <button
-          className="protota-btn"
-          onClick={() => setShowPresets(true)}
-        >📦 Presets</button>
-        <span style={{ opacity: 0.25 }}>│</span>
-        <button
-          className={`protota-btn${showFlows ? ' protota-btn--primary' : ''}`}
-          onClick={() => setShowFlows(!showFlows)}
-          data-active={showFlows ? 'true' : undefined}
-        >🔗 Flows</button>
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept=".mockup.json,.json"
-          onChange={handleImport}
-          style={{ display: 'none' }}
-        />
-      </header>
+      {/* Adwaita Toolbar View — frames the entire app */}
+      {/* @ts-ignore — adw-toolbar-view is a custom element */}
+      <adw-toolbar-view style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+        {/* Header Bar — combines menu + actions */}
+        {/* @ts-ignore — adw-header-bar is a custom element */}
+        <adw-header-bar slot="top" title={doc.title || 'Protota'}>
+          {/* Start slot: Layers toggle + Menu buttons */}
+          <div slot="start" style={{ display: 'flex', gap: '2px', alignItems: 'center' }}>
+            <button
+              className={`adw-button flat${leftOpen ? ' active' : ''}`}
+              onClick={() => setLeftOpen(v => !v)}
+              title="Toggle Layers Panel (Ctrl+\)"
+              style={leftOpen ? { backgroundColor: 'var(--button-active-color)' } : undefined}
+            ><span className="adw-icon adw-icon--sidebar-show"></span></button>
+            <MenuBar />
+          </div>
+          {/* End slot: Core actions + Properties toggle */}
+          <div slot="end" style={{ display: 'flex', gap: '2px', alignItems: 'center' }}>
+            <button className="adw-button flat" onClick={undo} title="Undo (Ctrl+Z)"><span className="adw-icon adw-icon--go-previous"></span></button>
+            <button className="adw-button flat" onClick={redo} title="Redo (Ctrl+Shift+Z)"><span className="adw-icon adw-icon--go-next"></span></button>
+            <button
+              className="adw-button suggested-action"
+              onClick={() => setShowAddScreenModal(true)}
+              title="Add Screen (Ctrl+N)"
+            ><span className="adw-icon adw-icon--list-add"></span></button>
+            <button
+              className="adw-button flat"
+              onClick={() => setShowPresets(true)}
+              title="Presets"
+            ><span className="adw-icon adw-icon--view-grid"></span></button>
+            <button
+              className={`adw-button flat${rightOpen ? ' active' : ''}`}
+              onClick={() => setRightOpen(v => !v)}
+              title="Toggle Properties Panel (Ctrl+])"
+              style={rightOpen ? { backgroundColor: 'var(--button-active-color)' } : undefined}
+            ><span className="adw-icon adw-icon--sidebar-show-right"></span></button>
+          </div>
+        </adw-header-bar>
 
       {/* Main Workspace (D10 Three-Pane) */}
       <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>

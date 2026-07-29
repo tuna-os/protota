@@ -67,6 +67,24 @@ export const ViewportCanvas: React.FC = () => {
     };
   }, []);
 
+  // Auto-fit zoom on mobile screens (< 768px wide)
+  useEffect(() => {
+    const autoFitMobile = () => {
+      if (window.innerWidth <= 768 && doc.screens.length > 0) {
+        const primaryWidth = doc.screens[0].width || 800;
+        const availableWidth = window.innerWidth - 32;
+        if (primaryWidth > availableWidth) {
+          const fittedZoom = Math.max(availableWidth / primaryWidth, 0.35);
+          setZoom(fittedZoom);
+          setPan({ x: 16, y: 16 });
+        }
+      }
+    };
+    autoFitMobile();
+    window.addEventListener('resize', autoFitMobile);
+    return () => window.removeEventListener('resize', autoFitMobile);
+  }, [doc.screens]);
+
   // Zoom keyboard shortcuts (handled here since zoom state is local)
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {

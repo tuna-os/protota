@@ -363,6 +363,10 @@ body,
 .protota-div-box[orientation="horizontal"] {
   flex-direction: row;
   align-items: center;
+  width: 100%;
+}
+.protota-div-box[orientation="horizontal"] > * {
+  flex: 1;
 }
 
 /* Center-box — start/center/end layout. */
@@ -406,10 +410,16 @@ body,
 }
 
 .protota-div-search-entry::before {
-  content: "🔍";
-  margin-right: var(--spacing-xs, 6px);
-  opacity: var(--dim-opacity, 0.55);
-  font-size: 12px;
+  content: '';
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  margin-right: 8px;
+  background-color: var(--window-fg-color, rgba(0, 0, 6, 0.6));
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zm-5.242 1.656a5 5 0 1 1 0-10 5 5 0 0 1 0 10z'/%3E%3C/svg%3E");
+  mask-repeat: no-repeat;
+  mask-position: center;
+  mask-size: contain;
 }
 
 .protota-div-switch-widget {
@@ -430,15 +440,19 @@ body,
 }
 
 .protota-div-check-button::before {
-  content: "☐";
-  font-size: 16px;
-  opacity: var(--dim-opacity, 0.55);
+  content: '';
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 1.5px solid var(--window-fg-color, rgba(0, 0, 6, 0.4));
+  border-radius: 4px;
+  background-color: transparent;
 }
 
 .protota-div-check-button[active]::before {
-  content: "☑";
-  color: var(--accent-bg-color, #3584e4);
-  opacity: 1;
+  background-color: var(--accent-bg-color, #3584e4);
+  border-color: var(--accent-bg-color, #3584e4);
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%23fff' d='M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0z'/%3E%3C/svg%3E");
 }
 
 .protota-div-list-box {
@@ -457,7 +471,14 @@ body,
     overflow-x: auto;
     flex-wrap: nowrap;
     padding: 6px 8px;
+    gap: 6px;
     -webkit-overflow-scrolling: touch;
+  }
+
+  .protota-toolbar button {
+    padding: 4px 8px;
+    font-size: 11px;
+    white-space: nowrap;
   }
 
   .protota-toolbar::-webkit-scrollbar {
@@ -477,6 +498,10 @@ body,
     bottom: 12px;
     left: 12px;
     padding: 2px 6px;
+  }
+
+  .protota-canvas-surface {
+    padding: 16px !important;
   }
 }
 

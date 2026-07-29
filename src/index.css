@@ -524,31 +524,38 @@ adw-status-page .adw-status-page-child {
 
 /* ---- Responsive Mobile Styles ---- */
 @media (max-width: 768px) {
-  .protota-toolbar {
-    overflow-x: auto;
-    flex-wrap: nowrap;
-    padding: 6px 8px;
-    gap: 6px;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  .protota-toolbar button {
-    padding: 4px 8px;
-    font-size: 11px;
-    white-space: nowrap;
-  }
-
-  .protota-toolbar::-webkit-scrollbar {
-    display: none;
+  .protota-mobile-scrim {
+    position: absolute;
+    inset: 0;
+    z-index: 40;
+    background: var(--dialog-scrim-color, rgba(0, 0, 6, 0.32));
+    backdrop-filter: blur(2px);
   }
 
   .protota-panel {
     position: absolute;
-    top: 48px;
+    top: 0;
     bottom: 0;
     z-index: 50;
-    max-width: 85vw;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+    width: 85vw !important;
+    max-width: 320px !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+  }
+
+  .protota-left-panel {
+    left: 0;
+    border-right: 1px solid var(--separator-color, rgba(0, 0, 6, 0.15));
+  }
+
+  .protota-right-panel {
+    right: 0;
+    border-left: 1px solid var(--separator-color, rgba(0, 0, 6, 0.15));
+  }
+
+  .protota-modal {
+    width: 92vw !important;
+    max-width: 480px;
+    padding: var(--spacing-m, 16px);
   }
 
   .protota-zoom-bar {

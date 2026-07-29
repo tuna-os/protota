@@ -326,6 +326,7 @@ export const ViewportCanvas: React.FC = () => {
 
       {/* Transformable Canvas Surface */}
       <div
+        className="protota-canvas-surface"
         style={{
           transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
           transformOrigin: "0 0",
@@ -333,6 +334,8 @@ export const ViewportCanvas: React.FC = () => {
           display: "inline-flex",
           gap: "40px",
           padding: "60px",
+          maxWidth: "100%",
+          boxSizing: "border-box",
         }}
       >
         {doc.screens.map((screen) => (

@@ -255,6 +255,20 @@ body,
   border: 1px solid var(--separator-color, rgba(0, 0, 6, 0.1));
 }
 
+/* Screenshot comparison is of the rendered application, not the editor that
+ * hosts it.  The test harness enables this explicit mode before it captures a
+ * render surface, preventing fixed editor controls and selection affordances
+ * from overlaying an otherwise correctly sized window. */
+:root[data-protota-capture="true"] .protota-zoom-bar,
+:root[data-protota-capture="true"] .protota-screen-label,
+:root[data-protota-capture="true"] .protota-type-badge {
+  display: none !important;
+}
+
+:root[data-protota-capture="true"] .adw-node-wrapper.selected-outline {
+  outline: none;
+}
+
 /* ---- Modal overlay ---- */
 .protota-modal-backdrop {
   position: fixed;

@@ -109,10 +109,31 @@ test.describe('Broadway reference captures', () => {
       localStorage.setItem('protota_doc_v1', JSON.stringify(preset.document));
     }, { id: presetId, width: reference.width, height: reference.height });
     await page.reload();
+    // The comparison target is the application render surface.  Explicitly
+    // switch off editor-only chrome that may otherwise be positioned above it.
+    await page.evaluate(() => {
+      document.documentElement.dataset.prototaCapture = 'true';
+    });
     // This marker defines the same export boundary as the PNG exporter, rather
     // than relying on a positional crop within the editor.
     const prototaSurface = page.locator('[data-protota-render-surface="true"]');
     await expect(prototaSurface).toBeVisible();
+    const prototaBounds = await prototaSurface.boundingBox();
+    expect(prototaBounds, 'Protota must expose a measurable render surface').not.toBeNull();
+    expect(Math.round(prototaBounds!.width), 'Protota surface width must equal the native window').toBe(reference.width);
+    expect(Math.round(prototaBounds!.height), 'Protota surface height must equal the native window').toBe(reference.height);
+    await attachArtifact(
+      `geometry-${appId}.json`,
+      Buffer.from(JSON.stringify({
+        appId,
+        nativeWindow: nativeBounds,
+        prototaSurface: prototaBounds,
+        // Both screenshots are clipped to their surface; page coordinates are
+        // diagnostic only and cannot contaminate the visual comparison.
+        comparisonSize: { width: reference.width, height: reference.height },
+      }, null, 2)),
+      'application/json',
+    );
     const unresolvedWidgets = await page.evaluate(() => {
       const surface = document.querySelector<HTMLElement>('[data-protota-render-surface="true"]');
       if (!surface) return [];

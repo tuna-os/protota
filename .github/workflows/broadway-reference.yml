@@ -8,6 +8,11 @@ on:
         required: true
         default: calculator
         type: string
+      max_diff_ratio:
+        description: Optional maximum differing-pixel ratio (for a calibrated preset)
+        required: false
+        default: ''
+        type: string
 
 permissions:
   contents: read
@@ -33,6 +38,8 @@ jobs:
       - name: Wait for Broadway
         run: until curl --fail --silent http://127.0.0.1:8085/; do sleep 1; done
       - name: Capture native and Protota output
+        env:
+          BROADWAY_MAX_DIFF_RATIO: ${{ inputs.max_diff_ratio }}
         run: BROADWAY_URL=http://127.0.0.1:8085/ BROADWAY_PRESET_ID="$BROADWAY_PRESET_ID" BROADWAY_VIEWPORT_WIDTH="$BROADWAY_VIEWPORT_WIDTH" BROADWAY_VIEWPORT_HEIGHT="$BROADWAY_VIEWPORT_HEIGHT" npx playwright test tests/broadway-reference.spec.ts
       - name: Upload reference captures
         if: always()

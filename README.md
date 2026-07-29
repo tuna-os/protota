@@ -28,6 +28,9 @@ its source, its preset, and a canonical viewport. The manual **Broadway
 Reference Capture** GitHub workflow runs the native app under GTK Broadway
 and uploads its capture alongside the matching Protota preset. This provides
 an external visual oracle while the structural tests keep the renderer honest.
+Each run also creates a pixel-diff image and JSON metric. It reports the
+metric during baseline tuning; supplying a maximum difference ratio makes the
+same comparison a CI gate for a calibrated preset.
 
 List the currently runnable suite locally with `node scripts/broadway-app.mjs
 --list`. Adding an app means adding its catalogue entry and preset together;

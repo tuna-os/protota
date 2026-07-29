@@ -38,4 +38,8 @@ test('generic renderer preserves GTK grid layout semantics', async ({ page }) =>
       style.style.rowGap === '6px' && style.style.columnGap === '8px';
   })).toBe(true);
   await expect(grid.getByRole('button')).toHaveCount(3);
+  expect(await page.evaluate(() => ({
+    source: localStorage.getItem('protota_blueprint_v1'),
+    legacy: localStorage.getItem('protota_doc_v1'),
+  }))).toMatchObject({ source: expect.stringContaining('Adw.ToolbarView'), legacy: null });
 });

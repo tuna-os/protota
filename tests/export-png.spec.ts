@@ -10,22 +10,22 @@ test.describe('Export to PNG (#17)', () => {
     await page.getByRole('button', { name: 'File' }).click();
   };
 
-  test('export command exists in the File menu', async ({ page }) => {
+  test('Blueprint export command exists in the File menu', async ({ page }) => {
     await openFileMenu(page);
-    const exportBtn = page.getByText('Export...', { exact: true });
+    const exportBtn = page.getByText('Export Blueprint (.blp)', { exact: true });
     await expect(exportBtn).toBeVisible();
   });
 
-  test('clicking export triggers download of .mockup.json', async ({ page }) => {
+  test('clicking Blueprint export triggers download of .blp', async ({ page }) => {
     await openFileMenu(page);
-    const exportBtn = page.getByText('Export...', { exact: true });
+    const exportBtn = page.getByText('Export Blueprint (.blp)', { exact: true });
 
     const [download] = await Promise.all([
       page.waitForEvent('download', { timeout: 5000 }),
       exportBtn.click(),
     ]);
 
-    expect(download.suggestedFilename()).toContain('.mockup.json');
+    expect(download.suggestedFilename()).toContain('.blp');
   });
 
   test('PNG export button triggers image download', async ({ page }) => {

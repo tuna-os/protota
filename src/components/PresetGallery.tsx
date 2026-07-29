@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import type { MockupDocument } from '../types/mockup';
+import { persistDocumentSource } from '../store/mockupStore';
 
 interface PresetMeta {
   id: string;
@@ -41,7 +42,7 @@ export const PresetGallery: React.FC<Props> = ({ isOpen, onClose }) => {
       doc.colorScheme = doc.colorScheme || 'auto';
 
       // Save to localStorage and reload
-      localStorage.setItem('protota_doc_v1', JSON.stringify(doc));
+      persistDocumentSource(doc);
       localStorage.setItem('protota_was_preset', 'true');
       window.location.reload();
     } catch (err) {

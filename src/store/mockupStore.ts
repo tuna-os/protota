@@ -6,9 +6,26 @@ import { SCREEN_DEFAULTS } from '../types/mockup';
 import type { LintViolation } from '../utils/higLinter';
 import { lintDocument } from '../utils/higLinter';
 import { findNodeLocation } from '../utils/treeHelpers';
+import { blueprintToDocument, mockupToBlueprint } from '../utils/blueprint';
 
-const STORAGE_KEY = 'protota_doc_v1';
+const BLUEPRINT_STORAGE_KEY = 'protota_blueprint_v1';
+const METADATA_STORAGE_KEY = 'protota_editor_metadata_v1';
+const LEGACY_STORAGE_KEY = 'protota_doc_v1';
 const MAX_HISTORY = 50;
+
+interface EditorMetadata {
+  title?: string;
+  colorScheme?: MockupDocument['colorScheme'];
+}
+
+/** Persist the UI as Blueprint; JSON is reserved for editor-only metadata. */
+export function persistDocumentSource(doc: MockupDocument) {
+  localStorage.setItem(BLUEPRINT_STORAGE_KEY, mockupToBlueprint(doc));
+  localStorage.setItem(
+    METADATA_STORAGE_KEY,
+    JSON.stringify({ title: doc.title, colorScheme: doc.colorScheme } satisfies EditorMetadata),
+  );
+}
 
 function uid(prefix: string): string {
   return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
@@ -260,13 +277,29 @@ interface MockupState {
 
 export const useMockupStore = create<MockupState>((set, get) => {
   const saved = (() => {
-    try { const raw = localStorage.getItem(STORAGE_KEY); return raw ? JSON.parse(raw) : null; }
+    try {
+      const source = localStorage.getItem(BLUEPRINT_STORAGE_KEY);
+      if (source) {
+        const metadata = JSON.parse(localStorage.getItem(METADATA_STORAGE_KEY) || '{}') as EditorMetadata;
+        const document = blueprintToDocument(source, metadata.title);
+        document.colorScheme = metadata.colorScheme || 'auto';
+        return document;
+      }
+      // One-time migration for documents created before Blueprint became the
+      // persisted UI format. New writes never store a JSON widget tree.
+      const legacy = localStorage.getItem(LEGACY_STORAGE_KEY);
+      if (!legacy) return null;
+      const document = JSON.parse(legacy) as MockupDocument;
+      persistDocumentSource(document);
+      localStorage.removeItem(LEGACY_STORAGE_KEY);
+      return document;
+    }
     catch { return null; }
   })();
   const startDoc: MockupDocument = saved || initialDocument;
 
   const pushSnapshot = (newDoc: MockupDocument): Partial<MockupState> => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(newDoc));
+    persistDocumentSource(newDoc);
     const { history, historyIndex } = get();
     const newHistory = history.slice(0, historyIndex + 1);
     if (newHistory.length >= MAX_HISTORY) newHistory.shift();
@@ -390,7 +423,7 @@ export const useMockupStore = create<MockupState>((set, get) => {
       if (historyIndex > 0) {
         const newIndex = historyIndex - 1;
         const prevDoc = history[newIndex];
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(prevDoc));
+        persistDocumentSource(prevDoc);
         set({ doc: prevDoc, historyIndex: newIndex });
       }
     },
@@ -400,7 +433,7 @@ export const useMockupStore = create<MockupState>((set, get) => {
       if (historyIndex < history.length - 1) {
         const newIndex = historyIndex + 1;
         const nextDoc = history[newIndex];
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(nextDoc));
+        persistDocumentSource(nextDoc);
         set({ doc: nextDoc, historyIndex: newIndex });
       }
     },

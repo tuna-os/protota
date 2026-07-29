@@ -93,6 +93,10 @@ export const ViewportCanvas: React.FC = () => {
 
   const handleCanvasClick = useCallback(() => selectNode(null), [selectNode]);
 
+  const [phoshScreenId, setPhoshScreenId] = useState<string | null>(null);
+
+  const activePhoshScreen = doc.screens.find((s) => s.id === phoshScreenId);
+
   return (
     <div
       className="protota-canvas"
@@ -109,6 +113,39 @@ export const ViewportCanvas: React.FC = () => {
         cursor: isPanning ? 'grabbing' : 'default',
       }}
     >
+      {/* Phosh Fullscreen Phone Overlay Mode */}
+      {activePhoshScreen && (
+        <div className="protota-phosh-container">
+          <div className="protota-phosh-header">
+            <span>📱 Phosh Phone View</span>
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <select
+                value={phoshScreenId || ''}
+                onChange={(e) => setPhoshScreenId(e.target.value)}
+                style={{ padding: '2px 8px', borderRadius: '4px', fontSize: '12px' }}
+              >
+                {doc.screens.map((s) => (
+                  <option key={s.id} value={s.id}>{s.title}</option>
+                ))}
+              </select>
+              <button
+                className="protota-btn suggested"
+                onClick={() => setPhoshScreenId(null)}
+              >
+                ✕ Exit Phone Mode
+              </button>
+            </div>
+          </div>
+
+          <div className="protota-phosh-phone-frame">
+            <AdwaitaRenderer
+              node={activePhoshScreen.rootNode}
+              screenId={activePhoshScreen.id}
+            />
+          </div>
+        </div>
+      )}
+
       {/* Zoom Controls */}
       <div className="protota-zoom-bar">
         <button className="protota-btn" onClick={() => setZoom((z) => Math.max(z - 0.1, 0.3))}>−</button>
@@ -117,6 +154,12 @@ export const ViewportCanvas: React.FC = () => {
         </span>
         <button className="protota-btn" onClick={() => setZoom((z) => Math.min(z + 0.1, 2.5))}>+</button>
         <button className="protota-btn" onClick={() => { setZoom(1); setPan({ x: 0, y: 0 }); }}>Reset</button>
+        <button
+          className="protota-btn suggested"
+          onClick={() => setPhoshScreenId(doc.screens[0]?.id || null)}
+        >
+          📱 Phosh Phone
+        </button>
       </div>
 
       {/* Transformable Canvas Surface */}

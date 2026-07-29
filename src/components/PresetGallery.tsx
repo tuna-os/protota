@@ -60,29 +60,47 @@ export const PresetGallery: React.FC<Props> = ({ isOpen, onClose }) => {
 
         {loading && <div style={{ padding: '16px', textAlign: 'center' }}>Loading…</div>}
 
-        <div className="protota-preset-gallery" style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '420px', overflow: 'auto' }}>
+        <div className="protota-preset-gallery" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px', maxHeight: '480px', overflow: 'auto' }}>
           {PRESETS.map((preset) => (
             <div
               key={preset.id}
               className="protota-preset-item"
               style={{
-                padding: '12px',
-                borderRadius: '8px',
-                border: '1px solid var(--separator-color, rgba(0,0,6,0.1))',
+                padding: '10px',
+                borderRadius: '10px',
+                border: '1px solid var(--separator-color, rgba(0,0,6,0.12))',
                 cursor: 'pointer',
                 background: 'var(--card-bg-color, #fff)',
                 display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
+                flexDirection: 'column',
+                gap: '8px',
+                transition: 'transform 0.15s ease, box-shadow 0.15s ease',
               }}
               onClick={() => handleLoad(preset.id)}
             >
-              <div>
-                <div style={{ fontWeight: 600, fontSize: '14px' }}>{preset.name}</div>
-                <div style={{ fontSize: '12px', opacity: 0.6, marginTop: '2px' }}>{preset.description}</div>
+              <div style={{
+                height: '110px',
+                borderRadius: '6px',
+                overflow: 'hidden',
+                background: '#f6f6f6',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                border: '1px solid rgba(0,0,0,0.06)'
+              }}>
+                <img
+                  src={`${import.meta.env.BASE_URL}presets/thumbnails/preset-${preset.id}-chromium-linux.png`}
+                  alt={`${preset.name} preview`}
+                  style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top left' }}
+                  onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }}
+                />
               </div>
-              <div style={{ fontSize: '11px', opacity: 0.4, flexShrink: 0 }}>
-                {preset.screens} screen{preset.screens !== 1 ? 's' : ''}
+              <div>
+                <div style={{ fontWeight: 600, fontSize: '13px', display: 'flex', justifyContent: 'space-between' }}>
+                  <span>{preset.name}</span>
+                  <span style={{ fontSize: '11px', opacity: 0.4 }}>{preset.screens} screen</span>
+                </div>
+                <div style={{ fontSize: '11px', opacity: 0.65, marginTop: '3px', lineHeight: '1.3' }}>{preset.description}</div>
               </div>
             </div>
           ))}

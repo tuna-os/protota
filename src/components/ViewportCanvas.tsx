@@ -16,14 +16,24 @@ export const ViewportCanvas: React.FC = () => {
   const spaceDown = useRef(false);
   const canvasRef = useRef<HTMLDivElement>(null);
 
-  const handleWheel = useCallback((e: React.WheelEvent) => {
-    if (e.ctrlKey || e.metaKey) {
-      e.preventDefault();
-      const zoomFactor = e.deltaY > 0 ? 0.9 : 1.1;
-      setZoom((z) => Math.min(Math.max(z * zoomFactor, 0.3), 2.5));
-    } else {
-      setPan((p) => ({ x: p.x - e.deltaX, y: p.y - e.deltaY }));
-    }
+  useEffect(() => {
+    const el = canvasRef.current;
+    if (!el) return;
+    const handler = (e: WheelEvent) => {
+      const isOverCanvas = el.contains(e.target as Node);
+      if ((e.ctrlKey || e.metaKey) && isOverCanvas) {
+        e.preventDefault();
+        const zoomFactor = e.deltaY > 0 ? 0.9 : 1.1;
+        setZoom((z) => Math.min(Math.max(z * zoomFactor, 0.3), 2.5));
+      } else if (e.shiftKey && isOverCanvas) {
+        e.preventDefault();
+        setPan((p) => ({ x: p.x - e.deltaY, y: p.y }));
+      } else if (!e.ctrlKey && !e.metaKey && !e.shiftKey) {
+        setPan((p) => ({ x: p.x - e.deltaX, y: p.y - e.deltaY }));
+      }
+    };
+    el.addEventListener("wheel", handler, { passive: false });
+    return () => el.removeEventListener("wheel", handler);
   }, []);
 
   const handleMouseDown = useCallback(
@@ -155,7 +165,7 @@ export const ViewportCanvas: React.FC = () => {
       ref={canvasRef}
       tabIndex={0}
       className="protota-canvas"
-      onWheel={handleWheel}
+
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}

@@ -17,13 +17,20 @@ if (app.status !== 'preset') {
   throw new Error(`GNOME app "${appId}" has no preset/reference capture target yet.`);
 }
 
-for (const [key, value] of Object.entries({
+const environment = {
   BROADWAY_APP_ID: appId,
   BROADWAY_APP_PACKAGE: app.aptPackage,
   BROADWAY_APP_COMMAND: app.command,
   BROADWAY_PRESET_ID: app.presetId,
   BROADWAY_VIEWPORT_WIDTH: app.viewport.width,
   BROADWAY_VIEWPORT_HEIGHT: app.viewport.height,
-})) {
+};
+if (app.sourceImport) {
+  environment.BROADWAY_SOURCE_REPOSITORY = app.sourceImport.repository;
+  environment.BROADWAY_SOURCE_UI_PATH = app.sourceImport.uiPath;
+  environment.BROADWAY_SOURCE_ENTRY = app.sourceImport.entry;
+}
+
+for (const [key, value] of Object.entries(environment)) {
   console.log(`${key}=${value}`);
 }

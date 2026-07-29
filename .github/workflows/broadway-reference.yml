@@ -82,6 +82,13 @@ jobs:
         name: Load app catalog entry
         run: node scripts/broadway-app.mjs "${{ matrix.app }}" >> "$GITHUB_ENV"
       - if: steps.select.outputs.enabled == 'true'
+        name: Clone official declarative UI source
+        run: |
+          if [[ -n "${BROADWAY_SOURCE_REPOSITORY:-}" ]]; then
+            git clone --depth 1 "$BROADWAY_SOURCE_REPOSITORY" .gnome-source
+            echo "BROADWAY_SOURCE_ROOT=$PWD/.gnome-source/$BROADWAY_SOURCE_UI_PATH" >> "$GITHUB_ENV"
+          fi
+      - if: steps.select.outputs.enabled == 'true'
         run: npx playwright install chromium --with-deps
       - if: steps.select.outputs.enabled == 'true'
         name: Build native Broadway runner
@@ -96,7 +103,7 @@ jobs:
         name: Capture native and Protota output
         env:
           BROADWAY_MAX_DIFF_RATIO: ${{ inputs.max_diff_ratio }}
-        run: BROADWAY_URL=http://127.0.0.1:8085/ BROADWAY_PRESET_ID="$BROADWAY_PRESET_ID" BROADWAY_VIEWPORT_WIDTH="$BROADWAY_VIEWPORT_WIDTH" BROADWAY_VIEWPORT_HEIGHT="$BROADWAY_VIEWPORT_HEIGHT" npx playwright test tests/broadway-reference.spec.ts
+        run: BROADWAY_URL=http://127.0.0.1:8085/ BROADWAY_PRESET_ID="$BROADWAY_PRESET_ID" BROADWAY_VIEWPORT_WIDTH="$BROADWAY_VIEWPORT_WIDTH" BROADWAY_VIEWPORT_HEIGHT="$BROADWAY_VIEWPORT_HEIGHT" BROADWAY_SOURCE_ROOT="$BROADWAY_SOURCE_ROOT" BROADWAY_SOURCE_ENTRY="$BROADWAY_SOURCE_ENTRY" npx playwright test tests/broadway-reference.spec.ts
       - name: Upload reference captures
         if: always() && steps.select.outputs.enabled == 'true'
         uses: actions/upload-artifact@v4

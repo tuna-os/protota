@@ -17,6 +17,11 @@
     "presetId": "calculator",
     "viewport": { "width": 410, "height": 666 },
     "source": "https://gitlab.gnome.org/GNOME/gnome-calculator",
+    "sourceImport": {
+      "repository": "https://gitlab.gnome.org/GNOME/gnome-calculator.git",
+      "uiPath": "src/ui",
+      "entry": "math-window.blp"
+    },
     "suite": "core",
     "status": "preset",
     "visualStatus": "not-validated"

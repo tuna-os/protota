@@ -1,11 +1,15 @@
 import { expect, test } from '@playwright/test';
-import { writeFileSync } from 'node:fs';
+import { readdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { join } from 'node:path';
 import pixelmatch from 'pixelmatch';
 import { PNG } from 'pngjs';
+import { blueprintBundleToDocument } from '../src/utils/blueprint';
 
 const broadwayUrl = process.env.BROADWAY_URL;
 const presetId = process.env.BROADWAY_PRESET_ID || 'calculator';
 const appId = process.env.BROADWAY_APP_ID || presetId;
+const sourceRoot = process.env.BROADWAY_SOURCE_ROOT;
+const sourceEntry = process.env.BROADWAY_SOURCE_ENTRY;
 const viewport = {
   width: Number(process.env.BROADWAY_VIEWPORT_WIDTH || 410),
   height: Number(process.env.BROADWAY_VIEWPORT_HEIGHT || 666),
@@ -64,6 +68,14 @@ function unresolvedWidgetMask(width: number, height: number, rectangles: Array<{
   return mask;
 }
 
+function sourceBundleDocument() {
+  if (!sourceRoot || !sourceEntry) return null;
+  const files = readdirSync(sourceRoot)
+    .filter(path => path.endsWith('.blp'))
+    .map(path => ({ path, content: readFileSync(join(sourceRoot, path), 'utf8') }));
+  return blueprintBundleToDocument(files, sourceEntry, `GNOME ${appId}`);
+}
+
 test.describe('Broadway reference captures', () => {
   test.skip(!broadwayUrl, 'Set BROADWAY_URL to run the native GTK reference capture.');
 
@@ -98,16 +110,16 @@ test.describe('Broadway reference captures', () => {
     await referencePage.close();
 
     const reference = PNG.sync.read(broadwayPng);
+    const sourceDocument = sourceBundleDocument();
     await page.goto('/');
-    await page.evaluate(async ({ id, width, height }) => {
-      const response = await fetch(`./presets/${id}.mockup.json`);
-      const preset = await response.json();
+    await page.evaluate(async ({ id, width, height, document }) => {
+      const preset = document ? { document } : await fetch(`./presets/${id}.mockup.json`).then(response => response.json());
       // Render the editable document at the native app surface dimensions.
       // This is a renderer contract, not an app-specific layout adjustment.
       preset.document.screens[0].width = width;
       preset.document.screens[0].height = height;
       localStorage.setItem('protota_doc_v1', JSON.stringify(preset.document));
-    }, { id: presetId, width: reference.width, height: reference.height });
+    }, { id: presetId, width: reference.width, height: reference.height, document: sourceDocument });
     await page.reload();
     // The comparison target is the application render surface.  Explicitly
     // switch off editor-only chrome that may otherwise be positioned above it.
@@ -191,7 +203,8 @@ test.describe('Broadway reference captures', () => {
     await attachArtifact(
       `comparison-${appId}.json`,
       Buffer.from(JSON.stringify({
-        appId, differentPixels, totalPixels, differenceRatio, ...foreground,
+        appId, inputKind: sourceDocument ? 'source-bundle' : 'legacy-preset',
+        differentPixels, totalPixels, differenceRatio, ...foreground,
         unresolvedWidgetPixels, unresolvedWidgetCoverage, rawSimilarityCeiling,
         resolvedDifferentPixels, resolvedPixels, sourceResolvedSimilarity,
       }, null, 2)),

@@ -73,6 +73,21 @@ export const ViewportCanvas: React.FC = () => {
     return () => window.removeEventListener('keydown', onKeyDown);
   }, []);
 
+  // Listen for zoom events from MenuBar
+  useEffect(() => {
+    const onZoomIn = () => setZoom((z) => Math.min(z * 1.1, 2.5));
+    const onZoomOut = () => setZoom((z) => Math.max(z * 0.9, 0.3));
+    const onZoomReset = () => { setZoom(1); setPan({ x: 0, y: 0 }); };
+    window.addEventListener('protota:zoom-in', onZoomIn);
+    window.addEventListener('protota:zoom-out', onZoomOut);
+    window.addEventListener('protota:zoom-reset', onZoomReset);
+    return () => {
+      window.removeEventListener('protota:zoom-in', onZoomIn);
+      window.removeEventListener('protota:zoom-out', onZoomOut);
+      window.removeEventListener('protota:zoom-reset', onZoomReset);
+    };
+  }, []);
+
   const handleCanvasClick = useCallback(() => selectNode(null), [selectNode]);
 
   return (
@@ -93,12 +108,12 @@ export const ViewportCanvas: React.FC = () => {
     >
       {/* Zoom Controls */}
       <div className="protota-zoom-bar">
-        <button className="protota-btn" onClick={() => setZoom((z) => Math.max(z - 0.1, 0.3))}>−</button>
-        <span style={{ fontSize: '12px', minWidth: '40px', textAlign: 'center' }}>
+        <button className="adw-button icon-only flat" onClick={() => setZoom((z) => Math.max(z - 0.1, 0.3))} title="Zoom Out (Ctrl+-)"><span className="adw-icon adw-icon--list-remove"></span></button>
+        <span style={{ fontSize: 'var(--font-size-small, 9pt)', minWidth: '40px', textAlign: 'center' }}>
           {Math.round(zoom * 100)}%
         </span>
-        <button className="protota-btn" onClick={() => setZoom((z) => Math.min(z + 0.1, 2.5))}>+</button>
-        <button className="protota-btn" onClick={() => { setZoom(1); setPan({ x: 0, y: 0 }); }}>Reset</button>
+        <button className="adw-button icon-only flat" onClick={() => setZoom((z) => Math.min(z + 0.1, 2.5))} title="Zoom In (Ctrl+=)"><span className="adw-icon adw-icon--list-add"></span></button>
+        <button className="adw-button flat" onClick={() => { setZoom(1); setPan({ x: 0, y: 0 }); }} title="Reset Zoom (Ctrl+0)">Reset</button>
       </div>
 
       {/* Transformable Canvas Surface */}

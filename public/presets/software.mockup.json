@@ -10,7 +10,7 @@
       {
         "id": "sw-main",
         "title": "Software — App Catalog",
-        "type": "view-switcher",
+        "type": "standard",
         "width": 1040,
         "height": 700,
         "rootNode": {
@@ -26,53 +26,28 @@
                   "type": "header-bar",
                   "children": [
                     { "id": "sw-search-btn", "type": "button", "title": "Search", "iconName": "edit-find-symbolic", "flat": true },
-                    { "id": "sw-switcher", "type": "view-switcher" },
+                    { "id": "sw-title", "type": "window-title", "title": "Software" },
                     { "id": "sw-menu", "type": "menu-button", "iconName": "open-menu-symbolic", "title": "Menu" }
                   ]
                 },
                 {
-                  "id": "sw-stack",
-                  "type": "view-stack",
+                  "id": "sw-body",
+                  "type": "clamp",
                   "children": [
                     {
-                      "id": "sw-explore-page",
-                      "type": "box",
-                      "orientation": "vertical",
-                      "spacing": 18,
-                      "children": [
-                        {
-                          "id": "sw-banner",
-                          "type": "banner",
-                          "title": "Featured App: Protota UI Designer for GNOME"
-                        },
-                        {
-                          "id": "sw-group-editors",
-                          "type": "preferences-group",
-                          "title": "Editor's Choice",
-                          "description": "Curated Flatpak applications for GNOME",
-                          "children": [
-                            { "id": "sw-app1", "type": "action-row", "title": "GNOME Text Editor", "subtitle": "Simple document editor · Utilities", "iconName": "document-edit-symbolic", "activatable": true },
-                            { "id": "sw-app2", "type": "action-row", "title": "Showtime", "subtitle": "Minimalist video player · Multimedia", "iconName": "video-display-symbolic", "activatable": true },
-                            { "id": "sw-app3", "type": "action-row", "title": "Decibels", "subtitle": "Audio player tailored for voice notes", "iconName": "audio-card-symbolic", "activatable": true }
-                          ]
-                        }
-                      ]
+                      "id": "sw-banner",
+                      "type": "banner",
+                      "title": "Featured App: Protota UI Designer for GNOME"
                     },
                     {
-                      "id": "sw-installed-page",
-                      "type": "box",
-                      "orientation": "vertical",
-                      "spacing": 18,
+                      "id": "sw-group-editors",
+                      "type": "preferences-group",
+                      "title": "Editor's Choice",
+                      "description": "Curated Flatpak applications for GNOME",
                       "children": [
-                        {
-                          "id": "sw-installed-group",
-                          "type": "preferences-group",
-                          "title": "Installed Applications",
-                          "children": [
-                            { "id": "i1", "type": "action-row", "title": "GNOME Calculator", "subtitle": "Version 47.0 · Up to date", "iconName": "accessories-calculator-symbolic" },
-                            { "id": "i2", "type": "action-row", "title": "GNOME Files", "subtitle": "Version 47.0 · Up to date", "iconName": "folder-symbolic" }
-                          ]
-                        }
+                        { "id": "sw-app1", "type": "action-row", "title": "GNOME Text Editor", "subtitle": "Simple document editor · Utilities", "iconName": "document-edit-symbolic", "activatable": true },
+                        { "id": "sw-app2", "type": "action-row", "title": "Showtime", "subtitle": "Minimalist video player · Multimedia", "iconName": "video-display-symbolic", "activatable": true },
+                        { "id": "sw-app3", "type": "action-row", "title": "Decibels", "subtitle": "Audio player tailored for voice notes", "iconName": "audio-card-symbolic", "activatable": true }
                       ]
                     }
                   ]

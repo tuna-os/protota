@@ -6,10 +6,32 @@ import { BottomBar } from "./BottomBar";
 import { windowCloseSymbolic } from "@gjsify/adwaita-icons/ui";
 import { toDataUri } from "@gjsify/adwaita-icons/utils";
 
+/**
+ * Compute new pan so that the world point under (mx, my) stays fixed
+ * when zoom changes from oldZoom → newZoom.
+ */
+function zoomAtPoint(
+  mx: number,
+  my: number,
+  oldZoom: number,
+  newZoom: number,
+  oldPan: { x: number; y: number },
+): { x: number; y: number } {
+  const wx = (mx - oldPan.x) / oldZoom;
+  const wy = (my - oldPan.y) / oldZoom;
+  return { x: mx - wx * newZoom, y: my - wy * newZoom };
+}
+
 export const ViewportCanvas: React.FC = () => {
   const { doc, selectNode } = useMockupStore();
   const [zoom, setZoom] = useState(1);
   const [pan, setPan] = useState({ x: 0, y: 0 });
+
+  // Ref versions so event handlers always read latest values without re-attaching
+  const zoomRef = useRef(zoom);
+  const panRef = useRef(pan);
+  zoomRef.current = zoom;
+  panRef.current = pan;
   const [isPanning, setIsPanning] = useState(false);
   const [spaceHeld, setSpaceHeld] = useState(false);
   const startPan = useRef({ x: 0, y: 0 });
@@ -23,8 +45,14 @@ export const ViewportCanvas: React.FC = () => {
       const isOverCanvas = el.contains(e.target as Node);
       if ((e.ctrlKey || e.metaKey) && isOverCanvas) {
         e.preventDefault();
-        const zoomFactor = e.deltaY > 0 ? 0.9 : 1.1;
-        setZoom((z) => Math.min(Math.max(z * zoomFactor, 0.3), 2.5));
+        const rect = el.getBoundingClientRect();
+        const mx = e.clientX - rect.left;
+        const my = e.clientY - rect.top;
+        const factor = e.deltaY > 0 ? 0.9 : 1.1;
+        const oldZ = zoomRef.current;
+        const newZ = Math.min(Math.max(oldZ * factor, 0.3), 2.5);
+        setPan(zoomAtPoint(mx, my, oldZ, newZ, panRef.current));
+        setZoom(newZ);
       } else if (e.shiftKey && isOverCanvas) {
         e.preventDefault();
         setPan((p) => ({ x: p.x - e.deltaY, y: p.y }));
@@ -104,8 +132,19 @@ export const ViewportCanvas: React.FC = () => {
     return () => window.removeEventListener('resize', autoFitMobile);
   }, [doc.screens]);
 
-  // Zoom keyboard shortcuts (handled here since zoom state is local)
+  // Zoom keyboard shortcuts — anchored to canvas center
   useEffect(() => {
+    const zoomAtCenter = (factor: number) => {
+      const el = canvasRef.current;
+      if (!el) return;
+      const rect = el.getBoundingClientRect();
+      const mx = rect.width / 2;
+      const my = rect.height / 2;
+      const oldZ = zoomRef.current;
+      const newZ = Math.min(Math.max(oldZ * factor, 0.3), 2.5);
+      setPan(zoomAtPoint(mx, my, oldZ, newZ, panRef.current));
+      setZoom(newZ);
+    };
     const onKeyDown = (e: KeyboardEvent) => {
       if (
         (e.target as HTMLElement)?.tagName === "INPUT" ||
@@ -115,29 +154,62 @@ export const ViewportCanvas: React.FC = () => {
       const mod = e.ctrlKey || e.metaKey;
       if (e.key === "=" && mod) {
         e.preventDefault();
-        setZoom((z) => Math.min(z * 1.1, 2.5));
+        zoomAtCenter(1.1);
       }
       if (e.key === "-" && mod) {
         e.preventDefault();
-        setZoom((z) => Math.max(z * 0.9, 0.3));
+        zoomAtCenter(0.9);
       }
       if (e.key === "0" && mod) {
         e.preventDefault();
+        const el = canvasRef.current;
+        if (!el) return;
+        const canvasW = el.clientWidth;
+        const padding = 60;
+        const gap = 40;
+        const totalContentW = doc.screens.reduce((sum, s) => sum + (s.width || 800), 0)
+          + gap * (doc.screens.length - 1)
+          + padding * 2;
+        setPan({
+          x: (canvasW - totalContentW) / 2,
+          y: padding,
+        });
         setZoom(1);
-        setPan({ x: 0, y: 0 });
       }
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
   }, []);
 
-  // Listen for zoom events from MenuBar
+  // Listen for zoom events from MenuBar — anchored to canvas center
   useEffect(() => {
-    const onZoomIn = () => setZoom((z) => Math.min(z * 1.1, 2.5));
-    const onZoomOut = () => setZoom((z) => Math.max(z * 0.9, 0.3));
+    const zoomAtCenter = (factor: number) => {
+      const el = canvasRef.current;
+      if (!el) return;
+      const rect = el.getBoundingClientRect();
+      const mx = rect.width / 2;
+      const my = rect.height / 2;
+      const oldZ = zoomRef.current;
+      const newZ = Math.min(Math.max(oldZ * factor, 0.3), 2.5);
+      setPan(zoomAtPoint(mx, my, oldZ, newZ, panRef.current));
+      setZoom(newZ);
+    };
+    const onZoomIn = () => zoomAtCenter(1.1);
+    const onZoomOut = () => zoomAtCenter(0.9);
     const onZoomReset = () => {
+      const el = canvasRef.current;
+      if (!el) return;
+      const canvasW = el.clientWidth;
+      const padding = 60;
+      const gap = 40;
+      const totalContentW = doc.screens.reduce((sum, s) => sum + (s.width || 800), 0)
+        + gap * (doc.screens.length - 1)
+        + padding * 2;
+      setPan({
+        x: (canvasW - totalContentW) / 2,
+        y: padding,
+      });
       setZoom(1);
-      setPan({ x: 0, y: 0 });
     };
     window.addEventListener("protota:zoom-in", onZoomIn);
     window.addEventListener("protota:zoom-out", onZoomOut);
@@ -281,8 +353,28 @@ export const ViewportCanvas: React.FC = () => {
       {/* Bottom Bar — Zoom + Desktop/Phone toggles */}
       <BottomBar
         zoom={zoom}
-        onZoomIn={() => setZoom((z) => Math.min(z + 0.1, 2.5))}
-        onZoomOut={() => setZoom((z) => Math.max(z - 0.1, 0.3))}
+        onZoomIn={() => {
+          const el = canvasRef.current;
+          if (!el) return;
+          const rect = el.getBoundingClientRect();
+          const mx = rect.width / 2;
+          const my = rect.height / 2;
+          const oldZ = zoomRef.current;
+          const newZ = Math.min(oldZ + 0.1, 2.5);
+          setPan(zoomAtPoint(mx, my, oldZ, newZ, panRef.current));
+          setZoom(newZ);
+        }}
+        onZoomOut={() => {
+          const el = canvasRef.current;
+          if (!el) return;
+          const rect = el.getBoundingClientRect();
+          const mx = rect.width / 2;
+          const my = rect.height / 2;
+          const oldZ = zoomRef.current;
+          const newZ = Math.max(oldZ - 0.1, 0.3);
+          setPan(zoomAtPoint(mx, my, oldZ, newZ, panRef.current));
+          setZoom(newZ);
+        }}
         onZoomFit={() => {
           if (!canvasRef.current || doc.screens.length === 0) return;
           const canvasW = canvasRef.current.clientWidth;
@@ -304,7 +396,20 @@ export const ViewportCanvas: React.FC = () => {
             y: (canvasH - scaledH - bottomBarH) / 2,
           });
         }}
-        onZoomReset={() => { setZoom(1); setPan({ x: 0, y: 0 }); }}
+        onZoomReset={() => {
+          if (!canvasRef.current || doc.screens.length === 0) return;
+          const canvasW = canvasRef.current.clientWidth;
+          const padding = 60;
+          const gap = 40;
+          const totalContentW = doc.screens.reduce((sum, s) => sum + (s.width || 800), 0)
+            + gap * (doc.screens.length - 1)
+            + padding * 2;
+          setPan({
+            x: (canvasW - totalContentW) / 2,
+            y: padding,
+          });
+          setZoom(1);
+        }}
         desktopScreenId={desktopScreenId}
         onToggleDesktop={() => setDesktopScreenId((prev) => {
           if (prev) return null;

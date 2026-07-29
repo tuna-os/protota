@@ -259,5 +259,119 @@
     "suite": "core",
     "status": "preset",
     "visualStatus": "not-validated"
+  },
+  "shortwave": {
+    "name": "Shortwave",
+    "aptPackage": "shortwave",
+    "command": "shortwave",
+    "presetId": "shortwave",
+    "viewport": {
+      "width": 900,
+      "height": 650
+    },
+    "source": "https://gitlab.gnome.org/World/Shortwave",
+    "sourceImport": {
+      "repository": "https://gitlab.gnome.org/World/Shortwave.git",
+      "uiPath": "ui",
+      "entry": "window.ui"
+    },
+    "suite": "circle",
+    "status": "preset",
+    "visualStatus": "not-validated"
+  },
+  "fragments": {
+    "name": "Fragments",
+    "aptPackage": "fragments",
+    "command": "fragments",
+    "presetId": "fragments",
+    "viewport": {
+      "width": 800,
+      "height": 600
+    },
+    "source": "https://gitlab.gnome.org/World/Fragments",
+    "sourceImport": {
+      "repository": "https://gitlab.gnome.org/World/Fragments.git",
+      "uiPath": "data/ui",
+      "entry": "window.ui"
+    },
+    "suite": "circle",
+    "status": "preset",
+    "visualStatus": "not-validated"
+  },
+  "secrets": {
+    "name": "Secrets",
+    "aptPackage": "gnome-passwordsafe",
+    "command": "secrets",
+    "presetId": "secrets",
+    "viewport": {
+      "width": 900,
+      "height": 650
+    },
+    "source": "https://gitlab.gnome.org/World/secrets",
+    "sourceImport": {
+      "repository": "https://gitlab.gnome.org/World/secrets.git",
+      "uiPath": "data/ui",
+      "entry": "window.ui"
+    },
+    "suite": "circle",
+    "status": "preset",
+    "visualStatus": "not-validated"
+  },
+  "pika-backup": {
+    "name": "Pika Backup",
+    "aptPackage": "pika-backup",
+    "command": "pika-backup",
+    "presetId": "pika-backup",
+    "viewport": {
+      "width": 900,
+      "height": 650
+    },
+    "source": "https://gitlab.gnome.org/World/pika-backup",
+    "sourceImport": {
+      "repository": "https://gitlab.gnome.org/World/pika-backup.git",
+      "uiPath": "data/resources/ui",
+      "entry": "window.ui"
+    },
+    "suite": "circle",
+    "status": "preset",
+    "visualStatus": "not-validated"
+  },
+  "warp": {
+    "name": "Warp",
+    "aptPackage": "warp",
+    "command": "warp",
+    "presetId": "warp",
+    "viewport": {
+      "width": 800,
+      "height": 600
+    },
+    "source": "https://gitlab.gnome.org/World/warp",
+    "sourceImport": {
+      "repository": "https://gitlab.gnome.org/World/warp.git",
+      "uiPath": "data/resources/ui",
+      "entry": "window.ui"
+    },
+    "suite": "circle",
+    "status": "preset",
+    "visualStatus": "not-validated"
+  },
+  "podcasts": {
+    "name": "Podcasts",
+    "aptPackage": "gnome-podcasts",
+    "command": "gnome-podcasts",
+    "presetId": "podcasts",
+    "viewport": {
+      "width": 900,
+      "height": 650
+    },
+    "source": "https://gitlab.gnome.org/World/podcasts",
+    "sourceImport": {
+      "repository": "https://gitlab.gnome.org/World/podcasts.git",
+      "uiPath": "podcasts-gtk/resources/ui",
+      "entry": "window.ui"
+    },
+    "suite": "circle",
+    "status": "preset",
+    "visualStatus": "not-validated"
   }
 }

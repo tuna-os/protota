@@ -1,5 +1,8 @@
 import type { MockupDocument } from '../types/mockup';
 
+/**
+ * Generates PyGObject (Python) code bindings with @Gtk.Template decorators and callbacks.
+ */
 export function generatePythonBindings(doc: MockupDocument): string {
   const title = doc.title.replace(/[^a-zA-Z0-9]/g, '');
 
@@ -94,5 +97,33 @@ public class ${title}Window : Adw.ApplicationWindow {
         message ("Button clicked");
     }
 }
+`;
+}
+
+/**
+ * Generates GTK Broadway web launcher bash script for native GTK C binary streaming.
+ */
+export function generateBroadwayScript(doc: MockupDocument): string {
+  const name = doc.title.toLowerCase().replace(/\s+/g, '-');
+  return `#!/usr/bin/env bash
+# Protota GTK Broadway Live Preview Stream Launcher
+
+echo "Starting broadwayd display server on port 8085 (:5)..."
+broadwayd :5 &
+BROADWAY_PID=$!
+
+sleep 1
+
+export GDK_BACKEND=broadway
+export BROADWAY_DISPLAY=:5
+
+echo "Compiling Blueprint UI markup..."
+blueprint-compiler compile ${name}.blp -o ${name}.ui
+
+echo "Launching native GTK4 application..."
+echo "Open Protota Broadway Tab or http://localhost:8085 to view native C rendering."
+gtk4-launch ./${name}.ui || echo "Executable launched on Broadway display :5"
+
+kill $BROADWAY_PID 2>/dev/null
 `;
 }

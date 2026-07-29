@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useMockupStore } from '../store/mockupStore';
 import { mockupToBlueprint } from '../utils/blueprint';
-import { generatePythonBindings, generateRustBindings, generateValaBindings } from '../utils/codeGenerator';
+import { generatePythonBindings, generateRustBindings, generateValaBindings, generateBroadwayScript } from '../utils/codeGenerator';
 
 interface Props {
   isOpen: boolean;
@@ -10,7 +10,7 @@ interface Props {
 
 export const ExportModal: React.FC<Props> = ({ isOpen, onClose }) => {
   const { doc } = useMockupStore();
-  const [activeTab, setActiveTab] = useState<'blp' | 'python' | 'rust' | 'vala'>('blp');
+  const [activeTab, setActiveTab] = useState<'blp' | 'python' | 'rust' | 'vala' | 'broadway'>('blp');
 
   if (!isOpen) return null;
 
@@ -18,6 +18,7 @@ export const ExportModal: React.FC<Props> = ({ isOpen, onClose }) => {
   const pythonCode = generatePythonBindings(doc);
   const rustCode = generateRustBindings(doc);
   const valaCode = generateValaBindings(doc);
+  const broadwayCode = generateBroadwayScript(doc);
 
   const getActiveCode = () => {
     switch (activeTab) {
@@ -25,6 +26,7 @@ export const ExportModal: React.FC<Props> = ({ isOpen, onClose }) => {
       case 'python': return pythonCode;
       case 'rust': return rustCode;
       case 'vala': return valaCode;
+      case 'broadway': return broadwayCode;
     }
   };
 
@@ -35,7 +37,7 @@ export const ExportModal: React.FC<Props> = ({ isOpen, onClose }) => {
 
   const handleDownload = () => {
     const code = getActiveCode();
-    const ext = activeTab === 'blp' ? 'blp' : activeTab === 'python' ? 'py' : activeTab === 'rust' ? 'rs' : 'vala';
+    const ext = activeTab === 'blp' ? 'blp' : activeTab === 'python' ? 'py' : activeTab === 'rust' ? 'rs' : activeTab === 'vala' ? 'vala' : 'sh';
     const blob = new Blob([code], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -75,6 +77,12 @@ export const ExportModal: React.FC<Props> = ({ isOpen, onClose }) => {
             onClick={() => setActiveTab('vala')}
           >
             Vala
+          </button>
+          <button
+            className={`protota-btn ${activeTab === 'broadway' ? 'suggested' : ''}`}
+            onClick={() => setActiveTab('broadway')}
+          >
+            Broadway Script (.sh)
           </button>
         </div>
 

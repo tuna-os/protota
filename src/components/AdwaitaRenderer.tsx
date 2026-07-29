@@ -271,7 +271,7 @@ export const AdwaitaRenderer: React.FC<Props> = ({
         iconPrefix,
         ...(children ?? []),
         // For label/inscription — render text content
-        ...(node.type === 'label' || node.type === 'inscription' || node.type === 'custom-widget'
+        ...(node.type === 'label' || node.type === 'inscription' || (node.type === 'custom-widget' && (!node.children || node.children.length === 0))
           ? [node.title || '']
           : []),
       )}

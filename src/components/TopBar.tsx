@@ -1,8 +1,8 @@
 import React, { useState, useRef, useEffect } from "react";
-import { useMockupStore } from "../store/mockupStore";
-import { exportDocumentFile, importDocumentFile } from "../utils/exportImport";
-import html2canvas from "html2canvas";
+import { persistDocumentSource, useMockupStore } from "../store/mockupStore";
+import { importDocumentFile } from "../utils/exportImport";
 import { mockupToBlueprint } from "../utils/blueprint";
+import { downloadPng, renderScreenToPng } from "../utils/pngExport";
 
 interface MenuItem {
   label: string;
@@ -38,23 +38,8 @@ export const TopBar: React.FC = () => {
   const themeLabel =
     doc.colorScheme === "dark" ? "Light" : doc.colorScheme === "light" ? "Auto" : "Dark";
 
-  const handleExport = async () => {
-    await exportDocumentFile(doc);
-  };
-
   const handleExportPNG = async () => {
-    const el = document.querySelector("adw-window");
-    if (!el) return;
-    const canvas = await html2canvas(el as HTMLElement, { scale: 2, backgroundColor: null });
-    canvas.toBlob((blob) => {
-      if (!blob) return;
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "protota-screen.png";
-      a.click();
-      URL.revokeObjectURL(url);
-    });
+    downloadPng(await renderScreenToPng());
   };
 
   const handleExportBlueprint = () => {
@@ -85,7 +70,7 @@ export const TopBar: React.FC = () => {
     try {
       const imported = await importDocumentFile(file);
       imported.colorScheme = imported.colorScheme || "auto";
-      localStorage.setItem("protota_doc_v1", JSON.stringify(imported));
+      persistDocumentSource(imported);
       window.location.reload();
     } catch (err) {
       alert("Failed to import: " + (err as Error).message);
@@ -108,9 +93,8 @@ export const TopBar: React.FC = () => {
           action: () => fileInputRef.current?.click(),
           shortcut: "Ctrl+I",
         },
-        { label: "Export...", action: handleExport, shortcut: "Ctrl+E" },
         { label: "Export as PNG", action: handleExportPNG },
-        { label: "Export Blueprint", action: handleExportBlueprint },
+        { label: "Export Blueprint (.blp)", action: handleExportBlueprint, shortcut: "Ctrl+E" },
         { label: "divider", divider: true },
         { label: "Share URL", action: handleShare, shortcut: "Ctrl+S" },
       ],
@@ -237,7 +221,7 @@ export const TopBar: React.FC = () => {
       <input
         ref={fileInputRef}
         type="file"
-        accept=".mockup.json,.json"
+        accept=".mockup.json,.json,.blp,.ui"
         onChange={handleImport}
         style={{ display: "none" }}
       />

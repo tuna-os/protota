@@ -26,8 +26,14 @@ export type AdwNodeType =
 
   // Layout
   | 'clamp'            // AdwClamp — max-width container
+  | 'bin'              // AdwBin — single-child container
+  | 'custom-widget'    // source-declared custom GTK/GObject widget boundary
   | 'box'              // GtkBox — directional container
+  | 'grid'             // GtkGrid — rows/columns (Calculator and keypads)
   | 'center-box'       // GtkCenterBox — start/center/end layout
+  | 'stack'            // GtkStack — visible page container
+  | 'stack-page'       // GtkStackPage — named stack child
+  | 'scrolled-window'  // GtkScrolledWindow — viewport with overflow
 
   // Preferences rows (boxed-list children)
   | 'action-row'       // AdwActionRow — title + subtitle + prefix/suffix
@@ -71,6 +77,12 @@ export type AdwNodeType =
 export interface AdwNode {
   id: string;
   type: AdwNodeType;
+  /**
+   * Named GTK/Libadwaita child slot, such as ToolbarView's `top`/`content`
+   * or OverlaySplitView's `sidebar`/`content`.  This is structural data,
+   * not an app-specific rendering hint.
+   */
+  slot?: string;
   // Common properties
   title?: string;
   subtitle?: string;
@@ -100,6 +112,18 @@ export interface AdwNode {
   // Layout
   orientation?: 'horizontal' | 'vertical';
   spacing?: number;
+  columns?: number;
+  rowSpacing?: number;
+  columnSpacing?: number;
+  /** GtkGrid child placement. Zero-based model coordinates. */
+  column?: number;
+  row?: number;
+  columnSpan?: number;
+  rowSpan?: number;
+  minWidth?: number;
+  minHeight?: number;
+  widthRequest?: number;
+  heightRequest?: number;
   // Breakpoint
   breakpointCondition?: string;
   // View stack pages
@@ -184,6 +208,11 @@ export const LEGAL_CHILDREN: Record<AdwNodeType, AdwNodeType[]> = {
     'box', 'label', 'status-page', 'list-box', 'button',
     'preferences-group', 'flow-box', 'inscription', 'spinner',
   ],
+  bin: [
+    'box', 'grid', 'clamp', 'label', 'status-page', 'list-box', 'flow-box',
+    'toast-overlay', 'view-stack', 'tab-view', 'button',
+  ],
+  'custom-widget': [],
   box: [
     'label', 'button', 'entry', 'search-entry', 'inscription',
     'spinner', 'toggle', 'switch-widget', 'check-button',
@@ -194,9 +223,23 @@ export const LEGAL_CHILDREN: Record<AdwNodeType, AdwNodeType[]> = {
     'split-button', 'menu-button', 'toggle-group',
     'view-stack', 'tab-view',
   ],
+  grid: [
+    'label', 'button', 'entry', 'search-entry', 'inscription', 'spinner',
+    'toggle', 'switch-widget', 'check-button', 'box', 'center-box',
+    'status-page', 'split-button', 'menu-button', 'toggle-group',
+  ],
   'center-box': [
     'button', 'label', 'window-title', 'view-switcher',
     'search-entry', 'entry', 'spinner', 'inscription',
+  ],
+  stack: [
+    'stack-page', 'box', 'grid', 'clamp', 'status-page', 'list-box', 'scrolled-window',
+  ],
+  'stack-page': [
+    'box', 'grid', 'clamp', 'status-page', 'list-box', 'scrolled-window',
+  ],
+  'scrolled-window': [
+    'box', 'grid', 'stack', 'stack-page', 'list-box', 'flow-box', 'custom-widget', 'label',
   ],
 
   // === Preferences rows ===

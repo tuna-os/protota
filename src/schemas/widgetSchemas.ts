@@ -57,6 +57,12 @@ export const WIDGET_SCHEMAS: Record<AdwNodeType, PropSchema[]> = {
   clamp: [
     { key: 'title', label: 'Content', type: 'string', defaultValue: '' },
   ],
+  bin: [],
+  'custom-widget': [
+    { key: 'title', label: 'Source widget class', type: 'string', defaultValue: 'CustomWidget' },
+    { key: 'widthRequest', label: 'Width request', type: 'number', defaultValue: 0 },
+    { key: 'heightRequest', label: 'Height request', type: 'number', defaultValue: 0 },
+  ],
   box: [
     {
       key: 'orientation',
@@ -67,7 +73,17 @@ export const WIDGET_SCHEMAS: Record<AdwNodeType, PropSchema[]> = {
     },
     { key: 'spacing', label: 'Spacing', type: 'number', defaultValue: 12 },
   ],
+  grid: [
+    { key: 'columns', label: 'Columns', type: 'number', defaultValue: 2 },
+    { key: 'rowSpacing', label: 'Row spacing', type: 'number', defaultValue: 6 },
+    { key: 'columnSpacing', label: 'Column spacing', type: 'number', defaultValue: 6 },
+  ],
   'center-box': [],
+  stack: [],
+  'stack-page': [
+    { key: 'title', label: 'Page title', type: 'string', defaultValue: '' },
+  ],
+  'scrolled-window': [],
 
   // === Preferences rows ===
   'action-row': [

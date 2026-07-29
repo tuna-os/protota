@@ -1,0 +1,1323 @@
+{
+  "version": 1,
+  "exportedAt": "2026-07-29T13:12:19.762Z",
+  "document": {
+    "id": "imported-document",
+    "title": "Citations",
+    "colorScheme": "auto",
+    "edges": [],
+    "sourceProject": {
+      "files": [
+        {
+          "path": "add_pdf_dialog.ui",
+          "content": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<interface>\n  <template class=\"AddPdfDialog\" parent=\"AdwDialog\">\n    <property name=\"width-request\">360</property>\n    <property name=\"height-request\">270</property>\n    <property name=\"content-width\">450</property>\n    <property name=\"content-height\">270</property>\n    <property name=\"title\" translatable=\"yes\">Add PDF</property>\n    <property name=\"focus-widget\">pdf_url_entry_row</property>\n    <child>\n      <object class=\"AdwToolbarView\">\n        <child type=\"top\">\n          <object class=\"AdwHeaderBar\"/>\n        </child>\n        <child>\n          <object class=\"AdwToastOverlay\" id=\"toast_overlay\">\n            <child>\n              <object class=\"GtkOverlay\">\n                <child type=\"overlay\">\n                  <object class=\"GtkProgressBar\" id=\"progress_bar\">\n                    <property name=\"valign\">start</property>\n                    <property name=\"visible\">False</property>\n                    <style>\n                      <class name=\"osd\"/>\n                    </style>\n                  </object>\n                </child>\n                <child>\n                  <object class=\"GtkScrolledWindow\">\n                    <child>\n                      <object class=\"AdwClamp\">\n                        <property name=\"vexpand\">True</property>\n                        <child>\n                          <object class=\"GtkBox\">\n                            <property name=\"orientation\">vertical</property>\n                            <property name=\"margin-top\">24</property>\n                            <property name=\"margin-bottom\">24</property>\n                            <property name=\"margin-start\">12</property>\n                            <property name=\"margin-end\">12</property>\n                            <property name=\"spacing\">12</property>\n                            <child>\n                              <object class=\"GtkBox\" id=\"error_box\">\n                                <property name=\"visible\">False</property>\n                                <child>\n                                  <object class=\"GtkLabel\">\n                                    <property name=\"xalign\">0</property>\n                                    <property name=\"label\" translatable=\"yes\">Bibliography folder not set</property>\n                                    <style>\n                                      <class name=\"error\"/>\n                                    </style>\n                                  </object>\n                                </child>\n                                <child>\n                                  <object class=\"GtkLabel\" id=\"error_label\">\n                                    <property name=\"xalign\">0</property>\n                                    <style>\n                                      <class name=\"error\"/>\n                                    </style>\n                                  </object>\n                                </child>\n                              </object>\n                            </child>\n                            <child>\n                              <object class=\"GtkLabel\">\n                                <property name=\"label\" translatable=\"yes\">Creates a copy of the selected pdf and stores it in your Bibliography folder.</property>\n                                <property name=\"wrap-mode\">word-char</property>\n                                <property name=\"wrap\">True</property>\n                                <property name=\"xalign\">0</property>\n                                <style>\n                                  <class name=\"dimmed\"/>\n                                </style>\n                              </object>\n                            </child>\n                            <child>\n                              <object class=\"GtkListBox\">\n                                <property name=\"selection-mode\">none</property>\n                                <child>\n                                  <object class=\"AdwEntryRow\" id=\"pdf_url_entry_row\">\n                                    <property name=\"activatable\">True</property>\n                                    <property name=\"title\" translatable=\"yes\">Add From URL</property>\n                                    <signal name=\"entry-activated\" handler=\"on_entry_activated\" swapped=\"true\"/>\n                                    <child>\n                                      <object class=\"GtkButton\" id=\"download_button\">\n                                        <property name=\"valign\">center</property>\n                                        <property name=\"icon-name\">go-next-symbolic</property>\n                                        <property name=\"tooltip-text\" translatable=\"yes\">Download…</property>\n                                        <signal name=\"clicked\" handler=\"on_download_pdf_button_clicked\" swapped=\"true\"/>\n                                        <style>\n                                          <class name=\"flat\"/>\n                                        </style>\n                                      </object>\n                                    </child>\n                                  </object>\n                                </child>\n                                <child>\n                                  <object class=\"AdwButtonRow\">\n                                    <property name=\"activatable\">True</property>\n                                    <property name=\"title\" translatable=\"yes\">Add From File…</property>\n                                    <property name=\"start-icon-name\">document-open-symbolic</property>\n                                    <signal name=\"activated\" handler=\"set_from_file_row_activated\" swapped=\"yes\"/>\n                                  </object>\n                                </child>\n                                <style>\n                                  <class name=\"boxed-list-separate\"/>\n                                </style>\n                              </object>\n                            </child>\n                          </object>\n                        </child>\n                      </object>\n                    </child>\n                  </object>\n                </child>\n              </object>\n            </child>\n          </object>\n        </child>\n      </object>\n    </child>\n  </template>\n</interface>\n"
+        },
+        {
+          "path": "citation_preview.ui",
+          "content": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<interface>\n  <template class=\"CitationPreview\" parent=\"AdwBin\">\n    <signal name=\"notify::template\" handler=\"on_template_notify\" swapped=\"true\"/>\n    <child>\n      <object class=\"GtkBox\">\n        <property name=\"orientation\">vertical</property>\n        <property name=\"spacing\">6</property>\n        <child>\n          <object class=\"GtkRevealer\" id=\"template_revealer\">\n            <property name=\"reveal-child\">False</property>\n            <property name=\"transition-type\">slide-up</property>\n            <child>\n              <object class=\"AdwPreferencesGroup\" id=\"citation_fmt_group\">\n                <property name=\"title\" translatable=\"yes\">Custom Citation Format</property>\n                <property name=\"header-suffix\">\n                  <object class=\"GtkMenuButton\">\n                    <property name=\"icon-name\">dialog-question-symbolic</property>\n                    <property name=\"popover\">popover</property>\n                    <property name=\"tooltip-text\" translatable=\"yes\">Help</property>\n                    <style>\n                      <class name=\"flat\"/>\n                    </style>\n                  </object>\n                </property>\n                <child>\n                  <object class=\"GtkScrolledWindow\">\n                    <property name=\"margin-bottom\">24</property>\n                    <property name=\"height-request\">90</property>\n                    <child>\n                      <object class=\"GtkTextView\" id=\"text_view\">\n                        <property name=\"hexpand\">True</property>\n                        <property name=\"monospace\">True</property>\n                        <property name=\"wrap-mode\">word</property>\n                        <style>\n                          <class name=\"inline\"/>\n                        </style>\n                        <accessibility>\n                          <relation name=\"labelled-by\">citation_fmt_group</relation>\n                        </accessibility>\n                      </object>\n                    </child>\n                    <style>\n                      <class name=\"card\"/>\n                    </style>\n                  </object>\n                </child>\n              </object>\n            </child>\n          </object>\n        </child>\n        <child>\n          <object class=\"AdwPreferencesGroup\" id=\"citation_group\">\n            <property name=\"title\" translatable=\"yes\">Citation</property>\n            <property name=\"header-suffix\">\n              <object class=\"GtkBox\">\n                <property name=\"spacing\">6</property>\n                <child>\n                  <object class=\"GtkDropDown\" id=\"template_drop_down\">\n                    <property name=\"model\">\n                      <object class=\"GtkEnumList\">\n                        <property name=\"enum-type\">Template</property>\n                      </object>\n                    </property>\n                    <property name=\"expression\">\n                      <closure type=\"gchararray\" function=\"template_type_name\"/>\n                    </property>\n                    <accessibility>\n                      <relation name=\"controls\">source_view</relation>\n                    </accessibility>\n                  </object>\n                </child>\n                <child>\n                  <object class=\"GtkDropDown\" id=\"drop_down\">\n                    <property name=\"model\">\n                      <object class=\"GtkEnumList\">\n                        <property name=\"enum-type\">Format</property>\n                      </object>\n                    </property>\n                    <property name=\"expression\">\n                      <closure type=\"gchararray\" function=\"format_type_name\"/>\n                    </property>\n                    <accessibility>\n                      <relation name=\"controls\">source_view</relation>\n                    </accessibility>\n                  </object>\n                </child>\n              </object>\n            </property>\n            <child>\n              <object class=\"GtkScrolledWindow\">\n                <property name=\"height-request\">90</property>\n                <child>\n                  <object class=\"GtkOverlay\">\n                    <child type=\"overlay\">\n                      <object class=\"GtkButton\">\n                        <property name=\"halign\">end</property>\n                        <property name=\"valign\">end</property>\n                        <property name=\"icon-name\">edit-copy-symbolic</property>\n                        <property name=\"margin-end\">6</property>\n                        <property name=\"margin-start\">6</property>\n                        <property name=\"margin-top\">6</property>\n                        <property name=\"margin-bottom\">6</property>\n                        <property name=\"tooltip-text\" translatable=\"yes\">Copy</property>\n                        <signal name=\"clicked\" handler=\"on_clicked\" swapped=\"true\"/>\n                        <style>\n                          <class name=\"flat\"/>\n                        </style>\n                      </object>\n                    </child>\n                    <child>\n                      <object class=\"GtkSourceView\" id=\"source_view\">\n                        <property name=\"hexpand\">True</property>\n                        <property name=\"wrap-mode\">word</property>\n                        <property name=\"editable\">False</property>\n                        <property name=\"accepts-tab\">False</property>\n                        <style>\n                          <class name=\"inline\"/>\n                        </style>\n                        <accessibility>\n                          <relation name=\"labelled-by\">citation_group</relation>\n                        </accessibility>\n                      </object>\n                    </child>\n                  </object>\n                </child>\n                <style>\n                  <class name=\"card\"/>\n                </style>\n              </object>\n            </child>\n          </object>\n        </child>\n      </object>\n    </child>\n  </template>\n  <object class=\"GtkPopover\" id=\"popover\">\n    <child>\n      <object class=\"GtkBox\">\n        <property name=\"orientation\">vertical</property>\n        <property name=\"spacing\">6</property>\n        <property name=\"margin-start\">6</property>\n        <property name=\"margin-end\">6</property>\n        <property name=\"margin-top\">6</property>\n        <property name=\"margin-bottom\">6</property>\n        <child>\n          <object class=\"GtkLabel\">\n            <property name=\"label\" translatable=\"yes\">Custom Template</property>\n            <property name=\"xalign\">0</property>\n            <style>\n              <class name=\"heading\"/>\n            </style>\n          </object>\n        </child>\n        <child>\n          <object class=\"GtkLabel\">\n            <property name=\"xalign\">0</property>\n            <property name=\"wrap\">True</property>\n            <property name=\"wrap-mode\">word-char</property>\n            <property name=\"ellipsize\">none</property>\n            <property name=\"lines\">4</property>\n            <property name=\"use-markup\">True</property>\n            <property name=\"max-width-chars\">40</property>\n            <property name=\"label\" translatable=\"yes\">Write a custom format for your citations, to insert the contents of a tag &lt;tt&gt;sometag&lt;/tt&gt; write &lt;tt&gt;%SOMETAG%&lt;/tt&gt;. Basic markdown syntax for bold and italics is supported. </property>\n          </object>\n        </child>\n        <child>\n          <object class=\"GtkLabel\">\n            <property name=\"label\" translatable=\"yes\">Example:</property>\n            <property name=\"xalign\">0</property>\n            <style>\n              <class name=\"heading\"/>\n            </style>\n          </object>\n        </child>\n        <child>\n          <object class=\"GtkScrolledWindow\">\n            <property name=\"height-request\">70</property>\n            <property name=\"width-request\">300</property>\n            <property name=\"max-content-width\">300</property>\n            <property name=\"hscrollbar-policy\">never</property>\n            <child>\n              <object class=\"GtkTextView\" id=\"help_source_view\">\n                <property name=\"hexpand\">True</property>\n                <property name=\"wrap-mode\">word</property>\n                <property name=\"editable\">False</property>\n                <property name=\"monospace\">True</property>\n                <style>\n                  <class name=\"inline\"/>\n                </style>\n              </object>\n            </child>\n            <style>\n              <class name=\"card\"/>\n            </style>\n          </object>\n        </child>\n      </object>\n    </child>\n  </object>\n</interface>\n"
+        },
+        {
+          "path": "entry_list.ui",
+          "content": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<interface>\n  <template class=\"EntryList\" parent=\"AdwBin\">\n    <child>\n      <object class=\"GtkStack\" id=\"stack\">\n        <child>\n          <object class=\"AdwStatusPage\" id=\"empty_list\">\n            <property name=\"icon-name\">document-text-symbolic</property>\n            <property name=\"title\" translatable=\"yes\" comments=\"TRANSLATORS Empty state widget\">No Citations</property>\n            <property name=\"description\" translatable=\"yes\">Create a new citation</property>\n            <style>\n              <class name=\"compact\"/>\n            </style>\n          </object>\n        </child>\n        <child>\n          <object class=\"GtkScrolledWindow\" id=\"scrolled_window\">\n            <property name=\"hscrollbar-policy\">never</property>\n            <child>\n              <object class=\"GtkListView\" id=\"list_view\">\n                <property name=\"single-click-activate\">True</property>\n                <signal name=\"activate\" handler=\"on_list_activate\" swapped=\"yes\"/>\n                <style>\n                  <class name=\"navigation-sidebar\"/>\n                  <class name=\"padded-sidebar\"/>\n                </style>\n              </object>\n            </child>\n          </object>\n        </child>\n      </object>\n    </child>\n  </template>\n</interface>\n"
+        },
+        {
+          "path": "entry_list_row.ui",
+          "content": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<interface>\n  <template class=\"EntryListRow\">\n    <child>\n      <object class=\"GtkGestureClick\" id=\"menu_gesture\">\n        <property name=\"button\">0</property>\n        <property name=\"exclusive\">True</property>\n        <signal name=\"pressed\" handler=\"menu_gesture_pressed\"/>\n      </object>\n    </child>\n    <child>\n      <object class=\"GtkGestureLongPress\">\n        <property name=\"delay-factor\">2</property>\n        <property name=\"touch-only\">True</property>\n        <property name=\"exclusive\">True</property>\n        <signal name=\"pressed\" handler=\"menu_long_gesture_pressed\"/>\n      </object>\n    </child>\n    <child>\n      <object class=\"GtkPopoverMenu\" id=\"popover\">\n        <property name=\"menu-model\">row_menu</property>\n        <property name=\"has-arrow\">False</property>\n        <property name=\"halign\">start</property>\n        <property name=\"position\">bottom</property>\n      </object>\n    </child>\n    <child>\n      <object class=\"GtkBox\" id=\"child\">\n        <property name=\"margin-start\">6</property>\n        <property name=\"margin-end\">6</property>\n        <property name=\"margin-top\">12</property>\n        <property name=\"margin-bottom\">12</property>\n        <property name=\"orientation\">vertical</property>\n        <property name=\"spacing\">6</property>\n        <child>\n          <object class=\"GtkBox\">\n            <property name=\"spacing\">6</property>\n            <child>\n              <object class=\"GtkLabel\" id=\"author\">\n                <property name=\"hexpand\">True</property>\n                <property name=\"xalign\">0</property>\n                <property name=\"ellipsize\">end</property>\n                <property name=\"lines\">2</property>\n                <property name=\"wrap\">True</property>\n                <property name=\"wrap-mode\">word-char</property>\n                <style>\n                  <class name=\"title\"/>\n                </style>\n              </object>\n            </child>\n            <child>\n              <object class=\"GtkLabel\" id=\"year_label\">\n                <property name=\"yalign\">0</property>\n                <style>\n                  <class name=\"dimmed\"/>\n                  <class name=\"numeric\"/>\n                </style>\n              </object>\n            </child>\n          </object>\n        </child>\n        <child>\n          <object class=\"GtkLabel\" id=\"title_label\">\n            <property name=\"ellipsize\">end</property>\n            <property name=\"lines\">2</property>\n            <property name=\"wrap\">True</property>\n            <property name=\"wrap-mode\">word-char</property>\n            <property name=\"xalign\">0</property>\n            <property name=\"hexpand\">True</property>\n            <style>\n              <class name=\"subtitle\"/>\n            </style>\n          </object>\n        </child>\n      </object>\n    </child>\n  </template>\n  <menu id=\"row_menu\">\n    <section>\n      <item>\n        <attribute name=\"label\" translatable=\"yes\">_Open PDF</attribute>\n        <attribute name=\"action\">entry-row.open-pdf</attribute>\n      </item>\n      <item>\n        <attribute name=\"label\" translatable=\"yes\">_Copy Key</attribute>\n        <attribute name=\"action\">entry-row.copy-key</attribute>\n      </item>\n    </section>\n    <section>\n      <item>\n        <attribute name=\"label\" translatable=\"yes\">_Delete</attribute>\n        <attribute name=\"action\">entry-row.delete</attribute>\n      </item>\n    </section>\n  </menu>\n</interface>\n"
+        },
+        {
+          "path": "entry_page.ui",
+          "content": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<interface>\n  <template class=\"EntryPage\" parent=\"AdwBin\">\n    <child>\n      <object class=\"GtkStack\" id=\"stack\">\n        <child>\n          <object class=\"AdwBin\" id=\"empty_bin\"/>\n        </child>\n        <child>\n          <object class=\"AdwStatusPage\" id=\"empty_page\">\n            <property name=\"vexpand\">True</property>\n            <property name=\"icon-name\">document-text-symbolic</property>\n            <property name=\"title\" translatable=\"yes\">No Citation Selected</property>\n          </object>\n        </child>\n        <child>\n          <object class=\"GtkScrolledWindow\" id=\"non_empty_page\">\n            <property name=\"hscrollbar-policy\">never</property>\n            <property name=\"vexpand\">True</property>\n            <child>\n              <object class=\"GtkViewport\">\n                <property name=\"vscroll-policy\">natural</property>\n                <child>\n                  <object class=\"AdwClamp\">\n                    <property name=\"margin-start\">12</property>\n                    <property name=\"margin-end\">12</property>\n                    <property name=\"margin-top\">36</property>\n                    <property name=\"margin-bottom\">36</property>\n                    <child>\n                      <object class=\"GtkBox\">\n                        <property name=\"orientation\">vertical</property>\n                        <property name=\"spacing\">30</property>\n                        <child>\n                          <object class=\"GtkBox\">\n                            <property name=\"orientation\">vertical</property>\n                            <property name=\"spacing\">12</property>\n                            <child>\n                              <object class=\"GtkBox\">\n                                <property name=\"spacing\">6</property>\n                                <child>\n                                  <object class=\"GtkLabel\" id=\"entry_type_label\">\n                                    <property name=\"hexpand\">True</property>\n                                    <property name=\"xalign\">0</property>\n                                    <property name=\"yalign\">1</property>\n                                    <property name=\"ellipsize\">none</property>\n                                    <style>\n                                      <class name=\"title-1\"/>\n                                    </style>\n                                  </object>\n                                </child>\n                                <child>\n                                  <object class=\"GtkLabel\" id=\"citation_label\">\n                                    <property name=\"yalign\">1</property>\n                                    <property name=\"ellipsize\">end</property>\n                                    <style>\n                                      <class name=\"dimmed\"/>\n                                    </style>\n                                  </object>\n                                </child>\n                              </object>\n                            </child>\n                            <child>\n                              <object class=\"GtkListBox\">\n                                <property name=\"selection-mode\">none</property>\n                                <style>\n                                  <class name=\"boxed-list\"/>\n                                </style>\n                                <child>\n                                  <object class=\"AdwComboRow\" id=\"entry_type_combo_row\">\n                                    <property name=\"title\" translatable=\"yes\">Citation _Type</property>\n                                    <property name=\"use-underline\">True</property>\n                                    <property name=\"model\">\n                                      <object class=\"GtkEnumList\">\n                                        <property name=\"enum-type\">EntryType</property>\n                                      </object>\n                                    </property>\n                                    <property name=\"expression\">\n                                      <closure type=\"gchararray\" function=\"drop_down_entry_type_name\"/>\n                                    </property>\n                                    <signal name=\"notify::selected\" handler=\"on_entry_type_selected_notify\" swapped=\"true\"/>\n                                  </object>\n                                </child>\n                                <child>\n                                  <object class=\"AdwEntryRow\" id=\"other_entry_type_row\">\n                                    <property name=\"visible\">False</property>\n                                    <property name=\"title\" translatable=\"yes\">_Other Citation Type</property>\n                                    <property name=\"use-underline\">True</property>\n                                    <signal name=\"changed\" handler=\"on_entry_type_entry_row_changed\" swapped=\"true\"/>\n                                  </object>\n                                </child>\n                                <child>\n                                  <object class=\"AdwEntryRow\" id=\"citation_key_entry\">\n                                    <property name=\"title\" translatable=\"yes\">_Citation Key</property>\n                                    <property name=\"use-underline\">True</property>\n                                    <property name=\"show-apply-button\">True</property>\n                                    <signal name=\"apply\" handler=\"on_citation_key_apply\"/>\n                                    <child>\n                                      <object class=\"GtkButton\">\n                                        <property name=\"valign\">center</property>\n                                        <property name=\"icon-name\">edit-copy-symbolic</property>\n                                        <property name=\"tooltip-text\" translatable=\"yes\">Copy</property>\n                                        <signal name=\"clicked\" handler=\"on_copy_key_clicked\" swapped=\"true\"/>\n                                        <style>\n                                          <class name=\"flat\"/>\n                                        </style>\n                                      </object>\n                                    </child>\n                                  </object>\n                                </child>\n                                <child>\n                                  <object class=\"AdwEntryRow\" id=\"author_entry\">\n                                    <property name=\"title\" translatable=\"yes\">_Author</property>\n                                    <property name=\"use-underline\">True</property>\n                                  </object>\n                                </child>\n                                <child>\n                                  <object class=\"AdwEntryRow\" id=\"title_entry\">\n                                    <property name=\"title\" translatable=\"yes\">_Title</property>\n                                    <property name=\"use-underline\">True</property>\n                                  </object>\n                                </child>\n                                <child>\n                                  <object class=\"AdwEntryRow\" id=\"year_entry\">\n                                    <property name=\"title\" translatable=\"yes\">_Year</property>\n                                    <property name=\"use-underline\">True</property>\n                                    <style>\n                                      <class name=\"numeric\"/>\n                                    </style>\n                                  </object>\n                                </child>\n                                <child>\n                                  <object class=\"AdwEntryRow\" id=\"doi_entry\">\n                                    <property name=\"title\">_DOI</property>\n                                    <property name=\"use-underline\">True</property>\n                                    <child>\n                                      <object class=\"GtkButton\" id=\"doi_button\">\n                                        <property name=\"sensitive\">False</property>\n                                        <property name=\"valign\">center</property>\n                                        <property name=\"icon-name\">external-link-symbolic</property>\n                                        <property name=\"tooltip-text\" translatable=\"yes\">Open in Browser</property>\n                                        <signal name=\"clicked\" handler=\"on_doi_clicked\" swapped=\"true\"/>\n                                        <style>\n                                          <class name=\"flat\"/>\n                                        </style>\n                                      </object>\n                                    </child>\n                                  </object>\n                                </child>\n                              </object>\n                            </child>\n                          </object>\n                        </child>\n                        <child>\n                          <object class=\"AdwPreferencesGroup\" id=\"extras_box\">\n                            <property name=\"visible\">False</property>\n                            <property name=\"title\" translatable=\"yes\">Other Properties</property>\n                            <child>\n                              <object class=\"GtkListBox\" id=\"extras_list_box\">\n                                <property name=\"selection-mode\">none</property>\n                                <style>\n                                  <class name=\"boxed-list\"/>\n                                </style>\n                              </object>\n                            </child>\n                          </object>\n                        </child>\n                        <child>\n                          <object class=\"AdwPreferencesGroup\" id=\"abstract_preferences_group\">\n                            <property name=\"visible\">False</property>\n                            <property name=\"title\" translatable=\"yes\">Abstract</property>\n                            <property name=\"header-suffix\">\n                              <object class=\"GtkButton\">\n                                <property name=\"icon-name\">edit-copy-symbolic</property>\n                                <property name=\"tooltip-text\" translatable=\"yes\">Copy Abstract</property>\n                                <signal name=\"clicked\" handler=\"on_copy_abstract_clicked\" swapped=\"yes\"/>\n                                <style>\n                                  <class name=\"flat\"/>\n                                </style>\n                              </object>\n                            </property>\n                            <child>\n                              <object class=\"GtkScrolledWindow\">\n                                <property name=\"height-request\">180</property>\n                                <child>\n                                  <object class=\"GtkTextView\" id=\"abstract_text_view\">\n                                    <property name=\"hexpand\">True</property>\n                                    <property name=\"wrap-mode\">word</property>\n                                    <property name=\"accepts-tab\">False</property>\n                                    <style>\n                                      <class name=\"inline\"/>\n                                    </style>\n                                    <accessibility>\n                                      <relation name=\"labelled-by\">abstract_preferences_group</relation>\n                                    </accessibility>\n                                  </object>\n                                </child>\n                                <style>\n                                  <class name=\"card\"/>\n                                </style>\n                              </object>\n                            </child>\n                          </object>\n                        </child>\n                        <child>\n                          <object class=\"AdwPreferencesGroup\" id=\"notes_preferences_group\">\n                            <property name=\"visible\">False</property>\n                            <property name=\"title\" translatable=\"yes\">Notes</property>\n                            <property name=\"header-suffix\">\n                              <object class=\"GtkButton\">\n                                <property name=\"icon-name\">edit-copy-symbolic</property>\n                                <property name=\"tooltip-text\" translatable=\"yes\">Copy Notes</property>\n                                <signal name=\"clicked\" handler=\"on_copy_notes_clicked\" swapped=\"yes\"/>\n                                <style>\n                                  <class name=\"flat\"/>\n                                </style>\n                              </object>\n                            </property>\n                            <child>\n                              <object class=\"GtkScrolledWindow\">\n                                <property name=\"height-request\">180</property>\n                                <child>\n                                  <object class=\"GtkTextView\" id=\"notes_text_view\">\n                                    <property name=\"hexpand\">True</property>\n                                    <property name=\"wrap-mode\">word</property>\n                                    <property name=\"accepts-tab\">False</property>\n                                    <style>\n                                      <class name=\"inline\"/>\n                                    </style>\n                                    <accessibility>\n                                      <relation name=\"labelled-by\">notes_preferences_group</relation>\n                                    </accessibility>\n                                  </object>\n                                </child>\n                                <style>\n                                  <class name=\"card\"/>\n                                </style>\n                              </object>\n                            </child>\n                          </object>\n                        </child>\n                        <child>\n                          <object class=\"CitationPreview\">\n                            <property name=\"entry\" bind-source=\"EntryPage\" bind-property=\"entry\" bind-flags=\"sync-create\"/>\n                          </object>\n                        </child>\n                        <child>\n                          <object class=\"GtkStack\" id=\"pdf_stack\">\n                            <property name=\"transition-type\">crossfade</property>\n                            <property name=\"vhomogeneous\">False</property>\n                            <child>\n                              <object class=\"GtkListBox\" id=\"pdf_add_list_box\">\n                                <property name=\"selection-mode\">none</property>\n                                <property name=\"valign\">start</property>\n                                <child>\n                                  <object class=\"AdwActionRow\" id=\"set_pdf_expander_row\">\n                                    <property name=\"title\" translatable=\"yes\" comments=\"Translators: Selects a PDF file for the citation\">Add PDF</property>\n                                    <property name=\"activatable\">True</property>\n                                    <property name=\"action-name\">entry-page.set-pdf</property>\n                                    <child>\n                                      <object class=\"GtkImage\">\n                                        <property name=\"icon-name\">go-next-symbolic</property>\n                                        <property name=\"accessible-role\">presentation</property>\n                                      </object>\n                                    </child>\n                                  </object>\n                                </child>\n                                <style>\n                                  <class name=\"boxed-list\"/>\n                                </style>\n                              </object>\n                            </child>\n                            <child>\n                              <object class=\"AdwPreferencesGroup\" id=\"pdf_preview\">\n                                <property name=\"title\" translatable=\"yes\">PDF</property>\n                                <property name=\"header-suffix\">\n                                  <object class=\"GtkBox\">\n                                    <property name=\"spacing\">6</property>\n                                    <child>\n                                      <object class=\"GtkButton\">\n                                        <property name=\"valign\">center</property>\n                                        <property name=\"action-name\">entry-page.open-pdf</property>\n                                        <child>\n                                          <object class=\"AdwButtonContent\">\n                                            <property name=\"icon-name\">external-link-symbolic</property>\n                                            <property name=\"label\" translatable=\"yes\">_Open</property>\n                                            <property name=\"use-underline\">True</property>\n                                            <property name=\"can-shrink\">True</property>\n                                          </object>\n                                        </child>\n                                        <style>\n                                          <class name=\"flat\"/>\n                                        </style>\n                                      </object>\n                                    </child>\n                                    <child>\n                                      <object class=\"GtkButton\">\n                                        <property name=\"valign\">center</property>\n                                        <property name=\"icon-name\">user-trash-symbolic</property>\n                                        <property name=\"tooltip-text\" translatable=\"yes\">Delete PDF</property>\n                                        <signal name=\"clicked\" handler=\"on_trash_pdf_button_clicked\" swapped=\"yes\"/>\n                                        <style>\n                                          <class name=\"destructive-action\"/>\n                                        </style>\n                                      </object>\n                                    </child>\n                                  </object>\n                                </property>\n                                <child>\n                                  <object class=\"GtkStack\" id=\"preview_error_stack\">\n                                    <property name=\"hhomogeneous\">False</property>\n                                    <property name=\"transition-type\">crossfade</property>\n                                    <child>\n                                      <object class=\"GtkPicture\" id=\"pdf_picture\">\n                                        <property name=\"keep-aspect-ratio\">True</property>\n                                        <property name=\"overflow\">hidden</property>\n                                        <style>\n                                          <class name=\"card\"/>\n                                        </style>\n                                        <accessibility>\n                                          <relation name=\"labelled-by\">pdf_preview</relation>\n                                        </accessibility>\n                                      </object>\n                                    </child>\n                                    <child>\n                                      <object class=\"GtkBox\" id=\"preview_error\">\n                                        <property name=\"spacing\">24</property>\n                                        <property name=\"orientation\">vertical</property>\n                                        <property name=\"margin-top\">12</property>\n                                        <property name=\"margin-bottom\">12</property>\n                                        <property name=\"margin-start\">12</property>\n                                        <property name=\"margin-end\">12</property>\n                                        <child>\n                                          <object class=\"GtkImage\">\n                                            <property name=\"icon-name\">image-missing-symbolic</property>\n                                            <property name=\"pixel-size\">128</property>\n                                          </object>\n                                        </child>\n                                        <child>\n                                          <object class=\"GtkLabel\">\n                                            <property name=\"label\" translatable=\"yes\">Could not set PDF Preview</property>\n                                            <property name=\"wrap\">True</property>\n                                            <property name=\"wrap-mode\">word-char</property>\n                                            <property name=\"justify\">center</property>\n                                            <property name=\"hexpand\">True</property>\n                                            <style>\n                                              <class name=\"title-1\"/>\n                                            </style>\n                                          </object>\n                                        </child>\n                                      </object>\n                                    </child>\n                                  </object>\n                                </child>\n                              </object>\n                            </child>\n                          </object>\n                        </child>\n                      </object>\n                    </child>\n                  </object>\n                </child>\n              </object>\n            </child>\n          </object>\n        </child>\n      </object>\n    </child>\n  </template>\n</interface>\n"
+        },
+        {
+          "path": "new_entry_dialog.ui",
+          "content": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<interface>\n  <template class=\"NewEntryDialog\" parent=\"AdwDialog\">\n    <property name=\"width-request\">360</property>\n    <property name=\"height-request\">360</property>\n    <property name=\"content-height\">270</property>\n    <property name=\"title\" translatable=\"yes\">Add new Entry</property>\n    <property name=\"default-widget\">create_button</property>\n    <property name=\"focus-widget\">entry_row</property>\n    <child>\n      <object class=\"AdwToolbarView\">\n        <child type=\"top\">\n          <object class=\"AdwHeaderBar\">\n            <property name=\"show-end-title-buttons\">False</property>\n            <property name=\"show-title\">false</property>\n            <child>\n              <object class=\"GtkButton\">\n                <property name=\"label\" translatable=\"yes\">_Cancel</property>\n                <property name=\"use-underline\">True</property>\n                <property name=\"can-shrink\">True</property>\n                <signal name=\"clicked\" handler=\"on_cancel_clicked\" swapped=\"true\"/>\n              </object>\n            </child>\n            <child type=\"end\">\n              <object class=\"GtkButton\" id=\"create_button\">\n                <property name=\"label\" translatable=\"yes\">C_reate</property>\n                <property name=\"use-underline\">True</property>\n                <property name=\"sensitive\">False</property>\n                <property name=\"can-shrink\">True</property>\n                <signal name=\"clicked\" handler=\"on_create_clicked\" swapped=\"true\"/>\n                <style>\n                  <class name=\"suggested-action\"/>\n                </style>\n              </object>\n            </child>\n          </object>\n        </child>\n        <child>\n          <object class=\"AdwViewStack\" id=\"view_stack\">\n            <property name=\"vexpand\">True</property>\n            <signal name=\"notify::visible-child\" handler=\"on_stack_visible_child_notify\" swapped=\"true\"/>\n            <child>\n              <object class=\"AdwViewStackPage\">\n                <property name=\"title\" translatable=\"yes\">New</property>\n                <property name=\"icon-name\">list-add-symbolic</property>\n                <property name=\"name\">new</property>\n                <property name=\"child\">\n                  <object class=\"GtkBox\">\n                    <property name=\"orientation\">vertical</property>\n                    <property name=\"spacing\">6</property>\n                    <property name=\"margin-start\">12</property>\n                    <property name=\"margin-end\">12</property>\n                    <property name=\"margin-top\">12</property>\n                    <property name=\"margin-bottom\">12</property>\n                    <child>\n                      <object class=\"GtkListBox\">\n                        <property name=\"selection-mode\">none</property>\n                        <style>\n                          <class name=\"boxed-list\"/>\n                        </style>\n                        <child>\n                          <object class=\"AdwEntryRow\" id=\"entry_row\">\n                            <property name=\"title\" translatable=\"yes\">Citation Key</property>\n                            <property name=\"activates-default\">True</property>\n                            <signal name=\"notify::text\" handler=\"on_entry_notify_text\" swapped=\"true\"/>\n                          </object>\n                        </child>\n                        <child>\n                          <object class=\"AdwComboRow\" id=\"combo_row\">\n                            <property name=\"title\" translatable=\"yes\">Citation Type</property>\n                            <property name=\"model\">\n                              <object class=\"GtkEnumList\">\n                                <property name=\"enum-type\">EntryType</property>\n                              </object>\n                            </property>\n                            <property name=\"expression\">\n                              <closure type=\"gchararray\" function=\"entry_type_name\"/>\n                            </property>\n                            <property name=\"selected\">1</property>\n                          </object>\n                        </child>\n                      </object>\n                    </child>\n                  </object>\n                </property>\n              </object>\n            </child>\n            <child>\n              <object class=\"AdwViewStackPage\" id=\"bibtex_page\">\n                <property name=\"title\" translatable=\"yes\" comments=\"TRANSLATORS BibTeX is a proper name\">From BibTeX</property>\n                <property name=\"icon-name\">document-new-symbolic</property>\n                <property name=\"name\">from_bibtex</property>\n                <property name=\"child\">\n                  <object class=\"GtkSourceView\" id=\"source_view\">\n                    <property name=\"hexpand\">True</property>\n                    <property name=\"wrap-mode\">word</property>\n                    <style>\n                      <class name=\"newentrydialog\"/>\n                    </style>\n                    <accessibility>\n                      <relation name=\"labelled-by\">bibtex_page</relation>\n                    </accessibility>\n                  </object>\n                </property>\n              </object>\n            </child>\n            <child>\n              <object class=\"AdwViewStackPage\" id=\"doi_page\">\n                <property name=\"title\" translatable=\"yes\">From DOI</property>\n                <property name=\"icon-name\">document-new-symbolic</property>\n                <property name=\"name\">from_doi</property>\n                <property name=\"child\">\n                  <object class=\"AdwPreferencesGroup\">\n                    <property name=\"margin-start\">12</property>\n                    <property name=\"margin-end\">12</property>\n                    <property name=\"margin-top\">12</property>\n                    <property name=\"margin-bottom\">12</property>\n                    <child>\n                      <object class=\"AdwEntryRow\" id=\"doi_row\">\n                        <property name=\"title\" translatable=\"yes\" comments=\"TRANSLATORS DOI is a proper name\">DOI</property>\n                        <property name=\"activates-default\">True</property>\n                        <signal name=\"notify::text\" handler=\"on_doi_notify_text\" swapped=\"true\"/>\n                      </object>\n                    </child>\n                  </object>\n                </property>\n              </object>\n            </child>\n          </object>\n        </child>\n        <child type=\"bottom\">\n          <object class=\"AdwViewSwitcherBar\">\n            <property name=\"stack\">view_stack</property>\n            <property name=\"reveal\">True</property>\n            <property name=\"valign\">end</property>\n          </object>\n        </child>\n      </object>\n    </child>\n  </template>\n</interface>\n"
+        },
+        {
+          "path": "shortcuts.ui",
+          "content": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<interface>\n  <object class=\"ADwShortcutsDialog\" id=\"shortcuts_dialog\">\n    <child>\n      <object class=\"AdwShortcutsSection\">\n        <property name=\"title\" translatable=\"yes\" context=\"shortcut window\">General</property>\n        <child>\n          <object class=\"AdwShortcutsItem\">\n            <property name=\"title\" translatable=\"yes\" context=\"shortcut window\">Show Shortcuts</property>\n            <property name=\"action-name\">app.shortcuts</property>\n          </object>\n        </child>\n        <child>\n          <object class=\"AdwShortcutsItem\">\n            <property name=\"title\" translatable=\"yes\" context=\"shortcut window\">New Window</property>\n            <property name=\"action-name\">app.new-window</property>\n          </object>\n        </child>\n        <child>\n          <object class=\"AdwShortcutsItem\">\n            <property name=\"title\" translatable=\"yes\" context=\"shortcut window\">Close Window</property>\n            <property name=\"action-name\">window.close</property>\n          </object>\n        </child>\n        <child>\n          <object class=\"AdwShortcutsItem\">\n            <property name=\"title\" translatable=\"yes\" context=\"shortcut window\">Quit</property>\n            <property name=\"action-name\">app.quit</property>\n          </object>\n        </child>\n      </object>\n    </child>\n    <child>\n      <object class=\"AdwShortcutsSection\">\n        <property name=\"title\" translatable=\"yes\" context=\"shortcut window\">Bibliography</property>\n        <child>\n          <object class=\"AdwShortcutsItem\">\n            <property name=\"title\" translatable=\"yes\" context=\"shortcut window\">Open</property>\n            <property name=\"action-name\">win.open('')</property>\n          </object>\n        </child>\n        <child>\n          <object class=\"AdwShortcutsItem\">\n            <property name=\"title\" translatable=\"yes\" context=\"shortcut window\">Save</property>\n            <property name=\"action-name\">win.save</property>\n          </object>\n        </child>\n        <child>\n          <object class=\"AdwShortcutsItem\">\n            <property name=\"title\" translatable=\"yes\" context=\"shortcut window\">Search</property>\n            <property name=\"action-name\">win.search</property>\n          </object>\n        </child>\n      </object>\n    </child>\n  </object>\n</interface>\n"
+        },
+        {
+          "path": "window.ui",
+          "content": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<interface>\n  <menu id=\"primary_menu_empty\">\n    <section>\n      <item>\n        <attribute name=\"label\" translatable=\"yes\">_Create New Bibliography</attribute>\n        <attribute name=\"action\">win.new_biblio</attribute>\n      </item>\n      <item>\n        <attribute name=\"label\" translatable=\"yes\">_Open</attribute>\n        <attribute name=\"action\">win.open</attribute>\n        <attribute name=\"target\" translatable=\"no\"></attribute>\n      </item>\n    </section>\n    <section>\n      <item>\n        <attribute name=\"label\" translatable=\"yes\">_Keyboard Shortcuts</attribute>\n        <attribute name=\"action\">app.shortcuts</attribute>\n      </item>\n      <item>\n        <attribute name=\"label\" translatable=\"yes\">_About Citations</attribute>\n        <attribute name=\"action\">win.about</attribute>\n      </item>\n    </section>\n  </menu>\n  <menu id=\"primary_menu\">\n    <section>\n      <item>\n        <attribute name=\"label\" translatable=\"yes\">_Save</attribute>\n        <attribute name=\"action\">win.save</attribute>\n      </item>\n      <item>\n        <attribute name=\"label\" translatable=\"yes\">_Open</attribute>\n        <attribute name=\"action\">win.open</attribute>\n        <attribute name=\"target\" translatable=\"no\"></attribute>\n      </item>\n      <item>\n        <attribute name=\"label\" translatable=\"yes\">New _Window</attribute>\n        <attribute name=\"action\">app.new-window</attribute>\n      </item>\n    </section>\n    <section>\n      <item>\n        <attribute name=\"label\" translatable=\"yes\">_Keyboard Shortcuts</attribute>\n        <attribute name=\"action\">app.shortcuts</attribute>\n      </item>\n      <item>\n        <attribute name=\"label\" translatable=\"yes\" comments=\"TRANSLATORS About dialog\">_About Citations</attribute>\n        <attribute name=\"action\">win.about</attribute>\n      </item>\n    </section>\n  </menu>\n  <menu id=\"entry_menu\">\n    <section>\n      <item>\n        <attribute name=\"label\" translatable=\"yes\">_Search in Google Scholar</attribute>\n        <attribute name=\"action\">win.search-google-scholar</attribute>\n      </item>\n      <item>\n        <attribute name=\"label\" translatable=\"yes\" comments=\"TRANSLATORS arXiv is a proper name\">_Search in arXiv</attribute>\n        <attribute name=\"action\">win.search-arxiv</attribute>\n      </item>\n    </section>\n    <section>\n      <item>\n        <attribute name=\"label\" translatable=\"yes\">_Copy BibTeX Entry</attribute>\n        <attribute name=\"action\">win.copy_entry_bibtex</attribute>\n      </item>\n    </section>\n    <section>\n      <item>\n        <attribute name=\"label\" translatable=\"yes\">_Delete</attribute>\n        <attribute name=\"action\">win.delete_entry</attribute>\n      </item>\n    </section>\n  </menu>\n  <template class=\"Window\" parent=\"AdwApplicationWindow\">\n    <property name=\"title\" translatable=\"yes\">Citations</property>\n    <child>\n      <object class=\"AdwBreakpoint\">\n        <condition>max-width: 600sp</condition>\n        <setter object=\"nav_split_view\" property=\"collapsed\">True</setter>\n      </object>\n    </child>\n    <child>\n      <object class=\"AdwToastOverlay\" id=\"toast_overlay\">\n        <child>\n          <object class=\"GtkStack\" id=\"main_stack\">\n            <child>\n              <object class=\"GtkStack\" id=\"recent_files_stack\">\n                <child>\n                  <object class=\"AdwToolbarView\" id=\"empty_state_stack_page\">\n                    <child type=\"top\">\n                      <object class=\"AdwHeaderBar\">\n                        <child type=\"end\">\n                          <object class=\"GtkMenuButton\">\n                            <property name=\"icon-name\">open-menu-symbolic</property>\n                            <property name=\"menu-model\">primary_menu_empty</property>\n                            <property name=\"tooltip-text\" translatable=\"yes\">Main Menu</property>\n                            <property name=\"primary\">True</property>\n                          </object>\n                        </child>\n                      </object>\n                    </child>\n                    <child>\n                      <object class=\"AdwStatusPage\" id=\"no_recent_files_status_page\">\n                        <property name=\"vexpand\">True</property>\n                        <property name=\"icon-name\">org.gnome.World.Citations</property>\n                        <property name=\"title\" translatable=\"yes\" comments=\"TRANSLATORS BibTeX is a proper name\">Open a BibTeX File</property>\n                        <property name=\"description\" translatable=\"yes\">Or drag-and-drop a file</property>\n                        <style>\n                          <class name=\"icon-dropshadow\"/>\n                        </style>\n                        <child>\n                          <object class=\"GtkButton\">\n                            <property name=\"label\" translatable=\"yes\">_Open</property>\n                            <property name=\"use-underline\">True</property>\n                            <property name=\"halign\">center</property>\n                            <property name=\"action-name\">win.open</property>\n                            <property name=\"action-target\">''</property>\n                            <property name=\"can-shrink\">True</property>\n                            <style>\n                              <class name=\"pill\"/>\n                              <class name=\"suggested-action\"/>\n                            </style>\n                          </object>\n                        </child>\n                      </object>\n                    </child>\n                  </object>\n                </child>\n                <child>\n                  <object class=\"AdwToolbarView\" id=\"recent_files_stack_page\">\n                    <child type=\"top\">\n                      <object class=\"AdwHeaderBar\">\n                        <child type=\"end\">\n                          <object class=\"GtkMenuButton\">\n                            <property name=\"icon-name\">open-menu-symbolic</property>\n                            <property name=\"menu-model\">primary_menu_empty</property>\n                            <property name=\"tooltip-text\" translatable=\"yes\">Main Menu</property>\n                            <property name=\"primary\">True</property>\n                          </object>\n                        </child>\n                      </object>\n                    </child>\n                    <child>\n                      <object class=\"AdwStatusPage\" id=\"recent_files_status_page\">\n                        <property name=\"title\" translatable=\"yes\">Manage your Citations</property>\n                        <property name=\"icon-name\">org.gnome.World.Citations</property>\n                        <style>\n                          <class name=\"icon-dropshadow\"/>\n                        </style>\n                        <child>\n                          <object class=\"AdwClamp\">\n                            <property name=\"maximum-size\">450</property>\n                            <child>\n                              <object class=\"AdwPreferencesGroup\">\n                                <property name=\"title\" translatable=\"yes\">Recent Files</property>\n                                <property name=\"header-suffix\">\n                                  <object class=\"GtkButton\">\n                                    <property name=\"action-name\">win.open</property>\n                                    <property name=\"action-target\">''</property>\n                                    <property name=\"child\">\n                                      <object class=\"AdwButtonContent\">\n                                        <property name=\"icon-name\">document-open-symbolic</property>\n                                        <property name=\"label\" translatable=\"yes\">_Open</property>\n                                        <property name=\"use-underline\">True</property>\n                                        <property name=\"can-shrink\">True</property>\n                                      </object>\n                                    </property>\n                                    <style>\n                                      <class name=\"flat\"/>\n                                    </style>\n                                  </object>\n                                </property>\n                                <child>\n                                  <object class=\"GtkListBox\" id=\"recent_files_list\">\n                                    <property name=\"selection-mode\">none</property>\n                                    <style>\n                                      <class name=\"boxed-list\"/>\n                                    </style>\n                                  </object>\n                                </child>\n                              </object>\n                            </child>\n                          </object>\n                        </child>\n                      </object>\n                    </child>\n                  </object>\n                </child>\n              </object>\n            </child>\n            <child>\n              <object class=\"AdwNavigationSplitView\" id=\"nav_split_view\">\n                <signal name=\"notify::collapsed\" handler=\"on_collapsed_notify\" swapped=\"yes\"/>\n                <property name=\"min-sidebar-width\">300</property>\n                <property name=\"max-sidebar-width\">360</property>\n                <property name=\"sidebar-width-fraction\">0.35</property>\n                <property name=\"show-content\">False</property>\n                <property name=\"sidebar\">\n                  <object class=\"AdwNavigationPage\">\n                    <property name=\"title\" translatable=\"yes\">Sidebar</property>\n                    <child>\n                      <object class=\"AdwToolbarView\">\n                        <child type=\"top\">\n                          <object class=\"AdwHeaderBar\">\n                            <property name=\"show-title\">False</property>\n                            <child>\n                              <object class=\"GtkButton\">\n                                <property name=\"sensitive\">False</property>\n                                <property name=\"icon-name\">list-add-symbolic</property>\n                                <property name=\"action-name\">win.new_entry</property>\n                                <property name=\"tooltip-text\" translatable=\"yes\">Add New Citation</property>\n                              </object>\n                            </child>\n                            <child type=\"end\">\n                              <object class=\"GtkMenuButton\" id=\"appmenu_button\">\n                                <property name=\"icon-name\">open-menu-symbolic</property>\n                                <property name=\"menu-model\">primary_menu</property>\n                                <property name=\"tooltip-text\" translatable=\"yes\">Main Menu</property>\n                                <property name=\"primary\">True</property>\n                              </object>\n                            </child>\n                            <child type=\"end\">\n                              <object class=\"GtkToggleButton\" id=\"search_button\">\n                                <property name=\"icon-name\">system-search-symbolic</property>\n                                <property name=\"tooltip-text\" translatable=\"yes\">Search</property>\n                                <property name=\"active\" bind-source=\"search_bar\" bind-property=\"search-mode-enabled\" bind-flags=\"bidirectional\"/>\n                              </object>\n                            </child>\n                          </object>\n                        </child>\n                        <child type=\"top\">\n                          <object class=\"GtkSearchBar\" id=\"search_bar\">\n                            <signal name=\"notify::search-mode-enabled\" handler=\"on_search_mode_enabled_notify\" swapped=\"true\"/>\n                            <accessibility>\n                              <relation name=\"labelled-by\">search_button</relation>\n                            </accessibility>\n                            <property name=\"child\">\n                              <object class=\"GtkSearchEntry\" id=\"search_entry\">\n                                <property name=\"placeholder-text\" translatable=\"yes\">Search…</property>\n                                <signal name=\"changed\" handler=\"on_changed\" swapped=\"true\"/>\n                                <signal name=\"previous-match\" handler=\"on_previous_match\" swapped=\"true\"/>\n                                <signal name=\"next-match\" handler=\"on_next_match\" swapped=\"true\"/>\n                                <accessibility>\n                                  <relation name=\"labelled-by\">search_bar</relation>\n                                </accessibility>\n                              </object>\n                            </property>\n                          </object>\n                        </child>\n                        <child>\n                          <object class=\"EntryList\" id=\"entry_list\">\n                            <signal name=\"entry-selected\" handler=\"on_entry_selected\" swapped=\"true\"/>\n                          </object>\n                        </child>\n                      </object>\n                    </child>\n                  </object>\n                </property>\n                <property name=\"content\">\n                  <object class=\"AdwNavigationPage\">\n                    <property name=\"title\" translatable=\"yes\">Content</property>\n                    <signal name=\"hidden\" handler=\"on_content_hidden\" swapped=\"true\"/>\n                    <child>\n                      <object class=\"AdwToolbarView\">\n                        <child type=\"top\">\n                          <object class=\"AdwHeaderBar\">\n                            <property name=\"show-title\">False</property>\n                            <child type=\"end\">\n                              <object class=\"GtkMenuButton\" id=\"secondary_menu_button\">\n                                <property name=\"icon-name\">view-more-symbolic</property>\n                                <property name=\"tooltip-text\" translatable=\"yes\">Secondary Menu</property>\n                                <property name=\"menu-model\">entry_menu</property>\n                                <property name=\"visible\">False</property>\n                              </object>\n                            </child>\n                          </object>\n                        </child>\n                        <child>\n                          <object class=\"EntryPage\" id=\"entry_page\"/>\n                        </child>\n                      </object>\n                    </child>\n                  </object>\n                </property>\n              </object>\n            </child>\n          </object>\n        </child>\n      </object>\n    </child>\n  </template>\n</interface>\n"
+        }
+      ],
+      "roots": [
+        "window.ui#1"
+      ],
+      "widgets": {
+        "window.ui#1": {
+          "key": "window.ui#1",
+          "sourceClass": "Window",
+          "sourceId": "Window",
+          "sourceKind": "object",
+          "origin": {
+            "file": "window.ui",
+            "start": 0,
+            "end": 14791
+          },
+          "properties": {
+            "title": {
+              "kind": "scalar",
+              "value": "Citations"
+            },
+            "content": {
+              "kind": "scalar",
+              "value": "<object class=\"AdwNavigationPage\">\n                    <property name=\"title\" translatable=\"yes\">Content"
+            }
+          },
+          "children": [
+            {
+              "nodeKey": "window.ui#2",
+              "origin": {
+                "file": "window.ui",
+                "start": 0,
+                "end": 14791
+              }
+            },
+            {
+              "nodeKey": "window.ui#3",
+              "origin": {
+                "file": "window.ui",
+                "start": 0,
+                "end": 14791
+              }
+            },
+            {
+              "nodeKey": "window.ui#18",
+              "origin": {
+                "file": "window.ui",
+                "start": 0,
+                "end": 14791
+              }
+            },
+            {
+              "nodeKey": "window.ui#25",
+              "origin": {
+                "file": "window.ui",
+                "start": 0,
+                "end": 14791
+              }
+            }
+          ],
+          "resolution": {
+            "kind": "generic-widget",
+            "rendererType": "window"
+          }
+        },
+        "window.ui#2": {
+          "key": "window.ui#2",
+          "sourceClass": "AdwBreakpoint",
+          "sourceId": "imported-1",
+          "sourceKind": "object",
+          "origin": {
+            "file": "window.ui",
+            "start": 0,
+            "end": 14791
+          },
+          "properties": {
+            "title": {
+              "kind": "scalar",
+              "value": "AdwBreakpoint"
+            }
+          },
+          "children": [],
+          "resolution": {
+            "kind": "unsupported-widget",
+            "reason": "renderer-does-not-support-class"
+          }
+        },
+        "window.ui#3": {
+          "key": "window.ui#3",
+          "sourceClass": "AdwToastOverlay",
+          "sourceId": "toast_overlay",
+          "sourceKind": "object",
+          "origin": {
+            "file": "window.ui",
+            "start": 0,
+            "end": 14791
+          },
+          "properties": {
+            "title": {
+              "kind": "scalar",
+              "value": "AdwToastOverlay"
+            }
+          },
+          "children": [
+            {
+              "nodeKey": "window.ui#4",
+              "origin": {
+                "file": "window.ui",
+                "start": 0,
+                "end": 14791
+              }
+            }
+          ],
+          "resolution": {
+            "kind": "unsupported-widget",
+            "reason": "renderer-does-not-support-class"
+          }
+        },
+        "window.ui#4": {
+          "key": "window.ui#4",
+          "sourceClass": "GtkStack",
+          "sourceId": "main_stack",
+          "sourceKind": "object",
+          "origin": {
+            "file": "window.ui",
+            "start": 0,
+            "end": 14791
+          },
+          "properties": {},
+          "children": [
+            {
+              "nodeKey": "window.ui#5",
+              "origin": {
+                "file": "window.ui",
+                "start": 0,
+                "end": 14791
+              }
+            }
+          ],
+          "resolution": {
+            "kind": "generic-widget",
+            "rendererType": "stack"
+          }
+        },
+        "window.ui#5": {
+          "key": "window.ui#5",
+          "sourceClass": "GtkStack",
+          "sourceId": "recent_files_stack",
+          "sourceKind": "object",
+          "origin": {
+            "file": "window.ui",
+            "start": 0,
+            "end": 14791
+          },
+          "properties": {},
+          "children": [
+            {
+              "nodeKey": "window.ui#6",
+              "origin": {
+                "file": "window.ui",
+                "start": 0,
+                "end": 14791
+              }
+            },
+            {
+              "nodeKey": "window.ui#11",
+              "origin": {
+                "file": "window.ui",
+                "start": 0,
+                "end": 14791
+              }
+            }
+          ],
+          "resolution": {
+            "kind": "generic-widget",
+            "rendererType": "stack"
+          }
+        },
+        "window.ui#6": {
+          "key": "window.ui#6",
+          "sourceClass": "AdwToolbarView",
+          "sourceId": "empty_state_stack_page",
+          "sourceKind": "object",
+          "origin": {
+            "file": "window.ui",
+            "start": 0,
+            "end": 14791
+          },
+          "properties": {},
+          "children": [
+            {
+              "nodeKey": "window.ui#7",
+              "origin": {
+                "file": "window.ui",
+                "start": 0,
+                "end": 14791
+              }
+            },
+            {
+              "nodeKey": "window.ui#9",
+              "origin": {
+                "file": "window.ui",
+                "start": 0,
+                "end": 14791
+              }
+            }
+          ],
+          "resolution": {
+            "kind": "generic-widget",
+            "rendererType": "toolbar-view"
+          }
+        },
+        "window.ui#7": {
+          "key": "window.ui#7",
+          "sourceClass": "AdwHeaderBar",
+          "sourceId": "imported-2",
+          "sourceKind": "object",
+          "origin": {
+            "file": "window.ui",
+            "start": 0,
+            "end": 14791
+          },
+          "properties": {},
+          "children": [
+            {
+              "nodeKey": "window.ui#8",
+              "origin": {
+                "file": "window.ui",
+                "start": 0,
+                "end": 14791
+              }
+            }
+          ],
+          "resolution": {
+            "kind": "generic-widget",
+            "rendererType": "header-bar"
+          }
+        },
+        "window.ui#8": {
+          "key": "window.ui#8",
+          "sourceClass": "GtkMenuButton",
+          "sourceId": "imported-3",
+          "sourceKind": "object",
+          "origin": {
+            "file": "window.ui",
+            "start": 0,
+            "end": 14791
+          },
+          "properties": {
+            "title": {
+              "kind": "scalar",
+              "value": "GtkMenuButton"
+            },
+            "iconName": {
+              "kind": "scalar",
+              "value": "open-menu-symbolic"
+            },
+            "menuModel": {
+              "kind": "scalar",
+              "value": "primary_menu_empty"
+            },
+            "tooltipText": {
+              "kind": "scalar",
+              "value": "Main Menu"
+            },
+            "primary": {
+              "kind": "scalar",
+              "value": "True"
+            }
+          },
+          "children": [],
+          "resolution": {
+            "kind": "unsupported-widget",
+            "reason": "renderer-does-not-support-class"
+          }
+        },
+        "window.ui#9": {
+          "key": "window.ui#9",
+          "sourceClass": "AdwStatusPage",
+          "sourceId": "no_recent_files_status_page",
+          "sourceKind": "object",
+          "origin": {
+            "file": "window.ui",
+            "start": 0,
+            "end": 14791
+          },
+          "properties": {
+            "title": {
+              "kind": "scalar",
+              "value": "Open a BibTeX File"
+            },
+            "vexpand": {
+              "kind": "scalar",
+              "value": "True"
+            },
+            "iconName": {
+              "kind": "scalar",
+              "value": "org.gnome.World.Citations"
+            },
+            "description": {
+              "kind": "scalar",
+              "value": "Or drag-and-drop a file"
+            }
+          },
+          "children": [
+            {
+              "nodeKey": "window.ui#10",
+              "origin": {
+                "file": "window.ui",
+                "start": 0,
+                "end": 14791
+              }
+            }
+          ],
+          "resolution": {
+            "kind": "unsupported-widget",
+            "reason": "renderer-does-not-support-class"
+          }
+        },
+        "window.ui#10": {
+          "key": "window.ui#10",
+          "sourceClass": "GtkButton",
+          "sourceId": "imported-4",
+          "sourceKind": "object",
+          "origin": {
+            "file": "window.ui",
+            "start": 0,
+            "end": 14791
+          },
+          "properties": {
+            "title": {
+              "kind": "scalar",
+              "value": "_Open"
+            },
+            "useUnderline": {
+              "kind": "scalar",
+              "value": "True"
+            },
+            "halign": {
+              "kind": "scalar",
+              "value": "center"
+            },
+            "actionName": {
+              "kind": "scalar",
+              "value": "win.open"
+            },
+            "actionTarget": {
+              "kind": "scalar",
+              "value": "''"
+            },
+            "canShrink": {
+              "kind": "scalar",
+              "value": "True"
+            }
+          },
+          "children": [],
+          "resolution": {
+            "kind": "generic-widget",
+            "rendererType": "button"
+          }
+        },
+        "window.ui#11": {
+          "key": "window.ui#11",
+          "sourceClass": "AdwToolbarView",
+          "sourceId": "recent_files_stack_page",
+          "sourceKind": "object",
+          "origin": {
+            "file": "window.ui",
+            "start": 0,
+            "end": 14791
+          },
+          "properties": {},
+          "children": [
+            {
+              "nodeKey": "window.ui#12",
+              "origin": {
+                "file": "window.ui",
+                "start": 0,
+                "end": 14791
+              }
+            },
+            {
+              "nodeKey": "window.ui#14",
+              "origin": {
+                "file": "window.ui",
+                "start": 0,
+                "end": 14791
+              }
+            }
+          ],
+          "resolution": {
+            "kind": "generic-widget",
+            "rendererType": "toolbar-view"
+          }
+        },
+        "window.ui#12": {
+          "key": "window.ui#12",
+          "sourceClass": "AdwHeaderBar",
+          "sourceId": "imported-5",
+          "sourceKind": "object",
+          "origin": {
+            "file": "window.ui",
+            "start": 0,
+            "end": 14791
+          },
+          "properties": {},
+          "children": [
+            {
+              "nodeKey": "window.ui#13",
+              "origin": {
+                "file": "window.ui",
+                "start": 0,
+                "end": 14791
+              }
+            }
+          ],
+          "resolution": {
+            "kind": "generic-widget",
+            "rendererType": "header-bar"
+          }
+        },
+        "window.ui#13": {
+          "key": "window.ui#13",
+          "sourceClass": "GtkMenuButton",
+          "sourceId": "imported-6",
+          "sourceKind": "object",
+          "origin": {
+            "file": "window.ui",
+            "start": 0,
+            "end": 14791
+          },
+          "properties": {
+            "title": {
+              "kind": "scalar",
+              "value": "GtkMenuButton"
+            },
+            "iconName": {
+              "kind": "scalar",
+              "value": "open-menu-symbolic"
+            },
+            "menuModel": {
+              "kind": "scalar",
+              "value": "primary_menu_empty"
+            },
+            "tooltipText": {
+              "kind": "scalar",
+              "value": "Main Menu"
+            },
+            "primary": {
+              "kind": "scalar",
+              "value": "True"
+            }
+          },
+          "children": [],
+          "resolution": {
+            "kind": "unsupported-widget",
+            "reason": "renderer-does-not-support-class"
+          }
+        },
+        "window.ui#14": {
+          "key": "window.ui#14",
+          "sourceClass": "AdwStatusPage",
+          "sourceId": "recent_files_status_page",
+          "sourceKind": "object",
+          "origin": {
+            "file": "window.ui",
+            "start": 0,
+            "end": 14791
+          },
+          "properties": {
+            "title": {
+              "kind": "scalar",
+              "value": "Manage your Citations"
+            },
+            "iconName": {
+              "kind": "scalar",
+              "value": "org.gnome.World.Citations"
+            }
+          },
+          "children": [
+            {
+              "nodeKey": "window.ui#15",
+              "origin": {
+                "file": "window.ui",
+                "start": 0,
+                "end": 14791
+              }
+            },
+            {
+              "nodeKey": "window.ui#17",
+              "origin": {
+                "file": "window.ui",
+                "start": 0,
+                "end": 14791
+              }
+            }
+          ],
+          "resolution": {
+            "kind": "unsupported-widget",
+            "reason": "renderer-does-not-support-class"
+          }
+        },
+        "window.ui#15": {
+          "key": "window.ui#15",
+          "sourceClass": "AdwClamp",
+          "sourceId": "imported-7",
+          "sourceKind": "object",
+          "origin": {
+            "file": "window.ui",
+            "start": 0,
+            "end": 14791
+          },
+          "properties": {
+            "title": {
+              "kind": "scalar",
+              "value": "AdwClamp"
+            },
+            "maximumSize": {
+              "kind": "scalar",
+              "value": 450
+            }
+          },
+          "children": [
+            {
+              "nodeKey": "window.ui#16",
+              "origin": {
+                "file": "window.ui",
+                "start": 0,
+                "end": 14791
+              }
+            }
+          ],
+          "resolution": {
+            "kind": "unsupported-widget",
+            "reason": "renderer-does-not-support-class"
+          }
+        },
+        "window.ui#16": {
+          "key": "window.ui#16",
+          "sourceClass": "AdwPreferencesGroup",
+          "sourceId": "imported-8",
+          "sourceKind": "object",
+          "origin": {
+            "file": "window.ui",
+            "start": 0,
+            "end": 14791
+          },
+          "properties": {
+            "title": {
+              "kind": "scalar",
+              "value": "Recent Files"
+            },
+            "headerSuffix": {
+              "kind": "scalar",
+              "value": "<object class=\"GtkButton\">\n                                    <property name=\"action-name\">win.open"
+            },
+            "actionTarget": {
+              "kind": "scalar",
+              "value": "''"
+            },
+            "child": {
+              "kind": "scalar",
+              "value": "<object class=\"AdwButtonContent\">\n                                        <property name=\"icon-name\">document-open-symbolic"
+            },
+            "label": {
+              "kind": "scalar",
+              "value": "_Open"
+            },
+            "useUnderline": {
+              "kind": "scalar",
+              "value": "True"
+            },
+            "canShrink": {
+              "kind": "scalar",
+              "value": "True"
+            }
+          },
+          "children": [],
+          "resolution": {
+            "kind": "generic-widget",
+            "rendererType": "preferences-group"
+          }
+        },
+        "window.ui#17": {
+          "key": "window.ui#17",
+          "sourceClass": "GtkListBox",
+          "sourceId": "recent_files_list",
+          "sourceKind": "object",
+          "origin": {
+            "file": "window.ui",
+            "start": 0,
+            "end": 14791
+          },
+          "properties": {
+            "selectionMode": {
+              "kind": "scalar",
+              "value": "none"
+            }
+          },
+          "children": [],
+          "resolution": {
+            "kind": "generic-widget",
+            "rendererType": "list-box"
+          }
+        },
+        "window.ui#18": {
+          "key": "window.ui#18",
+          "sourceClass": "AdwNavigationSplitView",
+          "sourceId": "nav_split_view",
+          "sourceKind": "object",
+          "origin": {
+            "file": "window.ui",
+            "start": 0,
+            "end": 14791
+          },
+          "properties": {
+            "title": {
+              "kind": "scalar",
+              "value": "AdwNavigationSplitView"
+            },
+            "minSidebarWidth": {
+              "kind": "scalar",
+              "value": 300
+            },
+            "maxSidebarWidth": {
+              "kind": "scalar",
+              "value": 360
+            },
+            "sidebarWidthFraction": {
+              "kind": "scalar",
+              "value": 0.35
+            },
+            "showContent": {
+              "kind": "scalar",
+              "value": "False"
+            },
+            "sidebar": {
+              "kind": "scalar",
+              "value": "<object class=\"AdwNavigationPage\">\n                    <property name=\"title\" translatable=\"yes\">Sidebar"
+            }
+          },
+          "children": [
+            {
+              "nodeKey": "window.ui#19",
+              "origin": {
+                "file": "window.ui",
+                "start": 0,
+                "end": 14791
+              }
+            }
+          ],
+          "resolution": {
+            "kind": "unsupported-widget",
+            "reason": "renderer-does-not-support-class"
+          }
+        },
+        "window.ui#19": {
+          "key": "window.ui#19",
+          "sourceClass": "AdwToolbarView",
+          "sourceId": "imported-9",
+          "sourceKind": "object",
+          "origin": {
+            "file": "window.ui",
+            "start": 0,
+            "end": 14791
+          },
+          "properties": {},
+          "children": [
+            {
+              "nodeKey": "window.ui#20",
+              "origin": {
+                "file": "window.ui",
+                "start": 0,
+                "end": 14791
+              }
+            },
+            {
+              "nodeKey": "window.ui#24",
+              "origin": {
+                "file": "window.ui",
+                "start": 0,
+                "end": 14791
+              }
+            }
+          ],
+          "resolution": {
+            "kind": "generic-widget",
+            "rendererType": "toolbar-view"
+          }
+        },
+        "window.ui#20": {
+          "key": "window.ui#20",
+          "sourceClass": "AdwHeaderBar",
+          "sourceId": "imported-10",
+          "sourceKind": "object",
+          "origin": {
+            "file": "window.ui",
+            "start": 0,
+            "end": 14791
+          },
+          "properties": {
+            "showTitle": {
+              "kind": "scalar",
+              "value": "False"
+            }
+          },
+          "children": [
+            {
+              "nodeKey": "window.ui#21",
+              "origin": {
+                "file": "window.ui",
+                "start": 0,
+                "end": 14791
+              }
+            },
+            {
+              "nodeKey": "window.ui#22",
+              "origin": {
+                "file": "window.ui",
+                "start": 0,
+                "end": 14791
+              }
+            },
+            {
+              "nodeKey": "window.ui#23",
+              "origin": {
+                "file": "window.ui",
+                "start": 0,
+                "end": 14791
+              }
+            }
+          ],
+          "resolution": {
+            "kind": "generic-widget",
+            "rendererType": "header-bar"
+          }
+        },
+        "window.ui#21": {
+          "key": "window.ui#21",
+          "sourceClass": "GtkButton",
+          "sourceId": "imported-11",
+          "sourceKind": "object",
+          "origin": {
+            "file": "window.ui",
+            "start": 0,
+            "end": 14791
+          },
+          "properties": {
+            "sensitive": {
+              "kind": "scalar",
+              "value": "False"
+            },
+            "iconName": {
+              "kind": "scalar",
+              "value": "list-add-symbolic"
+            },
+            "actionName": {
+              "kind": "scalar",
+              "value": "win.new_entry"
+            },
+            "tooltipText": {
+              "kind": "scalar",
+              "value": "Add New Citation"
+            }
+          },
+          "children": [],
+          "resolution": {
+            "kind": "generic-widget",
+            "rendererType": "button"
+          }
+        },
+        "window.ui#22": {
+          "key": "window.ui#22",
+          "sourceClass": "GtkMenuButton",
+          "sourceId": "appmenu_button",
+          "sourceKind": "object",
+          "origin": {
+            "file": "window.ui",
+            "start": 0,
+            "end": 14791
+          },
+          "properties": {
+            "title": {
+              "kind": "scalar",
+              "value": "GtkMenuButton"
+            },
+            "iconName": {
+              "kind": "scalar",
+              "value": "open-menu-symbolic"
+            },
+            "menuModel": {
+              "kind": "scalar",
+              "value": "primary_menu"
+            },
+            "tooltipText": {
+              "kind": "scalar",
+              "value": "Main Menu"
+            },
+            "primary": {
+              "kind": "scalar",
+              "value": "True"
+            }
+          },
+          "children": [],
+          "resolution": {
+            "kind": "unsupported-widget",
+            "reason": "renderer-does-not-support-class"
+          }
+        },
+        "window.ui#23": {
+          "key": "window.ui#23",
+          "sourceClass": "GtkToggleButton",
+          "sourceId": "search_button",
+          "sourceKind": "object",
+          "origin": {
+            "file": "window.ui",
+            "start": 0,
+            "end": 14791
+          },
+          "properties": {
+            "title": {
+              "kind": "scalar",
+              "value": "GtkToggleButton"
+            },
+            "iconName": {
+              "kind": "scalar",
+              "value": "system-search-symbolic"
+            },
+            "tooltipText": {
+              "kind": "scalar",
+              "value": "Search"
+            },
+            "active": {
+              "kind": "scalar",
+              "value": "</object>\n                            </child>\n                          </object>\n                        </child>\n                        <child type=\"top\">\n                          <object class=\"GtkSearchBar\" id=\"search_bar\">\n                            <signal name=\"notify::search-mode-enabled\" handler=\"on_search_mode_enabled_notify\" swapped=\"true\"/>\n                            <accessibility>\n                              <relation name=\"labelled-by\">search_button</relation>\n                            </accessibility>\n                            <property name=\"child\">\n                              <object class=\"GtkSearchEntry\" id=\"search_entry\">\n                                <property name=\"placeholder-text\" translatable=\"yes\">Search…"
+            }
+          },
+          "children": [],
+          "resolution": {
+            "kind": "unsupported-widget",
+            "reason": "renderer-does-not-support-class"
+          }
+        },
+        "window.ui#24": {
+          "key": "window.ui#24",
+          "sourceClass": "EntryList",
+          "sourceId": "entry_list",
+          "sourceKind": "object",
+          "origin": {
+            "file": "window.ui",
+            "start": 0,
+            "end": 14791
+          },
+          "properties": {
+            "title": {
+              "kind": "scalar",
+              "value": "EntryList"
+            }
+          },
+          "children": [],
+          "resolution": {
+            "kind": "unsupported-widget",
+            "reason": "code-defined-class"
+          }
+        },
+        "window.ui#25": {
+          "key": "window.ui#25",
+          "sourceClass": "AdwToolbarView",
+          "sourceId": "imported-12",
+          "sourceKind": "object",
+          "origin": {
+            "file": "window.ui",
+            "start": 0,
+            "end": 14791
+          },
+          "properties": {},
+          "children": [
+            {
+              "nodeKey": "window.ui#26",
+              "origin": {
+                "file": "window.ui",
+                "start": 0,
+                "end": 14791
+              }
+            },
+            {
+              "nodeKey": "window.ui#28",
+              "origin": {
+                "file": "window.ui",
+                "start": 0,
+                "end": 14791
+              }
+            }
+          ],
+          "resolution": {
+            "kind": "generic-widget",
+            "rendererType": "toolbar-view"
+          }
+        },
+        "window.ui#26": {
+          "key": "window.ui#26",
+          "sourceClass": "AdwHeaderBar",
+          "sourceId": "imported-13",
+          "sourceKind": "object",
+          "origin": {
+            "file": "window.ui",
+            "start": 0,
+            "end": 14791
+          },
+          "properties": {
+            "showTitle": {
+              "kind": "scalar",
+              "value": "False"
+            }
+          },
+          "children": [
+            {
+              "nodeKey": "window.ui#27",
+              "origin": {
+                "file": "window.ui",
+                "start": 0,
+                "end": 14791
+              }
+            }
+          ],
+          "resolution": {
+            "kind": "generic-widget",
+            "rendererType": "header-bar"
+          }
+        },
+        "window.ui#27": {
+          "key": "window.ui#27",
+          "sourceClass": "GtkMenuButton",
+          "sourceId": "secondary_menu_button",
+          "sourceKind": "object",
+          "origin": {
+            "file": "window.ui",
+            "start": 0,
+            "end": 14791
+          },
+          "properties": {
+            "title": {
+              "kind": "scalar",
+              "value": "GtkMenuButton"
+            },
+            "iconName": {
+              "kind": "scalar",
+              "value": "view-more-symbolic"
+            },
+            "tooltipText": {
+              "kind": "scalar",
+              "value": "Secondary Menu"
+            },
+            "menuModel": {
+              "kind": "scalar",
+              "value": "entry_menu"
+            },
+            "visible": {
+              "kind": "scalar",
+              "value": "False"
+            }
+          },
+          "children": [],
+          "resolution": {
+            "kind": "unsupported-widget",
+            "reason": "renderer-does-not-support-class"
+          }
+        },
+        "window.ui#28": {
+          "key": "window.ui#28",
+          "sourceClass": "EntryPage",
+          "sourceId": "entry_page",
+          "sourceKind": "object",
+          "origin": {
+            "file": "window.ui",
+            "start": 0,
+            "end": 14791
+          },
+          "properties": {
+            "title": {
+              "kind": "scalar",
+              "value": "EntryPage"
+            }
+          },
+          "children": [],
+          "resolution": {
+            "kind": "unsupported-widget",
+            "reason": "code-defined-class"
+          }
+        }
+      },
+      "templates": {},
+      "diagnostics": []
+    },
+    "screens": [
+      {
+        "id": "imported-screen-1",
+        "title": "Citations",
+        "type": "standard",
+        "width": 1024,
+        "height": 720,
+        "rootNode": {
+          "id": "Window",
+          "type": "window",
+          "sourceKey": "window.ui#1",
+          "sourceClass": "Window",
+          "children": [
+            {
+              "id": "imported-1",
+              "type": "custom-widget",
+              "sourceKey": "window.ui#2",
+              "sourceClass": "AdwBreakpoint",
+              "children": [],
+              "title": "AdwBreakpoint"
+            },
+            {
+              "id": "toast_overlay",
+              "type": "custom-widget",
+              "sourceKey": "window.ui#3",
+              "sourceClass": "AdwToastOverlay",
+              "children": [
+                {
+                  "id": "main_stack",
+                  "type": "stack",
+                  "sourceKey": "window.ui#4",
+                  "sourceClass": "GtkStack",
+                  "children": [
+                    {
+                      "id": "recent_files_stack",
+                      "type": "stack",
+                      "sourceKey": "window.ui#5",
+                      "sourceClass": "GtkStack",
+                      "children": [
+                        {
+                          "id": "empty_state_stack_page",
+                          "type": "toolbar-view",
+                          "sourceKey": "window.ui#6",
+                          "sourceClass": "AdwToolbarView",
+                          "children": [
+                            {
+                              "id": "imported-2",
+                              "type": "header-bar",
+                              "sourceKey": "window.ui#7",
+                              "sourceClass": "AdwHeaderBar",
+                              "children": [
+                                {
+                                  "id": "imported-3",
+                                  "type": "custom-widget",
+                                  "sourceKey": "window.ui#8",
+                                  "sourceClass": "GtkMenuButton",
+                                  "children": [],
+                                  "title": "GtkMenuButton",
+                                  "iconName": "open-menu-symbolic",
+                                  "menuModel": "primary_menu_empty",
+                                  "tooltipText": "Main Menu",
+                                  "primary": "True"
+                                }
+                              ]
+                            },
+                            {
+                              "id": "no_recent_files_status_page",
+                              "type": "custom-widget",
+                              "sourceKey": "window.ui#9",
+                              "sourceClass": "AdwStatusPage",
+                              "children": [
+                                {
+                                  "id": "imported-4",
+                                  "type": "button",
+                                  "sourceKey": "window.ui#10",
+                                  "sourceClass": "GtkButton",
+                                  "children": [],
+                                  "title": "_Open",
+                                  "useUnderline": "True",
+                                  "halign": "center",
+                                  "actionName": "win.open",
+                                  "actionTarget": "''",
+                                  "canShrink": "True"
+                                }
+                              ],
+                              "title": "Open a BibTeX File",
+                              "vexpand": "True",
+                              "iconName": "org.gnome.World.Citations",
+                              "description": "Or drag-and-drop a file"
+                            }
+                          ]
+                        },
+                        {
+                          "id": "recent_files_stack_page",
+                          "type": "toolbar-view",
+                          "sourceKey": "window.ui#11",
+                          "sourceClass": "AdwToolbarView",
+                          "children": [
+                            {
+                              "id": "imported-5",
+                              "type": "header-bar",
+                              "sourceKey": "window.ui#12",
+                              "sourceClass": "AdwHeaderBar",
+                              "children": [
+                                {
+                                  "id": "imported-6",
+                                  "type": "custom-widget",
+                                  "sourceKey": "window.ui#13",
+                                  "sourceClass": "GtkMenuButton",
+                                  "children": [],
+                                  "title": "GtkMenuButton",
+                                  "iconName": "open-menu-symbolic",
+                                  "menuModel": "primary_menu_empty",
+                                  "tooltipText": "Main Menu",
+                                  "primary": "True"
+                                }
+                              ]
+                            },
+                            {
+                              "id": "recent_files_status_page",
+                              "type": "custom-widget",
+                              "sourceKey": "window.ui#14",
+                              "sourceClass": "AdwStatusPage",
+                              "children": [
+                                {
+                                  "id": "imported-7",
+                                  "type": "custom-widget",
+                                  "sourceKey": "window.ui#15",
+                                  "sourceClass": "AdwClamp",
+                                  "children": [
+                                    {
+                                      "id": "imported-8",
+                                      "type": "preferences-group",
+                                      "sourceKey": "window.ui#16",
+                                      "sourceClass": "AdwPreferencesGroup",
+                                      "children": [],
+                                      "title": "Recent Files",
+                                      "headerSuffix": "<object class=\"GtkButton\">\n                                    <property name=\"action-name\">win.open",
+                                      "actionTarget": "''",
+                                      "child": "<object class=\"AdwButtonContent\">\n                                        <property name=\"icon-name\">document-open-symbolic",
+                                      "label": "_Open",
+                                      "useUnderline": "True",
+                                      "canShrink": "True"
+                                    }
+                                  ],
+                                  "title": "AdwClamp",
+                                  "maximumSize": 450
+                                },
+                                {
+                                  "id": "recent_files_list",
+                                  "type": "list-box",
+                                  "sourceKey": "window.ui#17",
+                                  "sourceClass": "GtkListBox",
+                                  "children": [],
+                                  "selectionMode": "none"
+                                }
+                              ],
+                              "title": "Manage your Citations",
+                              "iconName": "org.gnome.World.Citations"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ],
+              "title": "AdwToastOverlay"
+            },
+            {
+              "id": "nav_split_view",
+              "type": "custom-widget",
+              "sourceKey": "window.ui#18",
+              "sourceClass": "AdwNavigationSplitView",
+              "children": [
+                {
+                  "id": "imported-9",
+                  "type": "toolbar-view",
+                  "sourceKey": "window.ui#19",
+                  "sourceClass": "AdwToolbarView",
+                  "children": [
+                    {
+                      "id": "imported-10",
+                      "type": "header-bar",
+                      "sourceKey": "window.ui#20",
+                      "sourceClass": "AdwHeaderBar",
+                      "children": [
+                        {
+                          "id": "imported-11",
+                          "type": "button",
+                          "sourceKey": "window.ui#21",
+                          "sourceClass": "GtkButton",
+                          "children": [],
+                          "sensitive": "False",
+                          "iconName": "list-add-symbolic",
+                          "actionName": "win.new_entry",
+                          "tooltipText": "Add New Citation"
+                        },
+                        {
+                          "id": "appmenu_button",
+                          "type": "custom-widget",
+                          "sourceKey": "window.ui#22",
+                          "sourceClass": "GtkMenuButton",
+                          "children": [],
+                          "title": "GtkMenuButton",
+                          "iconName": "open-menu-symbolic",
+                          "menuModel": "primary_menu",
+                          "tooltipText": "Main Menu",
+                          "primary": "True"
+                        },
+                        {
+                          "id": "search_button",
+                          "type": "custom-widget",
+                          "sourceKey": "window.ui#23",
+                          "sourceClass": "GtkToggleButton",
+                          "children": [],
+                          "title": "GtkToggleButton",
+                          "iconName": "system-search-symbolic",
+                          "tooltipText": "Search",
+                          "active": "</object>\n                            </child>\n                          </object>\n                        </child>\n                        <child type=\"top\">\n                          <object class=\"GtkSearchBar\" id=\"search_bar\">\n                            <signal name=\"notify::search-mode-enabled\" handler=\"on_search_mode_enabled_notify\" swapped=\"true\"/>\n                            <accessibility>\n                              <relation name=\"labelled-by\">search_button</relation>\n                            </accessibility>\n                            <property name=\"child\">\n                              <object class=\"GtkSearchEntry\" id=\"search_entry\">\n                                <property name=\"placeholder-text\" translatable=\"yes\">Search…"
+                        }
+                      ],
+                      "showTitle": "False"
+                    },
+                    {
+                      "id": "entry_list",
+                      "type": "custom-widget",
+                      "sourceKey": "window.ui#24",
+                      "sourceClass": "EntryList",
+                      "children": [],
+                      "title": "EntryList"
+                    }
+                  ]
+                }
+              ],
+              "title": "AdwNavigationSplitView",
+              "minSidebarWidth": 300,
+              "maxSidebarWidth": 360,
+              "sidebarWidthFraction": 0.35,
+              "showContent": "False",
+              "sidebar": "<object class=\"AdwNavigationPage\">\n                    <property name=\"title\" translatable=\"yes\">Sidebar"
+            },
+            {
+              "id": "imported-12",
+              "type": "toolbar-view",
+              "sourceKey": "window.ui#25",
+              "sourceClass": "AdwToolbarView",
+              "children": [
+                {
+                  "id": "imported-13",
+                  "type": "header-bar",
+                  "sourceKey": "window.ui#26",
+                  "sourceClass": "AdwHeaderBar",
+                  "children": [
+                    {
+                      "id": "secondary_menu_button",
+                      "type": "custom-widget",
+                      "sourceKey": "window.ui#27",
+                      "sourceClass": "GtkMenuButton",
+                      "children": [],
+                      "title": "GtkMenuButton",
+                      "iconName": "view-more-symbolic",
+                      "tooltipText": "Secondary Menu",
+                      "menuModel": "entry_menu",
+                      "visible": "False"
+                    }
+                  ],
+                  "showTitle": "False"
+                },
+                {
+                  "id": "entry_page",
+                  "type": "custom-widget",
+                  "sourceKey": "window.ui#28",
+                  "sourceClass": "EntryPage",
+                  "children": [],
+                  "title": "EntryPage"
+                }
+              ]
+            }
+          ],
+          "title": "Citations",
+          "content": "<object class=\"AdwNavigationPage\">\n                    <property name=\"title\" translatable=\"yes\">Content"
+        }
+      }
+    ]
+  },
+  "assets": {}
+}

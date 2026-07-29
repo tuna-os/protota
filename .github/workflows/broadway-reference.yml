@@ -1,0 +1,112 @@
+name: Broadway Reference Capture
+
+on:
+  # Explicit opt-in branch convention for running a suite before this workflow
+  # has landed on the default branch.
+  push:
+    branches:
+      - 'ci/broadway-*'
+  # A weekly report keeps renderer regressions visible without making every
+  # pull request build ten complete GNOME application images.
+  schedule:
+    - cron: '23 3 * * 1'
+  workflow_dispatch:
+    inputs:
+      app:
+        description: Catalog app ID, or all-core for the Core matrix
+        required: true
+        default: calculator
+        type: string
+      max_diff_ratio:
+        description: Optional maximum differing-pixel ratio (for a calibrated preset)
+        required: false
+        default: ''
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  native-reference:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        include:
+          - app: calculator
+            scheduled: true
+          - app: calendar
+            scheduled: true
+          - app: clocks
+            scheduled: true
+          - app: disks
+            scheduled: true
+          - app: files
+            scheduled: true
+          - app: settings
+            scheduled: true
+          - app: software
+            scheduled: true
+          - app: text-editor
+            scheduled: true
+          - app: weather
+            scheduled: true
+          - app: web
+            scheduled: true
+          - app: amberol
+            scheduled: false
+    steps:
+      - id: select
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          REQUESTED_APP: ${{ inputs.app }}
+          SCHEDULED: ${{ matrix.scheduled }}
+        run: |
+          if [[ "$EVENT_NAME" == push || ( "$EVENT_NAME" == schedule && "$SCHEDULED" == true ) || "$REQUESTED_APP" == all-core || "$REQUESTED_APP" == "${{ matrix.app }}" ]]; then
+            echo 'enabled=true' >> "$GITHUB_OUTPUT"
+          else
+            echo 'enabled=false' >> "$GITHUB_OUTPUT"
+          fi
+      - if: steps.select.outputs.enabled == 'true'
+        uses: actions/checkout@v4
+      - if: steps.select.outputs.enabled == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - if: steps.select.outputs.enabled == 'true'
+        run: npm ci
+      - if: steps.select.outputs.enabled == 'true'
+        name: Load app catalog entry
+        run: node scripts/broadway-app.mjs "${{ matrix.app }}" >> "$GITHUB_ENV"
+      - if: steps.select.outputs.enabled == 'true'
+        name: Clone official declarative UI source
+        run: |
+          if [[ -n "${BROADWAY_SOURCE_REPOSITORY:-}" ]]; then
+            git clone --depth 1 "$BROADWAY_SOURCE_REPOSITORY" .gnome-source
+            echo "BROADWAY_SOURCE_ROOT=$PWD/.gnome-source/$BROADWAY_SOURCE_UI_PATH" >> "$GITHUB_ENV"
+          fi
+      - if: steps.select.outputs.enabled == 'true'
+        run: npx playwright install chromium --with-deps
+      - if: steps.select.outputs.enabled == 'true'
+        name: Build native Broadway runner
+        run: docker build --build-arg APP_PACKAGE="$BROADWAY_APP_PACKAGE" --build-arg APP_COMMAND="$BROADWAY_APP_COMMAND" --tag protota-broadway-app containers/broadway
+      - if: steps.select.outputs.enabled == 'true'
+        name: Start native app
+        run: docker run --detach --rm --name protota-broadway-app -p 8085:8085 protota-broadway-app
+      - if: steps.select.outputs.enabled == 'true'
+        name: Wait for Broadway
+        run: until curl --fail --silent http://127.0.0.1:8085/; do sleep 1; done
+      - if: steps.select.outputs.enabled == 'true'
+        name: Capture native and Protota output
+        env:
+          BROADWAY_MAX_DIFF_RATIO: ${{ inputs.max_diff_ratio }}
+        run: BROADWAY_URL=http://127.0.0.1:8085/ BROADWAY_PRESET_ID="$BROADWAY_PRESET_ID" BROADWAY_VIEWPORT_WIDTH="$BROADWAY_VIEWPORT_WIDTH" BROADWAY_VIEWPORT_HEIGHT="$BROADWAY_VIEWPORT_HEIGHT" BROADWAY_SOURCE_ROOT="$BROADWAY_SOURCE_ROOT" BROADWAY_SOURCE_ENTRY="$BROADWAY_SOURCE_ENTRY" npx playwright test tests/broadway-reference.spec.ts
+      - name: Upload reference captures
+        if: always() && steps.select.outputs.enabled == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.app }}-broadway-reference
+          path: test-results/

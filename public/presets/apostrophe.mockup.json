@@ -1,0 +1,1183 @@
+{
+  "version": 1,
+  "exportedAt": "2026-07-29T13:12:06.061Z",
+  "document": {
+    "id": "imported-document",
+    "title": "Apostrophe",
+    "colorScheme": "auto",
+    "edges": [],
+    "sourceProject": {
+      "files": [
+        {
+          "path": "AboutHemingway.ui",
+          "content": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<interface>\n  <requires lib=\"gtk\" version=\"4.0\" />\n  <requires lib=\"adw\" version=\"1.0\" />\n  <object class=\"AdwAlertDialog\" id=\"dialog\">\n  <property name=\"heading\" translatable=\"yes\">Hemingway Mode</property>\n  <property name=\"body\" translatable=\"yes\">The Hemingway Mode mimics the experience of writing on a typewriter, not allowing you to delete any text or doing any kind of editing. \n\nOnly being able to move forward may be frustrating, but can be an interesting exercise for improving your writing skills, gaining focus or facing the task on hand with a different mindset.\n  </property>\n  <property name=\"close-response\">cancel</property>\n  <responses>\n      <response id=\"cancel\" translatable=\"yes\">_Close</response>\n  </responses>\n  </object>\n</interface>\n"
+        },
+        {
+          "path": "BottomBar.ui",
+          "content": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<interface>\n  <requires lib=\"gtk\" version=\"4.0\"/>\n  <requires lib=\"adw\" version=\"1.0\"/>\n  <template class=\"ApostropheBottomBar\" parent=\"GtkWidget\">\n    <child>\n      <object class=\"AdwBin\" id=\"background_container\">\n        <property name=\"sensitive\">False</property>\n      </object>\n    </child>\n    <child>\n      <object class=\"GtkStack\" id=\"toolbars_container\">\n        <property name=\"hhomogeneous\">False</property>\n      </object>\n    </child>\n    <child>\n      <object class=\"AdwBin\" id=\"stats_container\">\n      </object>\n    </child>\n  </template>\n</interface>"
+        },
+        {
+          "path": "DetailedError.ui",
+          "content": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<interface>\n  <template class=\"DetailedError\" parent=\"AdwDialog\">\n    <property name=\"title\" translatable=\"yes\">Error Details</property>\n    <property name=\"content-width\">550</property>\n    <property name=\"content-height\">600</property>\n    <style>\n      <class name=\"error-details\" />\n    </style>\n    <property name=\"child\">\n      <object class=\"AdwToolbarView\">\n        <child type=\"top\">\n          <object class=\"AdwHeaderBar\" />\n        </child>\n        <property name=\"content\">\n          <object class=\"GtkBox\">\n            <property name=\"orientation\">vertical</property>\n            <property name=\"margin-start\">32</property>\n            <property name=\"margin-end\">32</property>\n            <property name=\"margin-top\">16</property>\n            <property name=\"margin-bottom\">16</property>\n            <property name=\"spacing\">8</property>\n            <child>\n              <object class=\"GtkLabel\" id=\"description\">\n                <property name=\"halign\">start</property>\n                <property name=\"wrap\">True</property>\n                <property name=\"margin-top\">16</property>\n                <property name=\"margin-bottom\">16</property>\n                <property name=\"label\" translatable=\"yes\">Apostrophe experienced an error</property>\n                <style>\n                  <class name=\"dimmed\" />\n                </style>\n              </object>\n            </child>\n            <child>\n              <object class=\"GtkBox\">\n                <property name=\"orientation\">horizontal</property>\n                <child>\n                  <object class=\"GtkLabel\">\n                    <property name=\"label\" translatable=\"yes\">Error Message</property>\n                    <property name=\"halign\">start</property>\n                    <property name=\"hexpand\">true</property>\n                    <style>\n                      <class name=\"heading\" />\n                    </style>\n                  </object>\n                </child>\n                <child>\n                  <object class=\"GtkButton\" id=\"copy\">\n                    <property name=\"halign\">end</property>\n                    <property name=\"hexpand\">true</property>\n                    <property name=\"icon-name\">edit-copy-symbolic</property>\n                    <property name=\"tooltip-text\" translatable=\"yes\">Copy Error Message</property>\n                    <style>\n                      <class name=\"flat\" />\n                    </style>\n                    <signal name=\"clicked\" handler=\"copy_error_message\" swapped=\"no\"/>\n                  </object>\n                </child>\n              </object>\n            </child>\n            <child>\n              <object class=\"GtkScrolledWindow\">\n                <property name=\"vexpand\">true</property>\n                <property name=\"overflow\">hidden</property>\n                <style>\n                  <class name=\"card\" />\n                </style>\n                <child>\n                  <object class=\"GtkTextView\" id=\"message\">\n                    <property name=\"editable\">false</property>\n                    <property name=\"wrap-mode\">word-char</property>\n                    <style>\n                      <class name=\"error-message\" />\n                      <class name=\"monospace\" />\n                    </style>\n                  </object>\n                </child>\n              </object>\n            </child>\n          </object>\n        </property>\n        <child type=\"bottom\">\n          <object class=\"GtkButton\" id=\"report\">\n            <property name=\"halign\">center</property>\n            <property name=\"margin-bottom\">24</property>\n            <style>\n              <class name=\"suggested-action\" />\n              <class name=\"pill\" />\n            </style>\n            <child>\n              <object class=\"AdwButtonContent\">\n                <property name=\"icon-name\">external-link-symbolic</property>\n                <property name=\"label\" translatable=\"yes\">Report _Issue</property>\n                <property name=\"use-underline\">true</property>\n              </object>\n            </child>\n            <signal name=\"clicked\" handler=\"report_issue\" swapped=\"no\"/>\n          </object>\n        </child>\n      </object>\n    </property>\n  </template>\n</interface>\n"
+        },
+        {
+          "path": "Editor.ui",
+          "content": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<interface>\n  <requires lib=\"gtk\" version=\"4.0\" />\n  <requires lib=\"adw\" version=\"1.0\" />\n  <template class=\"Editor\" parent=\"AdwBin\">\n    <child>\n      <object class=\"AdwBreakpointBin\" id=\"sizehandler\">\n        <property name=\"child\">\n          <object class=\"AdwToastOverlay\" id=\"toast_overlay\">\n            <property name=\"child\">\n              <object class=\"GtkOverlay\">\n                <property name=\"child\">\n                  <object class=\"ApostropheMovableBin\" id=\"movablebin\">\n                    <property name=\"hexpand\">1</property>\n                    <property name=\"vexpand\">1</property>\n                    <property name=\"child\">\n                      <object class=\"GtkScrolledWindow\" id=\"scrolledwindow\">\n                        <property name=\"focusable\">1</property>\n                        <property name=\"receives-default\">1</property>\n                        <property name=\"hexpand\">1</property>\n                        <property name=\"vexpand\">1</property>\n                        <child>\n                          <object class=\"ApostropheBorderScrollable\">\n                            <property name=\"top-margin\" bind-source=\"Editor\" bind-property=\"top-margin\" />\n                            <property name=\"bottom-margin\">48</property>\n                            <property name=\"child\">\n                              <object class=\"ApostropheTextView\" id=\"textview\">\n                              </object>\n                            </property>\n                          </object>\n                        </child>\n                      </object>\n                    </property>\n                  </object>\n                </property>\n                <child type=\"overlay\">\n                  <object class=\"ApostropheBottomBar\" id=\"bottombar\">\n                    <property name=\"valign\">end</property>\n                    <property name=\"toolbar\">\n                      <object class=\"Toolbar\" id=\"toolbar_revealer\">\n                        <property name=\"valign\">end</property>\n                        <property name=\"transition-type\">crossfade</property>\n                        <property name=\"halign\">start</property>\n                        <property name=\"reveal-child\">1</property>\n                        <child>\n                          <object class=\"GtkEventControllerMotion\">\n                            <signal name=\"enter\" handler=\"reveal_bottombar\" swapped=\"no\" />\n                          </object>\n                        </child>\n                        <signal name=\"notify::extra-toolbar-revealed\" handler=\"reveal_toolbar\" swapped=\"no\" />\n                        <style>\n                          <class name=\"bottombar\"/>\n                        </style>\n                      </object>\n                    </property>\n                    <property name=\"toolbar_narrow\">\n                      <object class=\"ToolbarNarrow\" id=\"toolbar_narrow_revealer\">\n                        <property name=\"transition-type\">crossfade</property>\n                        <property name=\"reveal-child\">1</property>\n                        <style>\n                          <class name=\"bottombar\"/>\n                        </style>\n                      </object>\n                    </property>\n                    <property name=\"stats\">\n                      <object class=\"Statsbar\" id=\"stats_revealer\">\n                        <property name=\"valign\">end</property>\n                        <property name=\"halign\">end</property>\n                        <property name=\"transition-type\">crossfade</property>\n                        <property name=\"transition-duration\">750</property>\n                        <property name=\"reveal-child\">1</property>\n                        <child>\n                          <object class=\"GtkEventControllerMotion\">\n                            <signal name=\"enter\" handler=\"reveal_bottombar\" swapped=\"no\" />\n                          </object>\n                        </child>\n                        <style>\n                          <class name=\"bottombar\"/>\n                        </style>\n                      </object>\n                    </property>\n                    <property name=\"background\">\n                      <object class=\"GtkRevealer\" id=\"background\">\n                        <property name=\"reveal-child\">True</property>\n                        <property name=\"valign\">end</property>\n                        <property name=\"halign\">fill</property>\n                        <property name=\"transition-type\">crossfade</property>\n                        <property name=\"child\">\n                          <object class=\"GtkBox\">\n                          </object>\n                        </property>\n                        <style>\n                          <class name=\"bottombar_background\"/>\n                        </style>\n                      </object>\n                    </property>\n                  </object>\n                </child>\n              </object>\n            </property>\n          </object>\n        </property>\n      </object>\n    </child>\n    <object class=\"GtkSizeGroup\">\n      <property name=\"mode\">vertical</property>\n      <widgets>\n        <widget name=\"background\"/>\n        <widget name=\"toolbar_revealer\"/>\n        <widget name=\"toolbar_narrow_revealer\"/>\n        <widget name=\"stats_revealer\"/>\n      </widgets>\n    </object>\n  </template>\n</interface>"
+        },
+        {
+          "path": "Export.ui",
+          "content": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<interface>\n  <requires lib=\"gtk\" version=\"4.0\"/>\n  <requires lib=\"adw\" version=\"1.0\"/>\n  <template class=\"AdvancedExportDialog\" parent=\"AdwDialog\">\n    <property name=\"content-width\">800</property>\n    <property name=\"content-height\">550</property>\n    <property name=\"width-request\">360</property>\n    <property name=\"height-request\">200</property>\n    <child>\n      <object class=\"AdwBreakpoint\">\n        <condition>max-width: 500sp</condition>\n        <setter object=\"split_view\" property=\"collapsed\">True</setter>\n      </object>\n    </child>\n    <property name=\"child\">\n      <object class=\"AdwNavigationSplitView\" id=\"split_view\">\n        <property name=\"min-sidebar-width\">250</property>\n        <property name=\"sidebar\">\n          <object class=\"AdwNavigationPage\">\n            <property name=\"title\" translatable=\"yes\">Formats</property>\n            <property name=\"child\">\n              <object class=\"AdwToolbarView\">\n                <child type=\"top\">\n                  <object class=\"AdwHeaderBar\"/>\n                </child>\n                <property name=\"content\">\n                  <object class=\"GtkScrolledWindow\" id=\"formats_page\">\n                    <property name=\"child\">\n                      <object class=\"GtkListBox\" id=\"formats_list\">\n                        <signal name=\"row-selected\" handler=\"on_format_selected\" swapped=\"no\"/>\n                        <style>\n                          <class name=\"navigation-sidebar\"/>\n                        </style>\n                      </object>\n                    </property>\n                  </object>\n                </property>\n              </object>\n            </property>\n          </object>\n        </property>\n        <property name=\"content\">\n          <object class=\"AdwNavigationPage\">\n            <property name=\"title\" bind-source=\"AdvancedExportDialog\" bind-property=\"title\" bind-flags=\"sync-create\"/>\n            <property name=\"child\">\n              <object class=\"AdwToolbarView\" id=\"options_page\">\n                <child type=\"top\">\n                  <object class=\"AdwHeaderBar\"/>\n                </child>\n                <property name=\"content\">\n                  <object class=\"GtkStack\">\n                    <property name=\"visible-child-name\" bind-source=\"AdvancedExportDialog\" bind-property=\"show_texlive_warning\"/>\n                    <child>\n                      <object class=\"GtkStackPage\">\n                        <property name=\"name\">FALSE</property>\n                        <property name=\"child\">\n                          <object class=\"AdwToolbarView\">\n                            <child type=\"bottom\">\n                              <object class=\"AdwBin\">\n                                <property name=\"margin-top\">12</property>\n                                <property name=\"margin-bottom\">12</property>\n                                <property name=\"margin-start\">12</property>\n                                <property name=\"margin-end\">12</property>\n                                <property name=\"child\">\n                                  <object class=\"GtkButton\" id=\"export_button\">\n                                    <property name=\"label\" translatable=\"yes\">Export</property>\n                                    <property name=\"receives-default\">1</property>\n                                    <property name=\"halign\">center</property>\n                                    <signal name=\"clicked\" handler=\"export\" swapped=\"no\"/>\n                                    <style>\n                                      <class name=\"popup\"/>\n                                      <class name=\"suggested-action\"/>\n                                      <class name=\"pill\"/>\n                                    </style>\n                                  </object>\n                                </property>\n                              </object>\n                            </child>\n                            <property name=\"content\">\n                              <object class=\"AdwPreferencesPage\" id=\"options\">\n                                <child>\n                                  <object class=\"AdwPreferencesGroup\">\n                                    <child>\n                                      <object class=\"AdwExpanderRow\">\n                                        <property name=\"title\" translatable=\"yes\">Options</property>\n                                        <child>\n                                          <object class=\"AdwSwitchRow\" id=\"sw_standalone\">\n                                            <property name=\"title\" translatable=\"yes\">Standalone</property>\n                                            <property name=\"subtitle\" translatable=\"yes\">Use a header and footer to include things like stylesheets and meta information</property>\n                                            <property name=\"active\">1</property>\n                                          </object>\n                                        </child>\n                                        <child>\n                                          <object class=\"AdwSwitchRow\" id=\"sw_absolute\">\n                                            <property name=\"title\" translatable=\"yes\">Relative to Absolute</property>\n                                            <property name=\"subtitle\" translatable=\"yes\">Replace relative path with absolute for images and links</property>\n                                            <property name=\"active\">1</property>\n                                          </object>\n                                        </child>\n                                        <child>\n                                          <object class=\"AdwSwitchRow\" id=\"sw_toc\">\n                                            <property name=\"title\" translatable=\"yes\">Table of Contents</property>\n                                            <property name=\"sensitive\" bind-source=\"sw_standalone\" bind-property=\"active\"/>\n                                          </object>\n                                        </child>\n                                        <child>\n                                          <object class=\"AdwSwitchRow\" id=\"sw_numbers\">\n                                            <property name=\"title\" translatable=\"yes\">Number Sections</property>\n                                          </object>\n                                        </child>\n                                      </object>\n                                    </child>\n                                  </object>\n                                </child>\n                                <child>\n                                  <object class=\"AdwPreferencesGroup\" id=\"page_options\">\n                                    <property name=\"visible\" bind-source=\"AdvancedExportDialog\" bind-property=\"show_page_size_options\"/>\n                                    <property name=\"title\" translatable=\"yes\">Page Size</property>\n                                    <child>\n                                      <object class=\"AdwComboRow\" id=\"cmb_page_size\">\n                                        <property name=\"title\" translatable=\"yes\">Page Size</property>\n                                        <property name=\"expression\">\n                                          <lookup name=\"string\" type=\"GtkStringObject\"/>\n                                        </property>\n                                      </object>\n                                    </child>\n                                  </object>\n                                </child>\n                                <child>\n                                  <object class=\"AdwPreferencesGroup\" id=\"slide_options\">\n                                    <property name=\"visible\" bind-source=\"AdvancedExportDialog\" bind-property=\"show_slide_size_options\"/>\n                                    <property name=\"title\" translatable=\"yes\">Page Size</property>\n                                    <child>\n                                      <object class=\"AdwComboRow\" id=\"cmb_slide_size\">\n                                        <property name=\"activatable\">False</property>\n                                        <property name=\"title\" translatable=\"yes\">Page Size</property>\n                                        <property name=\"expression\">\n                                          <lookup name=\"string\" type=\"GtkStringObject\"/>\n                                        </property>\n                                      </object>\n                                    </child>\n                                  </object>\n                                </child>\n                                <child>\n                                  <object class=\"AdwPreferencesGroup\" id=\"html_options\">\n                                    <property name=\"visible\" bind-source=\"AdvancedExportDialog\" bind-property=\"show_html_options\"/>\n                                    <property name=\"title\" translatable=\"yes\">HTML Options</property>\n                                    <child>\n                                      <object class=\"AdwSwitchRow\" id=\"sw_self_contained\">\n                                        <property name=\"title\" translatable=\"yes\">Self-Contained</property>\n                                        <property name=\"subtitle\" translatable=\"yes\">Produces an HTML file with no external dependencies</property>\n                                        <property name=\"active\">1</property>\n                                      </object>\n                                    </child>\n                                  </object>\n                                </child>\n                                <child>\n                                  <object class=\"AdwPreferencesGroup\" id=\"syntax_options\">\n                                    <property name=\"visible\" bind-source=\"AdvancedExportDialog\" bind-property=\"show_syntax_options\"/>\n                                    <property name=\"title\" translatable=\"yes\">Syntax Highlighting</property>\n                                    <child>\n                                      <object class=\"AdwExpanderRow\" id=\"sw_syntax_highlighting\">\n                                        <property name=\"title\" translatable=\"yes\">Use Syntax Highlighting</property>\n                                        <property name=\"enable-expansion\">False</property>\n                                        <property name=\"show-enable-switch\">True</property>\n                                        <child>\n                                          <object class=\"AdwComboRow\" id=\"cmb_syntax_highlighting\">\n                                            <property name=\"title\" translatable=\"yes\">Highlight Style</property>\n                                            <property name=\"expression\">\n                                              <lookup name=\"string\" type=\"GtkStringObject\"/>\n                                            </property>\n                                          </object>\n                                        </child>\n                                      </object>\n                                    </child>\n                                  </object>\n                                </child>\n                                <child>\n                                  <object class=\"AdwPreferencesGroup\" id=\"beamer_options\">\n                                    <property name=\"visible\" bind-source=\"AdvancedExportDialog\" bind-property=\"show_presentation_options\"/>\n                                    <property name=\"title\" translatable=\"yes\">Presentation</property>\n                                    <child>\n                                      <object class=\"AdwSwitchRow\" id=\"sw_incremental_bullets\">\n                                        <property name=\"title\" translatable=\"yes\">Incremental Bullets</property>\n                                        <property name=\"subtitle\" translatable=\"yes\">Show one bullet point after another in a slideshow</property>\n                                        <property name=\"active\">1</property>\n                                      </object>\n                                    </child>\n                                  </object>\n                                </child>\n                              </object>\n                            </property>\n                          </object>\n                        </property>\n                      </object>\n                    </child>\n                    <child>\n                      <object class=\"GtkStackPage\">\n                        <property name=\"name\">TRUE</property>\n                        <property name=\"child\">\n                          <object class=\"TexliveWarning\" id=\"texlive_warning\"/>\n                        </property>\n                      </object>\n                    </child>\n                  </object>\n                </property>\n              </object>\n            </property>\n          </object>\n        </property>\n      </object>\n    </property>\n  </template>\n</interface>\n"
+        },
+        {
+          "path": "Headerbar.ui",
+          "content": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<interface>\n  <requires lib=\"gtk\" version=\"4.0\"/>\n  <requires lib=\"adw\" version=\"1.0\"/>\n  <template class=\"BaseHeaderbar\" parent=\"AdwBin\">\n    <child>\n      <object class=\"AdwHeaderBar\" id=\"headerbar\">\n        <child type=\"start\">\n          <object class=\"GtkButton\">\n            <property name=\"tooltip-text\" translatable=\"yes\">New File</property>\n            <property name=\"action-name\">app.new-window</property>\n            <property name=\"icon_name\">document-new-symbolic</property>\n          </object>\n        </child>\n        <child type=\"start\">\n          <object class=\"GtkMenuButton\">\n            <property name=\"label\" translatable=\"yes\">_Open</property>\n            <property name=\"use-underline\">True</property>\n            <property name=\"can-shrink\">True</property>\n            <property name=\"tooltip-text\" translatable=\"yes\">Open Markdown File</property>\n            <property name=\"popover\">open_menu</property>\n          </object>\n        </child>\n        <child type=\"start\">\n          <object class=\"AdwSplitButton\">\n            <property name=\"label\" translatable=\"yes\">_Save</property>\n            <property name=\"use-underline\">True</property>\n            <property name=\"can-shrink\">True</property>\n            <property name=\"tooltip-text\" translatable=\"yes\">Save Markdown File</property>\n            <property name=\"action-name\">win.save</property>\n            <property name=\"menu-model\">export_menu</property>\n          </object>\n        </child>\n        <child type=\"end\">\n          <object class=\"GtkButton\" id=\"exit_fs_button\">\n            <property name=\"action-name\">win.fullscreen</property>\n            <property name=\"visible\" bind-source=\"BaseHeaderbar\" bind-property=\"is_fullscreen\" bind-flags=\"sync-create\"/>\n            <property name=\"icon-name\">view-restore-symbolic</property>\n          </object>\n        </child>\n        <child type=\"end\">\n          <object class=\"GtkMenuButton\" id=\"menu_button\">\n            <property name=\"menu-model\">Main Menu</property>\n            <property name=\"icon-name\">open-menu-symbolic</property>\n            <property name=\"tooltip-text\" translatable=\"yes\">Main Menu</property>\n            <style>\n              <class name=\"image-button\"/>\n            </style>\n          </object>\n        </child>\n        <child type=\"end\">\n          <object class=\"PreviewLayoutSwitcher\" id=\"preview_layout_switcher\"/>\n        </child>\n        <child type=\"end\">\n          <object class=\"GtkToggleButton\">\n            <property name=\"tooltip-text\" translatable=\"yes\">Search in the File</property>\n            <property name=\"action-name\">win.find</property>\n            <property name=\"icon-name\">system-search-symbolic</property>\n          </object>\n        </child>\n        <style>\n          <class name=\"titlebar\"/>\n        </style>\n      </object>\n    </child>\n  </template>\n  <object class=\"ApostropheOpenPopover\" id=\"open_menu\"/>\n\n  <!-- Main Menu-->\n\n  <menu id=\"Main Menu\">\n    <section>\n      <item>\n        <attribute name=\"custom\">themeswitcher</attribute>\n      </item>\n    </section>\n    <section>\n      <item>\n        <attribute name=\"label\" translatable=\"yes\">_Hemingway Mode</attribute>\n        <attribute name=\"action\">win.hemingway_mode</attribute>\n      </item>\n      <item>\n        <attribute name=\"label\" translatable=\"yes\">_Focus Mode</attribute>\n        <attribute name=\"action\">win.focus_mode</attribute>\n      </item>\n    </section>\n    <section>\n      <item>\n        <attribute name=\"label\" translatable=\"yes\">Find and _Replace</attribute>\n        <attribute name=\"action\">win.find_replace</attribute>\n      </item>\n    </section>\n    <section>\n      <item>\n        <attribute name=\"label\" translatable=\"yes\">_Preferences</attribute>\n        <attribute name=\"action\">app.preferences</attribute>\n      </item>\n    </section>\n    <section>\n      <item>\n        <attribute name=\"label\" translatable=\"yes\">Open _Tutorial</attribute>\n        <attribute name=\"action\">win.open_file</attribute>\n        <attribute name=\"target\">resource:///org/gnome/gitlab/somas/Apostrophe/media/apostrophe_markdown.md</attribute>\n      </item>\n      <item>\n        <attribute name=\"label\" translatable=\"yes\">_Keyboard Shortcuts</attribute>\n        <attribute name=\"action\">win.show-help-overlay</attribute>\n      </item>\n      <item>\n        <attribute name=\"label\" translatable=\"yes\">_About Apostrophe</attribute>\n        <attribute name=\"action\">app.about</attribute>\n      </item>\n    </section>\n  </menu>\n\n  <!-- Export Menu -->\n\n  <menu id=\"export_menu\">\n    <section>\n      <item>\n        <attribute name=\"label\" translatable=\"yes\">_Save As...</attribute>\n        <attribute name=\"action\">win.save_as</attribute>\n      </item>\n    </section>\n    <section>\n      <item>\n        <attribute name=\"label\" translatable=\"no\">_PDF</attribute>\n        <attribute name=\"action\">win.export</attribute>\n        <attribute name=\"target\">pdf</attribute>\n      </item>\n      <item>\n        <attribute name=\"label\" translatable=\"no\">_HTML</attribute>\n        <attribute name=\"action\">win.export</attribute>\n        <attribute name=\"target\">html</attribute>\n      </item>\n      <item>\n        <attribute name=\"label\" translatable=\"no\">_ODT</attribute>\n        <attribute name=\"action\">win.export</attribute>\n        <attribute name=\"target\">odt</attribute>\n      </item>\n    </section>\n    <section>\n      <item>\n        <attribute name=\"label\" translatable=\"yes\">Advanced _Export…</attribute>\n        <attribute name=\"action\">win.advanced_export</attribute>\n      </item>\n    </section>\n    <section>\n      <item>\n        <attribute name=\"label\" translatable=\"yes\">_Copy HTML</attribute>\n        <attribute name=\"action\">win.copy_html</attribute>\n      </item>\n    </section>\n  </menu>\n</interface>\n"
+        },
+        {
+          "path": "HeaderbarNarrow.ui",
+          "content": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<interface>\n  <requires lib=\"gtk\" version=\"4.0\"/>\n  <requires lib=\"adw\" version=\"1.0\"/>\n  <template class=\"BaseHeaderbarNarrow\" parent=\"AdwBin\">\n    <child>\n      <object class=\"AdwHeaderBar\" id=\"headerbar\">\n        <child type=\"start\">\n          <object class=\"GtkToggleButton\" id=\"preview_button\">\n            <property name=\"action-name\"></property>\n            <property name=\"icon-name\">view-dual-symbolic</property>\n            <property name=\"action-name\">win.preview</property>\n          </object>\n        </child>\n        <child type=\"end\">\n          <object class=\"GtkButton\" id=\"exit_fs_button\">\n            <property name=\"action-name\">win.fullscreen</property>\n            <property name=\"visible\" bind-source=\"BaseHeaderbarNarrow\" bind-property=\"is_fullscreen\" bind-flags=\"sync-create\"/>\n            <property name=\"icon-name\">view-restore-symbolic</property>\n          </object>\n        </child>\n        <child type=\"end\">\n          <object class=\"GtkMenuButton\" id=\"menu_button\">\n            <property name=\"menu-model\">Main Menu</property>\n            <property name=\"icon-name\">open-menu-symbolic</property>\n            <property name=\"tooltip-text\" translatable=\"yes\">Main Menu</property>\n            <style>\n              <class name=\"image-button\"/>\n            </style>\n          </object>\n        </child>\n        <style>\n          <class name=\"titlebar\"/>\n        </style>\n      </object>\n    </child>\n  </template>\n  <object class=\"ApostropheOpenPopover\" id=\"open_menu\"/>\n\n  <!-- Main Menu-->\n\n  <menu id=\"Main Menu\">\n    <section>\n      <item>\n        <attribute name=\"custom\">themeswitcher</attribute>\n      </item>\n    </section>\n    <section>\n    </section>\n      <item>\n        <attribute name=\"label\" translatable=\"yes\">New File</attribute>\n        <attribute name=\"action\">win.new</attribute>\n      </item>\n      <item>\n        <attribute name=\"label\" translatable=\"yes\">_Open</attribute>\n        <attribute name=\"action\">win.open</attribute>\n      </item>\n      <item>\n        <attribute name=\"label\" translatable=\"yes\">_Save</attribute>\n        <link name=\"submenu\">\n          <section>\n            <item>\n              <attribute name=\"label\" translatable=\"yes\">_Save</attribute>\n              <attribute name=\"action\">win.save</attribute>\n            </item>\n            <item>\n              <attribute name=\"label\" translatable=\"yes\">_Save As...</attribute>\n              <attribute name=\"action\">win.save_as</attribute>\n            </item>\n          </section>\n          <section>\n            <item>\n              <attribute name=\"label\" translatable=\"no\">_PDF</attribute>\n              <attribute name=\"action\">win.export</attribute>\n              <attribute name=\"target\">pdf</attribute>\n            </item>\n            <item>\n              <attribute name=\"label\" translatable=\"no\">_HTML</attribute>\n              <attribute name=\"action\">win.export</attribute>\n              <attribute name=\"target\">html</attribute>\n            </item>\n            <item>\n              <attribute name=\"label\" translatable=\"no\">_ODT</attribute>\n              <attribute name=\"action\">win.export</attribute>\n              <attribute name=\"target\">odt</attribute>\n            </item>\n          </section>\n          <section>\n            <item>\n              <attribute name=\"label\" translatable=\"yes\">Advanced _Export…</attribute>\n              <attribute name=\"action\">win.advanced_export</attribute>\n            </item>\n          </section>\n          <section>\n            <item>\n              <attribute name=\"label\" translatable=\"yes\">_Copy HTML</attribute>\n              <attribute name=\"action\">win.copy_html</attribute>\n            </item>\n          </section>\n        </link>\n      </item>\n    <section>\n      <item>\n        <attribute name=\"label\" translatable=\"yes\">_Hemingway Mode</attribute>\n        <attribute name=\"action\">win.hemingway_mode</attribute>\n      </item>\n      <item>\n        <attribute name=\"label\" translatable=\"yes\">_Focus Mode</attribute>\n        <attribute name=\"action\">win.focus_mode</attribute>\n      </item>\n    </section>\n    <section>\n    <item>\n        <attribute name=\"label\" translatable=\"yes\">Search in the File</attribute>\n        <attribute name=\"action\">win.find</attribute>\n      </item>\n      <item>\n        <attribute name=\"label\" translatable=\"yes\">Find and _Replace</attribute>\n        <attribute name=\"action\">win.find_replace</attribute>\n      </item>\n    </section>\n    <section>\n      <item>\n        <attribute name=\"label\" translatable=\"yes\">_Preferences</attribute>\n        <attribute name=\"action\">app.preferences</attribute>\n      </item>\n    </section>\n    <section>\n      <item>\n        <attribute name=\"label\" translatable=\"yes\">Open _Tutorial</attribute>\n        <attribute name=\"action\">win.open_file</attribute>\n        <attribute name=\"target\">resource:///org/gnome/gitlab/somas/Apostrophe/media/apostrophe_markdown.md</attribute>\n      </item>\n      <item>\n        <attribute name=\"label\" translatable=\"yes\">_Keyboard Shortcuts</attribute>\n        <attribute name=\"action\">win.show-help-overlay</attribute>\n      </item>\n      <item>\n        <attribute name=\"label\" translatable=\"yes\">_About Apostrophe</attribute>\n        <attribute name=\"action\">app.about</attribute>\n      </item>\n    </section>\n  </menu>\n\n</interface>\n"
+        },
+        {
+          "path": "InlinePreviewPopover.ui",
+          "content": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<interface>\n  <requires lib=\"gtk\" version=\"4.0\" />\n  <requires lib=\"adw\" version=\"1.0\" />\n  <template class=\"InlinePreviewPopover\" parent=\"GtkPopover\">\n    <property name=\"child\">\n      <object class=\"GtkStack\" id=\"stack\">\n        <property name=\"interpolate-size\">True</property>\n        <property name=\"hhomogeneous\">False</property>\n        <property name=\"vhomogeneous\">False</property>\n        <property name=\"transition-type\">crossfade</property>\n        <child>\n          <object class=\"GtkStackPage\">\n            <property name=\"child\">\n              <object class=\"AdwBin\" id=\"empty\">\n                <property name=\"margin-top\">18</property>\n                <property name=\"margin-bottom\">18</property>\n                <property name=\"margin-start\">18</property>\n                <property name=\"margin-end\">18</property>\n              </object>\n            </property>\n          </object>\n        </child>\n        <child>\n          <object class=\"GtkStackPage\">\n            <property name=\"child\">\n              <object class=\"AdwSpinner\" id=\"spinner\">\n                <property name=\"margin-top\">18</property>\n                <property name=\"margin-bottom\">18</property>\n                <property name=\"margin-start\">18</property>\n                <property name=\"margin-end\">18</property>\n                <property name=\"halign\">center</property>\n                <property name=\"valign\">center</property>\n              </object>\n            </property>\n          </object>\n        </child>\n        <child>\n          <object class=\"GtkStackPage\">\n            <property name=\"child\">\n              <object class=\"GtkLabel\" id=\"error\">\n                <property name=\"label\" translatable=\"yes\">Not Found</property>\n                <property name=\"margin-top\">18</property>\n                <property name=\"margin-bottom\">18</property>\n                <property name=\"margin-start\">18</property>\n                <property name=\"margin-end\">18</property>\n              </object>\n            </property>\n          </object>\n        </child>\n      </object>\n    </property>\n    <property name=\"has-arrow\">False</property>\n    <style>\n      <class name=\"quick-preview-popup\" />\n    </style>\n  </template>\n</interface>\n"
+        },
+        {
+          "path": "Panels.ui",
+          "content": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<interface>\n  <requires lib=\"gtk\" version=\"4.0\"/>\n  <requires lib=\"adw\" version=\"1.0\"/>\n  <template class=\"ApostrophePanels\" parent=\"GtkWidget\">\n    <child>\n      <object class=\"AdwBin\" id=\"content_container\">\n        <style>\n          <class name=\"content\"/>\n        </style>\n      </object>\n    </child>\n    <child>\n      <object class=\"GtkSeparator\" id=\"separator\">\n        <property name=\"orientation\" bind-source=\"ApostrophePanels\" bind-property=\"orientation\"/>\n        <style>\n          <class name=\"sidebar\"/>\n        </style>\n      </object>\n    </child>\n    <child>\n      <object class=\"AdwBin\" id=\"panel_container\">\n        <style>\n          <class name=\"panel\"/>\n        </style>\n      </object>\n    </child>\n  </template>\n</interface>\n"
+        },
+        {
+          "path": "Preferences.ui",
+          "content": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<interface>\n  <requires lib=\"gtk\" version=\"4.0\"/>\n  <requires lib=\"adw\" version=\"1.0\"/>\n  <template class=\"ApostrophePreferencesDialog\" parent=\"AdwPreferencesDialog\">\n    <child>\n      <object class=\"AdwPreferencesPage\">\n        <child>\n          <object class=\"AdwPreferencesGroup\">\n            <child>\n              <object class=\"AdwSwitchRow\" id=\"spellcheck_row\">\n                <property name=\"tooltip-text\" translatable=\"yes\">Check Spelling</property>\n                <property name=\"title\" translatable=\"yes\">Check Spelling</property>\n              </object>\n            </child>\n            <child>\n              <object class=\"AdwSwitchRow\" id=\"autohide_headerbar_row\">\n                <property name=\"title\" translatable=\"yes\">Auto-Hide Header Bar</property>\n                <property name=\"subtitle\" translatable=\"yes\">Auto-hide header and status bars while typing</property>\n              </object>\n            </child>\n            <child>\n              <object class=\"AdwSwitchRow\" id=\"bigger_text_row\">\n                <property name=\"title\" translatable=\"yes\">Large Text</property>\n                <property name=\"subtitle\" translatable=\"yes\">Reduce the margins width and increase the text size when possible</property>\n              </object>\n            </child>\n            <child>\n              <object class=\"AdwSwitchRow\" id=\"session_restore_row\">\n                <property name=\"visible\">False</property>\n                <property name=\"title\" translatable=\"yes\">Restore Session</property>\n                <property name=\"subtitle\" translatable=\"yes\">Return to your previous session when Apostrophe is started</property>\n              </object>\n            </child>\n            <child>\n              <object class=\"AdwComboRow\" id=\"input_format_comborow\">\n                <property name=\"title\" translatable=\"yes\">Input Format</property>\n                <property name=\"subtitle\" translatable=\"yes\">Flavor of markdown Apostrophe will use</property>\n                <property name=\"expression\">\n                  <lookup name=\"name\" type=\"InputFormat\"/>\n                </property>\n                <signal name=\"notify::selected\" handler=\"on_input_format\"/>\n                <child>\n                  <object class=\"GtkButton\">\n                    <property name=\"valign\">center</property>\n                    <property name=\"icon_name\">dialog-information-symbolic</property>\n                    <property name=\"tooltip-text\" translatable=\"yes\">Markdown Flavor Documentation</property>\n                    <signal name=\"clicked\" handler=\"on_input_format_help\"/>\n                    <style>\n                      <class name=\"flat\"/>\n                      <class name=\"circular\"/>\n                    </style>\n                  </object>\n                </child>\n              </object>\n            </child>\n          </object>\n        </child>\n        <child>\n          <object class=\"AdwPreferencesGroup\">\n            <property name=\"visible\">False</property>\n            <child>\n              <object class=\"AdwComboRow\" id=\"preview_security_comborow\">\n                <property name=\"title\" translatable=\"yes\">Preview Security</property>\n                <property name=\"subtitle\" translatable=\"yes\">Desired level of security when rendering the preview</property>\n                <property name=\"expression\">\n                  <lookup name=\"name\" type=\"SecurityFormat\"/>\n                </property>\n                <signal name=\"notify::selected\" handler=\"on_security\"/>\n              </object>\n            </child>\n          </object>\n        </child>\n      </object>\n    </child>\n  </template>\n</interface>\n"
+        },
+        {
+          "path": "PreviewLayoutSwitcher.ui",
+          "content": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<interface>\n  <requires lib=\"gtk\" version=\"4.0\"/>\n  <template class=\"PreviewLayoutSwitcher\" parent=\"GtkBox\">\n    <child>\n      <object class=\"GtkToggleButton\" id=\"preview_switcher_toggle\">\n        <property name=\"tooltip-text\" translatable=\"yes\">Preview</property>\n        <property name=\"action-name\">win.preview</property>\n        <property name=\"icon_name\">view-dual-symbolic</property>\n        <style>\n          <class name=\"preview_button_left\"/>\n        </style>\n      </object>\n    </child>\n    <child>\n      <object class=\"GtkRevealer\" id=\"preview_switcher_revealer\">\n        <property name=\"transition-type\">slide-right</property>\n        <property name=\"reveal-child\" bind-source=\"preview_switcher_toggle\" bind-property=\"active\"/>\n        <property name=\"child\">\n          <object class=\"GtkMenuButton\" id=\"preview_switcher_button\">\n            <property name=\"popover\">layout_popover</property>\n            <property name=\"always-show-arrow\">True</property>\n            <accessibility>\n              <property name=\"label\" translatable=\"yes\">Screen Layout</property>\n            </accessibility>\n            <child>\n              <object class=\"GtkImage\" id=\"layout_image\"/>\n            </child>\n            <style>\n              <class name=\"preview_button_right\"/>\n              <class name=\"raised\"/>\n            </style>\n          </object>\n        </property>\n      </object>\n    </child>\n  </template>\n  <object class=\"GtkPopover\" id=\"layout_popover\">\n    <signal name=\"show\" handler=\"update_ui\"/>\n    <property name=\"child\">\n      <object class=\"GtkListBox\" id=\"list_box\">\n        <property name=\"selection-mode\">none</property>\n        <signal name=\"row-activated\" handler=\"on_row_activated\"/>\n      </object>\n    </property>\n    <style>\n      <class name=\"menu\"/>\n    </style>\n  </object>\n</interface>\n"
+        },
+        {
+          "path": "PreviewLayoutSwitcherItem.ui",
+          "content": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<interface>\n  <requires lib=\"gtk\" version=\"4.0\"/>\n  <template class=\"PreviewLayoutSwitcherItem\" parent=\"GtkListBoxRow\">\n    <property name=\"child\">\n      <object class=\"GtkBox\">\n        <child>\n          <object class=\"GtkBox\">\n            <property name=\"halign\">start</property>\n            <property name=\"spacing\">12</property>\n            <property name=\"valign\">center</property>\n            <child>\n              <object class=\"GtkImage\" id=\"icon\">\n                <style>\n                  <class name=\"list-icon\"/>\n                </style>\n              </object>\n            </child>\n            <child>\n              <object class=\"GtkLabel\" id=\"title\">\n              </object>\n            </child>\n          </object>\n        </child>\n        <child>\n          <object class=\"GtkImage\" id=\"checkmark\">\n            <property name=\"icon-name\">object-select-symbolic</property>\n            <style>\n              <class name=\"checkmark\"/>\n            </style>\n          </object>\n        </child>\n      </object>\n    </property>\n  </template>\n</interface>\n"
+        },
+        {
+          "path": "PreviewWindow.ui",
+          "content": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<interface>\n  <requires lib=\"gtk\" version=\"4.0\"/>\n  <requires lib=\"adw\" version=\"1.0\"/>\n  <template class=\"ApostrophePreviewWindow\" parent=\"AdwApplicationWindow\">\n    <property name=\"default-width\">800</property>\n    <property name=\"default-height\">600</property>\n    <child>\n      <object class=\"GtkBox\" id=\"preview_box\">\n        <property name=\"orientation\">vertical</property>\n        <child>\n          <object class=\"AdwHeaderBar\">\n          </object>\n        </child>\n      </object>\n    </child>\n  </template>\n</interface>\n"
+        },
+        {
+          "path": "Recents.ui",
+          "content": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<interface>\n  <requires lib=\"gtk\" version=\"4.0\"/>\n  <template class=\"ApostropheOpenPopover\" parent=\"GtkPopover\">\n    <style>\n      <class name=\"open-popover\"/>\n    </style>\n    <property name=\"halign\">start</property>\n    <property name=\"valign\">end</property>\n    <property name=\"width-request\">350</property>\n    <property name=\"child\">\n      <object class=\"GtkBox\" id=\"box\">\n        <property name=\"orientation\">vertical</property>\n        <child>\n          <object class=\"GtkBox\">\n            <style>\n              <class name=\"toolbar\"/>\n            </style>\n            <child>\n              <object class=\"GtkSearchEntry\" id=\"search_entry\">\n                <property name=\"hexpand\">1</property>\n                <signal name=\"search-changed\" handler=\"on_search_entry_changed_cb\"/>\n              </object>\n            </child>\n            <child>\n              <object class=\"GtkButton\">\n                <property name=\"icon-name\">document-open-symbolic</property>\n                <property name=\"action-name\">win.open</property>\n              </object>\n            </child>\n          </object>\n        </child>\n        <child>\n          <object class=\"GtkStack\" id=\"stack\">\n            <property name=\"vhomogeneous\">0</property>\n            <property name=\"hhomogeneous\">0</property>\n            <child>\n              <object class=\"GtkLabel\" id=\"empty\">\n                <property name=\"label\" translatable=\"yes\">No Recent Documents</property>\n                <property name=\"margin-start\">6</property>\n                <property name=\"margin-top\">18</property>\n                <property name=\"margin-bottom\">18</property>\n                <property name=\"margin-end\">6</property>\n              </object>\n            </child>\n            <child>\n              <object class=\"GtkScrolledWindow\" id=\"recent\">\n                <property name=\"hexpand\">1</property>\n                <property name=\"hscrollbar-policy\">never</property>\n                <property name=\"max-content-height\">600</property>\n                <property name=\"max-content-width\">250</property>\n                <property name=\"min-content-width\">250</property>\n                <property name=\"propagate-natural-height\">1</property>\n                <property name=\"vexpand\">1</property>\n                <style>\n                  <class name=\"undershoot-top\"/>\n                </style>\n                <property name=\"child\">\n                  <object class=\"GtkListBox\" id=\"list_box\">\n                    <property name=\"selection-mode\">none</property>\n                    <child type=\"placeholder\">\n                      <object class=\"GtkLabel\">\n                        <property name=\"label\" translatable=\"yes\">No Results Found</property>\n                        <style>\n                          <class name=\"placeholder\"/>\n                          <class name=\"dim-label\"/>\n                        </style>\n                      </object>\n                    </child>\n                  </object>\n                </property>\n              </object>\n            </child>\n          </object>\n        </child>\n      </object>\n    </property>\n  </template>\n</interface>\n"
+        },
+        {
+          "path": "SearchBar.ui",
+          "content": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<interface>\n  <requires lib=\"gtk\" version=\"4.0\"/>\n  <requires lib=\"adw\" version=\"1.0\"/>\n  <template class=\"ApostropheSearchBar\" parent=\"AdwBin\">\n    <!--<signal name=\"size-allocate\" handler=\"update_textview_margin\" swapped=\"no\"/>-->\n    <child>\n      <object class=\"GtkSearchBar\" id=\"searchbar\">\n        <property name=\"search-mode-enabled\" bind-source=\"ApostropheSearchBar\" bind-property=\"search-mode-enabled\"/>\n        <child>\n          <object class=\"GtkBox\" id=\"searchpanel_box\">\n            <property name=\"orientation\">vertical</property>\n            <property name=\"halign\">center</property>\n            <child>\n              <object class=\"GtkBox\" id=\"search_box\">\n                <property name=\"spacing\">6</property>\n                <child>\n                  <object class=\"GtkBox\" id=\"searchbox_box\">\n                    <child>\n                      <object class=\"GtkSearchEntry\" id=\"search_entry\">\n                        <signal name=\"search-changed\" handler=\"search_entry_changed\" swapped=\"no\"/>\n                        <signal name=\"stop-search\" handler=\"hide\" swapped=\"no\"/>\n                      </object>\n                    </child>\n                    <child>\n                      <object class=\"GtkButton\" id=\"previous_result\">\n                        <property name=\"focusable\">1</property>\n                        <property name=\"receives-default\">1</property>\n                        <property name=\"tooltip-text\" translatable=\"yes\">Previous Match</property>\n                        <property name=\"icon-name\">go-up-symbolic</property>\n                        <property name=\"sensitive\" bind-source=\"ApostropheSearchBar\" bind-property=\"can_move\" bind-flags=\"sync-create\"/>\n                        <signal name=\"clicked\" handler=\"backward_search\" swapped=\"no\"/>\n                      </object>\n                    </child>\n                    <child>\n                      <object class=\"GtkButton\" id=\"next_result\">\n                        <property name=\"focusable\">1</property>\n                        <property name=\"receives-default\">1</property>\n                        <property name=\"tooltip-text\" translatable=\"yes\">Next Match</property>\n                        <property name=\"icon-name\">go-down-symbolic</property>\n                        <property name=\"sensitive\" bind-source=\"ApostropheSearchBar\" bind-property=\"can_move\" bind-flags=\"sync-create\"/>\n                        <signal name=\"clicked\" handler=\"forward_search\" swapped=\"no\"/>\n                      </object>\n                    </child>\n                    <style>\n                      <class name=\"linked\"/>\n                    </style>\n                  </object>\n                </child>\n                <child>\n                  <object class=\"GtkBox\" id=\"searchtools_box\">\n                    <property name=\"homogeneous\">1</property>\n                    <child>\n                      <object class=\"GtkToggleButton\" id=\"case_sensitive\">\n                        <property name=\"label\" translatable=\"yes\" comments=\"Translators: This indicates case sensitivity, so it should be the first vowel of the language in lowercase and uppercase\">aA</property>\n                        <property name=\"focusable\">1</property>\n                        <property name=\"receives-default\">1</property>\n                        <property name=\"tooltip-text\" translatable=\"yes\">Case Sensitive</property>\n                      </object>\n                    </child>\n                    <child>\n                      <object class=\"GtkToggleButton\" id=\"regex\">\n                        <property name=\"label\" translatable=\"no\">(.*)</property>\n                        <property name=\"focusable\">1</property>\n                        <property name=\"receives-default\">1</property>\n                        <property name=\"tooltip-text\" translatable=\"yes\">Regular Expression</property>\n                      </object>\n                    </child>\n                    <child>\n                      <object class=\"GtkToggleButton\" id=\"replace\">\n                        <property name=\"focusable\">1</property>\n                        <property name=\"receives-default\">1</property>\n                        <property name=\"tooltip-text\" translatable=\"yes\">Replace</property>\n                        <property name=\"active\" bind-source=\"ApostropheSearchBar\" bind-property=\"replace_mode_enabled\" bind-flags=\"bidirectional\"/>\n                        <property name=\"icon-name\">edit-find-replace-symbolic</property>\n                      </object>\n                    </child>\n                    <style>\n                      <class name=\"linked\"/>\n                    </style>\n                  </object>\n                </child>\n                \n              </object>\n            </child>\n            <child>\n              <object class=\"GtkRevealer\" id=\"replace_placeholder\">\n                <property name=\"reveal-child\" bind-source=\"ApostropheSearchBar\" bind-property=\"replace_mode_enabled\"/>\n                <property name=\"child\">\n                  <object class=\"GtkBox\" id=\"replace_box\">\n                    <property name=\"margin-top\">6</property>\n                    <property name=\"spacing\">6</property>\n                    <child>\n                      <object class=\"GtkBox\" id=\"replacebox_box\">\n                        <child>\n                          <object class=\"GtkEntry\" id=\"replace_entry\">\n                            <property name=\"focusable\">1</property>\n                            <property name=\"hexpand\">1</property>\n                            <property name=\"primary-icon-name\">edit-find-replace-symbolic</property>\n                          </object>\n                        </child>\n                        <style>\n                          <class name=\"linked\"/>\n                        </style>\n                      </object>\n                    </child>\n                    <child>\n                      <object class=\"GtkBox\" id=\"replacetools_box\">\n                        <child>\n                          <object class=\"GtkButton\" id=\"replace_one\">\n                            <property name=\"label\" translatable=\"yes\">Replace</property>\n                            <property name=\"focusable\">1</property>\n                            <property name=\"receives-default\">1</property>\n                            <property name=\"sensitive\" bind-source=\"ApostropheSearchBar\" bind-property=\"can_replace\" bind-flags=\"sync-create\"/>\n                            <signal name=\"clicked\" handler=\"replace_clicked\" swapped=\"no\"/>\n                          </object>\n                        </child>\n                        <child>\n                          <object class=\"GtkButton\" id=\"replace_all\">\n                            <property name=\"label\" translatable=\"yes\">Replace All</property>\n                            <property name=\"focusable\">1</property>\n                            <property name=\"receives-default\">1</property>\n                            <property name=\"sensitive\" bind-source=\"ApostropheSearchBar\" bind-property=\"can_replace_all\" bind-flags=\"sync-create\"/>\n                            <signal name=\"clicked\" handler=\"replace_all\" swapped=\"no\"/>\n                          </object>\n                        </child>\n                        <style>\n                          <class name=\"linked\"/>\n                        </style>\n                      </object>\n                    </child>\n                  </object>\n                </property>\n              </object>\n            </child>\n          </object>\n        </child>\n      </object>\n    </child>\n  </template>\n</interface>\n"
+        },
+        {
+          "path": "Shortcuts.ui",
+          "content": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<interface>\n  <object class=\"GtkShortcutsWindow\" id=\"help_overlay\">\n    <property name=\"modal\">True</property>\n    <child>\n      <object class=\"GtkShortcutsSection\" id=\"section1\">\n        <property name=\"section-name\">shortcuts</property>\n        <property name=\"max-height\">10</property>\n        <child>\n          <object class=\"GtkShortcutsGroup\" id=\"s1lbl\">\n            <property name=\"title\" translatable=\"yes\" context=\"shortcut window\">General</property>\n            <child>\n              <object class=\"GtkShortcutsShortcut\" id=\"s1-1\">\n                <property name=\"title\" translatable=\"yes\" context=\"shortcut window\">New</property>\n                <property name=\"action-name\">app.new-window</property>\n              </object>\n            </child>\n            <child>\n              <object class=\"GtkShortcutsShortcut\" id=\"s1-2\">\n                <property name=\"title\" translatable=\"yes\" context=\"shortcut window\">Open</property>\n                <property name=\"action-name\">win.open</property>\n              </object>\n            </child>\n            <child>\n              <object class=\"GtkShortcutsShortcut\" id=\"s1-3\">\n                <property name=\"title\" translatable=\"yes\" context=\"shortcut window\">Save</property>\n                <property name=\"action-name\">win.save</property>\n              </object>\n            </child>\n            <child>\n              <object class=\"GtkShortcutsShortcut\" id=\"s1-4\">\n                <property name=\"title\" translatable=\"yes\" context=\"shortcut window\">Save As</property>\n                <property name=\"action-name\">win.save_as</property>\n              </object>\n            </child>\n            <child>\n              <object class=\"GtkShortcutsShortcut\" id=\"s1-5\">\n                <property name=\"title\" translatable=\"yes\" context=\"shortcut window\">Close Document</property>\n                <property name=\"action-name\">win.close</property>\n              </object>\n            </child>\n            <child>\n              <object class=\"GtkShortcutsShortcut\" id=\"s1-5d\">\n                <property name=\"title\" translatable=\"yes\" context=\"shortcut window\">Show Preferences</property>\n                <property name=\"action-name\">app.preferences</property>\n              </object>\n            </child>\n            <child>\n              <object class=\"GtkShortcutsShortcut\" id=\"s1-5c\">\n                <property name=\"title\" translatable=\"yes\" context=\"shortcut window\">Keyboard Shortcuts</property>\n                <property name=\"action-name\">win.show-help-overlay</property>\n              </object>\n            </child>\n            <child>\n              <object class=\"GtkShortcutsShortcut\" id=\"s1-5b\">\n                <property name=\"title\" translatable=\"yes\" context=\"shortcut window\">Quit Application</property>\n                <property name=\"action-name\">app.quit</property>\n              </object>\n            </child>\n          </object>\n        </child>\n        <child>\n          <object class=\"GtkShortcutsGroup\" id=\"modes\">\n            <property name=\"title\" translatable=\"yes\" context=\"shortcut window\">Modes</property>\n            <child>\n              <object class=\"GtkShortcutsShortcut\" id=\"s1-6\">\n                <property name=\"title\" translatable=\"yes\" context=\"shortcut window\">Focus Mode</property>\n                <property name=\"action-name\">win.focus_mode</property>\n              </object>\n            </child>\n            <child>\n              <object class=\"GtkShortcutsShortcut\" id=\"s1-7\">\n                <property name=\"title\" translatable=\"yes\" context=\"shortcut window\">Hemingway Mode</property>\n                <property name=\"action-name\">win.hemingway_mode</property>\n              </object>\n            </child>\n            <child>\n              <object class=\"GtkShortcutsShortcut\" id=\"s1-9\">\n                <property name=\"visible\">True</property>\n                <property name=\"title\" translatable=\"yes\" context=\"shortcut window\">Preview</property>\n                <property name=\"action-name\">win.preview</property>\n              </object>\n            </child>\n            <child>\n              <object class=\"GtkShortcutsShortcut\" id=\"s1-8\">\n                <property name=\"title\" translatable=\"yes\" context=\"shortcut window\">Fullscreen</property>\n                <property name=\"action-name\">win.fullscreen</property>\n              </object>\n            </child>\n          </object>\n        </child>\n        <child>\n          <object class=\"GtkShortcutsGroup\" id=\"search\">\n            <property name=\"title\" translatable=\"yes\" context=\"shortcut window\">Find</property>\n            <child>\n              <object class=\"GtkShortcutsShortcut\" id=\"s1-10\">\n                <property name=\"title\" translatable=\"yes\" context=\"shortcut window\">Find</property>\n                <property name=\"action-name\">win.find</property>\n              </object>\n            </child>\n            <child>\n              <object class=\"GtkShortcutsShortcut\" id=\"s1-11\">\n                <property name=\"title\" translatable=\"yes\" context=\"shortcut window\">Find and Replace</property>\n                <property name=\"action-name\">win.find_replace</property>\n              </object>\n            </child>\n          </object>\n        </child>\n        <child>\n          <object class=\"GtkShortcutsGroup\" id=\"markdown\">\n            <property name=\"title\" translatable=\"yes\" context=\"shortcut window\">Markdown</property>\n            <child>\n              <object class=\"GtkShortcutsShortcut\" id=\"s2-1\">\n                <property name=\"title\" translatable=\"yes\" context=\"shortcut window\">Separator</property>\n                <property name=\"accelerator\">&lt;Primary&gt;r</property>\n              </object>\n            </child>\n            <child>\n              <object class=\"GtkShortcutsShortcut\" id=\"s2-2\">\n                <property name=\"title\" translatable=\"yes\" context=\"shortcut window\">Header</property>\n                <property name=\"accelerator\">&lt;Primary&gt;1 4</property>\n              </object>\n            </child>\n            <child>\n              <object class=\"GtkShortcutsShortcut\" id=\"s2-3\">\n                <property name=\"title\" translatable=\"yes\" context=\"shortcut window\">List Item</property>\n                <property name=\"accelerator\">&lt;Primary&gt;u</property>\n              </object>\n            </child>\n            <child>\n              <object class=\"GtkShortcutsShortcut\" id=\"s2-4\">\n                <property name=\"visible\">True</property>\n                <property name=\"title\" translatable=\"yes\" context=\"shortcut window\">Italic</property>\n                <property name=\"accelerator\">&lt;Primary&gt;i</property>\n              </object>\n            </child>\n            <child>\n              <object class=\"GtkShortcutsShortcut\" id=\"s2-5\">\n                <property name=\"title\" translatable=\"yes\" context=\"shortcut window\">Bold</property>\n                <property name=\"accelerator\">&lt;Primary&gt;b</property>\n              </object>\n            </child>\n            <child>\n              <object class=\"GtkShortcutsShortcut\" id=\"s2-6\">\n                <property name=\"title\" translatable=\"yes\" context=\"shortcut window\">Strikeout</property>\n                <property name=\"accelerator\">&lt;Shift&gt;&lt;Primary&gt;D</property>\n              </object>\n            </child>\n          </object>\n        </child>\n        <child>\n          <object class=\"GtkShortcutsGroup\" id=\"copy-paste\">\n            <property name=\"title\" translatable=\"yes\" context=\"shortcut window\">Copy and Paste</property>\n            <child>\n              <object class=\"GtkShortcutsShortcut\" id=\"s3-1\">\n                <property name=\"title\" translatable=\"yes\" context=\"shortcut window\">Copy</property>\n                <property name=\"accelerator\">&lt;Primary&gt;C</property>\n              </object>\n            </child>\n            <child>\n              <object class=\"GtkShortcutsShortcut\" id=\"s3-2\">\n                <property name=\"title\" translatable=\"yes\" context=\"shortcut window\">Cut</property>\n                <property name=\"accelerator\">&lt;Primary&gt;X</property>\n                </object>\n            </child>\n            <child>\n              <object class=\"GtkShortcutsShortcut\" id=\"s3-3\">\n                <property name=\"title\" translatable=\"yes\" context=\"shortcut window\">Paste</property>\n                <property name=\"accelerator\">&lt;Primary&gt;V</property>\n              </object>\n            </child>\n          </object>\n        </child>\n        <child>\n          <object class=\"GtkShortcutsGroup\" id=\"undo-redo\">\n            <property name=\"title\" translatable=\"yes\" context=\"shortcut window\">Undo and Redo</property>\n            <child>\n              <object class=\"GtkShortcutsShortcut\" id=\"s4-1\">\n                <property name=\"title\" translatable=\"yes\" context=\"shortcut window\">Undo Previous Command</property>\n                <property name=\"accelerator\">&lt;Primary&gt;Z</property>\n              </object>\n            </child>\n            <child>\n              <object class=\"GtkShortcutsShortcut\" id=\"s4-2\">\n                <property name=\"title\" translatable=\"yes\" context=\"shortcut window\">Redo Previous Command</property>\n                <property name=\"accelerator\">&lt;Shift&gt;&lt;Primary&gt;Z</property>\n              </object>\n            </child>\n          </object>\n        </child>\n        <child>\n          <object class=\"GtkShortcutsGroup\" id=\"selection\">\n            <property name=\"title\" translatable=\"yes\" context=\"shortcut window\">Selection</property>\n            <child>\n              <object class=\"GtkShortcutsShortcut\" id=\"s5-1\">\n                <property name=\"title\" translatable=\"yes\" context=\"shortcut window\">Select All Text</property>\n                <property name=\"accelerator\">&lt;Primary&gt;A</property>\n              </object>\n            </child>\n          </object>\n        </child>\n      \n      </object>\n    </child>\n  </object>\n</interface>\n"
+        },
+        {
+          "path": "Statsbar.ui",
+          "content": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<interface>\n  <requires lib=\"gtk\" version=\"4.0\" />\n  <requires lib=\"adw\" version=\"1.0\" />\n  <template class=\"Statsbar\" parent=\"GtkRevealer\">\n    <property name=\"valign\">end</property>\n    <property name=\"halign\">end</property>\n    <property name=\"transition-type\">crossfade</property>\n    <property name=\"transition-duration\">750</property>\n    <property name=\"reveal-child\">1</property>\n    <property name=\"child\">\n      <object class=\"GtkStack\" id=\"buttons_stack\">\n        <property name=\"hhomogeneous\">True</property>\n        <property name=\"transition-type\">crossfade</property>\n        <child>\n          <object class=\"GtkStackPage\">\n            <property name=\"name\">stats</property>\n            <property name=\"child\">\n              <object class=\"GtkMenuButton\" id=\"stats_button\">\n                <property name=\"always-show-arrow\">True</property>\n                <property name=\"tooltip-text\" translatable=\"yes\">Show Statistics</property>\n                <property name=\"label\" translatable=\"yes\">0 Words</property>\n                <property name=\"halign\">end</property>\n                <property name=\"valign\">end</property>\n                <property name=\"margin-end\">6</property>\n                <property name=\"margin-bottom\">6</property>\n                <style>\n                  <class name=\"stats-button\" />\n                  <class name=\"flat\" />\n                </style>\n              </object>\n            </property>\n          </object>\n        </child>\n        <child>\n          <object class=\"GtkStackPage\">\n            <property name=\"name\">stats_short</property>\n            <property name=\"child\">\n              <object class=\"GtkMenuButton\" id=\"stats_button_short\">\n                <property name=\"tooltip-text\" translatable=\"yes\">Show Statistics</property>\n                <property name=\"icon-name\">radio-symbolic</property>\n                <property name=\"halign\">end</property>\n                <property name=\"valign\">end</property>\n                <property name=\"margin-end\">6</property>\n                <property name=\"margin-bottom\">6</property>\n                <style>\n                  <class name=\"stats-button\" />\n                  <class name=\"flat\" />\n                </style>\n              </object>\n            </property>\n          </object>\n        </child>\n      </object>\n    </property>\n  </template>\n</interface>"
+        },
+        {
+          "path": "TableInput.ui",
+          "content": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<interface>\n  <requires lib=\"gtk\" version=\"4.0\" />\n  <requires lib=\"adw\" version=\"1.0\" />\n  <template class=\"TableInput\" parent=\"GtkOverlay\">\n    <style>\n      <class name=\"tableinput\" />\n    </style>\n    <property name=\"child\">\n      <object class=\"GtkGrid\" id=\"grid\">\n        <property name=\"column-spacing\">2</property>\n        <property name=\"row-spacing\">2</property>\n      </object>\n    </property>\n    <child type=\"overlay\">\n      <object class=\"GtkLabel\" id=\"label\">\n        <property name=\"sensitive\">False</property>\n      </object>\n    </child>\n  </template>\n</interface>"
+        },
+        {
+          "path": "TexliveWarning.ui",
+          "content": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<interface>\n  <requires lib=\"gtk\" version=\"4.0\"/>\n  <template class=\"TexliveWarning\" parent=\"GtkStack\">\n    <property name=\"vhomogeneous\">0</property>\n    <property name=\"hhomogeneous\">0</property>\n    <child>\n      <object class=\"GtkStackPage\">\n        <property name=\"name\">flatpak</property>\n        <property name=\"child\">\n          <object class=\"GtkBox\">\n            <property name=\"halign\">center</property>\n            <property name=\"valign\">center</property>\n            <property name=\"spacing\">16</property>\n            <property name=\"margin-start\">12</property>\n            <property name=\"margin-end\">12</property>\n            <property name=\"margin-top\">12</property>\n            <property name=\"margin-bottom\">12</property>\n            <property name=\"orientation\">vertical</property>\n            <child>\n              <object class=\"GtkLabel\">\n                <style>\n                  <class name=\"title-2\"/>\n                </style>\n                <property name=\"label\" translatable=\"yes\">TexLive Required</property>\n                <property name=\"use-markup\">1</property>\n                <property name=\"justify\">center</property>\n                <property name=\"margin-bottom\">16</property>\n              </object>\n            </child>\n            <child>\n              <object class=\"GtkLabel\">\n                <property name=\"label\" translatable=\"yes\">Apostrophe needs the TeXLive extension\nin order to export PDF or LaTeX files.\n\nInstall it from Apostrophe&apos;s page in Software\nor by running the following command in a terminal:</property>\n                <property name=\"use-markup\">1</property>\n                <property name=\"justify\">center</property>\n                <property name=\"wrap\">1</property>\n              </object>\n            </child>\n            <child>\n              <object class=\"GtkEntry\" id=\"command\">\n                <property name=\"text\">flatpak install org.gnome.gitlab.somas.Apostrophe.Plugin.TexLive</property>\n                <property name=\"editable\">0</property>\n                <property name=\"max-width-chars\">48</property>\n              </object>\n            </child>\n            <child>\n              <object class=\"GtkButton\">\n                <property name=\"halign\">center</property>\n                <property name=\"label\" translatable=\"yes\">Copy to Clipboard</property>\n                <signal name=\"clicked\" handler=\"copy\" swapped=\"no\"/>\n              </object>\n            </child>\n          </object>\n        </property>\n      </object>\n    </child>\n    <child>\n      <object class=\"GtkStackPage\">\n        <property name=\"name\">distro</property>\n        <property name=\"child\">\n          <object class=\"GtkBox\">\n            <property name=\"halign\">center</property>\n            <property name=\"valign\">center</property>\n            <property name=\"spacing\">16</property>\n            <property name=\"margin-start\">12</property>\n            <property name=\"margin-end\">12</property>\n            <property name=\"margin-top\">12</property>\n            <property name=\"margin-bottom\">12</property>\n            <property name=\"orientation\">vertical</property>\n            <child>\n              <object class=\"GtkLabel\">\n                <style>\n                  <class name=\"title-2\"/>\n                </style>\n                <property name=\"label\" translatable=\"yes\">TexLive Required</property>\n                <property name=\"use-markup\">1</property>\n                <property name=\"justify\">center</property>\n                <property name=\"margin-bottom\">16</property>\n              </object>\n            </child>\n            <child>\n              <object class=\"GtkLabel\">\n                <property name=\"label\" translatable=\"yes\">Apostrophe needs TeXLive\nin order to export PDF or LaTeX files.\n\nInstall it from your distribution repositories.</property>\n                <property name=\"use-markup\">1</property>\n                <property name=\"justify\">center</property>\n                <property name=\"wrap\">1</property>\n              </object>\n            </child>\n          </object>\n        </property>\n      </object>\n    </child>\n  </template>\n</interface>\n"
+        },
+        {
+          "path": "TextView.ui",
+          "content": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<interface>\n  <requires lib=\"gtk\" version=\"4.0\" />\n  <object class=\"ApostropheTextBuffer\" id=\"buffer\">\n    <signal name=\"mark-set\" handler=\"_on_mark_set\" />\n    <signal name=\"paste-done\" handler=\"_on_paste_done\" />\n    <signal name=\"changed\" handler=\"_on_text_changed\" />\n  </object>\n  <template class=\"ApostropheTextView\" parent=\"GtkSourceView\">\n    <property name=\"wrap-mode\">word-char</property>\n    <property name=\"pixels-above-lines\">4</property>\n    <property name=\"pixels-below-lines\">4</property>\n    <property name=\"pixels-inside-wrap\">8</property>\n    <property name=\"indent-on-tab\">False</property>\n    <property name=\"buffer\">buffer</property>\n    <child>\n      <object class=\"GtkGestureClick\" id=\"gesture_controller_context\">\n        <property name=\"button\">0</property>\n        <signal name=\"pressed\" handler=\"_on_button_pressed_event\" swapped=\"no\" />\n      </object>\n    </child>\n    <child>\n      <object class=\"GtkGestureClick\" id=\"gesture_controller\">\n        <signal name=\"released\" handler=\"_on_button_release_event\" swapped=\"no\" />\n      </object>\n    </child>\n    <child>\n      <object class='GtkShortcutController'>\n        <child>\n          <object class='GtkShortcut'>\n            <property name='trigger'>&lt;Control&gt;i</property>\n            <property name='action'>action(win.insert-italic)</property>\n          </object>\n        </child>\n        <child>\n          <object class='GtkShortcut'>\n            <property name='trigger'>&lt;Control&gt;b</property>\n            <property name='action'>action(win.insert-bold)</property>\n          </object>\n        </child>\n        <child>\n          <object class='GtkShortcut'>\n            <property name='trigger'>&lt;Control&gt;r</property>\n            <property name='action'>action(win.insert-hrule)</property>\n          </object>\n        </child>\n        <child>\n          <object class='GtkShortcut'>\n            <property name='trigger'>&lt;Control&gt;u</property>\n            <property name='action'>action(win.insert-listitem)</property>\n          </object>\n        </child>\n        <child>\n          <object class='GtkShortcut'>\n            <property name='trigger'>&lt;Control&gt;&lt;Shift&gt;d</property>\n            <property name='action'>action(win.insert-strikethrough)</property>\n          </object>\n        </child>\n        <child>\n          <object class='GtkShortcut'>\n            <property name='trigger'>&lt;Control&gt;1</property>\n            <property name='action'>action(win.insert-header)</property>\n            <property name='arguments'>1</property>\n          </object>\n        </child>\n        <child>\n          <object class='GtkShortcut'>\n            <property name='trigger'>&lt;Control&gt;2</property>\n            <property name='action'>action(win.insert-header)</property>\n            <property name='arguments'>2</property>\n          </object>\n        </child>\n        <child>\n          <object class='GtkShortcut'>\n            <property name='trigger'>&lt;Control&gt;3</property>\n            <property name='action'>action(win.insert-header)</property>\n            <property name='arguments'>3</property>\n          </object>\n        </child>\n        <child>\n          <object class='GtkShortcut'>\n            <property name='trigger'>&lt;Control&gt;4</property>\n            <property name='action'>action(win.insert-header)</property>\n            <property name='arguments'>4</property>\n          </object>\n        </child>\n      </object>\n    </child>\n    <style>\n      <class name=\"apostrophe-editor\" />\n    </style>\n    <signal name=\"notify::focus-mode\" handler=\"_on_focus_mode_update\" />\n    <signal name=\"notify::spellcheck\" handler=\"_on_spellcheck_update\" />\n    <signal name=\"notify::bigger-text\" handler=\"update_font_size\" />\n  </template>\n</interface>"
+        },
+        {
+          "path": "ThemeSwitcher.ui",
+          "content": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<interface>\n  <requires lib=\"gtk\" version=\"4.0\" />\n  <template class=\"ThemeSwitcher\" parent=\"GtkBox\">\n    <style>\n      <class name=\"themeswitcher\" />\n    </style>\n    <child>\n      <object class=\"GtkBox\">\n        <property name=\"halign\">center</property>\n        <property name=\"margin-start\">12</property>\n        <property name=\"margin-end\">12</property>\n        <property name=\"margin-bottom\">6</property>\n        <property name=\"spacing\">8</property>\n        <child>\n          <object class=\"GtkCheckButton\" id=\"system_selector\">\n            <property name=\"tooltip-text\" translatable=\"yes\">Use System Colors</property>\n            <signal name=\"notify::active\" handler=\"_on_color_scheme_changed\" />\n            <style>\n              <class name=\"system\" />\n            </style>\n          </object>\n        </child>\n        <child>\n          <object class=\"GtkCheckButton\" id=\"light_selector\">\n            <property name=\"group\">system_selector</property>\n            <property name=\"tooltip-text\" translatable=\"yes\">Use Light Colors</property>\n            <signal name=\"notify::active\" handler=\"_on_color_scheme_changed\" />\n            <style>\n              <class name=\"light\" />\n            </style>\n          </object>\n        </child>\n        <child>\n          <object class=\"GtkCheckButton\" id=\"sepia_selector\">\n            <property name=\"group\">system_selector</property>\n            <property name=\"tooltip-text\" translatable=\"yes\">Use Sepia Colors</property>\n            <signal name=\"notify::active\" handler=\"_on_color_scheme_changed\" />\n            <style>\n              <class name=\"sepia\" />\n            </style>\n          </object>\n        </child>\n        <child>\n          <object class=\"GtkCheckButton\" id=\"dark_selector\">\n            <property name=\"group\">system_selector</property>\n            <property name=\"tooltip-text\" translatable=\"yes\">Use Dark Colors</property>\n            <property name=\"halign\">center</property>\n            <signal name=\"notify::active\" handler=\"_on_color_scheme_changed\" />\n            <style>\n              <class name=\"dark\" />\n            </style>\n          </object>\n        </child>\n      </object>\n    </child>\n  </template>\n</interface>\n"
+        },
+        {
+          "path": "Toolbar.ui",
+          "content": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<interface>\n  <requires lib=\"gtk\" version=\"4.0\" />\n  <requires lib=\"adw\" version=\"1.0\" />\n  <template class=\"Toolbar\" parent=\"GtkRevealer\">\n    <property name=\"valign\">end</property>\n    <property name=\"halign\">start</property>\n    <property name=\"transition-type\">crossfade</property>\n    <property name=\"reveal-child\">1</property>\n    <property name=\"child\">\n      <object class=\"GtkBox\">\n        <property name=\"margin-bottom\">6</property>\n        <property name=\"margin-top\">6</property>\n        <property name=\"spacing\">6</property>\n        <child>\n          <object class=\"GtkRevealer\" id=\"toolbar_extra_revealer\">\n            <property name=\"valign\">end</property>\n            <property name=\"halign\">start</property>\n            <property name=\"transition-type\">slide-right</property>\n            <property name=\"reveal-child\" bind-source=\"Toolbar\" bind-property=\"extra_toolbar_revealed\" />\n            <property name=\"child\">\n              <object class=\"GtkBox\">\n                <property name=\"margin-start\">6</property>\n                <property name=\"spacing\">6</property>\n                <child>\n                  <object class=\"GtkButton\">\n                    <property name=\"tooltip-text\" translatable=\"yes\">Bold</property>\n                    <property name=\"icon-name\">format-text-bold-symbolic</property>\n                    <property name=\"action-name\">win.insert-bold</property>\n                    <style>\n                      <class name=\"flat\" />\n                    </style>\n                  </object>\n                </child>\n                <child>\n                  <object class=\"GtkButton\">\n                    <property name=\"tooltip-text\" translatable=\"yes\">Italic</property>\n                    <property name=\"icon-name\">format-text-italic-symbolic</property>\n                    <property name=\"action-name\">win.insert-italic</property>\n                    <style>\n                      <class name=\"flat\" />\n                    </style>\n                  </object>\n                </child>\n                <child>\n                  <object class=\"GtkButton\">\n                    <property name=\"tooltip-text\" translatable=\"yes\">Strikethrough</property>\n                    <property name=\"icon-name\">format-text-strikethrough-symbolic</property>\n                    <property name=\"action-name\">win.insert-strikethrough</property>\n                    <style>\n                      <class name=\"flat\" />\n                    </style>\n                  </object>\n                </child>\n                <child>\n                  <object class=\"GtkButton\">\n                    <property name=\"tooltip-text\" translatable=\"yes\">Heading</property>\n                    <property name=\"icon-name\">format-text-heading-symbolic</property>\n                    <property name=\"action-name\">win.insert-header</property>\n                    <property name='action-target'>-1</property>\n                    <style>\n                      <class name=\"flat\" />\n                    </style>\n                  </object>\n                </child>\n                <child>\n                  <object class=\"GtkButton\">\n                    <property name=\"tooltip-text\" translatable=\"yes\">Unordered List</property>\n                    <property name=\"icon-name\">view-list-bullet-symbolic</property>\n                    <property name=\"action-name\">win.insert-listitem</property>\n                    <style>\n                      <class name=\"flat\" />\n                    </style>\n                  </object>\n                </child>\n                <child>\n                  <object class=\"GtkButton\">\n                    <property name=\"tooltip-text\" translatable=\"yes\">Ordered List</property>\n                    <property name=\"icon-name\">view-list-ordered-symbolic</property>\n                    <property name=\"action-name\">win.insert-ordered-listitem</property>\n                    <style>\n                      <class name=\"flat\" />\n                    </style>\n                  </object>\n                </child>\n                <child>\n                  <object class=\"GtkButton\">\n                    <property name=\"tooltip-text\" translatable=\"yes\">Check List</property>\n                    <property name=\"icon-name\">checkbox-checked-symbolic</property>\n                    <property name=\"action-name\">win.insert-checklist-listitem</property>\n                    <style>\n                      <class name=\"flat\" />\n                    </style>\n                  </object>\n                </child>\n                <child>\n                  <object class=\"GtkButton\">\n                    <property name=\"tooltip-text\" translatable=\"yes\">Blockquote</property>\n                    <property name=\"icon-name\">quotation-symbolic</property>\n                    <property name=\"action-name\">win.insert-blockquote</property>\n                    <style>\n                      <class name=\"flat\" />\n                    </style>\n                  </object>\n                </child>\n                <child>\n                  <object class=\"GtkButton\">\n                    <property name=\"tooltip-text\" translatable=\"yes\">Code</property>\n                    <property name=\"icon-name\">code-symbolic</property>\n                    <property name=\"action-name\">win.insert-codeblock</property>\n                    <style>\n                      <class name=\"flat\" />\n                    </style>\n                  </object>\n                </child>\n                <child>\n                  <object class=\"GtkButton\">\n                    <property name=\"tooltip-text\" translatable=\"yes\">Link</property>\n                    <property name=\"icon-name\">web-browser-symbolic</property>\n                    <property name=\"action-name\">win.insert-link</property>\n                    <style>\n                      <class name=\"flat\" />\n                    </style>\n                  </object>\n                </child>\n                <child>\n                  <object class=\"GtkButton\">\n                    <property name=\"tooltip-text\" translatable=\"yes\">Image</property>\n                    <property name=\"icon-name\">image-x-generic-symbolic</property>\n                    <property name=\"action-name\">win.insert-image</property>\n                    <style>\n                      <class name=\"flat\" />\n                    </style>\n                  </object>\n                </child>\n                <child>\n                  <object class=\"GtkMenuButton\">\n                    <property name=\"tooltip-text\" translatable=\"yes\">Table</property>\n                    <property name=\"icon-name\">table-symbolic</property>\n                    <property name=\"popover\">insert_table_popover</property>\n                    <property name=\"direction\">up</property>\n                    <style>\n                      <class name=\"flat\" />\n                    </style>\n                  </object>\n                </child>\n              </object>\n            </property>\n          </object>\n        </child>\n        <child>\n          <object class=\"GtkToggleButton\" id=\"show_extra_controls_button\">\n            <property name=\"icon-name\">go-next-symbolic</property>\n            <property name=\"active\" bind-source=\"Toolbar\" bind-property=\"extra_toolbar_revealed\" bind-flags=\"bidirectional\"/>\n            <style>\n              <class name=\"flat\" />\n              <class name=\"show_extra_controls_button\" />\n            </style>\n          </object>\n        </child>\n      </object>\n    </property>\n  </template>\n  <object class=\"GtkPopover\" id=\"insert_table_popover\">\n    <property name=\"child\">\n      <object class=\"TableInput\">\n        <property name=\"rows\">4</property>\n        <property name=\"columns\">6</property>\n      </object>\n    </property>\n  </object>\n</interface>\n"
+        },
+        {
+          "path": "ToolbarNarrow.ui",
+          "content": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<interface>\n  <requires lib=\"gtk\" version=\"4.0\" />\n  <requires lib=\"adw\" version=\"1.0\" />\n  <template class=\"ToolbarNarrow\" parent=\"GtkRevealer\">\n    <property name=\"valign\">end</property>\n    <property name=\"halign\">start</property>\n    <property name=\"transition-type\">crossfade</property>\n    <property name=\"reveal-child\">1</property>\n    <property name=\"child\">\n      <object class=\"GtkBox\">\n        <property name=\"margin-start\">6</property>\n        <property name=\"spacing\">6</property>\n        <property name=\"valign\">center</property>\n        <child>\n          <object class=\"GtkButton\">\n            <property name=\"tooltip-text\" translatable=\"yes\">Bold</property>\n            <property name=\"icon-name\">format-text-bold-symbolic</property>\n            <property name=\"action-name\">win.insert-bold</property>\n            <style>\n              <class name=\"flat\"/>\n            </style>\n          </object>\n        </child>\n        <child>\n          <object class=\"GtkButton\">\n            <property name=\"tooltip-text\" translatable=\"yes\">Italic</property>\n            <property name=\"icon-name\">format-text-italic-symbolic</property>\n            <property name=\"action-name\">win.insert-italic</property>\n            <style>\n              <class name=\"flat\" />\n            </style>\n          </object>\n        </child>\n        <child>\n          <object class=\"GtkButton\">\n            <property name=\"tooltip-text\" translatable=\"yes\">Strikethrough</property>\n            <property name=\"icon-name\">format-text-strikethrough-symbolic</property>\n            <property name=\"action-name\">win.insert-strikethrough</property>\n            <style>\n              <class name=\"flat\" />\n            </style>\n          </object>\n        </child>\n        <child>\n          <object class=\"GtkButton\">\n            <property name=\"tooltip-text\" translatable=\"yes\">Heading</property>\n            <property name=\"icon-name\">format-text-heading-symbolic</property>\n            <property name=\"action-name\">win.insert-header</property>\n            <property name='action-target'>-1</property>\n            <style>\n              <class name=\"flat\" />\n            </style>\n          </object>\n        </child>\n        <child>\n          <object class=\"GtkMenuButton\">\n            <property name=\"tooltip-text\" translatable=\"yes\">List</property>\n            <property name=\"icon-name\">view-list-bullet-symbolic</property>\n            <property name=\"popover\">list_popover</property>\n            <property name=\"direction\">up</property>\n            <style>\n              <class name=\"flat\" />\n            </style>\n          </object>\n        </child>\n        <child>\n          <object class=\"GtkMenuButton\">\n            <property name=\"tooltip-text\" translatable=\"yes\">Insert</property>\n            <property name=\"icon-name\">insert-object-symbolic</property>\n            <property name=\"popover\">insert_popover</property>\n            <property name=\"direction\">up</property>\n            <style>\n              <class name=\"flat\" />\n            </style>\n          </object>\n        </child>\n        <child>\n          <object class=\"GtkMenuButton\">\n            <property name=\"tooltip-text\" translatable=\"yes\">Table</property>\n            <property name=\"icon-name\">table-symbolic</property>\n            <property name=\"popover\">insert_table_popover</property>\n            <property name=\"direction\">up</property>\n            <style>\n              <class name=\"flat\" />\n            </style>\n          </object>\n        </child>\n      </object>\n    </property>\n  </template>\n  <object class=\"GtkPopover\" id=\"insert_table_popover\">\n    <property name=\"child\">\n      <object class=\"TableInput\">\n        <property name=\"rows\">4</property>\n        <property name=\"columns\">6</property>\n      </object>\n    </property>\n  </object>\n  <object class=\"GtkPopover\" id=\"list_popover\">\n    <property name=\"margin-bottom\">6</property>\n    <property name=\"has-arrow\">False</property>\n    <property name=\"child\">\n      <object class=\"GtkListBox\">\n        <child>\n          <object class=\"GtkListBoxRow\">\n            <property name=\"action-name\">win.insert-listitem</property>\n            <child>\n              <object class=\"GtkBox\">\n                <child>\n                  <object class=\"GtkImage\">\n                    <property name=\"icon-name\">view-list-bullet-symbolic</property>\n                  </object>\n                </child>\n                <child>\n                  <object class=\"GtkLabel\">\n                    <property name=\"label\" translatable=\"yes\">Unordered</property>\n                  </object>\n                </child>\n              </object>\n            </child>\n          </object>\n        </child>\n        <child>\n          <object class=\"GtkListBoxRow\">\n            <property name=\"action-name\">win.insert-ordered-listitem</property>\n            <child>\n              <object class=\"GtkBox\">\n                <child>\n                  <object class=\"GtkImage\">\n                    <property name=\"icon-name\">view-list-ordered-symbolic</property>\n                  </object>\n                </child>\n                <child>\n                  <object class=\"GtkLabel\">\n                    <property name=\"label\" translatable=\"yes\">Ordered</property>\n                  </object>\n                </child>\n              </object>\n            </child>\n          </object>\n        </child>\n        <child>\n          <object class=\"GtkListBoxRow\">\n            <property name=\"action-name\">win.insert-checklist-listitem</property>\n            <child>\n              <object class=\"GtkBox\">\n                <child>\n                  <object class=\"GtkImage\">\n                    <property name=\"icon-name\">checkbox-checked-symbolic</property>\n                  </object>\n                </child>\n                <child>\n                  <object class=\"GtkLabel\">\n                    <property name=\"label\" translatable=\"yes\">Checklist</property>\n                  </object>\n                </child>\n              </object>\n            </child>\n          </object>\n        </child>\n      </object>\n    </property>\n    <style>\n      <class name=\"menu\"/>\n    </style>\n  </object>\n  <object class=\"GtkPopover\" id=\"insert_popover\">\n    <property name=\"margin-bottom\">6</property>\n    <property name=\"has-arrow\">False</property>\n    <property name=\"child\">\n      <object class=\"GtkListBox\">\n        <child>\n          <object class=\"GtkListBoxRow\">\n            <property name=\"action-name\">win.insert-blockquote</property>\n            <child>\n              <object class=\"GtkBox\">\n                <child>\n                  <object class=\"GtkImage\">\n                    <property name=\"icon-name\">quotation-symbolic</property>\n                  </object>\n                </child>\n                <child>\n                  <object class=\"GtkLabel\">\n                    <property name=\"label\" translatable=\"yes\">Blockquote</property>\n                  </object>\n                </child>\n              </object>\n            </child>\n          </object>\n        </child>\n        <child>\n          <object class=\"GtkListBoxRow\">\n            <property name=\"action-name\">win.insert-codeblock</property>\n            <child>\n              <object class=\"GtkBox\">\n                <child>\n                  <object class=\"GtkImage\">\n                    <property name=\"icon-name\">code-symbolic</property>\n                  </object>\n                </child>\n                <child>\n                  <object class=\"GtkLabel\">\n                    <property name=\"label\" translatable=\"yes\">Code</property>\n                  </object>\n                </child>\n              </object>\n            </child>\n          </object>\n        </child>\n        <child>\n          <object class=\"GtkListBoxRow\">\n            <property name=\"action-name\">win.insert-link</property>\n            <child>\n              <object class=\"GtkBox\">\n                <child>\n                  <object class=\"GtkImage\">\n                    <property name=\"icon-name\">web-browser-symbolic</property>\n                  </object>\n                </child>\n                <child>\n                  <object class=\"GtkLabel\">\n                    <property name=\"label\" translatable=\"yes\">Link</property>\n                  </object>\n                </child>\n              </object>\n            </child>\n          </object>\n        </child>\n        <child>\n          <object class=\"GtkListBoxRow\">\n            <property name=\"action-name\">win.insert-image</property>\n            <child>\n              <object class=\"GtkBox\">\n                <child>\n                  <object class=\"GtkImage\">\n                    <property name=\"icon-name\">image-x-generic-symbolic</property>\n                  </object>\n                </child>\n                <child>\n                  <object class=\"GtkLabel\">\n                    <property name=\"label\" translatable=\"yes\">Image</property>\n                  </object>\n                </child>\n              </object>\n            </child>\n          </object>\n        </child>\n      </object>\n    </property>\n    <style>\n      <class name=\"menu\"/>\n    </style>\n  </object>\n</interface>\n"
+        },
+        {
+          "path": "Window.ui",
+          "content": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<interface>\n  <requires lib=\"gtk\" version=\"4.0\" />\n  <requires lib=\"adw\" version=\"1.0\" />\n  <template class=\"ApostropheWindow\" parent=\"AdwApplicationWindow\">\n    <property name=\"default-width\">360</property>\n    <property name=\"default-height\">600</property>\n    <property name=\"topbars-height\" bind-source=\"topbars_sized_bin\" bind-property=\"height\" />\n    <style>\n      <class name=\"apostrophe-window\" />\n    </style>\n    <property name=\"content\">\n      <object class=\"GtkOverlay\" id=\"AppOverlay\">\n        <property name=\"name\">FullscreenOverlay</property>\n        <property name=\"child\">\n          <object class=\"ApostrophePanels\" id=\"panels\">\n            <property name=\"hexpand\">true</property>\n            <property name=\"content\">\n              <object class=\"Editor\" id=\"editor\">\n                <property name=\"name\">editor</property>\n                <property name=\"top-margin\" bind-source=\"ApostropheWindow\" bind-property=\"topbars-height\" />\n                <child>\n                  <object class=\"GtkEventControllerFocus\">\n                    <signal name=\"leave\" handler=\"reveal_headerbar_bottombar\" swapped=\"no\" />\n                  </object>\n                </child>\n              </object>\n            </property>\n            <property name=\"panel\">\n              <object class=\"GtkStack\" id=\"preview_stack\">\n                <property name=\"hexpand\">1</property>\n                <property name=\"overflow\">hidden</property>\n                <property name=\"transition-type\">crossfade</property>\n                <style>\n                  <class name=\"preview-background\"/>\n                </style>\n                <child>\n                  <object class=\"GtkStackPage\">\n                    <property name=\"child\">\n                      <object class=\"AdwSpinner\" id=\"preview_spinner\">\n                        <property name=\"halign\">center</property>\n                        <property name=\"hexpand\">1</property>\n                        <property name=\"vexpand\">1</property>\n                      </object>\n                    </property>\n                  </object>\n                </child>\n                <child>\n                  <object class=\"GtkStackPage\">\n                    <property name=\"name\">webview_snapshot</property>\n                    <property name=\"child\">\n                      <object class=\"GtkPicture\" id=\"webview_snapshot\">\n                        <property name=\"hexpand\">1</property>\n                        <property name=\"vexpand\">1</property>\n                      </object>\n                    </property>\n                  </object>\n                </child>\n                <child>\n                  <object class=\"GtkStackPage\">\n                    <property name=\"child\">\n                      <object class=\"AdwStatusPage\" id=\"security_warning\">\n                        <property name=\"icon-name\">dialog-warning-symbolic</property>\n                        <property name=\"title\" translatable=\"yes\">This file may be insecure</property>\n                        <property name=\"description\" translatable=\"yes\">Previewing files from untrusted sources can be dangerous.\nIf you're unsure about the contents of this file, open it in the Restricted Preview where javascript and HTML are disabled.</property>\n                        <property name=\"child\">\n                          <object class=\"GtkBox\">\n                            <property name=\"orientation\">vertical</property>\n                            <property name=\"halign\">center</property>\n                            <property name=\"spacing\">12</property>\n                            <property name=\"margin-bottom\">12</property>\n                            <child>\n                              <object class=\"GtkButton\">\n                                <property name=\"label\" translatable=\"yes\">Load Preview</property>\n                                <signal name=\"clicked\" handler=\"load_preview\" swapped=\"no\"/>\n                                <style>\n                                  <class name=\"pill\"/>\n                                </style>\n                              </object>\n                            </child>\n                            <child>\n                              <object class=\"GtkButton\">\n                                <property name=\"label\" translatable=\"yes\">Load Restricted Preview</property>\n                                <signal name=\"clicked\" handler=\"load_restricted_preview\" swapped=\"no\"/>\n                                <style>\n                                  <class name=\"pill\"/>\n                                  <class name=\"suggested-action\"/>\n                                </style>\n                              </object>\n                            </child>\n                          </object>\n                        </property>\n                      </object>\n                    </property>\n                  </object>\n                </child>\n              </object>\n            </property>\n          </object>\n        </property>\n        <child type=\"overlay\">\n          <object class=\"GtkBox\">\n            <property name=\"orientation\">vertical</property>\n            <property name=\"valign\">start</property>\n            <child>\n              <object class=\"ApostropheSizedBin\" id=\"topbars_sized_bin\">\n                <property name=\"hexpand\">1</property>\n                <property name=\"vexpand\">1</property>\n                <property name=\"child\">\n                  <object class=\"GtkRevealer\" id=\"headerbar_revealer\">\n                    <property name=\"transition-type\">crossfade</property>\n                    <property name=\"transition-duration\">450</property>\n                    <property name=\"reveal-child\">True</property>\n                    <property name=\"overflow\">visible</property>\n                    <property name=\"child\">\n                      <object class=\"GtkBox\">\n                        <property name=\"orientation\">vertical</property>\n                        <style>\n                          <class name=\"toolbars\"/>\n                          <class name=\"top\"/>\n                        </style>\n                        <child>\n                          <object class=\"GtkWindowHandle\">\n                            <property name=\"child\">\n                              <object class=\"GtkBox\">\n                                <property name=\"orientation\">vertical</property>\n                                <child>\n                                  <object class=\"AdwBreakpointBin\" id=\"headerbars_breakpointbin\">\n                                    <child>\n                                      <object class=\"AdwBreakpoint\"  id=\"headerbars_breakpoint\">\n                                        <condition>max-width: 500px</condition>\n                                        <setter object=\"headerbar_stack\" property=\"visible-child-name\">headerbar_narrow</setter>\n                                        <setter object=\"ApostropheWindow\" property=\"preview-layout\">0</setter>\n                                      </object>\n                                    </child>\n                                    <property name=\"child\">\n                                      <object class=\"GtkStack\" id=\"headerbar_stack\">\n                                        <property name=\"hhomogeneous\">False</property>\n                                        <property name=\"transition-type\">crossfade</property>\n                                        <child>\n                                          <object class=\"GtkStackPage\">\n                                            <property name=\"name\">headerbar</property>\n                                            <property name=\"child\">\n                                              <object class=\"BaseHeaderbar\" id=\"headerbar\">\n                                                <property name=\"valign\">start</property>\n                                                <property name=\"title\" bind-source=\"ApostropheWindow\" bind-property=\"title\" />\n                                                <property name=\"subtitle\" bind-source=\"ApostropheWindow\" bind-property=\"subtitle\" />\n                                                <property name=\"is-fullscreen\" bind-source=\"ApostropheWindow\" bind-property=\"is-fullscreen\" />\n                                              </object>\n                                            </property>\n                                          </object>\n                                        </child>\n                                        <child>\n                                          <object class=\"GtkStackPage\">\n                                            <property name=\"name\">headerbar_narrow</property>\n                                            <property name=\"child\">\n                                              <object class=\"BaseHeaderbarNarrow\" id=\"headerbar_narrow\">\n                                                <property name=\"valign\">start</property>\n                                                <property name=\"title\" bind-source=\"ApostropheWindow\" bind-property=\"title\" />\n                                                <property name=\"subtitle\" bind-source=\"ApostropheWindow\" bind-property=\"subtitle\" />\n                                                <property name=\"is-fullscreen\" bind-source=\"ApostropheWindow\" bind-property=\"is-fullscreen\" />\n                                              </object>\n                                            </property>\n                                          </object>\n                                        </child>\n                                      </object>\n                                    </property>\n                                  </object>\n                                </child>\n                                <child>\n                                  <object class=\"ApostropheSearchBar\" id=\"searchbar\"></object>\n                                </child>\n                              </object>\n                            </property>\n                          </object>\n                        </child>\n                        <child>\n                          <object class=\"AdwBanner\" id=\"recovered_file_banner\">\n                            <property name=\"title\" translatable=\"yes\">Apostrophe closed unexpectedly. This file has been recovered from an autosave</property>\n                            <property name=\"revealed\" bind-source=\"ApostropheWindow\" bind-property=\"snapshot-restored\" />\n                          </object>\n                        </child>\n                        <child>\n                          <object class=\"GtkInfoBar\" id=\"discard_infobar\">\n                            <property name=\"message-type\">warning</property>\n                            <property name=\"show-close-button\">True</property>\n                            <property name=\"revealed\">False</property>\n                            <signal name=\"response\" handler=\"dismiss_discard_infobar\"/>\n                            <child>\n                              <object class=\"GtkBox\">\n                                <property name=\"orientation\">vertical</property>\n                                <child>\n                                  <object class=\"GtkLabel\" id=\"title\">\n                                    <property name=\"halign\">start</property>\n                                    <property name=\"label\" translatable=\"yes\">File Has Changed on Disk</property>\n                                    <property name=\"wrap\">True</property>\n                                    <attributes>\n                                      <attribute name=\"weight\" value=\"bold\"/>\n                                    </attributes>\n                                  </object>\n                                </child>\n                                <child>\n                                  <object class=\"GtkLabel\" id=\"subtitle\">\n                                    <property name=\"halign\">start</property>\n                                    <property name=\"label\" translatable=\"yes\">The file has been changed by another program</property>\n                                    <property name=\"wrap\">True</property>\n                                  </object>\n                                </child>\n                              </object>\n                            </child>\n                            <child type=\"action\">\n                              <object class=\"GtkButton\" id=\"discard\">\n                                <property name=\"use-underline\">True</property>\n                                <signal name=\"clicked\" handler=\"reload_file\"/>\n                                <child>\n                                  <object class=\"GtkLabel\">\n                                  <property name=\"label\" translatable=\"yes\">_Discard Changes and Reload</property>\n                                    <property name=\"use-underline\">True</property>\n                                    <property name=\"wrap\">True</property>\n                                    <property name=\"wrap-mode\">word-char</property>\n                                  </object>\n                                </child>\n                              </object>\n                            </child>\n                          </object>\n                        </child>\n                      </object>\n                    </property>\n                    <child>\n                      <object class=\"GtkEventControllerMotion\">\n                        <signal name=\"enter\" handler=\"reveal_headerbar_bottombar\" swapped=\"no\" />\n                      </object>\n                    </child>\n                  </object>\n                </property>\n              </object>\n            </child>\n            <child>\n              <object class=\"GtkProgressBar\" id=\"save_progressbar\">\n                <property name=\"visible\">0</property>\n                <property name=\"valign\">start</property>\n                <style>\n                  <class name=\"osd\" />\n                </style>\n              </object>\n            </child>\n          </object>\n        </child>\n      </object>\n    </property>\n  </template>\n</interface>\n"
+        }
+      ],
+      "roots": [
+        "Window.ui#1",
+        "Window.ui#3",
+        "Window.ui#4",
+        "Window.ui#7",
+        "Window.ui#15",
+        "Window.ui#21",
+        "Window.ui#22"
+      ],
+      "widgets": {
+        "Window.ui#1": {
+          "key": "Window.ui#1",
+          "sourceClass": "ApostropheWindow",
+          "sourceId": "ApostropheWindow",
+          "sourceKind": "object",
+          "origin": {
+            "file": "Window.ui",
+            "start": 0,
+            "end": 14155
+          },
+          "properties": {
+            "defaultWidth": {
+              "kind": "scalar",
+              "value": 360
+            },
+            "defaultHeight": {
+              "kind": "scalar",
+              "value": 600
+            },
+            "topbarsHeight": {
+              "kind": "scalar",
+              "value": "<style>\n      <class name=\"apostrophe-window\" />\n    </style>\n    <property name=\"content\">\n      <object class=\"GtkOverlay\" id=\"AppOverlay\">\n        <property name=\"name\">FullscreenOverlay"
+            },
+            "child": {
+              "kind": "scalar",
+              "value": "<object class=\"ApostrophePanels\" id=\"panels\">\n            <property name=\"hexpand\">true"
+            },
+            "content": {
+              "kind": "scalar",
+              "value": "<object class=\"Editor\" id=\"editor\">\n                <property name=\"name\">editor"
+            },
+            "topMargin": {
+              "kind": "scalar",
+              "value": "<child>\n                  <object class=\"GtkEventControllerFocus\">\n                    <signal name=\"leave\" handler=\"reveal_headerbar_bottombar\" swapped=\"no\" />\n                  </object>\n                </child>\n              </object>"
+            },
+            "panel": {
+              "kind": "scalar",
+              "value": "<object class=\"GtkStack\" id=\"preview_stack\">\n                <property name=\"hexpand\">1"
+            },
+            "overflow": {
+              "kind": "scalar",
+              "value": "hidden"
+            },
+            "transitionType": {
+              "kind": "scalar",
+              "value": "crossfade"
+            }
+          },
+          "children": [
+            {
+              "nodeKey": "Window.ui#2",
+              "origin": {
+                "file": "Window.ui",
+                "start": 0,
+                "end": 14155
+              }
+            }
+          ],
+          "resolution": {
+            "kind": "generic-widget",
+            "rendererType": "window"
+          }
+        },
+        "Window.ui#2": {
+          "key": "Window.ui#2",
+          "sourceClass": "GtkStackPage",
+          "sourceId": "imported-1",
+          "sourceKind": "object",
+          "origin": {
+            "file": "Window.ui",
+            "start": 0,
+            "end": 14155
+          },
+          "properties": {
+            "child": {
+              "kind": "scalar",
+              "value": "<object class=\"AdwSpinner\" id=\"preview_spinner\">\n                        <property name=\"halign\">center"
+            },
+            "hexpand": {
+              "kind": "scalar",
+              "value": 1
+            },
+            "vexpand": {
+              "kind": "scalar",
+              "value": 1
+            }
+          },
+          "children": [],
+          "resolution": {
+            "kind": "generic-widget",
+            "rendererType": "stack-page"
+          }
+        },
+        "Window.ui#3": {
+          "key": "Window.ui#3",
+          "sourceClass": "GtkStackPage",
+          "sourceId": "imported-2",
+          "sourceKind": "object",
+          "origin": {
+            "file": "Window.ui",
+            "start": 0,
+            "end": 14155
+          },
+          "properties": {
+            "name": {
+              "kind": "scalar",
+              "value": "webview_snapshot"
+            },
+            "child": {
+              "kind": "scalar",
+              "value": "<object class=\"GtkPicture\" id=\"webview_snapshot\">\n                        <property name=\"hexpand\">1"
+            },
+            "vexpand": {
+              "kind": "scalar",
+              "value": 1
+            }
+          },
+          "children": [],
+          "resolution": {
+            "kind": "generic-widget",
+            "rendererType": "stack-page"
+          }
+        },
+        "Window.ui#4": {
+          "key": "Window.ui#4",
+          "sourceClass": "GtkStackPage",
+          "sourceId": "imported-3",
+          "sourceKind": "object",
+          "origin": {
+            "file": "Window.ui",
+            "start": 0,
+            "end": 14155
+          },
+          "properties": {
+            "child": {
+              "kind": "scalar",
+              "value": "<object class=\"GtkBox\">\n                            <property name=\"orientation\">vertical"
+            },
+            "title": {
+              "kind": "scalar",
+              "value": "This file may be insecure"
+            },
+            "description": {
+              "kind": "scalar",
+              "value": "Previewing files from untrusted sources can be dangerous.\nIf you're unsure about the contents of this file, open it in the Restricted Preview where javascript and HTML are disabled."
+            },
+            "halign": {
+              "kind": "scalar",
+              "value": "center"
+            },
+            "spacing": {
+              "kind": "scalar",
+              "value": 12
+            },
+            "marginBottom": {
+              "kind": "scalar",
+              "value": 12
+            }
+          },
+          "children": [
+            {
+              "nodeKey": "Window.ui#5",
+              "origin": {
+                "file": "Window.ui",
+                "start": 0,
+                "end": 14155
+              }
+            },
+            {
+              "nodeKey": "Window.ui#6",
+              "origin": {
+                "file": "Window.ui",
+                "start": 0,
+                "end": 14155
+              }
+            }
+          ],
+          "resolution": {
+            "kind": "generic-widget",
+            "rendererType": "stack-page"
+          }
+        },
+        "Window.ui#5": {
+          "key": "Window.ui#5",
+          "sourceClass": "GtkButton",
+          "sourceId": "imported-4",
+          "sourceKind": "object",
+          "origin": {
+            "file": "Window.ui",
+            "start": 0,
+            "end": 14155
+          },
+          "properties": {
+            "title": {
+              "kind": "scalar",
+              "value": "Load Preview"
+            }
+          },
+          "children": [],
+          "resolution": {
+            "kind": "generic-widget",
+            "rendererType": "button"
+          }
+        },
+        "Window.ui#6": {
+          "key": "Window.ui#6",
+          "sourceClass": "GtkButton",
+          "sourceId": "imported-5",
+          "sourceKind": "object",
+          "origin": {
+            "file": "Window.ui",
+            "start": 0,
+            "end": 14155
+          },
+          "properties": {
+            "title": {
+              "kind": "scalar",
+              "value": "Load Restricted Preview"
+            }
+          },
+          "children": [],
+          "resolution": {
+            "kind": "generic-widget",
+            "rendererType": "button"
+          }
+        },
+        "Window.ui#7": {
+          "key": "Window.ui#7",
+          "sourceClass": "GtkBox",
+          "sourceId": "imported-6",
+          "sourceKind": "object",
+          "origin": {
+            "file": "Window.ui",
+            "start": 0,
+            "end": 14155
+          },
+          "properties": {
+            "orientation": {
+              "kind": "scalar",
+              "value": "vertical"
+            },
+            "valign": {
+              "kind": "scalar",
+              "value": "start"
+            }
+          },
+          "children": [
+            {
+              "nodeKey": "Window.ui#8",
+              "origin": {
+                "file": "Window.ui",
+                "start": 0,
+                "end": 14155
+              }
+            }
+          ],
+          "resolution": {
+            "kind": "generic-widget",
+            "rendererType": "box"
+          }
+        },
+        "Window.ui#8": {
+          "key": "Window.ui#8",
+          "sourceClass": "ApostropheSizedBin",
+          "sourceId": "topbars_sized_bin",
+          "sourceKind": "object",
+          "origin": {
+            "file": "Window.ui",
+            "start": 0,
+            "end": 14155
+          },
+          "properties": {
+            "title": {
+              "kind": "scalar",
+              "value": "ApostropheSizedBin"
+            },
+            "hexpand": {
+              "kind": "scalar",
+              "value": 1
+            },
+            "vexpand": {
+              "kind": "scalar",
+              "value": 1
+            },
+            "child": {
+              "kind": "scalar",
+              "value": "<object class=\"GtkBox\">\n                        <property name=\"orientation\">vertical"
+            },
+            "transitionDuration": {
+              "kind": "scalar",
+              "value": 450
+            },
+            "revealChild": {
+              "kind": "scalar",
+              "value": "True"
+            },
+            "overflow": {
+              "kind": "scalar",
+              "value": "visible"
+            }
+          },
+          "children": [
+            {
+              "nodeKey": "Window.ui#9",
+              "origin": {
+                "file": "Window.ui",
+                "start": 0,
+                "end": 14155
+              }
+            },
+            {
+              "nodeKey": "Window.ui#14",
+              "origin": {
+                "file": "Window.ui",
+                "start": 0,
+                "end": 14155
+              }
+            }
+          ],
+          "resolution": {
+            "kind": "unsupported-widget",
+            "reason": "code-defined-class"
+          }
+        },
+        "Window.ui#9": {
+          "key": "Window.ui#9",
+          "sourceClass": "GtkWindowHandle",
+          "sourceId": "imported-7",
+          "sourceKind": "object",
+          "origin": {
+            "file": "Window.ui",
+            "start": 0,
+            "end": 14155
+          },
+          "properties": {
+            "title": {
+              "kind": "scalar",
+              "value": "GtkWindowHandle"
+            },
+            "child": {
+              "kind": "scalar",
+              "value": "<object class=\"GtkBox\">\n                                <property name=\"orientation\">vertical"
+            }
+          },
+          "children": [
+            {
+              "nodeKey": "Window.ui#10",
+              "origin": {
+                "file": "Window.ui",
+                "start": 0,
+                "end": 14155
+              }
+            }
+          ],
+          "resolution": {
+            "kind": "unsupported-widget",
+            "reason": "renderer-does-not-support-class"
+          }
+        },
+        "Window.ui#10": {
+          "key": "Window.ui#10",
+          "sourceClass": "AdwBreakpointBin",
+          "sourceId": "headerbars_breakpointbin",
+          "sourceKind": "object",
+          "origin": {
+            "file": "Window.ui",
+            "start": 0,
+            "end": 14155
+          },
+          "properties": {
+            "title": {
+              "kind": "scalar",
+              "value": "AdwBreakpointBin"
+            },
+            "child": {
+              "kind": "scalar",
+              "value": "<object class=\"GtkStack\" id=\"headerbar_stack\">\n                                        <property name=\"hhomogeneous\">False"
+            },
+            "transitionType": {
+              "kind": "scalar",
+              "value": "crossfade"
+            }
+          },
+          "children": [
+            {
+              "nodeKey": "Window.ui#11",
+              "origin": {
+                "file": "Window.ui",
+                "start": 0,
+                "end": 14155
+              }
+            },
+            {
+              "nodeKey": "Window.ui#12",
+              "origin": {
+                "file": "Window.ui",
+                "start": 0,
+                "end": 14155
+              }
+            },
+            {
+              "nodeKey": "Window.ui#13",
+              "origin": {
+                "file": "Window.ui",
+                "start": 0,
+                "end": 14155
+              }
+            }
+          ],
+          "resolution": {
+            "kind": "unsupported-widget",
+            "reason": "renderer-does-not-support-class"
+          }
+        },
+        "Window.ui#11": {
+          "key": "Window.ui#11",
+          "sourceClass": "AdwBreakpoint",
+          "sourceId": "headerbars_breakpoint",
+          "sourceKind": "object",
+          "origin": {
+            "file": "Window.ui",
+            "start": 0,
+            "end": 14155
+          },
+          "properties": {
+            "title": {
+              "kind": "scalar",
+              "value": "AdwBreakpoint"
+            }
+          },
+          "children": [],
+          "resolution": {
+            "kind": "unsupported-widget",
+            "reason": "renderer-does-not-support-class"
+          }
+        },
+        "Window.ui#12": {
+          "key": "Window.ui#12",
+          "sourceClass": "GtkStackPage",
+          "sourceId": "imported-8",
+          "sourceKind": "object",
+          "origin": {
+            "file": "Window.ui",
+            "start": 0,
+            "end": 14155
+          },
+          "properties": {
+            "name": {
+              "kind": "scalar",
+              "value": "headerbar"
+            },
+            "child": {
+              "kind": "scalar",
+              "value": "<object class=\"BaseHeaderbar\" id=\"headerbar\">\n                                                <property name=\"valign\">start"
+            },
+            "title": {
+              "kind": "scalar",
+              "value": "<property name=\"subtitle\" bind-source=\"ApostropheWindow\" bind-property=\"subtitle\" />\n                                                <property name=\"is-fullscreen\" bind-source=\"ApostropheWindow\" bind-property=\"is-fullscreen\" />\n                                              </object>"
+            }
+          },
+          "children": [],
+          "resolution": {
+            "kind": "generic-widget",
+            "rendererType": "stack-page"
+          }
+        },
+        "Window.ui#13": {
+          "key": "Window.ui#13",
+          "sourceClass": "GtkStackPage",
+          "sourceId": "imported-9",
+          "sourceKind": "object",
+          "origin": {
+            "file": "Window.ui",
+            "start": 0,
+            "end": 14155
+          },
+          "properties": {
+            "name": {
+              "kind": "scalar",
+              "value": "headerbar_narrow"
+            },
+            "child": {
+              "kind": "scalar",
+              "value": "<object class=\"BaseHeaderbarNarrow\" id=\"headerbar_narrow\">\n                                                <property name=\"valign\">start"
+            },
+            "title": {
+              "kind": "scalar",
+              "value": "<property name=\"subtitle\" bind-source=\"ApostropheWindow\" bind-property=\"subtitle\" />\n                                                <property name=\"is-fullscreen\" bind-source=\"ApostropheWindow\" bind-property=\"is-fullscreen\" />\n                                              </object>"
+            }
+          },
+          "children": [],
+          "resolution": {
+            "kind": "generic-widget",
+            "rendererType": "stack-page"
+          }
+        },
+        "Window.ui#14": {
+          "key": "Window.ui#14",
+          "sourceClass": "ApostropheSearchBar",
+          "sourceId": "searchbar",
+          "sourceKind": "object",
+          "origin": {
+            "file": "Window.ui",
+            "start": 0,
+            "end": 14155
+          },
+          "properties": {
+            "title": {
+              "kind": "scalar",
+              "value": "ApostropheSearchBar"
+            }
+          },
+          "children": [],
+          "resolution": {
+            "kind": "unsupported-widget",
+            "reason": "code-defined-class"
+          }
+        },
+        "Window.ui#15": {
+          "key": "Window.ui#15",
+          "sourceClass": "AdwBanner",
+          "sourceId": "recovered_file_banner",
+          "sourceKind": "object",
+          "origin": {
+            "file": "Window.ui",
+            "start": 0,
+            "end": 14155
+          },
+          "properties": {
+            "title": {
+              "kind": "scalar",
+              "value": "Apostrophe closed unexpectedly. This file has been recovered from an autosave"
+            },
+            "revealed": {
+              "kind": "scalar",
+              "value": "False"
+            },
+            "showCloseButton": {
+              "kind": "scalar",
+              "value": "True"
+            }
+          },
+          "children": [
+            {
+              "nodeKey": "Window.ui#16",
+              "origin": {
+                "file": "Window.ui",
+                "start": 0,
+                "end": 14155
+              }
+            },
+            {
+              "nodeKey": "Window.ui#19",
+              "origin": {
+                "file": "Window.ui",
+                "start": 0,
+                "end": 14155
+              }
+            }
+          ],
+          "resolution": {
+            "kind": "unsupported-widget",
+            "reason": "renderer-does-not-support-class"
+          }
+        },
+        "Window.ui#16": {
+          "key": "Window.ui#16",
+          "sourceClass": "GtkBox",
+          "sourceId": "imported-10",
+          "sourceKind": "object",
+          "origin": {
+            "file": "Window.ui",
+            "start": 0,
+            "end": 14155
+          },
+          "properties": {
+            "orientation": {
+              "kind": "scalar",
+              "value": "vertical"
+            }
+          },
+          "children": [
+            {
+              "nodeKey": "Window.ui#17",
+              "origin": {
+                "file": "Window.ui",
+                "start": 0,
+                "end": 14155
+              }
+            },
+            {
+              "nodeKey": "Window.ui#18",
+              "origin": {
+                "file": "Window.ui",
+                "start": 0,
+                "end": 14155
+              }
+            }
+          ],
+          "resolution": {
+            "kind": "generic-widget",
+            "rendererType": "box"
+          }
+        },
+        "Window.ui#17": {
+          "key": "Window.ui#17",
+          "sourceClass": "GtkLabel",
+          "sourceId": "title",
+          "sourceKind": "object",
+          "origin": {
+            "file": "Window.ui",
+            "start": 0,
+            "end": 14155
+          },
+          "properties": {
+            "halign": {
+              "kind": "scalar",
+              "value": "start"
+            },
+            "title": {
+              "kind": "scalar",
+              "value": "File Has Changed on Disk"
+            },
+            "wrap": {
+              "kind": "scalar",
+              "value": "True"
+            }
+          },
+          "children": [],
+          "resolution": {
+            "kind": "generic-widget",
+            "rendererType": "label"
+          }
+        },
+        "Window.ui#18": {
+          "key": "Window.ui#18",
+          "sourceClass": "GtkLabel",
+          "sourceId": "subtitle",
+          "sourceKind": "object",
+          "origin": {
+            "file": "Window.ui",
+            "start": 0,
+            "end": 14155
+          },
+          "properties": {
+            "halign": {
+              "kind": "scalar",
+              "value": "start"
+            },
+            "title": {
+              "kind": "scalar",
+              "value": "The file has been changed by another program"
+            },
+            "wrap": {
+              "kind": "scalar",
+              "value": "True"
+            }
+          },
+          "children": [],
+          "resolution": {
+            "kind": "generic-widget",
+            "rendererType": "label"
+          }
+        },
+        "Window.ui#19": {
+          "key": "Window.ui#19",
+          "sourceClass": "GtkButton",
+          "sourceId": "discard",
+          "sourceKind": "object",
+          "origin": {
+            "file": "Window.ui",
+            "start": 0,
+            "end": 14155
+          },
+          "properties": {
+            "useUnderline": {
+              "kind": "scalar",
+              "value": "True"
+            }
+          },
+          "children": [
+            {
+              "nodeKey": "Window.ui#20",
+              "origin": {
+                "file": "Window.ui",
+                "start": 0,
+                "end": 14155
+              }
+            }
+          ],
+          "resolution": {
+            "kind": "generic-widget",
+            "rendererType": "button"
+          }
+        },
+        "Window.ui#20": {
+          "key": "Window.ui#20",
+          "sourceClass": "GtkLabel",
+          "sourceId": "imported-11",
+          "sourceKind": "object",
+          "origin": {
+            "file": "Window.ui",
+            "start": 0,
+            "end": 14155
+          },
+          "properties": {
+            "title": {
+              "kind": "scalar",
+              "value": "_Discard Changes and Reload"
+            },
+            "useUnderline": {
+              "kind": "scalar",
+              "value": "True"
+            },
+            "wrap": {
+              "kind": "scalar",
+              "value": "True"
+            },
+            "wrapMode": {
+              "kind": "scalar",
+              "value": "word-char"
+            }
+          },
+          "children": [],
+          "resolution": {
+            "kind": "generic-widget",
+            "rendererType": "label"
+          }
+        },
+        "Window.ui#21": {
+          "key": "Window.ui#21",
+          "sourceClass": "GtkEventControllerMotion",
+          "sourceId": "imported-12",
+          "sourceKind": "object",
+          "origin": {
+            "file": "Window.ui",
+            "start": 0,
+            "end": 14155
+          },
+          "properties": {
+            "title": {
+              "kind": "scalar",
+              "value": "GtkEventControllerMotion"
+            }
+          },
+          "children": [],
+          "resolution": {
+            "kind": "unsupported-widget",
+            "reason": "renderer-does-not-support-class"
+          }
+        },
+        "Window.ui#22": {
+          "key": "Window.ui#22",
+          "sourceClass": "GtkProgressBar",
+          "sourceId": "save_progressbar",
+          "sourceKind": "object",
+          "origin": {
+            "file": "Window.ui",
+            "start": 0,
+            "end": 14155
+          },
+          "properties": {
+            "title": {
+              "kind": "scalar",
+              "value": "GtkProgressBar"
+            },
+            "visible": {
+              "kind": "scalar",
+              "value": 0
+            },
+            "valign": {
+              "kind": "scalar",
+              "value": "start"
+            }
+          },
+          "children": [],
+          "resolution": {
+            "kind": "unsupported-widget",
+            "reason": "renderer-does-not-support-class"
+          }
+        }
+      },
+      "templates": {},
+      "diagnostics": []
+    },
+    "screens": [
+      {
+        "id": "imported-screen-1",
+        "title": "Apostrophe 1",
+        "type": "standard",
+        "width": 1024,
+        "height": 720,
+        "rootNode": {
+          "id": "ApostropheWindow",
+          "type": "window",
+          "sourceKey": "Window.ui#1",
+          "sourceClass": "ApostropheWindow",
+          "children": [
+            {
+              "id": "imported-1",
+              "type": "stack-page",
+              "sourceKey": "Window.ui#2",
+              "sourceClass": "GtkStackPage",
+              "children": [],
+              "child": "<object class=\"AdwSpinner\" id=\"preview_spinner\">\n                        <property name=\"halign\">center",
+              "hexpand": 1,
+              "vexpand": 1
+            }
+          ],
+          "defaultWidth": 360,
+          "defaultHeight": 600,
+          "topbarsHeight": "<style>\n      <class name=\"apostrophe-window\" />\n    </style>\n    <property name=\"content\">\n      <object class=\"GtkOverlay\" id=\"AppOverlay\">\n        <property name=\"name\">FullscreenOverlay",
+          "child": "<object class=\"ApostrophePanels\" id=\"panels\">\n            <property name=\"hexpand\">true",
+          "content": "<object class=\"Editor\" id=\"editor\">\n                <property name=\"name\">editor",
+          "topMargin": "<child>\n                  <object class=\"GtkEventControllerFocus\">\n                    <signal name=\"leave\" handler=\"reveal_headerbar_bottombar\" swapped=\"no\" />\n                  </object>\n                </child>\n              </object>",
+          "panel": "<object class=\"GtkStack\" id=\"preview_stack\">\n                <property name=\"hexpand\">1",
+          "overflow": "hidden",
+          "transitionType": "crossfade"
+        }
+      },
+      {
+        "id": "imported-screen-2",
+        "title": "Apostrophe 2",
+        "type": "standard",
+        "width": 1024,
+        "height": 720,
+        "rootNode": {
+          "id": "imported-2",
+          "type": "stack-page",
+          "sourceKey": "Window.ui#3",
+          "sourceClass": "GtkStackPage",
+          "children": [],
+          "name": "webview_snapshot",
+          "child": "<object class=\"GtkPicture\" id=\"webview_snapshot\">\n                        <property name=\"hexpand\">1",
+          "vexpand": 1
+        }
+      },
+      {
+        "id": "imported-screen-3",
+        "title": "This file may be insecure",
+        "type": "standard",
+        "width": 1024,
+        "height": 720,
+        "rootNode": {
+          "id": "imported-3",
+          "type": "stack-page",
+          "sourceKey": "Window.ui#4",
+          "sourceClass": "GtkStackPage",
+          "children": [
+            {
+              "id": "imported-4",
+              "type": "button",
+              "sourceKey": "Window.ui#5",
+              "sourceClass": "GtkButton",
+              "children": [],
+              "title": "Load Preview"
+            },
+            {
+              "id": "imported-5",
+              "type": "button",
+              "sourceKey": "Window.ui#6",
+              "sourceClass": "GtkButton",
+              "children": [],
+              "title": "Load Restricted Preview"
+            }
+          ],
+          "child": "<object class=\"GtkBox\">\n                            <property name=\"orientation\">vertical",
+          "title": "This file may be insecure",
+          "description": "Previewing files from untrusted sources can be dangerous.\nIf you're unsure about the contents of this file, open it in the Restricted Preview where javascript and HTML are disabled.",
+          "halign": "center",
+          "spacing": 12,
+          "marginBottom": 12
+        }
+      },
+      {
+        "id": "imported-screen-4",
+        "title": "Apostrophe 4",
+        "type": "standard",
+        "width": 1024,
+        "height": 720,
+        "rootNode": {
+          "id": "imported-6",
+          "type": "box",
+          "sourceKey": "Window.ui#7",
+          "sourceClass": "GtkBox",
+          "children": [
+            {
+              "id": "topbars_sized_bin",
+              "type": "custom-widget",
+              "sourceKey": "Window.ui#8",
+              "sourceClass": "ApostropheSizedBin",
+              "children": [
+                {
+                  "id": "imported-7",
+                  "type": "custom-widget",
+                  "sourceKey": "Window.ui#9",
+                  "sourceClass": "GtkWindowHandle",
+                  "children": [
+                    {
+                      "id": "headerbars_breakpointbin",
+                      "type": "custom-widget",
+                      "sourceKey": "Window.ui#10",
+                      "sourceClass": "AdwBreakpointBin",
+                      "children": [
+                        {
+                          "id": "headerbars_breakpoint",
+                          "type": "custom-widget",
+                          "sourceKey": "Window.ui#11",
+                          "sourceClass": "AdwBreakpoint",
+                          "children": [],
+                          "title": "AdwBreakpoint"
+                        },
+                        {
+                          "id": "imported-8",
+                          "type": "stack-page",
+                          "sourceKey": "Window.ui#12",
+                          "sourceClass": "GtkStackPage",
+                          "children": [],
+                          "name": "headerbar",
+                          "child": "<object class=\"BaseHeaderbar\" id=\"headerbar\">\n                                                <property name=\"valign\">start",
+                          "title": "<property name=\"subtitle\" bind-source=\"ApostropheWindow\" bind-property=\"subtitle\" />\n                                                <property name=\"is-fullscreen\" bind-source=\"ApostropheWindow\" bind-property=\"is-fullscreen\" />\n                                              </object>"
+                        },
+                        {
+                          "id": "imported-9",
+                          "type": "stack-page",
+                          "sourceKey": "Window.ui#13",
+                          "sourceClass": "GtkStackPage",
+                          "children": [],
+                          "name": "headerbar_narrow",
+                          "child": "<object class=\"BaseHeaderbarNarrow\" id=\"headerbar_narrow\">\n                                                <property name=\"valign\">start",
+                          "title": "<property name=\"subtitle\" bind-source=\"ApostropheWindow\" bind-property=\"subtitle\" />\n                                                <property name=\"is-fullscreen\" bind-source=\"ApostropheWindow\" bind-property=\"is-fullscreen\" />\n                                              </object>"
+                        }
+                      ],
+                      "title": "AdwBreakpointBin",
+                      "child": "<object class=\"GtkStack\" id=\"headerbar_stack\">\n                                        <property name=\"hhomogeneous\">False",
+                      "transitionType": "crossfade"
+                    }
+                  ],
+                  "title": "GtkWindowHandle",
+                  "child": "<object class=\"GtkBox\">\n                                <property name=\"orientation\">vertical"
+                },
+                {
+                  "id": "searchbar",
+                  "type": "custom-widget",
+                  "sourceKey": "Window.ui#14",
+                  "sourceClass": "ApostropheSearchBar",
+                  "children": [],
+                  "title": "ApostropheSearchBar"
+                }
+              ],
+              "title": "ApostropheSizedBin",
+              "hexpand": 1,
+              "vexpand": 1,
+              "child": "<object class=\"GtkBox\">\n                        <property name=\"orientation\">vertical",
+              "transitionDuration": 450,
+              "revealChild": "True",
+              "overflow": "visible"
+            }
+          ],
+          "orientation": "vertical",
+          "valign": "start"
+        }
+      },
+      {
+        "id": "imported-screen-5",
+        "title": "Apostrophe closed unexpectedly. This file has been recovered from an autosave",
+        "type": "standard",
+        "width": 1024,
+        "height": 720,
+        "rootNode": {
+          "id": "recovered_file_banner",
+          "type": "custom-widget",
+          "sourceKey": "Window.ui#15",
+          "sourceClass": "AdwBanner",
+          "children": [
+            {
+              "id": "imported-10",
+              "type": "box",
+              "sourceKey": "Window.ui#16",
+              "sourceClass": "GtkBox",
+              "children": [
+                {
+                  "id": "title",
+                  "type": "label",
+                  "sourceKey": "Window.ui#17",
+                  "sourceClass": "GtkLabel",
+                  "children": [],
+                  "halign": "start",
+                  "title": "File Has Changed on Disk",
+                  "wrap": "True"
+                },
+                {
+                  "id": "subtitle",
+                  "type": "label",
+                  "sourceKey": "Window.ui#18",
+                  "sourceClass": "GtkLabel",
+                  "children": [],
+                  "halign": "start",
+                  "title": "The file has been changed by another program",
+                  "wrap": "True"
+                }
+              ],
+              "orientation": "vertical"
+            },
+            {
+              "id": "discard",
+              "type": "button",
+              "sourceKey": "Window.ui#19",
+              "sourceClass": "GtkButton",
+              "children": [
+                {
+                  "id": "imported-11",
+                  "type": "label",
+                  "sourceKey": "Window.ui#20",
+                  "sourceClass": "GtkLabel",
+                  "children": [],
+                  "title": "_Discard Changes and Reload",
+                  "useUnderline": "True",
+                  "wrap": "True",
+                  "wrapMode": "word-char"
+                }
+              ],
+              "useUnderline": "True"
+            }
+          ],
+          "title": "Apostrophe closed unexpectedly. This file has been recovered from an autosave",
+          "revealed": "False",
+          "showCloseButton": "True"
+        }
+      },
+      {
+        "id": "imported-screen-6",
+        "title": "GtkEventControllerMotion",
+        "type": "standard",
+        "width": 1024,
+        "height": 720,
+        "rootNode": {
+          "id": "imported-12",
+          "type": "custom-widget",
+          "sourceKey": "Window.ui#21",
+          "sourceClass": "GtkEventControllerMotion",
+          "children": [],
+          "title": "GtkEventControllerMotion"
+        }
+      },
+      {
+        "id": "imported-screen-7",
+        "title": "GtkProgressBar",
+        "type": "standard",
+        "width": 1024,
+        "height": 720,
+        "rootNode": {
+          "id": "save_progressbar",
+          "type": "custom-widget",
+          "sourceKey": "Window.ui#22",
+          "sourceClass": "GtkProgressBar",
+          "children": [],
+          "title": "GtkProgressBar",
+          "visible": 0,
+          "valign": "start"
+        }
+      }
+    ]
+  },
+  "assets": {}
+}

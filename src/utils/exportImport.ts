@@ -1,5 +1,6 @@
 import type { MockupDocument, AdwNode } from '../types/mockup';
 import { getImageBlob, saveImageBlob } from '../services/imageStore';
+import { blueprintToDocument } from './blueprint';
 
 interface ExportPayload {
   version: number;
@@ -69,6 +70,11 @@ export async function exportDocumentFile(doc: MockupDocument): Promise<void> {
 
 export async function importDocumentFile(file: File): Promise<MockupDocument> {
   const text = await file.text();
+  const filename = file.name.toLowerCase();
+  if (filename.endsWith('.blp') || filename.endsWith('.ui')) {
+    const title = file.name.replace(/\.(blp|ui)$/i, '').replace(/[-_]+/g, ' ').trim() || 'Imported GNOME App';
+    return blueprintToDocument(text, title);
+  }
   const payload: ExportPayload = JSON.parse(text);
 
   if (!payload.document) throw new Error('Invalid mockup document format');

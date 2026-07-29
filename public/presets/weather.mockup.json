@@ -1,64 +1,611 @@
 {
   "version": 1,
-  "exportedAt": "2026-07-29T00:00:00Z",
+  "exportedAt": "2026-07-29T13:07:24.216Z",
   "document": {
-    "id": "preset-weather",
-    "title": "GNOME Weather",
+    "id": "imported-document",
+    "title": "Weather",
     "colorScheme": "auto",
     "edges": [],
-    "screens": [
-      {
-        "id": "weather-main",
-        "title": "Weather — Forecast",
-        "type": "standard",
-        "width": 780,
-        "height": 580,
-        "rootNode": {
-          "id": "w-root",
-          "type": "window",
+    "sourceProject": {
+      "files": [
+        {
+          "path": "city.ui",
+          "content": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<interface>\n  <requires lib=\"gtk\" version=\"4.0\" />\n  <template class=\"Gjs_WeatherView\">\n    <child>\n      <object class=\"GtkStack\" id=\"stack\">\n        <property name=\"transition_type\">crossfade</property>\n        <child>\n          <object class=\"GtkStackPage\">\n            <property name=\"name\">loading</property>\n            <property name=\"child\">\n              <object class=\"AdwSpinner\"/>\n            </property>\n          </object>\n        </child>\n      </object>\n    </child>\n  </template>\n</interface>\n"
+        },
+        {
+          "path": "day-entry.ui",
+          "content": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<interface>\n  <requires lib=\"gtk\" version=\"4.0\" />\n  <object class=\"GtkPopover\" id=\"more_menu\">\n    <style>\n      <class name=\"day-popover\" />\n    </style>\n    <property name=\"child\">\n      <object class=\"GtkGrid\">\n        <property name=\"row_spacing\">8</property>\n        <property name=\"column_spacing\">16</property>\n\n        <property name=\"margin_top\">16</property>\n        <property name=\"margin_bottom\">16</property>\n        <property name=\"margin_start\">16</property>\n        <property name=\"margin_end\">16</property>\n        <child>\n          <object class=\"GtkLabel\">\n            <property name=\"halign\">end</property>\n            <property name=\"label\" translatable=\"yes\">Night</property>\n            <layout>\n              <property name=\"column\">0</property>\n              <property name=\"row\">1</property>\n            </layout>\n            <style>\n              <class name=\"caption\" />\n            </style>\n          </object>\n        </child>\n        <child>\n          <object class=\"GtkLabel\">\n            <property name=\"halign\">end</property>\n            <property name=\"label\" translatable=\"yes\">Morning</property>\n            <layout>\n              <property name=\"column\">0</property>\n              <property name=\"row\">2</property>\n            </layout>\n            <style>\n              <class name=\"caption\" />\n            </style>\n          </object>\n        </child>\n        <child>\n          <object class=\"GtkLabel\">\n            <property name=\"halign\">end</property>\n            <property name=\"label\" translatable=\"yes\">Afternoon</property>\n            <layout>\n              <property name=\"column\">0</property>\n              <property name=\"row\">3</property>\n            </layout>\n            <style>\n              <class name=\"caption\" />\n            </style>\n          </object>\n        </child>\n        <child>\n          <object class=\"GtkLabel\">\n            <property name=\"halign\">end</property>\n            <property name=\"label\" translatable=\"yes\">Evening</property>\n            <layout>\n              <property name=\"column\">0</property>\n              <property name=\"row\">4</property>\n            </layout>\n            <style>\n              <class name=\"caption\" />\n            </style>\n          </object>\n        </child>\n        <child>\n          <object class=\"GtkImage\" id=\"nightImage\">\n            <property name=\"icon_name\">weather-showers-symbolic</property>\n            <layout>\n              <property name=\"column\">1</property>\n              <property name=\"row\">1</property>\n            </layout>\n          </object>\n        </child>\n        <child>\n          <object class=\"GtkImage\" id=\"morningImage\">\n            <property name=\"icon_name\">weather-showers-symbolic</property>\n            <layout>\n              <property name=\"column\">1</property>\n              <property name=\"row\">2</property>\n            </layout>\n          </object>\n        </child>\n        <child>\n          <object class=\"GtkImage\" id=\"afternoonImage\">\n            <property name=\"icon_name\">weather-showers-symbolic</property>\n            <layout>\n              <property name=\"column\">1</property>\n              <property name=\"row\">3</property>\n            </layout>\n          </object>\n        </child>\n        <child>\n          <object class=\"GtkImage\" id=\"eveningImage\">\n            <property name=\"icon_name\">weather-showers-symbolic</property>\n            <layout>\n              <property name=\"column\">1</property>\n              <property name=\"row\">4</property>\n            </layout>\n          </object>\n        </child>\n        <child>\n          <object class=\"GtkImage\">\n            <property name=\"icon_name\">temperature-symbolic</property>\n            <layout>\n              <property name=\"column\">2</property>\n              <property name=\"row\">0</property>\n            </layout>\n          </object>\n        </child>\n        <child>\n          <object class=\"GtkLabel\" id=\"nightTemperatureLabel\">\n            <property name=\"label\">16°</property>\n            <layout>\n              <property name=\"column\">2</property>\n              <property name=\"row\">1</property>\n            </layout>\n          </object>\n        </child>\n        <child>\n          <object class=\"GtkLabel\" id=\"morningTemperatureLabel\">\n            <property name=\"label\">16°</property>\n            <layout>\n              <property name=\"column\">2</property>\n              <property name=\"row\">2</property>\n            </layout>\n          </object>\n        </child>\n        <child>\n          <object class=\"GtkLabel\" id=\"afternoonTemperatureLabel\">\n            <property name=\"label\">16°</property>\n            <layout>\n              <property name=\"column\">2</property>\n              <property name=\"row\">3</property>\n            </layout>\n          </object>\n        </child>\n        <child>\n          <object class=\"GtkLabel\" id=\"eveningTemperatureLabel\">\n            <property name=\"label\">16°</property>\n            <layout>\n              <property name=\"column\">2</property>\n              <property name=\"row\">4</property>\n            </layout>\n          </object>\n        </child>\n        <child>\n          <object class=\"GtkImage\">\n            <property name=\"icon_name\">weather-showers-scattered-symbolic</property>\n            <layout>\n              <property name=\"column\">3</property>\n              <property name=\"row\">0</property>\n            </layout>\n          </object>\n        </child>\n        <child>\n          <object class=\"GtkLabel\" id=\"nightHumidity\">\n            <property name=\"label\">2.1 mm</property>\n            <layout>\n              <property name=\"column\">3</property>\n              <property name=\"row\">1</property>\n            </layout>\n          </object>\n        </child>\n        <child>\n          <object class=\"GtkLabel\" id=\"morningHumidity\">\n            <property name=\"label\">2.1 mm</property>\n            <layout>\n              <property name=\"column\">3</property>\n              <property name=\"row\">2</property>\n            </layout>\n          </object>\n        </child>\n        <child>\n          <object class=\"GtkLabel\" id=\"afternoonHumidity\">\n            <property name=\"label\">2.1 mm</property>\n            <layout>\n              <property name=\"column\">3</property>\n              <property name=\"row\">3</property>\n            </layout>\n          </object>\n        </child>\n        <child>\n          <object class=\"GtkLabel\" id=\"eveningHumidity\">\n            <property name=\"label\">2.1 mm</property>\n            <layout>\n              <property name=\"column\">3</property>\n              <property name=\"row\">4</property>\n            </layout>\n          </object>\n        </child>\n        <child>\n          <object class=\"GtkImage\">\n            <property name=\"icon_name\">weather-windy</property>\n            <layout>\n              <property name=\"column\">4</property>\n              <property name=\"row\">0</property>\n            </layout>\n          </object>\n        </child>\n        <child>\n          <object class=\"GtkLabel\" id=\"nightWind\">\n            <property name=\"label\">5 m/s</property>\n            <layout>\n              <property name=\"column\">4</property>\n              <property name=\"row\">1</property>\n            </layout>\n          </object>\n        </child>\n        <child>\n          <object class=\"GtkLabel\" id=\"morningWind\">\n            <property name=\"label\">5 m/s</property>\n            <layout>\n              <property name=\"column\">4</property>\n              <property name=\"row\">2</property>\n            </layout>\n          </object>\n        </child>\n        <child>\n          <object class=\"GtkLabel\" id=\"afternoonWind\">\n            <property name=\"label\">5 m/s</property>\n            <layout>\n              <property name=\"column\">4</property>\n              <property name=\"row\">3</property>\n            </layout>\n          </object>\n        </child>\n        <child>\n          <object class=\"GtkLabel\" id=\"eveningWind\">\n            <property name=\"label\">5 m/s</property>\n            <layout>\n              <property name=\"column\">4</property>\n              <property name=\"row\">4</property>\n            </layout>\n          </object>\n        </child>\n      </object>\n    </property>\n  </object>\n  <template class=\"Gjs_DayEntry\" parent=\"AdwBin\">\n    <property name=\"width_request\">100</property>\n    <property name=\"height_request\">200</property>\n    <property name=\"margin_top\">18</property>\n    <property name=\"margin_bottom\">18</property>\n    <property name=\"hexpand\">True</property>\n    <property name=\"vexpand\">True</property>\n    <child>\n      <object class=\"GtkBox\">\n        <property name=\"orientation\">vertical</property>\n        <child>\n          <object class=\"GtkLabel\" id=\"nameLabel\">\n            <property name=\"margin_top\">8</property>\n            <property name=\"label\">Tues</property>\n            <style>\n              <class name=\"caption-heading\" />\n            </style>\n          </object>\n        </child>\n        <child>\n          <object class=\"GtkLabel\" id=\"dateLabel\">\n            <property name=\"margin_top\">8</property>\n            <property name=\"label\">7 June</property>\n            <style>\n              <class name=\"caption\" />\n            </style>\n          </object>\n        </child>\n        <child>\n          <object class=\"GtkImage\" id=\"image\">\n            <property name=\"valign\">start</property>\n            <property name=\"pixel_size\">32</property>\n            <property name=\"icon_name\">weather-showers-symbolic</property>\n            <style>\n              <class name=\"forecast-graphic\" />\n            </style>\n          </object>\n        </child>\n        <child>\n          <object class=\"Gjs_Thermometer\" id=\"thermometer\">\n            <property name=\"vexpand\">True</property>\n            <property name=\"hexpand\">True</property>\n          </object>\n        </child>\n        <child>\n          <object class=\"GtkMenuButton\">\n            <property name=\"halign\">center</property>\n            <property name=\"icon_name\">view-more-symbolic</property>\n            <property name=\"valign\">center</property>\n            <property name=\"popover\">more_menu</property>\n            <style>\n              <class name=\"forecast-button\" />\n              <class name=\"image-button\" />\n              <class name=\"circular\" />\n              <class name=\"flat\" />\n            </style>\n          </object>\n        </child>\n      </object>\n    </child>\n  </template>\n</interface>"
+        },
+        {
+          "path": "hour-entry.ui",
+          "content": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<interface>\n  <requires lib=\"gtk\" version=\"4.0\" />\n  <template class=\"Gjs_HourEntry\" parent=\"AdwBin\">\n    <property name=\"width_request\">75</property>\n    <property name=\"height_request\">200</property>\n    <property name=\"hexpand\">true</property>\n    <property name=\"vexpand\">true</property>\n    <property name=\"margin_top\">18</property>\n    <property name=\"margin_bottom\">18</property>\n    <child>\n      <object class=\"GtkBox\">\n        <property name=\"orientation\">vertical</property>\n        <property name=\"spacing\">18</property>\n        <child>\n          <object class=\"GtkLabel\" id=\"timeLabel\">\n            <property name=\"label\">Now</property>\n          </object>\n        </child>\n        <child>\n          <object class=\"GtkImage\" id=\"image\">\n            <property name=\"valign\">start</property>\n            <property name=\"vexpand\">true</property>\n            <property name=\"pixel_size\">32</property>\n            <property name=\"icon_name\">weather-showers-symbolic</property>\n            <style>\n              <class name=\"forecast-graphic\" />\n            </style>\n          </object>\n        </child>\n        <child>\n          <object class=\"GtkLabel\" id=\"forecastTemperatureLabel\">\n\n            <property name=\"valign\">2</property>\n            <property name=\"label\">13°</property>\n            <style>\n              <class name=\"forecast-temperature-label\" />\n            </style>\n          </object>\n        </child>\n      </object>\n    </child>\n  </template>\n</interface>"
+        },
+        {
+          "path": "places-popover.ui",
+          "content": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<interface>\n  <requires lib=\"gtk\" version=\"4.0\" />\n\n  <object class=\"GtkBox\" id=\"popoverBox\">\n\n    <property name=\"orientation\">vertical</property>\n    <property name=\"width-request\">320</property>\n    <property name=\"height-request\">300</property>\n    <child>\n      <object class=\"Gjs_LocationSearchEntry\" id=\"location-entry\">\n        <property name=\"name\">locationEntry</property>\n        <property name=\"hexpand\">True</property>\n\n        <property name=\"placeholder-text\" translatable=\"yes\">Search for a city</property>\n      </object>\n    </child>\n    <child>\n      <object class=\"GtkStack\" id=\"popover-stack\">\n        <property name=\"hexpand\">True</property>\n        <property name=\"vexpand\">True</property>\n        <property name=\"width-request\">300</property>\n        <child>\n          <object class=\"GtkScrolledWindow\" id=\"search-list-scroll-window\">\n            <property name=\"hscrollbar-policy\">never</property>\n            <property name=\"vexpand\">True</property>\n            <style>\n              <class name=\"undershoot-top\" />\n            </style>\n            <child>\n              <object class=\"GtkListView\" id=\"search-list-view\">\n                <property name=\"name\">search-list-view</property>\n                <property name=\"hscroll-policy\">minimum</property>\n              </object>\n            </child>\n          </object>\n        </child>\n        <child>\n          <object class=\"GtkScrolledWindow\" id=\"locations-list-scroll-window\">\n            <property name=\"hscrollbar-policy\">never</property>\n            <style>\n              <class name=\"undershoot-top\" />\n            </style>\n            <child>\n              <object class=\"GtkViewport\">\n                <child>\n                  <object class=\"GtkListBox\" id=\"locations-list-box\">\n                    <property name=\"name\">locations-list-box</property>\n                    <property name=\"hexpand\">True</property>\n                    <property name=\"selection-mode\">none</property>\n                    <property name=\"show-separators\">False</property>\n                    <child type=\"placeholder\">\n                      <object class=\"GtkGrid\" id=\"empty-search-grid\">\n                        <property name=\"name\">search-city-grid</property>\n                        <property name=\"orientation\">vertical</property>\n                        <property name=\"margin_top\">25</property>\n                        <property name=\"margin_bottom\">25</property>\n                        <property name=\"halign\">center</property>\n                        <property name=\"valign\">center</property>\n                        <property name=\"row_homogeneous\">true</property>\n                        <child>\n                          <object class=\"GtkImage\" id=\"search-image\">\n                            <property name=\"icon_name\">edit-find-symbolic</property>\n                            <property name=\"icon_size\">2</property>\n                            <property name=\"use_fallback\">true</property>\n                            <property name=\"halign\">center</property>\n                            <property name=\"valign\">center</property>\n                            <layout>\n                              <property name=\"column\">0</property>\n                              <property name=\"row\">0</property>\n                            </layout>\n                          </object>\n                        </child>\n                        <child>\n                          <object class=\"GtkLabel\" id=\"search-label\">\n                            <property name=\"label\" translatable=\"yes\">Search for a city</property>\n                            <property name=\"halign\">center</property>\n                            <property name=\"valign\">center</property>\n                            <style>\n                              <class name=\"dim-label\" />\n                            </style>\n                            <layout>\n                              <property name=\"column\">0</property>\n                              <property name=\"row\">1</property>\n                            </layout>\n                          </object>\n                        </child>\n                      </object>\n                    </child>\n                  </object>\n                </child>\n              </object>\n            </child>\n          </object>\n        </child>\n      </object>\n    </child>\n  </object>\n</interface>\n"
+        },
+        {
+          "path": "weather-widget.ui",
+          "content": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<interface>\n  <requires lib=\"gtk\" version=\"4.0\"/>\n  <template class=\"Gjs_WeatherWidget\">\n    <child>\n      <object class=\"GtkBox\" id=\"outerBox\">\n        <property name=\"orientation\">vertical</property>\n        <property name=\"margin-start\">0</property>\n        <property name=\"margin-end\">0</property>\n        <property name=\"margin-top\">18</property>\n        <property name=\"margin-bottom\">18</property>\n        <property name=\"spacing\">20</property>\n        <child>\n          <object class=\"GtkGrid\">\n            <property name=\"name\">conditions-grid</property>\n            <property name=\"column_spacing\">10</property>\n            <child>\n              <object class=\"GtkImage\" id=\"conditionsImage\">\n                <property name=\"halign\">start</property>\n                <property name=\"valign\">center</property>\n                <property name=\"pixel_size\">84</property>\n                <style>\n                  <class name=\"icon-dropshadow\"/>\n                </style>\n                <layout>\n                  <property name=\"column\">0</property>\n                  <property name=\"row\">0</property>\n                  <property name=\"row-span\">2</property>\n                </layout>\n              </object>\n            </child>\n            <child>\n              <object class=\"GtkMenuButton\" id=\"placesButton\">\n                <property name=\"halign\">start</property>\n                <property name=\"valign\">start</property>\n                <property name=\"always-show-arrow\">True</property>\n                <property name=\"child\">\n                  <object class=\"GtkLabel\" id=\"placesLabel\">\n                    <property name=\"name\">places-label</property>\n                    <property name=\"wrap\">true</property>\n                    <property name=\"wrap-mode\">word-char</property>\n                    <property name=\"label\" translatable=\"yes\">Places</property>\n                  </object>\n                </property>\n                <style>\n                  <class name=\"text-button\"/>\n                  <class name=\"flat\"/>\n                </style>\n                <layout>\n                  <property name=\"column\">1</property>\n                  <property name=\"row\">0</property>\n                </layout>\n              </object>\n            </child>\n            <child>\n              <object class=\"GtkBox\" id=\"temperatureBox\">\n                <property name=\"halign\">start</property>\n                <property name=\"valign\">start</property>\n                <property name=\"spacing\">8</property>\n                <property name=\"baseline_position\">bottom</property>\n                <child>\n                  <object class=\"GtkLabel\" id=\"temperatureLabel\">\n                    <property name=\"name\">temperature-label</property>\n                    <property name=\"halign\">start</property>\n                    <property name=\"valign\">baseline</property>\n                  </object>\n                </child>\n                <child>\n                  <object class=\"GtkLabel\" id=\"apparentLabel\">\n                    <property name=\"halign\">start</property>\n                    <property name=\"valign\">baseline</property>\n                    <style>\n                      <class name=\"caption\" />\n                    </style>\n                  </object>\n                </child>\n                <layout>\n                  <property name=\"column\">1</property>\n                  <property name=\"row\">1</property>\n                </layout>\n              </object>\n            </child>\n          </object>\n        </child>\n        <child>\n          <object class=\"GtkOverlay\">\n            <property name=\"child\">\n              <object class=\"AdwViewStack\" id=\"forecastStack\">\n                <child>\n                  <object class=\"AdwViewStackPage\">\n                    <property name=\"name\">hourly</property>\n                    <property name=\"title\" translatable=\"yes\">_Hourly</property>\n                    <property name=\"use-underline\">True</property>\n                    <property name=\"icon-name\">weather-hourly-symbolic</property>\n                    <property name=\"child\">\n                      <object class=\"GtkScrolledWindow\" id=\"forecastHourlyScrollWindow\">\n                        <style>\n                          <class name=\"forecast-card\"/>\n                          <class name=\"card\"/>\n                        </style>\n                        <property name=\"vscrollbar_policy\">never</property>\n                        <property name=\"hscrollbar_policy\">external</property>\n                        <property name=\"overflow\">hidden</property>\n                        <property name=\"hadjustment\">\n                          <object class=\"GtkAdjustment\" id=\"forecastHourlyAdjustment\" />\n                        </property>\n                        <property name=\"min_content_width\">308</property>\n                        <property name=\"child\">\n                          <object class=\"GtkViewport\">\n                            <property name=\"hscroll_policy\">natural</property>\n                            <property name=\"vscroll_policy\">natural</property>\n                            <child>\n                              <object class=\"Gjs_HourlyForecastBox\" id=\"forecastHourly\" />\n                            </child>\n                          </object>\n                        </property>\n                      </object>\n                    </property>\n                  </object>\n                </child>\n                <child>\n                  <object class=\"AdwViewStackPage\">\n                    <property name=\"name\">daily</property>\n                    <property name=\"title\" translatable=\"yes\">_Daily</property>\n                    <property name=\"use-underline\">True</property>\n                    <property name=\"icon-name\">x-office-calendar-symbolic</property>\n                    <property name=\"child\">\n                      <object class=\"GtkScrolledWindow\" id=\"forecastDailyScrollWindow\">\n                        <style>\n                          <class name=\"forecast-card\"/>\n                          <class name=\"card\"/>\n                        </style>\n                        <property name=\"vscrollbar_policy\">never</property>\n                        <property name=\"hscrollbar_policy\">external</property>\n                        <property name=\"overflow\">hidden</property>\n                        <property name=\"hadjustment\">\n                          <object class=\"GtkAdjustment\" id=\"forecastDailyAdjustment\" />\n                        </property>\n                        <property name=\"min_content_width\">308</property>\n                        <property name=\"child\">\n                          <object class=\"GtkViewport\">\n                            <property name=\"hscroll_policy\">natural</property>\n                            <property name=\"vscroll_policy\">natural</property>\n                            <child>\n                              <object class=\"Gjs_DailyForecastBox\" id=\"forecastDaily\"/>\n                            </child>\n                          </object>\n                        </property>\n                      </object>\n                    </property>\n                  </object>\n                </child>\n              </object>\n            </property>\n            <child type=\"overlay\">\n              <object class=\"GtkButton\" id=\"endButton\">\n                <property name=\"halign\">end</property>\n                <property name=\"valign\">center</property>\n                <property name=\"margin_end\">28</property>\n                <property name=\"icon_name\">go-next-symbolic</property>\n                <style>\n                  <class name=\"osd\"/>\n                  <class name=\"circular\"/>\n                </style>\n              </object>\n            </child>\n            <child type=\"overlay\">\n              <object class=\"GtkButton\" id=\"startButton\">\n                <property name=\"halign\">start</property>\n                <property name=\"valign\">center</property>\n                <property name=\"margin_start\">28</property>\n                <property name=\"icon_name\">go-previous-symbolic</property>\n                <style>\n                  <class name=\"osd\"/>\n                  <class name=\"circular\"/>\n                </style>\n              </object>\n            </child>\n          </object>\n        </child>\n        <child>\n          <object class=\"GtkBox\">\n            <property name=\"name\">attributionGrid</property>\n            <property name=\"orientation\">vertical</property>\n            <property name=\"spacing\">6</property>\n            <child>\n              <object class=\"GtkLabel\" id=\"updatedTimeLabel\">\n                <property name=\"halign\">start</property>\n                <style>\n                  <class name=\"caption\" />\n                </style>\n              </object>\n            </child>\n            <child>\n              <object class=\"GtkLabel\" id=\"attributionLabel\">\n                <property name=\"use_markup\">true</property>\n                <property name=\"wrap\">1</property>\n                <property name=\"xalign\">0</property>\n                <!-- ellipsize this text so that on small layouts we\n                     don't cause the bottom navigation to overflow -->\n                <property name=\"ellipsize\">end</property>\n                <style>\n                  <class name=\"dim-label\" />\n                  <class name=\"caption\" />\n                </style>\n              </object>\n            </child>\n          </object>\n        </child>\n      </object>\n    </child>\n  </template>\n</interface>\n"
+        },
+        {
+          "path": "window.ui",
+          "content": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<interface>\n  <requires lib=\"gtk\" version=\"4.0\" />\n  <menu id=\"primary-menu\">\n    <section>\n      <attribute translatable=\"yes\" name=\"label\">Temperature Unit</attribute>\n      <item>\n        <attribute translatable=\"yes\" name=\"label\">_Celsius</attribute>\n        <attribute name=\"action\">app.temperature-unit</attribute>\n        <attribute name=\"target\">centigrade</attribute>\n      </item>\n      <item>\n        <attribute translatable=\"yes\" name=\"label\">_Fahrenheit</attribute>\n        <attribute name=\"action\">app.temperature-unit</attribute>\n        <attribute name=\"target\">fahrenheit</attribute>\n      </item>\n    </section>\n    <section>\n      <item>\n        <attribute name=\"action\">win.about</attribute>\n        <attribute name=\"label\" translatable=\"yes\">_About Weather</attribute>\n      </item>\n    </section>\n  </menu>\n  <template class=\"Gjs_MainWindow\">\n    <property name=\"default_width\">1050</property>\n    <property name=\"default_height\">650</property>\n    <child>\n      <object class=\"GtkStack\" id=\"stack\">\n        <property name=\"transition_type\">crossfade</property>\n        <child>\n          <object class=\"AdwToolbarView\" id=\"searchView\">\n            <child type=\"top\">\n              <object class=\"AdwHeaderBar\">\n                <property name=\"show-title\">False</property>\n                <child type=\"end\">\n                  <object class=\"GtkMenuButton\">\n                    <property name=\"valign\">center</property>\n                    <property name=\"menu_model\">primary-menu</property>\n                    <property name=\"icon_name\">open-menu-symbolic</property>\n                  </object>\n                </child>\n              </object>\n            </child>\n            <property name=\"content\">\n              <object class=\"AdwStatusPage\" id=\"searchViewStatus\">\n                <property name=\"title\" translatable=\"yes\">Welcome to Weather!</property>\n                <property name=\"description\" translatable=\"yes\">To get started, select a location.</property>\n                <child>\n                  <object class=\"GtkMenuButton\" id=\"searchButton\">\n                    <property name=\"hexpand\">False</property>\n                    <property name=\"halign\">center</property>\n                    <property name=\"width-request\">146</property>\n                    <property name=\"label\" translatable=\"yes\">Search for a city or country</property>\n                  </object>\n                </child>\n              </object>\n            </property>\n          </object>\n        </child>\n\n        <child>\n          <object class=\"AdwToolbarView\" id=\"cityBox\">\n            <child type=\"top\">\n              <object class=\"AdwHeaderBar\" id=\"header\">\n                <property name=\"centering_policy\">strict</property>\n                <child type=\"start\">\n                  <object class=\"GtkRevealer\" id=\"refreshRevealer\">\n                    <property name=\"transition_type\">crossfade</property>\n                    <property name=\"child\">\n                      <object class=\"GtkButton\" id=\"refresh\">\n                        <property name=\"valign\">center</property>\n                        <property name=\"tooltip-text\" translatable=\"yes\">Refresh</property>\n                        <property name=\"action_name\">win.refresh</property>\n                        <property name=\"icon_name\">view-refresh-symbolic</property>\n                      </object>\n                    </property>\n                  </object>\n                </child>\n                <child type=\"title\">\n                  <object class=\"AdwViewSwitcherTitle\" id=\"forecastStackSwitcher\">\n                    <property name=\"title\" translatable=\"yes\">Weather</property>\n                  </object>\n                </child>\n                <child type=\"end\">\n                  <object class=\"GtkMenuButton\">\n                    <property name=\"tooltip-text\" translatable=\"yes\">Main Menu</property>\n                    <property name=\"valign\">center</property>\n                    <property name=\"menu_model\">primary-menu</property>\n                    <property name=\"icon_name\">open-menu-symbolic</property>\n                    <property name=\"primary\">true</property>\n                  </object>\n                </child>\n              </object>\n            </child>\n            <property name=\"content\">\n              <object class=\"AdwBin\" id=\"cityBin\"/>\n            </property>\n            <child type=\"bottom\">\n              <object class=\"AdwViewSwitcherBar\" id=\"forecastStackSwitcherBar\">\n                <property name=\"reveal\" bind-source=\"forecastStackSwitcher\" bind-property=\"title-visible\" bind-flags=\"sync-create\" />\n              </object>\n            </child>\n          </object>\n        </child>\n      </object>\n    </child>\n  </template>\n</interface>\n"
+        }
+      ],
+      "roots": [
+        "window.ui#1"
+      ],
+      "widgets": {
+        "window.ui#1": {
+          "key": "window.ui#1",
+          "sourceClass": "Gjs_MainWindow",
+          "sourceId": "Gjs_MainWindow",
+          "sourceKind": "object",
+          "origin": {
+            "file": "window.ui",
+            "start": 0,
+            "end": 4796
+          },
+          "properties": {
+            "title": {
+              "kind": "scalar",
+              "value": "Gjs_MainWindow"
+            },
+            "default_width": {
+              "kind": "scalar",
+              "value": 1050
+            },
+            "default_height": {
+              "kind": "scalar",
+              "value": 650
+            },
+            "content": {
+              "kind": "scalar",
+              "value": "<object class=\"AdwBin\" id=\"cityBin\"/>"
+            }
+          },
           "children": [
             {
-              "id": "w-toolbar",
-              "type": "toolbar-view",
+              "nodeKey": "window.ui#2",
+              "origin": {
+                "file": "window.ui",
+                "start": 0,
+                "end": 4796
+              }
+            },
+            {
+              "nodeKey": "window.ui#7",
+              "origin": {
+                "file": "window.ui",
+                "start": 0,
+                "end": 4796
+              }
+            },
+            {
+              "nodeKey": "window.ui#12",
+              "origin": {
+                "file": "window.ui",
+                "start": 0,
+                "end": 4796
+              }
+            }
+          ],
+          "resolution": {
+            "kind": "unsupported-widget",
+            "reason": "code-defined-class"
+          }
+        },
+        "window.ui#2": {
+          "key": "window.ui#2",
+          "sourceClass": "GtkStack",
+          "sourceId": "stack",
+          "sourceKind": "object",
+          "origin": {
+            "file": "window.ui",
+            "start": 0,
+            "end": 4796
+          },
+          "properties": {
+            "transition_type": {
+              "kind": "scalar",
+              "value": "crossfade"
+            }
+          },
+          "children": [
+            {
+              "nodeKey": "window.ui#3",
+              "origin": {
+                "file": "window.ui",
+                "start": 0,
+                "end": 4796
+              }
+            }
+          ],
+          "resolution": {
+            "kind": "generic-widget",
+            "rendererType": "stack"
+          }
+        },
+        "window.ui#3": {
+          "key": "window.ui#3",
+          "sourceClass": "AdwToolbarView",
+          "sourceId": "searchView",
+          "sourceKind": "object",
+          "origin": {
+            "file": "window.ui",
+            "start": 0,
+            "end": 4796
+          },
+          "properties": {
+            "content": {
+              "kind": "scalar",
+              "value": "<object class=\"AdwStatusPage\" id=\"searchViewStatus\">\n                <property name=\"title\" translatable=\"yes\">Welcome to Weather!"
+            },
+            "description": {
+              "kind": "scalar",
+              "value": "To get started, select a location."
+            }
+          },
+          "children": [
+            {
+              "nodeKey": "window.ui#4",
+              "origin": {
+                "file": "window.ui",
+                "start": 0,
+                "end": 4796
+              }
+            },
+            {
+              "nodeKey": "window.ui#6",
+              "origin": {
+                "file": "window.ui",
+                "start": 0,
+                "end": 4796
+              }
+            }
+          ],
+          "resolution": {
+            "kind": "generic-widget",
+            "rendererType": "toolbar-view"
+          }
+        },
+        "window.ui#4": {
+          "key": "window.ui#4",
+          "sourceClass": "AdwHeaderBar",
+          "sourceId": "imported-1",
+          "sourceKind": "object",
+          "origin": {
+            "file": "window.ui",
+            "start": 0,
+            "end": 4796
+          },
+          "properties": {
+            "showTitle": {
+              "kind": "scalar",
+              "value": "False"
+            }
+          },
+          "children": [
+            {
+              "nodeKey": "window.ui#5",
+              "origin": {
+                "file": "window.ui",
+                "start": 0,
+                "end": 4796
+              }
+            }
+          ],
+          "resolution": {
+            "kind": "generic-widget",
+            "rendererType": "header-bar"
+          }
+        },
+        "window.ui#5": {
+          "key": "window.ui#5",
+          "sourceClass": "GtkMenuButton",
+          "sourceId": "imported-2",
+          "sourceKind": "object",
+          "origin": {
+            "file": "window.ui",
+            "start": 0,
+            "end": 4796
+          },
+          "properties": {
+            "title": {
+              "kind": "scalar",
+              "value": "GtkMenuButton"
+            },
+            "valign": {
+              "kind": "scalar",
+              "value": "center"
+            },
+            "menu_model": {
+              "kind": "scalar",
+              "value": "primary-menu"
+            },
+            "icon_name": {
+              "kind": "scalar",
+              "value": "open-menu-symbolic"
+            }
+          },
+          "children": [],
+          "resolution": {
+            "kind": "unsupported-widget",
+            "reason": "renderer-does-not-support-class"
+          }
+        },
+        "window.ui#6": {
+          "key": "window.ui#6",
+          "sourceClass": "GtkMenuButton",
+          "sourceId": "searchButton",
+          "sourceKind": "object",
+          "origin": {
+            "file": "window.ui",
+            "start": 0,
+            "end": 4796
+          },
+          "properties": {
+            "title": {
+              "kind": "scalar",
+              "value": "GtkMenuButton"
+            },
+            "hexpand": {
+              "kind": "scalar",
+              "value": "False"
+            },
+            "halign": {
+              "kind": "scalar",
+              "value": "center"
+            },
+            "widthRequest": {
+              "kind": "scalar",
+              "value": 146
+            },
+            "label": {
+              "kind": "scalar",
+              "value": "Search for a city or country"
+            }
+          },
+          "children": [],
+          "resolution": {
+            "kind": "unsupported-widget",
+            "reason": "renderer-does-not-support-class"
+          }
+        },
+        "window.ui#7": {
+          "key": "window.ui#7",
+          "sourceClass": "AdwToolbarView",
+          "sourceId": "cityBox",
+          "sourceKind": "object",
+          "origin": {
+            "file": "window.ui",
+            "start": 0,
+            "end": 4796
+          },
+          "properties": {},
+          "children": [
+            {
+              "nodeKey": "window.ui#8",
+              "origin": {
+                "file": "window.ui",
+                "start": 0,
+                "end": 4796
+              }
+            },
+            {
+              "nodeKey": "window.ui#10",
+              "origin": {
+                "file": "window.ui",
+                "start": 0,
+                "end": 4796
+              }
+            },
+            {
+              "nodeKey": "window.ui#11",
+              "origin": {
+                "file": "window.ui",
+                "start": 0,
+                "end": 4796
+              }
+            }
+          ],
+          "resolution": {
+            "kind": "generic-widget",
+            "rendererType": "toolbar-view"
+          }
+        },
+        "window.ui#8": {
+          "key": "window.ui#8",
+          "sourceClass": "AdwHeaderBar",
+          "sourceId": "header",
+          "sourceKind": "object",
+          "origin": {
+            "file": "window.ui",
+            "start": 0,
+            "end": 4796
+          },
+          "properties": {
+            "centering_policy": {
+              "kind": "scalar",
+              "value": "strict"
+            }
+          },
+          "children": [
+            {
+              "nodeKey": "window.ui#9",
+              "origin": {
+                "file": "window.ui",
+                "start": 0,
+                "end": 4796
+              }
+            }
+          ],
+          "resolution": {
+            "kind": "generic-widget",
+            "rendererType": "header-bar"
+          }
+        },
+        "window.ui#9": {
+          "key": "window.ui#9",
+          "sourceClass": "GtkRevealer",
+          "sourceId": "refreshRevealer",
+          "sourceKind": "object",
+          "origin": {
+            "file": "window.ui",
+            "start": 0,
+            "end": 4796
+          },
+          "properties": {
+            "title": {
+              "kind": "scalar",
+              "value": "GtkRevealer"
+            },
+            "transition_type": {
+              "kind": "scalar",
+              "value": "crossfade"
+            },
+            "child": {
+              "kind": "scalar",
+              "value": "<object class=\"GtkButton\" id=\"refresh\">\n                        <property name=\"valign\">center"
+            },
+            "tooltipText": {
+              "kind": "scalar",
+              "value": "Refresh"
+            },
+            "action_name": {
+              "kind": "scalar",
+              "value": "win.refresh"
+            },
+            "icon_name": {
+              "kind": "scalar",
+              "value": "view-refresh-symbolic"
+            }
+          },
+          "children": [],
+          "resolution": {
+            "kind": "unsupported-widget",
+            "reason": "renderer-does-not-support-class"
+          }
+        },
+        "window.ui#10": {
+          "key": "window.ui#10",
+          "sourceClass": "AdwViewSwitcherTitle",
+          "sourceId": "forecastStackSwitcher",
+          "sourceKind": "object",
+          "origin": {
+            "file": "window.ui",
+            "start": 0,
+            "end": 4796
+          },
+          "properties": {
+            "title": {
+              "kind": "scalar",
+              "value": "Weather"
+            }
+          },
+          "children": [],
+          "resolution": {
+            "kind": "unsupported-widget",
+            "reason": "renderer-does-not-support-class"
+          }
+        },
+        "window.ui#11": {
+          "key": "window.ui#11",
+          "sourceClass": "GtkMenuButton",
+          "sourceId": "imported-3",
+          "sourceKind": "object",
+          "origin": {
+            "file": "window.ui",
+            "start": 0,
+            "end": 4796
+          },
+          "properties": {
+            "title": {
+              "kind": "scalar",
+              "value": "GtkMenuButton"
+            },
+            "tooltipText": {
+              "kind": "scalar",
+              "value": "Main Menu"
+            },
+            "valign": {
+              "kind": "scalar",
+              "value": "center"
+            },
+            "menu_model": {
+              "kind": "scalar",
+              "value": "primary-menu"
+            },
+            "icon_name": {
+              "kind": "scalar",
+              "value": "open-menu-symbolic"
+            },
+            "primary": {
+              "kind": "scalar",
+              "value": true
+            }
+          },
+          "children": [],
+          "resolution": {
+            "kind": "unsupported-widget",
+            "reason": "renderer-does-not-support-class"
+          }
+        },
+        "window.ui#12": {
+          "key": "window.ui#12",
+          "sourceClass": "AdwViewSwitcherBar",
+          "sourceId": "forecastStackSwitcherBar",
+          "sourceKind": "object",
+          "origin": {
+            "file": "window.ui",
+            "start": 0,
+            "end": 4796
+          },
+          "properties": {
+            "title": {
+              "kind": "scalar",
+              "value": "AdwViewSwitcherBar"
+            }
+          },
+          "children": [],
+          "resolution": {
+            "kind": "unsupported-widget",
+            "reason": "renderer-does-not-support-class"
+          }
+        }
+      },
+      "templates": {},
+      "diagnostics": []
+    },
+    "screens": [
+      {
+        "id": "imported-screen-1",
+        "title": "Gjs_MainWindow",
+        "type": "standard",
+        "width": 1024,
+        "height": 720,
+        "rootNode": {
+          "id": "Gjs_MainWindow",
+          "type": "custom-widget",
+          "sourceKey": "window.ui#1",
+          "sourceClass": "Gjs_MainWindow",
+          "children": [
+            {
+              "id": "stack",
+              "type": "stack",
+              "sourceKey": "window.ui#2",
+              "sourceClass": "GtkStack",
               "children": [
                 {
-                  "id": "w-hdr",
-                  "type": "header-bar",
-                  "children": [
-                    { "id": "w-search", "type": "search-entry", "placeholder": "Search city or location…" },
-                    { "id": "w-title", "type": "window-title", "title": "London, UK", "subtitle": "Updated 5m ago" },
-                    { "id": "w-menu", "type": "menu-button", "iconName": "open-menu-symbolic", "title": "Menu" }
-                  ]
-                },
-                {
-                  "id": "w-body",
-                  "type": "clamp",
+                  "id": "searchView",
+                  "type": "toolbar-view",
+                  "sourceKey": "window.ui#3",
+                  "sourceClass": "AdwToolbarView",
                   "children": [
                     {
-                      "id": "w-status",
-                      "type": "status-page",
-                      "title": "21°C · Partly Cloudy",
-                      "description": "High: 24°C  Low: 14°C · Humidity 58% · Wind 12 km/h",
-                      "iconName": "weather-clear-night-symbolic",
+                      "id": "imported-1",
+                      "type": "header-bar",
+                      "sourceKey": "window.ui#4",
+                      "sourceClass": "AdwHeaderBar",
                       "children": [
                         {
-                          "id": "w-forecast-group",
-                          "type": "preferences-group",
-                          "title": "7-Day Forecast",
-                          "children": [
-                            { "id": "f1", "type": "action-row", "title": "Today", "subtitle": "Partly Cloudy · 24°C / 14°C", "iconName": "weather-clear-night-symbolic" },
-                            { "id": "f2", "type": "action-row", "title": "Thursday", "subtitle": "Sunny · 26°C / 15°C", "iconName": "weather-clear-symbolic" },
-                            { "id": "f3", "type": "action-row", "title": "Friday", "subtitle": "Light Rain · 20°C / 12°C", "iconName": "weather-showers-symbolic" },
-                            { "id": "f4", "type": "action-row", "title": "Saturday", "subtitle": "Thunderstorm · 18°C / 11°C", "iconName": "weather-storm-symbolic" }
-                          ]
+                          "id": "imported-2",
+                          "type": "custom-widget",
+                          "sourceKey": "window.ui#5",
+                          "sourceClass": "GtkMenuButton",
+                          "children": [],
+                          "title": "GtkMenuButton",
+                          "valign": "center",
+                          "menu_model": "primary-menu",
+                          "icon_name": "open-menu-symbolic"
                         }
-                      ]
+                      ],
+                      "showTitle": "False"
+                    },
+                    {
+                      "id": "searchButton",
+                      "type": "custom-widget",
+                      "sourceKey": "window.ui#6",
+                      "sourceClass": "GtkMenuButton",
+                      "children": [],
+                      "title": "GtkMenuButton",
+                      "hexpand": "False",
+                      "halign": "center",
+                      "widthRequest": 146,
+                      "label": "Search for a city or country"
                     }
-                  ]
+                  ],
+                  "content": "<object class=\"AdwStatusPage\" id=\"searchViewStatus\">\n                <property name=\"title\" translatable=\"yes\">Welcome to Weather!",
+                  "description": "To get started, select a location."
+                }
+              ],
+              "transition_type": "crossfade"
+            },
+            {
+              "id": "cityBox",
+              "type": "toolbar-view",
+              "sourceKey": "window.ui#7",
+              "sourceClass": "AdwToolbarView",
+              "children": [
+                {
+                  "id": "header",
+                  "type": "header-bar",
+                  "sourceKey": "window.ui#8",
+                  "sourceClass": "AdwHeaderBar",
+                  "children": [
+                    {
+                      "id": "refreshRevealer",
+                      "type": "custom-widget",
+                      "sourceKey": "window.ui#9",
+                      "sourceClass": "GtkRevealer",
+                      "children": [],
+                      "title": "GtkRevealer",
+                      "transition_type": "crossfade",
+                      "child": "<object class=\"GtkButton\" id=\"refresh\">\n                        <property name=\"valign\">center",
+                      "tooltipText": "Refresh",
+                      "action_name": "win.refresh",
+                      "icon_name": "view-refresh-symbolic"
+                    }
+                  ],
+                  "centering_policy": "strict"
+                },
+                {
+                  "id": "forecastStackSwitcher",
+                  "type": "custom-widget",
+                  "sourceKey": "window.ui#10",
+                  "sourceClass": "AdwViewSwitcherTitle",
+                  "children": [],
+                  "title": "Weather"
+                },
+                {
+                  "id": "imported-3",
+                  "type": "custom-widget",
+                  "sourceKey": "window.ui#11",
+                  "sourceClass": "GtkMenuButton",
+                  "children": [],
+                  "title": "GtkMenuButton",
+                  "tooltipText": "Main Menu",
+                  "valign": "center",
+                  "menu_model": "primary-menu",
+                  "icon_name": "open-menu-symbolic",
+                  "primary": true
                 }
               ]
+            },
+            {
+              "id": "forecastStackSwitcherBar",
+              "type": "custom-widget",
+              "sourceKey": "window.ui#12",
+              "sourceClass": "AdwViewSwitcherBar",
+              "children": [],
+              "title": "AdwViewSwitcherBar"
             }
-          ]
+          ],
+          "title": "Gjs_MainWindow",
+          "default_width": 1050,
+          "default_height": 650,
+          "content": "<object class=\"AdwBin\" id=\"cityBin\"/>"
         }
       }
     ]

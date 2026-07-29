@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { useMockupStore } from "../store/mockupStore";
+import { persistDocumentSource, useMockupStore } from "../store/mockupStore";
 import { LayersPanel } from "./LayersPanel";
 import { ViewportCanvas } from "./ViewportCanvas";
 import { InspectorPanel } from "./InspectorPanel";
@@ -65,7 +65,7 @@ export const App: React.FC = () => {
       const { importDocumentFile } = await import("../utils/exportImport");
       const imported = await importDocumentFile(file);
       imported.colorScheme = imported.colorScheme || "auto";
-      localStorage.setItem("protota_doc_v1", JSON.stringify(imported));
+      persistDocumentSource(imported);
       window.location.reload();
     } catch (err) {
       alert("Failed to import: " + (err as Error).message);
@@ -364,7 +364,7 @@ export const App: React.FC = () => {
       <input
         ref={fileInputRef}
         type="file"
-        accept=".mockup.json,.json"
+        accept=".mockup.json,.json,.blp,.ui"
         onChange={handleImport}
         style={{ display: "none" }}
       />

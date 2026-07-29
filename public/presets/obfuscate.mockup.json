@@ -1,0 +1,1566 @@
+{
+  "version": 1,
+  "exportedAt": "2026-07-29T13:12:33.678Z",
+  "document": {
+    "id": "imported-document",
+    "title": "Obfuscate",
+    "colorScheme": "auto",
+    "edges": [],
+    "sourceProject": {
+      "files": [
+        {
+          "path": "drawing_area.ui",
+          "content": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<interface>\n  <template class=\"DrawingArea\" parent=\"GtkWidget\">\n    <property name=\"hexpand\">True</property>\n    <property name=\"vexpand\">True</property>\n    <signal name=\"notify::scale-factor\" handler=\"on_scale_factor_notify\" swapped=\"true\" />\n    <child>\n      <object class=\"GtkGestureDrag\">\n        <property name=\"button\">0</property>\n        <property name=\"exclusive\">True</property>\n        <signal name=\"drag-begin\" handler=\"on_drag_begin\" swapped=\"true\" />\n        <signal name=\"drag-update\" handler=\"on_drag_update\" swapped=\"true\" />\n        <signal name=\"drag-end\" handler=\"on_drag_end\" swapped=\"true\" />\n        <signal name=\"cancel\" handler=\"on_drag_cancel\" swapped=\"true\" />\n      </object>\n    </child>\n    <child>\n      <object class=\"GtkEventControllerMotion\">\n        <signal name=\"enter\" handler=\"on_motion_enter\" swapped=\"true\" />\n        <signal name=\"motion\" handler=\"on_motion\" swapped=\"true\" />\n        <signal name=\"leave\" handler=\"on_motion_leave\" swapped=\"true\" />\n      </object>\n    </child>\n    <child>\n      <object class=\"GtkEventControllerScroll\">\n        <property name=\"flags\">vertical</property>\n        <signal name=\"scroll\" handler=\"on_scroll\" swapped=\"true\" />\n      </object>\n    </child>\n    <child>\n      <object class=\"GtkGestureZoom\">\n        <signal name=\"begin\" handler=\"on_zoom_begin\" swapped=\"true\" />\n        <signal name=\"scale-changed\" handler=\"on_zoom_scale_changed\" swapped=\"true\" />\n      </object>\n    </child>\n  </template>\n</interface>\n"
+        },
+        {
+          "path": "shortcuts.ui",
+          "content": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<interface>\n  <object class=\"AdwShortcutsDialog\" id=\"shortcuts_dialog\">\n    <child>\n      <object class=\"AdwShortcutsSection\">\n        <property name=\"title\" translatable=\"yes\" context=\"shortcut window\">General</property>\n        <child>\n          <object class=\"AdwShortcutsItem\">\n            <property name=\"title\" translatable=\"yes\" context=\"shortcut window\">Open a New Window</property>\n            <property name=\"action-name\">app.new-window</property>\n          </object>\n        </child>\n        <child>\n          <object class=\"AdwShortcutsItem\">\n            <property name=\"title\" translatable=\"yes\" context=\"shortcut window\">Open a File</property>\n            <property name=\"action-name\">win.open</property>\n          </object>\n        </child>\n        <child>\n          <object class=\"AdwShortcutsItem\">\n            <property name=\"title\" translatable=\"yes\" context=\"shortcut window\">Load Image from Clipboard</property>\n            <property name=\"action-name\">win.paste</property>\n          </object>\n        </child>\n        <child>\n          <object class=\"AdwShortcutsItem\">\n            <property name=\"title\" translatable=\"yes\" context=\"shortcut window\">Copy Image to Clipboard</property>\n            <property name=\"action-name\">win.copy</property>\n          </object>\n        </child>\n        <child>\n          <object class=\"AdwShortcutsItem\">\n            <property name=\"title\" translatable=\"yes\" context=\"shortcut window\">Save As</property>\n            <property name=\"action-name\">win.save</property>\n          </object>\n        </child>\n        <child>\n          <object class=\"AdwShortcutsItem\">\n            <property name=\"title\" translatable=\"yes\" context=\"shortcut window\">Show Shortcuts</property>\n            <property name=\"action-name\">app.shortcuts</property>\n          </object>\n        </child>\n        <child>\n          <object class=\"AdwShortcutsItem\">\n            <property name=\"title\" translatable=\"yes\" context=\"shortcut window\">Close the Active Window</property>\n            <property name=\"action-name\">app.quit</property>\n          </object>\n        </child>\n      </object>\n    </child>\n    <child>\n      <object class=\"AdwShortcutsSection\">\n        <property name=\"title\" translatable=\"yes\" context=\"shortcut window\">Editor</property>\n        <child>\n          <object class=\"AdwShortcutsItem\">\n            <property name=\"title\" translatable=\"yes\" context=\"shortcut window\">Undo</property>\n            <property name=\"action-name\">win.undo</property>\n          </object>\n        </child>\n        <child>\n          <object class=\"AdwShortcutsItem\">\n            <property name=\"title\" translatable=\"yes\" context=\"shortcut window\">Redo</property>\n            <property name=\"action-name\">win.redo</property>\n          </object>\n        </child>\n        <child>\n          <object class=\"AdwShortcutsItem\">\n            <property name=\"title\" translatable=\"yes\" context=\"shortcut window\">Zoom In</property>\n            <property name=\"action-name\">win.zoom_in</property>\n          </object>\n        </child>\n        <child>\n          <object class=\"AdwShortcutsItem\">\n            <property name=\"title\" translatable=\"yes\" context=\"shortcut window\">Zoom Out</property>\n            <property name=\"action-name\">win.zoom_out</property>\n          </object>\n        </child>\n      </object>\n    </child>\n  </object>\n</interface>\n\n"
+        },
+        {
+          "path": "window.ui",
+          "content": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<interface>\n  <menu id=\"main_menu\">\n    <item>\n      <attribute name=\"custom\">zoom</attribute>\n    </item>\n    <section>\n      <item>\n        <attribute name=\"label\" translatable=\"yes\">_Copy</attribute>\n        <attribute name=\"action\">win.copy</attribute>\n      </item>\n      <item>\n        <attribute name=\"label\" translatable=\"yes\">_Save</attribute>\n        <attribute name=\"action\">win.save</attribute>\n      </item>\n    </section>\n    <section>\n      <item>\n        <attribute name=\"label\" translatable=\"yes\">_Open File</attribute>\n        <attribute name=\"action\">win.open</attribute>\n      </item>\n      <item>\n        <attribute name=\"label\" translatable=\"yes\">_New Window</attribute>\n        <attribute name=\"action\">app.new-window</attribute>\n      </item>\n    </section>\n    <section>\n      <item>\n        <attribute name=\"label\" translatable=\"yes\">_Keyboard Shortcuts</attribute>\n        <attribute name=\"action\">app.shortcuts</attribute>\n      </item>\n      <item>\n        <attribute name=\"label\" translatable=\"yes\">_About Obfuscate</attribute>\n        <attribute name=\"action\">app.about</attribute>\n      </item>\n    </section>\n  </menu>\n  <menu id=\"empty_menu\">\n    <section>\n      <item>\n        <attribute name=\"label\" translatable=\"yes\">_Open File</attribute>\n        <attribute name=\"action\">win.open</attribute>\n      </item>\n      <item>\n        <attribute name=\"label\" translatable=\"yes\">_New Window</attribute>\n        <attribute name=\"action\">app.new-window</attribute>\n      </item>\n    </section>\n    <section>\n      <item>\n        <attribute name=\"label\" translatable=\"yes\">_Keyboard Shortcuts</attribute>\n        <attribute name=\"action\">app.shortcuts</attribute>\n      </item>\n      <item>\n        <attribute name=\"label\" translatable=\"yes\">_About Obfuscate</attribute>\n        <attribute name=\"action\">app.about</attribute>\n      </item>\n    </section>\n  </menu>\n  <object class=\"GtkPopoverMenu\" id=\"popover\">\n    <property name=\"menu-model\">main_menu</property>\n    <child type=\"zoom\">\n      <object class=\"GtkBox\">\n        <property name=\"homogeneous\">True</property>\n        <child>\n          <object class=\"GtkButton\">\n            <property name=\"tooltip-text\" translatable=\"yes\">Zoom out</property>\n            <property name=\"action-name\">win.zoom_out</property>\n            <property name=\"icon-name\">zoom-out-symbolic</property>\n          </object>\n        </child>\n        <child>\n          <object class=\"GtkButton\">\n            <property name=\"tooltip-text\" translatable=\"yes\">Reset Zoom</property>\n            <property name=\"sensitive\">False</property>\n            <property name=\"action-name\">win.zoom_reset</property>\n            <child>\n              <object class=\"GtkLabel\" id=\"zoom_level\">\n                <property name=\"label\" translatable=\"yes\">100%</property>\n                <property name=\"width-chars\">5</property>\n              </object>\n            </child>\n          </object>\n        </child>\n        <child>\n          <object class=\"GtkButton\">\n            <property name=\"tooltip-text\" translatable=\"yes\">Zoom in</property>\n            <property name=\"action-name\">win.zoom_in</property>\n            <property name=\"icon-name\">zoom-in-symbolic</property>\n          </object>\n        </child>\n        <style>\n          <class name=\"linked\"/>\n        </style>\n      </object>\n    </child>>\n  </object>\n  <template parent=\"AdwApplicationWindow\" class=\"Window\">\n    <property name=\"default-width\">500</property>\n    <property name=\"default-height\">400</property>\n    <property name=\"width-request\">360</property>\n    <property name=\"height-request\">360</property>\n    <child>\n      <object class=\"GtkStack\" id=\"stack\">\n        <child>\n          <object class=\"GtkStackPage\">\n            <property name=\"name\">empty</property>\n            <property name=\"child\">\n              <object class=\"AdwToolbarView\">\n                <child type=\"top\">\n                  <object class=\"AdwHeaderBar\">\n                    <child>\n                      <object class=\"GtkButton\">\n                        <property name=\"tooltip-text\" translatable=\"yes\">Select a File</property>\n                        <property name=\"action-name\">win.open</property>\n                        <child>\n                          <object class=\"AdwButtonContent\">\n                            <property name=\"icon-name\">document-open-symbolic</property>\n                            <property name=\"label\" translatable=\"yes\">Open</property>\n                          </object>\n                        </child>\n                      </object>\n                    </child>\n                    <child type=\"end\">\n                      <object class=\"GtkMenuButton\">\n                        <property name=\"tooltip-text\" translatable=\"yes\">Main Menu</property>\n                        <property name=\"valign\">center</property>\n                        <property name=\"menu-model\">empty_menu</property>\n                        <property name=\"primary\">True</property>\n                        <property name=\"icon-name\">open-menu-symbolic</property>\n                      </object>\n                    </child>\n                  </object>\n                </child>\n                <child>\n                  <object class=\"AdwStatusPage\" id=\"status_page\">\n                    <property name=\"title\" translatable=\"yes\">Drop an Image Here</property>\n                    <property name=\"hexpand\">True</property>\n                    <property name=\"vexpand\">True</property>\n                  </object>\n                </child>\n              </object>\n            </property>\n          </object>\n        </child>\n        <child>\n          <object class=\"GtkStackPage\">\n            <property name=\"name\">image</property>\n            <property name=\"child\">\n              <object class=\"AdwToolbarView\">\n                <child type=\"top\">\n                  <object class=\"AdwHeaderBar\">\n                    <property name=\"title-widget\">\n                      <object class=\"AdwWindowTitle\" id=\"window_title\">\n                        <property name=\"title\" translatable=\"yes\">Obfuscate</property>\n                      </object>\n                    </property>\n                    <child>\n                      <object class=\"GtkBox\" id=\"header_tools\">\n                        <property name=\"orientation\">horizontal</property>\n                        <child>\n                          <object class=\"GtkButton\">\n                            <property name=\"tooltip-text\" translatable=\"yes\">Undo</property>\n                            <property name=\"action-name\">win.undo</property>\n                            <property name=\"icon-name\">edit-undo-symbolic</property>\n                          </object>\n                        </child>\n                        <child>\n                          <object class=\"GtkButton\">\n                            <property name=\"tooltip-text\" translatable=\"yes\">Redo</property>\n                            <property name=\"action-name\">win.redo</property>\n                            <property name=\"icon-name\">edit-redo-symbolic</property>\n                          </object>\n                        </child>\n                        <child>\n                          <object class=\"GtkSeparator\">\n                            <style>\n                              <class name=\"spacer\"/>\n                            </style>\n                          </object>\n                        </child>\n                        <child>\n                          <object class=\"AdwToggleGroup\" id=\"toggle_group_top\">\n                            <signal name=\"notify::active-name\" handler=\"on_toggle_group_active_name_notify\" swapped=\"true\" />\n                            <style>\n                              <class name=\"flat\"/>\n                            </style>\n                            <child>\n                              <object class=\"AdwToggle\">\n                                <property name=\"tooltip\" translatable=\"yes\">Fill</property>\n                                <property name=\"icon-name\">square-filled-symbolic</property>\n                                <property name=\"name\">fill</property>\n                              </object>\n                            </child>\n                            <child>\n                              <object class=\"AdwToggle\">\n                                <property name=\"tooltip\" translatable=\"yes\">Blur</property>\n                                <property name=\"icon-name\">blur-symbolic</property>\n                                <property name=\"name\">blur</property>\n                              </object>\n                            </child>\n                            <property name=\"active-name\">fill</property>\n                          </object>\n                        </child>\n                      </object>\n                    </child>\n                    <child type=\"end\">\n                      <object class=\"GtkMenuButton\">\n                        <property name=\"tooltip-text\" translatable=\"yes\">Main Menu</property>\n                        <property name=\"valign\">center</property>\n                        <property name=\"popover\">popover</property>\n                        <property name=\"primary\">True</property>\n                        <property name=\"icon-name\">open-menu-symbolic</property>\n                      </object>\n                    </child>\n                  </object>\n                </child>\n                <child>\n                  <object class=\"AdwToastOverlay\" id=\"toast_overlay\">\n                    <child>\n                      <object class=\"GtkBox\">\n                        <property name=\"orientation\">vertical</property>\n                        <child>\n                          <object class=\"GtkScrolledWindow\">\n                            <property name=\"hexpand\">True</property>\n                            <property name=\"vexpand\">True</property>\n                            <child>\n                              <object class=\"DrawingArea\" id=\"drawing_area\">\n                                <signal name=\"notify::can-undo\" handler=\"on_notify_can_undo\" swapped=\"true\" />\n                                <signal name=\"notify::can-redo\" handler=\"on_notify_can_redo\" swapped=\"true\" />\n                                <signal name=\"notify::zoom\" handler=\"on_notify_zoom\" swapped=\"true\" />\n                                <signal name=\"notify::saved\" handler=\"on_notify_saved\" swapped=\"true\" />\n                                <signal name=\"loaded\" handler=\"on_image_loaded\" swapped=\"true\" />\n                              </object>\n                            </child>\n                          </object>\n                        </child>\n                        <child>\n                          <object class=\"GtkBox\" id=\"bottom_tools\">\n                            <property name=\"visible\">False</property>\n                            <property name=\"orientation\">horizontal</property>\n                            <child>\n                              <object class=\"GtkBox\">\n                                <property name=\"orientation\">horizontal</property>\n                                <child>\n                                  <object class=\"GtkButton\">\n                                    <property name=\"tooltip-text\" translatable=\"yes\">Undo</property>\n                                    <property name=\"action-name\">win.undo</property>\n                                    <property name=\"icon-name\">edit-undo-symbolic</property>\n                                  </object>\n                                </child>\n                                <child>\n                                  <object class=\"GtkButton\">\n                                    <property name=\"tooltip-text\" translatable=\"yes\">Redo</property>\n                                    <property name=\"action-name\">win.redo</property>\n                                    <property name=\"icon-name\">edit-redo-symbolic</property>\n                                  </object>\n                                </child>\n                              </object>\n                            </child>\n                            <child>\n                              <object class=\"AdwToggleGroup\" id=\"toggle_group_bottom\">\n                                <style>\n                                  <class name=\"flat\"/>\n                                </style>\n                                <child>\n                                  <object class=\"AdwToggle\">\n                                    <property name=\"tooltip\" translatable=\"yes\">Fill</property>\n                                    <property name=\"icon-name\">square-filled-symbolic</property>\n                                    <property name=\"name\">fill</property>\n                                  </object>\n                                </child>\n                                <child>\n                                  <object class=\"AdwToggle\">\n                                    <property name=\"tooltip\" translatable=\"yes\">Blur</property>\n                                    <property name=\"icon-name\">blur-symbolic</property>\n                                    <property name=\"name\">blur</property>\n                                  </object>\n                                </child>\n                              </object>\n                            </child>\n                            <style>\n                              <class name=\"toolbar\" />\n                            </style>\n                          </object>\n                        </child>\n                      </object>\n                    </child>\n                  </object>\n                </child>\n              </object>\n            </property>\n          </object>\n        </child>\n      </object>\n    </child>\n    <child>\n      <object class=\"AdwBreakpoint\">\n        <condition>max-width: 400sp</condition>\n        <setter object=\"bottom_tools\" property=\"visible\">True</setter>\n        <setter object=\"header_tools\" property=\"visible\">False</setter>\n      </object>\n    </child>\n  </template>\n</interface>\n"
+        }
+      ],
+      "roots": [
+        "window.ui#1",
+        "window.ui#7",
+        "window.ui#13",
+        "window.ui#14",
+        "window.ui#21",
+        "window.ui#22",
+        "window.ui#33"
+      ],
+      "widgets": {
+        "window.ui#1": {
+          "key": "window.ui#1",
+          "sourceClass": "GtkPopoverMenu",
+          "sourceId": "popover",
+          "sourceKind": "object",
+          "origin": {
+            "file": "window.ui",
+            "start": 0,
+            "end": 14103
+          },
+          "properties": {
+            "title": {
+              "kind": "scalar",
+              "value": "GtkPopoverMenu"
+            },
+            "menuModel": {
+              "kind": "scalar",
+              "value": "main_menu"
+            }
+          },
+          "children": [
+            {
+              "nodeKey": "window.ui#2",
+              "origin": {
+                "file": "window.ui",
+                "start": 0,
+                "end": 14103
+              }
+            }
+          ],
+          "resolution": {
+            "kind": "unsupported-widget",
+            "reason": "renderer-does-not-support-class"
+          }
+        },
+        "window.ui#2": {
+          "key": "window.ui#2",
+          "sourceClass": "GtkBox",
+          "sourceId": "imported-1",
+          "sourceKind": "object",
+          "origin": {
+            "file": "window.ui",
+            "start": 0,
+            "end": 14103
+          },
+          "properties": {
+            "homogeneous": {
+              "kind": "scalar",
+              "value": "True"
+            }
+          },
+          "children": [
+            {
+              "nodeKey": "window.ui#3",
+              "origin": {
+                "file": "window.ui",
+                "start": 0,
+                "end": 14103
+              }
+            },
+            {
+              "nodeKey": "window.ui#4",
+              "origin": {
+                "file": "window.ui",
+                "start": 0,
+                "end": 14103
+              }
+            },
+            {
+              "nodeKey": "window.ui#6",
+              "origin": {
+                "file": "window.ui",
+                "start": 0,
+                "end": 14103
+              }
+            }
+          ],
+          "resolution": {
+            "kind": "generic-widget",
+            "rendererType": "box"
+          }
+        },
+        "window.ui#3": {
+          "key": "window.ui#3",
+          "sourceClass": "GtkButton",
+          "sourceId": "imported-2",
+          "sourceKind": "object",
+          "origin": {
+            "file": "window.ui",
+            "start": 0,
+            "end": 14103
+          },
+          "properties": {
+            "tooltipText": {
+              "kind": "scalar",
+              "value": "Zoom out"
+            },
+            "actionName": {
+              "kind": "scalar",
+              "value": "win.zoom_out"
+            },
+            "iconName": {
+              "kind": "scalar",
+              "value": "zoom-out-symbolic"
+            }
+          },
+          "children": [],
+          "resolution": {
+            "kind": "generic-widget",
+            "rendererType": "button"
+          }
+        },
+        "window.ui#4": {
+          "key": "window.ui#4",
+          "sourceClass": "GtkButton",
+          "sourceId": "imported-3",
+          "sourceKind": "object",
+          "origin": {
+            "file": "window.ui",
+            "start": 0,
+            "end": 14103
+          },
+          "properties": {
+            "tooltipText": {
+              "kind": "scalar",
+              "value": "Reset Zoom"
+            },
+            "sensitive": {
+              "kind": "scalar",
+              "value": "False"
+            },
+            "actionName": {
+              "kind": "scalar",
+              "value": "win.zoom_reset"
+            }
+          },
+          "children": [
+            {
+              "nodeKey": "window.ui#5",
+              "origin": {
+                "file": "window.ui",
+                "start": 0,
+                "end": 14103
+              }
+            }
+          ],
+          "resolution": {
+            "kind": "generic-widget",
+            "rendererType": "button"
+          }
+        },
+        "window.ui#5": {
+          "key": "window.ui#5",
+          "sourceClass": "GtkLabel",
+          "sourceId": "zoom_level",
+          "sourceKind": "object",
+          "origin": {
+            "file": "window.ui",
+            "start": 0,
+            "end": 14103
+          },
+          "properties": {
+            "title": {
+              "kind": "scalar",
+              "value": "100%"
+            },
+            "widthChars": {
+              "kind": "scalar",
+              "value": 5
+            }
+          },
+          "children": [],
+          "resolution": {
+            "kind": "generic-widget",
+            "rendererType": "label"
+          }
+        },
+        "window.ui#6": {
+          "key": "window.ui#6",
+          "sourceClass": "GtkButton",
+          "sourceId": "imported-4",
+          "sourceKind": "object",
+          "origin": {
+            "file": "window.ui",
+            "start": 0,
+            "end": 14103
+          },
+          "properties": {
+            "tooltipText": {
+              "kind": "scalar",
+              "value": "Zoom in"
+            },
+            "actionName": {
+              "kind": "scalar",
+              "value": "win.zoom_in"
+            },
+            "iconName": {
+              "kind": "scalar",
+              "value": "zoom-in-symbolic"
+            }
+          },
+          "children": [],
+          "resolution": {
+            "kind": "generic-widget",
+            "rendererType": "button"
+          }
+        },
+        "window.ui#7": {
+          "key": "window.ui#7",
+          "sourceClass": "Window",
+          "sourceId": "Window",
+          "sourceKind": "object",
+          "origin": {
+            "file": "window.ui",
+            "start": 0,
+            "end": 14103
+          },
+          "properties": {
+            "defaultWidth": {
+              "kind": "scalar",
+              "value": 500
+            },
+            "defaultHeight": {
+              "kind": "scalar",
+              "value": 400
+            },
+            "widthRequest": {
+              "kind": "scalar",
+              "value": 360
+            },
+            "heightRequest": {
+              "kind": "scalar",
+              "value": 360
+            }
+          },
+          "children": [
+            {
+              "nodeKey": "window.ui#8",
+              "origin": {
+                "file": "window.ui",
+                "start": 0,
+                "end": 14103
+              }
+            },
+            {
+              "nodeKey": "window.ui#12",
+              "origin": {
+                "file": "window.ui",
+                "start": 0,
+                "end": 14103
+              }
+            }
+          ],
+          "resolution": {
+            "kind": "generic-widget",
+            "rendererType": "window"
+          }
+        },
+        "window.ui#8": {
+          "key": "window.ui#8",
+          "sourceClass": "GtkStack",
+          "sourceId": "stack",
+          "sourceKind": "object",
+          "origin": {
+            "file": "window.ui",
+            "start": 0,
+            "end": 14103
+          },
+          "properties": {},
+          "children": [
+            {
+              "nodeKey": "window.ui#9",
+              "origin": {
+                "file": "window.ui",
+                "start": 0,
+                "end": 14103
+              }
+            },
+            {
+              "nodeKey": "window.ui#11",
+              "origin": {
+                "file": "window.ui",
+                "start": 0,
+                "end": 14103
+              }
+            }
+          ],
+          "resolution": {
+            "kind": "generic-widget",
+            "rendererType": "stack"
+          }
+        },
+        "window.ui#9": {
+          "key": "window.ui#9",
+          "sourceClass": "GtkStackPage",
+          "sourceId": "imported-5",
+          "sourceKind": "object",
+          "origin": {
+            "file": "window.ui",
+            "start": 0,
+            "end": 14103
+          },
+          "properties": {
+            "name": {
+              "kind": "scalar",
+              "value": "empty"
+            },
+            "child": {
+              "kind": "scalar",
+              "value": "<object class=\"AdwToolbarView\">\n                <child type=\"top\">\n                  <object class=\"AdwHeaderBar\">\n                    <child>\n                      <object class=\"GtkButton\">\n                        <property name=\"tooltip-text\" translatable=\"yes\">Select a File"
+            },
+            "actionName": {
+              "kind": "scalar",
+              "value": "win.open"
+            }
+          },
+          "children": [
+            {
+              "nodeKey": "window.ui#10",
+              "origin": {
+                "file": "window.ui",
+                "start": 0,
+                "end": 14103
+              }
+            }
+          ],
+          "resolution": {
+            "kind": "generic-widget",
+            "rendererType": "stack-page"
+          }
+        },
+        "window.ui#10": {
+          "key": "window.ui#10",
+          "sourceClass": "AdwButtonContent",
+          "sourceId": "imported-6",
+          "sourceKind": "object",
+          "origin": {
+            "file": "window.ui",
+            "start": 0,
+            "end": 14103
+          },
+          "properties": {
+            "title": {
+              "kind": "scalar",
+              "value": "AdwButtonContent"
+            },
+            "iconName": {
+              "kind": "scalar",
+              "value": "document-open-symbolic"
+            },
+            "label": {
+              "kind": "scalar",
+              "value": "Open"
+            }
+          },
+          "children": [],
+          "resolution": {
+            "kind": "unsupported-widget",
+            "reason": "renderer-does-not-support-class"
+          }
+        },
+        "window.ui#11": {
+          "key": "window.ui#11",
+          "sourceClass": "GtkMenuButton",
+          "sourceId": "imported-7",
+          "sourceKind": "object",
+          "origin": {
+            "file": "window.ui",
+            "start": 0,
+            "end": 14103
+          },
+          "properties": {
+            "title": {
+              "kind": "scalar",
+              "value": "GtkMenuButton"
+            },
+            "tooltipText": {
+              "kind": "scalar",
+              "value": "Main Menu"
+            },
+            "valign": {
+              "kind": "scalar",
+              "value": "center"
+            },
+            "menuModel": {
+              "kind": "scalar",
+              "value": "empty_menu"
+            },
+            "primary": {
+              "kind": "scalar",
+              "value": "True"
+            },
+            "iconName": {
+              "kind": "scalar",
+              "value": "open-menu-symbolic"
+            }
+          },
+          "children": [],
+          "resolution": {
+            "kind": "unsupported-widget",
+            "reason": "renderer-does-not-support-class"
+          }
+        },
+        "window.ui#12": {
+          "key": "window.ui#12",
+          "sourceClass": "AdwStatusPage",
+          "sourceId": "status_page",
+          "sourceKind": "object",
+          "origin": {
+            "file": "window.ui",
+            "start": 0,
+            "end": 14103
+          },
+          "properties": {
+            "title": {
+              "kind": "scalar",
+              "value": "Drop an Image Here"
+            },
+            "hexpand": {
+              "kind": "scalar",
+              "value": "True"
+            },
+            "vexpand": {
+              "kind": "scalar",
+              "value": "True"
+            }
+          },
+          "children": [],
+          "resolution": {
+            "kind": "unsupported-widget",
+            "reason": "renderer-does-not-support-class"
+          }
+        },
+        "window.ui#13": {
+          "key": "window.ui#13",
+          "sourceClass": "GtkStackPage",
+          "sourceId": "imported-8",
+          "sourceKind": "object",
+          "origin": {
+            "file": "window.ui",
+            "start": 0,
+            "end": 14103
+          },
+          "properties": {
+            "name": {
+              "kind": "scalar",
+              "value": "image"
+            },
+            "child": {
+              "kind": "scalar",
+              "value": "<object class=\"AdwToolbarView\">\n                <child type=\"top\">\n                  <object class=\"AdwHeaderBar\">\n                    <property name=\"title-widget\">\n                      <object class=\"AdwWindowTitle\" id=\"window_title\">\n                        <property name=\"title\" translatable=\"yes\">Obfuscate"
+            }
+          },
+          "children": [],
+          "resolution": {
+            "kind": "generic-widget",
+            "rendererType": "stack-page"
+          }
+        },
+        "window.ui#14": {
+          "key": "window.ui#14",
+          "sourceClass": "GtkBox",
+          "sourceId": "header_tools",
+          "sourceKind": "object",
+          "origin": {
+            "file": "window.ui",
+            "start": 0,
+            "end": 14103
+          },
+          "properties": {
+            "orientation": {
+              "kind": "scalar",
+              "value": "horizontal"
+            }
+          },
+          "children": [
+            {
+              "nodeKey": "window.ui#15",
+              "origin": {
+                "file": "window.ui",
+                "start": 0,
+                "end": 14103
+              }
+            },
+            {
+              "nodeKey": "window.ui#16",
+              "origin": {
+                "file": "window.ui",
+                "start": 0,
+                "end": 14103
+              }
+            },
+            {
+              "nodeKey": "window.ui#17",
+              "origin": {
+                "file": "window.ui",
+                "start": 0,
+                "end": 14103
+              }
+            },
+            {
+              "nodeKey": "window.ui#18",
+              "origin": {
+                "file": "window.ui",
+                "start": 0,
+                "end": 14103
+              }
+            }
+          ],
+          "resolution": {
+            "kind": "generic-widget",
+            "rendererType": "box"
+          }
+        },
+        "window.ui#15": {
+          "key": "window.ui#15",
+          "sourceClass": "GtkButton",
+          "sourceId": "imported-9",
+          "sourceKind": "object",
+          "origin": {
+            "file": "window.ui",
+            "start": 0,
+            "end": 14103
+          },
+          "properties": {
+            "tooltipText": {
+              "kind": "scalar",
+              "value": "Undo"
+            },
+            "actionName": {
+              "kind": "scalar",
+              "value": "win.undo"
+            },
+            "iconName": {
+              "kind": "scalar",
+              "value": "edit-undo-symbolic"
+            }
+          },
+          "children": [],
+          "resolution": {
+            "kind": "generic-widget",
+            "rendererType": "button"
+          }
+        },
+        "window.ui#16": {
+          "key": "window.ui#16",
+          "sourceClass": "GtkButton",
+          "sourceId": "imported-10",
+          "sourceKind": "object",
+          "origin": {
+            "file": "window.ui",
+            "start": 0,
+            "end": 14103
+          },
+          "properties": {
+            "tooltipText": {
+              "kind": "scalar",
+              "value": "Redo"
+            },
+            "actionName": {
+              "kind": "scalar",
+              "value": "win.redo"
+            },
+            "iconName": {
+              "kind": "scalar",
+              "value": "edit-redo-symbolic"
+            }
+          },
+          "children": [],
+          "resolution": {
+            "kind": "generic-widget",
+            "rendererType": "button"
+          }
+        },
+        "window.ui#17": {
+          "key": "window.ui#17",
+          "sourceClass": "GtkSeparator",
+          "sourceId": "imported-11",
+          "sourceKind": "object",
+          "origin": {
+            "file": "window.ui",
+            "start": 0,
+            "end": 14103
+          },
+          "properties": {
+            "title": {
+              "kind": "scalar",
+              "value": "GtkSeparator"
+            }
+          },
+          "children": [],
+          "resolution": {
+            "kind": "unsupported-widget",
+            "reason": "renderer-does-not-support-class"
+          }
+        },
+        "window.ui#18": {
+          "key": "window.ui#18",
+          "sourceClass": "AdwToggleGroup",
+          "sourceId": "toggle_group_top",
+          "sourceKind": "object",
+          "origin": {
+            "file": "window.ui",
+            "start": 0,
+            "end": 14103
+          },
+          "properties": {
+            "title": {
+              "kind": "scalar",
+              "value": "AdwToggleGroup"
+            },
+            "activeName": {
+              "kind": "scalar",
+              "value": "fill"
+            }
+          },
+          "children": [
+            {
+              "nodeKey": "window.ui#19",
+              "origin": {
+                "file": "window.ui",
+                "start": 0,
+                "end": 14103
+              }
+            },
+            {
+              "nodeKey": "window.ui#20",
+              "origin": {
+                "file": "window.ui",
+                "start": 0,
+                "end": 14103
+              }
+            }
+          ],
+          "resolution": {
+            "kind": "unsupported-widget",
+            "reason": "renderer-does-not-support-class"
+          }
+        },
+        "window.ui#19": {
+          "key": "window.ui#19",
+          "sourceClass": "AdwToggle",
+          "sourceId": "imported-12",
+          "sourceKind": "object",
+          "origin": {
+            "file": "window.ui",
+            "start": 0,
+            "end": 14103
+          },
+          "properties": {
+            "title": {
+              "kind": "scalar",
+              "value": "AdwToggle"
+            },
+            "tooltip": {
+              "kind": "scalar",
+              "value": "Fill"
+            },
+            "iconName": {
+              "kind": "scalar",
+              "value": "square-filled-symbolic"
+            },
+            "name": {
+              "kind": "scalar",
+              "value": "fill"
+            }
+          },
+          "children": [],
+          "resolution": {
+            "kind": "unsupported-widget",
+            "reason": "renderer-does-not-support-class"
+          }
+        },
+        "window.ui#20": {
+          "key": "window.ui#20",
+          "sourceClass": "AdwToggle",
+          "sourceId": "imported-13",
+          "sourceKind": "object",
+          "origin": {
+            "file": "window.ui",
+            "start": 0,
+            "end": 14103
+          },
+          "properties": {
+            "title": {
+              "kind": "scalar",
+              "value": "AdwToggle"
+            },
+            "tooltip": {
+              "kind": "scalar",
+              "value": "Blur"
+            },
+            "iconName": {
+              "kind": "scalar",
+              "value": "blur-symbolic"
+            },
+            "name": {
+              "kind": "scalar",
+              "value": "blur"
+            }
+          },
+          "children": [],
+          "resolution": {
+            "kind": "unsupported-widget",
+            "reason": "renderer-does-not-support-class"
+          }
+        },
+        "window.ui#21": {
+          "key": "window.ui#21",
+          "sourceClass": "GtkMenuButton",
+          "sourceId": "imported-14",
+          "sourceKind": "object",
+          "origin": {
+            "file": "window.ui",
+            "start": 0,
+            "end": 14103
+          },
+          "properties": {
+            "title": {
+              "kind": "scalar",
+              "value": "GtkMenuButton"
+            },
+            "tooltipText": {
+              "kind": "scalar",
+              "value": "Main Menu"
+            },
+            "valign": {
+              "kind": "scalar",
+              "value": "center"
+            },
+            "popover": {
+              "kind": "scalar",
+              "value": "popover"
+            },
+            "primary": {
+              "kind": "scalar",
+              "value": "True"
+            },
+            "iconName": {
+              "kind": "scalar",
+              "value": "open-menu-symbolic"
+            }
+          },
+          "children": [],
+          "resolution": {
+            "kind": "unsupported-widget",
+            "reason": "renderer-does-not-support-class"
+          }
+        },
+        "window.ui#22": {
+          "key": "window.ui#22",
+          "sourceClass": "AdwToastOverlay",
+          "sourceId": "toast_overlay",
+          "sourceKind": "object",
+          "origin": {
+            "file": "window.ui",
+            "start": 0,
+            "end": 14103
+          },
+          "properties": {
+            "title": {
+              "kind": "scalar",
+              "value": "AdwToastOverlay"
+            }
+          },
+          "children": [
+            {
+              "nodeKey": "window.ui#23",
+              "origin": {
+                "file": "window.ui",
+                "start": 0,
+                "end": 14103
+              }
+            }
+          ],
+          "resolution": {
+            "kind": "unsupported-widget",
+            "reason": "renderer-does-not-support-class"
+          }
+        },
+        "window.ui#23": {
+          "key": "window.ui#23",
+          "sourceClass": "GtkBox",
+          "sourceId": "imported-15",
+          "sourceKind": "object",
+          "origin": {
+            "file": "window.ui",
+            "start": 0,
+            "end": 14103
+          },
+          "properties": {
+            "orientation": {
+              "kind": "scalar",
+              "value": "vertical"
+            }
+          },
+          "children": [
+            {
+              "nodeKey": "window.ui#24",
+              "origin": {
+                "file": "window.ui",
+                "start": 0,
+                "end": 14103
+              }
+            },
+            {
+              "nodeKey": "window.ui#26",
+              "origin": {
+                "file": "window.ui",
+                "start": 0,
+                "end": 14103
+              }
+            }
+          ],
+          "resolution": {
+            "kind": "generic-widget",
+            "rendererType": "box"
+          }
+        },
+        "window.ui#24": {
+          "key": "window.ui#24",
+          "sourceClass": "GtkScrolledWindow",
+          "sourceId": "imported-16",
+          "sourceKind": "object",
+          "origin": {
+            "file": "window.ui",
+            "start": 0,
+            "end": 14103
+          },
+          "properties": {
+            "hexpand": {
+              "kind": "scalar",
+              "value": "True"
+            },
+            "vexpand": {
+              "kind": "scalar",
+              "value": "True"
+            }
+          },
+          "children": [
+            {
+              "nodeKey": "window.ui#25",
+              "origin": {
+                "file": "window.ui",
+                "start": 0,
+                "end": 14103
+              }
+            }
+          ],
+          "resolution": {
+            "kind": "generic-widget",
+            "rendererType": "scrolled-window"
+          }
+        },
+        "window.ui#25": {
+          "key": "window.ui#25",
+          "sourceClass": "DrawingArea",
+          "sourceId": "drawing_area",
+          "sourceKind": "object",
+          "origin": {
+            "file": "window.ui",
+            "start": 0,
+            "end": 14103
+          },
+          "properties": {
+            "title": {
+              "kind": "scalar",
+              "value": "DrawingArea"
+            }
+          },
+          "children": [],
+          "resolution": {
+            "kind": "unsupported-widget",
+            "reason": "code-defined-class"
+          }
+        },
+        "window.ui#26": {
+          "key": "window.ui#26",
+          "sourceClass": "GtkBox",
+          "sourceId": "bottom_tools",
+          "sourceKind": "object",
+          "origin": {
+            "file": "window.ui",
+            "start": 0,
+            "end": 14103
+          },
+          "properties": {
+            "visible": {
+              "kind": "scalar",
+              "value": "False"
+            },
+            "orientation": {
+              "kind": "scalar",
+              "value": "horizontal"
+            }
+          },
+          "children": [
+            {
+              "nodeKey": "window.ui#27",
+              "origin": {
+                "file": "window.ui",
+                "start": 0,
+                "end": 14103
+              }
+            },
+            {
+              "nodeKey": "window.ui#30",
+              "origin": {
+                "file": "window.ui",
+                "start": 0,
+                "end": 14103
+              }
+            }
+          ],
+          "resolution": {
+            "kind": "generic-widget",
+            "rendererType": "box"
+          }
+        },
+        "window.ui#27": {
+          "key": "window.ui#27",
+          "sourceClass": "GtkBox",
+          "sourceId": "imported-17",
+          "sourceKind": "object",
+          "origin": {
+            "file": "window.ui",
+            "start": 0,
+            "end": 14103
+          },
+          "properties": {
+            "orientation": {
+              "kind": "scalar",
+              "value": "horizontal"
+            }
+          },
+          "children": [
+            {
+              "nodeKey": "window.ui#28",
+              "origin": {
+                "file": "window.ui",
+                "start": 0,
+                "end": 14103
+              }
+            },
+            {
+              "nodeKey": "window.ui#29",
+              "origin": {
+                "file": "window.ui",
+                "start": 0,
+                "end": 14103
+              }
+            }
+          ],
+          "resolution": {
+            "kind": "generic-widget",
+            "rendererType": "box"
+          }
+        },
+        "window.ui#28": {
+          "key": "window.ui#28",
+          "sourceClass": "GtkButton",
+          "sourceId": "imported-18",
+          "sourceKind": "object",
+          "origin": {
+            "file": "window.ui",
+            "start": 0,
+            "end": 14103
+          },
+          "properties": {
+            "tooltipText": {
+              "kind": "scalar",
+              "value": "Undo"
+            },
+            "actionName": {
+              "kind": "scalar",
+              "value": "win.undo"
+            },
+            "iconName": {
+              "kind": "scalar",
+              "value": "edit-undo-symbolic"
+            }
+          },
+          "children": [],
+          "resolution": {
+            "kind": "generic-widget",
+            "rendererType": "button"
+          }
+        },
+        "window.ui#29": {
+          "key": "window.ui#29",
+          "sourceClass": "GtkButton",
+          "sourceId": "imported-19",
+          "sourceKind": "object",
+          "origin": {
+            "file": "window.ui",
+            "start": 0,
+            "end": 14103
+          },
+          "properties": {
+            "tooltipText": {
+              "kind": "scalar",
+              "value": "Redo"
+            },
+            "actionName": {
+              "kind": "scalar",
+              "value": "win.redo"
+            },
+            "iconName": {
+              "kind": "scalar",
+              "value": "edit-redo-symbolic"
+            }
+          },
+          "children": [],
+          "resolution": {
+            "kind": "generic-widget",
+            "rendererType": "button"
+          }
+        },
+        "window.ui#30": {
+          "key": "window.ui#30",
+          "sourceClass": "AdwToggleGroup",
+          "sourceId": "toggle_group_bottom",
+          "sourceKind": "object",
+          "origin": {
+            "file": "window.ui",
+            "start": 0,
+            "end": 14103
+          },
+          "properties": {
+            "title": {
+              "kind": "scalar",
+              "value": "AdwToggleGroup"
+            }
+          },
+          "children": [
+            {
+              "nodeKey": "window.ui#31",
+              "origin": {
+                "file": "window.ui",
+                "start": 0,
+                "end": 14103
+              }
+            },
+            {
+              "nodeKey": "window.ui#32",
+              "origin": {
+                "file": "window.ui",
+                "start": 0,
+                "end": 14103
+              }
+            }
+          ],
+          "resolution": {
+            "kind": "unsupported-widget",
+            "reason": "renderer-does-not-support-class"
+          }
+        },
+        "window.ui#31": {
+          "key": "window.ui#31",
+          "sourceClass": "AdwToggle",
+          "sourceId": "imported-20",
+          "sourceKind": "object",
+          "origin": {
+            "file": "window.ui",
+            "start": 0,
+            "end": 14103
+          },
+          "properties": {
+            "title": {
+              "kind": "scalar",
+              "value": "AdwToggle"
+            },
+            "tooltip": {
+              "kind": "scalar",
+              "value": "Fill"
+            },
+            "iconName": {
+              "kind": "scalar",
+              "value": "square-filled-symbolic"
+            },
+            "name": {
+              "kind": "scalar",
+              "value": "fill"
+            }
+          },
+          "children": [],
+          "resolution": {
+            "kind": "unsupported-widget",
+            "reason": "renderer-does-not-support-class"
+          }
+        },
+        "window.ui#32": {
+          "key": "window.ui#32",
+          "sourceClass": "AdwToggle",
+          "sourceId": "imported-21",
+          "sourceKind": "object",
+          "origin": {
+            "file": "window.ui",
+            "start": 0,
+            "end": 14103
+          },
+          "properties": {
+            "title": {
+              "kind": "scalar",
+              "value": "AdwToggle"
+            },
+            "tooltip": {
+              "kind": "scalar",
+              "value": "Blur"
+            },
+            "iconName": {
+              "kind": "scalar",
+              "value": "blur-symbolic"
+            },
+            "name": {
+              "kind": "scalar",
+              "value": "blur"
+            }
+          },
+          "children": [],
+          "resolution": {
+            "kind": "unsupported-widget",
+            "reason": "renderer-does-not-support-class"
+          }
+        },
+        "window.ui#33": {
+          "key": "window.ui#33",
+          "sourceClass": "AdwBreakpoint",
+          "sourceId": "imported-22",
+          "sourceKind": "object",
+          "origin": {
+            "file": "window.ui",
+            "start": 0,
+            "end": 14103
+          },
+          "properties": {
+            "title": {
+              "kind": "scalar",
+              "value": "AdwBreakpoint"
+            }
+          },
+          "children": [],
+          "resolution": {
+            "kind": "unsupported-widget",
+            "reason": "renderer-does-not-support-class"
+          }
+        }
+      },
+      "templates": {},
+      "diagnostics": []
+    },
+    "screens": [
+      {
+        "id": "imported-screen-1",
+        "title": "GtkPopoverMenu",
+        "type": "standard",
+        "width": 1024,
+        "height": 720,
+        "rootNode": {
+          "id": "popover",
+          "type": "custom-widget",
+          "sourceKey": "window.ui#1",
+          "sourceClass": "GtkPopoverMenu",
+          "children": [
+            {
+              "id": "imported-1",
+              "type": "box",
+              "sourceKey": "window.ui#2",
+              "sourceClass": "GtkBox",
+              "children": [
+                {
+                  "id": "imported-2",
+                  "type": "button",
+                  "sourceKey": "window.ui#3",
+                  "sourceClass": "GtkButton",
+                  "children": [],
+                  "tooltipText": "Zoom out",
+                  "actionName": "win.zoom_out",
+                  "iconName": "zoom-out-symbolic"
+                },
+                {
+                  "id": "imported-3",
+                  "type": "button",
+                  "sourceKey": "window.ui#4",
+                  "sourceClass": "GtkButton",
+                  "children": [
+                    {
+                      "id": "zoom_level",
+                      "type": "label",
+                      "sourceKey": "window.ui#5",
+                      "sourceClass": "GtkLabel",
+                      "children": [],
+                      "title": "100%",
+                      "widthChars": 5
+                    }
+                  ],
+                  "tooltipText": "Reset Zoom",
+                  "sensitive": "False",
+                  "actionName": "win.zoom_reset"
+                },
+                {
+                  "id": "imported-4",
+                  "type": "button",
+                  "sourceKey": "window.ui#6",
+                  "sourceClass": "GtkButton",
+                  "children": [],
+                  "tooltipText": "Zoom in",
+                  "actionName": "win.zoom_in",
+                  "iconName": "zoom-in-symbolic"
+                }
+              ],
+              "homogeneous": "True"
+            }
+          ],
+          "title": "GtkPopoverMenu",
+          "menuModel": "main_menu"
+        }
+      },
+      {
+        "id": "imported-screen-2",
+        "title": "Obfuscate 2",
+        "type": "standard",
+        "width": 1024,
+        "height": 720,
+        "rootNode": {
+          "id": "Window",
+          "type": "window",
+          "sourceKey": "window.ui#7",
+          "sourceClass": "Window",
+          "children": [
+            {
+              "id": "stack",
+              "type": "stack",
+              "sourceKey": "window.ui#8",
+              "sourceClass": "GtkStack",
+              "children": [
+                {
+                  "id": "imported-5",
+                  "type": "stack-page",
+                  "sourceKey": "window.ui#9",
+                  "sourceClass": "GtkStackPage",
+                  "children": [
+                    {
+                      "id": "imported-6",
+                      "type": "custom-widget",
+                      "sourceKey": "window.ui#10",
+                      "sourceClass": "AdwButtonContent",
+                      "children": [],
+                      "title": "AdwButtonContent",
+                      "iconName": "document-open-symbolic",
+                      "label": "Open"
+                    }
+                  ],
+                  "name": "empty",
+                  "child": "<object class=\"AdwToolbarView\">\n                <child type=\"top\">\n                  <object class=\"AdwHeaderBar\">\n                    <child>\n                      <object class=\"GtkButton\">\n                        <property name=\"tooltip-text\" translatable=\"yes\">Select a File",
+                  "actionName": "win.open"
+                },
+                {
+                  "id": "imported-7",
+                  "type": "custom-widget",
+                  "sourceKey": "window.ui#11",
+                  "sourceClass": "GtkMenuButton",
+                  "children": [],
+                  "title": "GtkMenuButton",
+                  "tooltipText": "Main Menu",
+                  "valign": "center",
+                  "menuModel": "empty_menu",
+                  "primary": "True",
+                  "iconName": "open-menu-symbolic"
+                }
+              ]
+            },
+            {
+              "id": "status_page",
+              "type": "custom-widget",
+              "sourceKey": "window.ui#12",
+              "sourceClass": "AdwStatusPage",
+              "children": [],
+              "title": "Drop an Image Here",
+              "hexpand": "True",
+              "vexpand": "True"
+            }
+          ],
+          "defaultWidth": 500,
+          "defaultHeight": 400,
+          "widthRequest": 360,
+          "heightRequest": 360
+        }
+      },
+      {
+        "id": "imported-screen-3",
+        "title": "Obfuscate 3",
+        "type": "standard",
+        "width": 1024,
+        "height": 720,
+        "rootNode": {
+          "id": "imported-8",
+          "type": "stack-page",
+          "sourceKey": "window.ui#13",
+          "sourceClass": "GtkStackPage",
+          "children": [],
+          "name": "image",
+          "child": "<object class=\"AdwToolbarView\">\n                <child type=\"top\">\n                  <object class=\"AdwHeaderBar\">\n                    <property name=\"title-widget\">\n                      <object class=\"AdwWindowTitle\" id=\"window_title\">\n                        <property name=\"title\" translatable=\"yes\">Obfuscate"
+        }
+      },
+      {
+        "id": "imported-screen-4",
+        "title": "Obfuscate 4",
+        "type": "standard",
+        "width": 1024,
+        "height": 720,
+        "rootNode": {
+          "id": "header_tools",
+          "type": "box",
+          "sourceKey": "window.ui#14",
+          "sourceClass": "GtkBox",
+          "children": [
+            {
+              "id": "imported-9",
+              "type": "button",
+              "sourceKey": "window.ui#15",
+              "sourceClass": "GtkButton",
+              "children": [],
+              "tooltipText": "Undo",
+              "actionName": "win.undo",
+              "iconName": "edit-undo-symbolic"
+            },
+            {
+              "id": "imported-10",
+              "type": "button",
+              "sourceKey": "window.ui#16",
+              "sourceClass": "GtkButton",
+              "children": [],
+              "tooltipText": "Redo",
+              "actionName": "win.redo",
+              "iconName": "edit-redo-symbolic"
+            },
+            {
+              "id": "imported-11",
+              "type": "custom-widget",
+              "sourceKey": "window.ui#17",
+              "sourceClass": "GtkSeparator",
+              "children": [],
+              "title": "GtkSeparator"
+            },
+            {
+              "id": "toggle_group_top",
+              "type": "custom-widget",
+              "sourceKey": "window.ui#18",
+              "sourceClass": "AdwToggleGroup",
+              "children": [
+                {
+                  "id": "imported-12",
+                  "type": "custom-widget",
+                  "sourceKey": "window.ui#19",
+                  "sourceClass": "AdwToggle",
+                  "children": [],
+                  "title": "AdwToggle",
+                  "tooltip": "Fill",
+                  "iconName": "square-filled-symbolic",
+                  "name": "fill"
+                },
+                {
+                  "id": "imported-13",
+                  "type": "custom-widget",
+                  "sourceKey": "window.ui#20",
+                  "sourceClass": "AdwToggle",
+                  "children": [],
+                  "title": "AdwToggle",
+                  "tooltip": "Blur",
+                  "iconName": "blur-symbolic",
+                  "name": "blur"
+                }
+              ],
+              "title": "AdwToggleGroup",
+              "activeName": "fill"
+            }
+          ],
+          "orientation": "horizontal"
+        }
+      },
+      {
+        "id": "imported-screen-5",
+        "title": "GtkMenuButton",
+        "type": "standard",
+        "width": 1024,
+        "height": 720,
+        "rootNode": {
+          "id": "imported-14",
+          "type": "custom-widget",
+          "sourceKey": "window.ui#21",
+          "sourceClass": "GtkMenuButton",
+          "children": [],
+          "title": "GtkMenuButton",
+          "tooltipText": "Main Menu",
+          "valign": "center",
+          "popover": "popover",
+          "primary": "True",
+          "iconName": "open-menu-symbolic"
+        }
+      },
+      {
+        "id": "imported-screen-6",
+        "title": "AdwToastOverlay",
+        "type": "standard",
+        "width": 1024,
+        "height": 720,
+        "rootNode": {
+          "id": "toast_overlay",
+          "type": "custom-widget",
+          "sourceKey": "window.ui#22",
+          "sourceClass": "AdwToastOverlay",
+          "children": [
+            {
+              "id": "imported-15",
+              "type": "box",
+              "sourceKey": "window.ui#23",
+              "sourceClass": "GtkBox",
+              "children": [
+                {
+                  "id": "imported-16",
+                  "type": "scrolled-window",
+                  "sourceKey": "window.ui#24",
+                  "sourceClass": "GtkScrolledWindow",
+                  "children": [
+                    {
+                      "id": "drawing_area",
+                      "type": "custom-widget",
+                      "sourceKey": "window.ui#25",
+                      "sourceClass": "DrawingArea",
+                      "children": [],
+                      "title": "DrawingArea"
+                    }
+                  ],
+                  "hexpand": "True",
+                  "vexpand": "True"
+                },
+                {
+                  "id": "bottom_tools",
+                  "type": "box",
+                  "sourceKey": "window.ui#26",
+                  "sourceClass": "GtkBox",
+                  "children": [
+                    {
+                      "id": "imported-17",
+                      "type": "box",
+                      "sourceKey": "window.ui#27",
+                      "sourceClass": "GtkBox",
+                      "children": [
+                        {
+                          "id": "imported-18",
+                          "type": "button",
+                          "sourceKey": "window.ui#28",
+                          "sourceClass": "GtkButton",
+                          "children": [],
+                          "tooltipText": "Undo",
+                          "actionName": "win.undo",
+                          "iconName": "edit-undo-symbolic"
+                        },
+                        {
+                          "id": "imported-19",
+                          "type": "button",
+                          "sourceKey": "window.ui#29",
+                          "sourceClass": "GtkButton",
+                          "children": [],
+                          "tooltipText": "Redo",
+                          "actionName": "win.redo",
+                          "iconName": "edit-redo-symbolic"
+                        }
+                      ],
+                      "orientation": "horizontal"
+                    },
+                    {
+                      "id": "toggle_group_bottom",
+                      "type": "custom-widget",
+                      "sourceKey": "window.ui#30",
+                      "sourceClass": "AdwToggleGroup",
+                      "children": [
+                        {
+                          "id": "imported-20",
+                          "type": "custom-widget",
+                          "sourceKey": "window.ui#31",
+                          "sourceClass": "AdwToggle",
+                          "children": [],
+                          "title": "AdwToggle",
+                          "tooltip": "Fill",
+                          "iconName": "square-filled-symbolic",
+                          "name": "fill"
+                        },
+                        {
+                          "id": "imported-21",
+                          "type": "custom-widget",
+                          "sourceKey": "window.ui#32",
+                          "sourceClass": "AdwToggle",
+                          "children": [],
+                          "title": "AdwToggle",
+                          "tooltip": "Blur",
+                          "iconName": "blur-symbolic",
+                          "name": "blur"
+                        }
+                      ],
+                      "title": "AdwToggleGroup"
+                    }
+                  ],
+                  "visible": "False",
+                  "orientation": "horizontal"
+                }
+              ],
+              "orientation": "vertical"
+            }
+          ],
+          "title": "AdwToastOverlay"
+        }
+      },
+      {
+        "id": "imported-screen-7",
+        "title": "AdwBreakpoint",
+        "type": "standard",
+        "width": 1024,
+        "height": 720,
+        "rootNode": {
+          "id": "imported-22",
+          "type": "custom-widget",
+          "sourceKey": "window.ui#33",
+          "sourceClass": "AdwBreakpoint",
+          "children": [],
+          "title": "AdwBreakpoint"
+        }
+      }
+    ]
+  },
+  "assets": {}
+}

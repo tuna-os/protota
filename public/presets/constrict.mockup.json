@@ -1,0 +1,443 @@
+{
+  "version": 1,
+  "exportedAt": "2026-07-29T13:12:21.674Z",
+  "document": {
+    "id": "imported-document",
+    "title": "Constrict",
+    "colorScheme": "auto",
+    "edges": [],
+    "screens": [
+      {
+        "id": "imported-screen-1",
+        "title": "Adw.ShortcutsDialog",
+        "type": "standard",
+        "width": 1024,
+        "height": 720,
+        "rootNode": {
+          "id": "shortcuts_dialog",
+          "type": "custom-widget",
+          "sourceKey": "shortcuts-dialog.blp#1",
+          "sourceClass": "Adw.ShortcutsDialog",
+          "children": [
+            {
+              "id": "imported-2",
+              "type": "custom-widget",
+              "sourceKey": "shortcuts-dialog.blp#3",
+              "sourceClass": "Adw.ShortcutsSection",
+              "children": [
+                {
+                  "id": "imported-4",
+                  "type": "custom-widget",
+                  "sourceKey": "shortcuts-dialog.blp#5",
+                  "sourceClass": "Adw.ShortcutsItem",
+                  "children": [],
+                  "title": "Adw.ShortcutsItem",
+                  "actionName": "win.open"
+                },
+                {
+                  "id": "imported-6",
+                  "type": "custom-widget",
+                  "sourceKey": "shortcuts-dialog.blp#7",
+                  "sourceClass": "Adw.ShortcutsItem",
+                  "children": [],
+                  "title": "Adw.ShortcutsItem",
+                  "actionName": "win.export"
+                }
+              ],
+              "title": "Adw.ShortcutsSection"
+            },
+            {
+              "id": "imported-8",
+              "type": "custom-widget",
+              "sourceKey": "shortcuts-dialog.blp#9",
+              "sourceClass": "Adw.ShortcutsSection",
+              "children": [
+                {
+                  "id": "imported-10",
+                  "type": "custom-widget",
+                  "sourceKey": "shortcuts-dialog.blp#11",
+                  "sourceClass": "Adw.ShortcutsItem",
+                  "children": [],
+                  "title": "Adw.ShortcutsItem",
+                  "actionName": "win.toggle-sidebar"
+                },
+                {
+                  "id": "imported-12",
+                  "type": "custom-widget",
+                  "sourceKey": "shortcuts-dialog.blp#13",
+                  "sourceClass": "Adw.ShortcutsItem",
+                  "children": [],
+                  "title": "Adw.ShortcutsItem",
+                  "actionName": "app.shortcuts"
+                },
+                {
+                  "id": "imported-14",
+                  "type": "custom-widget",
+                  "sourceKey": "shortcuts-dialog.blp#15",
+                  "sourceClass": "Adw.ShortcutsItem",
+                  "children": [],
+                  "title": "Adw.ShortcutsItem",
+                  "actionName": "win.close"
+                },
+                {
+                  "id": "imported-16",
+                  "type": "custom-widget",
+                  "sourceKey": "shortcuts-dialog.blp#17",
+                  "sourceClass": "Adw.ShortcutsItem",
+                  "children": [],
+                  "title": "Adw.ShortcutsItem",
+                  "actionName": "app.quit"
+                },
+                {
+                  "id": "imported-18",
+                  "type": "custom-widget",
+                  "sourceKey": "shortcuts-dialog.blp#19",
+                  "sourceClass": "Adw.ShortcutsItem",
+                  "children": [],
+                  "title": "Adw.ShortcutsItem",
+                  "actionName": "app.preferences"
+                }
+              ],
+              "title": "Adw.ShortcutsSection"
+            }
+          ],
+          "title": "Adw.ShortcutsDialog"
+        }
+      }
+    ],
+    "sourceProject": {
+      "files": [
+        {
+          "path": "shortcuts-dialog.blp",
+          "content": "using Gtk 4.0;\nusing Adw 1;\n\nAdw.ShortcutsDialog shortcuts_dialog {\n  Adw.ShortcutsSection {\n    title: C_(\"shortcut window\", \"Video Management\");\n\n    Adw.ShortcutsItem {\n      title: C_(\"shortcut window\", \"Open\");\n      action-name: \"win.open\";\n    }\n\n    Adw.ShortcutsItem {\n      title: C_(\"shortcut window\", \"Export\");\n      action-name: \"win.export\";\n    }\n  }\n\n  Adw.ShortcutsSection {\n    title: C_(\"shortcut window\", \"General\");\n\n    Adw.ShortcutsItem {\n      title: C_(\"shortcut window\", \"Toggle Settings Pane\");\n      action-name: \"win.toggle-sidebar\";\n    }\n\n    Adw.ShortcutsItem {\n      title: C_(\"shortcut window\", \"Show Shortcuts\");\n      action-name: \"app.shortcuts\";\n    }\n\n    Adw.ShortcutsItem {\n      title: C_(\"shortcut window\", \"Close Window\");\n      action-name: \"win.close\";\n    }\n\n    Adw.ShortcutsItem {\n      title: C_(\"shortcut window\", \"Quit\");\n      action-name: \"app.quit\";\n    }\n\n    Adw.ShortcutsItem {\n      title: C_(\"shortcut window\", \"Show Preferences\");\n      action-name: \"app.preferences\";\n    }\n  }\n}\n"
+        }
+      ],
+      "roots": [
+        "shortcuts-dialog.blp#1"
+      ],
+      "widgets": {
+        "shortcuts-dialog.blp#1": {
+          "key": "shortcuts-dialog.blp#1",
+          "sourceClass": "Adw.ShortcutsDialog",
+          "sourceId": "shortcuts_dialog",
+          "sourceKind": "object",
+          "origin": {
+            "file": "shortcuts-dialog.blp",
+            "start": 29,
+            "end": 1042
+          },
+          "properties": {},
+          "children": [
+            {
+              "nodeKey": "shortcuts-dialog.blp#3",
+              "origin": {
+                "file": "shortcuts-dialog.blp",
+                "start": 70,
+                "end": 366
+              }
+            },
+            {
+              "nodeKey": "shortcuts-dialog.blp#9",
+              "origin": {
+                "file": "shortcuts-dialog.blp",
+                "start": 370,
+                "end": 1040
+              }
+            }
+          ],
+          "resolution": {
+            "kind": "unsupported-widget",
+            "reason": "renderer-does-not-support-class"
+          }
+        },
+        "shortcuts-dialog.blp#3": {
+          "key": "shortcuts-dialog.blp#3",
+          "sourceClass": "Adw.ShortcutsSection",
+          "sourceId": "imported-2",
+          "sourceKind": "object",
+          "origin": {
+            "file": "shortcuts-dialog.blp",
+            "start": 70,
+            "end": 366
+          },
+          "properties": {
+            "title": {
+              "kind": "opaque",
+              "sourceText": "C_ \"shortcut window\""
+            }
+          },
+          "children": [
+            {
+              "nodeKey": "shortcuts-dialog.blp#5",
+              "origin": {
+                "file": "shortcuts-dialog.blp",
+                "start": 152,
+                "end": 252
+              }
+            },
+            {
+              "nodeKey": "shortcuts-dialog.blp#7",
+              "origin": {
+                "file": "shortcuts-dialog.blp",
+                "start": 258,
+                "end": 362
+              }
+            }
+          ],
+          "resolution": {
+            "kind": "unsupported-widget",
+            "reason": "renderer-does-not-support-class"
+          }
+        },
+        "shortcuts-dialog.blp#5": {
+          "key": "shortcuts-dialog.blp#5",
+          "sourceClass": "Adw.ShortcutsItem",
+          "sourceId": "imported-4",
+          "sourceKind": "object",
+          "origin": {
+            "file": "shortcuts-dialog.blp",
+            "start": 152,
+            "end": 252
+          },
+          "properties": {
+            "title": {
+              "kind": "opaque",
+              "sourceText": "C_ \"shortcut window\""
+            },
+            "action-name": {
+              "kind": "scalar",
+              "value": "win.open"
+            }
+          },
+          "children": [],
+          "resolution": {
+            "kind": "unsupported-widget",
+            "reason": "renderer-does-not-support-class"
+          }
+        },
+        "shortcuts-dialog.blp#7": {
+          "key": "shortcuts-dialog.blp#7",
+          "sourceClass": "Adw.ShortcutsItem",
+          "sourceId": "imported-6",
+          "sourceKind": "object",
+          "origin": {
+            "file": "shortcuts-dialog.blp",
+            "start": 258,
+            "end": 362
+          },
+          "properties": {
+            "title": {
+              "kind": "opaque",
+              "sourceText": "C_ \"shortcut window\""
+            },
+            "action-name": {
+              "kind": "scalar",
+              "value": "win.export"
+            }
+          },
+          "children": [],
+          "resolution": {
+            "kind": "unsupported-widget",
+            "reason": "renderer-does-not-support-class"
+          }
+        },
+        "shortcuts-dialog.blp#9": {
+          "key": "shortcuts-dialog.blp#9",
+          "sourceClass": "Adw.ShortcutsSection",
+          "sourceId": "imported-8",
+          "sourceKind": "object",
+          "origin": {
+            "file": "shortcuts-dialog.blp",
+            "start": 370,
+            "end": 1040
+          },
+          "properties": {
+            "title": {
+              "kind": "opaque",
+              "sourceText": "C_ \"shortcut window\""
+            }
+          },
+          "children": [
+            {
+              "nodeKey": "shortcuts-dialog.blp#11",
+              "origin": {
+                "file": "shortcuts-dialog.blp",
+                "start": 443,
+                "end": 569
+              }
+            },
+            {
+              "nodeKey": "shortcuts-dialog.blp#13",
+              "origin": {
+                "file": "shortcuts-dialog.blp",
+                "start": 575,
+                "end": 690
+              }
+            },
+            {
+              "nodeKey": "shortcuts-dialog.blp#15",
+              "origin": {
+                "file": "shortcuts-dialog.blp",
+                "start": 696,
+                "end": 805
+              }
+            },
+            {
+              "nodeKey": "shortcuts-dialog.blp#17",
+              "origin": {
+                "file": "shortcuts-dialog.blp",
+                "start": 811,
+                "end": 911
+              }
+            },
+            {
+              "nodeKey": "shortcuts-dialog.blp#19",
+              "origin": {
+                "file": "shortcuts-dialog.blp",
+                "start": 917,
+                "end": 1036
+              }
+            }
+          ],
+          "resolution": {
+            "kind": "unsupported-widget",
+            "reason": "renderer-does-not-support-class"
+          }
+        },
+        "shortcuts-dialog.blp#11": {
+          "key": "shortcuts-dialog.blp#11",
+          "sourceClass": "Adw.ShortcutsItem",
+          "sourceId": "imported-10",
+          "sourceKind": "object",
+          "origin": {
+            "file": "shortcuts-dialog.blp",
+            "start": 443,
+            "end": 569
+          },
+          "properties": {
+            "title": {
+              "kind": "opaque",
+              "sourceText": "C_ \"shortcut window\""
+            },
+            "action-name": {
+              "kind": "scalar",
+              "value": "win.toggle-sidebar"
+            }
+          },
+          "children": [],
+          "resolution": {
+            "kind": "unsupported-widget",
+            "reason": "renderer-does-not-support-class"
+          }
+        },
+        "shortcuts-dialog.blp#13": {
+          "key": "shortcuts-dialog.blp#13",
+          "sourceClass": "Adw.ShortcutsItem",
+          "sourceId": "imported-12",
+          "sourceKind": "object",
+          "origin": {
+            "file": "shortcuts-dialog.blp",
+            "start": 575,
+            "end": 690
+          },
+          "properties": {
+            "title": {
+              "kind": "opaque",
+              "sourceText": "C_ \"shortcut window\""
+            },
+            "action-name": {
+              "kind": "scalar",
+              "value": "app.shortcuts"
+            }
+          },
+          "children": [],
+          "resolution": {
+            "kind": "unsupported-widget",
+            "reason": "renderer-does-not-support-class"
+          }
+        },
+        "shortcuts-dialog.blp#15": {
+          "key": "shortcuts-dialog.blp#15",
+          "sourceClass": "Adw.ShortcutsItem",
+          "sourceId": "imported-14",
+          "sourceKind": "object",
+          "origin": {
+            "file": "shortcuts-dialog.blp",
+            "start": 696,
+            "end": 805
+          },
+          "properties": {
+            "title": {
+              "kind": "opaque",
+              "sourceText": "C_ \"shortcut window\""
+            },
+            "action-name": {
+              "kind": "scalar",
+              "value": "win.close"
+            }
+          },
+          "children": [],
+          "resolution": {
+            "kind": "unsupported-widget",
+            "reason": "renderer-does-not-support-class"
+          }
+        },
+        "shortcuts-dialog.blp#17": {
+          "key": "shortcuts-dialog.blp#17",
+          "sourceClass": "Adw.ShortcutsItem",
+          "sourceId": "imported-16",
+          "sourceKind": "object",
+          "origin": {
+            "file": "shortcuts-dialog.blp",
+            "start": 811,
+            "end": 911
+          },
+          "properties": {
+            "title": {
+              "kind": "opaque",
+              "sourceText": "C_ \"shortcut window\""
+            },
+            "action-name": {
+              "kind": "scalar",
+              "value": "app.quit"
+            }
+          },
+          "children": [],
+          "resolution": {
+            "kind": "unsupported-widget",
+            "reason": "renderer-does-not-support-class"
+          }
+        },
+        "shortcuts-dialog.blp#19": {
+          "key": "shortcuts-dialog.blp#19",
+          "sourceClass": "Adw.ShortcutsItem",
+          "sourceId": "imported-18",
+          "sourceKind": "object",
+          "origin": {
+            "file": "shortcuts-dialog.blp",
+            "start": 917,
+            "end": 1036
+          },
+          "properties": {
+            "title": {
+              "kind": "opaque",
+              "sourceText": "C_ \"shortcut window\""
+            },
+            "action-name": {
+              "kind": "scalar",
+              "value": "app.preferences"
+            }
+          },
+          "children": [],
+          "resolution": {
+            "kind": "unsupported-widget",
+            "reason": "renderer-does-not-support-class"
+          }
+        }
+      },
+      "templates": {},
+      "diagnostics": []
+    }
+  },
+  "assets": {}
+}

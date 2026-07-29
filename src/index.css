@@ -255,6 +255,20 @@ body,
   border: 1px solid var(--separator-color, rgba(0, 0, 6, 0.1));
 }
 
+/* Screenshot comparison is of the rendered application, not the editor that
+ * hosts it.  The test harness enables this explicit mode before it captures a
+ * render surface, preventing fixed editor controls and selection affordances
+ * from overlaying an otherwise correctly sized window. */
+:root[data-protota-capture="true"] .protota-zoom-bar,
+:root[data-protota-capture="true"] .protota-screen-label,
+:root[data-protota-capture="true"] .protota-type-badge {
+  display: none !important;
+}
+
+:root[data-protota-capture="true"] .adw-node-wrapper.selected-outline {
+  outline: none;
+}
+
 /* ---- Modal overlay ---- */
 .protota-modal-backdrop {
   position: fixed;
@@ -352,6 +366,29 @@ body,
 /* ---- Div-only widget types (no custom element available) ---- */
 
 /* Box — directional container. Uses flexbox with Adwaita spacing scale. */
+.protota-div-bin {
+  display: block;
+}
+
+/* A source-declared widget implemented in C/GJS/Vala. This is a visible
+   layout boundary, never a fake approximation of its runtime contents. */
+.protota-div-custom-widget {
+  display: flex;
+  box-sizing: border-box;
+  align-items: center;
+  justify-content: center;
+  min-width: 48px;
+  min-height: 48px;
+  padding: var(--spacing-m, 12px);
+  border: 1px dashed var(--accent-color, #3584e4);
+  border-radius: var(--card-radius, 12px);
+  background: repeating-linear-gradient(-45deg, color-mix(in srgb, var(--accent-bg-color, #3584e4) 8%, transparent) 0 8px, transparent 8px 16px);
+  color: var(--accent-color, #3584e4);
+  font-family: var(--monospace-font-family, monospace);
+  font-size: var(--font-size-small, 11px);
+  text-align: center;
+}
+
 .protota-div-box {
   display: flex;
   flex-direction: column;
@@ -366,6 +403,27 @@ body,
 }
 .protota-div-box[orientation="horizontal"] > * {
   flex: 1;
+}
+
+/* Grid — maps GtkGrid's explicit column model to CSS Grid. */
+.protota-div-grid {
+  display: grid;
+  width: 100%;
+}
+
+/* A StatusPage's optional children are an action group in Libadwaita, not an
+   inline sentence. This applies to every imported/preset status page. */
+adw-status-page {
+  flex: 1 1 auto;
+  min-height: 0;
+  box-sizing: border-box;
+}
+
+adw-status-page .adw-status-page-child {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--spacing-s, 6px);
 }
 
 /* Center-box — start/center/end layout. */
@@ -579,4 +637,3 @@ body,
   padding: 24px;
   overflow: auto;
 }
-

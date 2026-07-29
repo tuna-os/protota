@@ -23,6 +23,16 @@ generic: presets must not add app-specific rendering branches. Blueprint and
 GtkBuilder imports preserve supported tree structure and properties; unknown
 visual widgets are reported so support can be added deliberately.
 
+### Editing an app UI file
+
+Import a work-in-progress `.blp` (Blueprint) or `.ui` (GtkBuilder) file using
+**File → Import**. Protota turns it into an editable `MockupDocument`; after
+editing, use **File → Export Blueprint** and replace the corresponding UI
+file in your checkout before rebuilding the app. The browser deliberately
+downloads the result rather than writing into a local source tree. Unsupported
+GTK/Libadwaita widgets fail import explicitly, so the generated UI is never a
+plausible-but-wrong substitute.
+
 The `tests/fixtures/gnome-app-catalog.json` catalog connects a GNOME app,
 its source, its preset, and a canonical viewport. The manual **Broadway
 Reference Capture** GitHub workflow runs the native app under GTK Broadway

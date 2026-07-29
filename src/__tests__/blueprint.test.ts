@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { blueprintToDocument, blueprintToNode, mockupToBlueprint } from '../utils/blueprint';
+import { importDocumentFile } from '../utils/exportImport';
 import type { MockupDocument } from '../types/mockup';
 
 const document: MockupDocument = {
@@ -78,5 +79,15 @@ describe('Blueprint import', () => {
       expect.objectContaining({ type: 'button', title: '1' }),
       expect.objectContaining({ type: 'button', title: '+' }),
     ]));
+  });
+
+  it('imports a Blueprint source file directly as an editable document', async () => {
+    const file = new File([toolbarGridFixture], 'toolbar-grid.blp', { type: 'text/plain' });
+    const imported = await importDocumentFile(file);
+
+    expect(imported.title).toBe('toolbar grid');
+    expect(imported.screens[0].rootNode).toMatchObject({ type: 'window' });
+    expect(imported.screens[0].rootNode.children?.[0]).toMatchObject({ type: 'toolbar-view' });
+    expect(mockupToBlueprint(imported)).toContain('Adw.ToolbarView');
   });
 });

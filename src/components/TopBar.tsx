@@ -226,7 +226,7 @@ export const TopBar: React.FC = () => {
       <input
         ref={fileInputRef}
         type="file"
-        accept=".mockup.json,.json"
+        accept=".mockup.json,.json,.blp,.ui"
         onChange={handleImport}
         style={{ display: "none" }}
       />

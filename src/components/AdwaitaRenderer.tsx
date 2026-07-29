@@ -168,17 +168,23 @@ function childSlot(parent: AdwNode, child: AdwNode, index: number): string | und
 }
 
 function nodeLayout(node: AdwNode): React.CSSProperties | undefined {
+  const placement: React.CSSProperties = {};
+  if (node.minWidth !== undefined) placement.minWidth = node.minWidth;
+  if (node.minHeight !== undefined) placement.minHeight = node.minHeight;
+  if (node.column !== undefined) placement.gridColumn = `${node.column + 1} / span ${node.columnSpan ?? 1}`;
+  if (node.row !== undefined) placement.gridRow = `${node.row + 1} / span ${node.rowSpan ?? 1}`;
   if (node.type === 'box') {
-    return { gap: node.spacing ?? 12 };
+    return { gap: node.spacing ?? 12, ...placement };
   }
   if (node.type === 'grid') {
     return {
       gridTemplateColumns: `repeat(${node.columns ?? 1}, minmax(0, 1fr))`,
       rowGap: node.rowSpacing ?? node.spacing ?? 6,
       columnGap: node.columnSpacing ?? node.spacing ?? 6,
+      ...placement,
     };
   }
-  return undefined;
+  return Object.keys(placement).length ? placement : undefined;
 }
 
 export const AdwaitaRenderer: React.FC<Props> = ({

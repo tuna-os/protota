@@ -110,6 +110,13 @@ export interface AdwNode {
   columns?: number;
   rowSpacing?: number;
   columnSpacing?: number;
+  /** GtkGrid child placement. Zero-based model coordinates. */
+  column?: number;
+  row?: number;
+  columnSpan?: number;
+  rowSpan?: number;
+  minWidth?: number;
+  minHeight?: number;
   // Breakpoint
   breakpointCondition?: string;
   // View stack pages

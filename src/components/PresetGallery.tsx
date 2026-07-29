@@ -89,8 +89,8 @@ export const PresetGallery: React.FC<Props> = ({ isOpen, onClose }) => {
                 border: '1px solid rgba(0,0,0,0.06)'
               }}>
                 <img
-                  src={`${import.meta.env.BASE_URL}presets/thumbnails/preset-${preset.id}-chromium-linux.png`}
-                  alt={`${preset.name} preview`}
+                  src={`${import.meta.env.BASE_URL}presets/thumbnails/${preset.id}.png`}
+                  alt={`${preset.name} official preview`}
                   style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top left' }}
                   onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }}
                 />

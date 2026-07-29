@@ -94,8 +94,10 @@ export const ViewportCanvas: React.FC = () => {
   const handleCanvasClick = useCallback(() => selectNode(null), [selectNode]);
 
   const [phoshScreenId, setPhoshScreenId] = useState<string | null>(null);
+  const [desktopScreenId, setDesktopScreenId] = useState<string | null>(null);
 
   const activePhoshScreen = doc.screens.find((s) => s.id === phoshScreenId);
+  const activeDesktopScreen = doc.screens.find((s) => s.id === desktopScreenId);
 
   return (
     <div
@@ -113,6 +115,44 @@ export const ViewportCanvas: React.FC = () => {
         cursor: isPanning ? 'grabbing' : 'default',
       }}
     >
+      {/* GNOME Desktop Fullscreen Live Interactive Preview Mode */}
+      {activeDesktopScreen && (
+        <div className="protota-gnome-desktop-container">
+          <div className="protota-gnome-topbar">
+            <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+              <span style={{ fontWeight: 700 }}>Activities</span>
+              <select
+                value={desktopScreenId || ''}
+                onChange={(e) => setDesktopScreenId(e.target.value)}
+                style={{ padding: '2px 8px', borderRadius: '4px', fontSize: '12px', background: 'rgba(255,255,255,0.15)', color: '#fff', border: 'none' }}
+              >
+                {doc.screens.map((s) => (
+                  <option key={s.id} value={s.id} style={{ color: '#000' }}>{s.title}</option>
+                ))}
+              </select>
+            </div>
+            <div style={{ fontSize: '13px' }}>
+              {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+            </div>
+            <button
+              className="protota-btn suggested"
+              onClick={() => setDesktopScreenId(null)}
+              style={{ fontSize: '11px', padding: '2px 8px' }}
+            >
+              ✕ Exit Desktop Mode
+            </button>
+          </div>
+
+          <div className="protota-gnome-window-frame">
+            <AdwaitaRenderer
+              node={activeDesktopScreen.rootNode}
+              screenId={activeDesktopScreen.id}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Phosh Fullscreen Phone Overlay Mode */}
       {/* Phosh Fullscreen Phone Overlay Mode */}
       {activePhoshScreen && (
         <div className="protota-phosh-container">
@@ -154,6 +194,12 @@ export const ViewportCanvas: React.FC = () => {
         </span>
         <button className="protota-btn" onClick={() => setZoom((z) => Math.min(z + 0.1, 2.5))}>+</button>
         <button className="protota-btn" onClick={() => { setZoom(1); setPan({ x: 0, y: 0 }); }}>Reset</button>
+        <button
+          className="protota-btn suggested"
+          onClick={() => setDesktopScreenId(doc.screens[0]?.id || null)}
+        >
+          🖥️ GNOME Desktop
+        </button>
         <button
           className="protota-btn suggested"
           onClick={() => setPhoshScreenId(doc.screens[0]?.id || null)}

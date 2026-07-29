@@ -430,3 +430,35 @@ html, body, #root {
   border-radius: 24px !important;
 }
 
+/* ---- GNOME Desktop Fullscreen Live Interactive Preview Mode ---- */
+.protota-gnome-desktop-container {
+  position: absolute;
+  inset: 0;
+  z-index: 100;
+  background: #1e1e1e;
+  display: flex;
+  flex-direction: column;
+}
+
+.protota-gnome-topbar {
+  height: 32px;
+  background: #000000;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  font-size: 13px;
+  user-select: none;
+}
+
+.protota-gnome-window-frame {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at center, #3584e4 0%, #1c71d8 100%);
+  padding: 24px;
+  overflow: auto;
+}
+

@@ -1,0 +1,82 @@
+import { describe, expect, it } from 'vitest';
+import { readFileSync } from 'node:fs';
+import { blueprintToDocument, blueprintToNode, mockupToBlueprint } from '../utils/blueprint';
+import type { MockupDocument } from '../types/mockup';
+
+const document: MockupDocument = {
+  id: 'round-trip',
+  title: 'Round trip',
+  colorScheme: 'dark',
+  edges: [],
+  screens: [{
+    id: 'main', title: 'Main', type: 'standard', width: 800, height: 600,
+    rootNode: {
+      id: 'window', type: 'window', children: [{
+        id: 'toolbar', type: 'toolbar-view', children: [
+          { id: 'header', type: 'header-bar', slot: 'top', title: 'Round trip', children: [] },
+          { id: 'content', type: 'box', slot: 'content', orientation: 'vertical', spacing: 12, children: [
+            { id: 'save', type: 'button', title: 'Save "draft"', suggested: true },
+            { id: 'name', type: 'label', title: 'Name' },
+          ] },
+        ],
+      }],
+    },
+  }],
+};
+
+describe('Blueprint import', () => {
+  const toolbarGridFixture = readFileSync(new URL('../../tests/fixtures/gnome-ui/toolbar-grid.blp', import.meta.url), 'utf8');
+
+  it('preserves hierarchy and supported properties through a mockup → Blueprint → mockup round trip', () => {
+    const imported = blueprintToNode(mockupToBlueprint(document));
+    const toolbar = imported.children?.[0];
+    const content = toolbar?.children?.[1];
+    const save = content?.children?.[0];
+
+    expect(imported).toMatchObject({ id: 'window', type: 'window' });
+    expect(toolbar).toMatchObject({ id: 'toolbar', type: 'toolbar-view' });
+    expect(toolbar?.children?.[0]).toMatchObject({ id: 'header', slot: 'top' });
+    expect(content).toMatchObject({ id: 'content', type: 'box', slot: 'content', orientation: 'vertical', spacing: 12 });
+    expect(save).toMatchObject({ id: 'save', type: 'button', title: 'Save "draft"', suggested: true });
+  });
+
+  it('imports nested GtkBuilder objects instead of flattening them', () => {
+    const imported = blueprintToDocument(`
+      <interface>
+        <object class="AdwApplicationWindow" id="window">
+          <property name="title">Files</property>
+          <child><object class="GtkBox" id="content">
+            <property name="orientation">vertical</property>
+            <child><object class="GtkButton" id="open"><property name="label">Open</property></object></child>
+          </object></child>
+        </object>
+      </interface>
+    `, 'Files');
+
+    expect(imported.screens).toHaveLength(1);
+    expect(imported.screens[0].rootNode).toMatchObject({ id: 'window', type: 'window', title: 'Files' });
+    expect(imported.screens[0].rootNode.children?.[0]).toMatchObject({ id: 'content', type: 'box', orientation: 'vertical' });
+    expect(imported.screens[0].rootNode.children?.[0].children?.[0]).toMatchObject({ id: 'open', type: 'button', title: 'Open' });
+  });
+
+  it('rejects unmapped visual widgets instead of rendering them as a fake box', () => {
+    expect(() => blueprintToNode('Gtk.ImaginaryWidget content {}')).toThrow('Unsupported GTK/Libadwaita widget: Gtk.ImaginaryWidget');
+  });
+
+  it('imports the upstream-style toolbar, content slot, and grid fixture with its layout semantics intact', () => {
+    const root = blueprintToNode(toolbarGridFixture);
+    const toolbar = root.children?.[0];
+    const content = toolbar?.children?.[1];
+    const grid = content?.children?.[0];
+
+    expect(root).toMatchObject({ type: 'window', title: 'Conformance Fixture' });
+    expect(toolbar).toMatchObject({ type: 'toolbar-view' });
+    expect(toolbar?.children?.[0]).toMatchObject({ type: 'header-bar', slot: 'top' });
+    expect(content).toMatchObject({ type: 'box', slot: 'content', orientation: 'vertical', spacing: 12 });
+    expect(grid).toMatchObject({ type: 'grid', columnSpacing: 6, rowSpacing: 6 });
+    expect(grid?.children).toEqual(expect.arrayContaining([
+      expect.objectContaining({ type: 'button', title: '1' }),
+      expect.objectContaining({ type: 'button', title: '+' }),
+    ]));
+  });
+});

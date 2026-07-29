@@ -67,6 +67,11 @@ export const WIDGET_SCHEMAS: Record<AdwNodeType, PropSchema[]> = {
     },
     { key: 'spacing', label: 'Spacing', type: 'number', defaultValue: 12 },
   ],
+  grid: [
+    { key: 'columns', label: 'Columns', type: 'number', defaultValue: 2 },
+    { key: 'rowSpacing', label: 'Row spacing', type: 'number', defaultValue: 6 },
+    { key: 'columnSpacing', label: 'Column spacing', type: 'number', defaultValue: 6 },
+  ],
   'center-box': [],
 
   // === Preferences rows ===

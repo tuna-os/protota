@@ -9,6 +9,7 @@
     "lint": "oxlint",
     "preview": "vite preview",
     "test": "playwright test",
+    "test:unit": "vitest run src/__tests__",
     "test:ui": "playwright test --ui"
   },
   "dependencies": {

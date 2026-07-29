@@ -27,6 +27,7 @@ export type AdwNodeType =
   // Layout
   | 'clamp'            // AdwClamp — max-width container
   | 'box'              // GtkBox — directional container
+  | 'grid'             // GtkGrid — rows/columns (Calculator and keypads)
   | 'center-box'       // GtkCenterBox — start/center/end layout
 
   // Preferences rows (boxed-list children)
@@ -71,6 +72,12 @@ export type AdwNodeType =
 export interface AdwNode {
   id: string;
   type: AdwNodeType;
+  /**
+   * Named GTK/Libadwaita child slot, such as ToolbarView's `top`/`content`
+   * or OverlaySplitView's `sidebar`/`content`.  This is structural data,
+   * not an app-specific rendering hint.
+   */
+  slot?: string;
   // Common properties
   title?: string;
   subtitle?: string;
@@ -100,6 +107,9 @@ export interface AdwNode {
   // Layout
   orientation?: 'horizontal' | 'vertical';
   spacing?: number;
+  columns?: number;
+  rowSpacing?: number;
+  columnSpacing?: number;
   // Breakpoint
   breakpointCondition?: string;
   // View stack pages
@@ -193,6 +203,11 @@ export const LEGAL_CHILDREN: Record<AdwNodeType, AdwNodeType[]> = {
     'status-page', 'banner', 'header-bar',
     'split-button', 'menu-button', 'toggle-group',
     'view-stack', 'tab-view',
+  ],
+  grid: [
+    'label', 'button', 'entry', 'search-entry', 'inscription', 'spinner',
+    'toggle', 'switch-widget', 'check-button', 'box', 'center-box',
+    'status-page', 'split-button', 'menu-button', 'toggle-group',
   ],
   'center-box': [
     'button', 'label', 'window-title', 'view-switcher',

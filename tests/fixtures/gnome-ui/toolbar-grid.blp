@@ -1,0 +1,31 @@
+// Canonical GTK4/Libadwaita composition used by GNOME applications.
+// Reference: https://gnome.pages.gitlab.gnome.org/libadwaita/doc/main/class.Window.html
+//            https://gnome.pages.gitlab.gnome.org/libadwaita/doc/1.6/class.ToolbarView.html
+using Gtk 4.0;
+using Adw 1;
+
+Adw.Window main_window {
+  title: "Conformance Fixture";
+  content {
+    Adw.ToolbarView toolbar_view {
+      top {
+        Adw.HeaderBar header_bar {
+          title: "Conformance Fixture";
+        }
+      }
+      content {
+        Gtk.Box content_box {
+          orientation: vertical;
+          spacing: 12;
+          Gtk.Grid keypad {
+            column-spacing: 6;
+            row-spacing: 6;
+            Gtk.Button digit_one { label: "1"; }
+            Gtk.Button digit_two { label: "2"; }
+            Gtk.Button add { label: "+"; }
+          }
+        }
+      }
+    }
+  }
+}

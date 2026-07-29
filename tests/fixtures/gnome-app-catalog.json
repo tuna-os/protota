@@ -1,0 +1,102 @@
+{
+  "calculator": {
+    "name": "GNOME Calculator",
+    "aptPackage": "gnome-calculator",
+    "command": "gnome-calculator",
+    "presetId": "calculator",
+    "viewport": { "width": 410, "height": 666 },
+    "source": "https://gitlab.gnome.org/GNOME/gnome-calculator",
+    "suite": "core",
+    "status": "preset"
+  },
+  "calendar": {
+    "name": "GNOME Calendar",
+    "aptPackage": "gnome-calendar",
+    "command": "gnome-calendar",
+    "presetId": "calendar",
+    "viewport": { "width": 1419, "height": 923 },
+    "source": "https://gitlab.gnome.org/GNOME/gnome-calendar",
+    "suite": "core",
+    "status": "preset"
+  },
+  "clocks": {
+    "name": "GNOME Clocks",
+    "aptPackage": "gnome-clocks",
+    "command": "gnome-clocks",
+    "presetId": "clocks",
+    "viewport": { "width": 901, "height": 738 },
+    "source": "https://gitlab.gnome.org/GNOME/gnome-clocks",
+    "suite": "core",
+    "status": "preset"
+  },
+  "disks": {
+    "name": "GNOME Disks",
+    "aptPackage": "gnome-disk-utility",
+    "command": "gnome-disks",
+    "presetId": "disks",
+    "viewport": { "width": 1156, "height": 823 },
+    "source": "https://gitlab.gnome.org/GNOME/gnome-disk-utility",
+    "suite": "core",
+    "status": "preset"
+  },
+  "files": {
+    "name": "Files",
+    "aptPackage": "nautilus",
+    "command": "nautilus --no-desktop",
+    "presetId": "files",
+    "viewport": { "width": 1122, "height": 822 },
+    "source": "https://gitlab.gnome.org/GNOME/nautilus",
+    "suite": "core",
+    "status": "preset"
+  },
+  "settings": {
+    "name": "Settings",
+    "aptPackage": "gnome-control-center",
+    "command": "gnome-control-center",
+    "presetId": "settings",
+    "viewport": { "width": 1047, "height": 738 },
+    "source": "https://gitlab.gnome.org/GNOME/gnome-control-center",
+    "suite": "core",
+    "status": "preset"
+  },
+  "software": {
+    "name": "Software",
+    "aptPackage": "gnome-software",
+    "command": "gnome-software --mode=overview",
+    "presetId": "software",
+    "viewport": { "width": 1322, "height": 797 },
+    "source": "https://gitlab.gnome.org/GNOME/gnome-software",
+    "suite": "core",
+    "status": "preset"
+  },
+  "text-editor": {
+    "name": "Text Editor",
+    "aptPackage": "gnome-text-editor",
+    "command": "gnome-text-editor --new-window",
+    "presetId": "text-editor",
+    "viewport": { "width": 1074, "height": 824 },
+    "source": "https://gitlab.gnome.org/GNOME/gnome-text-editor",
+    "suite": "core",
+    "status": "preset"
+  },
+  "weather": {
+    "name": "Weather",
+    "aptPackage": "gnome-weather",
+    "command": "gnome-weather",
+    "presetId": "weather",
+    "viewport": { "width": 881, "height": 667 },
+    "source": "https://gitlab.gnome.org/GNOME/gnome-weather",
+    "suite": "core",
+    "status": "preset"
+  },
+  "web": {
+    "name": "Web",
+    "aptPackage": "epiphany-browser",
+    "command": "epiphany --new-window",
+    "presetId": "web",
+    "viewport": { "width": 1116, "height": 827 },
+    "source": "https://gitlab.gnome.org/GNOME/epiphany",
+    "suite": "core",
+    "status": "preset"
+  }
+}

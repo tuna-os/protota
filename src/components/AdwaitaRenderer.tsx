@@ -8,6 +8,7 @@ interface Props {
   screenId: string;
   screenWidth?: number;
   screenHeight?: number;
+  inheritedSlot?: string;
 }
 
 /**
@@ -52,6 +53,7 @@ const TAG_MAP: Record<string, string | null> = {
   'flow-box':            'adw-wrap-box',
   // These lack custom elements — rendered as styled divs
   box:                   null,
+  grid:                  null,
   'center-box':          null,
   'search-entry':        null,
   'switch-widget':       null,
@@ -63,13 +65,16 @@ const TAG_MAP: Record<string, string | null> = {
 
 /** Div-only types: render a semantic container with Adwaita-styled layout. */
 const DIV_TYPES = new Set([
-  'box', 'center-box', 'search-entry', 'switch-widget',
+  'box', 'grid', 'center-box', 'search-entry', 'switch-widget',
   'check-button', 'list-box', 'label', 'inscription',
 ]);
 
-function nodeProps(node: AdwNode): Record<string, string> {
+function nodeProps(node: AdwNode, inheritedSlot?: string): Record<string, string> {
   const p: Record<string, string> = {};
   const t = node.type;
+
+  const slot = node.slot ?? inheritedSlot;
+  if (slot) p.slot = slot;
 
   // Text-bearing widgets
   if (t === 'header-bar' || t === 'window-title') {
@@ -110,7 +115,6 @@ function nodeProps(node: AdwNode): Record<string, string> {
     'check-button': ['active'],
     'spin-row': ['min', 'max', 'step'],
     'combo-row': ['selectedIndex'],
-    box: ['orientation', 'spacing'],
   };
   for (const [key, value] of Object.entries(node)) {
     const flags = boolFlags[t] || [];
@@ -122,11 +126,39 @@ function nodeProps(node: AdwNode): Record<string, string> {
   return p;
 }
 
+/**
+ * Pre-slot mockups used direct ToolbarView children. Preserve that valid GTK
+ * structure while documents imported from Blueprint keep their explicit slot.
+ */
+function childSlot(parent: AdwNode, child: AdwNode): string | undefined {
+  if (child.slot) return child.slot;
+  if (parent.type === 'toolbar-view') {
+    return child.type === 'header-bar' ? 'top' : 'content';
+  }
+  return undefined;
+}
+
+function nodeLayout(node: AdwNode): React.CSSProperties | undefined {
+  if (node.type === 'box') {
+    return { gap: node.spacing ?? 12 };
+  }
+  if (node.type === 'grid') {
+    return {
+      gridTemplateColumns: `repeat(${node.columns ?? 1}, minmax(0, 1fr))`,
+      rowGap: node.rowSpacing ?? node.spacing ?? 6,
+      columnGap: node.columnSpacing ?? node.spacing ?? 6,
+    };
+  }
+  return undefined;
+}
+
 export const AdwaitaRenderer: React.FC<Props> = ({
   node, screenId, screenWidth, screenHeight,
+  inheritedSlot,
 }) => {
   const { selectedNodeId, selectNode, addChildNode, doc } = useMockupStore();
   const isSelected = selectedNodeId === node.id;
+
   const legalAdds = LEGAL_CHILDREN[node.type] || [];
   const elRef = useRef<HTMLElement>(null);
 
@@ -138,7 +170,7 @@ export const AdwaitaRenderer: React.FC<Props> = ({
   }, [node.type, screenWidth, screenHeight]);
 
   const tag = TAG_MAP[node.type] || 'div';
-  const attrs = nodeProps(node);
+  const attrs = nodeProps(node, inheritedSlot);
 
   // Apply theme class to window/dialog roots based on doc colorScheme
   const isRoot = node.type === 'window' || node.type === 'dialog' ||
@@ -148,7 +180,7 @@ export const AdwaitaRenderer: React.FC<Props> = ({
   if (themeClass) attrs['class'] = themeClass;
 
   const children = node.children?.map((child) => (
-    <AdwaitaRenderer key={child.id} node={child} screenId={screenId} />
+    <AdwaitaRenderer key={child.id} node={child} screenId={screenId} inheritedSlot={childSlot(node, child)} />
   ));
 
   // Div-only types get Adwaita-styled classes for layout/structure
@@ -163,13 +195,13 @@ export const AdwaitaRenderer: React.FC<Props> = ({
     <div
       onClick={handleClick}
       className={`adw-node-wrapper${isSelected ? ' selected-outline' : ''} ${divClass}`}
-      style={{ position: 'relative' }}
+      style={isSelected ? { position: 'relative' } : { display: 'contents' }}
     >
       {isSelected && (
         <div className="protota-type-badge">{node.type}</div>
       )}
 
-      {React.createElement(tag, { ref: elRef, ...attrs, className: divClass || undefined },
+      {React.createElement(tag, { ref: elRef, ...attrs, 'data-protota-type': node.type, style: nodeLayout(node), className: divClass || undefined },
         ...(children ?? []),
         // For label/inscription — render text content
         ...(node.type === 'label' || node.type === 'inscription'

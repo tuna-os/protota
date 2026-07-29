@@ -368,6 +368,12 @@ body,
   flex: 1;
 }
 
+/* Grid — maps GtkGrid's explicit column model to CSS Grid. */
+.protota-div-grid {
+  display: grid;
+  width: 100%;
+}
+
 /* Center-box — start/center/end layout. */
 .protota-div-center-box {
   display: flex;
@@ -579,4 +585,3 @@ body,
   padding: 24px;
   overflow: auto;
 }
-

@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { writeFileSync } from 'node:fs';
 import pixelmatch from 'pixelmatch';
 import { PNG } from 'pngjs';
 
@@ -14,6 +15,12 @@ test.describe('Broadway reference captures', () => {
   test.skip(!broadwayUrl, 'Set BROADWAY_URL to run the native GTK reference capture.');
 
   test('compares the native GNOME app with its matching Protota preset', async ({ browser, page }, testInfo) => {
+    const attachArtifact = async (name: string, body: Buffer, contentType: string) => {
+      const path = testInfo.outputPath(name);
+      writeFileSync(path, body);
+      await testInfo.attach(name, { path, contentType });
+    };
+
     await page.setViewportSize(viewport);
     await page.goto('/');
     await page.evaluate(async (id) => {
@@ -24,13 +31,13 @@ test.describe('Broadway reference captures', () => {
     await page.reload();
     await expect(page.locator('adw-window')).toBeVisible();
     const prototaPng = await page.screenshot();
-    await testInfo.attach(`protota-${appId}.png`, { body: prototaPng, contentType: 'image/png' });
+    await attachArtifact(`protota-${appId}.png`, prototaPng, 'image/png');
 
     const referencePage = await browser.newPage({ viewport });
     await referencePage.goto(broadwayUrl!);
     await referencePage.waitForTimeout(2_000);
     const broadwayPng = await referencePage.screenshot();
-    await testInfo.attach(`broadway-${appId}.png`, { body: broadwayPng, contentType: 'image/png' });
+    await attachArtifact(`broadway-${appId}.png`, broadwayPng, 'image/png');
     await referencePage.close();
 
     const actual = PNG.sync.read(prototaPng);
@@ -48,11 +55,12 @@ test.describe('Broadway reference captures', () => {
     );
     const totalPixels = actual.width * actual.height;
     const differenceRatio = differentPixels / totalPixels;
-    await testInfo.attach(`diff-${appId}.png`, { body: PNG.sync.write(diff), contentType: 'image/png' });
-    await testInfo.attach(`comparison-${appId}.json`, {
-      body: Buffer.from(JSON.stringify({ appId, differentPixels, totalPixels, differenceRatio }, null, 2)),
-      contentType: 'application/json',
-    });
+    await attachArtifact(`diff-${appId}.png`, PNG.sync.write(diff), 'image/png');
+    await attachArtifact(
+      `comparison-${appId}.json`,
+      Buffer.from(JSON.stringify({ appId, differentPixels, totalPixels, differenceRatio }, null, 2)),
+      'application/json',
+    );
 
     // Baseline collection is report-only. Once a preset is tuned, CI can set
     // a per-run maximum to make its visual delta an enforced contract.

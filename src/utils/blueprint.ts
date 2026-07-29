@@ -187,7 +187,7 @@ interface Token {
 function tokenizeBlueprint(code: string): Token[] {
   const withoutComments = code.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/.*$/gm, '');
   const tokens: Token[] = [];
-  const pattern = /"(?:\\.|[^"\\])*"|-?\d+(?:\.\d+)?|[A-Za-z_][A-Za-z0-9_.-]*|[{}:;,]/g;
+  const pattern = /"(?:\\.|[^"\\])*"|-?\d+(?:\.\d+)?|\$?[A-Za-z_][A-Za-z0-9_.-]*|[{}:;,]/g;
   for (const match of withoutComments.matchAll(pattern)) {
     const value = match[0];
     tokens.push({
@@ -232,6 +232,19 @@ function makeNode(rawClass: string, id: string, properties: Record<string, Bluep
   return node;
 }
 
+/** Custom Blueprint templates must be supplied by the source bundle. */
+export function blueprintTemplateReferences(code: string): string[] {
+  const tokens = tokenizeBlueprint(code);
+  const references = new Set<string>();
+  for (let index = 0; index < tokens.length; index++) {
+    const token = tokens[index];
+    if (!token.value.startsWith('$')) continue;
+    // `template $Name: Class` declares a template; `$Name instance {}` uses it.
+    if (tokens[index + 1]?.value !== ':') references.add(token.value.slice(1));
+  }
+  return [...references];
+}
+
 function parseBlueprintRoots(code: string): AdwNode[] {
   const tokens = tokenizeBlueprint(code);
   let cursor = 0;
@@ -244,6 +257,10 @@ function parseBlueprintRoots(code: string): AdwNode[] {
       const first = tokens[cursor];
       const second = tokens[cursor + 1];
       const third = tokens[cursor + 2];
+
+      if (first?.value.startsWith('$') && (second?.value === '{' || third?.value === '{')) {
+        throw new Error(`Unresolved Blueprint template reference: ${first.value}. Import its defining UI file with the source bundle.`);
+      }
 
       // Gtk/Adw object: `Gtk.Button save_button { ... }`.
       if (first?.kind === 'word' && (first.value.includes('.') || CLASS_TO_WIDGET_MAP[first.value]) && (second?.value === '{' || third?.value === '{')) {

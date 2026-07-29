@@ -51,6 +51,8 @@ renderer path.
 See [GNOME app visual conformance](docs/gnome-app-conformance.md) for the
 current validation state. "Passed" always means the paired screenshots and
 their diff were visually reviewed, not merely that a capture command exited.
+See [GNOME Core source-import loop](docs/gnome-source-import.md) for the
+official-source UI inputs and explicit custom-widget boundaries.
 
 ## Pull requests
 

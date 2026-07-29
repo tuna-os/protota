@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
-import { blueprintToDocument, blueprintToNode, mockupToBlueprint } from '../utils/blueprint';
+import { blueprintTemplateReferences, blueprintToDocument, blueprintToNode, mockupToBlueprint } from '../utils/blueprint';
 import { importDocumentFile } from '../utils/exportImport';
 import type { MockupDocument } from '../types/mockup';
 
@@ -107,5 +107,11 @@ describe('Blueprint import', () => {
       expect.objectContaining({ type: 'button', title: 'C', column: 0, row: 0 }),
       expect.objectContaining({ type: 'toggle', title: '↑n', column: 1, row: 0 }),
     ]));
+  });
+
+  it('reports source-bundle dependencies instead of silently dropping custom templates', () => {
+    const source = 'Adw.Bin { $HistoryView history {} }';
+    expect(blueprintTemplateReferences(source)).toEqual(['HistoryView']);
+    expect(() => blueprintToNode(source)).toThrow('Unresolved Blueprint template reference: $HistoryView');
   });
 });

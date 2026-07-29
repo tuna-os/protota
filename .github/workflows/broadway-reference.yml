@@ -1,6 +1,11 @@
 name: Broadway Reference Capture
 
 on:
+  # Explicit opt-in branch convention for running a suite before this workflow
+  # has landed on the default branch.
+  push:
+    branches:
+      - 'ci/broadway-*'
   # A weekly report keeps renderer regressions visible without making every
   # pull request build ten complete GNOME application images.
   schedule:
@@ -23,7 +28,7 @@ permissions:
 
 jobs:
   native-reference:
-    if: (github.event_name == 'schedule' && matrix.scheduled) || inputs.app == 'all-core' || matrix.app == inputs.app
+    if: github.event_name == 'push' || (github.event_name == 'schedule' && matrix.scheduled) || inputs.app == 'all-core' || matrix.app == inputs.app
     runs-on: ubuntu-latest
     timeout-minutes: 20
     strategy:

@@ -1,4 +1,14 @@
 {
+  "amberol": {
+    "name": "Amberol",
+    "aptPackage": "amberol",
+    "command": "amberol",
+    "presetId": "amberol",
+    "viewport": { "width": 480, "height": 640 },
+    "source": "https://gitlab.gnome.org/World/amberol",
+    "suite": "circle",
+    "status": "preset"
+  },
   "calculator": {
     "name": "GNOME Calculator",
     "aptPackage": "gnome-calculator",

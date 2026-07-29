@@ -1,0 +1,44 @@
+{
+  "version": 1,
+  "exportedAt": "2026-07-29T00:00:00Z",
+  "document": {
+    "id": "preset-amberol",
+    "title": "Amberol",
+    "colorScheme": "auto",
+    "edges": [],
+    "screens": [
+      {
+        "id": "amberol-library",
+        "title": "Amberol — Empty library",
+        "type": "status-page",
+        "width": 480,
+        "height": 640,
+        "rootNode": {
+          "id": "amberol-window",
+          "type": "window",
+          "children": [
+            {
+              "id": "amberol-toolbar",
+              "type": "toolbar-view",
+              "children": [
+                {
+                  "id": "amberol-empty",
+                  "type": "status-page",
+                  "slot": "content",
+                  "title": "Amberol",
+                  "description": "Select a file or a folder, or drag files from your file manager to the application window to add songs to the playlist",
+                  "iconName": "folder-music-symbolic",
+                  "children": [
+                    { "id": "amberol-add-folder", "type": "button", "title": "Add Folder", "suggested": true },
+                    { "id": "amberol-add-song", "type": "button", "title": "Add Song" }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "assets": {}
+}

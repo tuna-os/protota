@@ -9,6 +9,7 @@ interface PresetMeta {
 }
 
 const PRESETS: PresetMeta[] = [
+  { id: 'amberol', name: 'Amberol', description: 'GNOME Circle music player empty-library state with add-folder and add-song actions.', screens: 1 },
   { id: 'text-editor', name: 'GNOME Text Editor', description: 'Document editor with header bar, save/open buttons, and content area.', screens: 1 },
   { id: 'settings', name: 'GNOME Settings', description: 'ViewSwitcher with Wi-Fi, Bluetooth, and Display panels. Search in header bar.', screens: 1 },
   { id: 'calculator', name: 'GNOME Calculator', description: 'Button grid calculator with display and arithmetic operations.', screens: 1 },
@@ -52,7 +53,7 @@ export const PresetGallery: React.FC<Props> = ({ isOpen, onClose }) => {
   return (
     <div className="protota-modal-backdrop" onClick={onClose}>
       <div className="protota-modal" onClick={(e) => e.stopPropagation()} style={{ width: '520px', maxHeight: '80vh' }}>
-        <h3 style={{ marginTop: 0 }}>Load Preset — GNOME Core Apps</h3>
+        <h3 style={{ marginTop: 0 }}>Load Preset — GNOME Apps</h3>
         <p style={{ fontSize: '12px', opacity: 0.65, marginBottom: '16px' }}>
           Replace the current document with a pre-built mockup. Your current work will be lost.
           Use Undo (Ctrl+Z) to restore after loading.

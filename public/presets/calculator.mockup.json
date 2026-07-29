@@ -35,16 +35,16 @@
                   "id": "calc-body",
                   "type": "box",
                   "orientation": "vertical",
-                  "spacing": 12,
+                  "spacing": 6,
                   "children": [
                     {
                       "id": "calc-history-list",
                       "type": "list-box",
                       "children": [
-                        { "id": "calc-h1", "type": "action-row", "title": "30 × 5", "subtitle": "150" },
-                        { "id": "calc-h2", "type": "action-row", "title": "150 ÷ 15", "subtitle": "10" },
-                        { "id": "calc-h3", "type": "action-row", "title": "10 × 9.8", "subtitle": "98" },
-                        { "id": "calc-h4", "type": "action-row", "title": "98 − 80", "subtitle": "18" }
+                        { "id": "calc-h1", "type": "action-row", "title": "30 × 5", "subtitle": "= 150" },
+                        { "id": "calc-h2", "type": "action-row", "title": "150 ÷ 15", "subtitle": "= 10" },
+                        { "id": "calc-h3", "type": "action-row", "title": "10 × 9.8", "subtitle": "= 98" },
+                        { "id": "calc-h4", "type": "action-row", "title": "98 − 80", "subtitle": "= 18" }
                       ]
                     },
                     { "id": "calc-display", "type": "entry", "value": "18", "placeholder": "0" },
@@ -52,13 +52,13 @@
                       "id": "calc-grid",
                       "type": "box",
                       "orientation": "vertical",
-                      "spacing": 6,
+                      "spacing": 4,
                       "children": [
                         {
                           "id": "calc-row1",
                           "type": "box",
                           "orientation": "horizontal",
-                          "spacing": 6,
+                          "spacing": 4,
                           "children": [
                             { "id": "calc-c", "type": "button", "title": "C" },
                             { "id": "calc-upn", "type": "button", "title": "↑n", "flat": true },
@@ -71,7 +71,7 @@
                           "id": "calc-row2",
                           "type": "box",
                           "orientation": "horizontal",
-                          "spacing": 6,
+                          "spacing": 4,
                           "children": [
                             { "id": "calc-7", "type": "button", "title": "7" },
                             { "id": "calc-8", "type": "button", "title": "8" },
@@ -84,7 +84,7 @@
                           "id": "calc-row3",
                           "type": "box",
                           "orientation": "horizontal",
-                          "spacing": 6,
+                          "spacing": 4,
                           "children": [
                             { "id": "calc-4", "type": "button", "title": "4" },
                             { "id": "calc-5", "type": "button", "title": "5" },
@@ -97,7 +97,7 @@
                           "id": "calc-row4",
                           "type": "box",
                           "orientation": "horizontal",
-                          "spacing": 6,
+                          "spacing": 4,
                           "children": [
                             { "id": "calc-1", "type": "button", "title": "1" },
                             { "id": "calc-2", "type": "button", "title": "2" },

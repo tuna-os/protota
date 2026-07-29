@@ -13,6 +13,7 @@ export const ViewportCanvas: React.FC = () => {
   const [isPanning, setIsPanning] = useState(false);
   const startPan = useRef({ x: 0, y: 0 });
   const spaceDown = useRef(false);
+  const canvasRef = useRef<HTMLDivElement>(null);
 
   const handleWheel = useCallback((e: React.WheelEvent) => {
     if (e.ctrlKey || e.metaKey) {
@@ -48,16 +49,18 @@ export const ViewportCanvas: React.FC = () => {
 
   React.useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.code === "Space") {
-        e.preventDefault();
-        spaceDown.current = true;
-      }
       if (e.key === "Escape") {
         selectNode(null);
+      }
+      if (e.code === "Space") {
+        if (!canvasRef.current?.contains(e.target as Node)) return;
+        e.preventDefault();
+        spaceDown.current = true;
       }
     };
     const onKeyUp = (e: KeyboardEvent) => {
       if (e.code === "Space") {
+        if (!canvasRef.current?.contains(e.target as Node)) return;
         spaceDown.current = false;
         setIsPanning(false);
       }
@@ -143,6 +146,7 @@ export const ViewportCanvas: React.FC = () => {
 
   return (
     <div
+      ref={canvasRef}
       className="protota-canvas"
       onWheel={handleWheel}
       onMouseDown={handleMouseDown}

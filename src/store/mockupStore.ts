@@ -256,6 +256,7 @@ interface MockupState {
   toggleColorScheme: () => void;
   toggleLint: () => void;
   setShowAddScreenModal: (show: boolean) => void;
+  clearCanvas: () => void;
 }
 
 export const useMockupStore = create<MockupState>((set, get) => {
@@ -421,6 +422,15 @@ export const useMockupStore = create<MockupState>((set, get) => {
       const nextEnabled = !get().lintEnabled;
       const nextViolations = nextEnabled ? lintDocument(get().doc) : [];
       set({ lintEnabled: nextEnabled, violations: nextViolations });
+    },
+
+    clearCanvas: () => {
+      const freshDoc: MockupDocument = {
+        ...get().doc,
+        edges: [],
+        screens: [],
+      };
+      set(pushSnapshot(freshDoc));
     },
   };
 });

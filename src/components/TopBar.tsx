@@ -29,6 +29,7 @@ export const TopBar: React.FC = () => {
     lintEnabled,
     toggleLint,
     violations,
+    clearCanvas,
   } = useMockupStore();
   const [openMenu, setOpenMenu] = useState<string | null>(null);
   const menuBarRef = useRef<HTMLDivElement>(null);
@@ -98,9 +99,8 @@ export const TopBar: React.FC = () => {
       label: "File",
       items: [
         {
-          label: "New Screen",
-          action: () => setShowAddScreenModal(true),
-          shortcut: "Ctrl+N",
+          label: "New Project",
+          action: clearCanvas,
         },
         { label: "divider", divider: true },
         {

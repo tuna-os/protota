@@ -8,7 +8,7 @@ import { ContextMenu } from "./ContextMenu";
 import { PresetGallery } from "./PresetGallery";
 import { CommandPalette } from "./CommandPalette";
 import { AddScreenModal } from "./AddScreenModal";
-import { MenuBar } from "./MenuBar";
+import { TopBar } from "./TopBar";
 
 export const App: React.FC = () => {
   const {
@@ -182,10 +182,8 @@ export const App: React.FC = () => {
       onContextMenu={handleContextMenu}
     >
       {/* Adwaita Toolbar View — frames the entire app */}
-      {/* @ts-ignore — adw-toolbar-view is a custom element */}
       <adw-toolbar-view style={{ flex: 1, display: "flex", flexDirection: "column" }}>
         {/* Header Bar — combines menu + actions */}
-        {/* @ts-ignore — adw-header-bar is a custom element */}
         <adw-header-bar slot="top" title={doc.title || "Protota"}>
           {/* Start slot: Layers toggle + Menu buttons */}
           <div slot="start" style={{ display: "flex", gap: "2px", alignItems: "center" }}>
@@ -197,7 +195,7 @@ export const App: React.FC = () => {
             >
               <span className="adw-icon adw-icon--sidebar-show"></span>
             </button>
-            <MenuBar />
+            <TopBar />
           </div>
           {/* End slot: Core actions + Properties toggle */}
           <div slot="end" style={{ display: "flex", gap: "2px", alignItems: "center" }}>

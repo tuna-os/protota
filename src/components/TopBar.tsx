@@ -9,7 +9,6 @@ interface MenuItem {
   action?: () => void;
   shortcut?: string;
   divider?: boolean;
-  icon?: string;
 }
 
 interface MenuGroup {
@@ -17,12 +16,27 @@ interface MenuGroup {
   items: MenuItem[];
 }
 
-export const MenuBar: React.FC = () => {
-  const { doc, undo, redo, setShowAddScreenModal, selectedNodeId, deleteNode, selectNode } =
-    useMockupStore();
+export const TopBar: React.FC = () => {
+  const {
+    doc,
+    undo,
+    redo,
+    setShowAddScreenModal,
+    selectedNodeId,
+    deleteNode,
+    selectNode,
+    toggleColorScheme,
+    lintEnabled,
+    toggleLint,
+    violations,
+  } = useMockupStore();
   const [openMenu, setOpenMenu] = useState<string | null>(null);
   const menuBarRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [showFlows, setShowFlows] = useState(false);
+
+  const themeLabel =
+    doc.colorScheme === "dark" ? "Light" : doc.colorScheme === "light" ? "Auto" : "Dark";
 
   const handleExport = async () => {
     await exportDocumentFile(doc);
@@ -87,27 +101,25 @@ export const MenuBar: React.FC = () => {
           label: "New Screen",
           action: () => setShowAddScreenModal(true),
           shortcut: "Ctrl+N",
-          icon: "📄",
         },
         { label: "divider", divider: true },
         {
           label: "Import...",
           action: () => fileInputRef.current?.click(),
           shortcut: "Ctrl+I",
-          icon: "📂",
         },
-        { label: "Export...", action: handleExport, shortcut: "Ctrl+E", icon: "💾" },
-        { label: "Export as PNG", action: handleExportPNG, icon: "📸" },
-        { label: "Export Blueprint", action: handleExportBlueprint, icon: "📋" },
+        { label: "Export...", action: handleExport, shortcut: "Ctrl+E" },
+        { label: "Export as PNG", action: handleExportPNG },
+        { label: "Export Blueprint", action: handleExportBlueprint },
         { label: "divider", divider: true },
-        { label: "Share URL", action: handleShare, shortcut: "Ctrl+S", icon: "🔗" },
+        { label: "Share URL", action: handleShare, shortcut: "Ctrl+S" },
       ],
     },
     {
       label: "Edit",
       items: [
-        { label: "Undo", action: undo, shortcut: "Ctrl+Z", icon: "↩" },
-        { label: "Redo", action: redo, shortcut: "Ctrl+Shift+Z", icon: "↪" },
+        { label: "Undo", action: undo, shortcut: "Ctrl+Z" },
+        { label: "Redo", action: redo, shortcut: "Ctrl+Shift+Z" },
         { label: "divider", divider: true },
         {
           label: "Delete",
@@ -115,9 +127,14 @@ export const MenuBar: React.FC = () => {
             if (selectedNodeId) deleteNode(selectedNodeId);
           },
           shortcut: "Del",
-          icon: "🗑",
         },
-        { label: "Deselect", action: () => selectNode(null), shortcut: "Esc", icon: "✕" },
+        { label: "Deselect", action: () => selectNode(null), shortcut: "Esc" },
+        { label: "divider", divider: true },
+        {
+          label: `HIG Lint ${lintEnabled ? `ON (${violations.length})` : "OFF"}`,
+          action: toggleLint,
+          shortcut: "Ctrl+.",
+        },
       ],
     },
     {
@@ -127,26 +144,32 @@ export const MenuBar: React.FC = () => {
           label: "Zoom In",
           action: () => window.dispatchEvent(new CustomEvent("protota:zoom-in")),
           shortcut: "Ctrl+=",
-          icon: "🔍",
         },
         {
           label: "Zoom Out",
           action: () => window.dispatchEvent(new CustomEvent("protota:zoom-out")),
           shortcut: "Ctrl+-",
-          icon: "🔎",
         },
         {
           label: "Reset Zoom",
           action: () => window.dispatchEvent(new CustomEvent("protota:zoom-reset")),
           shortcut: "Ctrl+0",
-          icon: "↺",
+        },
+        { label: "divider", divider: true },
+        {
+          label: `Theme: ${doc.colorScheme} → ${themeLabel}`,
+          action: toggleColorScheme,
+        },
+        { label: "divider", divider: true },
+        {
+          label: `Flows ${showFlows ? "ON" : "OFF"}`,
+          action: () => setShowFlows(!showFlows),
         },
         { label: "divider", divider: true },
         {
           label: "Show Shortcuts",
           action: () => window.dispatchEvent(new CustomEvent("protota:show-shortcuts")),
           shortcut: "?",
-          icon: "⌨",
         },
       ],
     },

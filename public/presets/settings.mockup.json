@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exportedAt": "2026-07-28T00:00:00Z",
+  "exportedAt": "2026-07-29T00:00:00Z",
   "document": {
     "id": "preset-settings",
     "title": "GNOME Settings",
@@ -9,83 +9,77 @@
     "screens": [
       {
         "id": "settings-main",
-        "title": "Settings — Main",
-        "type": "view-switcher",
-        "width": 900,
-        "height": 660,
+        "title": "Settings — Network & Appearance",
+        "type": "sidebar",
+        "width": 980,
+        "height": 680,
         "rootNode": {
           "id": "s-root",
           "type": "window",
-          "children": [{
-            "id": "s-toolbar",
-            "type": "toolbar-view",
-            "children": [
-              {
-                "id": "s-hdr",
-                "type": "header-bar",
-                "children": [
-                  { "id": "s-switcher", "type": "view-switcher" },
-                  { "id": "s-search", "type": "search-entry", "placeholder": "Search Settings…" }
-                ]
-              },
-              {
-                "id": "s-stack",
-                "type": "view-stack",
-                "children": [
-                  {
-                    "id": "s-page-wifi",
-                    "type": "box",
-                    "orientation": "vertical",
-                    "spacing": 18,
-                    "children": [
-                      { "id": "s-wifi-lbl", "type": "label", "title": "Wi-Fi" },
-                      {
-                        "id": "s-wifi-list",
-                        "type": "list-box",
-                        "children": [
-                          { "id": "s-wifi-row1", "type": "action-row", "title": "Home Network", "subtitle": "Connected", "iconName": "network-wireless-symbolic", "activatable": true },
-                          { "id": "s-wifi-row2", "type": "action-row", "title": "Guest Wi-Fi", "subtitle": "Secured", "iconName": "network-wireless-symbolic" }
-                        ]
-                      }
-                    ]
-                  },
-                  {
-                    "id": "s-page-bluetooth",
-                    "type": "box",
-                    "orientation": "vertical",
-                    "spacing": 18,
-                    "children": [
-                      { "id": "s-bt-lbl", "type": "label", "title": "Bluetooth" },
-                      {
-                        "id": "s-bt-list",
-                        "type": "list-box",
-                        "children": [
-                          { "id": "s-bt-row1", "type": "switch-row", "title": "Bluetooth", "subtitle": "Turn on to connect devices", "active": true }
-                        ]
-                      }
-                    ]
-                  },
-                  {
-                    "id": "s-page-display",
-                    "type": "box",
-                    "orientation": "vertical",
-                    "spacing": 18,
-                    "children": [
-                      { "id": "s-disp-lbl", "type": "label", "title": "Displays" },
-                      {
-                        "id": "s-disp-list",
-                        "type": "list-box",
-                        "children": [
-                          { "id": "s-disp-row1", "type": "combo-row", "title": "Resolution", "subtitle": "Select display resolution" },
-                          { "id": "s-disp-row2", "type": "switch-row", "title": "Night Light", "subtitle": "Warmer colors at night", "active": false }
-                        ]
-                      }
-                    ]
-                  }
-                ]
-              }
-            ]
-          }]
+          "children": [
+            {
+              "id": "s-toolbar",
+              "type": "toolbar-view",
+              "children": [
+                {
+                  "id": "s-hdr",
+                  "type": "header-bar",
+                  "children": [
+                    { "id": "s-title", "type": "window-title", "title": "Settings", "subtitle": "System Preferences" },
+                    { "id": "s-search", "type": "search-entry", "placeholder": "Search Settings…" },
+                    { "id": "s-menu", "type": "menu-button", "iconName": "open-menu-symbolic", "title": "Menu" }
+                  ]
+                },
+                {
+                  "id": "s-split",
+                  "type": "overlay-split",
+                  "children": [
+                    {
+                      "id": "s-sidebar",
+                      "type": "list-box",
+                      "children": [
+                        { "id": "s-nav-wifi", "type": "action-row", "title": "Wi-Fi", "iconName": "network-wireless-symbolic", "activatable": true },
+                        { "id": "s-nav-bt", "type": "action-row", "title": "Bluetooth", "iconName": "bluetooth-symbolic", "activatable": true },
+                        { "id": "s-nav-disp", "type": "action-row", "title": "Displays", "iconName": "video-display-symbolic", "activatable": true },
+                        { "id": "s-nav-sound", "type": "action-row", "title": "Sound", "iconName": "audio-card-symbolic", "activatable": true },
+                        { "id": "s-nav-power", "type": "action-row", "title": "Power", "iconName": "battery-good-symbolic", "activatable": true },
+                        { "id": "s-nav-about", "type": "action-row", "title": "About", "iconName": "help-about-symbolic", "activatable": true }
+                      ]
+                    },
+                    {
+                      "id": "s-content",
+                      "type": "box",
+                      "orientation": "vertical",
+                      "spacing": 18,
+                      "children": [
+                        {
+                          "id": "s-group-wifi",
+                          "type": "preferences-group",
+                          "title": "Wi-Fi Networks",
+                          "description": "Connect to wireless access points",
+                          "children": [
+                            { "id": "s-wifi-toggle", "type": "switch-row", "title": "Wi-Fi", "subtitle": "Enable wireless network adapter", "active": true },
+                            { "id": "s-wifi-row1", "type": "action-row", "title": "Home Network (5GHz)", "subtitle": "Connected · 100 Mbps", "iconName": "network-wireless-symbolic", "activatable": true },
+                            { "id": "s-wifi-row2", "type": "action-row", "title": "Guest Wi-Fi", "subtitle": "WPA3 Encrypted", "iconName": "network-wireless-symbolic", "activatable": true }
+                          ]
+                        },
+                        {
+                          "id": "s-group-disp",
+                          "type": "preferences-group",
+                          "title": "Display & Appearance",
+                          "description": "Screen resolution and color schedule",
+                          "children": [
+                            { "id": "s-disp-res", "type": "combo-row", "title": "Resolution", "subtitle": "3840 × 2160 (16:9)" },
+                            { "id": "s-disp-night", "type": "switch-row", "title": "Night Light", "subtitle": "Reduces eye strain by softening blue light", "active": false }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
         }
       }
     ]

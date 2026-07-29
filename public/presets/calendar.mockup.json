@@ -1,33 +1,62 @@
 {
-  "version": 1, "exportedAt": "2026-07-28T00:00:00Z",
+  "version": 1,
+  "exportedAt": "2026-07-29T00:00:00Z",
   "document": {
-    "id": "preset-calendar", "title": "GNOME Calendar", "colorScheme": "auto", "edges": [],
-    "screens": [{
-      "id": "cal-main", "title": "Calendar",
-      "type": "standard", "width": 900, "height": 650,
-      "rootNode": {
-        "id": "cal-root", "type": "window",
-        "children": [{
-          "id": "cal-toolbar", "type": "toolbar-view",
+    "id": "preset-calendar",
+    "title": "GNOME Calendar",
+    "colorScheme": "auto",
+    "edges": [],
+    "screens": [
+      {
+        "id": "cal-main",
+        "title": "Calendar — Month View",
+        "type": "standard",
+        "width": 920,
+        "height": 660,
+        "rootNode": {
+          "id": "cal-root",
+          "type": "window",
           "children": [
-            { "id": "cal-hdr", "type": "header-bar", "title": "Calendar", "children": [
-              { "id": "cal-today", "type": "button", "title": "Today", "suggested": true },
-              { "id": "cal-prev", "type": "button", "title": "Previous", "iconName": "go-previous-symbolic", "flat": true },
-              { "id": "cal-next", "type": "button", "title": "Next", "iconName": "go-next-symbolic", "flat": true },
-              { "id": "cal-add", "type": "button", "title": "New Event", "iconName": "appointment-new-symbolic" },
-              { "id": "cal-menu", "type": "menu-button", "iconName": "open-menu-symbolic", "title": "Menu" }
-            ]},
-            { "id": "cal-body", "type": "clamp", "children": [
-              { "id": "cal-label", "type": "label", "title": "July 2026" },
-              { "id": "cal-list", "type": "list-box", "children": [
-                { "id": "cal-event1", "type": "action-row", "title": "Team Standup", "subtitle": "10:00 AM — 10:30 AM", "iconName": "appointment-soon-symbolic", "activatable": true },
-                { "id": "cal-event2", "type": "action-row", "title": "Design Review", "subtitle": "2:00 PM — 3:00 PM", "iconName": "appointment-soon-symbolic", "activatable": true },
-                { "id": "cal-event3", "type": "action-row", "title": "Release Meeting", "subtitle": "4:00 PM — 4:45 PM", "iconName": "appointment-missed-symbolic", "activatable": true }
-              ]}
-            ]}
+            {
+              "id": "cal-toolbar",
+              "type": "toolbar-view",
+              "children": [
+                {
+                  "id": "cal-hdr",
+                  "type": "header-bar",
+                  "children": [
+                    { "id": "cal-title", "type": "window-title", "title": "July 2026", "subtitle": "GNOME Calendar" },
+                    { "id": "cal-today", "type": "button", "title": "Today", "suggested": true },
+                    { "id": "cal-prev", "type": "button", "title": "Previous", "iconName": "go-previous-symbolic", "flat": true },
+                    { "id": "cal-next", "type": "button", "title": "Next", "iconName": "go-next-symbolic", "flat": true },
+                    { "id": "cal-add", "type": "button", "title": "New Event", "iconName": "appointment-new-symbolic", "suggested": true },
+                    { "id": "cal-search", "type": "button", "title": "Search", "iconName": "edit-find-symbolic", "flat": true },
+                    { "id": "cal-menu", "type": "menu-button", "iconName": "open-menu-symbolic", "title": "Menu" }
+                  ]
+                },
+                {
+                  "id": "cal-body",
+                  "type": "clamp",
+                  "children": [
+                    {
+                      "id": "cal-group",
+                      "type": "preferences-group",
+                      "title": "Upcoming Agenda — Wednesday, July 29",
+                      "description": "Scheduled events and reminders",
+                      "children": [
+                        { "id": "cal-event1", "type": "action-row", "title": "Team Standup", "subtitle": "10:00 AM — 10:30 AM · Video Call", "iconName": "appointment-soon-symbolic", "activatable": true },
+                        { "id": "cal-event2", "type": "action-row", "title": "Design Review (Protota)", "subtitle": "2:00 PM — 3:00 PM · Conference Room B", "iconName": "appointment-soon-symbolic", "activatable": true },
+                        { "id": "cal-event3", "type": "action-row", "title": "GNOME Core Release Sync", "subtitle": "4:00 PM — 4:45 PM · Online", "iconName": "appointment-missed-symbolic", "activatable": true }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
           ]
-        }]
+        }
       }
-    }]
-  }, "assets": {}
+    ]
+  },
+  "assets": {}
 }

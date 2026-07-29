@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exportedAt": "2026-07-28T00:00:00Z",
+  "exportedAt": "2026-07-29T00:00:00Z",
   "document": {
     "id": "preset-text-editor",
     "title": "GNOME Text Editor",
@@ -16,32 +16,36 @@
         "rootNode": {
           "id": "te-root",
           "type": "window",
-          "children": [{
-            "id": "te-toolbar",
-            "type": "toolbar-view",
-            "children": [
-              {
-                "id": "te-hdr",
-                "type": "header-bar",
-                "title": "Untitled Document",
-                "children": [
-                  { "id": "te-title", "type": "window-title", "title": "Untitled Document — Text Editor" },
-                  { "id": "te-open", "type": "button", "title": "Open", "iconName": "document-open-symbolic", "flat": true },
-                  { "id": "te-save", "type": "button", "title": "Save", "iconName": "document-save-symbolic", "flat": true },
-                  { "id": "te-menu", "type": "menu-button", "iconName": "open-menu-symbolic", "title": "Main Menu" }
-                ]
-              },
-              {
-                "id": "te-content",
-                "type": "box",
-                "orientation": "vertical",
-                "spacing": 0,
-                "children": [
-                  { "id": "te-label", "type": "label", "title": "Start typing…" }
-                ]
-              }
-            ]
-          }]
+          "children": [
+            {
+              "id": "te-toolbar",
+              "type": "toolbar-view",
+              "children": [
+                {
+                  "id": "te-hdr",
+                  "type": "header-bar",
+                  "title": "Untitled Document",
+                  "children": [
+                    { "id": "te-title", "type": "window-title", "title": "Document.txt", "subtitle": "~/Documents — Text Editor" },
+                    { "id": "te-new", "type": "button", "title": "New Tab", "iconName": "tab-new-symbolic", "flat": true },
+                    { "id": "te-open", "type": "button", "title": "Open", "iconName": "document-open-symbolic", "flat": true },
+                    { "id": "te-save", "type": "button", "title": "Save", "iconName": "document-save-symbolic", "suggested": true },
+                    { "id": "te-search", "type": "button", "title": "Search", "iconName": "edit-find-symbolic", "flat": true },
+                    { "id": "te-menu", "type": "menu-button", "iconName": "open-menu-symbolic", "title": "Main Menu" }
+                  ]
+                },
+                {
+                  "id": "te-content",
+                  "type": "box",
+                  "orientation": "vertical",
+                  "spacing": 0,
+                  "children": [
+                    { "id": "te-label", "type": "label", "title": "1  import { useState } from 'react';\n2  \n3  export function App() {\n4    return <h1>Hello GNOME Text Editor</h1>;\n5  }" }
+                  ]
+                }
+              ]
+            }
+          ]
         }
       }
     ]

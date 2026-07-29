@@ -66,4 +66,21 @@ test.describe('GNOME Core app presets (#6)', () => {
       expect(parsed.id).toBe('preset-calculator');
     }
   });
+
+  test('preset rendering matches snapshot expectations', async ({ page }) => {
+    const presetsToTest = ['calculator', 'settings', 'text-editor', 'files', 'calendar'];
+    for (const presetId of presetsToTest) {
+      await page.evaluate(async (id) => {
+        const res = await fetch(`./presets/${id}.mockup.json`);
+        const data = await res.json();
+        localStorage.setItem('protota_doc_v1', JSON.stringify(data.document));
+      }, presetId);
+      await page.reload();
+      await page.waitForSelector('adw-window', { timeout: 10000 });
+      const windowEl = page.locator('adw-window');
+      await expect(windowEl).toBeVisible();
+      // Take snapshot of rendered preset window for visual comparison
+      await expect(windowEl).toHaveScreenshot(`preset-${presetId}.png`, { maxDiffPixelRatio: 0.1 });
+    }
+  });
 });

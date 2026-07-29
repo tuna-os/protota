@@ -327,3 +327,33 @@ html, body, #root {
   border: 1px solid var(--separator-color, rgba(0, 0, 6, 0.1));
   overflow: hidden;
 }
+
+/* ---- Responsive Mobile Styles ---- */
+@media (max-width: 768px) {
+  .protota-toolbar {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    padding: 6px 8px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .protota-toolbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .protota-panel {
+    position: absolute;
+    top: 48px;
+    bottom: 0;
+    z-index: 50;
+    max-width: 85vw;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  }
+
+  .protota-zoom-bar {
+    bottom: 12px;
+    left: 12px;
+    padding: 2px 6px;
+  }
+}
+

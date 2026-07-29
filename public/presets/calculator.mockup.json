@@ -11,8 +11,8 @@
         "id": "calc-main",
         "title": "Calculator — Basic Mode",
         "type": "standard",
-        "width": 360,
-        "height": 560,
+        "width": 410,
+        "height": 666,
         "rootNode": {
           "id": "calc-root",
           "type": "window",

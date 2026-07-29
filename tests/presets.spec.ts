@@ -83,7 +83,7 @@ test.describe('GNOME Core app presets (#6)', () => {
       const windowEl = page.locator('adw-window');
       await expect(windowEl).toBeVisible();
       // Compare rendered window canvas directly against official GNOME application screenshots
-      await expect(windowEl).toHaveScreenshot(`../official-snapshots/${presetId}.png`, { maxDiffPixelRatio: 0.15 });
+      await expect(windowEl).toHaveScreenshot(`${presetId}.png`, { maxDiffPixelRatio: 0.15 });
     }
   });
 });

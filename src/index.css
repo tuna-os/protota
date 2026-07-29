@@ -241,6 +241,10 @@ html, body, #root {
 .protota-div-box[orientation="horizontal"] {
   flex-direction: row;
   align-items: center;
+  width: 100%;
+}
+.protota-div-box[orientation="horizontal"] > * {
+  flex: 1;
 }
 
 /* Center-box — start/center/end layout. */

@@ -201,12 +201,12 @@ interface Token {
 function tokenizeBlueprint(code: string): Token[] {
   const withoutComments = code.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/.*$/gm, '');
   const tokens: Token[] = [];
-  const pattern = /"(?:\\.|[^"\\])*"|-?\d+(?:\.\d+)?|\$?[A-Za-z_][A-Za-z0-9_.-]*|[{}:;,]/g;
+  const pattern = /"(?:\\.|[^"\\])*"|-?\d+(?:\.\d+)?|\$?[A-Za-z_][A-Za-z0-9_.-]*|[{}\[\]:;,]/g;
   for (const match of withoutComments.matchAll(pattern)) {
     const value = match[0];
     tokens.push({
       value,
-      kind: value.startsWith('"') ? 'string' : /^-?\d/.test(value) ? 'number' : /^[{}:;,]$/.test(value) ? 'punct' : 'word',
+      kind: value.startsWith('"') ? 'string' : /^-?\d/.test(value) ? 'number' : /^[{}\[\]:;,]$/.test(value) ? 'punct' : 'word',
     });
   }
   return tokens;
@@ -291,6 +291,14 @@ function parseBlueprintRoots(code: string): AdwNode[] {
             cursor += 2;
             const value = parseValue(tokens[cursor++]);
             if (value !== undefined) properties[key.value] = value;
+            if (tokens[cursor]?.value === ';' || tokens[cursor]?.value === ',') cursor++;
+          } else if (key?.kind === 'word' && tokens[cursor + 1]?.value === '[') {
+            // Blueprint arrays (for example `styles [ "card" ]`) are
+            // metadata. Consume them without letting them swallow following
+            // source widgets in the enclosing object.
+            cursor += 2;
+            while (cursor < tokens.length && tokens[cursor]?.value !== ']') cursor++;
+            if (tokens[cursor]?.value === ']') cursor++;
             if (tokens[cursor]?.value === ';' || tokens[cursor]?.value === ',') cursor++;
           } else if (key?.value === 'layout' && tokens[cursor + 1]?.value === '{') {
             cursor += 2;

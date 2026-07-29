@@ -167,6 +167,8 @@ export const ViewportCanvas: React.FC = () => {
         position: "relative",
         outline: "none",
         cursor: isPanning ? "grabbing" : "default",
+        backgroundImage: "radial-gradient(circle, rgba(128,128,128,0.25) 1px, transparent 1px)",
+        backgroundSize: "20px 20px",
       }}
     >
       {/* GNOME Desktop Fullscreen Live Interactive Preview Mode */}

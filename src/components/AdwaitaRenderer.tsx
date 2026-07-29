@@ -72,9 +72,14 @@ const DIV_TYPES = new Set([
 function nodeProps(node: AdwNode, inheritedSlot?: string): Record<string, string> {
   const p: Record<string, string> = {};
   const t = node.type;
+  void inheritedSlot;
 
-  const slot = node.slot ?? inheritedSlot;
-  if (slot) p.slot = slot;
+  // Layout attributes are part of the GTK widget model, rather than styling
+  // hints.  In particular, GtkBox orientation must survive the model → DOM
+  // boundary for every imported Blueprint and preset.
+  if (t === 'box' && node.orientation) p.orientation = node.orientation;
+  if (t === 'overlay-split') p['show-sidebar'] = '';
+  const icon = node.iconName?.replace(/-symbolic$/, '');
 
   // Text-bearing widgets
   if (t === 'header-bar' || t === 'window-title') {
@@ -96,9 +101,20 @@ function nodeProps(node: AdwNode, inheritedSlot?: string): Record<string, string
   }
   if (t === 'button') {
     if (node.title) p.label = node.title;
-    if (node.iconName) p.icon = node.iconName;
+    if (icon) p.icon = icon;
   }
-  if (t === 'entry') { if (node.title) p.value = node.title; if (node.placeholder) p.placeholder = node.placeholder; }
+  if (t === 'menu-button') {
+    if (icon) p['icon-name'] = icon;
+    if (node.title) p['menu-title'] = node.title;
+  }
+  if (t === 'split-button') {
+    if (node.title) p.label = node.title;
+    if (icon) p['icon-name'] = icon;
+  }
+  if (t === 'entry') {
+    if (node.value ?? node.title) p.value = String(node.value ?? node.title);
+    if (node.placeholder) p.placeholder = node.placeholder;
+  }
   if (t === 'entry-row' || t === 'password-row') {
     if (node.value) p.value = node.value;
     if (node.placeholder) p.placeholder = node.placeholder;
@@ -130,10 +146,23 @@ function nodeProps(node: AdwNode, inheritedSlot?: string): Record<string, string
  * Pre-slot mockups used direct ToolbarView children. Preserve that valid GTK
  * structure while documents imported from Blueprint keep their explicit slot.
  */
-function childSlot(parent: AdwNode, child: AdwNode): string | undefined {
+function childSlot(parent: AdwNode, child: AdwNode, index: number): string | undefined {
   if (child.slot) return child.slot;
   if (parent.type === 'toolbar-view') {
     return child.type === 'header-bar' ? 'top' : 'content';
+  }
+  if (parent.type === 'overlay-split') {
+    return index === 0 ? 'sidebar' : 'content';
+  }
+  if (parent.type === 'header-bar') {
+    const children = parent.children ?? [];
+    const centerIndex = children.findIndex((candidate) =>
+      ['window-title', 'view-switcher', 'search-entry', 'entry', 'combo-row', 'toggle-group']
+        .includes(candidate.type),
+    );
+    if (index === centerIndex) return 'center';
+    if (centerIndex !== -1) return index < centerIndex ? 'start' : 'end';
+    return child.type === 'menu-button' ? 'end' : 'start';
   }
   return undefined;
 }
@@ -179,9 +208,21 @@ export const AdwaitaRenderer: React.FC<Props> = ({
     ? `theme-${doc.colorScheme}` : '';
   if (themeClass) attrs['class'] = themeClass;
 
-  const children = node.children?.map((child) => (
-    <AdwaitaRenderer key={child.id} node={child} screenId={screenId} inheritedSlot={childSlot(node, child)} />
+  const children = node.children?.map((child, index) => (
+    <AdwaitaRenderer
+      key={child.id}
+      node={child}
+      screenId={screenId}
+      inheritedSlot={childSlot(node, child, index)}
+    />
   ));
+  const iconPrefix = node.type === 'action-row' && node.iconName ? (
+    <span
+      aria-hidden="true"
+      slot="prefix"
+      className={`adw-icon adw-icon--${node.iconName.replace(/-symbolic$/, '')}`}
+    />
+  ) : null;
 
   // Div-only types get Adwaita-styled classes for layout/structure
   const divClass = DIV_TYPES.has(node.type) ? `protota-div-${node.type}` : '';
@@ -194,6 +235,7 @@ export const AdwaitaRenderer: React.FC<Props> = ({
   return (
     <div
       onClick={handleClick}
+      slot={node.slot ?? inheritedSlot}
       className={`adw-node-wrapper${isSelected ? ' selected-outline' : ''} ${divClass}`}
       style={isSelected ? { position: 'relative' } : { display: 'contents' }}
     >
@@ -209,6 +251,7 @@ export const AdwaitaRenderer: React.FC<Props> = ({
         style: nodeLayout(node),
         className: divClass || undefined,
       },
+        iconPrefix,
         ...(children ?? []),
         // For label/inscription — render text content
         ...(node.type === 'label' || node.type === 'inscription'

@@ -27,8 +27,10 @@ test('generic renderer preserves GTK grid layout semantics', async ({ page }) =>
   const grid = page.locator('[data-protota-type="grid"]');
   const header = page.locator('[data-protota-type="header-bar"]');
   await expect(grid).toBeVisible();
-  await expect(header).toHaveAttribute('slot', 'top');
-  await expect(grid).toHaveAttribute('slot', 'content');
+  // The editor wrapper owns the slot so web components can discover it as a
+  // direct child; the actual GTK node remains structurally unwrapped.
+  await expect(header.locator('..')).toHaveAttribute('slot', 'top');
+  await expect(grid.locator('..')).toHaveAttribute('slot', 'content');
   await expect(grid).toHaveCSS('display', 'grid');
   expect(await grid.evaluate((element) => {
     const style = element as HTMLElement;

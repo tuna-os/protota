@@ -2,6 +2,9 @@ import React, { useState, useRef, useCallback, useEffect } from "react";
 import { useMockupStore } from "../store/mockupStore";
 // import { BreakpointBar } from "./BreakpointBar";
 import { AdwaitaRenderer } from "./AdwaitaRenderer";
+import { computerSymbolic, phoneSymbolic } from "@gjsify/adwaita-icons/devices";
+import { windowCloseSymbolic } from "@gjsify/adwaita-icons/ui";
+import { toDataUri } from "@gjsify/adwaita-icons/utils";
 
 export const ViewportCanvas: React.FC = () => {
   const { doc, selectNode } = useMockupStore();
@@ -132,6 +135,12 @@ export const ViewportCanvas: React.FC = () => {
 
   const handleCanvasClick = useCallback(() => selectNode(null), [selectNode]);
 
+  const [phoshScreenId, setPhoshScreenId] = useState<string | null>(null);
+  const [desktopScreenId, setDesktopScreenId] = useState<string | null>(null);
+
+  const activePhoshScreen = doc.screens.find((s) => s.id === phoshScreenId);
+  const activeDesktopScreen = doc.screens.find((s) => s.id === desktopScreenId);
+
   return (
     <div
       className="protota-canvas"
@@ -148,6 +157,103 @@ export const ViewportCanvas: React.FC = () => {
         cursor: isPanning ? "grabbing" : "default",
       }}
     >
+      {/* GNOME Desktop Fullscreen Live Interactive Preview Mode */}
+      {activeDesktopScreen && (
+        <div className="protota-gnome-desktop-container">
+          <div className="protota-gnome-topbar">
+            <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+              <span style={{ fontWeight: 700 }}>Activities</span>
+              <select
+                value={desktopScreenId || ''}
+                onChange={(e) => setDesktopScreenId(e.target.value)}
+                style={{ padding: '2px 8px', borderRadius: '4px', fontSize: '12px', background: 'rgba(255,255,255,0.15)', color: '#fff', border: 'none' }}
+              >
+                {doc.screens.map((s) => (
+                  <option key={s.id} value={s.id} style={{ color: '#000' }}>{s.title}</option>
+                ))}
+              </select>
+            </div>
+            <div style={{ fontSize: '13px' }}>
+              {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+            </div>
+            <button
+              className="protota-btn suggested"
+              onClick={() => setDesktopScreenId(null)}
+              style={{ fontSize: '11px', padding: '2px 8px' }}
+            >
+              <span
+                style={{
+                  display: "inline-block",
+                  width: "12px",
+                  height: "12px",
+                  maskImage: toDataUri(windowCloseSymbolic),
+                  WebkitMaskImage: toDataUri(windowCloseSymbolic),
+                  maskSize: "contain",
+                  WebkitMaskSize: "contain",
+                  backgroundColor: "currentColor",
+                  marginRight: "4px",
+                }}
+              />
+              Exit Desktop Mode
+            </button>
+          </div>
+
+          <div className="protota-gnome-window-frame">
+            <AdwaitaRenderer
+              node={activeDesktopScreen.rootNode}
+              screenId={activeDesktopScreen.id}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Phosh Fullscreen Phone Overlay Mode */}
+      {/* Phosh Fullscreen Phone Overlay Mode */}
+      {activePhoshScreen && (
+        <div className="protota-phosh-container">
+          <div className="protota-phosh-header">
+            <span>📱 Phosh Phone View</span>
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <select
+                value={phoshScreenId || ''}
+                onChange={(e) => setPhoshScreenId(e.target.value)}
+                style={{ padding: '2px 8px', borderRadius: '4px', fontSize: '12px' }}
+              >
+                {doc.screens.map((s) => (
+                  <option key={s.id} value={s.id}>{s.title}</option>
+                ))}
+              </select>
+              <button
+                className="protota-btn suggested"
+                onClick={() => setPhoshScreenId(null)}
+              >
+                <span
+                  style={{
+                    display: "inline-block",
+                    width: "12px",
+                    height: "12px",
+                    maskImage: toDataUri(windowCloseSymbolic),
+                    WebkitMaskImage: toDataUri(windowCloseSymbolic),
+                    maskSize: "contain",
+                    WebkitMaskSize: "contain",
+                    backgroundColor: "currentColor",
+                    marginRight: "4px",
+                  }}
+                />
+                Exit Phone Mode
+              </button>
+            </div>
+          </div>
+
+          <div className="protota-phosh-phone-frame">
+            <AdwaitaRenderer
+              node={activePhoshScreen.rootNode}
+              screenId={activePhoshScreen.id}
+            />
+          </div>
+        </div>
+      )}
+
       {/* Zoom Controls */}
       <div className="protota-zoom-bar">
         <button
@@ -178,6 +284,43 @@ export const ViewportCanvas: React.FC = () => {
           title="Reset Zoom (Ctrl+0)"
         >
           Reset
+        </button>
+        <button
+          className="adw-button suggested-action"
+          onClick={() => setDesktopScreenId(doc.screens[0]?.id || null)}
+          style={{ marginLeft: "8px" }}
+        >
+          <span
+            style={{
+              display: "inline-block",
+              width: "16px",
+              height: "16px",
+              maskImage: toDataUri(computerSymbolic),
+              WebkitMaskImage: toDataUri(computerSymbolic),
+              maskSize: "contain",
+              WebkitMaskSize: "contain",
+              backgroundColor: "currentColor",
+            }}
+          />
+          Desktop
+        </button>
+        <button
+          className="adw-button suggested-action"
+          onClick={() => setPhoshScreenId(doc.screens[0]?.id || null)}
+        >
+          <span
+            style={{
+              display: "inline-block",
+              width: "16px",
+              height: "16px",
+              maskImage: toDataUri(phoneSymbolic),
+              WebkitMaskImage: toDataUri(phoneSymbolic),
+              maskSize: "contain",
+              WebkitMaskSize: "contain",
+              backgroundColor: "currentColor",
+            }}
+          />
+          Phone
         </button>
       </div>
 

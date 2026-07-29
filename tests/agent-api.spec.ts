@@ -6,7 +6,7 @@ test.describe('Agent API (#7)', () => {
     await page.waitForSelector('adw-window', { timeout: 10000 });
 
     // Export the document and verify it matches the schema structure
-    const exportBtn = page.getByRole('button', { name: /export/i });
+    const exportBtn = page.getByRole('button', { name: /save json/i });
     const [download] = await Promise.all([
       page.waitForEvent('download', { timeout: 5000 }),
       exportBtn.click(),

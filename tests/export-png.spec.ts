@@ -7,12 +7,12 @@ test.describe('Export to PNG (#17)', () => {
   });
 
   test('export button exists in toolbar', async ({ page }) => {
-    const exportBtn = page.getByRole('button', { name: /export/i });
+    const exportBtn = page.getByRole('button', { name: /save json/i });
     await expect(exportBtn).toBeVisible();
   });
 
   test('clicking export triggers download of .mockup.json', async ({ page }) => {
-    const exportBtn = page.getByRole('button', { name: /export/i });
+    const exportBtn = page.getByRole('button', { name: /save json/i });
 
     const [download] = await Promise.all([
       page.waitForEvent('download', { timeout: 5000 }),

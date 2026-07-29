@@ -27,9 +27,20 @@ test.describe('Broadway reference captures', () => {
     const referencePage = await browser.newPage({ viewport: { width: Math.max(viewport.width, 1280), height: Math.max(viewport.height, 900) } });
     await referencePage.goto(broadwayUrl!);
     await referencePage.waitForTimeout(2_000);
-    const nativeSurface = referencePage.locator('body > div > div');
-    await expect(nativeSurface).toBeVisible();
-    const broadwayPng = await nativeSurface.screenshot();
+    const nativeBounds = await referencePage.locator('div').evaluateAll((elements) => {
+      const viewportArea = window.innerWidth * window.innerHeight;
+      const candidates = elements
+        .map((element) => {
+          const rect = element.getBoundingClientRect();
+          return { x: rect.x, y: rect.y, width: rect.width, height: rect.height, area: rect.width * rect.height };
+        })
+        // Broadway adds an outer canvas at (0,0); the native window is the
+        // largest painted descendant inset within that canvas.
+        .filter(rect => rect.x > 0 && rect.y > 0 && rect.width > 100 && rect.height > 100 && rect.area < viewportArea);
+      return candidates.sort((a, b) => b.area - a.area)[0] || null;
+    });
+    expect(nativeBounds, 'Broadway must expose a painted native window surface').not.toBeNull();
+    const broadwayPng = await referencePage.screenshot({ clip: nativeBounds! });
     await attachArtifact(`broadway-${appId}.png`, broadwayPng, 'image/png');
     await referencePage.close();
 

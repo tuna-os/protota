@@ -1,10 +1,19 @@
 import React, { useState, useRef, useCallback, useEffect, useMemo } from "react";
 import { useMockupStore } from "../store/mockupStore";
-// import { BreakpointBar } from "./BreakpointBar";
 import { AdwaitaRenderer } from "./AdwaitaRenderer";
 import { BottomBar } from "./BottomBar";
 import { windowCloseSymbolic } from "@gjsify/adwaita-icons/ui";
 import { toDataUri } from "@gjsify/adwaita-icons/utils";
+
+const CANVAS_PADDING = 60;
+const CANVAS_GAP = 40;
+const CANVAS_BOTTOM_BAR_H = 48;
+
+/** Total world-space width of all screens + gaps + padding. */
+function getTotalContentWidth(screens: { width?: number }[]): number {
+  return screens.reduce((sum, s) => sum + (s.width || 800), 0)
+    + CANVAS_GAP * (screens.length - 1) + CANVAS_PADDING * 2;
+}
 
 /**
  * Compute new pan so that the world point under (mx, my) stays fixed
@@ -24,6 +33,11 @@ function zoomAtPoint(
 
 export const ViewportCanvas: React.FC = () => {
   const { doc, selectNode } = useMockupStore();
+
+  // Ref mirror of doc — lets stable callbacks read latest screens without re-creating
+  const docRef = useRef(doc);
+  docRef.current = doc;
+
   const [zoom, setZoom] = useState(1);
   const [pan, setPan] = useState({ x: 0, y: 0 });
 
@@ -33,10 +47,37 @@ export const ViewportCanvas: React.FC = () => {
   zoomRef.current = zoom;
   panRef.current = pan;
   const [isPanning, setIsPanning] = useState(false);
+  const isPanningRef = useRef(false);
   const [spaceHeld, setSpaceHeld] = useState(false);
   const startPan = useRef({ x: 0, y: 0 });
   const spaceDown = useRef(false);
   const canvasRef = useRef<HTMLDivElement>(null);
+
+  // --- Stable zoom helpers (read from refs, never re-create) ---
+
+  const zoomAtCenter = useCallback((factor: number) => {
+    const el = canvasRef.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    const mx = rect.width / 2;
+    const my = rect.height / 2;
+    const oldZ = zoomRef.current;
+    const newZ = Math.min(Math.max(oldZ * factor, 0.3), 2.5);
+    setPan(zoomAtPoint(mx, my, oldZ, newZ, panRef.current));
+    setZoom(newZ);
+  }, []);
+
+  const resetView = useCallback(() => {
+    const el = canvasRef.current;
+    if (!el || docRef.current.screens.length === 0) return;
+    setPan({
+      x: (el.clientWidth - getTotalContentWidth(docRef.current.screens)) / 2,
+      y: CANVAS_PADDING,
+    });
+    setZoom(1);
+  }, []);
+
+  // --- Wheel handler (stable, reads from refs) ---
 
   useEffect(() => {
     const el = canvasRef.current;
@@ -64,29 +105,36 @@ export const ViewportCanvas: React.FC = () => {
     return () => el.removeEventListener("wheel", handler);
   }, []);
 
-  const handleMouseDown = useCallback(
-    (e: React.MouseEvent) => {
-      if (e.button === 1 || spaceDown.current) {
-        e.preventDefault();
-        setIsPanning(true);
-        startPan.current = { x: e.clientX - pan.x, y: e.clientY - pan.y };
-      }
-    },
-    [pan],
-  );
+  // --- Mouse handlers (all stable via refs) ---
 
-  const handleMouseMove = useCallback(
-    (e: React.MouseEvent) => {
-      if (isPanning) {
-        setPan({ x: e.clientX - startPan.current.x, y: e.clientY - startPan.current.y });
-      }
-    },
-    [isPanning],
-  );
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    if (e.button === 1 || spaceDown.current) {
+      e.preventDefault();
+      isPanningRef.current = true;
+      setIsPanning(true);
+      startPan.current = { x: e.clientX - panRef.current.x, y: e.clientY - panRef.current.y };
+    }
+  }, []);
 
-  const handleMouseUp = useCallback(() => setIsPanning(false), []);
+  const handleMouseMove = useCallback((e: React.MouseEvent) => {
+    if (isPanningRef.current) {
+      setPan({ x: e.clientX - startPan.current.x, y: e.clientY - startPan.current.y });
+    }
+  }, []);
 
-  React.useEffect(() => {
+  const handleMouseUp = useCallback(() => {
+    isPanningRef.current = false;
+    setIsPanning(false);
+  }, []);
+
+  const handleCanvasClick = useCallback(() => {
+    canvasRef.current?.focus();
+    selectNode(null);
+  }, [selectNode]);
+
+  // --- Keyboard: Escape + Space (pan mode) ---
+
+  useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         selectNode(null);
@@ -103,6 +151,7 @@ export const ViewportCanvas: React.FC = () => {
         if (!canvasRef.current?.contains(e.target as Node)) return;
         spaceDown.current = false;
         setSpaceHeld(false);
+        isPanningRef.current = false;
         setIsPanning(false);
       }
     };
@@ -112,39 +161,11 @@ export const ViewportCanvas: React.FC = () => {
       window.removeEventListener("keydown", onKeyDown);
       window.removeEventListener("keyup", onKeyUp);
     };
-  }, []);
+  }, [selectNode]);
 
-  // Auto-fit zoom on mobile screens (< 768px wide)
-  useEffect(() => {
-    const autoFitMobile = () => {
-      if (window.innerWidth <= 768 && doc.screens.length > 0) {
-        const primaryWidth = doc.screens[0].width || 800;
-        const availableWidth = window.innerWidth - 32;
-        if (primaryWidth > availableWidth) {
-          const fittedZoom = Math.max(availableWidth / primaryWidth, 0.35);
-          setZoom(fittedZoom);
-          setPan({ x: 16, y: 16 });
-        }
-      }
-    };
-    autoFitMobile();
-    window.addEventListener('resize', autoFitMobile);
-    return () => window.removeEventListener('resize', autoFitMobile);
-  }, [doc.screens]);
+  // --- Keyboard: zoom shortcuts (Ctrl+= / - / 0) — uses stable callbacks, no stale closure ---
 
-  // Zoom keyboard shortcuts — anchored to canvas center
   useEffect(() => {
-    const zoomAtCenter = (factor: number) => {
-      const el = canvasRef.current;
-      if (!el) return;
-      const rect = el.getBoundingClientRect();
-      const mx = rect.width / 2;
-      const my = rect.height / 2;
-      const oldZ = zoomRef.current;
-      const newZ = Math.min(Math.max(oldZ * factor, 0.3), 2.5);
-      setPan(zoomAtPoint(mx, my, oldZ, newZ, panRef.current));
-      setZoom(newZ);
-    };
     const onKeyDown = (e: KeyboardEvent) => {
       if (
         (e.target as HTMLElement)?.tagName === "INPUT" ||
@@ -162,55 +183,19 @@ export const ViewportCanvas: React.FC = () => {
       }
       if (e.key === "0" && mod) {
         e.preventDefault();
-        const el = canvasRef.current;
-        if (!el) return;
-        const canvasW = el.clientWidth;
-        const padding = 60;
-        const gap = 40;
-        const totalContentW = doc.screens.reduce((sum, s) => sum + (s.width || 800), 0)
-          + gap * (doc.screens.length - 1)
-          + padding * 2;
-        setPan({
-          x: (canvasW - totalContentW) / 2,
-          y: padding,
-        });
-        setZoom(1);
+        resetView();
       }
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, []);
+  }, [zoomAtCenter, resetView]);
 
-  // Listen for zoom events from MenuBar — anchored to canvas center
+  // --- Custom events: zoom from MenuBar — uses stable callbacks, no stale closure ---
+
   useEffect(() => {
-    const zoomAtCenter = (factor: number) => {
-      const el = canvasRef.current;
-      if (!el) return;
-      const rect = el.getBoundingClientRect();
-      const mx = rect.width / 2;
-      const my = rect.height / 2;
-      const oldZ = zoomRef.current;
-      const newZ = Math.min(Math.max(oldZ * factor, 0.3), 2.5);
-      setPan(zoomAtPoint(mx, my, oldZ, newZ, panRef.current));
-      setZoom(newZ);
-    };
     const onZoomIn = () => zoomAtCenter(1.1);
     const onZoomOut = () => zoomAtCenter(0.9);
-    const onZoomReset = () => {
-      const el = canvasRef.current;
-      if (!el) return;
-      const canvasW = el.clientWidth;
-      const padding = 60;
-      const gap = 40;
-      const totalContentW = doc.screens.reduce((sum, s) => sum + (s.width || 800), 0)
-        + gap * (doc.screens.length - 1)
-        + padding * 2;
-      setPan({
-        x: (canvasW - totalContentW) / 2,
-        y: padding,
-      });
-      setZoom(1);
-    };
+    const onZoomReset = () => resetView();
     window.addEventListener("protota:zoom-in", onZoomIn);
     window.addEventListener("protota:zoom-out", onZoomOut);
     window.addEventListener("protota:zoom-reset", onZoomReset);
@@ -219,18 +204,34 @@ export const ViewportCanvas: React.FC = () => {
       window.removeEventListener("protota:zoom-out", onZoomOut);
       window.removeEventListener("protota:zoom-reset", onZoomReset);
     };
-  }, []);
+  }, [zoomAtCenter, resetView]);
 
-  const handleCanvasClick = useCallback(() => {
-    canvasRef.current?.focus();
-    selectNode(null);
-  }, [selectNode]);
+  // --- Auto-fit zoom on mobile screens (< 768px wide) ---
+
+  useEffect(() => {
+    const autoFitMobile = () => {
+      const screens = docRef.current.screens;
+      if (window.innerWidth <= 768 && screens.length > 0) {
+        const primaryWidth = screens[0].width || 800;
+        const availableWidth = window.innerWidth - 32;
+        if (primaryWidth > availableWidth) {
+          const fittedZoom = Math.max(availableWidth / primaryWidth, 0.35);
+          setZoom(fittedZoom);
+          setPan({ x: 16, y: 16 });
+        }
+      }
+    };
+    autoFitMobile();
+    window.addEventListener('resize', autoFitMobile);
+    return () => window.removeEventListener('resize', autoFitMobile);
+  }, [doc.screens]);
+
+  // --- Screen focus state ---
 
   const [phoshScreenId, setPhoshScreenId] = useState<string | null>(null);
   const [desktopScreenId, setDesktopScreenId] = useState<string | null>(null);
   const [focusedScreenIdx, setFocusedScreenIdx] = useState(0);
 
-  // Refs so callbacks read latest values without re-creating
   const focusedScreenIdxRef = useRef(focusedScreenIdx);
   focusedScreenIdxRef.current = focusedScreenIdx;
   const desktopScreenIdRef = useRef(desktopScreenId);
@@ -248,54 +249,51 @@ export const ViewportCanvas: React.FC = () => {
   const activePhoshScreen = doc.screens.find((s) => s.id === phoshScreenId);
   const activeDesktopScreen = doc.screens.find((s) => s.id === desktopScreenId);
 
-  // Memoized screen list for BottomBar — avoids re-setting adw-drop-down options on every render.
-  // Labels are prefixed with the 1-based index (e.g. "2: New Screen"); the closed button shows
-  // just the number, overridden in BottomBar after the web component updates its label.
+  // Memoized screen list for BottomBar — only recomputes when screen ids/titles change,
+  // not on every node edit inside a screen.
   const screensForBottomBar = useMemo(
     () => doc.screens.map((s, i) => ({ id: s.id, title: `${i + 1}: ${s.title}` })),
-    [doc.screens],
+    [doc.screens.map((s) => `${s.id}:${s.title}`).join('|')], // eslint-disable-line react-hooks/exhaustive-deps
   );
 
-  // Pan the canvas to top-center a specific screen (used in normal canvas mode)
+  // --- Stable screen-focus callbacks (read from refs) ---
+
   const panToScreen = useCallback((idx: number) => {
-    if (!canvasRef.current || doc.screens.length === 0) return;
-    const clampedIdx = Math.max(0, Math.min(idx, doc.screens.length - 1));
-    const screen = doc.screens[clampedIdx];
+    const screens = docRef.current.screens;
+    if (!canvasRef.current || screens.length === 0) return;
+    const clampedIdx = Math.max(0, Math.min(idx, screens.length - 1));
+    const screen = screens[clampedIdx];
     if (!screen) return;
 
     const canvasW = canvasRef.current.clientWidth;
-    const padding = 60;
-    const gap = 40;
     const currentZoom = zoomRef.current;
 
-    // Compute world-x of the screen's left edge
-    let screenX = padding;
+    let screenX = CANVAS_PADDING;
     for (let i = 0; i < clampedIdx; i++) {
-      screenX += (doc.screens[i].width || 800) + gap;
+      screenX += (screens[i].width || 800) + CANVAS_GAP;
     }
 
     const screenW = screen.width || 800;
-
     setPan({
       x: (canvasW - screenW * currentZoom) / 2 - screenX * currentZoom,
-      y: padding,
+      y: CANVAS_PADDING,
     });
-  }, [doc.screens]);
+  }, []);
 
-  // Unified focus handler — works in canvas, desktop, and phosh modes (no wrap)
   const handleFocusScreen = useCallback((idx: number) => {
-    if (doc.screens.length === 0) return;
-    if (idx < 0 || idx >= doc.screens.length) return;
+    const screens = docRef.current.screens;
+    if (screens.length === 0) return;
+    if (idx < 0 || idx >= screens.length) return;
     setFocusedScreenIdx(idx);
 
     if (desktopScreenIdRef.current !== null) {
-      setDesktopScreenId(doc.screens[idx].id);
+      setDesktopScreenId(screens[idx].id);
     } else if (phoshScreenIdRef.current !== null) {
-      setPhoshScreenId(doc.screens[idx].id);
+      setPhoshScreenId(screens[idx].id);
     } else {
       panToScreen(idx);
     }
-  }, [doc.screens, panToScreen]);
+  }, [panToScreen]);
 
   const handleFocusPrev = useCallback(() => {
     handleFocusScreen(focusedScreenIdxRef.current - 1);
@@ -304,6 +302,69 @@ export const ViewportCanvas: React.FC = () => {
   const handleFocusNext = useCallback(() => {
     handleFocusScreen(focusedScreenIdxRef.current + 1);
   }, [handleFocusScreen]);
+
+  // --- Stable BottomBar zoom callbacks (additive, distinct from keyboard multiplicative) ---
+
+  const handleZoomIn = useCallback(() => {
+    const el = canvasRef.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    const mx = rect.width / 2;
+    const my = rect.height / 2;
+    const oldZ = zoomRef.current;
+    const newZ = Math.min(oldZ + 0.1, 2.5);
+    setPan(zoomAtPoint(mx, my, oldZ, newZ, panRef.current));
+    setZoom(newZ);
+  }, []);
+
+  const handleZoomOut = useCallback(() => {
+    const el = canvasRef.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    const mx = rect.width / 2;
+    const my = rect.height / 2;
+    const oldZ = zoomRef.current;
+    const newZ = Math.max(oldZ - 0.1, 0.3);
+    setPan(zoomAtPoint(mx, my, oldZ, newZ, panRef.current));
+    setZoom(newZ);
+  }, []);
+
+  const handleZoomFit = useCallback(() => {
+    const el = canvasRef.current;
+    if (!el || docRef.current.screens.length === 0) return;
+    const screens = docRef.current.screens;
+    const canvasW = el.clientWidth;
+    const canvasH = el.clientHeight;
+    const totalContentW = getTotalContentWidth(screens);
+    const maxContentH = Math.max(...screens.map((s) => s.height || 600))
+      + 28 /* label */ + CANVAS_PADDING * 2;
+    const fitZoom = Math.min(canvasW / totalContentW, canvasH / maxContentH, 1.5);
+    setZoom(fitZoom);
+    const scaledW = totalContentW * fitZoom;
+    const scaledH = maxContentH * fitZoom;
+    setPan({
+      x: (canvasW - scaledW) / 2,
+      y: (canvasH - scaledH - CANVAS_BOTTOM_BAR_H) / 2,
+    });
+  }, []);
+
+  // --- Stable Desktop/Phosh toggle callbacks ---
+
+  const handleToggleDesktop = useCallback(() => {
+    setDesktopScreenId((prev) => {
+      if (prev) return null;
+      setPhoshScreenId(null);
+      return docRef.current.screens[focusedScreenIdxRef.current]?.id || null;
+    });
+  }, []);
+
+  const handleTogglePhone = useCallback(() => {
+    setPhoshScreenId((prev) => {
+      if (prev) return null;
+      setDesktopScreenId(null);
+      return docRef.current.screens[focusedScreenIdxRef.current]?.id || null;
+    });
+  }, []);
 
   return (
     <div
@@ -377,7 +438,6 @@ export const ViewportCanvas: React.FC = () => {
       )}
 
       {/* Phosh Fullscreen Phone Overlay Mode */}
-      {/* Phosh Fullscreen Phone Overlay Mode */}
       {activePhoshScreen && (
         <div className="protota-phosh-container">
           <div className="protota-phosh-header">
@@ -426,75 +486,14 @@ export const ViewportCanvas: React.FC = () => {
       {/* Bottom Bar — Zoom + Desktop/Phone toggles */}
       <BottomBar
         zoom={zoom}
-        onZoomIn={() => {
-          const el = canvasRef.current;
-          if (!el) return;
-          const rect = el.getBoundingClientRect();
-          const mx = rect.width / 2;
-          const my = rect.height / 2;
-          const oldZ = zoomRef.current;
-          const newZ = Math.min(oldZ + 0.1, 2.5);
-          setPan(zoomAtPoint(mx, my, oldZ, newZ, panRef.current));
-          setZoom(newZ);
-        }}
-        onZoomOut={() => {
-          const el = canvasRef.current;
-          if (!el) return;
-          const rect = el.getBoundingClientRect();
-          const mx = rect.width / 2;
-          const my = rect.height / 2;
-          const oldZ = zoomRef.current;
-          const newZ = Math.max(oldZ - 0.1, 0.3);
-          setPan(zoomAtPoint(mx, my, oldZ, newZ, panRef.current));
-          setZoom(newZ);
-        }}
-        onZoomFit={() => {
-          if (!canvasRef.current || doc.screens.length === 0) return;
-          const canvasW = canvasRef.current.clientWidth;
-          const canvasH = canvasRef.current.clientHeight;
-          const padding = 60;
-          const gap = 40;
-          const totalContentW = doc.screens.reduce((sum, s) => sum + (s.width || 800), 0)
-            + gap * (doc.screens.length - 1)
-            + padding * 2;
-          const maxContentH = Math.max(...doc.screens.map((s) => s.height || 600))
-            + 28 /* label */ + padding * 2;
-          const fitZoom = Math.min(canvasW / totalContentW, canvasH / maxContentH, 1.5);
-          setZoom(fitZoom);
-          const scaledW = totalContentW * fitZoom;
-          const scaledH = maxContentH * fitZoom;
-          const bottomBarH = 48;
-          setPan({
-            x: (canvasW - scaledW) / 2,
-            y: (canvasH - scaledH - bottomBarH) / 2,
-          });
-        }}
-        onZoomReset={() => {
-          if (!canvasRef.current || doc.screens.length === 0) return;
-          const canvasW = canvasRef.current.clientWidth;
-          const padding = 60;
-          const gap = 40;
-          const totalContentW = doc.screens.reduce((sum, s) => sum + (s.width || 800), 0)
-            + gap * (doc.screens.length - 1)
-            + padding * 2;
-          setPan({
-            x: (canvasW - totalContentW) / 2,
-            y: padding,
-          });
-          setZoom(1);
-        }}
+        onZoomIn={handleZoomIn}
+        onZoomOut={handleZoomOut}
+        onZoomFit={handleZoomFit}
+        onZoomReset={resetView}
         desktopScreenId={desktopScreenId}
-        onToggleDesktop={() => setDesktopScreenId((prev) => {
-          if (prev) return null;
-          setPhoshScreenId(null);
-          return doc.screens[focusedScreenIdxRef.current]?.id || null;
-        })}
+        onToggleDesktop={handleToggleDesktop}
         phoshScreenId={phoshScreenId}
-        onTogglePhone={() => setPhoshScreenId((prev) => {
-          if (prev) return null;
-          setDesktopScreenId(null);
-          return doc.screens[focusedScreenIdxRef.current]?.id || null;
-        })}
+        onTogglePhone={handleTogglePhone}
         screens={screensForBottomBar}
         focusedScreenIdx={focusedScreenIdx}
         canFocusPrev={focusedScreenIdx > 0}
@@ -511,8 +510,8 @@ export const ViewportCanvas: React.FC = () => {
           transformOrigin: "0 0",
           transition: isPanning ? "none" : "transform 0.05s ease-out",
           display: "inline-flex",
-          gap: "40px",
-          padding: "60px",
+          gap: `${CANVAS_GAP}px`,
+          padding: `${CANVAS_PADDING}px`,
           pointerEvents: spaceHeld || isPanning ? "none" : undefined,
         }}
       >

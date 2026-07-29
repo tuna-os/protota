@@ -34,7 +34,63 @@ interface BottomBarProps {
   onSelectScreen: (idx: number) => void;
 }
 
-export const BottomBar: React.FC<BottomBarProps> = ({
+/** Cached data URIs for SVG icons — avoids re-encoding on every render. */
+const dataUriCache = new Map<string, string>();
+function cachedDataUri(svg: string): string {
+  let uri = dataUriCache.get(svg);
+  if (uri === undefined) {
+    uri = toDataUri(svg);
+    dataUriCache.set(svg, uri);
+  }
+  return uri;
+}
+
+/** Reusable toolbar icon button — memoized so it skips re-render when props are unchanged. */
+const ToolbarIconButton = React.memo(({
+  icon,
+  onClick,
+  title,
+  disabled,
+  active,
+  children,
+}: {
+  icon: string;
+  onClick?: () => void;
+  title: string;
+  disabled?: boolean;
+  active?: boolean;
+  children?: React.ReactNode;
+}) => (
+  <button
+    className={`adw-button flat${children ? "" : " icon-only"}${active ? " active" : ""}${disabled ? " disabled" : ""}`}
+    onClick={onClick}
+    disabled={disabled}
+    title={title}
+  >
+    <span
+      className="adw-toolbar-icon"
+      style={{
+        maskImage: cachedDataUri(icon),
+        WebkitMaskImage: cachedDataUri(icon),
+      }}
+    />
+    {children}
+  </button>
+));
+ToolbarIconButton.displayName = "ToolbarIconButton";
+
+const Separator = () => (
+  <span
+    style={{
+      width: "1px",
+      height: "16px",
+      background: "var(--separator-color, rgba(0,0,6,0.12))",
+      margin: "0 4px",
+    }}
+  />
+);
+
+export const BottomBar: React.FC<BottomBarProps> = React.memo(({
   zoom,
   onZoomIn,
   onZoomOut,
@@ -95,134 +151,68 @@ export const BottomBar: React.FC<BottomBarProps> = ({
     <div className="protota-zoom-bar">
       {showFocusControls && (
         <>
-          <button
-            className={`adw-button icon-only flat${canFocusPrev ? "" : " disabled"}`}
+          <ToolbarIconButton
+            icon={goPreviousSymbolic}
             onClick={onFocusPrev}
-            disabled={!canFocusPrev}
             title="Previous Screen"
-          >
-            <span
-              className="adw-toolbar-icon"
-              style={{
-                maskImage: toDataUri(goPreviousSymbolic),
-                WebkitMaskImage: toDataUri(goPreviousSymbolic),
-              }}
-            />
-          </button>
+            disabled={!canFocusPrev}
+          />
           <adw-drop-down
             ref={dropDownRef}
             className="protota-screen-dropdown"
           />
-          <button
-            className={`adw-button icon-only flat${canFocusNext ? "" : " disabled"}`}
+          <ToolbarIconButton
+            icon={goNextSymbolic}
             onClick={onFocusNext}
-            disabled={!canFocusNext}
             title="Next Screen"
-          >
-            <span
-              className="adw-toolbar-icon"
-              style={{
-                maskImage: toDataUri(goNextSymbolic),
-                WebkitMaskImage: toDataUri(goNextSymbolic),
-              }}
-            />
-          </button>
-          <span
-            style={{
-              width: "1px",
-              height: "16px",
-              background: "var(--separator-color, rgba(0,0,6,0.12))",
-              margin: "0 4px",
-            }}
+            disabled={!canFocusNext}
           />
+          <Separator />
         </>
       )}
-      <button
-        className="adw-button icon-only flat"
+      <ToolbarIconButton
+        icon={zoomOriginalSymbolic}
         onClick={onZoomReset}
         title="Reset Zoom (Ctrl+0)"
-      >
-        <span
-          className="adw-toolbar-icon"
-          style={{
-            maskImage: toDataUri(zoomOriginalSymbolic),
-            WebkitMaskImage: toDataUri(zoomOriginalSymbolic),
-          }}
-        />
-      </button>
-      <button
-        className="adw-button icon-only flat"
+      />
+      <ToolbarIconButton
+        icon={zoomOutSymbolic}
         onClick={onZoomOut}
         title="Zoom Out (Ctrl+-)"
-      >
-        <span
-          className="adw-toolbar-icon"
-          style={{
-            maskImage: toDataUri(zoomOutSymbolic),
-            WebkitMaskImage: toDataUri(zoomOutSymbolic),
-          }}
-        />
-      </button>
+      />
       <span
         style={{ fontSize: "var(--font-size-small, 9pt)", minWidth: "40px", textAlign: "center" }}
       >
         {Math.round(zoom * 100)}%
       </span>
-      <button
-        className="adw-button icon-only flat"
+      <ToolbarIconButton
+        icon={zoomInSymbolic}
         onClick={onZoomIn}
         title="Zoom In (Ctrl+=)"
-      >
-        <span
-          className="adw-toolbar-icon"
-          style={{
-            maskImage: toDataUri(zoomInSymbolic),
-            WebkitMaskImage: toDataUri(zoomInSymbolic),
-          }}
-        />
-      </button>
-      <button
-        className="adw-button icon-only flat"
+      />
+      <ToolbarIconButton
+        icon={zoomFitBestSymbolic}
         onClick={onZoomFit}
         title="Fit All Screens"
-      >
-        <span
-          className="adw-toolbar-icon"
-          style={{
-            maskImage: toDataUri(zoomFitBestSymbolic),
-            WebkitMaskImage: toDataUri(zoomFitBestSymbolic),
-          }}
-        />
-      </button>
-      <span style={{ width: '1px', height: '16px', background: 'var(--separator-color, rgba(0,0,6,0.12))', margin: '0 4px' }} />
-      <button
-        className={`adw-button flat${desktopScreenId ? " active" : ""}`}
+      />
+      <Separator />
+      <ToolbarIconButton
+        icon={computerSymbolic}
         onClick={onToggleDesktop}
         title="Toggle Desktop Preview"
+        active={!!desktopScreenId}
       >
-        <span
-          className="adw-toolbar-icon"
-          style={{
-            maskImage: toDataUri(computerSymbolic),
-            WebkitMaskImage: toDataUri(computerSymbolic),
-          }}
-        />
         Desktop
-      </button>
-      <button
-        className={`adw-button flat${phoshScreenId ? " active" : ""}`}
+      </ToolbarIconButton>
+      <ToolbarIconButton
+        icon={phoneSymbolic}
         onClick={onTogglePhone}
         title="Toggle Phone Preview"
+        active={!!phoshScreenId}
       >
-        <span
-          className="adw-toolbar-icon"
-          style={{
-            maskImage: toDataUri(phoneSymbolic),
-            WebkitMaskImage: toDataUri(phoneSymbolic),
-          }}
-        />
         Phone
-      </button>
+      </ToolbarIconButton>
     </div>
   );
-};
+});
+BottomBar.displayName = "BottomBar";

@@ -15,10 +15,7 @@ html, body, #root {
   width: 100%;
 }
 
-/* Bind the Adwaita surface to the document root so chrome matches widgets.
-   The @gjsify/adwaita-web variables (--window-bg-color, --window-fg-color, ...)
-   are defined by the adwaita-web stylesheet. On dark-mode preference or
-   .theme-dark, they flip to the dark palette. */
+/* Bind the Adwaita surface to the document root so chrome matches widgets. */
 #root {
   background-color: var(--window-bg-color, #fafafb);
   color: var(--window-fg-color, rgba(0, 0, 6, 0.8));
@@ -30,73 +27,118 @@ html, body, #root {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* ---- Toolbar (headerbar) ---- */
-.protota-toolbar {
-  background-color: var(--headerbar-bg-color, #ffffff);
-  color: var(--headerbar-fg-color, rgba(0, 0, 6, 0.8));
-  border-bottom: 1px solid var(--separator-color, rgba(0, 0, 6, 0.1));
-  box-shadow: 0 1px 2px var(--headerbar-shade-color, rgba(0, 0, 6, 0.12));
-}
-
-/* ---- Side panels (layers + inspector) ---- */
-.protota-panel {
-  background-color: var(--sidebar-bg-color, #ebebed);
-  border-color: var(--separator-color, rgba(0, 0, 6, 0.1));
-}
-
-.protota-panel-header {
-  border-bottom: 1px solid var(--separator-color, rgba(0, 0, 6, 0.1));
-}
-
-/* ---- Canvas ---- */
-.protota-canvas {
-  background-color: var(--view-bg-color, #ffffff);
-}
-
-/* ---- Buttons - Adwaita flat/toolbar style ---- */
-.protota-btn {
+/* ---- Adwaita Button (base class) ---- */
+.adw-button {
+  box-sizing: border-box;
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
-  padding: 6px 12px;
+  min-height: 34px;
+  min-width: 34px;
+  margin: 0;
+  padding: 4px 14px;
   border: none;
-  border-radius: 8px;
-  background: var(--button-bg-color, rgba(0, 0, 6, 0.08));
+  border-radius: var(--button-radius, 9px);
+  background-color: var(--button-bg-color, rgba(0, 0, 6, 0.08));
   color: var(--window-fg-color, rgba(0, 0, 6, 0.8));
-  font-family: inherit;
-  font-size: 13px;
-  font-weight: 500;
+  font-family: var(--font-family, inherit);
+  font-size: var(--font-size-base, 11pt);
+  font-weight: 700;
+  line-height: 1;
   cursor: pointer;
-  transition: background 0.15s ease;
+  transition: background-color 0.1s ease;
   user-select: none;
 }
 
-.protota-btn:hover {
-  background: var(--button-hover-color, rgba(0, 0, 6, 0.13));
+.adw-button:hover {
+  background-color: var(--button-hover-color, rgba(0, 0, 6, 0.13));
 }
 
-.protota-btn:active {
-  background: var(--button-active-color, rgba(0, 0, 6, 0.19));
+.adw-button:active {
+  background-color: var(--button-active-color, rgba(0, 0, 6, 0.19));
 }
 
-.protota-btn--primary {
-  background: var(--accent-bg-color, #3584e4);
+.adw-button:focus-visible {
+  outline: 2px solid var(--accent-color, #1c71d8);
+  outline-offset: 1px;
+}
+
+.adw-button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+/* Flat button — no resting background */
+.adw-button.flat {
+  background-color: transparent;
+}
+
+.adw-button.flat:hover {
+  background-color: var(--button-hover-color, rgba(0, 0, 6, 0.13));
+}
+
+.adw-button.flat:active {
+  background-color: var(--button-active-color, rgba(0, 0, 6, 0.19));
+}
+
+/* Suggested action — accent/primary */
+.adw-button.suggested-action {
+  background-color: var(--accent-bg-color, #3584e4);
   color: var(--accent-fg-color, #ffffff);
 }
 
-.protota-btn--primary:hover {
-  opacity: 0.9;
+.adw-button.suggested-action:hover {
+  background-color: var(--accent-color, #1c71d8);
 }
 
-.protota-btn--destructive {
-  background: var(--destructive-bg-color, #e01b24);
+/* Destructive action — red */
+.adw-button.destructive-action {
+  background-color: var(--destructive-bg-color, #e01b24);
   color: var(--destructive-fg-color, #ffffff);
 }
 
-/* ---- Inputs ---- */
-.protota-input {
-  padding: 6px 8px;
-  border-radius: 6px;
+/* Icon-only — square icon button */
+.adw-button.icon-only {
+  padding: 0;
+  width: 34px;
+}
+
+/* Circular — round icon button */
+.adw-button.circular {
+  padding: 0;
+  width: 34px;
+  border-radius: 9999px;
+}
+
+/* Linked group — segmented control */
+.adw-linked {
+  display: inline-flex;
+}
+
+.adw-linked > .adw-button {
+  border-radius: 0;
+}
+
+.adw-linked > .adw-button:first-child {
+  border-top-left-radius: var(--button-radius, 9px);
+  border-bottom-left-radius: var(--button-radius, 9px);
+}
+
+.adw-linked > .adw-button:last-child {
+  border-top-right-radius: var(--button-radius, 9px);
+  border-bottom-right-radius: var(--button-radius, 9px);
+}
+
+.adw-linked > .adw-button + .adw-button {
+  margin-left: 2px;
+}
+
+/* ---- Adwaita Entry ---- */
+.adw-entry {
+  box-sizing: border-box;
+  padding: 6px 10px;
+  border-radius: var(--button-radius, 9px);
   border: 1px solid var(--entry-border-color, rgba(0, 0, 6, 0.18));
   background: var(--entry-bg-color, #ffffff);
   color: var(--window-fg-color, rgba(0, 0, 6, 0.8));
@@ -105,13 +147,29 @@ html, body, #root {
   outline: none;
 }
 
-.protota-input:focus {
+.adw-entry:focus {
   border-color: var(--accent-color, #1c71d8);
+}
+
+/* ---- Side panels (Adwaita sidebar styling) ---- */
+.adw-sidebar-like {
+  background-color: var(--sidebar-bg-color, #ebebed);
+  border-color: var(--separator-color, rgba(0, 0, 6, 0.1));
+}
+
+.protota-panel-header {
+  border-bottom: 1px solid var(--separator-color, rgba(0, 0, 6, 0.1));
+  padding: var(--spacing-s, 9px) var(--spacing-m, 12px);
+}
+
+/* ---- Canvas ---- */
+.protota-canvas {
+  background-color: var(--view-bg-color, #ffffff);
 }
 
 /* ---- Screen cards ---- */
 .protota-screen-label {
-  font-size: 13px;
+  font-size: var(--font-size-small, 9pt);
   font-weight: 600;
   color: var(--window-fg-color, rgba(0, 0, 6, 0.8));
   opacity: 0.7;
@@ -126,25 +184,26 @@ html, body, #root {
 
 /* ---- Layers tree ---- */
 .protota-tree-item {
-  padding: 4px 8px;
-  border-radius: 4px;
+  padding: var(--spacing-xs, 6px) var(--spacing-m, 12px);
+  border-radius: var(--button-radius, 9px);
   cursor: pointer;
-  font-size: 12px;
+  font-size: var(--font-size-small, 9pt);
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 2px;
   background: transparent;
   color: var(--window-fg-color, rgba(0, 0, 6, 0.8));
+  transition: background-color 0.1s ease;
 }
 
 .protota-tree-item:hover {
-  background: var(--button-bg-color, rgba(0, 0, 6, 0.08));
+  background: var(--button-hover-color, rgba(0, 0, 6, 0.13));
 }
 
 .protota-tree-item--selected {
-  background: var(--accent-bg-color, #3584e4) !important;
-  color: var(--accent-fg-color, #ffffff) !important;
+  background: var(--button-active-color, rgba(0, 0, 6, 0.19)) !important;
+  color: var(--window-fg-color, rgba(0, 0, 6, 0.8)) !important;
 }
 
 /* ---- Type badge (debug label) ---- */
@@ -169,7 +228,7 @@ html, body, #root {
   background: var(--accent-bg-color, #3584e4);
   color: var(--accent-fg-color, #ffffff);
   border: none;
-  border-radius: 4px;
+  border-radius: var(--button-radius, 9px);
   padding: 2px 7px;
   font-family: inherit;
   font-weight: 500;
@@ -182,15 +241,15 @@ html, body, #root {
 /* ---- Zoom controls ---- */
 .protota-zoom-bar {
   position: absolute;
-  bottom: 16px;
-  left: 16px;
+  bottom: var(--spacing-m, 12px);
+  left: var(--spacing-m, 12px);
   z-index: 100;
   background: var(--card-bg-color, #ffffff);
-  padding: 4px 10px;
-  border-radius: 10px;
+  padding: var(--spacing-xs, 6px) var(--spacing-m, 12px);
+  border-radius: var(--card-radius, 12px);
   box-shadow: 0 2px 8px var(--headerbar-shade-color, rgba(0, 0, 6, 0.12));
   display: flex;
-  gap: 4px;
+  gap: var(--spacing-xs, 6px);
   align-items: center;
   border: 1px solid var(--separator-color, rgba(0, 0, 6, 0.1));
 }
@@ -209,25 +268,84 @@ html, body, #root {
 .protota-modal {
   background: var(--popover-bg-color, #ffffff);
   color: var(--popover-fg-color, rgba(0, 0, 6, 0.8));
-  border-radius: 12px;
-  padding: 24px;
+  border-radius: var(--card-radius, 12px);
+  padding: var(--spacing-xl, 24px);
   width: 400px;
   box-shadow: 0 12px 32px rgba(0, 0, 6, 0.24);
 }
 
 /* ---- Property inspector labels ---- */
 .protota-field-label {
-  font-size: 12px;
+  font-size: var(--font-size-small, 9pt);
   font-weight: 600;
   color: var(--window-fg-color, rgba(0, 0, 6, 0.8));
-  opacity: 0.65;
+  opacity: var(--dim-opacity, 0.55);
 }
 
 /* ---- Divider ---- */
 .protota-divider {
   border: none;
   border-top: 1px solid var(--separator-color, rgba(0, 0, 6, 0.1));
-  margin: 4px 0;
+  margin: var(--spacing-xs, 6px) 0;
+}
+
+/* ---- Menu dropdown (Adwaita popover style) ---- */
+.protota-menu-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  min-width: 200px;
+  background: var(--popover-bg-color, #ffffff);
+  border: 1px solid var(--separator-color, rgba(0, 0, 6, 0.12));
+  border-radius: var(--button-radius, 9px);
+  box-shadow: 0 4px 12px var(--popover-shade-color, rgba(0, 0, 6, 0.07));
+  padding: var(--spacing-xs, 6px) 0;
+  z-index: 1000;
+}
+
+.protota-menu-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-s, 9px);
+  width: 100%;
+  padding: var(--spacing-xs, 6px) var(--spacing-m, 12px);
+  background: transparent;
+  border: none;
+  font-family: var(--font-family, inherit);
+  font-size: var(--font-size-base, 11pt);
+  color: var(--window-fg-color, rgba(0, 0, 6, 0.8));
+  cursor: pointer;
+  text-align: left;
+}
+
+.protota-menu-item:hover {
+  background: var(--button-hover-color, rgba(0, 0, 6, 0.13));
+}
+
+.protota-menu-item:active {
+  background: var(--button-active-color, rgba(0, 0, 6, 0.19));
+}
+
+.protota-menu-item-icon {
+  width: 16px;
+  height: 16px;
+  opacity: var(--dim-opacity, 0.55);
+}
+
+.protota-menu-item-label {
+  flex: 1;
+}
+
+.protota-menu-item-shortcut {
+  font-size: var(--font-size-small, 9pt);
+  opacity: var(--dim-opacity, 0.55);
+  font-family: "Adwaita Sans";
+}
+
+.protota-menu-divider {
+  height: 1px;
+  background: var(--separator-color, rgba(0, 0, 6, 0.1));
+  margin: var(--spacing-xs, 6px) 0;
 }
 
 /* ---- Div-only widget types (no custom element available) ---- */
@@ -239,6 +357,7 @@ html, body, #root {
   padding: 0;
   gap: 12px;
 }
+
 .protota-div-box[orientation="horizontal"] {
   flex-direction: row;
   align-items: center;
@@ -253,18 +372,16 @@ html, body, #root {
   gap: 12px;
 }
 
-/* Label — Adwaita text styling. */
 .protota-div-label {
-  font-size: 14px;
+  font-size: var(--font-size-base, 11pt);
   line-height: 1.5;
   color: var(--window-fg-color, rgba(0, 0, 6, 0.8));
   padding: 2px 0;
   white-space: pre-wrap;
 }
 
-/* Inscription — text with ellipsis overflow. */
 .protota-div-inscription {
-  font-size: 14px;
+  font-size: var(--font-size-base, 11pt);
   line-height: 1.5;
   color: var(--window-fg-color, rgba(0, 0, 6, 0.8));
   overflow: hidden;
@@ -273,7 +390,6 @@ html, body, #root {
   padding: 2px 0;
 }
 
-/* Search entry — text input styled like GtkSearchEntry. */
 .protota-div-search-entry {
   display: flex;
   align-items: center;
@@ -286,6 +402,7 @@ html, body, #root {
   font-size: 13px;
   box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.04);
 }
+
 .protota-div-search-entry::before {
   content: '🔍';
   margin-right: 8px;
@@ -293,7 +410,6 @@ html, body, #root {
   font-size: 12px;
 }
 
-/* Switch (standalone, not SwitchRow) — toggle pill. */
 .protota-div-switch-widget {
   display: inline-block;
   width: 44px;
@@ -303,7 +419,6 @@ html, body, #root {
   position: relative;
 }
 
-/* Check button — inline checkbox. */
 .protota-div-check-button {
   display: inline-flex;
   align-items: center;
@@ -311,18 +426,19 @@ html, body, #root {
   padding: 4px 6px;
   font-size: 14px;
 }
+
 .protota-div-check-button::before {
   content: '☐';
   font-size: 16px;
-  opacity: 0.6;
+  opacity: var(--dim-opacity, 0.55);
 }
+
 .protota-div-check-button[active]::before {
   content: '☑';
   color: var(--accent-bg-color, #3584e4);
   opacity: 1;
 }
 
-/* List box — boxed-list container. */
 .protota-div-list-box {
   display: flex;
   flex-direction: column;

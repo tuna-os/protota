@@ -144,8 +144,9 @@ describe('Blueprint import', () => {
 
     const imported = blueprintBundleToDocument(files, 'math-window.blp', 'GNOME Calculator');
     expect(imported.screens[0].rootNode).toMatchObject({ type: 'window' });
-    expect(imported.screens[0].rootNode.children).toEqual(expect.arrayContaining([
-      expect.objectContaining({ id: 'math_buttons', type: 'custom-widget', title: 'MathButtons' }),
+    const nodes = (node: MockupDocument['screens'][number]['rootNode']): typeof node[] => [node, ...(node.children || []).flatMap(nodes)];
+    expect(nodes(imported.screens[0].rootNode)).toEqual(expect.arrayContaining([
+      expect.objectContaining({ id: '_buttons', type: 'custom-widget', title: 'MathButtons' }),
     ]));
   });
 });

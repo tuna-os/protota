@@ -211,6 +211,7 @@ export const App: React.FC = () => {
               className={`adw-button flat${leftOpen ? " active" : ""}`}
               onClick={() => setLeftOpen((v) => !v)}
               title="Toggle Layers Panel (Ctrl+\)"
+              aria-label="Toggle Layers"
             >
               <span style={iconStyle(sidebarShowSymbolic)} />
             </button>
@@ -242,6 +243,7 @@ export const App: React.FC = () => {
               className={`adw-button flat${rightOpen ? " active" : ""}`}
               onClick={() => setRightOpen((v) => !v)}
               title="Toggle Properties Panel (Ctrl+])"
+              aria-label="Toggle Properties"
             >
               <span style={iconStyle(sidebarShowRightSymbolic)} />
             </button>
@@ -249,11 +251,19 @@ export const App: React.FC = () => {
         </adw-header-bar>
 
         {/* Main Workspace — content slot of toolbar-view */}
-        <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
+        <div className="protota-workspace-container" style={{ display: "flex", flex: 1, overflow: "hidden", position: "relative" }}>
+          {/* Left Drawer (Layers) Backdrop on Mobile */}
+          {leftOpen && (
+            <div
+              className="protota-mobile-scrim"
+              onClick={() => setLeftOpen(false)}
+            />
+          )}
+
           {/* Left Drawer (Layers) — Adwaita sidebar styling */}
           {leftOpen && (
             <aside
-              className="protota-panel adw-sidebar-like"
+              className="protota-panel protota-left-panel adw-sidebar-like"
               style={{
                 width: "240px",
                 overflow: "auto",
@@ -268,10 +278,18 @@ export const App: React.FC = () => {
           {/* Center Canvas */}
           <ViewportCanvas />
 
+          {/* Right Drawer (Inspector) Backdrop on Mobile */}
+          {rightOpen && (
+            <div
+              className="protota-mobile-scrim"
+              onClick={() => setRightOpen(false)}
+            />
+          )}
+
           {/* Right Drawer (Inspector) — Adwaita sidebar styling */}
           {rightOpen && (
             <aside
-              className="protota-panel adw-sidebar-like"
+              className="protota-panel protota-right-panel adw-sidebar-like"
               style={{
                 width: "280px",
                 overflow: "auto",

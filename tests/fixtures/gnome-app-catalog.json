@@ -276,7 +276,7 @@
       "entry": "window.ui"
     },
     "suite": "circle",
-    "status": "preset",
+    "status": "planned",
     "visualStatus": "not-validated"
   },
   "fragments": {
@@ -295,7 +295,7 @@
       "entry": "window.ui"
     },
     "suite": "circle",
-    "status": "preset",
+    "status": "planned",
     "visualStatus": "not-validated"
   },
   "secrets": {
@@ -390,7 +390,7 @@
       "entry": "window.ui"
     },
     "suite": "circle",
-    "status": "preset",
+    "status": "planned",
     "visualStatus": "not-validated"
   },
   "biblioteca": {
@@ -409,7 +409,7 @@
       "entry": "window.ui"
     },
     "suite": "circle",
-    "status": "preset",
+    "status": "planned",
     "visualStatus": "not-validated"
   },
   "binary": {
@@ -428,7 +428,7 @@
       "entry": "window.ui"
     },
     "suite": "circle",
-    "status": "preset",
+    "status": "planned",
     "visualStatus": "not-validated"
   },
   "blanket": {
@@ -447,7 +447,7 @@
       "entry": "window.ui"
     },
     "suite": "circle",
-    "status": "preset",
+    "status": "planned",
     "visualStatus": "not-validated"
   },
   "boatswain": {
@@ -466,7 +466,7 @@
       "entry": "window.ui"
     },
     "suite": "circle",
-    "status": "preset",
+    "status": "planned",
     "visualStatus": "not-validated"
   },
   "bobby": {
@@ -485,7 +485,7 @@
       "entry": "window.ui"
     },
     "suite": "circle",
-    "status": "preset",
+    "status": "planned",
     "visualStatus": "not-validated"
   },
   "bustle": {
@@ -523,7 +523,7 @@
       "entry": "window.ui"
     },
     "suite": "circle",
-    "status": "preset",
+    "status": "planned",
     "visualStatus": "not-validated"
   },
   "chess-clock": {
@@ -542,7 +542,7 @@
       "entry": "window.ui"
     },
     "suite": "circle",
-    "status": "preset",
+    "status": "planned",
     "visualStatus": "not-validated"
   },
   "citations": {
@@ -580,7 +580,7 @@
       "entry": "window.ui"
     },
     "suite": "circle",
-    "status": "preset",
+    "status": "planned",
     "visualStatus": "not-validated"
   },
   "collision": {
@@ -599,7 +599,7 @@
       "entry": "window.ui"
     },
     "suite": "circle",
-    "status": "preset",
+    "status": "planned",
     "visualStatus": "not-validated"
   },
   "commit": {
@@ -618,7 +618,7 @@
       "entry": "window.ui"
     },
     "suite": "circle",
-    "status": "preset",
+    "status": "planned",
     "visualStatus": "not-validated"
   },
   "constrict": {
@@ -656,7 +656,7 @@
       "entry": "window.ui"
     },
     "suite": "circle",
-    "status": "preset",
+    "status": "planned",
     "visualStatus": "not-validated"
   },
   "deja-dup-backups": {
@@ -675,7 +675,7 @@
       "entry": "window.ui"
     },
     "suite": "circle",
-    "status": "preset",
+    "status": "planned",
     "visualStatus": "not-validated"
   },
   "dialect": {
@@ -694,7 +694,7 @@
       "entry": "window.ui"
     },
     "suite": "circle",
-    "status": "preset",
+    "status": "planned",
     "visualStatus": "not-validated"
   },
   "drum-machine": {
@@ -713,7 +713,7 @@
       "entry": "window.ui"
     },
     "suite": "circle",
-    "status": "preset",
+    "status": "planned",
     "visualStatus": "not-validated"
   },
   "ear-tag": {
@@ -751,7 +751,7 @@
       "entry": "window.ui"
     },
     "suite": "circle",
-    "status": "preset",
+    "status": "planned",
     "visualStatus": "not-validated"
   },
   "emblem": {
@@ -770,7 +770,7 @@
       "entry": "window.ui"
     },
     "suite": "circle",
-    "status": "preset",
+    "status": "planned",
     "visualStatus": "not-validated"
   },
   "errands": {
@@ -789,7 +789,7 @@
       "entry": "window.ui"
     },
     "suite": "circle",
-    "status": "preset",
+    "status": "planned",
     "visualStatus": "not-validated"
   },
   "exercise-timer": {
@@ -808,7 +808,7 @@
       "entry": "window.ui"
     },
     "suite": "circle",
-    "status": "preset",
+    "status": "planned",
     "visualStatus": "not-validated"
   },
   "eyedropper": {
@@ -827,7 +827,7 @@
       "entry": "window.ui"
     },
     "suite": "circle",
-    "status": "preset",
+    "status": "planned",
     "visualStatus": "not-validated"
   },
   "file-shredder": {
@@ -846,7 +846,7 @@
       "entry": "window.ui"
     },
     "suite": "circle",
-    "status": "preset",
+    "status": "planned",
     "visualStatus": "not-validated"
   },
   "forge-sparks": {
@@ -865,7 +865,7 @@
       "entry": "window.ui"
     },
     "suite": "circle",
-    "status": "preset",
+    "status": "planned",
     "visualStatus": "not-validated"
   },
   "fretboard": {
@@ -884,7 +884,7 @@
       "entry": "window.ui"
     },
     "suite": "circle",
-    "status": "preset",
+    "status": "planned",
     "visualStatus": "not-validated"
   },
   "gaphor": {
@@ -903,7 +903,7 @@
       "entry": "window.ui"
     },
     "suite": "circle",
-    "status": "preset",
+    "status": "planned",
     "visualStatus": "not-validated"
   },
   "gradia": {
@@ -922,7 +922,7 @@
       "entry": "window.ui"
     },
     "suite": "circle",
-    "status": "preset",
+    "status": "planned",
     "visualStatus": "not-validated"
   },
   "graphs": {
@@ -960,7 +960,7 @@
       "entry": "window.ui"
     },
     "suite": "circle",
-    "status": "preset",
+    "status": "planned",
     "visualStatus": "not-validated"
   },
   "identity": {
@@ -979,7 +979,7 @@
       "entry": "window.ui"
     },
     "suite": "circle",
-    "status": "preset",
+    "status": "planned",
     "visualStatus": "not-validated"
   },
   "impression": {
@@ -998,7 +998,7 @@
       "entry": "window.ui"
     },
     "suite": "circle",
-    "status": "preset",
+    "status": "planned",
     "visualStatus": "not-validated"
   },
   "iotas": {
@@ -1036,7 +1036,7 @@
       "entry": "window.ui"
     },
     "suite": "circle",
-    "status": "preset",
+    "status": "planned",
     "visualStatus": "not-validated"
   },
   "keypunch": {
@@ -1055,7 +1055,7 @@
       "entry": "window.ui"
     },
     "suite": "circle",
-    "status": "preset",
+    "status": "planned",
     "visualStatus": "not-validated"
   },
   "komikku": {
@@ -1074,7 +1074,7 @@
       "entry": "window.ui"
     },
     "suite": "circle",
-    "status": "preset",
+    "status": "planned",
     "visualStatus": "not-validated"
   },
   "lorem": {
@@ -1093,7 +1093,7 @@
       "entry": "window.ui"
     },
     "suite": "circle",
-    "status": "preset",
+    "status": "planned",
     "visualStatus": "not-validated"
   },
   "mahjongg": {
@@ -1112,7 +1112,7 @@
       "entry": "window.ui"
     },
     "suite": "circle",
-    "status": "preset",
+    "status": "planned",
     "visualStatus": "not-validated"
   },
   "mousai": {
@@ -1131,7 +1131,7 @@
       "entry": "window.ui"
     },
     "suite": "circle",
-    "status": "preset",
+    "status": "planned",
     "visualStatus": "not-validated"
   },
   "newsflash": {
@@ -1150,7 +1150,7 @@
       "entry": "window.ui"
     },
     "suite": "circle",
-    "status": "preset",
+    "status": "planned",
     "visualStatus": "not-validated"
   },
   "obfuscate": {
@@ -1188,7 +1188,7 @@
       "entry": "window.ui"
     },
     "suite": "circle",
-    "status": "preset",
+    "status": "planned",
     "visualStatus": "not-validated"
   },
   "polari": {
@@ -1207,7 +1207,7 @@
       "entry": "window.ui"
     },
     "suite": "circle",
-    "status": "preset",
+    "status": "planned",
     "visualStatus": "not-validated"
   },
   "railway": {
@@ -1226,7 +1226,7 @@
       "entry": "window.ui"
     },
     "suite": "circle",
-    "status": "preset",
+    "status": "planned",
     "visualStatus": "not-validated"
   },
   "resources": {
@@ -1245,7 +1245,7 @@
       "entry": "window.ui"
     },
     "suite": "circle",
-    "status": "preset",
+    "status": "planned",
     "visualStatus": "not-validated"
   },
   "sessions": {
@@ -1264,7 +1264,7 @@
       "entry": "window.ui"
     },
     "suite": "circle",
-    "status": "preset",
+    "status": "planned",
     "visualStatus": "not-validated"
   },
   "share-preview": {
@@ -1283,7 +1283,7 @@
       "entry": "window.ui"
     },
     "suite": "circle",
-    "status": "preset",
+    "status": "planned",
     "visualStatus": "not-validated"
   },
   "solanum": {
@@ -1321,7 +1321,7 @@
       "entry": "window.ui"
     },
     "suite": "circle",
-    "status": "preset",
+    "status": "planned",
     "visualStatus": "not-validated"
   },
   "switcheroo": {
@@ -1340,7 +1340,7 @@
       "entry": "window.ui"
     },
     "suite": "circle",
-    "status": "preset",
+    "status": "planned",
     "visualStatus": "not-validated"
   },
   "tally": {
@@ -1359,7 +1359,7 @@
       "entry": "window.ui"
     },
     "suite": "circle",
-    "status": "preset",
+    "status": "planned",
     "visualStatus": "not-validated"
   },
   "tangram": {
@@ -1378,7 +1378,7 @@
       "entry": "window.ui"
     },
     "suite": "circle",
-    "status": "preset",
+    "status": "planned",
     "visualStatus": "not-validated"
   },
   "text-pieces": {
@@ -1397,7 +1397,7 @@
       "entry": "window.ui"
     },
     "suite": "circle",
-    "status": "preset",
+    "status": "planned",
     "visualStatus": "not-validated"
   },
   "tuba": {
@@ -1416,7 +1416,7 @@
       "entry": "window.ui"
     },
     "suite": "circle",
-    "status": "preset",
+    "status": "planned",
     "visualStatus": "not-validated"
   },
   "valuta": {
@@ -1435,7 +1435,7 @@
       "entry": "window.ui"
     },
     "suite": "circle",
-    "status": "preset",
+    "status": "planned",
     "visualStatus": "not-validated"
   },
   "video-trimmer": {
@@ -1454,7 +1454,7 @@
       "entry": "window.ui"
     },
     "suite": "circle",
-    "status": "preset",
+    "status": "planned",
     "visualStatus": "not-validated"
   },
   "webfont-bundler": {
@@ -1473,7 +1473,7 @@
       "entry": "window.ui"
     },
     "suite": "circle",
-    "status": "preset",
+    "status": "planned",
     "visualStatus": "not-validated"
   },
   "wike": {
@@ -1492,7 +1492,7 @@
       "entry": "window.ui"
     },
     "suite": "circle",
-    "status": "preset",
+    "status": "planned",
     "visualStatus": "not-validated"
   },
   "wordbook": {
@@ -1511,7 +1511,7 @@
       "entry": "window.ui"
     },
     "suite": "circle",
-    "status": "preset",
+    "status": "planned",
     "visualStatus": "not-validated"
   },
   "workbench": {
@@ -1530,7 +1530,7 @@
       "entry": "window.ui"
     },
     "suite": "circle",
-    "status": "preset",
+    "status": "planned",
     "visualStatus": "not-validated"
   }
 }

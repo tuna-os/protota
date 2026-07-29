@@ -11,6 +11,45 @@ const viewport = {
   height: Number(process.env.BROADWAY_VIEWPORT_HEIGHT || 666),
 };
 
+type Rgba = { r: number; g: number; b: number; a: number };
+
+function cornerBackground(image: PNG): Rgba {
+  const offset = (image.height - 1) * image.width * 4 + (image.width - 1) * 4;
+  return { r: image.data[offset], g: image.data[offset + 1], b: image.data[offset + 2], a: image.data[offset + 3] };
+}
+
+function isForeground(image: PNG, offset: number, background: Rgba): boolean {
+  // Screenshots have opaque pixels, so alpha is not useful. A tolerance around
+  // the lower-right window background isolates controls, text, separators and
+  // content without rewarding two otherwise-empty windows for matching.
+  return Math.max(
+    Math.abs(image.data[offset] - background.r),
+    Math.abs(image.data[offset + 1] - background.g),
+    Math.abs(image.data[offset + 2] - background.b),
+  ) > 12;
+}
+
+function foregroundOverlap(reference: PNG, actual: PNG) {
+  const referenceBackground = cornerBackground(reference);
+  const actualBackground = cornerBackground(actual);
+  let referencePixels = 0;
+  let actualPixels = 0;
+  let intersection = 0;
+  for (let offset = 0; offset < reference.data.length; offset += 4) {
+    const referenceForeground = isForeground(reference, offset, referenceBackground);
+    const actualForeground = isForeground(actual, offset, actualBackground);
+    if (referenceForeground) referencePixels++;
+    if (actualForeground) actualPixels++;
+    if (referenceForeground && actualForeground) intersection++;
+  }
+  const union = referencePixels + actualPixels - intersection;
+  return {
+    referenceForegroundPixels: referencePixels,
+    prototaForegroundPixels: actualPixels,
+    foregroundIoU: union === 0 ? 1 : intersection / union,
+  };
+}
+
 test.describe('Broadway reference captures', () => {
   test.skip(!broadwayUrl, 'Set BROADWAY_URL to run the native GTK reference capture.');
 
@@ -77,10 +116,11 @@ test.describe('Broadway reference captures', () => {
     );
     const totalPixels = actual.width * actual.height;
     const differenceRatio = differentPixels / totalPixels;
+    const foreground = foregroundOverlap(reference, actual);
     await attachArtifact(`diff-${appId}.png`, PNG.sync.write(diff), 'image/png');
     await attachArtifact(
       `comparison-${appId}.json`,
-      Buffer.from(JSON.stringify({ appId, differentPixels, totalPixels, differenceRatio }, null, 2)),
+      Buffer.from(JSON.stringify({ appId, differentPixels, totalPixels, differenceRatio, ...foreground }, null, 2)),
       'application/json',
     );
 

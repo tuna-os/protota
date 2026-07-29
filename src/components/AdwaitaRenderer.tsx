@@ -31,6 +31,7 @@ const TAG_MAP: Record<string, string | null> = {
   'overlay-split':       'adw-overlay-split-view',
   clamp:                 'adw-clamp',
   bin:                   null,
+  'custom-widget':       null,
   'action-row':          'adw-action-row',
   'switch-row':          'adw-switch-row',
   'combo-row':           'adw-combo-row',
@@ -66,7 +67,7 @@ const TAG_MAP: Record<string, string | null> = {
 
 /** Div-only types: render a semantic container with Adwaita-styled layout. */
 const DIV_TYPES = new Set([
-  'bin', 'box', 'grid', 'center-box', 'search-entry', 'switch-widget',
+  'bin', 'custom-widget', 'box', 'grid', 'center-box', 'search-entry', 'switch-widget',
   'check-button', 'list-box', 'label', 'inscription',
 ]);
 
@@ -172,6 +173,8 @@ function nodeLayout(node: AdwNode): React.CSSProperties | undefined {
   const placement: React.CSSProperties = {};
   if (node.minWidth !== undefined) placement.minWidth = node.minWidth;
   if (node.minHeight !== undefined) placement.minHeight = node.minHeight;
+  if (node.widthRequest !== undefined) placement.width = node.widthRequest;
+  if (node.heightRequest !== undefined) placement.height = node.heightRequest;
   if (node.column !== undefined) placement.gridColumn = `${node.column + 1} / span ${node.columnSpan ?? 1}`;
   if (node.row !== undefined) placement.gridRow = `${node.row + 1} / span ${node.rowSpan ?? 1}`;
   if (node.type === 'box') {
@@ -261,7 +264,7 @@ export const AdwaitaRenderer: React.FC<Props> = ({
         iconPrefix,
         ...(children ?? []),
         // For label/inscription — render text content
-        ...(node.type === 'label' || node.type === 'inscription'
+        ...(node.type === 'label' || node.type === 'inscription' || node.type === 'custom-widget'
           ? [node.title || '']
           : []),
       )}

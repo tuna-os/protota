@@ -58,6 +58,11 @@ export const WIDGET_SCHEMAS: Record<AdwNodeType, PropSchema[]> = {
     { key: 'title', label: 'Content', type: 'string', defaultValue: '' },
   ],
   bin: [],
+  'custom-widget': [
+    { key: 'title', label: 'Source widget class', type: 'string', defaultValue: 'CustomWidget' },
+    { key: 'widthRequest', label: 'Width request', type: 'number', defaultValue: 0 },
+    { key: 'heightRequest', label: 'Height request', type: 'number', defaultValue: 0 },
+  ],
   box: [
     {
       key: 'orientation',

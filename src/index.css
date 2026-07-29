@@ -356,6 +356,25 @@ body,
   display: block;
 }
 
+/* A source-declared widget implemented in C/GJS/Vala. This is a visible
+   layout boundary, never a fake approximation of its runtime contents. */
+.protota-div-custom-widget {
+  display: flex;
+  box-sizing: border-box;
+  align-items: center;
+  justify-content: center;
+  min-width: 48px;
+  min-height: 48px;
+  padding: var(--spacing-m, 12px);
+  border: 1px dashed var(--accent-color, #3584e4);
+  border-radius: var(--card-radius, 12px);
+  background: repeating-linear-gradient(-45deg, color-mix(in srgb, var(--accent-bg-color, #3584e4) 8%, transparent) 0 8px, transparent 8px 16px);
+  color: var(--accent-color, #3584e4);
+  font-family: var(--monospace-font-family, monospace);
+  font-size: var(--font-size-small, 11px);
+  text-align: center;
+}
+
 .protota-div-box {
   display: flex;
   flex-direction: column;

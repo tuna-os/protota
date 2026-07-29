@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
-import { blueprintTemplateReferences, blueprintToDocument, blueprintToNode, mockupToBlueprint } from '../utils/blueprint';
+import { blueprintBundleToDocument, blueprintTemplateReferences, blueprintToDocument, blueprintToNode, mockupToBlueprint } from '../utils/blueprint';
 import { importDocumentFile } from '../utils/exportImport';
 import type { MockupDocument } from '../types/mockup';
 
@@ -113,5 +113,25 @@ describe('Blueprint import', () => {
     const source = 'Adw.Bin { $HistoryView history {} }';
     expect(blueprintTemplateReferences(source)).toEqual(['HistoryView']);
     expect(() => blueprintToNode(source)).toThrow('Unresolved Blueprint template reference: $HistoryView');
+  });
+
+  it('resolves linked Blueprint templates from an official-style source bundle', () => {
+    const imported = blueprintBundleToDocument([
+      { path: 'window.blp', content: 'Adw.ApplicationWindow { $Panel panel {} }' },
+      { path: 'panel.blp', content: 'template $Panel: Gtk.Box { Gtk.Button open { label: "Open"; } }' },
+    ], 'window.blp', 'Source bundle');
+
+    expect(imported.screens[0].rootNode.children?.[0]).toMatchObject({ id: 'panel', type: 'box' });
+    expect(imported.screens[0].rootNode.children?.[0].children?.[0]).toMatchObject({ id: 'open', type: 'button', title: 'Open' });
+  });
+
+  it('keeps an unresolved code-only widget as an explicit layout boundary', () => {
+    const imported = blueprintBundleToDocument([
+      { path: 'window.blp', content: 'Adw.ApplicationWindow { $CodeOnlyWidget body { height-request: 120; } }' },
+    ], 'window.blp');
+
+    expect(imported.screens[0].rootNode.children?.[0]).toMatchObject({
+      id: 'body', type: 'custom-widget', title: 'CodeOnlyWidget', heightRequest: 120,
+    });
   });
 });

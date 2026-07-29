@@ -27,6 +27,7 @@ export type AdwNodeType =
   // Layout
   | 'clamp'            // AdwClamp — max-width container
   | 'bin'              // AdwBin — single-child container
+  | 'custom-widget'    // source-declared custom GTK/GObject widget boundary
   | 'box'              // GtkBox — directional container
   | 'grid'             // GtkGrid — rows/columns (Calculator and keypads)
   | 'center-box'       // GtkCenterBox — start/center/end layout
@@ -118,6 +119,8 @@ export interface AdwNode {
   rowSpan?: number;
   minWidth?: number;
   minHeight?: number;
+  widthRequest?: number;
+  heightRequest?: number;
   // Breakpoint
   breakpointCondition?: string;
   // View stack pages
@@ -206,6 +209,7 @@ export const LEGAL_CHILDREN: Record<AdwNodeType, AdwNodeType[]> = {
     'box', 'grid', 'clamp', 'label', 'status-page', 'list-box', 'flow-box',
     'toast-overlay', 'view-stack', 'tab-view', 'button',
   ],
+  'custom-widget': [],
   box: [
     'label', 'button', 'entry', 'search-entry', 'inscription',
     'spinner', 'toggle', 'switch-widget', 'check-button',

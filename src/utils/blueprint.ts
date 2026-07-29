@@ -17,6 +17,7 @@ const CLASS_TO_WIDGET_MAP: Record<string, AdwNodeType> = {
   'Adw.OverlaySplitView': 'overlay-split',
   'Adw.Clamp': 'clamp',
   'Adw.Bin': 'bin',
+  'Protota.CustomWidget': 'custom-widget',
   'Adw.ActionRow': 'action-row',
   'Adw.SwitchRow': 'switch-row',
   'Adw.ComboRow': 'combo-row',
@@ -92,6 +93,7 @@ const WIDGET_CLASS_MAP: Record<string, string> = {
   'overlay-split': 'Adw.OverlaySplitView',
   clamp: 'Adw.Clamp',
   bin: 'Adw.Bin',
+  'custom-widget': 'Protota.CustomWidget',
   'action-row': 'Adw.ActionRow',
   'switch-row': 'Adw.SwitchRow',
   'combo-row': 'Adw.ComboRow',
@@ -377,4 +379,69 @@ export function blueprintToDocument(code: string, title = 'Imported GNOME App'):
     rootNode: root,
   }));
   return { id: 'imported-document', title, colorScheme: 'auto', edges: [], screens };
+}
+
+export interface BlueprintSourceFile {
+  path: string;
+  content: string;
+}
+
+interface BlueprintTemplate {
+  className: string;
+  body: string;
+}
+
+function closingBrace(source: string, openingIndex: number): number {
+  let depth = 0;
+  let quoted = false;
+  let escaped = false;
+  for (let index = openingIndex; index < source.length; index++) {
+    const character = source[index];
+    if (quoted) {
+      if (!escaped && character === '"') quoted = false;
+      escaped = !escaped && character === '\\';
+      continue;
+    }
+    if (character === '"') { quoted = true; continue; }
+    if (character === '{') depth++;
+    if (character === '}' && --depth === 0) return index;
+  }
+  throw new Error('Unclosed Blueprint template body');
+}
+
+function collectTemplates(files: BlueprintSourceFile[]): Map<string, BlueprintTemplate> {
+  const templates = new Map<string, BlueprintTemplate>();
+  const declaration = /template\s+\$([A-Za-z_][A-Za-z0-9_-]*)\s*:\s*([A-Za-z_.][A-Za-z0-9_.-]*)\s*\{/g;
+  for (const file of files) {
+    for (const match of file.content.matchAll(declaration)) {
+      const openingIndex = (match.index || 0) + match[0].lastIndexOf('{');
+      const end = closingBrace(file.content, openingIndex);
+      templates.set(match[1], { className: match[2], body: file.content.slice(openingIndex + 1, end) });
+    }
+  }
+  return templates;
+}
+
+function expandBundleTemplates(source: string, templates: Map<string, BlueprintTemplate>, stack: string[] = []): string {
+  const reference = /\$([A-Za-z_][A-Za-z0-9_-]*)\s+([A-Za-z_][A-Za-z0-9_-]*)\s*\{/g;
+  return source.replace(reference, (_match, name: string, id: string) => {
+    const template = templates.get(name);
+    if (!template) {
+      return `Protota.CustomWidget ${id} { title: "${name}";`;
+    }
+    if (stack.includes(name)) throw new Error(`Recursive Blueprint template reference: $${[...stack, name].join(' → $')}`);
+    return `${template.className} ${id} {${expandBundleTemplates(template.body, templates, [...stack, name])}`;
+  });
+}
+
+/**
+ * Import an official app's declarative UI bundle. The entry source is expanded
+ * only through templates declared in the supplied files; code-only widgets are
+ * intentionally errors rather than invented visual stand-ins.
+ */
+export function blueprintBundleToDocument(files: BlueprintSourceFile[], entryPath: string, title?: string): MockupDocument {
+  const entry = files.find(file => file.path === entryPath);
+  if (!entry) throw new Error(`Blueprint entry file not found in source bundle: ${entryPath}`);
+  const expanded = expandBundleTemplates(entry.content, collectTemplates(files));
+  return blueprintToDocument(expanded, title || entry.path.replace(/^.*\//, '').replace(/\.blp$/i, ''));
 }

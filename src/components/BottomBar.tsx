@@ -1,8 +1,19 @@
-import React from "react";
-import { useMockupStore } from "../store/mockupStore";
+import React, { useRef, useEffect } from "react";
 import { computerSymbolic, phoneSymbolic } from "@gjsify/adwaita-icons/devices";
-import { zoomFitBestSymbolic, zoomInSymbolic, zoomOriginalSymbolic, zoomOutSymbolic } from "@gjsify/adwaita-icons/actions";
+import {
+  zoomFitBestSymbolic,
+  zoomInSymbolic,
+  zoomOriginalSymbolic,
+  zoomOutSymbolic,
+  goPreviousSymbolic,
+  goNextSymbolic,
+} from "@gjsify/adwaita-icons/actions";
 import { toDataUri } from "@gjsify/adwaita-icons/utils";
+
+interface ScreenOption {
+  id: string;
+  title: string;
+}
 
 interface BottomBarProps {
   zoom: number;
@@ -14,6 +25,13 @@ interface BottomBarProps {
   onToggleDesktop: () => void;
   phoshScreenId: string | null;
   onTogglePhone: () => void;
+  screens: ScreenOption[];
+  focusedScreenIdx: number;
+  canFocusPrev: boolean;
+  canFocusNext: boolean;
+  onFocusPrev: () => void;
+  onFocusNext: () => void;
+  onSelectScreen: (idx: number) => void;
 }
 
 export const BottomBar: React.FC<BottomBarProps> = ({
@@ -26,9 +44,99 @@ export const BottomBar: React.FC<BottomBarProps> = ({
   onToggleDesktop,
   phoshScreenId,
   onTogglePhone,
+  screens,
+  focusedScreenIdx,
+  canFocusPrev,
+  canFocusNext,
+  onFocusPrev,
+  onFocusNext,
+  onSelectScreen,
 }) => {
+  const dropDownRef = useRef<HTMLElement & {
+    options: { value: string; label: string }[];
+    selected: number;
+  }>(null);
+  const showFocusControls = screens.length > 1;
+
+  // Set options on the adw-drop-down web component
+  useEffect(() => {
+    const el = dropDownRef.current;
+    if (!el) return;
+    el.options = screens.map((s) => ({ value: s.id, label: s.title }));
+  }, [screens]);
+
+  // Sync selected index from parent state → web component, then override
+  // the button label to show just the 1-based number instead of the title.
+  useEffect(() => {
+    const el = dropDownRef.current;
+    if (!el) return;
+    el.selected = focusedScreenIdx;
+    const labelEl = el.querySelector('.adw-drop-down-label');
+    if (labelEl) {
+      labelEl.textContent = String(focusedScreenIdx + 1);
+    }
+  }, [focusedScreenIdx]);
+
+  // Listen for user-initiated selection changes (change fires only on user interaction)
+  useEffect(() => {
+    const el = dropDownRef.current;
+    if (!el) return;
+    const onChange = (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      if (detail && typeof detail.index === "number") {
+        onSelectScreen(detail.index);
+      }
+    };
+    el.addEventListener("change", onChange);
+    return () => el.removeEventListener("change", onChange);
+  }, [onSelectScreen]);
+
   return (
     <div className="protota-zoom-bar">
+      {showFocusControls && (
+        <>
+          <button
+            className={`adw-button icon-only flat${canFocusPrev ? "" : " disabled"}`}
+            onClick={onFocusPrev}
+            disabled={!canFocusPrev}
+            title="Previous Screen"
+          >
+            <span
+              className="adw-toolbar-icon"
+              style={{
+                maskImage: toDataUri(goPreviousSymbolic),
+                WebkitMaskImage: toDataUri(goPreviousSymbolic),
+              }}
+            />
+          </button>
+          <adw-drop-down
+            ref={dropDownRef}
+            className="protota-screen-dropdown"
+          />
+          <button
+            className={`adw-button icon-only flat${canFocusNext ? "" : " disabled"}`}
+            onClick={onFocusNext}
+            disabled={!canFocusNext}
+            title="Next Screen"
+          >
+            <span
+              className="adw-toolbar-icon"
+              style={{
+                maskImage: toDataUri(goNextSymbolic),
+                WebkitMaskImage: toDataUri(goNextSymbolic),
+              }}
+            />
+          </button>
+          <span
+            style={{
+              width: "1px",
+              height: "16px",
+              background: "var(--separator-color, rgba(0,0,6,0.12))",
+              margin: "0 4px",
+            }}
+          />
+        </>
+      )}
       <button
         className="adw-button icon-only flat"
         onClick={onZoomReset}

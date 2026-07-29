@@ -253,6 +253,38 @@ body,
   opacity: 0.85;
 }
 
+/* ---- Screen focus dropdown (opens upward in bottom bar) ---- */
+.protota-zoom-bar .protota-screen-dropdown .adw-drop-down-button {
+  min-width: 32px;
+  justify-content: center !important;
+  padding: var(--spacing-xs, 6px) var(--spacing-s, 9px) !important;
+}
+.protota-zoom-bar .protota-screen-dropdown .adw-drop-down-popover {
+  top: auto !important;
+  bottom: calc(100% + 6px) !important;
+}
+/* Hide the check mark; use bold font for the selected item instead */
+.protota-zoom-bar .protota-screen-dropdown .adw-drop-down-item-check {
+  display: none;
+}
+.protota-zoom-bar .protota-screen-dropdown .adw-drop-down-item.selected .adw-drop-down-item-label {
+  font-weight: 700;
+}
+/* Hide the chevron-down arrow on the trigger button — show only the number */
+.protota-zoom-bar .protota-screen-dropdown .adw-drop-down-arrow {
+  display: none;
+}
+/* Center the number in the trigger button */
+.protota-zoom-bar .protota-screen-dropdown .adw-drop-down-label {
+  flex: 0 0 auto !important;
+  text-align: center !important;
+}
+.protota-zoom-bar .adw-button.disabled {
+  opacity: var(--dim-opacity, 0.55);
+  cursor: default;
+  pointer-events: none;
+}
+
 /* ---- Zoom controls ---- */
 .protota-zoom-bar {
   position: absolute;

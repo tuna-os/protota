@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback, useEffect } from "react";
+import React, { useState, useRef, useCallback, useEffect, useMemo } from "react";
 import { useMockupStore } from "../store/mockupStore";
 // import { BreakpointBar } from "./BreakpointBar";
 import { AdwaitaRenderer } from "./AdwaitaRenderer";
@@ -228,9 +228,82 @@ export const ViewportCanvas: React.FC = () => {
 
   const [phoshScreenId, setPhoshScreenId] = useState<string | null>(null);
   const [desktopScreenId, setDesktopScreenId] = useState<string | null>(null);
+  const [focusedScreenIdx, setFocusedScreenIdx] = useState(0);
+
+  // Refs so callbacks read latest values without re-creating
+  const focusedScreenIdxRef = useRef(focusedScreenIdx);
+  focusedScreenIdxRef.current = focusedScreenIdx;
+  const desktopScreenIdRef = useRef(desktopScreenId);
+  desktopScreenIdRef.current = desktopScreenId;
+  const phoshScreenIdRef = useRef(phoshScreenId);
+  phoshScreenIdRef.current = phoshScreenId;
+
+  // Clamp focusedScreenIdx when screens shrink (e.g. deletion)
+  useEffect(() => {
+    if (doc.screens.length > 0 && focusedScreenIdx >= doc.screens.length) {
+      setFocusedScreenIdx(doc.screens.length - 1);
+    }
+  }, [doc.screens.length, focusedScreenIdx]);
 
   const activePhoshScreen = doc.screens.find((s) => s.id === phoshScreenId);
   const activeDesktopScreen = doc.screens.find((s) => s.id === desktopScreenId);
+
+  // Memoized screen list for BottomBar — avoids re-setting adw-drop-down options on every render.
+  // Labels are prefixed with the 1-based index (e.g. "2: New Screen"); the closed button shows
+  // just the number, overridden in BottomBar after the web component updates its label.
+  const screensForBottomBar = useMemo(
+    () => doc.screens.map((s, i) => ({ id: s.id, title: `${i + 1}: ${s.title}` })),
+    [doc.screens],
+  );
+
+  // Pan the canvas to top-center a specific screen (used in normal canvas mode)
+  const panToScreen = useCallback((idx: number) => {
+    if (!canvasRef.current || doc.screens.length === 0) return;
+    const clampedIdx = Math.max(0, Math.min(idx, doc.screens.length - 1));
+    const screen = doc.screens[clampedIdx];
+    if (!screen) return;
+
+    const canvasW = canvasRef.current.clientWidth;
+    const padding = 60;
+    const gap = 40;
+    const currentZoom = zoomRef.current;
+
+    // Compute world-x of the screen's left edge
+    let screenX = padding;
+    for (let i = 0; i < clampedIdx; i++) {
+      screenX += (doc.screens[i].width || 800) + gap;
+    }
+
+    const screenW = screen.width || 800;
+
+    setPan({
+      x: (canvasW - screenW * currentZoom) / 2 - screenX * currentZoom,
+      y: padding,
+    });
+  }, [doc.screens]);
+
+  // Unified focus handler — works in canvas, desktop, and phosh modes (no wrap)
+  const handleFocusScreen = useCallback((idx: number) => {
+    if (doc.screens.length === 0) return;
+    if (idx < 0 || idx >= doc.screens.length) return;
+    setFocusedScreenIdx(idx);
+
+    if (desktopScreenIdRef.current !== null) {
+      setDesktopScreenId(doc.screens[idx].id);
+    } else if (phoshScreenIdRef.current !== null) {
+      setPhoshScreenId(doc.screens[idx].id);
+    } else {
+      panToScreen(idx);
+    }
+  }, [doc.screens, panToScreen]);
+
+  const handleFocusPrev = useCallback(() => {
+    handleFocusScreen(focusedScreenIdxRef.current - 1);
+  }, [handleFocusScreen]);
+
+  const handleFocusNext = useCallback(() => {
+    handleFocusScreen(focusedScreenIdxRef.current + 1);
+  }, [handleFocusScreen]);
 
   return (
     <div
@@ -414,14 +487,21 @@ export const ViewportCanvas: React.FC = () => {
         onToggleDesktop={() => setDesktopScreenId((prev) => {
           if (prev) return null;
           setPhoshScreenId(null);
-          return doc.screens[0]?.id || null;
+          return doc.screens[focusedScreenIdxRef.current]?.id || null;
         })}
         phoshScreenId={phoshScreenId}
         onTogglePhone={() => setPhoshScreenId((prev) => {
           if (prev) return null;
           setDesktopScreenId(null);
-          return doc.screens[0]?.id || null;
+          return doc.screens[focusedScreenIdxRef.current]?.id || null;
         })}
+        screens={screensForBottomBar}
+        focusedScreenIdx={focusedScreenIdx}
+        canFocusPrev={focusedScreenIdx > 0}
+        canFocusNext={focusedScreenIdx < doc.screens.length - 1}
+        onFocusPrev={handleFocusPrev}
+        onFocusNext={handleFocusNext}
+        onSelectScreen={handleFocusScreen}
       />
 
       {/* Transformable Canvas Surface */}

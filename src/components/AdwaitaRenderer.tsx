@@ -201,7 +201,14 @@ export const AdwaitaRenderer: React.FC<Props> = ({
         <div className="protota-type-badge">{node.type}</div>
       )}
 
-      {React.createElement(tag, { ref: elRef, ...attrs, 'data-protota-type': node.type, style: nodeLayout(node), className: divClass || undefined },
+      {React.createElement(tag, {
+        ref: elRef,
+        ...attrs,
+        'data-protota-type': node.type,
+        ...(node.type === 'window' && screenWidth ? { 'data-protota-render-surface': 'true' } : {}),
+        style: nodeLayout(node),
+        className: divClass || undefined,
+      },
         ...(children ?? []),
         // For label/inscription — render text content
         ...(node.type === 'label' || node.type === 'inscription'

@@ -1,8 +1,8 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useMockupStore } from "../store/mockupStore";
 import { exportDocumentFile, importDocumentFile } from "../utils/exportImport";
-import html2canvas from "html2canvas";
 import { mockupToBlueprint } from "../utils/blueprint";
+import { downloadPng, renderScreenToPng } from "../utils/pngExport";
 
 interface MenuItem {
   label: string;
@@ -43,18 +43,7 @@ export const TopBar: React.FC = () => {
   };
 
   const handleExportPNG = async () => {
-    const el = document.querySelector("adw-window");
-    if (!el) return;
-    const canvas = await html2canvas(el as HTMLElement, { scale: 2, backgroundColor: null });
-    canvas.toBlob((blob) => {
-      if (!blob) return;
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "protota-screen.png";
-      a.click();
-      URL.revokeObjectURL(url);
-    });
+    downloadPng(await renderScreenToPng());
   };
 
   const handleExportBlueprint = () => {

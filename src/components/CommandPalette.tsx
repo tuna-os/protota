@@ -56,7 +56,8 @@ export const CommandPalette: React.FC<Props> = ({ isOpen, onClose }) => {
   useEffect(() => {
     if (isOpen) {
       setSearch("");
-      setTimeout(() => inputRef.current?.focus(), 50);
+      const timer = setTimeout(() => inputRef.current?.focus(), 50);
+      return () => clearTimeout(timer);
     }
   }, [isOpen]);
 

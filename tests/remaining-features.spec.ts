@@ -7,7 +7,7 @@ test.describe('Remaining features (#9, #16, #18-#24)', () => {
   });
 
   test('#9 Blueprint export button exists', async ({ page }) => {
-    await expect(page.getByRole('button', { name: /blp/i })).toBeVisible();
+    await expect(page.getByRole('button', { name: /code export/i })).toBeVisible();
   });
 
   test('#16 Screen width defaults exist in store', async ({ page }) => {
@@ -53,7 +53,7 @@ test.describe('Remaining features (#9, #16, #18-#24)', () => {
   });
 
   test('#24 Export + PNG buttons visible', async ({ page }) => {
-    await expect(page.getByRole('button', { name: /export/i })).toBeVisible();
+    await expect(page.getByRole('button', { name: /save json/i })).toBeVisible();
     await expect(page.getByRole('button', { name: /png/i })).toBeVisible();
   });
 });

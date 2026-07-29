@@ -146,7 +146,9 @@ describe('Blueprint import', () => {
     expect(imported.screens[0].rootNode).toMatchObject({ type: 'window' });
     const nodes = (node: MockupDocument['screens'][number]['rootNode']): typeof node[] => [node, ...(node.children || []).flatMap(nodes)];
     expect(nodes(imported.screens[0].rootNode)).toEqual(expect.arrayContaining([
-      expect.objectContaining({ id: '_buttons', type: 'custom-widget', title: 'MathButtons' }),
+      // GtkSourceView is defined in Calculator's code, rather than this
+      // Blueprint bundle; it must remain measurable, not become a fake box.
+      expect.objectContaining({ id: 'source_view', type: 'custom-widget', title: 'GtkSourceView' }),
     ]));
   });
 });

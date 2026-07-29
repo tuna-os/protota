@@ -45,8 +45,8 @@ export const App: React.FC = () => {
     addChildNode,
   } = useMockupStore();
 
-  const [leftOpen, setLeftOpen] = useState(true);
-  const [rightOpen, setRightOpen] = useState(true);
+  const [leftOpen, setLeftOpen] = useState(() => typeof window !== 'undefined' ? window.innerWidth >= 768 : true);
+  const [rightOpen, setRightOpen] = useState(() => typeof window !== 'undefined' ? window.innerWidth >= 768 : true);
   const [showShortcuts, setShowShortcuts] = useState(false);
   const [showPresets, setShowPresets] = useState(false);
   const [showCommandPalette, setShowCommandPalette] = useState(false);

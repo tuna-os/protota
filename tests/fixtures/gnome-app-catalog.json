@@ -6,9 +6,46 @@
     "presetId": "amberol",
     "viewport": { "width": 480, "height": 640 },
     "source": "https://gitlab.gnome.org/World/amberol",
+    "sourceImport": {
+      "repository": "https://gitlab.gnome.org/World/amberol.git",
+      "uiPath": "src/gtk",
+      "entry": "window.blp"
+    },
     "suite": "circle",
     "status": "preset",
     "visualStatus": "needs-tuning"
+  },
+  "apostrophe": {
+    "name": "Apostrophe",
+    "aptPackage": "apostrophe",
+    "command": "apostrophe",
+    "presetId": "apostrophe",
+    "viewport": { "width": 1024, "height": 720 },
+    "source": "https://gitlab.gnome.org/World/apostrophe",
+    "sourceImport": {
+      "repository": "https://gitlab.gnome.org/World/apostrophe.git",
+      "uiPath": "data/ui",
+      "entry": "Window.ui"
+    },
+    "suite": "circle",
+    "status": "preset",
+    "visualStatus": "not-validated"
+  },
+  "authenticator": {
+    "name": "Authenticator",
+    "aptPackage": "authenticator",
+    "command": "authenticator",
+    "presetId": "authenticator",
+    "viewport": { "width": 900, "height": 650 },
+    "source": "https://gitlab.gnome.org/World/Authenticator",
+    "sourceImport": {
+      "repository": "https://gitlab.gnome.org/World/Authenticator.git",
+      "uiPath": "data/resources/ui",
+      "entry": "window.ui"
+    },
+    "suite": "circle",
+    "status": "preset",
+    "visualStatus": "not-validated"
   },
   "calculator": {
     "name": "GNOME Calculator",
@@ -26,6 +63,22 @@
     "status": "preset",
     "visualStatus": "not-validated"
   },
+  "decoder": {
+    "name": "Decoder",
+    "aptPackage": "decoder",
+    "command": "decoder",
+    "presetId": "decoder",
+    "viewport": { "width": 900, "height": 650 },
+    "source": "https://gitlab.gnome.org/World/Decoder",
+    "sourceImport": {
+      "repository": "https://gitlab.gnome.org/World/Decoder.git",
+      "uiPath": "data/resources/ui",
+      "entry": "window.ui"
+    },
+    "suite": "circle",
+    "status": "preset",
+    "visualStatus": "not-validated"
+  },
   "calendar": {
     "name": "GNOME Calendar",
     "aptPackage": "gnome-calendar",
@@ -33,6 +86,11 @@
     "presetId": "calendar",
     "viewport": { "width": 1419, "height": 923 },
     "source": "https://gitlab.gnome.org/GNOME/gnome-calendar",
+    "sourceImport": {
+      "repository": "https://gitlab.gnome.org/GNOME/gnome-calendar.git",
+      "uiPath": "src/gui",
+      "entry": "gcal-window.blp"
+    },
     "suite": "core",
     "status": "preset",
     "visualStatus": "not-validated"
@@ -44,6 +102,11 @@
     "presetId": "clocks",
     "viewport": { "width": 901, "height": 738 },
     "source": "https://gitlab.gnome.org/GNOME/gnome-clocks",
+    "sourceImport": {
+      "repository": "https://gitlab.gnome.org/GNOME/gnome-clocks.git",
+      "uiPath": "data/ui",
+      "entry": "window.ui"
+    },
     "suite": "core",
     "status": "preset",
     "visualStatus": "not-validated"
@@ -55,6 +118,11 @@
     "presetId": "disks",
     "viewport": { "width": 1156, "height": 823 },
     "source": "https://gitlab.gnome.org/GNOME/gnome-disk-utility",
+    "sourceImport": {
+      "repository": "https://gitlab.gnome.org/GNOME/gnome-disk-utility.git",
+      "uiPath": "src/resources/ui",
+      "entry": "gdu-window.blp"
+    },
     "suite": "core",
     "status": "preset",
     "visualStatus": "not-validated"
@@ -66,6 +134,11 @@
     "presetId": "files",
     "viewport": { "width": 1122, "height": 822 },
     "source": "https://gitlab.gnome.org/GNOME/nautilus",
+    "sourceImport": {
+      "repository": "https://gitlab.gnome.org/GNOME/nautilus.git",
+      "uiPath": "src/resources/ui",
+      "entry": "nautilus-window.blp"
+    },
     "suite": "core",
     "status": "preset",
     "visualStatus": "not-validated"
@@ -77,6 +150,11 @@
     "presetId": "settings",
     "viewport": { "width": 1047, "height": 738 },
     "source": "https://gitlab.gnome.org/GNOME/gnome-control-center",
+    "sourceImport": {
+      "repository": "https://gitlab.gnome.org/GNOME/gnome-control-center.git",
+      "uiPath": "shell",
+      "entry": "cc-window.blp"
+    },
     "suite": "core",
     "status": "preset",
     "visualStatus": "not-validated"
@@ -88,6 +166,11 @@
     "presetId": "software",
     "viewport": { "width": 1322, "height": 797 },
     "source": "https://gitlab.gnome.org/GNOME/gnome-software",
+    "sourceImport": {
+      "repository": "https://gitlab.gnome.org/GNOME/gnome-software.git",
+      "uiPath": "src",
+      "entry": "gs-shell.ui"
+    },
     "suite": "core",
     "status": "preset",
     "visualStatus": "not-validated"
@@ -99,6 +182,11 @@
     "presetId": "text-editor",
     "viewport": { "width": 1074, "height": 824 },
     "source": "https://gitlab.gnome.org/GNOME/gnome-text-editor",
+    "sourceImport": {
+      "repository": "https://gitlab.gnome.org/GNOME/gnome-text-editor.git",
+      "uiPath": "src",
+      "entry": "editor-window.ui"
+    },
     "suite": "core",
     "status": "preset",
     "visualStatus": "not-validated"
@@ -110,6 +198,11 @@
     "presetId": "weather",
     "viewport": { "width": 881, "height": 667 },
     "source": "https://gitlab.gnome.org/GNOME/gnome-weather",
+    "sourceImport": {
+      "repository": "https://gitlab.gnome.org/GNOME/gnome-weather.git",
+      "uiPath": "data",
+      "entry": "window.ui"
+    },
     "suite": "core",
     "status": "preset",
     "visualStatus": "not-validated"

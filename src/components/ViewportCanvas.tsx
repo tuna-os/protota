@@ -273,9 +273,17 @@ export const ViewportCanvas: React.FC = () => {
         onZoomOut={() => setZoom((z) => Math.max(z - 0.1, 0.3))}
         onZoomReset={() => { setZoom(1); setPan({ x: 0, y: 0 }); }}
         desktopScreenId={desktopScreenId}
-        onToggleDesktop={() => setDesktopScreenId((prev) => prev ? null : (doc.screens[0]?.id || null))}
+        onToggleDesktop={() => setDesktopScreenId((prev) => {
+          if (prev) return null;
+          setPhoshScreenId(null);
+          return doc.screens[0]?.id || null;
+        })}
         phoshScreenId={phoshScreenId}
-        onTogglePhone={() => setPhoshScreenId((prev) => prev ? null : (doc.screens[0]?.id || null))}
+        onTogglePhone={() => setPhoshScreenId((prev) => {
+          if (prev) return null;
+          setDesktopScreenId(null);
+          return doc.screens[0]?.id || null;
+        })}
       />
 
       {/* Transformable Canvas Surface */}

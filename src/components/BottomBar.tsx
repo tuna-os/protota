@@ -52,11 +52,11 @@ export const BottomBar: React.FC<BottomBarProps> = ({
       >
         Reset
       </button>
+      <span style={{ width: '1px', height: '16px', background: 'var(--separator-color, rgba(0,0,6,0.12))', margin: '0 4px' }} />
       <button
-        className={`adw-button${desktopScreenId ? " active" : ""}`}
+        className={`adw-button flat${desktopScreenId ? " active" : ""}`}
         onClick={onToggleDesktop}
         title="Toggle Desktop Preview"
-        style={{ marginLeft: "8px" }}
       >
         <span
           style={{
@@ -73,7 +73,7 @@ export const BottomBar: React.FC<BottomBarProps> = ({
         Desktop
       </button>
       <button
-        className={`adw-button${phoshScreenId ? " active" : ""}`}
+        className={`adw-button flat${phoshScreenId ? " active" : ""}`}
         onClick={onTogglePhone}
         title="Toggle Phone Preview"
       >

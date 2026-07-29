@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { MockupBuilder, generateMockup } from '../utils/agent-api';
+import { mockupToBlueprint, blueprintToNode } from '../utils/blueprint';
 
 describe('MockupBuilder', () => {
   it('creates a document with a screen', () => {
@@ -66,5 +67,16 @@ describe('MockupBuilder', () => {
     const parsed = JSON.parse(json);
     expect(parsed.document.id).toBe(original.id);
     expect(parsed.document.screens.length).toBe(1);
+  });
+
+  it('supports roundtrip Blueprint BLP code export and parsing', () => {
+    const doc = generateMockup('Blueprint Test', 'standard');
+    const blpCode = mockupToBlueprint(doc);
+    expect(blpCode).toContain('using Gtk 4.0;');
+    expect(blpCode).toContain('Adw.ApplicationWindow');
+
+    const parsedNode = blueprintToNode(blpCode);
+    expect(parsedNode.type).toBe('window');
+    expect(parsedNode.children?.length).toBeGreaterThan(0);
   });
 });

@@ -10,6 +10,7 @@ interface CatalogEntry {
   source: string;
   suite: 'core' | 'circle';
   status: 'preset' | 'planned';
+  visualStatus: 'not-validated' | 'needs-tuning' | 'passed';
 }
 
 const catalog = JSON.parse(
@@ -39,6 +40,7 @@ describe('GNOME app conformance catalogue', () => {
       expect(app.source, id).toMatch(/^https:\/\//);
       expect(app.viewport.width, id).toBeGreaterThan(0);
       expect(app.viewport.height, id).toBeGreaterThan(0);
+      expect(app.visualStatus, id).toMatch(/^(not-validated|needs-tuning|passed)$/);
     }
   });
 });

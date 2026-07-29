@@ -38,6 +38,10 @@ the conformance test rejects either an untracked preset or an incomplete
 native-reference target. Core and Circle use the same catalogue fields and
 renderer path.
 
+See [GNOME app visual conformance](docs/gnome-app-conformance.md) for the
+current validation state. "Passed" always means the paired screenshots and
+their diff were visually reviewed, not merely that a capture command exited.
+
 ## Pull requests
 
 Required checks should be allowed to complete normally. If the repository has

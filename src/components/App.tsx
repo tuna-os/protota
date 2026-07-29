@@ -6,11 +6,11 @@ import { InspectorPanel } from './InspectorPanel';
 import { AuditPanel } from './AuditPanel';
 import { ContextMenu } from "./ContextMenu";
 import { PresetGallery } from './PresetGallery';
+import { ExportModal } from './ExportModal';
 import { CommandPalette } from './CommandPalette';
 import { AddScreenModal } from './AddScreenModal';
 import { exportDocumentFile, importDocumentFile } from '../utils/exportImport';
 import html2canvas from 'html2canvas';
-import { mockupToBlueprint } from '../utils/blueprint';
 
 const handleExportPNG = async (screenEl: HTMLElement | null) => {
   if (!screenEl) return;
@@ -39,6 +39,7 @@ export const App: React.FC = () => {
   const [rightOpen, setRightOpen] = useState(true);
   const [showShortcuts, setShowShortcuts] = useState(false);
   const [showPresets, setShowPresets] = useState(false);
+  const [showExportModal, setShowExportModal] = useState(false);
   const [showCommandPalette, setShowCommandPalette] = useState(false);
   const [showFlows, setShowFlows] = useState(false);
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null);
@@ -57,17 +58,6 @@ export const App: React.FC = () => {
 
   const handleExport = async () => {
     await exportDocumentFile(doc);
-  };
-
-  const handleExportBlueprint = () => {
-    const xml = mockupToBlueprint(doc);
-    const blob = new Blob([xml], { type: 'application/xml' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${doc.title.toLowerCase().replace(/\s+/g, '-')}.blp`;
-    a.click();
-    URL.revokeObjectURL(url);
   };
 
   const handleContextMenu = (e: React.MouseEvent) => {
@@ -152,12 +142,12 @@ export const App: React.FC = () => {
           + Add Screen
         </button>
         <span style={{ opacity: 0.25 }}>│</span>
-        <button className="protota-btn" onClick={handleExport}>💾 Export</button>
+        <button className="protota-btn" onClick={handleExport}>💾 Save JSON</button>
         <button className="protota-btn" onClick={() => {
           const el = document.querySelector('adw-window');
           handleExportPNG(el as HTMLElement);
         }}>📸 PNG</button>
-        <button className="protota-btn" onClick={handleExportBlueprint}>📋 BLP</button>
+        <button className="protota-btn suggested" onClick={() => setShowExportModal(true)}>💻 Code Export (.blp / Py / Rust / Vala)</button>
         <button className="protota-btn" onClick={handleShare}>🔗 Share</button>
         <button className="protota-btn" onClick={() => fileInputRef.current?.click()}>📂 Import</button>
         <span style={{ opacity: 0.25 }}>│</span>
@@ -281,6 +271,11 @@ export const App: React.FC = () => {
       <PresetGallery
         isOpen={showPresets}
         onClose={() => setShowPresets(false)}
+      />
+
+      <ExportModal
+        isOpen={showExportModal}
+        onClose={() => setShowExportModal(false)}
       />
 
       <CommandPalette

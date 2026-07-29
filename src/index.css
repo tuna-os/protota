@@ -374,6 +374,21 @@ body,
   width: 100%;
 }
 
+/* A StatusPage's optional children are an action group in Libadwaita, not an
+   inline sentence. This applies to every imported/preset status page. */
+adw-status-page {
+  flex: 1 1 auto;
+  min-height: 0;
+  box-sizing: border-box;
+}
+
+adw-status-page .adw-status-page-child {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--spacing-s, 6px);
+}
+
 /* Center-box — start/center/end layout. */
 .protota-div-center-box {
   display: flex;

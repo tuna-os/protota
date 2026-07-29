@@ -32,7 +32,7 @@ export const InspectorPanel: React.FC = () => {
 
       <div>
         <span className="protota-field-label" style={{ fontSize: '10px' }}>Widget Type</span>
-        <div style={{ fontSize: '14px', fontWeight: 700, fontFamily: 'monospace' }}>
+        <div style={{ fontSize: '14px', fontWeight: 700, fontFamily: 'Adwaita Mono' }}>
           {selectedNode.type}
         </div>
       </div>

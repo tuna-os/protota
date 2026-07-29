@@ -228,7 +228,9 @@ export const App: React.FC = () => {
                 {group.items.map((item) => (
                   <div key={item.keys} style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', fontSize: '13px', borderBottom: '1px solid var(--separator-color, rgba(0,0,6,0.06))' }}>
                     <span>{item.label}</span>
-                      {item.keys.split(' ').flatMap((k, i) => i === 0 ? [<kbd key={k} style={kbdStyle}>{k}</kbd>] : [' ', <kbd key={k} style={kbdStyle}>{k}</kbd>])}
+                    <span style={{ fontFamily: 'Adwaita Sans', fontSize: '12px', opacity: 0.7 }}>
+                      {item.keys.split(' ').map((k) => <kbd key={k} style={kbdStyle}>{k}</kbd>).reduce((prev, curr) => <>{prev} {curr}</>)}
+                    </span>
                   </div>
                 ))}
               </div>

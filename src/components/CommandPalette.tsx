@@ -116,7 +116,7 @@ export const CommandPalette: React.FC<Props> = ({ isOpen, onClose }) => {
                 <div style={{ fontWeight: 600, fontSize: '13px' }}>{w.label}</div>
                 <div style={{ fontSize: '11px', opacity: 0.5 }}>{w.desc}</div>
               </div>
-              <span style={{ fontSize: '10px', opacity: 0.3, fontFamily: 'monospace' }}>{w.type}</span>
+              <span style={{ fontSize: '10px', opacity: 0.3, fontFamily: 'Adwaita Mono' }}>{w.type}</span>
             </div>
           ))}
           {filtered.length === 0 && search && selectedNode && (

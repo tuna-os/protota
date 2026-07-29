@@ -1,10 +1,10 @@
-import React from 'react';
-import { useMockupStore } from '../store/mockupStore';
-import { WIDGET_SCHEMAS } from '../schemas/widgetSchemas';
-import type { AdwNode } from '../types/mockup';
-import { findNodeById } from '../utils/treeHelpers';
-import { NodeActions } from './NodeActions';
-import { IconPicker } from './IconPicker';
+import React from "react";
+import { useMockupStore } from "../store/mockupStore";
+import { WIDGET_SCHEMAS } from "../schemas/widgetSchemas";
+import type { AdwNode } from "../types/mockup";
+import { findNodeById } from "../utils/treeHelpers";
+import { NodeActions } from "./NodeActions";
+import { IconPicker } from "./IconPicker";
 
 export const InspectorPanel: React.FC = () => {
   const { doc, selectedNodeId, selectedScreenId, updateNodeProps } = useMockupStore();
@@ -18,7 +18,7 @@ export const InspectorPanel: React.FC = () => {
 
   if (!selectedNode) {
     return (
-      <div style={{ padding: '16px', opacity: 0.5, fontStyle: 'italic' }}>
+      <div style={{ padding: "16px", opacity: 0.5, fontStyle: "italic" }}>
         Select an element on the canvas to inspect.
       </div>
     );
@@ -27,12 +27,14 @@ export const InspectorPanel: React.FC = () => {
   const schema = WIDGET_SCHEMAS[selectedNode.type] || [];
 
   return (
-    <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+    <div style={{ padding: "16px", display: "flex", flexDirection: "column", gap: "16px" }}>
       <NodeActions nodeId={selectedNode.id} />
 
       <div>
-        <span className="protota-field-label" style={{ fontSize: '10px' }}>Widget Type</span>
-        <div style={{ fontSize: '14px', fontWeight: 700, fontFamily: 'Adwaita Mono' }}>
+        <span className="protota-field-label" style={{ fontSize: "10px" }}>
+          Widget Type
+        </span>
+        <div style={{ fontSize: "14px", fontWeight: 700, fontFamily: "Adwaita Mono" }}>
           {selectedNode.type}
         </div>
       </div>
@@ -40,13 +42,13 @@ export const InspectorPanel: React.FC = () => {
       <hr className="protota-divider" />
 
       {schema.map((field) => {
-        const value = (selectedNode)[field.key] ?? field.defaultValue ?? '';
+        const value = selectedNode[field.key] ?? field.defaultValue ?? "";
 
         return (
-          <div key={field.key} style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+          <div key={field.key} style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
             <label className="protota-field-label">{field.label}</label>
 
-            {field.type === 'string' && (
+            {field.type === "string" && (
               <input
                 type="text"
                 className="protota-input"
@@ -54,25 +56,31 @@ export const InspectorPanel: React.FC = () => {
                 onChange={(e) => updateNodeProps(selectedNode.id, { [field.key]: e.target.value })}
               />
             )}
-            {field.type === 'boolean' && (
-              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+            {field.type === "boolean" && (
+              <label
+                style={{ display: "flex", alignItems: "center", gap: "8px", cursor: "pointer" }}
+              >
                 <input
                   type="checkbox"
                   checked={Boolean(value)}
-                  onChange={(e) => updateNodeProps(selectedNode.id, { [field.key]: e.target.checked })}
+                  onChange={(e) =>
+                    updateNodeProps(selectedNode.id, { [field.key]: e.target.checked })
+                  }
                 />
-                <span style={{ fontSize: '13px' }}>Enabled</span>
+                <span style={{ fontSize: "13px" }}>Enabled</span>
               </label>
             )}
-            {field.type === 'number' && (
+            {field.type === "number" && (
               <input
                 type="number"
                 className="protota-input"
                 value={Number(value)}
-                onChange={(e) => updateNodeProps(selectedNode.id, { [field.key]: Number(e.target.value) })}
+                onChange={(e) =>
+                  updateNodeProps(selectedNode.id, { [field.key]: Number(e.target.value) })
+                }
               />
             )}
-            {field.type === 'icon' && (
+            {field.type === "icon" && (
               <IconPicker
                 value={String(value)}
                 onChange={(iconName: string) =>

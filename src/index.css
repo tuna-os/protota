@@ -1,6 +1,6 @@
-@import url('https://cdn.jsdelivr.net/npm/@fontsource/adwaita-sans@5.3.0/index.min.css');
-@import url('https://cdn.jsdelivr.net/npm/@fontsource/adwaita-mono@5.3.0/index.min.css');
-@import './icons.css';
+@import url("https://cdn.jsdelivr.net/npm/@fontsource/adwaita-sans@5.3.0/index.min.css");
+@import url("https://cdn.jsdelivr.net/npm/@fontsource/adwaita-mono@5.3.0/index.min.css");
+@import "./icons.css";
 
 *,
 *::before,
@@ -8,7 +8,9 @@
   box-sizing: border-box;
 }
 
-html, body, #root {
+html,
+body,
+#root {
   margin: 0;
   padding: 0;
   height: 100%;
@@ -404,9 +406,9 @@ html, body, #root {
 }
 
 .protota-div-search-entry::before {
-  content: '🔍';
-  margin-right: 8px;
-  opacity: 0.5;
+  content: "🔍";
+  margin-right: var(--spacing-xs, 6px);
+  opacity: var(--dim-opacity, 0.55);
   font-size: 12px;
 }
 
@@ -428,13 +430,13 @@ html, body, #root {
 }
 
 .protota-div-check-button::before {
-  content: '☐';
+  content: "☐";
   font-size: 16px;
   opacity: var(--dim-opacity, 0.55);
 }
 
 .protota-div-check-button[active]::before {
-  content: '☑';
+  content: "☑";
   color: var(--accent-bg-color, #3584e4);
   opacity: 1;
 }

@@ -1,8 +1,8 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { useMockupStore } from '../store/mockupStore';
-import { exportDocumentFile, importDocumentFile } from '../utils/exportImport';
-import html2canvas from 'html2canvas';
-import { mockupToBlueprint } from '../utils/blueprint';
+import React, { useState, useRef, useEffect } from "react";
+import { useMockupStore } from "../store/mockupStore";
+import { exportDocumentFile, importDocumentFile } from "../utils/exportImport";
+import html2canvas from "html2canvas";
+import { mockupToBlueprint } from "../utils/blueprint";
 
 interface MenuItem {
   label: string;
@@ -18,8 +18,8 @@ interface MenuGroup {
 }
 
 export const MenuBar: React.FC = () => {
-  const { doc, undo, redo, setShowAddScreenModal,
-    selectedNodeId, deleteNode, selectNode } = useMockupStore();
+  const { doc, undo, redo, setShowAddScreenModal, selectedNodeId, deleteNode, selectNode } =
+    useMockupStore();
   const [openMenu, setOpenMenu] = useState<string | null>(null);
   const menuBarRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -29,15 +29,15 @@ export const MenuBar: React.FC = () => {
   };
 
   const handleExportPNG = async () => {
-    const el = document.querySelector('adw-window');
+    const el = document.querySelector("adw-window");
     if (!el) return;
     const canvas = await html2canvas(el as HTMLElement, { scale: 2, backgroundColor: null });
     canvas.toBlob((blob) => {
       if (!blob) return;
       const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
+      const a = document.createElement("a");
       a.href = url;
-      a.download = 'protota-screen.png';
+      a.download = "protota-screen.png";
       a.click();
       URL.revokeObjectURL(url);
     });
@@ -45,11 +45,11 @@ export const MenuBar: React.FC = () => {
 
   const handleExportBlueprint = () => {
     const xml = mockupToBlueprint(doc);
-    const blob = new Blob([xml], { type: 'application/xml' });
+    const blob = new Blob([xml], { type: "application/xml" });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = url;
-    a.download = `${doc.title.toLowerCase().replace(/\s+/g, '-')}.blp`;
+    a.download = `${doc.title.toLowerCase().replace(/\s+/g, "-")}.blp`;
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -61,7 +61,7 @@ export const MenuBar: React.FC = () => {
     try {
       await navigator.clipboard.writeText(url);
     } catch {
-      prompt('Share this URL:', url);
+      prompt("Share this URL:", url);
     }
   };
 
@@ -70,47 +70,84 @@ export const MenuBar: React.FC = () => {
     if (!file) return;
     try {
       const imported = await importDocumentFile(file);
-      imported.colorScheme = imported.colorScheme || 'auto';
-      localStorage.setItem('protota_doc_v1', JSON.stringify(imported));
+      imported.colorScheme = imported.colorScheme || "auto";
+      localStorage.setItem("protota_doc_v1", JSON.stringify(imported));
       window.location.reload();
     } catch (err) {
-      alert('Failed to import: ' + (err as Error).message);
+      alert("Failed to import: " + (err as Error).message);
     }
-    e.target.value = '';
+    e.target.value = "";
   };
 
   const menus: MenuGroup[] = [
     {
-      label: 'File',
+      label: "File",
       items: [
-        { label: 'New Screen', action: () => setShowAddScreenModal(true), shortcut: 'Ctrl+N', icon: '📄' },
-        { label: 'divider', divider: true },
-        { label: 'Import...', action: () => fileInputRef.current?.click(), shortcut: 'Ctrl+I', icon: '📂' },
-        { label: 'Export...', action: handleExport, shortcut: 'Ctrl+E', icon: '💾' },
-        { label: 'Export as PNG', action: handleExportPNG, icon: '📸' },
-        { label: 'Export Blueprint', action: handleExportBlueprint, icon: '📋' },
-        { label: 'divider', divider: true },
-        { label: 'Share URL', action: handleShare, shortcut: 'Ctrl+S', icon: '🔗' },
+        {
+          label: "New Screen",
+          action: () => setShowAddScreenModal(true),
+          shortcut: "Ctrl+N",
+          icon: "📄",
+        },
+        { label: "divider", divider: true },
+        {
+          label: "Import...",
+          action: () => fileInputRef.current?.click(),
+          shortcut: "Ctrl+I",
+          icon: "📂",
+        },
+        { label: "Export...", action: handleExport, shortcut: "Ctrl+E", icon: "💾" },
+        { label: "Export as PNG", action: handleExportPNG, icon: "📸" },
+        { label: "Export Blueprint", action: handleExportBlueprint, icon: "📋" },
+        { label: "divider", divider: true },
+        { label: "Share URL", action: handleShare, shortcut: "Ctrl+S", icon: "🔗" },
       ],
     },
     {
-      label: 'Edit',
+      label: "Edit",
       items: [
-        { label: 'Undo', action: undo, shortcut: 'Ctrl+Z', icon: '↩' },
-        { label: 'Redo', action: redo, shortcut: 'Ctrl+Shift+Z', icon: '↪' },
-        { label: 'divider', divider: true },
-        { label: 'Delete', action: () => { if (selectedNodeId) deleteNode(selectedNodeId); }, shortcut: 'Del', icon: '🗑' },
-        { label: 'Deselect', action: () => selectNode(null), shortcut: 'Esc', icon: '✕' },
+        { label: "Undo", action: undo, shortcut: "Ctrl+Z", icon: "↩" },
+        { label: "Redo", action: redo, shortcut: "Ctrl+Shift+Z", icon: "↪" },
+        { label: "divider", divider: true },
+        {
+          label: "Delete",
+          action: () => {
+            if (selectedNodeId) deleteNode(selectedNodeId);
+          },
+          shortcut: "Del",
+          icon: "🗑",
+        },
+        { label: "Deselect", action: () => selectNode(null), shortcut: "Esc", icon: "✕" },
       ],
     },
     {
-      label: 'View',
+      label: "View",
       items: [
-        { label: 'Zoom In', action: () => window.dispatchEvent(new CustomEvent('protota:zoom-in')), shortcut: 'Ctrl+=', icon: '🔍' },
-        { label: 'Zoom Out', action: () => window.dispatchEvent(new CustomEvent('protota:zoom-out')), shortcut: 'Ctrl+-', icon: '🔎' },
-        { label: 'Reset Zoom', action: () => window.dispatchEvent(new CustomEvent('protota:zoom-reset')), shortcut: 'Ctrl+0', icon: '↺' },
-        { label: 'divider', divider: true },
-        { label: 'Show Shortcuts', action: () => window.dispatchEvent(new CustomEvent('protota:show-shortcuts')), shortcut: '?', icon: '⌨' },
+        {
+          label: "Zoom In",
+          action: () => window.dispatchEvent(new CustomEvent("protota:zoom-in")),
+          shortcut: "Ctrl+=",
+          icon: "🔍",
+        },
+        {
+          label: "Zoom Out",
+          action: () => window.dispatchEvent(new CustomEvent("protota:zoom-out")),
+          shortcut: "Ctrl+-",
+          icon: "🔎",
+        },
+        {
+          label: "Reset Zoom",
+          action: () => window.dispatchEvent(new CustomEvent("protota:zoom-reset")),
+          shortcut: "Ctrl+0",
+          icon: "↺",
+        },
+        { label: "divider", divider: true },
+        {
+          label: "Show Shortcuts",
+          action: () => window.dispatchEvent(new CustomEvent("protota:show-shortcuts")),
+          shortcut: "?",
+          icon: "⌨",
+        },
       ],
     },
   ];
@@ -121,8 +158,8 @@ export const MenuBar: React.FC = () => {
         setOpenMenu(null);
       }
     };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   const handleMenuClick = (label: string) => {
@@ -137,14 +174,18 @@ export const MenuBar: React.FC = () => {
   };
 
   return (
-    <div ref={menuBarRef} style={{ display: 'flex', gap: '2px' }}>
+    <div ref={menuBarRef} style={{ display: "flex", gap: "2px" }}>
       {menus.map((menu) => (
-        <div key={menu.label} style={{ position: 'relative' }}>
+        <div key={menu.label} style={{ position: "relative" }}>
           <button
-            className={`adw-button flat${openMenu === menu.label ? ' active' : ''}`}
+            className={`adw-button flat${openMenu === menu.label ? " active" : ""}`}
             onClick={() => handleMenuClick(menu.label)}
             onMouseEnter={() => openMenu && setOpenMenu(menu.label)}
-            style={openMenu === menu.label ? { backgroundColor: 'var(--button-active-color)' } : undefined}
+            style={
+              openMenu === menu.label
+                ? { backgroundColor: "var(--button-active-color)" }
+                : undefined
+            }
           >
             {menu.label}
           </button>
@@ -164,7 +205,7 @@ export const MenuBar: React.FC = () => {
                       <span className="protota-menu-item-shortcut">{item.shortcut}</span>
                     )}
                   </button>
-                )
+                ),
               )}
             </div>
           )}
@@ -175,7 +216,7 @@ export const MenuBar: React.FC = () => {
         type="file"
         accept=".mockup.json,.json"
         onChange={handleImport}
-        style={{ display: 'none' }}
+        style={{ display: "none" }}
       />
     </div>
   );

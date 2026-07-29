@@ -243,7 +243,8 @@ body,
 .protota-zoom-bar {
   position: absolute;
   bottom: var(--spacing-m, 12px);
-  left: var(--spacing-m, 12px);
+  left: 50%;
+  transform: translateX(-50%);
   z-index: 100;
   background: var(--card-bg-color, #ffffff);
   padding: var(--spacing-xs, 6px) var(--spacing-m, 12px);
@@ -253,6 +254,11 @@ body,
   gap: var(--spacing-xs, 6px);
   align-items: center;
   border: 1px solid var(--separator-color, rgba(0, 0, 6, 0.1));
+}
+
+/* Toggle pressed state for mode buttons */
+.adw-button.active {
+  background-color: var(--button-active-color, rgba(0, 0, 6, 0.19));
 }
 
 /* ---- Modal overlay ---- */
@@ -495,7 +501,8 @@ body,
 
   .protota-zoom-bar {
     bottom: 12px;
-    left: 12px;
+    left: 50%;
+    transform: translateX(-50%);
     padding: 2px 6px;
   }
 

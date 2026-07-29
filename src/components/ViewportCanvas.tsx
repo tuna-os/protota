@@ -2,7 +2,7 @@ import React, { useState, useRef, useCallback, useEffect } from "react";
 import { useMockupStore } from "../store/mockupStore";
 // import { BreakpointBar } from "./BreakpointBar";
 import { AdwaitaRenderer } from "./AdwaitaRenderer";
-import { computerSymbolic, phoneSymbolic } from "@gjsify/adwaita-icons/devices";
+import { BottomBar } from "./BottomBar";
 import { windowCloseSymbolic } from "@gjsify/adwaita-icons/ui";
 import { toDataUri } from "@gjsify/adwaita-icons/utils";
 
@@ -266,75 +266,17 @@ export const ViewportCanvas: React.FC = () => {
         </div>
       )}
 
-      {/* Zoom Controls */}
-      <div className="protota-zoom-bar">
-        <button
-          className="adw-button icon-only flat"
-          onClick={() => setZoom((z) => Math.max(z - 0.1, 0.3))}
-          title="Zoom Out (Ctrl+-)"
-        >
-          <span className="adw-icon adw-icon--list-remove"></span>
-        </button>
-        <span
-          style={{ fontSize: "var(--font-size-small, 9pt)", minWidth: "40px", textAlign: "center" }}
-        >
-          {Math.round(zoom * 100)}%
-        </span>
-        <button
-          className="adw-button icon-only flat"
-          onClick={() => setZoom((z) => Math.min(z + 0.1, 2.5))}
-          title="Zoom In (Ctrl+=)"
-        >
-          <span className="adw-icon adw-icon--list-add"></span>
-        </button>
-        <button
-          className="adw-button flat"
-          onClick={() => {
-            setZoom(1);
-            setPan({ x: 0, y: 0 });
-          }}
-          title="Reset Zoom (Ctrl+0)"
-        >
-          Reset
-        </button>
-        <button
-          className="adw-button suggested-action"
-          onClick={() => setDesktopScreenId(doc.screens[0]?.id || null)}
-          style={{ marginLeft: "8px" }}
-        >
-          <span
-            style={{
-              display: "inline-block",
-              width: "16px",
-              height: "16px",
-              maskImage: toDataUri(computerSymbolic),
-              WebkitMaskImage: toDataUri(computerSymbolic),
-              maskSize: "contain",
-              WebkitMaskSize: "contain",
-              backgroundColor: "currentColor",
-            }}
-          />
-          Desktop
-        </button>
-        <button
-          className="adw-button suggested-action"
-          onClick={() => setPhoshScreenId(doc.screens[0]?.id || null)}
-        >
-          <span
-            style={{
-              display: "inline-block",
-              width: "16px",
-              height: "16px",
-              maskImage: toDataUri(phoneSymbolic),
-              WebkitMaskImage: toDataUri(phoneSymbolic),
-              maskSize: "contain",
-              WebkitMaskSize: "contain",
-              backgroundColor: "currentColor",
-            }}
-          />
-          Phone
-        </button>
-      </div>
+      {/* Bottom Bar — Zoom + Desktop/Phone toggles */}
+      <BottomBar
+        zoom={zoom}
+        onZoomIn={() => setZoom((z) => Math.min(z + 0.1, 2.5))}
+        onZoomOut={() => setZoom((z) => Math.max(z - 0.1, 0.3))}
+        onZoomReset={() => { setZoom(1); setPan({ x: 0, y: 0 }); }}
+        desktopScreenId={desktopScreenId}
+        onToggleDesktop={() => setDesktopScreenId((prev) => prev ? null : (doc.screens[0]?.id || null))}
+        phoshScreenId={phoshScreenId}
+        onTogglePhone={() => setPhoshScreenId((prev) => prev ? null : (doc.screens[0]?.id || null))}
+      />
 
       {/* Transformable Canvas Surface */}
       <div
@@ -351,7 +293,7 @@ export const ViewportCanvas: React.FC = () => {
         {doc.screens.map((screen) => (
           <div
             key={screen.id}
-            style={{ display: "flex", flexDirection: "column", alignItems: "center" }}
+            style={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}
           >
             <div className="protota-screen-label" style={{ marginBottom: "8px" }}>
               {screen.title}

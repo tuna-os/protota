@@ -342,7 +342,14 @@ html, body, #root {
     overflow-x: auto;
     flex-wrap: nowrap;
     padding: 6px 8px;
+    gap: 6px;
     -webkit-overflow-scrolling: touch;
+  }
+
+  .protota-toolbar button {
+    padding: 4px 8px;
+    font-size: 11px;
+    white-space: nowrap;
   }
 
   .protota-toolbar::-webkit-scrollbar {
@@ -362,6 +369,10 @@ html, body, #root {
     bottom: 12px;
     left: 12px;
     padding: 2px 6px;
+  }
+
+  .protota-canvas-surface {
+    padding: 16px !important;
   }
 }
 

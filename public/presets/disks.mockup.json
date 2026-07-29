@@ -1,0 +1,82 @@
+{
+  "version": 1,
+  "exportedAt": "2026-07-29T00:00:00Z",
+  "document": {
+    "id": "preset-disks",
+    "title": "GNOME Disks",
+    "colorScheme": "auto",
+    "edges": [],
+    "screens": [
+      {
+        "id": "disks-main",
+        "title": "Disks — Drive Manager",
+        "type": "sidebar",
+        "width": 940,
+        "height": 640,
+        "rootNode": {
+          "id": "d-root",
+          "type": "window",
+          "children": [
+            {
+              "id": "d-toolbar",
+              "type": "toolbar-view",
+              "children": [
+                {
+                  "id": "d-hdr",
+                  "type": "header-bar",
+                  "children": [
+                    { "id": "d-title", "type": "window-title", "title": "Disks" },
+                    { "id": "d-menu", "type": "menu-button", "iconName": "open-menu-symbolic", "title": "Menu" }
+                  ]
+                },
+                {
+                  "id": "d-split",
+                  "type": "overlay-split",
+                  "children": [
+                    {
+                      "id": "d-sidebar",
+                      "type": "list-box",
+                      "children": [
+                        { "id": "d1", "type": "action-row", "title": "1.0 TB Disk", "subtitle": "Samsung SSD 980 PRO 1TB", "iconName": "drive-harddisk-symbolic", "activatable": true },
+                        { "id": "d2", "type": "action-row", "title": "1.0 TB Disk", "subtitle": "Samsung SSD 980 PRO 1TB", "iconName": "drive-harddisk-symbolic", "activatable": true },
+                        { "id": "d3", "type": "action-row", "title": "2.0 TB Disk", "subtitle": "Samsung SSD 990 PRO 2TB", "iconName": "drive-harddisk-symbolic", "activatable": true }
+                      ]
+                    },
+                    {
+                      "id": "d-content",
+                      "type": "box",
+                      "orientation": "vertical",
+                      "spacing": 18,
+                      "children": [
+                        {
+                          "id": "d-header-group",
+                          "type": "preferences-group",
+                          "title": "2.0 TB Disk",
+                          "description": "Samsung SSD 990 PRO 2TB · Model NVMe SSD",
+                          "children": [
+                            { "id": "d-info", "type": "action-row", "title": "Drive Information", "subtitle": "SMART Status: OK · Temperature: 34°C", "iconName": "dialog-information-symbolic" }
+                          ]
+                        },
+                        {
+                          "id": "d-volumes-group",
+                          "type": "preferences-group",
+                          "title": "Volumes & Partitions",
+                          "children": [
+                            { "id": "v1", "type": "action-row", "title": "100.7 MB FAT", "subtitle": "/boot · EFI System Partition", "iconName": "drive-harddisk-symbolic", "activatable": true },
+                            { "id": "v2", "type": "action-row", "title": "Arch Linux", "subtitle": "/ · Btrfs Root Partition", "iconName": "drive-harddisk-symbolic", "activatable": true },
+                            { "id": "v3", "type": "action-row", "title": "Home Data", "subtitle": "/home · 1.8 TB Available", "iconName": "folder-documents-symbolic", "activatable": true }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "assets": {}
+}

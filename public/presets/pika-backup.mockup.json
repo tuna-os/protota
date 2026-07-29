@@ -1,0 +1,322 @@
+{
+  "version": 1,
+  "exportedAt": "2026-07-29T13:12:11.320Z",
+  "document": {
+    "id": "imported-document",
+    "title": "Pika Backup",
+    "colorScheme": "auto",
+    "edges": [],
+    "sourceProject": {
+      "files": [
+        {
+          "path": "resources/shortcuts-dialog.ui",
+          "content": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<interface>\n  <object class=\"AdwShortcutsDialog\" id=\"shortcuts_dialog\">\n    <child>\n      <object class=\"AdwShortcutsSection\">\n        <property name=\"title\" translatable=\"yes\">General</property>\n        <child>\n          <object class=\"AdwShortcutsItem\">\n            <property name=\"accelerator\">&lt;Ctrl&gt;N</property>\n            <property name=\"title\" translatable=\"yes\">Set Up New Backup</property>\n          </object>\n        </child>\n        <child>\n          <object class=\"AdwShortcutsItem\">\n            <property name=\"action-name\">app.shortcuts</property>\n            <property name=\"title\" translatable=\"yes\">Show Keyboard Shortcuts</property>\n          </object>\n        </child>\n        <child>\n          <object class=\"AdwShortcutsItem\">\n            <property name=\"action-name\">app.quit</property>\n            <property name=\"title\" translatable=\"yes\">Quit</property>\n          </object>\n        </child>\n        <child>\n          <object class=\"AdwShortcutsItem\">\n            <property name=\"accelerator\">&lt;alt&gt;Left</property>\n            <property name=\"title\" translatable=\"yes\">Back</property>\n          </object>\n        </child>\n        <child>\n          <object class=\"AdwShortcutsItem\">\n            <property name=\"accelerator\">F10</property>\n            <property name=\"title\" translatable=\"yes\">Open Menu</property>\n          </object>\n        </child>\n      </object>\n    </child>\n  </object>\n</interface>\n"
+        }
+      ],
+      "roots": [
+        "resources/shortcuts-dialog.ui#1"
+      ],
+      "widgets": {
+        "resources/shortcuts-dialog.ui#1": {
+          "key": "resources/shortcuts-dialog.ui#1",
+          "sourceClass": "AdwShortcutsDialog",
+          "sourceId": "shortcuts_dialog",
+          "sourceKind": "object",
+          "origin": {
+            "file": "resources/shortcuts-dialog.ui",
+            "start": 0,
+            "end": 1478
+          },
+          "properties": {
+            "title": {
+              "kind": "scalar",
+              "value": "AdwShortcutsDialog"
+            }
+          },
+          "children": [
+            {
+              "nodeKey": "resources/shortcuts-dialog.ui#2",
+              "origin": {
+                "file": "resources/shortcuts-dialog.ui",
+                "start": 0,
+                "end": 1478
+              }
+            }
+          ],
+          "resolution": {
+            "kind": "unsupported-widget",
+            "reason": "renderer-does-not-support-class"
+          }
+        },
+        "resources/shortcuts-dialog.ui#2": {
+          "key": "resources/shortcuts-dialog.ui#2",
+          "sourceClass": "AdwShortcutsSection",
+          "sourceId": "imported-1",
+          "sourceKind": "object",
+          "origin": {
+            "file": "resources/shortcuts-dialog.ui",
+            "start": 0,
+            "end": 1478
+          },
+          "properties": {
+            "title": {
+              "kind": "scalar",
+              "value": "General"
+            }
+          },
+          "children": [
+            {
+              "nodeKey": "resources/shortcuts-dialog.ui#3",
+              "origin": {
+                "file": "resources/shortcuts-dialog.ui",
+                "start": 0,
+                "end": 1478
+              }
+            },
+            {
+              "nodeKey": "resources/shortcuts-dialog.ui#4",
+              "origin": {
+                "file": "resources/shortcuts-dialog.ui",
+                "start": 0,
+                "end": 1478
+              }
+            },
+            {
+              "nodeKey": "resources/shortcuts-dialog.ui#5",
+              "origin": {
+                "file": "resources/shortcuts-dialog.ui",
+                "start": 0,
+                "end": 1478
+              }
+            },
+            {
+              "nodeKey": "resources/shortcuts-dialog.ui#6",
+              "origin": {
+                "file": "resources/shortcuts-dialog.ui",
+                "start": 0,
+                "end": 1478
+              }
+            },
+            {
+              "nodeKey": "resources/shortcuts-dialog.ui#7",
+              "origin": {
+                "file": "resources/shortcuts-dialog.ui",
+                "start": 0,
+                "end": 1478
+              }
+            }
+          ],
+          "resolution": {
+            "kind": "unsupported-widget",
+            "reason": "renderer-does-not-support-class"
+          }
+        },
+        "resources/shortcuts-dialog.ui#3": {
+          "key": "resources/shortcuts-dialog.ui#3",
+          "sourceClass": "AdwShortcutsItem",
+          "sourceId": "imported-2",
+          "sourceKind": "object",
+          "origin": {
+            "file": "resources/shortcuts-dialog.ui",
+            "start": 0,
+            "end": 1478
+          },
+          "properties": {
+            "title": {
+              "kind": "scalar",
+              "value": "Set Up New Backup"
+            },
+            "accelerator": {
+              "kind": "scalar",
+              "value": "&lt;Ctrl&gt;N"
+            }
+          },
+          "children": [],
+          "resolution": {
+            "kind": "unsupported-widget",
+            "reason": "renderer-does-not-support-class"
+          }
+        },
+        "resources/shortcuts-dialog.ui#4": {
+          "key": "resources/shortcuts-dialog.ui#4",
+          "sourceClass": "AdwShortcutsItem",
+          "sourceId": "imported-3",
+          "sourceKind": "object",
+          "origin": {
+            "file": "resources/shortcuts-dialog.ui",
+            "start": 0,
+            "end": 1478
+          },
+          "properties": {
+            "title": {
+              "kind": "scalar",
+              "value": "Show Keyboard Shortcuts"
+            },
+            "actionName": {
+              "kind": "scalar",
+              "value": "app.shortcuts"
+            }
+          },
+          "children": [],
+          "resolution": {
+            "kind": "unsupported-widget",
+            "reason": "renderer-does-not-support-class"
+          }
+        },
+        "resources/shortcuts-dialog.ui#5": {
+          "key": "resources/shortcuts-dialog.ui#5",
+          "sourceClass": "AdwShortcutsItem",
+          "sourceId": "imported-4",
+          "sourceKind": "object",
+          "origin": {
+            "file": "resources/shortcuts-dialog.ui",
+            "start": 0,
+            "end": 1478
+          },
+          "properties": {
+            "title": {
+              "kind": "scalar",
+              "value": "Quit"
+            },
+            "actionName": {
+              "kind": "scalar",
+              "value": "app.quit"
+            }
+          },
+          "children": [],
+          "resolution": {
+            "kind": "unsupported-widget",
+            "reason": "renderer-does-not-support-class"
+          }
+        },
+        "resources/shortcuts-dialog.ui#6": {
+          "key": "resources/shortcuts-dialog.ui#6",
+          "sourceClass": "AdwShortcutsItem",
+          "sourceId": "imported-5",
+          "sourceKind": "object",
+          "origin": {
+            "file": "resources/shortcuts-dialog.ui",
+            "start": 0,
+            "end": 1478
+          },
+          "properties": {
+            "title": {
+              "kind": "scalar",
+              "value": "Back"
+            },
+            "accelerator": {
+              "kind": "scalar",
+              "value": "&lt;alt&gt;Left"
+            }
+          },
+          "children": [],
+          "resolution": {
+            "kind": "unsupported-widget",
+            "reason": "renderer-does-not-support-class"
+          }
+        },
+        "resources/shortcuts-dialog.ui#7": {
+          "key": "resources/shortcuts-dialog.ui#7",
+          "sourceClass": "AdwShortcutsItem",
+          "sourceId": "imported-6",
+          "sourceKind": "object",
+          "origin": {
+            "file": "resources/shortcuts-dialog.ui",
+            "start": 0,
+            "end": 1478
+          },
+          "properties": {
+            "title": {
+              "kind": "scalar",
+              "value": "Open Menu"
+            },
+            "accelerator": {
+              "kind": "scalar",
+              "value": "F10"
+            }
+          },
+          "children": [],
+          "resolution": {
+            "kind": "unsupported-widget",
+            "reason": "renderer-does-not-support-class"
+          }
+        }
+      },
+      "templates": {},
+      "diagnostics": []
+    },
+    "screens": [
+      {
+        "id": "imported-screen-1",
+        "title": "AdwShortcutsDialog",
+        "type": "standard",
+        "width": 1024,
+        "height": 720,
+        "rootNode": {
+          "id": "shortcuts_dialog",
+          "type": "custom-widget",
+          "sourceKey": "resources/shortcuts-dialog.ui#1",
+          "sourceClass": "AdwShortcutsDialog",
+          "children": [
+            {
+              "id": "imported-1",
+              "type": "custom-widget",
+              "sourceKey": "resources/shortcuts-dialog.ui#2",
+              "sourceClass": "AdwShortcutsSection",
+              "children": [
+                {
+                  "id": "imported-2",
+                  "type": "custom-widget",
+                  "sourceKey": "resources/shortcuts-dialog.ui#3",
+                  "sourceClass": "AdwShortcutsItem",
+                  "children": [],
+                  "title": "Set Up New Backup",
+                  "accelerator": "&lt;Ctrl&gt;N"
+                },
+                {
+                  "id": "imported-3",
+                  "type": "custom-widget",
+                  "sourceKey": "resources/shortcuts-dialog.ui#4",
+                  "sourceClass": "AdwShortcutsItem",
+                  "children": [],
+                  "title": "Show Keyboard Shortcuts",
+                  "actionName": "app.shortcuts"
+                },
+                {
+                  "id": "imported-4",
+                  "type": "custom-widget",
+                  "sourceKey": "resources/shortcuts-dialog.ui#5",
+                  "sourceClass": "AdwShortcutsItem",
+                  "children": [],
+                  "title": "Quit",
+                  "actionName": "app.quit"
+                },
+                {
+                  "id": "imported-5",
+                  "type": "custom-widget",
+                  "sourceKey": "resources/shortcuts-dialog.ui#6",
+                  "sourceClass": "AdwShortcutsItem",
+                  "children": [],
+                  "title": "Back",
+                  "accelerator": "&lt;alt&gt;Left"
+                },
+                {
+                  "id": "imported-6",
+                  "type": "custom-widget",
+                  "sourceKey": "resources/shortcuts-dialog.ui#7",
+                  "sourceClass": "AdwShortcutsItem",
+                  "children": [],
+                  "title": "Open Menu",
+                  "accelerator": "F10"
+                }
+              ],
+              "title": "General"
+            }
+          ],
+          "title": "AdwShortcutsDialog"
+        }
+      }
+    ]
+  },
+  "assets": {}
+}

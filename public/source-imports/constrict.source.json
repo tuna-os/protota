@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "entry": "shortcuts-dialog.blp",
+  "files": [
+    {
+      "path": "shortcuts-dialog.blp",
+      "content": "using Gtk 4.0;\nusing Adw 1;\n\nAdw.ShortcutsDialog shortcuts_dialog {\n  Adw.ShortcutsSection {\n    title: C_(\"shortcut window\", \"Video Management\");\n\n    Adw.ShortcutsItem {\n      title: C_(\"shortcut window\", \"Open\");\n      action-name: \"win.open\";\n    }\n\n    Adw.ShortcutsItem {\n      title: C_(\"shortcut window\", \"Export\");\n      action-name: \"win.export\";\n    }\n  }\n\n  Adw.ShortcutsSection {\n    title: C_(\"shortcut window\", \"General\");\n\n    Adw.ShortcutsItem {\n      title: C_(\"shortcut window\", \"Toggle Settings Pane\");\n      action-name: \"win.toggle-sidebar\";\n    }\n\n    Adw.ShortcutsItem {\n      title: C_(\"shortcut window\", \"Show Shortcuts\");\n      action-name: \"app.shortcuts\";\n    }\n\n    Adw.ShortcutsItem {\n      title: C_(\"shortcut window\", \"Close Window\");\n      action-name: \"win.close\";\n    }\n\n    Adw.ShortcutsItem {\n      title: C_(\"shortcut window\", \"Quit\");\n      action-name: \"app.quit\";\n    }\n\n    Adw.ShortcutsItem {\n      title: C_(\"shortcut window\", \"Show Preferences\");\n      action-name: \"app.preferences\";\n    }\n  }\n}\n"
+    }
+  ]
+}

@@ -1,0 +1,1251 @@
+{
+  "version": 1,
+  "exportedAt": "2026-07-29T13:12:12.444Z",
+  "document": {
+    "id": "imported-document",
+    "title": "Warp",
+    "colorScheme": "auto",
+    "edges": [],
+    "sourceProject": {
+      "files": [
+        {
+          "path": "action_view.ui",
+          "content": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n\n<!--\nSPDX-FileCopyrightText: 2026 The Warp Developers\n\nSPDX-License-Identifier: GPL-3.0-only\n-->\n\n<interface>\n  <object class=\"GtkFileDialog\" id=\"save_as_file_dialog\">\n    <property name=\"title\" translatable=\"yes\">Save As</property>\n    <property name=\"modal\">True</property>\n  </object>\n  <object class=\"GtkPopover\" id=\"popover_code\">\n    <child>\n      <object class=\"GtkLabel\" id=\"code_detail_label\">\n        <property name=\"max-width-chars\">36</property>\n        <property name=\"justify\">center</property>\n        <property name=\"wrap\">True</property>\n        <style>\n          <class name=\"popover-label\"/>\n        </style>\n      </object>\n    </child>\n  </object>\n  <object class=\"GtkSizeGroup\">\n    <property name=\"mode\">horizontal</property>\n    <widgets>\n      <widget name=\"accept_transfer_button\" />\n      <widget name=\"save_as_button\" />\n    </widgets>\n  </object>\n  <object class=\"GtkSizeGroup\">\n    <property name=\"mode\">horizontal</property>\n    <widgets>\n      <widget name=\"open_button\" />\n      <widget name=\"open_dir_button\" />\n    </widgets>\n  </object>\n  <template class=\"ActionView\" parent=\"AdwNavigationPage\">\n    <style>\n      <class name=\"action-view\" />\n    </style>\n    <property name=\"child\">\n      <object class=\"AdwToolbarView\">\n        <child type=\"top\">\n          <object class=\"AdwHeaderBar\" id=\"headerbar\">\n            <property name=\"centering-policy\">strict</property>\n          </object>\n        </child>\n        <property name=\"content\">\n          <object class=\"GtkStack\" id=\"stack\">\n            <child>\n              <object class=\"AdwStatusPage\" id=\"status_page_progress\">\n                <style>\n                  <class name=\"cancel-page\"/>\n                </style>\n                <property name=\"icon-name\">arrows-questionmark-symbolic</property>\n                <child>\n                  <object class=\"GtkBox\">\n                    <property name=\"orientation\">vertical</property>\n                    <property name=\"spacing\">12</property>\n                    <property name=\"halign\">center</property>\n                    <child>\n                      <object class=\"AdwClamp\">\n                        <child>\n                          <object class=\"GtkProgressBar\" id=\"progress_bar\">\n                            <property name=\"pulse-step\">0.05</property>\n                            <property name=\"show-text\">True</property>\n                          </object>\n                        </child>\n                      </object>\n                    </child>\n                  </object>\n                </child>\n              </object>\n            </child>\n            <child>\n              <object class=\"GtkScrolledWindow\" id=\"status_page_code\">\n                <accessibility>\n                  <relation name=\"labelled-by\">code_title</relation>\n                  <relation name=\"described-by\">code_description</relation>\n                </accessibility>\n                <style>\n                  <class name=\"code-page\"/>\n                  <class name=\"cancel-page\"/>\n                </style>\n                <property name=\"hscrollbar-policy\">never</property>\n                <property name=\"propagate-natural-height\">True</property>\n                <property name=\"child\">\n                  <object class=\"GtkBox\">\n                    <property name=\"orientation\">vertical</property>\n                    <property name=\"valign\">center</property>\n                    <property name=\"margin-bottom\">24</property>\n                    <child>\n                      <object class=\"AdwClamp\">\n                        <property name=\"child\">\n                          <object class=\"GtkBox\">\n                            <style>\n                              <class name=\"status-box\"/>\n                            </style>\n                            <property name=\"orientation\">vertical</property>\n                            <property name=\"valign\">center</property>\n                            <child>\n                              <object class=\"GtkButton\" id=\"link_copy_button\">\n                                <style>\n                                  <class name=\"card\"/>\n                                  <class name=\"qr\"/>\n                                </style>\n                                <signal name=\"clicked\" handler=\"link_copy_button_clicked\" swapped=\"true\"/>\n                                <property name=\"icon-name\">chain-link-symbolic</property>\n                                <!-- Translators: Button; Transmit Link is a noun -->\n                                <property name=\"tooltip-text\" translatable=\"yes\">Copy Transmit Link</property>\n                                <property name=\"halign\">center</property>\n                                <property name=\"valign\">center</property>\n                                <property name=\"overflow\">hidden</property>\n                                <property name=\"child\">\n                                  <object class=\"GtkImage\" id=\"code_image\">\n                                    <property name=\"accessible-role\">presentation</property>\n                                    <property name=\"icon-name\">code-symbolic</property>\n                                    <property name=\"halign\">center</property>\n                                    <property name=\"valign\">center</property>\n                                    <property name=\"overflow\">hidden</property>\n                                  </object>\n                                </property>\n                              </object>\n                            </child>\n                            <child>\n                              <object class=\"GtkCenterBox\">\n                                <property name=\"orientation\">horizontal</property>\n                                <property name=\"halign\">center</property>\n                                <child type=\"center\">\n                                  <object class=\"GtkLabel\" id=\"code_title\">\n                                    <property name=\"wrap\">True</property>\n                                    <property name=\"wrap-mode\">word-char</property>\n                                    <property name=\"justify\">center</property>\n                                    <property name=\"margin-end\">12</property>\n                                    <property name=\"label\" translatable=\"yes\">Your Transmit Code</property>\n                                    <style>\n                                      <class name=\"title\"/>\n                                      <class name=\"title-1\"/>\n                                    </style>\n                                  </object>\n                                </child>\n                                <child type=\"end\">\n                                  <object class=\"GtkMenuButton\">\n                                    <property name=\"popover\">popover_code</property>\n                                    <property name=\"valign\">center</property>\n                                    <property name=\"icon-name\">dialog-information-symbolic</property>\n                                    <style>\n                                      <class name=\"circular\"/>\n                                    </style>\n                                  </object>\n                                </child>\n                              </object>\n                            </child>\n                            <child>\n                              <object class=\"GtkLabel\" id=\"code_description\">\n                                <property name=\"wrap\">True</property>\n                                <property name=\"wrap-mode\">word-char</property>\n                                <property name=\"justify\">center</property>\n                                <property name=\"use-markup\">True</property>\n                                <style>\n                                  <class name=\"body\"/>\n                                  <class name=\"description\"/>\n                                </style>\n                              </object>\n                            </child>\n                          </object>\n                        </property>\n                      </object>\n                    </child>\n                    <child>\n                      <object class=\"AdwClamp\">\n                        <child>\n                          <object class=\"GtkEntry\" id=\"code_entry\">\n                            <style>\n                              <class name=\"card\"/>\n                            </style>\n                            <signal name=\"notify::cursor-position\" handler=\"code_entry_select_all\"/>\n                            <signal name=\"notify::selection-bound\" handler=\"code_entry_select_all\"/>\n                            <property name=\"editable\">False</property>\n                            <property name=\"halign\">center</property>\n                            <property name=\"secondary-icon-name\">edit-copy-symbolic</property>\n                            <!-- Translators: Button; Transmit Code is a noun -->\n                            <property name=\"secondary-icon-tooltip-text\" translatable=\"yes\">Copy Transmit Code</property>\n                            <signal name=\"icon-release\" handler=\"code_copy_button_clicked\" swapped=\"true\"/>\n                          </object>\n                        </child>\n                      </object>\n                    </child>    \n                  </object>\n                </property>\n              </object>\n            </child>\n            <child>\n              <object class=\"AdwStatusPage\" id=\"status_page_ask_confirmation\">\n                <style>\n                  <class name=\"cancel-page\"/>\n                </style>\n                <property name=\"icon-name\">paper-filled-symbolic</property>\n                <!-- Translators: Title -->\n                <property name=\"title\" translatable=\"yes\">Accept File Transfer?</property>\n                <child>\n                  <object class=\"GtkBox\">\n                    <property name=\"orientation\">vertical</property>\n                    <property name=\"halign\">center</property>\n                    <property name=\"spacing\">12</property>\n                    <child>\n                      <object class=\"GtkButton\" id=\"accept_transfer_button\">\n                        <signal name=\"clicked\" handler=\"accept_transfer_button_clicked\" swapped=\"true\"/>\n                        <property name=\"can-shrink\">True</property>\n                        <property name=\"tooltip-text\" translatable=\"yes\">Save to Downloads Folder</property>\n                        <!-- Translators: Button -->\n                        <property name=\"label\" translatable=\"yes\">_Accept</property>\n                        <property name=\"use-underline\">true</property>\n                        <property name=\"width-request\">150</property>\n                        <property name=\"hexpand\">False</property>\n                        <style>\n                          <class name=\"pill\"/>\n                          <class name=\"suggested-action\"/>\n                        </style>\n                      </object>\n                    </child>\n                    <child>\n                      <object class=\"GtkButton\" id=\"save_as_button\">\n                        <signal name=\"clicked\" handler=\"save_as_button_clicked\" swapped=\"true\"/>\n                        <property name=\"can-shrink\">True</property>\n                        <!-- Translators: Button -->\n                        <property name=\"label\" translatable=\"yes\">Sa_ve As…</property>\n                        <property name=\"use-underline\">true</property>\n                        <property name=\"width-request\">150</property>\n                        <property name=\"hexpand\">False</property>\n                        <style>\n                          <class name=\"pill\"/>\n                        </style>\n                      </object>\n                    </child>\n                  </object>\n                </child>\n              </object>\n            </child>\n            <child>\n              <object class=\"AdwStatusPage\" id=\"status_page_success\">\n                <style>\n                  <class name=\"cancel-page\"/>\n                </style>\n                <property name=\"icon-name\">checkmark-large-symbolic</property>\n                <!-- Translators: Title -->\n                <property name=\"title\" translatable=\"yes\">File Transfer Successful</property>\n                <child>\n                  <object class=\"GtkBox\">\n                    <property name=\"orientation\">vertical</property>\n                    <property name=\"spacing\">12</property>\n                    <child>\n                      <object class=\"GtkButton\" id=\"open_button\">\n                        <signal name=\"clicked\" handler=\"open_button_clicked\" swapped=\"true\"/>\n                        <property name=\"can-shrink\">True</property>\n                        <!-- Translators: Button -->\n                        <property name=\"label\" translatable=\"yes\">_Open File</property>\n                        <property name=\"use-underline\">true</property>\n                        <property name=\"width-request\">150</property>\n                        <property name=\"hexpand\">False</property>\n                        <property name=\"halign\">center</property>\n                        <style>\n                          <class name=\"pill\"/>\n                          <class name=\"suggested-action\"/>\n                        </style>\n                      </object>\n                    </child>\n                    <child>\n                      <object class=\"GtkButton\" id=\"open_dir_button\">\n                        <signal name=\"clicked\" handler=\"open_dir_button_clicked\" swapped=\"true\"/>\n                        <property name=\"can-shrink\">True</property>\n                        <!-- Translators: Button -->\n                        <property name=\"label\" translatable=\"yes\">_Show in Folder</property>\n                        <property name=\"use-underline\">true</property>\n                        <property name=\"width-request\">150</property>\n                        <property name=\"hexpand\">False</property>\n                        <property name=\"halign\">center</property>\n                        <style>\n                          <class name=\"pill\"/>\n                        </style>\n                      </object>\n                    </child>\n                  </object>\n                </child>\n              </object>\n            </child>\n            <child>\n              <object class=\"AdwStatusPage\" id=\"status_page_error\">\n                <style>\n                  <class name=\"cancel-page\"/>\n                </style>\n                <property name=\"icon-name\">horizontal-arrows-one-way-symbolic</property>\n                <!-- Translators: Title -->\n                <property name=\"title\" translatable=\"yes\">File Transfer Failed</property>\n                <child>\n                  <object class=\"GtkButton\" id=\"copy_error_button\">\n                    <signal name=\"clicked\" handler=\"copy_error_button_clicked\" swapped=\"true\"/>\n                    <property name=\"can-shrink\">True</property>\n                    <!-- Translators: Button -->\n                    <property name=\"label\" translatable=\"yes\">Co_py Error Message</property>\n                    <property name=\"use-underline\">true</property>\n                    <property name=\"hexpand\">False</property>\n                    <property name=\"halign\">center</property>\n                    <style>\n                      <class name=\"pill\"/>\n                    </style>\n                  </object>\n                </child>\n              </object>\n            </child>\n          </object>\n        </property>\n        <child type=\"bottom\">\n          <object class=\"GtkButton\" id=\"cancel_button\">\n            <signal name=\"clicked\" handler=\"cancel_button_clicked\" swapped=\"true\"/>\n            <property name=\"can-shrink\">True</property>\n            <!-- Translators: Button -->\n            <property name=\"label\" translatable=\"yes\">_Cancel</property>\n            <property name=\"use-underline\">true</property>\n            <property name=\"halign\">center</property>\n            <property name=\"valign\">center</property>\n            <style>\n              <class name=\"pill\"/>\n              <class name=\"cancel-button\"/>\n            </style>\n          </object>\n        </child>\n      </object>\n    </property>\n  </template>\n</interface>\n"
+        },
+        {
+          "path": "camera.ui",
+          "content": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n\n<!--\nSPDX-FileCopyrightText: 2026 The Warp Developers\n\nSPDX-License-Identifier: GPL-3.0-only\n-->\n\n<interface>\n  <object class=\"GtkSizeGroup\">\n    <property name=\"mode\">horizontal</property>\n    <widgets>\n      <widget name=\"retry_button\" />\n      <widget name=\"troubleshooting_button\" />\n    </widgets>\n  </object>\n  <template class=\"Camera\" parent=\"AdwNavigationPage\">\n    <property name=\"title\" translatable=\"yes\">Scan QR Code</property>\n    <child>\n      <object class=\"AdwToolbarView\" id=\"toolbar_view\">\n        <child type=\"top\">\n          <object class=\"AdwHeaderBar\" />\n        </child>\n        <child>\n          <object class=\"GtkStack\" id=\"stack\">\n            <property name=\"transition-type\">crossfade</property>\n            <property name=\"hhomogeneous\">False</property>\n            <child>\n              <object class=\"GtkStackPage\">\n                <property name=\"name\">loading</property>\n                <property name=\"child\">\n                  <object class=\"AdwSpinner\">\n                    <property name=\"halign\">center</property>\n                    <property name=\"valign\">center</property>\n                    <property name=\"width-request\">48</property>\n                    <property name=\"height-request\">48</property>\n                  </object>\n                </property>\n              </object>\n            </child>\n            <child>\n              <object class=\"GtkStackPage\">\n                <property name=\"name\">error</property>\n                <property name=\"child\">\n                  <object class=\"AdwStatusPage\" id=\"error_page\">\n                    <property name=\"vexpand\">True</property>\n                    <property name=\"icon-name\">camera-hardware-disabled-symbolic</property>\n                    <property name=\"child\">\n                      <object class=\"GtkBox\">\n                        <property name=\"orientation\">vertical</property>\n                        <property name=\"halign\">center</property>\n                        <property name=\"spacing\">12</property>\n                        <child>\n                          <object class=\"GtkButton\" id=\"retry_button\">\n                            <property name=\"label\" translatable=\"yes\">_Retry</property>\n                            <property name=\"hexpand\">False</property>\n                            <property name=\"use-underline\">True</property>\n                            <signal name=\"clicked\" handler=\"on_retry_clicked\" swapped=\"true\" />\n                            <style>\n                              <class name=\"pill\" />\n                            </style>\n                          </object>\n                        </child>\n                        <child>\n                          <object class=\"GtkButton\" id=\"troubleshooting_button\">\n                            <property name=\"label\" translatable=\"yes\">_Troubleshooting</property>\n                            <property name=\"hexpand\">False</property>\n                            <property name=\"use-underline\">True</property>\n                            <property name=\"width-request\">150</property>\n                            <signal name=\"clicked\" handler=\"on_troubleshooting_clicked\" swapped=\"true\" />\n                            <style>\n                              <class name=\"pill\" />\n                            </style>\n                          </object>\n                        </child>\n                      </object>\n                    </property>\n                  </object>\n                </property>\n              </object>\n            </child>\n            <child>\n              <object class=\"GtkStackPage\">\n                <property name=\"name\">stream</property>\n                <property name=\"child\">\n                  <object class=\"GtkOverlay\">\n                    <child>\n                      <object class=\"AdwBin\" id=\"viewfinder_bin\" />\n                    </child>\n                    <child type=\"overlay\">\n                      <object class=\"GtkMenuButton\" id=\"selection_button\">\n                          <property name=\"icon-name\">pick-camera-alt2-symbolic</property>\n                          <property name=\"halign\">end</property>\n                          <property name=\"valign\">end</property>\n                          <property name=\"margin-end\">18</property>\n                          <property name=\"margin-bottom\">18</property>\n                          <style>\n                            <class name=\"osd\" />\n                            <class name=\"circular\" />\n                            <class name=\"selectionbutton\" />\n                          </style>\n                      </object>\n                    </child>\n                  </object>\n                </property>\n              </object>\n            </child>\n          </object>\n        </child>\n      </object>\n    </child>\n  </template>\n</interface>\n"
+        },
+        {
+          "path": "preferences.ui",
+          "content": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n\n<!--\nSPDX-FileCopyrightText: 2026 The Warp Developers\n\nSPDX-License-Identifier: GPL-3.0-only\n-->\n\n<interface>\n  <template class=\"WarpPreferencesDialog\" parent=\"AdwPreferencesDialog\">\n    <property name=\"title\" translatable=\"yes\">Preferences</property>\n    <child>\n      <object class=\"AdwPreferencesPage\">\n        <property name=\"icon-name\">network-server-symbolic</property>\n        <property name=\"title\" translatable=\"yes\">Network</property>\n        <property name=\"name\">network</property>\n        <child>\n          <object class=\"AdwPreferencesGroup\">\n            <property name=\"title\" translatable=\"yes\">Code Words</property>\n            <property name=\"description\" translatable=\"yes\">The code word count determines the security of the transfer.\n\nA short code is easy to remember but increases the risk of someone else guessing the code. As a code may only be guessed once, the risk is very small even with short codes. A length of 4 is very secure.</property>\n            <child>\n              <object class=\"AdwSpinRow\" id=\"code_length_spin_row\">\n                <property name=\"title\" translatable=\"yes\">Code Word Count</property>\n                <property name=\"value\" bind-source=\"WarpPreferencesDialog\" bind-property=\"code-length\" bind-flags=\"sync-create|bidirectional\"/>\n              </object>\n            </child>\n          </object>\n        </child>\n        <child>\n          <object class=\"AdwPreferencesGroup\" id=\"preferences_group\">\n            <property name=\"title\" translatable=\"yes\">Server URLs</property>\n            <child>\n              <object class=\"AdwEntryRow\" id=\"rendezvous_server_url_entry_row\">\n                <property name=\"title\" translatable=\"yes\">Rendezvous Server URL</property>\n                <property name=\"input-purpose\">url</property>\n                <property name=\"text\" bind-source=\"WarpPreferencesDialog\" bind-property=\"rendezvous-server-url\" bind-flags=\"sync-create|bidirectional\"/>\n              </object>\n            </child>\n            <child>\n              <object class=\"AdwEntryRow\" id=\"transit_server_url_entry_row\">\n                <property name=\"title\" translatable=\"yes\">Transit Server URL</property>\n                <property name=\"input-purpose\">url</property>\n                <property name=\"text\" bind-source=\"WarpPreferencesDialog\" bind-property=\"transit-server-url\" bind-flags=\"sync-create|bidirectional\"/>\n              </object>\n            </child>\n          </object>\n        </child>\n      </object>\n    </child>\n  </template>\n</interface>"
+        },
+        {
+          "path": "welcome_dialog.ui",
+          "content": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n\n<!--\nSPDX-FileCopyrightText: 2026 The Warp Developers\n\nSPDX-License-Identifier: GPL-3.0-only\n-->\n\n<interface>\n  <template class=\"WelcomeDialog\" parent=\"AdwDialog\">\n    <property name=\"content-width\">500</property>\n    <property name=\"content-height\">500</property>\n    <child>\n      <object class=\"AdwNavigationView\" id=\"navigation_view\">\n        <child>\n          <object class=\"AdwNavigationPage\">\n            <property name=\"title\" translatable=\"yes\">Welcome</property>\n            <property name=\"child\">\n              <object class=\"AdwToolbarView\">\n                <child type=\"top\">\n                  <object class=\"AdwHeaderBar\">\n                    <property name=\"title-widget\">\n                      <object class=\"GtkBox\"/>\n                    </property>\n                  </object>\n                </child>\n                <property name=\"content\">\n                  <object class=\"AdwStatusPage\" id=\"status_page\">\n                    <property name=\"vexpand\">True</property>\n                    <property name=\"title\" translatable=\"yes\">Welcome to Warp</property>\n                    <property name=\"description\" translatable=\"yes\">Fast and secure file transfer</property>\n                    <property name=\"child\">\n                      <object class=\"GtkButton\" id=\"next_button\">\n                        <signal name=\"clicked\" handler=\"push_detail\" swapped=\"true\"/>\n                        <property name=\"halign\">center</property>\n                        <property name=\"width-request\">150</property>\n                        <!-- Translators: Button -->\n                        <property name=\"label\" translatable=\"yes\">Next</property>\n                        <style>\n                          <class name=\"suggested-action\"/>\n                          <class name=\"pill\"/>\n                        </style>\n                      </object>\n                    </property>\n                  </object>\n                </property>\n              </object>\n            </property>\n          </object>\n        </child>\n        <child>\n          <object class=\"AdwNavigationPage\" id=\"page_detail\">\n            <property name=\"title\">Introduction</property>\n            <property name=\"child\">\n              <object class=\"AdwToolbarView\">\n                <child type=\"top\">\n                  <object class=\"AdwHeaderBar\">\n                    <property name=\"centering-policy\">strict</property>\n                    <property name=\"title-widget\">\n                      <object class=\"GtkBox\"/>\n                    </property>\n                  </object>\n                </child>\n                <property name=\"content\">\n                  <object class=\"GtkScrolledWindow\">\n                    <property name=\"hscrollbar-policy\">never</property>\n                    <property name=\"propagate-natural-height\">True</property>\n                    <child>\n                      <object class=\"GtkViewport\">\n                        <property name=\"scroll-to-focus\">True</property>\n                        <child>\n                          <object class=\"AdwClamp\">\n                            <child>\n                              <object class=\"GtkBox\">\n                                <property name=\"valign\">center</property>\n                                <property name=\"vexpand\">True</property>\n                                <property name=\"margin-top\">24</property>\n                                <property name=\"margin-bottom\">24</property>\n                                <property name=\"margin-start\">24</property>\n                                <property name=\"margin-end\">24</property>\n                                <property name=\"spacing\">24</property>\n                                <property name=\"orientation\">vertical</property>\n                                <child>\n                                  <object class=\"GtkLabel\">\n                                    <property name=\"justify\">left</property>\n                                    <property name=\"label\" translatable=\"yes\">Introduction</property>\n                                    <style>\n                                      <class name=\"title-1\"/>\n                                    </style>\n                                  </object>\n                                </child>\n                                <child>\n                                  <object class=\"GtkLabel\">\n                                    <property name=\"wrap\">True</property>\n                                    <property name=\"halign\">center</property>\n                                    <property name=\"justify\">left</property>\n                                    <property name=\"label\" translatable=\"yes\">Warp makes file transfer simple. To get started, both parties need to install Warp on their devices.\n\nAfter selecting a file to transmit, the sender needs to tell the receiver the displayed transmit code. This is preferably done via a secure communication channel.\n\nWhen the receiver has entered the code, the file transfer can begin.\n\nFor more information about Warp, open the Help section from the Main Menu.</property>\n                                  </object>\n                                </child>\n                                <child>\n                                  <object class=\"GtkButton\" id=\"get_started_button\">\n                                    <signal name=\"clicked\" handler=\"get_started_button_clicked\" swapped=\"true\"/>\n                                    <!-- Translators: Big button to finish welcome screen -->\n                                    <property name=\"label\" translatable=\"yes\">Get Started Using Warp</property>\n                                    <property name=\"halign\">center</property>\n                                    <style>\n                                      <class name=\"pill\"/>\n                                      <class name=\"suggested-action\"/>\n                                    </style>\n                                  </object>\n                                </child>\n                              </object>\n                            </child>\n                          </object>\n                        </child>\n                      </object>\n                    </child>\n                  </object>\n                </property>\n              </object>\n            </property>\n          </object>\n        </child>\n      </object>\n    </child>\n  </template>\n</interface>\n"
+        },
+        {
+          "path": "window.ui",
+          "content": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n\n<!--\nSPDX-FileCopyrightText: 2026 The Warp Developers\n\nSPDX-License-Identifier: GPL-3.0-only\n-->\n\n<interface>\n  <menu id=\"primary_menu\">\n    <section>\n      <item>\n        <!-- Translators: menu item -->\n        <attribute name=\"label\" translatable=\"yes\">_Preferences</attribute>\n        <attribute name=\"action\">win.preferences</attribute>\n      </item>\n      <item>\n        <!-- Translators: menu item -->\n        <attribute name=\"label\" translatable=\"yes\">_Keyboard Shortcuts</attribute>\n        <attribute name=\"action\">app.shortcuts</attribute>\n      </item>\n      <item>\n        <!-- Translators: menu item -->\n        <attribute name=\"label\" translatable=\"yes\">_Help</attribute>\n        <attribute name=\"action\">app.help</attribute>\n      </item>\n      <item>\n        <!-- Translators: menu item -->\n        <attribute name=\"label\" translatable=\"yes\">_About Warp</attribute>\n        <attribute name=\"action\">win.about</attribute>\n      </item>\n    </section>\n  </menu>\n  <object class=\"GtkFileDialog\" id=\"file_dialog\">\n    <property name=\"modal\">True</property>\n  </object>\n  <object class=\"AdwToast\" id=\"inserted_code_toast\">\n    <signal name=\"dismissed\" handler=\"inserted_code_toast_dismissed\" swapped=\"true\"/>\n    <!-- Translators: Notification when code was automatically detected in clipboard and inserted into code entry on receive page -->\n    <property name=\"title\" translatable=\"yes\">Inserted code from clipboard</property>\n    <property name=\"timeout\">3</property>\n  </object>\n  <object class=\"AdwAlertDialog\" id=\"ask_abort_dialog\">\n    <!-- Translators: File receive confirmation message dialog title -->\n    <property name=\"heading\" translatable=\"yes\">Abort File Transfer?</property>\n    <property name=\"body\" translatable=\"yes\">Do you want to abort the current file transfer?</property>\n    <property name=\"close_response\">continue</property>\n    <responses>\n      <response id=\"continue\" translatable=\"yes\">_Continue</response>\n      <response id=\"abort\" appearance=\"destructive\" translatable=\"yes\">_Abort</response>\n    </responses>\n  </object>\n  <object class=\"AdwAlertDialog\" id=\"no_registered_application_error_dialog\">\n    <!-- Translators: Error dialog title -->\n    <property name=\"heading\" translatable=\"yes\">Unable to Open File</property>\n    <responses>\n      <response id=\"close\" translatable=\"yes\">_Close</response>\n      <response id=\"show-in-folder\" translatable=\"yes\">_Show in Folder</response>\n    </responses>\n  </object>\n  <object class=\"GtkSizeGroup\">\n    <property name=\"mode\">horizontal</property>\n    <widgets>\n      <widget name=\"send_select_file_button\" />\n      <widget name=\"send_select_folder_button\" />\n    </widgets>\n  </object>\n  <template class=\"WarpApplicationWindow\" parent=\"AdwApplicationWindow\">\n    <signal name=\"notify::is-active\" handler=\"add_code_from_clipboard\" swapped=\"true\"/>\n    <property name=\"width-request\">360</property>\n    <property name=\"height-request\">200</property>\n    <property name=\"default-width\">460</property>\n    <property name=\"default-height\">600</property>\n    <child>\n      <object class=\"AdwBreakpoint\">\n        <condition>max-width: 400sp</condition>\n        <setter object=\"view_switcher_bar\" property=\"reveal\">True</setter>\n        <setter object=\"headerbar\" property=\"title-widget\"/>\n      </object>\n    </child>\n    <property name=\"content\">\n      <object class=\"AdwToastOverlay\" id=\"toast_overlay\">\n        <child>\n          <object class=\"AdwNavigationView\" id=\"navigation_view\">\n            <signal name=\"notify::visible-page\" handler=\"navigation_view_visible_page_notify\" swapped=\"true\"/>\n            <child>\n              <object class=\"AdwNavigationPage\" id=\"page_root\">\n                <property name=\"title\" translatable=\"yes\">Warp</property>\n                <property name=\"child\">\n                  <object class=\"AdwToolbarView\">\n                    <child type=\"top\">\n                      <object class=\"AdwHeaderBar\" id=\"headerbar\">\n                        <property name=\"centering-policy\">strict</property>\n                        <property name=\"title-widget\">\n                          <object class=\"AdwViewSwitcher\" id=\"title\">\n                            <property name=\"stack\">stack</property>\n                            <property name=\"policy\">wide</property>\n                          </object>\n                        </property>\n                        <child type=\"start\">\n                          <object class=\"GtkMenuButton\" id=\"appmenu_button\">\n                            <property name=\"icon-name\">open-menu-symbolic</property>\n                            <property name=\"menu-model\">primary_menu</property>\n                            <property name=\"primary\">True</property>\n                            <property name=\"tooltip-text\" translatable=\"yes\">Main Menu</property>\n                          </object>\n                        </child>\n                      </object>\n                    </child>\n                    <child type=\"bottom\">\n                      <object class=\"AdwViewSwitcherBar\" id=\"view_switcher_bar\">\n                        <property name=\"stack\">stack</property>\n                      </object>\n                    </child>\n                    <property name=\"content\">\n                      <object class=\"GtkBox\" id=\"label\">\n                        <property name=\"orientation\">vertical</property>\n                        <child>\n                          <object class=\"AdwViewStack\" id=\"stack\">\n                            <signal name=\"notify::visible-child-name\" handler=\"add_code_from_clipboard\" swapped=\"true\"/>\n                            <child>\n                              <object class=\"AdwViewStackPage\">\n                                <property name=\"name\">send</property>\n                                <property name=\"title\" translatable=\"yes\">_Send</property>\n                                <property name=\"use-underline\">True</property>\n                                <property name=\"icon-name\">send-to-symbolic</property>\n                                <property name=\"child\">\n                                  <object class=\"GtkBox\" id=\"send_box\">\n                                    <property name=\"orientation\">vertical</property>\n                                    <style>\n                                      <class name=\"send-box\"/>\n                                    </style>\n                                    <child>\n                                      <object class=\"AdwStatusPage\" id=\"send_status_page\">\n                                        <property name=\"vexpand\">True</property>\n                                        <property name=\"title\" translatable=\"yes\">Send File</property>\n                                        <property name=\"description\" translatable=\"yes\">Select or drop the file or directory to send</property>\n                                        <property name=\"icon-name\">send-to-symbolic</property>\n                                        <child>\n                                          <object class=\"GtkBox\">\n                                            <property name=\"orientation\">vertical</property>\n                                            <property name=\"halign\">center</property>\n                                            <property name=\"spacing\">12</property>\n                                            <child>\n                                              <object class=\"GtkButton\" id=\"send_select_file_button\">\n                                                <signal name=\"clicked\" handler=\"select_file\" swapped=\"true\"/>\n                                                <property name=\"can-shrink\">True</property>\n                                                <!-- Translators: Button -->\n                                                <property name=\"label\" translatable=\"yes\">Select _File…</property>\n                                                <property name=\"use-underline\">True</property>\n                                                <property name=\"width-request\">150</property>\n                                                <property name=\"hexpand\">False</property>\n                                                <style>\n                                                  <class name=\"suggested-action\"/>\n                                                  <class name=\"pill\"/>\n                                                </style>\n                                              </object>\n                                            </child>\n                                            <child>\n                                              <object class=\"GtkButton\" id=\"send_select_folder_button\">\n                                                <signal name=\"clicked\" handler=\"select_folder\" swapped=\"true\"/>\n                                                <property name=\"can-shrink\">True</property>\n                                                <!-- Translators: Button -->\n                                                <property name=\"label\" translatable=\"yes\">Select F_older…</property>\n                                                <property name=\"use-underline\">True</property>\n                                                <property name=\"width-request\">150</property>\n                                                <property name=\"hexpand\">False</property>\n                                                <style>\n                                                  <class name=\"pill\"/>\n                                                </style>\n                                              </object>\n                                            </child>\n                                          </object>\n                                        </child>\n                                      </object>\n                                    </child>\n                                  </object>\n                                </property>\n                              </object>\n                            </child>\n                            <child>\n                              <object class=\"AdwViewStackPage\">\n                                <property name=\"name\">receive</property>\n                                <property name=\"title\" translatable=\"yes\">_Receive</property>\n                                <property name=\"use-underline\">True</property>\n                                <property name=\"icon-name\">folder-download-symbolic</property>\n                                <property name=\"child\">\n                                  <object class=\"GtkBox\">\n                                    <property name=\"orientation\">vertical</property>\n                                    <child>\n                                      <object class=\"AdwStatusPage\">\n                                        <property name=\"vexpand\">True</property>\n                                        <property name=\"title\" translatable=\"yes\">Receive File</property>\n                                        <!-- Translators: Text above code input box, transmit code is a noun -->\n                                        <property name=\"description\" translatable=\"yes\">Enter the transmit code from the sender</property>\n                                        <property name=\"icon-name\">folder-download-symbolic</property>\n                                        <child>\n                                          <object class=\"GtkBox\">\n                                            <property name=\"orientation\">vertical</property>\n                                            <property name=\"halign\">center</property>\n                                            <property name=\"spacing\">24</property>\n                                            <child>\n                                              <object class=\"AdwClamp\">\n                                                <child>\n                                                  <object class=\"GtkListBox\">\n                                                    <property name=\"selection-mode\">none</property>\n                                                    <style>\n                                                      <class name=\"boxed-list\"/>\n                                                    </style>\n                                                    <child>\n                                                      <object class=\"AdwEntryRow\" id=\"code_entry\">\n                                                        <property name=\"input-hints\">private</property>\n                                                        <signal name=\"entry-activated\" handler=\"receive_button_clicked\" swapped=\"true\"/>\n                                                        <!-- Translators: Entry placeholder; This is a noun -->\n                                                        <property name=\"title\" translatable=\"yes\">Transmit Code</property>\n                                                        <property name=\"hexpand\">False</property>\n                                                        <signal name=\"changed\" handler=\"code_entry_changed\" swapped=\"true\"/>\n                                                        <child type=\"suffix\">\n                                                          <object class=\"GtkButton\" id=\"scan_qr_code_button\">\n                                                            <property name=\"visible\">False</property>\n                                                            <property name=\"can-shrink\">True</property>\n                                                            <property name=\"valign\">center</property>\n                                                            <property name=\"icon-name\">qr-code-symbolic</property>\n                                                            <property name=\"tooltip-text\" translatable=\"yes\">Scan QR Code</property>\n                                                            <signal name=\"clicked\" handler=\"scan_qr_code_button_clicked\" swapped=\"true\"/>\n                                                            <style>\n                                                              <class name=\"flat\"/>\n                                                            </style>\n                                                          </object>\n                                                        </child>\n                                                      </object>\n                                                    </child>\n                                                  </object>\n                                                </child>\n                                              </object>\n                                            </child>\n                                            <child>\n                                              <object class=\"GtkButton\" id=\"receive_button\">\n                                                <signal name=\"clicked\" handler=\"receive_button_clicked\" swapped=\"true\"/>\n                                                <property name=\"can-shrink\">True</property>\n                                                <property name=\"halign\">center</property>\n                                                <property name=\"width-request\">150</property>\n                                                <property name=\"sensitive\">False</property>\n                                                <!-- Translators: Button -->\n                                                <property name=\"label\" translatable=\"yes\">Receive _File</property>\n                                                <property name=\"use-underline\">True</property>\n                                                <style>\n                                                  <class name=\"suggested-action\"/>\n                                                  <class name=\"pill\"/>\n                                                </style>\n                                              </object>\n                                            </child>\n                                          </object>\n                                        </child>\n                                      </object>\n                                    </child>\n                                  </object>\n                                </property>\n                              </object>\n                            </child>\n                          </object>\n                        </child>\n                      </object>\n                    </property>\n                  </object>\n                </property>\n              </object>\n            </child>\n            <child>\n              <object class=\"ActionView\" id=\"action_view\">\n                <property name=\"title\" translatable=\"yes\">File Transfer</property>\n              </object>\n            </child>\n          </object>\n        </child>\n      </object>\n    </property>\n  </template>\n</interface>\n"
+        }
+      ],
+      "roots": [
+        "window.ui#1",
+        "window.ui#2",
+        "window.ui#3",
+        "window.ui#4",
+        "window.ui#5",
+        "window.ui#6",
+        "window.ui#8",
+        "window.ui#9",
+        "window.ui#10",
+        "window.ui#16",
+        "window.ui#24"
+      ],
+      "widgets": {
+        "window.ui#1": {
+          "key": "window.ui#1",
+          "sourceClass": "GtkFileDialog",
+          "sourceId": "file_dialog",
+          "sourceKind": "object",
+          "origin": {
+            "file": "window.ui",
+            "start": 0,
+            "end": 16898
+          },
+          "properties": {
+            "title": {
+              "kind": "scalar",
+              "value": "GtkFileDialog"
+            },
+            "modal": {
+              "kind": "scalar",
+              "value": "True"
+            }
+          },
+          "children": [],
+          "resolution": {
+            "kind": "unsupported-widget",
+            "reason": "renderer-does-not-support-class"
+          }
+        },
+        "window.ui#2": {
+          "key": "window.ui#2",
+          "sourceClass": "AdwToast",
+          "sourceId": "inserted_code_toast",
+          "sourceKind": "object",
+          "origin": {
+            "file": "window.ui",
+            "start": 0,
+            "end": 16898
+          },
+          "properties": {
+            "title": {
+              "kind": "scalar",
+              "value": "Inserted code from clipboard"
+            },
+            "timeout": {
+              "kind": "scalar",
+              "value": 3
+            }
+          },
+          "children": [],
+          "resolution": {
+            "kind": "unsupported-widget",
+            "reason": "renderer-does-not-support-class"
+          }
+        },
+        "window.ui#3": {
+          "key": "window.ui#3",
+          "sourceClass": "AdwAlertDialog",
+          "sourceId": "ask_abort_dialog",
+          "sourceKind": "object",
+          "origin": {
+            "file": "window.ui",
+            "start": 0,
+            "end": 16898
+          },
+          "properties": {
+            "title": {
+              "kind": "scalar",
+              "value": "AdwAlertDialog"
+            },
+            "heading": {
+              "kind": "scalar",
+              "value": "Abort File Transfer?"
+            },
+            "body": {
+              "kind": "scalar",
+              "value": "Do you want to abort the current file transfer?"
+            },
+            "close_response": {
+              "kind": "scalar",
+              "value": "continue"
+            }
+          },
+          "children": [],
+          "resolution": {
+            "kind": "unsupported-widget",
+            "reason": "renderer-does-not-support-class"
+          }
+        },
+        "window.ui#4": {
+          "key": "window.ui#4",
+          "sourceClass": "AdwAlertDialog",
+          "sourceId": "no_registered_application_error_dialog",
+          "sourceKind": "object",
+          "origin": {
+            "file": "window.ui",
+            "start": 0,
+            "end": 16898
+          },
+          "properties": {
+            "title": {
+              "kind": "scalar",
+              "value": "AdwAlertDialog"
+            },
+            "heading": {
+              "kind": "scalar",
+              "value": "Unable to Open File"
+            }
+          },
+          "children": [],
+          "resolution": {
+            "kind": "unsupported-widget",
+            "reason": "renderer-does-not-support-class"
+          }
+        },
+        "window.ui#5": {
+          "key": "window.ui#5",
+          "sourceClass": "GtkSizeGroup",
+          "sourceId": "imported-1",
+          "sourceKind": "object",
+          "origin": {
+            "file": "window.ui",
+            "start": 0,
+            "end": 16898
+          },
+          "properties": {
+            "title": {
+              "kind": "scalar",
+              "value": "GtkSizeGroup"
+            },
+            "mode": {
+              "kind": "scalar",
+              "value": "horizontal"
+            }
+          },
+          "children": [],
+          "resolution": {
+            "kind": "unsupported-widget",
+            "reason": "renderer-does-not-support-class"
+          }
+        },
+        "window.ui#6": {
+          "key": "window.ui#6",
+          "sourceClass": "WarpApplicationWindow",
+          "sourceId": "WarpApplicationWindow",
+          "sourceKind": "object",
+          "origin": {
+            "file": "window.ui",
+            "start": 0,
+            "end": 16898
+          },
+          "properties": {
+            "widthRequest": {
+              "kind": "scalar",
+              "value": 360
+            },
+            "heightRequest": {
+              "kind": "scalar",
+              "value": 200
+            },
+            "defaultWidth": {
+              "kind": "scalar",
+              "value": 460
+            },
+            "defaultHeight": {
+              "kind": "scalar",
+              "value": 600
+            },
+            "content": {
+              "kind": "scalar",
+              "value": "<object class=\"AdwToastOverlay\" id=\"toast_overlay\">\n        <child>\n          <object class=\"AdwNavigationView\" id=\"navigation_view\">\n            <signal name=\"notify::visible-page\" handler=\"navigation_view_visible_page_notify\" swapped=\"true\"/>\n            <child>\n              <object class=\"AdwNavigationPage\" id=\"page_root\">\n                <property name=\"title\" translatable=\"yes\">Warp"
+            },
+            "child": {
+              "kind": "scalar",
+              "value": "<object class=\"AdwToolbarView\">\n                    <child type=\"top\">\n                      <object class=\"AdwHeaderBar\" id=\"headerbar\">\n                        <property name=\"centering-policy\">strict"
+            },
+            "titleWidget": {
+              "kind": "scalar",
+              "value": "<object class=\"AdwViewSwitcher\" id=\"title\">\n                            <property name=\"stack\">stack"
+            },
+            "policy": {
+              "kind": "scalar",
+              "value": "wide"
+            }
+          },
+          "children": [
+            {
+              "nodeKey": "window.ui#7",
+              "origin": {
+                "file": "window.ui",
+                "start": 0,
+                "end": 16898
+              }
+            }
+          ],
+          "resolution": {
+            "kind": "generic-widget",
+            "rendererType": "window"
+          }
+        },
+        "window.ui#7": {
+          "key": "window.ui#7",
+          "sourceClass": "AdwBreakpoint",
+          "sourceId": "imported-2",
+          "sourceKind": "object",
+          "origin": {
+            "file": "window.ui",
+            "start": 0,
+            "end": 16898
+          },
+          "properties": {
+            "title": {
+              "kind": "scalar",
+              "value": "AdwBreakpoint"
+            }
+          },
+          "children": [],
+          "resolution": {
+            "kind": "unsupported-widget",
+            "reason": "renderer-does-not-support-class"
+          }
+        },
+        "window.ui#8": {
+          "key": "window.ui#8",
+          "sourceClass": "GtkMenuButton",
+          "sourceId": "appmenu_button",
+          "sourceKind": "object",
+          "origin": {
+            "file": "window.ui",
+            "start": 0,
+            "end": 16898
+          },
+          "properties": {
+            "title": {
+              "kind": "scalar",
+              "value": "GtkMenuButton"
+            },
+            "iconName": {
+              "kind": "scalar",
+              "value": "open-menu-symbolic"
+            },
+            "menuModel": {
+              "kind": "scalar",
+              "value": "primary_menu"
+            },
+            "primary": {
+              "kind": "scalar",
+              "value": "True"
+            },
+            "tooltipText": {
+              "kind": "scalar",
+              "value": "Main Menu"
+            }
+          },
+          "children": [],
+          "resolution": {
+            "kind": "unsupported-widget",
+            "reason": "renderer-does-not-support-class"
+          }
+        },
+        "window.ui#9": {
+          "key": "window.ui#9",
+          "sourceClass": "AdwViewSwitcherBar",
+          "sourceId": "view_switcher_bar",
+          "sourceKind": "object",
+          "origin": {
+            "file": "window.ui",
+            "start": 0,
+            "end": 16898
+          },
+          "properties": {
+            "title": {
+              "kind": "scalar",
+              "value": "AdwViewSwitcherBar"
+            },
+            "stack": {
+              "kind": "scalar",
+              "value": "stack"
+            }
+          },
+          "children": [],
+          "resolution": {
+            "kind": "unsupported-widget",
+            "reason": "renderer-does-not-support-class"
+          }
+        },
+        "window.ui#10": {
+          "key": "window.ui#10",
+          "sourceClass": "AdwViewStack",
+          "sourceId": "stack",
+          "sourceKind": "object",
+          "origin": {
+            "file": "window.ui",
+            "start": 0,
+            "end": 16898
+          },
+          "properties": {},
+          "children": [
+            {
+              "nodeKey": "window.ui#11",
+              "origin": {
+                "file": "window.ui",
+                "start": 0,
+                "end": 16898
+              }
+            }
+          ],
+          "resolution": {
+            "kind": "generic-widget",
+            "rendererType": "view-stack"
+          }
+        },
+        "window.ui#11": {
+          "key": "window.ui#11",
+          "sourceClass": "AdwViewStackPage",
+          "sourceId": "imported-3",
+          "sourceKind": "object",
+          "origin": {
+            "file": "window.ui",
+            "start": 0,
+            "end": 16898
+          },
+          "properties": {
+            "title": {
+              "kind": "scalar",
+              "value": "_Send"
+            },
+            "name": {
+              "kind": "scalar",
+              "value": "send"
+            },
+            "useUnderline": {
+              "kind": "scalar",
+              "value": "True"
+            },
+            "iconName": {
+              "kind": "scalar",
+              "value": "send-to-symbolic"
+            },
+            "child": {
+              "kind": "scalar",
+              "value": "<object class=\"GtkBox\" id=\"send_box\">\n                                    <property name=\"orientation\">vertical"
+            }
+          },
+          "children": [
+            {
+              "nodeKey": "window.ui#12",
+              "origin": {
+                "file": "window.ui",
+                "start": 0,
+                "end": 16898
+              }
+            }
+          ],
+          "resolution": {
+            "kind": "unsupported-widget",
+            "reason": "renderer-does-not-support-class"
+          }
+        },
+        "window.ui#12": {
+          "key": "window.ui#12",
+          "sourceClass": "AdwStatusPage",
+          "sourceId": "send_status_page",
+          "sourceKind": "object",
+          "origin": {
+            "file": "window.ui",
+            "start": 0,
+            "end": 16898
+          },
+          "properties": {
+            "title": {
+              "kind": "scalar",
+              "value": "Send File"
+            },
+            "vexpand": {
+              "kind": "scalar",
+              "value": "True"
+            },
+            "description": {
+              "kind": "scalar",
+              "value": "Select or drop the file or directory to send"
+            },
+            "iconName": {
+              "kind": "scalar",
+              "value": "send-to-symbolic"
+            }
+          },
+          "children": [
+            {
+              "nodeKey": "window.ui#13",
+              "origin": {
+                "file": "window.ui",
+                "start": 0,
+                "end": 16898
+              }
+            }
+          ],
+          "resolution": {
+            "kind": "unsupported-widget",
+            "reason": "renderer-does-not-support-class"
+          }
+        },
+        "window.ui#13": {
+          "key": "window.ui#13",
+          "sourceClass": "GtkBox",
+          "sourceId": "imported-4",
+          "sourceKind": "object",
+          "origin": {
+            "file": "window.ui",
+            "start": 0,
+            "end": 16898
+          },
+          "properties": {
+            "orientation": {
+              "kind": "scalar",
+              "value": "vertical"
+            },
+            "halign": {
+              "kind": "scalar",
+              "value": "center"
+            },
+            "spacing": {
+              "kind": "scalar",
+              "value": 12
+            }
+          },
+          "children": [
+            {
+              "nodeKey": "window.ui#14",
+              "origin": {
+                "file": "window.ui",
+                "start": 0,
+                "end": 16898
+              }
+            },
+            {
+              "nodeKey": "window.ui#15",
+              "origin": {
+                "file": "window.ui",
+                "start": 0,
+                "end": 16898
+              }
+            }
+          ],
+          "resolution": {
+            "kind": "generic-widget",
+            "rendererType": "box"
+          }
+        },
+        "window.ui#14": {
+          "key": "window.ui#14",
+          "sourceClass": "GtkButton",
+          "sourceId": "send_select_file_button",
+          "sourceKind": "object",
+          "origin": {
+            "file": "window.ui",
+            "start": 0,
+            "end": 16898
+          },
+          "properties": {
+            "canShrink": {
+              "kind": "scalar",
+              "value": "True"
+            },
+            "title": {
+              "kind": "scalar",
+              "value": "Select _File…"
+            },
+            "useUnderline": {
+              "kind": "scalar",
+              "value": "True"
+            },
+            "widthRequest": {
+              "kind": "scalar",
+              "value": 150
+            },
+            "hexpand": {
+              "kind": "scalar",
+              "value": "False"
+            }
+          },
+          "children": [],
+          "resolution": {
+            "kind": "generic-widget",
+            "rendererType": "button"
+          }
+        },
+        "window.ui#15": {
+          "key": "window.ui#15",
+          "sourceClass": "GtkButton",
+          "sourceId": "send_select_folder_button",
+          "sourceKind": "object",
+          "origin": {
+            "file": "window.ui",
+            "start": 0,
+            "end": 16898
+          },
+          "properties": {
+            "canShrink": {
+              "kind": "scalar",
+              "value": "True"
+            },
+            "title": {
+              "kind": "scalar",
+              "value": "Select F_older…"
+            },
+            "useUnderline": {
+              "kind": "scalar",
+              "value": "True"
+            },
+            "widthRequest": {
+              "kind": "scalar",
+              "value": 150
+            },
+            "hexpand": {
+              "kind": "scalar",
+              "value": "False"
+            }
+          },
+          "children": [],
+          "resolution": {
+            "kind": "generic-widget",
+            "rendererType": "button"
+          }
+        },
+        "window.ui#16": {
+          "key": "window.ui#16",
+          "sourceClass": "AdwViewStackPage",
+          "sourceId": "imported-5",
+          "sourceKind": "object",
+          "origin": {
+            "file": "window.ui",
+            "start": 0,
+            "end": 16898
+          },
+          "properties": {
+            "title": {
+              "kind": "scalar",
+              "value": "_Receive"
+            },
+            "name": {
+              "kind": "scalar",
+              "value": "receive"
+            },
+            "useUnderline": {
+              "kind": "scalar",
+              "value": "True"
+            },
+            "iconName": {
+              "kind": "scalar",
+              "value": "folder-download-symbolic"
+            },
+            "child": {
+              "kind": "scalar",
+              "value": "<object class=\"GtkBox\">\n                                    <property name=\"orientation\">vertical"
+            }
+          },
+          "children": [
+            {
+              "nodeKey": "window.ui#17",
+              "origin": {
+                "file": "window.ui",
+                "start": 0,
+                "end": 16898
+              }
+            }
+          ],
+          "resolution": {
+            "kind": "unsupported-widget",
+            "reason": "renderer-does-not-support-class"
+          }
+        },
+        "window.ui#17": {
+          "key": "window.ui#17",
+          "sourceClass": "AdwStatusPage",
+          "sourceId": "imported-6",
+          "sourceKind": "object",
+          "origin": {
+            "file": "window.ui",
+            "start": 0,
+            "end": 16898
+          },
+          "properties": {
+            "title": {
+              "kind": "scalar",
+              "value": "Receive File"
+            },
+            "vexpand": {
+              "kind": "scalar",
+              "value": "True"
+            },
+            "description": {
+              "kind": "scalar",
+              "value": "Enter the transmit code from the sender"
+            },
+            "iconName": {
+              "kind": "scalar",
+              "value": "folder-download-symbolic"
+            }
+          },
+          "children": [
+            {
+              "nodeKey": "window.ui#18",
+              "origin": {
+                "file": "window.ui",
+                "start": 0,
+                "end": 16898
+              }
+            }
+          ],
+          "resolution": {
+            "kind": "unsupported-widget",
+            "reason": "renderer-does-not-support-class"
+          }
+        },
+        "window.ui#18": {
+          "key": "window.ui#18",
+          "sourceClass": "GtkBox",
+          "sourceId": "imported-7",
+          "sourceKind": "object",
+          "origin": {
+            "file": "window.ui",
+            "start": 0,
+            "end": 16898
+          },
+          "properties": {
+            "orientation": {
+              "kind": "scalar",
+              "value": "vertical"
+            },
+            "halign": {
+              "kind": "scalar",
+              "value": "center"
+            },
+            "spacing": {
+              "kind": "scalar",
+              "value": 24
+            }
+          },
+          "children": [
+            {
+              "nodeKey": "window.ui#19",
+              "origin": {
+                "file": "window.ui",
+                "start": 0,
+                "end": 16898
+              }
+            },
+            {
+              "nodeKey": "window.ui#23",
+              "origin": {
+                "file": "window.ui",
+                "start": 0,
+                "end": 16898
+              }
+            }
+          ],
+          "resolution": {
+            "kind": "generic-widget",
+            "rendererType": "box"
+          }
+        },
+        "window.ui#19": {
+          "key": "window.ui#19",
+          "sourceClass": "AdwClamp",
+          "sourceId": "imported-8",
+          "sourceKind": "object",
+          "origin": {
+            "file": "window.ui",
+            "start": 0,
+            "end": 16898
+          },
+          "properties": {
+            "title": {
+              "kind": "scalar",
+              "value": "AdwClamp"
+            }
+          },
+          "children": [
+            {
+              "nodeKey": "window.ui#20",
+              "origin": {
+                "file": "window.ui",
+                "start": 0,
+                "end": 16898
+              }
+            }
+          ],
+          "resolution": {
+            "kind": "unsupported-widget",
+            "reason": "renderer-does-not-support-class"
+          }
+        },
+        "window.ui#20": {
+          "key": "window.ui#20",
+          "sourceClass": "GtkListBox",
+          "sourceId": "imported-9",
+          "sourceKind": "object",
+          "origin": {
+            "file": "window.ui",
+            "start": 0,
+            "end": 16898
+          },
+          "properties": {
+            "selectionMode": {
+              "kind": "scalar",
+              "value": "none"
+            }
+          },
+          "children": [
+            {
+              "nodeKey": "window.ui#21",
+              "origin": {
+                "file": "window.ui",
+                "start": 0,
+                "end": 16898
+              }
+            }
+          ],
+          "resolution": {
+            "kind": "generic-widget",
+            "rendererType": "list-box"
+          }
+        },
+        "window.ui#21": {
+          "key": "window.ui#21",
+          "sourceClass": "AdwEntryRow",
+          "sourceId": "code_entry",
+          "sourceKind": "object",
+          "origin": {
+            "file": "window.ui",
+            "start": 0,
+            "end": 16898
+          },
+          "properties": {
+            "title": {
+              "kind": "scalar",
+              "value": "Transmit Code"
+            },
+            "inputHints": {
+              "kind": "scalar",
+              "value": "private"
+            },
+            "hexpand": {
+              "kind": "scalar",
+              "value": "False"
+            }
+          },
+          "children": [
+            {
+              "nodeKey": "window.ui#22",
+              "origin": {
+                "file": "window.ui",
+                "start": 0,
+                "end": 16898
+              }
+            }
+          ],
+          "resolution": {
+            "kind": "unsupported-widget",
+            "reason": "renderer-does-not-support-class"
+          }
+        },
+        "window.ui#22": {
+          "key": "window.ui#22",
+          "sourceClass": "GtkButton",
+          "sourceId": "scan_qr_code_button",
+          "sourceKind": "object",
+          "origin": {
+            "file": "window.ui",
+            "start": 0,
+            "end": 16898
+          },
+          "properties": {
+            "visible": {
+              "kind": "scalar",
+              "value": "False"
+            },
+            "canShrink": {
+              "kind": "scalar",
+              "value": "True"
+            },
+            "valign": {
+              "kind": "scalar",
+              "value": "center"
+            },
+            "iconName": {
+              "kind": "scalar",
+              "value": "qr-code-symbolic"
+            },
+            "tooltipText": {
+              "kind": "scalar",
+              "value": "Scan QR Code"
+            }
+          },
+          "children": [],
+          "resolution": {
+            "kind": "generic-widget",
+            "rendererType": "button"
+          }
+        },
+        "window.ui#23": {
+          "key": "window.ui#23",
+          "sourceClass": "GtkButton",
+          "sourceId": "receive_button",
+          "sourceKind": "object",
+          "origin": {
+            "file": "window.ui",
+            "start": 0,
+            "end": 16898
+          },
+          "properties": {
+            "canShrink": {
+              "kind": "scalar",
+              "value": "True"
+            },
+            "halign": {
+              "kind": "scalar",
+              "value": "center"
+            },
+            "widthRequest": {
+              "kind": "scalar",
+              "value": 150
+            },
+            "sensitive": {
+              "kind": "scalar",
+              "value": "False"
+            },
+            "title": {
+              "kind": "scalar",
+              "value": "Receive _File"
+            },
+            "useUnderline": {
+              "kind": "scalar",
+              "value": "True"
+            }
+          },
+          "children": [],
+          "resolution": {
+            "kind": "generic-widget",
+            "rendererType": "button"
+          }
+        },
+        "window.ui#24": {
+          "key": "window.ui#24",
+          "sourceClass": "ActionView",
+          "sourceId": "action_view",
+          "sourceKind": "object",
+          "origin": {
+            "file": "window.ui",
+            "start": 0,
+            "end": 16898
+          },
+          "properties": {
+            "title": {
+              "kind": "scalar",
+              "value": "File Transfer"
+            }
+          },
+          "children": [],
+          "resolution": {
+            "kind": "unsupported-widget",
+            "reason": "code-defined-class"
+          }
+        }
+      },
+      "templates": {},
+      "diagnostics": []
+    },
+    "screens": [
+      {
+        "id": "imported-screen-1",
+        "title": "GtkFileDialog",
+        "type": "standard",
+        "width": 1024,
+        "height": 720,
+        "rootNode": {
+          "id": "file_dialog",
+          "type": "custom-widget",
+          "sourceKey": "window.ui#1",
+          "sourceClass": "GtkFileDialog",
+          "children": [],
+          "title": "GtkFileDialog",
+          "modal": "True"
+        }
+      },
+      {
+        "id": "imported-screen-2",
+        "title": "Inserted code from clipboard",
+        "type": "standard",
+        "width": 1024,
+        "height": 720,
+        "rootNode": {
+          "id": "inserted_code_toast",
+          "type": "custom-widget",
+          "sourceKey": "window.ui#2",
+          "sourceClass": "AdwToast",
+          "children": [],
+          "title": "Inserted code from clipboard",
+          "timeout": 3
+        }
+      },
+      {
+        "id": "imported-screen-3",
+        "title": "AdwAlertDialog",
+        "type": "standard",
+        "width": 1024,
+        "height": 720,
+        "rootNode": {
+          "id": "ask_abort_dialog",
+          "type": "custom-widget",
+          "sourceKey": "window.ui#3",
+          "sourceClass": "AdwAlertDialog",
+          "children": [],
+          "title": "AdwAlertDialog",
+          "heading": "Abort File Transfer?",
+          "body": "Do you want to abort the current file transfer?",
+          "close_response": "continue"
+        }
+      },
+      {
+        "id": "imported-screen-4",
+        "title": "AdwAlertDialog",
+        "type": "standard",
+        "width": 1024,
+        "height": 720,
+        "rootNode": {
+          "id": "no_registered_application_error_dialog",
+          "type": "custom-widget",
+          "sourceKey": "window.ui#4",
+          "sourceClass": "AdwAlertDialog",
+          "children": [],
+          "title": "AdwAlertDialog",
+          "heading": "Unable to Open File"
+        }
+      },
+      {
+        "id": "imported-screen-5",
+        "title": "GtkSizeGroup",
+        "type": "standard",
+        "width": 1024,
+        "height": 720,
+        "rootNode": {
+          "id": "imported-1",
+          "type": "custom-widget",
+          "sourceKey": "window.ui#5",
+          "sourceClass": "GtkSizeGroup",
+          "children": [],
+          "title": "GtkSizeGroup",
+          "mode": "horizontal"
+        }
+      },
+      {
+        "id": "imported-screen-6",
+        "title": "Warp 6",
+        "type": "standard",
+        "width": 1024,
+        "height": 720,
+        "rootNode": {
+          "id": "WarpApplicationWindow",
+          "type": "window",
+          "sourceKey": "window.ui#6",
+          "sourceClass": "WarpApplicationWindow",
+          "children": [
+            {
+              "id": "imported-2",
+              "type": "custom-widget",
+              "sourceKey": "window.ui#7",
+              "sourceClass": "AdwBreakpoint",
+              "children": [],
+              "title": "AdwBreakpoint"
+            }
+          ],
+          "widthRequest": 360,
+          "heightRequest": 200,
+          "defaultWidth": 460,
+          "defaultHeight": 600,
+          "content": "<object class=\"AdwToastOverlay\" id=\"toast_overlay\">\n        <child>\n          <object class=\"AdwNavigationView\" id=\"navigation_view\">\n            <signal name=\"notify::visible-page\" handler=\"navigation_view_visible_page_notify\" swapped=\"true\"/>\n            <child>\n              <object class=\"AdwNavigationPage\" id=\"page_root\">\n                <property name=\"title\" translatable=\"yes\">Warp",
+          "child": "<object class=\"AdwToolbarView\">\n                    <child type=\"top\">\n                      <object class=\"AdwHeaderBar\" id=\"headerbar\">\n                        <property name=\"centering-policy\">strict",
+          "titleWidget": "<object class=\"AdwViewSwitcher\" id=\"title\">\n                            <property name=\"stack\">stack",
+          "policy": "wide"
+        }
+      },
+      {
+        "id": "imported-screen-7",
+        "title": "GtkMenuButton",
+        "type": "standard",
+        "width": 1024,
+        "height": 720,
+        "rootNode": {
+          "id": "appmenu_button",
+          "type": "custom-widget",
+          "sourceKey": "window.ui#8",
+          "sourceClass": "GtkMenuButton",
+          "children": [],
+          "title": "GtkMenuButton",
+          "iconName": "open-menu-symbolic",
+          "menuModel": "primary_menu",
+          "primary": "True",
+          "tooltipText": "Main Menu"
+        }
+      },
+      {
+        "id": "imported-screen-8",
+        "title": "AdwViewSwitcherBar",
+        "type": "standard",
+        "width": 1024,
+        "height": 720,
+        "rootNode": {
+          "id": "view_switcher_bar",
+          "type": "custom-widget",
+          "sourceKey": "window.ui#9",
+          "sourceClass": "AdwViewSwitcherBar",
+          "children": [],
+          "title": "AdwViewSwitcherBar",
+          "stack": "stack"
+        }
+      },
+      {
+        "id": "imported-screen-9",
+        "title": "Warp 9",
+        "type": "standard",
+        "width": 1024,
+        "height": 720,
+        "rootNode": {
+          "id": "stack",
+          "type": "view-stack",
+          "sourceKey": "window.ui#10",
+          "sourceClass": "AdwViewStack",
+          "children": [
+            {
+              "id": "imported-3",
+              "type": "custom-widget",
+              "sourceKey": "window.ui#11",
+              "sourceClass": "AdwViewStackPage",
+              "children": [
+                {
+                  "id": "send_status_page",
+                  "type": "custom-widget",
+                  "sourceKey": "window.ui#12",
+                  "sourceClass": "AdwStatusPage",
+                  "children": [
+                    {
+                      "id": "imported-4",
+                      "type": "box",
+                      "sourceKey": "window.ui#13",
+                      "sourceClass": "GtkBox",
+                      "children": [
+                        {
+                          "id": "send_select_file_button",
+                          "type": "button",
+                          "sourceKey": "window.ui#14",
+                          "sourceClass": "GtkButton",
+                          "children": [],
+                          "canShrink": "True",
+                          "title": "Select _File…",
+                          "useUnderline": "True",
+                          "widthRequest": 150,
+                          "hexpand": "False"
+                        },
+                        {
+                          "id": "send_select_folder_button",
+                          "type": "button",
+                          "sourceKey": "window.ui#15",
+                          "sourceClass": "GtkButton",
+                          "children": [],
+                          "canShrink": "True",
+                          "title": "Select F_older…",
+                          "useUnderline": "True",
+                          "widthRequest": 150,
+                          "hexpand": "False"
+                        }
+                      ],
+                      "orientation": "vertical",
+                      "halign": "center",
+                      "spacing": 12
+                    }
+                  ],
+                  "title": "Send File",
+                  "vexpand": "True",
+                  "description": "Select or drop the file or directory to send",
+                  "iconName": "send-to-symbolic"
+                }
+              ],
+              "title": "_Send",
+              "name": "send",
+              "useUnderline": "True",
+              "iconName": "send-to-symbolic",
+              "child": "<object class=\"GtkBox\" id=\"send_box\">\n                                    <property name=\"orientation\">vertical"
+            }
+          ]
+        }
+      },
+      {
+        "id": "imported-screen-10",
+        "title": "_Receive",
+        "type": "standard",
+        "width": 1024,
+        "height": 720,
+        "rootNode": {
+          "id": "imported-5",
+          "type": "custom-widget",
+          "sourceKey": "window.ui#16",
+          "sourceClass": "AdwViewStackPage",
+          "children": [
+            {
+              "id": "imported-6",
+              "type": "custom-widget",
+              "sourceKey": "window.ui#17",
+              "sourceClass": "AdwStatusPage",
+              "children": [
+                {
+                  "id": "imported-7",
+                  "type": "box",
+                  "sourceKey": "window.ui#18",
+                  "sourceClass": "GtkBox",
+                  "children": [
+                    {
+                      "id": "imported-8",
+                      "type": "custom-widget",
+                      "sourceKey": "window.ui#19",
+                      "sourceClass": "AdwClamp",
+                      "children": [
+                        {
+                          "id": "imported-9",
+                          "type": "list-box",
+                          "sourceKey": "window.ui#20",
+                          "sourceClass": "GtkListBox",
+                          "children": [
+                            {
+                              "id": "code_entry",
+                              "type": "custom-widget",
+                              "sourceKey": "window.ui#21",
+                              "sourceClass": "AdwEntryRow",
+                              "children": [
+                                {
+                                  "id": "scan_qr_code_button",
+                                  "type": "button",
+                                  "sourceKey": "window.ui#22",
+                                  "sourceClass": "GtkButton",
+                                  "children": [],
+                                  "visible": "False",
+                                  "canShrink": "True",
+                                  "valign": "center",
+                                  "iconName": "qr-code-symbolic",
+                                  "tooltipText": "Scan QR Code"
+                                }
+                              ],
+                              "title": "Transmit Code",
+                              "inputHints": "private",
+                              "hexpand": "False"
+                            }
+                          ],
+                          "selectionMode": "none"
+                        }
+                      ],
+                      "title": "AdwClamp"
+                    },
+                    {
+                      "id": "receive_button",
+                      "type": "button",
+                      "sourceKey": "window.ui#23",
+                      "sourceClass": "GtkButton",
+                      "children": [],
+                      "canShrink": "True",
+                      "halign": "center",
+                      "widthRequest": 150,
+                      "sensitive": "False",
+                      "title": "Receive _File",
+                      "useUnderline": "True"
+                    }
+                  ],
+                  "orientation": "vertical",
+                  "halign": "center",
+                  "spacing": 24
+                }
+              ],
+              "title": "Receive File",
+              "vexpand": "True",
+              "description": "Enter the transmit code from the sender",
+              "iconName": "folder-download-symbolic"
+            }
+          ],
+          "title": "_Receive",
+          "name": "receive",
+          "useUnderline": "True",
+          "iconName": "folder-download-symbolic",
+          "child": "<object class=\"GtkBox\">\n                                    <property name=\"orientation\">vertical"
+        }
+      },
+      {
+        "id": "imported-screen-11",
+        "title": "File Transfer",
+        "type": "standard",
+        "width": 1024,
+        "height": 720,
+        "rootNode": {
+          "id": "action_view",
+          "type": "custom-widget",
+          "sourceKey": "window.ui#24",
+          "sourceClass": "ActionView",
+          "children": [],
+          "title": "File Transfer"
+        }
+      }
+    ]
+  },
+  "assets": {}
+}

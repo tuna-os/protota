@@ -272,7 +272,7 @@
     "source": "https://gitlab.gnome.org/World/Shortwave",
     "sourceImport": {
       "repository": "https://gitlab.gnome.org/World/Shortwave.git",
-      "uiPath": "ui",
+      "uiPath": "src/ui",
       "entry": "window.ui"
     },
     "suite": "circle",
@@ -291,7 +291,7 @@
     "source": "https://gitlab.gnome.org/World/Fragments",
     "sourceImport": {
       "repository": "https://gitlab.gnome.org/World/Fragments.git",
-      "uiPath": "data/ui",
+      "uiPath": "src/ui",
       "entry": "window.ui"
     },
     "suite": "circle",
@@ -310,8 +310,8 @@
     "source": "https://gitlab.gnome.org/World/secrets",
     "sourceImport": {
       "repository": "https://gitlab.gnome.org/World/secrets.git",
-      "uiPath": "data/ui",
-      "entry": "window.ui"
+      "uiPath": "data",
+      "entry": "gtk/history_window.ui"
     },
     "suite": "circle",
     "status": "preset",
@@ -329,8 +329,8 @@
     "source": "https://gitlab.gnome.org/World/pika-backup",
     "sourceImport": {
       "repository": "https://gitlab.gnome.org/World/pika-backup.git",
-      "uiPath": "data/resources/ui",
-      "entry": "window.ui"
+      "uiPath": "data",
+      "entry": "resources/shortcuts-dialog.ui"
     },
     "suite": "circle",
     "status": "preset",
@@ -348,7 +348,7 @@
     "source": "https://gitlab.gnome.org/World/warp",
     "sourceImport": {
       "repository": "https://gitlab.gnome.org/World/warp.git",
-      "uiPath": "data/resources/ui",
+      "uiPath": "src/ui",
       "entry": "window.ui"
     },
     "suite": "circle",
@@ -367,7 +367,1166 @@
     "source": "https://gitlab.gnome.org/World/podcasts",
     "sourceImport": {
       "repository": "https://gitlab.gnome.org/World/podcasts.git",
-      "uiPath": "podcasts-gtk/resources/ui",
+      "uiPath": ".",
+      "entry": "podcasts-gtk/resources/gtk/window.ui"
+    },
+    "suite": "circle",
+    "status": "preset",
+    "visualStatus": "not-validated"
+  },
+  "audio-sharing": {
+    "name": "Audio Sharing",
+    "aptPackage": "audio-sharing",
+    "command": "audio-sharing",
+    "presetId": "audio-sharing",
+    "viewport": {
+      "width": 900,
+      "height": 650
+    },
+    "source": "https://gitlab.gnome.org/World/AudioSharing",
+    "sourceImport": {
+      "repository": "https://gitlab.gnome.org/World/AudioSharing.git",
+      "uiPath": "src/ui",
+      "entry": "window.ui"
+    },
+    "suite": "circle",
+    "status": "preset",
+    "visualStatus": "not-validated"
+  },
+  "biblioteca": {
+    "name": "Biblioteca",
+    "aptPackage": "biblioteca",
+    "command": "biblioteca",
+    "presetId": "biblioteca",
+    "viewport": {
+      "width": 900,
+      "height": 650
+    },
+    "source": "https://gitlab.gnome.org/World/Biblioteca",
+    "sourceImport": {
+      "repository": "https://gitlab.gnome.org/World/Biblioteca.git",
+      "uiPath": "data/ui",
+      "entry": "window.ui"
+    },
+    "suite": "circle",
+    "status": "preset",
+    "visualStatus": "not-validated"
+  },
+  "binary": {
+    "name": "Binary",
+    "aptPackage": "binary",
+    "command": "binary",
+    "presetId": "binary",
+    "viewport": {
+      "width": 900,
+      "height": 650
+    },
+    "source": "https://gitlab.gnome.org/World/Binary",
+    "sourceImport": {
+      "repository": "https://gitlab.gnome.org/World/Binary.git",
+      "uiPath": "data/ui",
+      "entry": "window.ui"
+    },
+    "suite": "circle",
+    "status": "preset",
+    "visualStatus": "not-validated"
+  },
+  "blanket": {
+    "name": "Blanket",
+    "aptPackage": "blanket",
+    "command": "blanket",
+    "presetId": "blanket",
+    "viewport": {
+      "width": 900,
+      "height": 650
+    },
+    "source": "https://gitlab.gnome.org/World/Blanket",
+    "sourceImport": {
+      "repository": "https://gitlab.gnome.org/World/Blanket.git",
+      "uiPath": "data/ui",
+      "entry": "window.ui"
+    },
+    "suite": "circle",
+    "status": "preset",
+    "visualStatus": "not-validated"
+  },
+  "boatswain": {
+    "name": "Boatswain",
+    "aptPackage": "boatswain",
+    "command": "boatswain",
+    "presetId": "boatswain",
+    "viewport": {
+      "width": 900,
+      "height": 650
+    },
+    "source": "https://gitlab.gnome.org/World/Boatswain",
+    "sourceImport": {
+      "repository": "https://gitlab.gnome.org/World/Boatswain.git",
+      "uiPath": "data",
+      "entry": "window.ui"
+    },
+    "suite": "circle",
+    "status": "preset",
+    "visualStatus": "not-validated"
+  },
+  "bobby": {
+    "name": "Bobby",
+    "aptPackage": "bobby",
+    "command": "bobby",
+    "presetId": "bobby",
+    "viewport": {
+      "width": 900,
+      "height": 650
+    },
+    "source": "https://gitlab.gnome.org/World/Bobby",
+    "sourceImport": {
+      "repository": "https://gitlab.gnome.org/World/Bobby.git",
+      "uiPath": "data/ui",
+      "entry": "window.ui"
+    },
+    "suite": "circle",
+    "status": "preset",
+    "visualStatus": "not-validated"
+  },
+  "bustle": {
+    "name": "Bustle",
+    "aptPackage": "bustle",
+    "command": "bustle",
+    "presetId": "bustle",
+    "viewport": {
+      "width": 900,
+      "height": 650
+    },
+    "source": "https://gitlab.gnome.org/World/Bustle",
+    "sourceImport": {
+      "repository": "https://gitlab.gnome.org/World/Bustle.git",
+      "uiPath": "data/resources/ui",
+      "entry": "window.ui"
+    },
+    "suite": "circle",
+    "status": "preset",
+    "visualStatus": "not-validated"
+  },
+  "cartridges": {
+    "name": "Cartridges",
+    "aptPackage": "cartridges",
+    "command": "cartridges",
+    "presetId": "cartridges",
+    "viewport": {
+      "width": 900,
+      "height": 650
+    },
+    "source": "https://gitlab.gnome.org/World/Cartridges",
+    "sourceImport": {
+      "repository": "https://gitlab.gnome.org/World/Cartridges.git",
+      "uiPath": "data/ui",
+      "entry": "window.ui"
+    },
+    "suite": "circle",
+    "status": "preset",
+    "visualStatus": "not-validated"
+  },
+  "chess-clock": {
+    "name": "Chess Clock",
+    "aptPackage": "chess-clock",
+    "command": "chess-clock",
+    "presetId": "chess-clock",
+    "viewport": {
+      "width": 900,
+      "height": 650
+    },
+    "source": "https://gitlab.gnome.org/World/ChessClock",
+    "sourceImport": {
+      "repository": "https://gitlab.gnome.org/World/ChessClock.git",
+      "uiPath": "data/ui",
+      "entry": "window.ui"
+    },
+    "suite": "circle",
+    "status": "preset",
+    "visualStatus": "not-validated"
+  },
+  "citations": {
+    "name": "Citations",
+    "aptPackage": "citations",
+    "command": "citations",
+    "presetId": "citations",
+    "viewport": {
+      "width": 900,
+      "height": 650
+    },
+    "source": "https://gitlab.gnome.org/World/Citations",
+    "sourceImport": {
+      "repository": "https://gitlab.gnome.org/World/Citations.git",
+      "uiPath": "data/resources/ui",
+      "entry": "window.ui"
+    },
+    "suite": "circle",
+    "status": "preset",
+    "visualStatus": "not-validated"
+  },
+  "clairvoyant": {
+    "name": "Clairvoyant",
+    "aptPackage": "clairvoyant",
+    "command": "clairvoyant",
+    "presetId": "clairvoyant",
+    "viewport": {
+      "width": 900,
+      "height": 650
+    },
+    "source": "https://gitlab.gnome.org/World/Clairvoyant",
+    "sourceImport": {
+      "repository": "https://gitlab.gnome.org/World/Clairvoyant.git",
+      "uiPath": "data/ui",
+      "entry": "window.ui"
+    },
+    "suite": "circle",
+    "status": "preset",
+    "visualStatus": "not-validated"
+  },
+  "collision": {
+    "name": "Collision",
+    "aptPackage": "collision",
+    "command": "collision",
+    "presetId": "collision",
+    "viewport": {
+      "width": 900,
+      "height": 650
+    },
+    "source": "https://gitlab.gnome.org/World/Collision",
+    "sourceImport": {
+      "repository": "https://gitlab.gnome.org/World/Collision.git",
+      "uiPath": "data/ui",
+      "entry": "window.ui"
+    },
+    "suite": "circle",
+    "status": "preset",
+    "visualStatus": "not-validated"
+  },
+  "commit": {
+    "name": "Commit",
+    "aptPackage": "commit",
+    "command": "commit",
+    "presetId": "commit",
+    "viewport": {
+      "width": 900,
+      "height": 650
+    },
+    "source": "https://gitlab.gnome.org/World/Commit",
+    "sourceImport": {
+      "repository": "https://gitlab.gnome.org/World/Commit.git",
+      "uiPath": "data/ui",
+      "entry": "window.ui"
+    },
+    "suite": "circle",
+    "status": "preset",
+    "visualStatus": "not-validated"
+  },
+  "constrict": {
+    "name": "Constrict",
+    "aptPackage": "constrict",
+    "command": "constrict",
+    "presetId": "constrict",
+    "viewport": {
+      "width": 900,
+      "height": 650
+    },
+    "source": "https://gitlab.gnome.org/World/Constrict",
+    "sourceImport": {
+      "repository": "https://gitlab.gnome.org/World/Constrict.git",
+      "uiPath": "src/gtk",
+      "entry": "shortcuts-dialog.blp"
+    },
+    "suite": "circle",
+    "status": "preset",
+    "visualStatus": "not-validated"
+  },
+  "curtail": {
+    "name": "Curtail",
+    "aptPackage": "curtail",
+    "command": "curtail",
+    "presetId": "curtail",
+    "viewport": {
+      "width": 900,
+      "height": 650
+    },
+    "source": "https://gitlab.gnome.org/World/Curtail",
+    "sourceImport": {
+      "repository": "https://gitlab.gnome.org/World/Curtail.git",
+      "uiPath": "data/ui",
+      "entry": "window.ui"
+    },
+    "suite": "circle",
+    "status": "preset",
+    "visualStatus": "not-validated"
+  },
+  "deja-dup-backups": {
+    "name": "Déjà Dup Backups",
+    "aptPackage": "deja-dup-backups",
+    "command": "deja-dup-backups",
+    "presetId": "deja-dup-backups",
+    "viewport": {
+      "width": 900,
+      "height": 650
+    },
+    "source": "https://gitlab.gnome.org/World/DéjàDupBackups",
+    "sourceImport": {
+      "repository": "https://gitlab.gnome.org/World/DéjàDupBackups.git",
+      "uiPath": "data/ui",
+      "entry": "window.ui"
+    },
+    "suite": "circle",
+    "status": "preset",
+    "visualStatus": "not-validated"
+  },
+  "dialect": {
+    "name": "Dialect",
+    "aptPackage": "dialect",
+    "command": "dialect",
+    "presetId": "dialect",
+    "viewport": {
+      "width": 900,
+      "height": 650
+    },
+    "source": "https://gitlab.gnome.org/World/Dialect",
+    "sourceImport": {
+      "repository": "https://gitlab.gnome.org/World/Dialect.git",
+      "uiPath": "data/ui",
+      "entry": "window.ui"
+    },
+    "suite": "circle",
+    "status": "preset",
+    "visualStatus": "not-validated"
+  },
+  "drum-machine": {
+    "name": "Drum Machine",
+    "aptPackage": "drum-machine",
+    "command": "drum-machine",
+    "presetId": "drum-machine",
+    "viewport": {
+      "width": 900,
+      "height": 650
+    },
+    "source": "https://gitlab.gnome.org/World/DrumMachine",
+    "sourceImport": {
+      "repository": "https://gitlab.gnome.org/World/DrumMachine.git",
+      "uiPath": "data/ui",
+      "entry": "window.ui"
+    },
+    "suite": "circle",
+    "status": "preset",
+    "visualStatus": "not-validated"
+  },
+  "ear-tag": {
+    "name": "Ear Tag",
+    "aptPackage": "ear-tag",
+    "command": "ear-tag",
+    "presetId": "ear-tag",
+    "viewport": {
+      "width": 900,
+      "height": 650
+    },
+    "source": "https://gitlab.gnome.org/World/EarTag",
+    "sourceImport": {
+      "repository": "https://gitlab.gnome.org/World/EarTag.git",
+      "uiPath": "src/ui",
+      "entry": "window.blp"
+    },
+    "suite": "circle",
+    "status": "preset",
+    "visualStatus": "not-validated"
+  },
+  "elastic": {
+    "name": "Elastic",
+    "aptPackage": "elastic",
+    "command": "elastic",
+    "presetId": "elastic",
+    "viewport": {
+      "width": 900,
+      "height": 650
+    },
+    "source": "https://gitlab.gnome.org/World/Elastic",
+    "sourceImport": {
+      "repository": "https://gitlab.gnome.org/World/Elastic.git",
+      "uiPath": "data",
+      "entry": "window.ui"
+    },
+    "suite": "circle",
+    "status": "preset",
+    "visualStatus": "not-validated"
+  },
+  "emblem": {
+    "name": "Emblem",
+    "aptPackage": "emblem",
+    "command": "emblem",
+    "presetId": "emblem",
+    "viewport": {
+      "width": 900,
+      "height": 650
+    },
+    "source": "https://gitlab.gnome.org/World/Emblem",
+    "sourceImport": {
+      "repository": "https://gitlab.gnome.org/World/Emblem.git",
+      "uiPath": "data/ui",
+      "entry": "window.ui"
+    },
+    "suite": "circle",
+    "status": "preset",
+    "visualStatus": "not-validated"
+  },
+  "errands": {
+    "name": "Errands",
+    "aptPackage": "errands",
+    "command": "errands",
+    "presetId": "errands",
+    "viewport": {
+      "width": 900,
+      "height": 650
+    },
+    "source": "https://gitlab.gnome.org/World/Errands",
+    "sourceImport": {
+      "repository": "https://gitlab.gnome.org/World/Errands.git",
+      "uiPath": "data/ui",
+      "entry": "window.ui"
+    },
+    "suite": "circle",
+    "status": "preset",
+    "visualStatus": "not-validated"
+  },
+  "exercise-timer": {
+    "name": "Exercise Timer",
+    "aptPackage": "exercise-timer",
+    "command": "exercise-timer",
+    "presetId": "exercise-timer",
+    "viewport": {
+      "width": 900,
+      "height": 650
+    },
+    "source": "https://gitlab.gnome.org/World/ExerciseTimer",
+    "sourceImport": {
+      "repository": "https://gitlab.gnome.org/World/ExerciseTimer.git",
+      "uiPath": "data/ui",
+      "entry": "window.ui"
+    },
+    "suite": "circle",
+    "status": "preset",
+    "visualStatus": "not-validated"
+  },
+  "eyedropper": {
+    "name": "Eyedropper",
+    "aptPackage": "eyedropper",
+    "command": "eyedropper",
+    "presetId": "eyedropper",
+    "viewport": {
+      "width": 900,
+      "height": 650
+    },
+    "source": "https://gitlab.gnome.org/World/Eyedropper",
+    "sourceImport": {
+      "repository": "https://gitlab.gnome.org/World/Eyedropper.git",
+      "uiPath": "data/ui",
+      "entry": "window.ui"
+    },
+    "suite": "circle",
+    "status": "preset",
+    "visualStatus": "not-validated"
+  },
+  "file-shredder": {
+    "name": "File Shredder",
+    "aptPackage": "file-shredder",
+    "command": "file-shredder",
+    "presetId": "file-shredder",
+    "viewport": {
+      "width": 900,
+      "height": 650
+    },
+    "source": "https://gitlab.gnome.org/World/FileShredder",
+    "sourceImport": {
+      "repository": "https://gitlab.gnome.org/World/FileShredder.git",
+      "uiPath": "data/ui",
+      "entry": "window.ui"
+    },
+    "suite": "circle",
+    "status": "preset",
+    "visualStatus": "not-validated"
+  },
+  "forge-sparks": {
+    "name": "Forge Sparks",
+    "aptPackage": "forge-sparks",
+    "command": "forge-sparks",
+    "presetId": "forge-sparks",
+    "viewport": {
+      "width": 900,
+      "height": 650
+    },
+    "source": "https://gitlab.gnome.org/World/ForgeSparks",
+    "sourceImport": {
+      "repository": "https://gitlab.gnome.org/World/ForgeSparks.git",
+      "uiPath": "data/ui",
+      "entry": "window.ui"
+    },
+    "suite": "circle",
+    "status": "preset",
+    "visualStatus": "not-validated"
+  },
+  "fretboard": {
+    "name": "Fretboard",
+    "aptPackage": "fretboard",
+    "command": "fretboard",
+    "presetId": "fretboard",
+    "viewport": {
+      "width": 900,
+      "height": 650
+    },
+    "source": "https://gitlab.gnome.org/World/Fretboard",
+    "sourceImport": {
+      "repository": "https://gitlab.gnome.org/World/Fretboard.git",
+      "uiPath": "data/ui",
+      "entry": "window.ui"
+    },
+    "suite": "circle",
+    "status": "preset",
+    "visualStatus": "not-validated"
+  },
+  "gaphor": {
+    "name": "Gaphor",
+    "aptPackage": "gaphor",
+    "command": "gaphor",
+    "presetId": "gaphor",
+    "viewport": {
+      "width": 900,
+      "height": 650
+    },
+    "source": "https://gitlab.gnome.org/World/Gaphor",
+    "sourceImport": {
+      "repository": "https://gitlab.gnome.org/World/Gaphor.git",
+      "uiPath": "data/ui",
+      "entry": "window.ui"
+    },
+    "suite": "circle",
+    "status": "preset",
+    "visualStatus": "not-validated"
+  },
+  "gradia": {
+    "name": "Gradia",
+    "aptPackage": "gradia",
+    "command": "gradia",
+    "presetId": "gradia",
+    "viewport": {
+      "width": 900,
+      "height": 650
+    },
+    "source": "https://gitlab.gnome.org/World/Gradia",
+    "sourceImport": {
+      "repository": "https://gitlab.gnome.org/World/Gradia.git",
+      "uiPath": "data/ui",
+      "entry": "window.ui"
+    },
+    "suite": "circle",
+    "status": "preset",
+    "visualStatus": "not-validated"
+  },
+  "graphs": {
+    "name": "Graphs",
+    "aptPackage": "graphs",
+    "command": "graphs",
+    "presetId": "graphs",
+    "viewport": {
+      "width": 900,
+      "height": 650
+    },
+    "source": "https://gitlab.gnome.org/World/Graphs",
+    "sourceImport": {
+      "repository": "https://gitlab.gnome.org/World/Graphs.git",
+      "uiPath": "data/ui",
+      "entry": "window.blp"
+    },
+    "suite": "circle",
+    "status": "preset",
+    "visualStatus": "not-validated"
+  },
+  "hieroglyphic": {
+    "name": "Hieroglyphic",
+    "aptPackage": "hieroglyphic",
+    "command": "hieroglyphic",
+    "presetId": "hieroglyphic",
+    "viewport": {
+      "width": 900,
+      "height": 650
+    },
+    "source": "https://gitlab.gnome.org/World/Hieroglyphic",
+    "sourceImport": {
+      "repository": "https://gitlab.gnome.org/World/Hieroglyphic.git",
+      "uiPath": "data/ui",
+      "entry": "window.ui"
+    },
+    "suite": "circle",
+    "status": "preset",
+    "visualStatus": "not-validated"
+  },
+  "identity": {
+    "name": "Identity",
+    "aptPackage": "identity",
+    "command": "identity",
+    "presetId": "identity",
+    "viewport": {
+      "width": 900,
+      "height": 650
+    },
+    "source": "https://gitlab.gnome.org/World/Identity",
+    "sourceImport": {
+      "repository": "https://gitlab.gnome.org/World/Identity.git",
+      "uiPath": "data/ui",
+      "entry": "window.ui"
+    },
+    "suite": "circle",
+    "status": "preset",
+    "visualStatus": "not-validated"
+  },
+  "impression": {
+    "name": "Impression",
+    "aptPackage": "impression",
+    "command": "impression",
+    "presetId": "impression",
+    "viewport": {
+      "width": 900,
+      "height": 650
+    },
+    "source": "https://gitlab.gnome.org/World/Impression",
+    "sourceImport": {
+      "repository": "https://gitlab.gnome.org/World/Impression.git",
+      "uiPath": "data/ui",
+      "entry": "window.ui"
+    },
+    "suite": "circle",
+    "status": "preset",
+    "visualStatus": "not-validated"
+  },
+  "iotas": {
+    "name": "Iotas",
+    "aptPackage": "iotas",
+    "command": "iotas",
+    "presetId": "iotas",
+    "viewport": {
+      "width": 900,
+      "height": 650
+    },
+    "source": "https://gitlab.gnome.org/World/Iotas",
+    "sourceImport": {
+      "repository": "https://gitlab.gnome.org/World/Iotas.git",
+      "uiPath": "data/ui",
+      "entry": "window.blp"
+    },
+    "suite": "circle",
+    "status": "preset",
+    "visualStatus": "not-validated"
+  },
+  "junction": {
+    "name": "Junction",
+    "aptPackage": "junction",
+    "command": "junction",
+    "presetId": "junction",
+    "viewport": {
+      "width": 900,
+      "height": 650
+    },
+    "source": "https://gitlab.gnome.org/World/Junction",
+    "sourceImport": {
+      "repository": "https://gitlab.gnome.org/World/Junction.git",
+      "uiPath": "data/ui",
+      "entry": "window.ui"
+    },
+    "suite": "circle",
+    "status": "preset",
+    "visualStatus": "not-validated"
+  },
+  "keypunch": {
+    "name": "Keypunch",
+    "aptPackage": "keypunch",
+    "command": "keypunch",
+    "presetId": "keypunch",
+    "viewport": {
+      "width": 900,
+      "height": 650
+    },
+    "source": "https://gitlab.gnome.org/World/Keypunch",
+    "sourceImport": {
+      "repository": "https://gitlab.gnome.org/World/Keypunch.git",
+      "uiPath": "data/ui",
+      "entry": "window.ui"
+    },
+    "suite": "circle",
+    "status": "preset",
+    "visualStatus": "not-validated"
+  },
+  "komikku": {
+    "name": "Komikku",
+    "aptPackage": "komikku",
+    "command": "komikku",
+    "presetId": "komikku",
+    "viewport": {
+      "width": 900,
+      "height": 650
+    },
+    "source": "https://gitlab.gnome.org/World/Komikku",
+    "sourceImport": {
+      "repository": "https://gitlab.gnome.org/World/Komikku.git",
+      "uiPath": "data/ui",
+      "entry": "window.ui"
+    },
+    "suite": "circle",
+    "status": "preset",
+    "visualStatus": "not-validated"
+  },
+  "lorem": {
+    "name": "Lorem",
+    "aptPackage": "lorem",
+    "command": "lorem",
+    "presetId": "lorem",
+    "viewport": {
+      "width": 900,
+      "height": 650
+    },
+    "source": "https://gitlab.gnome.org/World/Lorem",
+    "sourceImport": {
+      "repository": "https://gitlab.gnome.org/World/Lorem.git",
+      "uiPath": "data/ui",
+      "entry": "window.ui"
+    },
+    "suite": "circle",
+    "status": "preset",
+    "visualStatus": "not-validated"
+  },
+  "mahjongg": {
+    "name": "Mahjongg",
+    "aptPackage": "mahjongg",
+    "command": "mahjongg",
+    "presetId": "mahjongg",
+    "viewport": {
+      "width": 900,
+      "height": 650
+    },
+    "source": "https://gitlab.gnome.org/World/Mahjongg",
+    "sourceImport": {
+      "repository": "https://gitlab.gnome.org/World/Mahjongg.git",
+      "uiPath": "data/ui",
+      "entry": "window.ui"
+    },
+    "suite": "circle",
+    "status": "preset",
+    "visualStatus": "not-validated"
+  },
+  "mousai": {
+    "name": "Mousai",
+    "aptPackage": "mousai",
+    "command": "mousai",
+    "presetId": "mousai",
+    "viewport": {
+      "width": 900,
+      "height": 650
+    },
+    "source": "https://gitlab.gnome.org/World/Mousai",
+    "sourceImport": {
+      "repository": "https://gitlab.gnome.org/World/Mousai.git",
+      "uiPath": "data/ui",
+      "entry": "window.ui"
+    },
+    "suite": "circle",
+    "status": "preset",
+    "visualStatus": "not-validated"
+  },
+  "newsflash": {
+    "name": "Newsflash",
+    "aptPackage": "newsflash",
+    "command": "newsflash",
+    "presetId": "newsflash",
+    "viewport": {
+      "width": 900,
+      "height": 650
+    },
+    "source": "https://gitlab.gnome.org/World/Newsflash",
+    "sourceImport": {
+      "repository": "https://gitlab.gnome.org/World/Newsflash.git",
+      "uiPath": "data/ui",
+      "entry": "window.ui"
+    },
+    "suite": "circle",
+    "status": "preset",
+    "visualStatus": "not-validated"
+  },
+  "obfuscate": {
+    "name": "Obfuscate",
+    "aptPackage": "obfuscate",
+    "command": "obfuscate",
+    "presetId": "obfuscate",
+    "viewport": {
+      "width": 900,
+      "height": 650
+    },
+    "source": "https://gitlab.gnome.org/World/Obfuscate",
+    "sourceImport": {
+      "repository": "https://gitlab.gnome.org/World/Obfuscate.git",
+      "uiPath": "data/resources/ui",
+      "entry": "window.ui"
+    },
+    "suite": "circle",
+    "status": "preset",
+    "visualStatus": "not-validated"
+  },
+  "paper-clip": {
+    "name": "Paper Clip",
+    "aptPackage": "paper-clip",
+    "command": "paper-clip",
+    "presetId": "paper-clip",
+    "viewport": {
+      "width": 900,
+      "height": 650
+    },
+    "source": "https://gitlab.gnome.org/World/PaperClip",
+    "sourceImport": {
+      "repository": "https://gitlab.gnome.org/World/PaperClip.git",
+      "uiPath": "data/ui",
+      "entry": "window.ui"
+    },
+    "suite": "circle",
+    "status": "preset",
+    "visualStatus": "not-validated"
+  },
+  "polari": {
+    "name": "Polari",
+    "aptPackage": "polari",
+    "command": "polari",
+    "presetId": "polari",
+    "viewport": {
+      "width": 900,
+      "height": 650
+    },
+    "source": "https://gitlab.gnome.org/World/Polari",
+    "sourceImport": {
+      "repository": "https://gitlab.gnome.org/World/Polari.git",
+      "uiPath": "data/ui",
+      "entry": "window.ui"
+    },
+    "suite": "circle",
+    "status": "preset",
+    "visualStatus": "not-validated"
+  },
+  "railway": {
+    "name": "Railway",
+    "aptPackage": "railway",
+    "command": "railway",
+    "presetId": "railway",
+    "viewport": {
+      "width": 900,
+      "height": 650
+    },
+    "source": "https://gitlab.gnome.org/World/Railway",
+    "sourceImport": {
+      "repository": "https://gitlab.gnome.org/World/Railway.git",
+      "uiPath": "data/ui",
+      "entry": "window.ui"
+    },
+    "suite": "circle",
+    "status": "preset",
+    "visualStatus": "not-validated"
+  },
+  "resources": {
+    "name": "Resources",
+    "aptPackage": "resources",
+    "command": "resources",
+    "presetId": "resources",
+    "viewport": {
+      "width": 900,
+      "height": 650
+    },
+    "source": "https://gitlab.gnome.org/World/Resources",
+    "sourceImport": {
+      "repository": "https://gitlab.gnome.org/World/Resources.git",
+      "uiPath": "data/ui",
+      "entry": "window.ui"
+    },
+    "suite": "circle",
+    "status": "preset",
+    "visualStatus": "not-validated"
+  },
+  "sessions": {
+    "name": "Sessions",
+    "aptPackage": "sessions",
+    "command": "sessions",
+    "presetId": "sessions",
+    "viewport": {
+      "width": 900,
+      "height": 650
+    },
+    "source": "https://gitlab.gnome.org/World/Sessions",
+    "sourceImport": {
+      "repository": "https://gitlab.gnome.org/World/Sessions.git",
+      "uiPath": "data/ui",
+      "entry": "window.ui"
+    },
+    "suite": "circle",
+    "status": "preset",
+    "visualStatus": "not-validated"
+  },
+  "share-preview": {
+    "name": "Share Preview",
+    "aptPackage": "share-preview",
+    "command": "share-preview",
+    "presetId": "share-preview",
+    "viewport": {
+      "width": 900,
+      "height": 650
+    },
+    "source": "https://gitlab.gnome.org/World/SharePreview",
+    "sourceImport": {
+      "repository": "https://gitlab.gnome.org/World/SharePreview.git",
+      "uiPath": "data/ui",
+      "entry": "window.ui"
+    },
+    "suite": "circle",
+    "status": "preset",
+    "visualStatus": "not-validated"
+  },
+  "solanum": {
+    "name": "Solanum",
+    "aptPackage": "solanum",
+    "command": "solanum",
+    "presetId": "solanum",
+    "viewport": {
+      "width": 900,
+      "height": 650
+    },
+    "source": "https://gitlab.gnome.org/World/Solanum",
+    "sourceImport": {
+      "repository": "https://gitlab.gnome.org/World/Solanum.git",
+      "uiPath": "data/ui",
+      "entry": "preferences-window.blp"
+    },
+    "suite": "circle",
+    "status": "preset",
+    "visualStatus": "not-validated"
+  },
+  "sudoku": {
+    "name": "Sudoku",
+    "aptPackage": "sudoku",
+    "command": "sudoku",
+    "presetId": "sudoku",
+    "viewport": {
+      "width": 900,
+      "height": 650
+    },
+    "source": "https://gitlab.gnome.org/World/Sudoku",
+    "sourceImport": {
+      "repository": "https://gitlab.gnome.org/World/Sudoku.git",
+      "uiPath": "data/ui",
+      "entry": "window.ui"
+    },
+    "suite": "circle",
+    "status": "preset",
+    "visualStatus": "not-validated"
+  },
+  "switcheroo": {
+    "name": "Switcheroo",
+    "aptPackage": "switcheroo",
+    "command": "switcheroo",
+    "presetId": "switcheroo",
+    "viewport": {
+      "width": 900,
+      "height": 650
+    },
+    "source": "https://gitlab.gnome.org/World/Switcheroo",
+    "sourceImport": {
+      "repository": "https://gitlab.gnome.org/World/Switcheroo.git",
+      "uiPath": "data/ui",
+      "entry": "window.ui"
+    },
+    "suite": "circle",
+    "status": "preset",
+    "visualStatus": "not-validated"
+  },
+  "tally": {
+    "name": "Tally",
+    "aptPackage": "tally",
+    "command": "tally",
+    "presetId": "tally",
+    "viewport": {
+      "width": 900,
+      "height": 650
+    },
+    "source": "https://gitlab.gnome.org/World/Tally",
+    "sourceImport": {
+      "repository": "https://gitlab.gnome.org/World/Tally.git",
+      "uiPath": "data/ui",
+      "entry": "window.ui"
+    },
+    "suite": "circle",
+    "status": "preset",
+    "visualStatus": "not-validated"
+  },
+  "tangram": {
+    "name": "Tangram",
+    "aptPackage": "tangram",
+    "command": "tangram",
+    "presetId": "tangram",
+    "viewport": {
+      "width": 900,
+      "height": 650
+    },
+    "source": "https://gitlab.gnome.org/World/Tangram",
+    "sourceImport": {
+      "repository": "https://gitlab.gnome.org/World/Tangram.git",
+      "uiPath": "data/ui",
+      "entry": "window.ui"
+    },
+    "suite": "circle",
+    "status": "preset",
+    "visualStatus": "not-validated"
+  },
+  "text-pieces": {
+    "name": "Text Pieces",
+    "aptPackage": "text-pieces",
+    "command": "text-pieces",
+    "presetId": "text-pieces",
+    "viewport": {
+      "width": 900,
+      "height": 650
+    },
+    "source": "https://gitlab.gnome.org/World/TextPieces",
+    "sourceImport": {
+      "repository": "https://gitlab.gnome.org/World/TextPieces.git",
+      "uiPath": "data/ui",
+      "entry": "window.ui"
+    },
+    "suite": "circle",
+    "status": "preset",
+    "visualStatus": "not-validated"
+  },
+  "tuba": {
+    "name": "Tuba",
+    "aptPackage": "tuba",
+    "command": "tuba",
+    "presetId": "tuba",
+    "viewport": {
+      "width": 900,
+      "height": 650
+    },
+    "source": "https://gitlab.gnome.org/World/Tuba",
+    "sourceImport": {
+      "repository": "https://gitlab.gnome.org/World/Tuba.git",
+      "uiPath": "data/ui",
+      "entry": "window.ui"
+    },
+    "suite": "circle",
+    "status": "preset",
+    "visualStatus": "not-validated"
+  },
+  "valuta": {
+    "name": "Valuta",
+    "aptPackage": "valuta",
+    "command": "valuta",
+    "presetId": "valuta",
+    "viewport": {
+      "width": 900,
+      "height": 650
+    },
+    "source": "https://gitlab.gnome.org/World/Valuta",
+    "sourceImport": {
+      "repository": "https://gitlab.gnome.org/World/Valuta.git",
+      "uiPath": "data/ui",
+      "entry": "window.ui"
+    },
+    "suite": "circle",
+    "status": "preset",
+    "visualStatus": "not-validated"
+  },
+  "video-trimmer": {
+    "name": "Video Trimmer",
+    "aptPackage": "video-trimmer",
+    "command": "video-trimmer",
+    "presetId": "video-trimmer",
+    "viewport": {
+      "width": 900,
+      "height": 650
+    },
+    "source": "https://gitlab.gnome.org/World/VideoTrimmer",
+    "sourceImport": {
+      "repository": "https://gitlab.gnome.org/World/VideoTrimmer.git",
+      "uiPath": "data/ui",
+      "entry": "window.ui"
+    },
+    "suite": "circle",
+    "status": "preset",
+    "visualStatus": "not-validated"
+  },
+  "webfont-bundler": {
+    "name": "Webfont Bundler",
+    "aptPackage": "webfont-bundler",
+    "command": "webfont-bundler",
+    "presetId": "webfont-bundler",
+    "viewport": {
+      "width": 900,
+      "height": 650
+    },
+    "source": "https://gitlab.gnome.org/World/WebfontBundler",
+    "sourceImport": {
+      "repository": "https://gitlab.gnome.org/World/WebfontBundler.git",
+      "uiPath": "data/ui",
+      "entry": "window.ui"
+    },
+    "suite": "circle",
+    "status": "preset",
+    "visualStatus": "not-validated"
+  },
+  "wike": {
+    "name": "Wike",
+    "aptPackage": "wike",
+    "command": "wike",
+    "presetId": "wike",
+    "viewport": {
+      "width": 900,
+      "height": 650
+    },
+    "source": "https://gitlab.gnome.org/World/Wike",
+    "sourceImport": {
+      "repository": "https://gitlab.gnome.org/World/Wike.git",
+      "uiPath": "data/ui",
+      "entry": "window.ui"
+    },
+    "suite": "circle",
+    "status": "preset",
+    "visualStatus": "not-validated"
+  },
+  "wordbook": {
+    "name": "Wordbook",
+    "aptPackage": "wordbook",
+    "command": "wordbook",
+    "presetId": "wordbook",
+    "viewport": {
+      "width": 900,
+      "height": 650
+    },
+    "source": "https://gitlab.gnome.org/World/Wordbook",
+    "sourceImport": {
+      "repository": "https://gitlab.gnome.org/World/Wordbook.git",
+      "uiPath": "data/ui",
+      "entry": "window.ui"
+    },
+    "suite": "circle",
+    "status": "preset",
+    "visualStatus": "not-validated"
+  },
+  "workbench": {
+    "name": "Workbench",
+    "aptPackage": "workbench",
+    "command": "workbench",
+    "presetId": "workbench",
+    "viewport": {
+      "width": 900,
+      "height": 650
+    },
+    "source": "https://gitlab.gnome.org/World/Workbench",
+    "sourceImport": {
+      "repository": "https://gitlab.gnome.org/World/Workbench.git",
+      "uiPath": "data/ui",
       "entry": "window.ui"
     },
     "suite": "circle",

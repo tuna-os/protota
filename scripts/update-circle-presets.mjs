@@ -1,116 +1,11 @@
 #!/usr/bin/env node
 import { execSync } from 'node:child_process';
-import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { blueprintBundleToDocument } from '../src/utils/blueprint.js';
 
 const catalogPath = new URL('../tests/fixtures/gnome-app-catalog.json', import.meta.url);
 const catalog = JSON.parse(readFileSync(catalogPath, 'utf8'));
-
-// Additional GNOME Circle applications in the World namespace
-const additionalCircleApps = [
-  {
-    id: 'shortwave',
-    name: 'Shortwave',
-    aptPackage: 'shortwave',
-    command: 'shortwave',
-    viewport: { width: 900, height: 650 },
-    source: 'https://gitlab.gnome.org/World/Shortwave',
-    sourceImport: {
-      repository: 'https://gitlab.gnome.org/World/Shortwave.git',
-      uiPath: 'ui',
-      entry: 'window.ui',
-    },
-    suite: 'circle',
-  },
-  {
-    id: 'fragments',
-    name: 'Fragments',
-    aptPackage: 'fragments',
-    command: 'fragments',
-    viewport: { width: 800, height: 600 },
-    source: 'https://gitlab.gnome.org/World/Fragments',
-    sourceImport: {
-      repository: 'https://gitlab.gnome.org/World/Fragments.git',
-      uiPath: 'data/ui',
-      entry: 'window.ui',
-    },
-    suite: 'circle',
-  },
-  {
-    id: 'secrets',
-    name: 'Secrets',
-    aptPackage: 'gnome-passwordsafe',
-    command: 'secrets',
-    viewport: { width: 900, height: 650 },
-    source: 'https://gitlab.gnome.org/World/secrets',
-    sourceImport: {
-      repository: 'https://gitlab.gnome.org/World/secrets.git',
-      uiPath: 'data/ui',
-      entry: 'window.ui',
-    },
-    suite: 'circle',
-  },
-  {
-    id: 'pika-backup',
-    name: 'Pika Backup',
-    aptPackage: 'pika-backup',
-    command: 'pika-backup',
-    viewport: { width: 900, height: 650 },
-    source: 'https://gitlab.gnome.org/World/pika-backup',
-    sourceImport: {
-      repository: 'https://gitlab.gnome.org/World/pika-backup.git',
-      uiPath: 'data/resources/ui',
-      entry: 'window.ui',
-    },
-    suite: 'circle',
-  },
-  {
-    id: 'warp',
-    name: 'Warp',
-    aptPackage: 'warp',
-    command: 'warp',
-    viewport: { width: 800, height: 600 },
-    source: 'https://gitlab.gnome.org/World/warp',
-    sourceImport: {
-      repository: 'https://gitlab.gnome.org/World/warp.git',
-      uiPath: 'data/resources/ui',
-      entry: 'window.ui',
-    },
-    suite: 'circle',
-  },
-  {
-    id: 'podcasts',
-    name: 'Podcasts',
-    aptPackage: 'gnome-podcasts',
-    command: 'gnome-podcasts',
-    viewport: { width: 900, height: 650 },
-    source: 'https://gitlab.gnome.org/World/podcasts',
-    sourceImport: {
-      repository: 'https://gitlab.gnome.org/World/podcasts.git',
-      uiPath: 'podcasts-gtk/resources/ui',
-      entry: 'window.ui',
-    },
-    suite: 'circle',
-  },
-];
-
-for (const app of additionalCircleApps) {
-  if (!catalog[app.id]) {
-    catalog[app.id] = {
-      name: app.name,
-      aptPackage: app.aptPackage,
-      command: app.command,
-      presetId: app.id,
-      viewport: app.viewport,
-      source: app.source,
-      sourceImport: app.sourceImport,
-      suite: app.suite,
-      status: 'preset',
-      visualStatus: 'not-validated',
-    };
-  }
-}
 
 const tmpDir = join(process.cwd(), '.tmp-gnome-circle-fetch');
 if (!existsSync(tmpDir)) mkdirSync(tmpDir, { recursive: true });
@@ -126,19 +21,38 @@ for (const [id, app] of Object.entries(catalog)) {
     console.log(`Cloning ${app.sourceImport.repository}...`);
     execSync(`git clone --depth 1 "${app.sourceImport.repository}" "${cloneDir}"`, { stdio: 'inherit' });
 
-    const uiRoot = join(cloneDir, app.sourceImport.uiPath);
+    let uiRoot = join(cloneDir, app.sourceImport.uiPath);
+    
+    // Auto-detect UI directory if specified path doesn't exist
+    if (!existsSync(uiRoot)) {
+      console.log(`UI root ${app.sourceImport.uiPath} not found in ${id}, auto-searching for UI directory...`);
+      const possibleDirs = ['data/ui', 'data/resources/ui', 'src/ui', 'src/gtk', 'ui', 'data', 'src'];
+      const foundDir = possibleDirs.find(d => existsSync(join(cloneDir, d)));
+      if (foundDir) {
+        uiRoot = join(cloneDir, foundDir);
+        app.sourceImport.uiPath = foundDir;
+        console.log(`Auto-detected UI root: ${foundDir}`);
+      } else {
+        uiRoot = cloneDir;
+        app.sourceImport.uiPath = '.';
+      }
+    }
+
     let entry = app.sourceImport.entry;
 
-    // Auto-detect entry file if original path is non-standard
-    if (!existsSync(join(uiRoot, entry))) {
-      console.log(`Entry ${entry} not found in ${uiRoot}, scanning for root UI file...`);
-      const { readdirSync } = await import('node:fs');
-      const files = readdirSync(uiRoot, { recursive: true }).filter(f => f.endsWith('.ui') || f.endsWith('.blp'));
-      const candidate = files.find(f => /window\.(ui|blp)$/i.test(f) || /main\.(ui|blp)$/i.test(f)) || files[0];
+    // Auto-detect entry file if original path is missing or non-existent
+    const files = readdirSync(uiRoot, { recursive: true }).filter(f => typeof f === 'string' && (f.endsWith('.ui') || f.endsWith('.blp')));
+    if (!files.length) {
+      console.warn(`No .ui or .blp files found in ${uiRoot} for ${id}`);
+      continue;
+    }
+
+    if (!files.includes(entry)) {
+      const candidate = files.find(f => /window\.(ui|blp)$/i.test(f) || /main\.(ui|blp)$/i.test(f) || /app\.(ui|blp)$/i.test(f)) || files[0];
       if (candidate) {
         entry = candidate;
         app.sourceImport.entry = entry;
-        console.log(`Auto-selected entry: ${entry}`);
+        console.log(`Auto-selected entry file: ${entry}`);
       }
     }
 

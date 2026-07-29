@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "entry": "resources/shortcuts-dialog.ui",
+  "files": [
+    {
+      "path": "resources/shortcuts-dialog.ui",
+      "content": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<interface>\n  <object class=\"AdwShortcutsDialog\" id=\"shortcuts_dialog\">\n    <child>\n      <object class=\"AdwShortcutsSection\">\n        <property name=\"title\" translatable=\"yes\">General</property>\n        <child>\n          <object class=\"AdwShortcutsItem\">\n            <property name=\"accelerator\">&lt;Ctrl&gt;N</property>\n            <property name=\"title\" translatable=\"yes\">Set Up New Backup</property>\n          </object>\n        </child>\n        <child>\n          <object class=\"AdwShortcutsItem\">\n            <property name=\"action-name\">app.shortcuts</property>\n            <property name=\"title\" translatable=\"yes\">Show Keyboard Shortcuts</property>\n          </object>\n        </child>\n        <child>\n          <object class=\"AdwShortcutsItem\">\n            <property name=\"action-name\">app.quit</property>\n            <property name=\"title\" translatable=\"yes\">Quit</property>\n          </object>\n        </child>\n        <child>\n          <object class=\"AdwShortcutsItem\">\n            <property name=\"accelerator\">&lt;alt&gt;Left</property>\n            <property name=\"title\" translatable=\"yes\">Back</property>\n          </object>\n        </child>\n        <child>\n          <object class=\"AdwShortcutsItem\">\n            <property name=\"accelerator\">F10</property>\n            <property name=\"title\" translatable=\"yes\">Open Menu</property>\n          </object>\n        </child>\n      </object>\n    </child>\n  </object>\n</interface>\n"
+    }
+  ]
+}

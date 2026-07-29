@@ -1,0 +1,1170 @@
+{
+  "version": 1,
+  "exportedAt": "2026-07-29T13:12:36.210Z",
+  "document": {
+    "id": "imported-document",
+    "title": "Solanum",
+    "colorScheme": "auto",
+    "edges": [],
+    "screens": [
+      {
+        "id": "imported-screen-1",
+        "title": "Adw.PreferencesWindow",
+        "type": "standard",
+        "width": 1024,
+        "height": 720,
+        "rootNode": {
+          "id": "imported-1",
+          "type": "custom-widget",
+          "sourceKey": "preferences-window.blp#2",
+          "sourceClass": "Adw.PreferencesWindow",
+          "children": [
+            {
+              "id": "imported-3",
+              "type": "preferences-page",
+              "sourceKey": "preferences-window.blp#4",
+              "sourceClass": "Adw.PreferencesPage",
+              "children": [
+                {
+                  "id": "imported-5",
+                  "type": "preferences-group",
+                  "sourceKey": "preferences-window.blp#6",
+                  "sourceClass": "Adw.PreferencesGroup",
+                  "children": [
+                    {
+                      "id": "lap_spin",
+                      "type": "spin-row",
+                      "sourceKey": "preferences-window.blp#7",
+                      "sourceClass": "Adw.SpinRow",
+                      "children": [
+                        {
+                          "id": "adjustment",
+                          "type": "custom-widget",
+                          "sourceKey": "preferences-window.blp#8",
+                          "sourceClass": "Gtk.Adjustment",
+                          "children": [],
+                          "title": "Gtk.Adjustment",
+                          "lower": 1,
+                          "upper": 99,
+                          "stepIncrement": 1,
+                          "slot": "adjustment"
+                        }
+                      ],
+                      "numeric": true
+                    },
+                    {
+                      "id": "short_break_spin",
+                      "type": "spin-row",
+                      "sourceKey": "preferences-window.blp#9",
+                      "sourceClass": "Adw.SpinRow",
+                      "children": [
+                        {
+                          "id": "imported-10",
+                          "type": "custom-widget",
+                          "sourceKey": "preferences-window.blp#11",
+                          "sourceClass": "Gtk.Adjustment",
+                          "children": [],
+                          "title": "Gtk.Adjustment",
+                          "slot": "adjustment"
+                        }
+                      ],
+                      "numeric": true
+                    },
+                    {
+                      "id": "long_break_spin",
+                      "type": "spin-row",
+                      "sourceKey": "preferences-window.blp#12",
+                      "sourceClass": "Adw.SpinRow",
+                      "children": [
+                        {
+                          "id": "imported-13",
+                          "type": "custom-widget",
+                          "sourceKey": "preferences-window.blp#14",
+                          "sourceClass": "Gtk.Adjustment",
+                          "children": [],
+                          "title": "Gtk.Adjustment",
+                          "slot": "adjustment"
+                        }
+                      ],
+                      "numeric": true
+                    }
+                  ]
+                },
+                {
+                  "id": "imported-15",
+                  "type": "preferences-group",
+                  "sourceKey": "preferences-window.blp#16",
+                  "sourceClass": "Adw.PreferencesGroup",
+                  "children": [
+                    {
+                      "id": "session_count_spin",
+                      "type": "spin-row",
+                      "sourceKey": "preferences-window.blp#17",
+                      "sourceClass": "Adw.SpinRow",
+                      "children": [
+                        {
+                          "id": "imported-18",
+                          "type": "custom-widget",
+                          "sourceKey": "preferences-window.blp#19",
+                          "sourceClass": "Gtk.Adjustment",
+                          "children": [],
+                          "title": "Gtk.Adjustment",
+                          "slot": "adjustment"
+                        }
+                      ],
+                      "numeric": true
+                    }
+                  ]
+                },
+                {
+                  "id": "imported-20",
+                  "type": "preferences-group",
+                  "sourceKey": "preferences-window.blp#21",
+                  "sourceClass": "Adw.PreferencesGroup",
+                  "children": [
+                    {
+                      "id": "fullscreen_switch",
+                      "type": "switch-row",
+                      "sourceKey": "preferences-window.blp#22",
+                      "sourceClass": "Adw.SwitchRow",
+                      "children": []
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "title": "Adw.PreferencesWindow",
+          "searchEnabled": false
+        }
+      }
+    ],
+    "sourceProject": {
+      "files": [
+        {
+          "path": "preferences-window.blp",
+          "content": "using Gtk 4.0;\nusing Adw 1;\n\ntemplate $SolanumPreferencesWindow : Adw.PreferencesWindow {\n  search-enabled: false;\n\n  Adw.PreferencesPage {\n    Adw.PreferencesGroup {\n      title: _(\"Session Length\");\n      description: _(\"The length of each session type in minutes. Changes apply to the next session of each type.\");\n\n      Adw.SpinRow lap_spin {\n        title: _(\"Lap Length\");\n        numeric: true;\n        adjustment: Gtk.Adjustment adjustment {\n          lower: 1;\n          upper: 99;\n          step-increment: 1;\n        };\n      }\n\n      Adw.SpinRow short_break_spin {\n        title: _(\"Short Break Length\");\n        numeric: true;\n        adjustment: Gtk.Adjustment {\n          lower: bind adjustment.lower;\n          upper: bind adjustment.upper;\n          step-increment: bind adjustment.step-increment;\n        };\n      }\n\n      Adw.SpinRow long_break_spin {\n        title: _(\"Long Break Length\");\n        numeric: true;\n        adjustment: Gtk.Adjustment {\n          lower: bind adjustment.lower;\n          upper: bind adjustment.upper;\n          step-increment: bind adjustment.step-increment;\n        };\n      }\n    }\n\n    Adw.PreferencesGroup {\n      Adw.SpinRow session_count_spin {\n        title: _(\"Sessions Until Long Break\");\n        numeric: true;\n        adjustment: Gtk.Adjustment {\n          lower: bind adjustment.lower;\n          upper: bind adjustment.upper;\n          step-increment: bind adjustment.step-increment;\n        };\n      }\n    }\n\n    Adw.PreferencesGroup {\n      Adw.SwitchRow fullscreen_switch {\n        title: _(\"Fullscreen During Breaks\");\n      }\n    }\n  }\n}\n"
+        },
+        {
+          "path": "window.blp",
+          "content": "using Gtk 4.0;\nusing Adw 1;\n\ntemplate $SolanumWindow : Adw.ApplicationWindow {\n  default-width: 360;\n  default-height: 360;\n  height-request: 294;\n  default-widget: timer_button;\n  content: Adw.ToolbarView {\n    [top]\n    Adw.HeaderBar {\n      show-title: false;\n    }\n\n    content: Gtk.Box {\n      orientation: vertical;\n      valign: center;\n      vexpand: true;\n      spacing: 6;\n      styles [\"main-box\"]\n\n      Gtk.Label lap_label {\n        styles [\"heading\", \"dim-label\"]\n      }\n\n      Gtk.Label timer_label {\n        styles [\"timer-label\", \"accent\", \"blinking\"]\n      }\n\n      Gtk.CenterBox {\n        margin-bottom: 48;\n        halign: center;\n\n        [center]\n        Gtk.Box {\n          spacing: 12;\n          halign: center;\n\n          Gtk.Button timer_button {\n            tooltip-text: _(\"Toggle Timer\");\n            icon-name: \"media-playback-start-symbolic\";\n            action-name: \"win.toggle-timer\";\n            valign: center;\n            styles [\"circular\", \"large\", \"suggested-action\"]\n          }\n\n          Gtk.Button skip_button {\n            tooltip-text: _(\"Skip\");\n            icon-name: \"media-seek-forward-symbolic\";\n            action-name: \"win.skip\";\n            valign: center;\n            styles [\"circular\", \"large\"]\n          }\n        }\n\n        [end]\n        Gtk.MenuButton menu_button {\n          primary: true;\n          tooltip-text: _(\"Main Menu\");\n          menu-model: app_menu;\n          icon-name: \"open-menu-symbolic\";\n          halign: end;\n          valign: center;\n          margin-start: 12;\n          styles [\"circular\"]\n        }\n      }\n    };\n  };\n\n  Adw.Breakpoint large_text_bp {\n    condition (\"min-width: 800sp and min-height: 800sp\")\n  }\n}\n\nmenu app_menu {\n  section {\n    item (_(\"Reset Sessions\"), \"win.reset\")\n  }\n\n  section {\n    item (_(\"_Preferences\"), \"app.preferences\")\n    item (_(\"_Keyboard Shortcuts\"), \"win.show-help-overlay\")\n    item (_(\"_About Solanum\"), \"app.about\")\n  }\n}\n"
+        }
+      ],
+      "roots": [
+        "preferences-window.blp#2"
+      ],
+      "widgets": {
+        "preferences-window.blp#2": {
+          "key": "preferences-window.blp#2",
+          "sourceClass": "Adw.PreferencesWindow",
+          "sourceId": "imported-1",
+          "sourceKind": "template-root",
+          "origin": {
+            "file": "preferences-window.blp",
+            "start": 66,
+            "end": 1604
+          },
+          "properties": {
+            "search-enabled": {
+              "kind": "scalar",
+              "value": false
+            }
+          },
+          "children": [
+            {
+              "nodeKey": "preferences-window.blp#4",
+              "origin": {
+                "file": "preferences-window.blp",
+                "start": 118,
+                "end": 1602
+              }
+            }
+          ],
+          "resolution": {
+            "kind": "unsupported-widget",
+            "reason": "renderer-does-not-support-class"
+          }
+        },
+        "preferences-window.blp#4": {
+          "key": "preferences-window.blp#4",
+          "sourceClass": "Adw.PreferencesPage",
+          "sourceId": "imported-3",
+          "sourceKind": "object",
+          "origin": {
+            "file": "preferences-window.blp",
+            "start": 118,
+            "end": 1602
+          },
+          "properties": {},
+          "children": [
+            {
+              "nodeKey": "preferences-window.blp#6",
+              "origin": {
+                "file": "preferences-window.blp",
+                "start": 144,
+                "end": 1133
+              }
+            },
+            {
+              "nodeKey": "preferences-window.blp#16",
+              "origin": {
+                "file": "preferences-window.blp",
+                "start": 1139,
+                "end": 1470
+              }
+            },
+            {
+              "nodeKey": "preferences-window.blp#21",
+              "origin": {
+                "file": "preferences-window.blp",
+                "start": 1476,
+                "end": 1598
+              }
+            }
+          ],
+          "resolution": {
+            "kind": "generic-widget",
+            "rendererType": "preferences-page"
+          }
+        },
+        "preferences-window.blp#6": {
+          "key": "preferences-window.blp#6",
+          "sourceClass": "Adw.PreferencesGroup",
+          "sourceId": "imported-5",
+          "sourceKind": "object",
+          "origin": {
+            "file": "preferences-window.blp",
+            "start": 144,
+            "end": 1133
+          },
+          "properties": {
+            "title": {
+              "kind": "opaque",
+              "sourceText": "_ \"Session Length\""
+            },
+            "description": {
+              "kind": "opaque",
+              "sourceText": "_ \"The length of each session type in minutes. Changes apply to the next session of each type.\""
+            }
+          },
+          "children": [
+            {
+              "nodeKey": "preferences-window.blp#7",
+              "origin": {
+                "file": "preferences-window.blp",
+                "start": 325,
+                "end": 539
+              }
+            },
+            {
+              "nodeKey": "preferences-window.blp#9",
+              "origin": {
+                "file": "preferences-window.blp",
+                "start": 547,
+                "end": 834
+              }
+            },
+            {
+              "nodeKey": "preferences-window.blp#12",
+              "origin": {
+                "file": "preferences-window.blp",
+                "start": 842,
+                "end": 1127
+              }
+            }
+          ],
+          "resolution": {
+            "kind": "generic-widget",
+            "rendererType": "preferences-group"
+          }
+        },
+        "preferences-window.blp#7": {
+          "key": "preferences-window.blp#7",
+          "sourceClass": "Adw.SpinRow",
+          "sourceId": "lap_spin",
+          "sourceKind": "object",
+          "origin": {
+            "file": "preferences-window.blp",
+            "start": 325,
+            "end": 539
+          },
+          "properties": {
+            "title": {
+              "kind": "opaque",
+              "sourceText": "_ \"Lap Length\""
+            },
+            "numeric": {
+              "kind": "scalar",
+              "value": true
+            },
+            "adjustment": {
+              "kind": "object",
+              "nodeKey": "preferences-window.blp#8"
+            }
+          },
+          "children": [
+            {
+              "nodeKey": "preferences-window.blp#8",
+              "slot": "adjustment",
+              "origin": {
+                "file": "preferences-window.blp",
+                "start": 423,
+                "end": 530
+              }
+            }
+          ],
+          "resolution": {
+            "kind": "generic-widget",
+            "rendererType": "spin-row"
+          }
+        },
+        "preferences-window.blp#8": {
+          "key": "preferences-window.blp#8",
+          "sourceClass": "Gtk.Adjustment",
+          "sourceId": "adjustment",
+          "sourceKind": "object",
+          "origin": {
+            "file": "preferences-window.blp",
+            "start": 423,
+            "end": 530
+          },
+          "properties": {
+            "lower": {
+              "kind": "scalar",
+              "value": 1
+            },
+            "upper": {
+              "kind": "scalar",
+              "value": 99
+            },
+            "step-increment": {
+              "kind": "scalar",
+              "value": 1
+            }
+          },
+          "children": [],
+          "resolution": {
+            "kind": "unsupported-widget",
+            "reason": "renderer-does-not-support-class"
+          }
+        },
+        "preferences-window.blp#9": {
+          "key": "preferences-window.blp#9",
+          "sourceClass": "Adw.SpinRow",
+          "sourceId": "short_break_spin",
+          "sourceKind": "object",
+          "origin": {
+            "file": "preferences-window.blp",
+            "start": 547,
+            "end": 834
+          },
+          "properties": {
+            "title": {
+              "kind": "opaque",
+              "sourceText": "_ \"Short Break Length\""
+            },
+            "numeric": {
+              "kind": "scalar",
+              "value": true
+            },
+            "adjustment": {
+              "kind": "object",
+              "nodeKey": "preferences-window.blp#11"
+            }
+          },
+          "children": [
+            {
+              "nodeKey": "preferences-window.blp#11",
+              "slot": "adjustment",
+              "origin": {
+                "file": "preferences-window.blp",
+                "start": 661,
+                "end": 825
+              }
+            }
+          ],
+          "resolution": {
+            "kind": "generic-widget",
+            "rendererType": "spin-row"
+          }
+        },
+        "preferences-window.blp#11": {
+          "key": "preferences-window.blp#11",
+          "sourceClass": "Gtk.Adjustment",
+          "sourceId": "imported-10",
+          "sourceKind": "object",
+          "origin": {
+            "file": "preferences-window.blp",
+            "start": 661,
+            "end": 825
+          },
+          "properties": {
+            "lower": {
+              "kind": "binding",
+              "sourceText": "bind adjustment.lower"
+            },
+            "upper": {
+              "kind": "binding",
+              "sourceText": "bind adjustment.upper"
+            },
+            "step-increment": {
+              "kind": "binding",
+              "sourceText": "bind adjustment.step-increment"
+            }
+          },
+          "children": [],
+          "resolution": {
+            "kind": "unsupported-widget",
+            "reason": "renderer-does-not-support-class"
+          }
+        },
+        "preferences-window.blp#12": {
+          "key": "preferences-window.blp#12",
+          "sourceClass": "Adw.SpinRow",
+          "sourceId": "long_break_spin",
+          "sourceKind": "object",
+          "origin": {
+            "file": "preferences-window.blp",
+            "start": 842,
+            "end": 1127
+          },
+          "properties": {
+            "title": {
+              "kind": "opaque",
+              "sourceText": "_ \"Long Break Length\""
+            },
+            "numeric": {
+              "kind": "scalar",
+              "value": true
+            },
+            "adjustment": {
+              "kind": "object",
+              "nodeKey": "preferences-window.blp#14"
+            }
+          },
+          "children": [
+            {
+              "nodeKey": "preferences-window.blp#14",
+              "slot": "adjustment",
+              "origin": {
+                "file": "preferences-window.blp",
+                "start": 954,
+                "end": 1118
+              }
+            }
+          ],
+          "resolution": {
+            "kind": "generic-widget",
+            "rendererType": "spin-row"
+          }
+        },
+        "preferences-window.blp#14": {
+          "key": "preferences-window.blp#14",
+          "sourceClass": "Gtk.Adjustment",
+          "sourceId": "imported-13",
+          "sourceKind": "object",
+          "origin": {
+            "file": "preferences-window.blp",
+            "start": 954,
+            "end": 1118
+          },
+          "properties": {
+            "lower": {
+              "kind": "binding",
+              "sourceText": "bind adjustment.lower"
+            },
+            "upper": {
+              "kind": "binding",
+              "sourceText": "bind adjustment.upper"
+            },
+            "step-increment": {
+              "kind": "binding",
+              "sourceText": "bind adjustment.step-increment"
+            }
+          },
+          "children": [],
+          "resolution": {
+            "kind": "unsupported-widget",
+            "reason": "renderer-does-not-support-class"
+          }
+        },
+        "preferences-window.blp#16": {
+          "key": "preferences-window.blp#16",
+          "sourceClass": "Adw.PreferencesGroup",
+          "sourceId": "imported-15",
+          "sourceKind": "object",
+          "origin": {
+            "file": "preferences-window.blp",
+            "start": 1139,
+            "end": 1470
+          },
+          "properties": {},
+          "children": [
+            {
+              "nodeKey": "preferences-window.blp#17",
+              "origin": {
+                "file": "preferences-window.blp",
+                "start": 1168,
+                "end": 1464
+              }
+            }
+          ],
+          "resolution": {
+            "kind": "generic-widget",
+            "rendererType": "preferences-group"
+          }
+        },
+        "preferences-window.blp#17": {
+          "key": "preferences-window.blp#17",
+          "sourceClass": "Adw.SpinRow",
+          "sourceId": "session_count_spin",
+          "sourceKind": "object",
+          "origin": {
+            "file": "preferences-window.blp",
+            "start": 1168,
+            "end": 1464
+          },
+          "properties": {
+            "title": {
+              "kind": "opaque",
+              "sourceText": "_ \"Sessions Until Long Break\""
+            },
+            "numeric": {
+              "kind": "scalar",
+              "value": true
+            },
+            "adjustment": {
+              "kind": "object",
+              "nodeKey": "preferences-window.blp#19"
+            }
+          },
+          "children": [
+            {
+              "nodeKey": "preferences-window.blp#19",
+              "slot": "adjustment",
+              "origin": {
+                "file": "preferences-window.blp",
+                "start": 1291,
+                "end": 1455
+              }
+            }
+          ],
+          "resolution": {
+            "kind": "generic-widget",
+            "rendererType": "spin-row"
+          }
+        },
+        "preferences-window.blp#19": {
+          "key": "preferences-window.blp#19",
+          "sourceClass": "Gtk.Adjustment",
+          "sourceId": "imported-18",
+          "sourceKind": "object",
+          "origin": {
+            "file": "preferences-window.blp",
+            "start": 1291,
+            "end": 1455
+          },
+          "properties": {
+            "lower": {
+              "kind": "binding",
+              "sourceText": "bind adjustment.lower"
+            },
+            "upper": {
+              "kind": "binding",
+              "sourceText": "bind adjustment.upper"
+            },
+            "step-increment": {
+              "kind": "binding",
+              "sourceText": "bind adjustment.step-increment"
+            }
+          },
+          "children": [],
+          "resolution": {
+            "kind": "unsupported-widget",
+            "reason": "renderer-does-not-support-class"
+          }
+        },
+        "preferences-window.blp#21": {
+          "key": "preferences-window.blp#21",
+          "sourceClass": "Adw.PreferencesGroup",
+          "sourceId": "imported-20",
+          "sourceKind": "object",
+          "origin": {
+            "file": "preferences-window.blp",
+            "start": 1476,
+            "end": 1598
+          },
+          "properties": {},
+          "children": [
+            {
+              "nodeKey": "preferences-window.blp#22",
+              "origin": {
+                "file": "preferences-window.blp",
+                "start": 1505,
+                "end": 1592
+              }
+            }
+          ],
+          "resolution": {
+            "kind": "generic-widget",
+            "rendererType": "preferences-group"
+          }
+        },
+        "preferences-window.blp#22": {
+          "key": "preferences-window.blp#22",
+          "sourceClass": "Adw.SwitchRow",
+          "sourceId": "fullscreen_switch",
+          "sourceKind": "object",
+          "origin": {
+            "file": "preferences-window.blp",
+            "start": 1505,
+            "end": 1592
+          },
+          "properties": {
+            "title": {
+              "kind": "opaque",
+              "sourceText": "_ \"Fullscreen During Breaks\""
+            }
+          },
+          "children": [],
+          "resolution": {
+            "kind": "generic-widget",
+            "rendererType": "switch-row"
+          }
+        },
+        "window.blp#24": {
+          "key": "window.blp#24",
+          "sourceClass": "Adw.ApplicationWindow",
+          "sourceId": "imported-23",
+          "sourceKind": "template-root",
+          "origin": {
+            "file": "window.blp",
+            "start": 55,
+            "end": 1701
+          },
+          "properties": {
+            "default-width": {
+              "kind": "scalar",
+              "value": 360
+            },
+            "default-height": {
+              "kind": "scalar",
+              "value": 360
+            },
+            "height-request": {
+              "kind": "scalar",
+              "value": 294
+            },
+            "default-widget": {
+              "kind": "scalar",
+              "value": "timer_button"
+            },
+            "content": {
+              "kind": "object",
+              "nodeKey": "window.blp#26"
+            }
+          },
+          "children": [
+            {
+              "nodeKey": "window.blp#26",
+              "slot": "content",
+              "origin": {
+                "file": "window.blp",
+                "start": 190,
+                "end": 1603
+              }
+            },
+            {
+              "nodeKey": "window.blp#40",
+              "origin": {
+                "file": "window.blp",
+                "start": 1608,
+                "end": 1699
+              }
+            }
+          ],
+          "resolution": {
+            "kind": "generic-widget",
+            "rendererType": "window"
+          }
+        },
+        "window.blp#26": {
+          "key": "window.blp#26",
+          "sourceClass": "Adw.ToolbarView",
+          "sourceId": "imported-25",
+          "sourceKind": "object",
+          "origin": {
+            "file": "window.blp",
+            "start": 190,
+            "end": 1603
+          },
+          "properties": {
+            "content": {
+              "kind": "object",
+              "nodeKey": "window.blp#30"
+            }
+          },
+          "children": [
+            {
+              "nodeKey": "window.blp#28",
+              "origin": {
+                "file": "window.blp",
+                "start": 222,
+                "end": 268
+              }
+            },
+            {
+              "nodeKey": "window.blp#30",
+              "slot": "content",
+              "origin": {
+                "file": "window.blp",
+                "start": 283,
+                "end": 1598
+              }
+            }
+          ],
+          "resolution": {
+            "kind": "generic-widget",
+            "rendererType": "toolbar-view"
+          }
+        },
+        "window.blp#28": {
+          "key": "window.blp#28",
+          "sourceClass": "Adw.HeaderBar",
+          "sourceId": "imported-27",
+          "sourceKind": "object",
+          "origin": {
+            "file": "window.blp",
+            "start": 222,
+            "end": 268
+          },
+          "properties": {
+            "show-title": {
+              "kind": "scalar",
+              "value": false
+            }
+          },
+          "children": [],
+          "resolution": {
+            "kind": "generic-widget",
+            "rendererType": "header-bar"
+          }
+        },
+        "window.blp#30": {
+          "key": "window.blp#30",
+          "sourceClass": "Gtk.Box",
+          "sourceId": "imported-29",
+          "sourceKind": "object",
+          "origin": {
+            "file": "window.blp",
+            "start": 283,
+            "end": 1598
+          },
+          "properties": {
+            "orientation": {
+              "kind": "scalar",
+              "value": "vertical"
+            },
+            "valign": {
+              "kind": "scalar",
+              "value": "center"
+            },
+            "vexpand": {
+              "kind": "scalar",
+              "value": true
+            },
+            "spacing": {
+              "kind": "scalar",
+              "value": 6
+            },
+            "styles": {
+              "kind": "array",
+              "values": [
+                {
+                  "kind": "scalar",
+                  "value": "main-box"
+                }
+              ]
+            }
+          },
+          "children": [
+            {
+              "nodeKey": "window.blp#31",
+              "origin": {
+                "file": "window.blp",
+                "start": 416,
+                "end": 485
+              }
+            },
+            {
+              "nodeKey": "window.blp#32",
+              "origin": {
+                "file": "window.blp",
+                "start": 493,
+                "end": 577
+              }
+            },
+            {
+              "nodeKey": "window.blp#34",
+              "origin": {
+                "file": "window.blp",
+                "start": 585,
+                "end": 1592
+              }
+            }
+          ],
+          "resolution": {
+            "kind": "generic-widget",
+            "rendererType": "box"
+          }
+        },
+        "window.blp#31": {
+          "key": "window.blp#31",
+          "sourceClass": "Gtk.Label",
+          "sourceId": "lap_label",
+          "sourceKind": "object",
+          "origin": {
+            "file": "window.blp",
+            "start": 416,
+            "end": 485
+          },
+          "properties": {
+            "styles": {
+              "kind": "array",
+              "values": [
+                {
+                  "kind": "scalar",
+                  "value": "heading"
+                },
+                {
+                  "kind": "scalar",
+                  "value": "dim-label"
+                }
+              ]
+            }
+          },
+          "children": [],
+          "resolution": {
+            "kind": "generic-widget",
+            "rendererType": "label"
+          }
+        },
+        "window.blp#32": {
+          "key": "window.blp#32",
+          "sourceClass": "Gtk.Label",
+          "sourceId": "timer_label",
+          "sourceKind": "object",
+          "origin": {
+            "file": "window.blp",
+            "start": 493,
+            "end": 577
+          },
+          "properties": {
+            "styles": {
+              "kind": "array",
+              "values": [
+                {
+                  "kind": "scalar",
+                  "value": "timer-label"
+                },
+                {
+                  "kind": "scalar",
+                  "value": "accent"
+                },
+                {
+                  "kind": "scalar",
+                  "value": "blinking"
+                }
+              ]
+            }
+          },
+          "children": [],
+          "resolution": {
+            "kind": "generic-widget",
+            "rendererType": "label"
+          }
+        },
+        "window.blp#34": {
+          "key": "window.blp#34",
+          "sourceClass": "Gtk.CenterBox",
+          "sourceId": "imported-33",
+          "sourceKind": "object",
+          "origin": {
+            "file": "window.blp",
+            "start": 585,
+            "end": 1592
+          },
+          "properties": {
+            "margin-bottom": {
+              "kind": "scalar",
+              "value": 48
+            },
+            "halign": {
+              "kind": "scalar",
+              "value": "center"
+            }
+          },
+          "children": [
+            {
+              "nodeKey": "window.blp#36",
+              "origin": {
+                "file": "window.blp",
+                "start": 678,
+                "end": 1275
+              }
+            },
+            {
+              "nodeKey": "window.blp#39",
+              "origin": {
+                "file": "window.blp",
+                "start": 1299,
+                "end": 1584
+              }
+            }
+          ],
+          "resolution": {
+            "kind": "generic-widget",
+            "rendererType": "center-box"
+          }
+        },
+        "window.blp#36": {
+          "key": "window.blp#36",
+          "sourceClass": "Gtk.Box",
+          "sourceId": "imported-35",
+          "sourceKind": "object",
+          "origin": {
+            "file": "window.blp",
+            "start": 678,
+            "end": 1275
+          },
+          "properties": {
+            "spacing": {
+              "kind": "scalar",
+              "value": 12
+            },
+            "halign": {
+              "kind": "scalar",
+              "value": "center"
+            }
+          },
+          "children": [
+            {
+              "nodeKey": "window.blp#37",
+              "origin": {
+                "file": "window.blp",
+                "start": 748,
+                "end": 1020
+              }
+            },
+            {
+              "nodeKey": "window.blp#38",
+              "origin": {
+                "file": "window.blp",
+                "start": 1032,
+                "end": 1265
+              }
+            }
+          ],
+          "resolution": {
+            "kind": "generic-widget",
+            "rendererType": "box"
+          }
+        },
+        "window.blp#37": {
+          "key": "window.blp#37",
+          "sourceClass": "Gtk.Button",
+          "sourceId": "timer_button",
+          "sourceKind": "object",
+          "origin": {
+            "file": "window.blp",
+            "start": 748,
+            "end": 1020
+          },
+          "properties": {
+            "tooltip-text": {
+              "kind": "opaque",
+              "sourceText": "_ \"Toggle Timer\""
+            },
+            "icon-name": {
+              "kind": "scalar",
+              "value": "media-playback-start-symbolic"
+            },
+            "action-name": {
+              "kind": "scalar",
+              "value": "win.toggle-timer"
+            },
+            "valign": {
+              "kind": "scalar",
+              "value": "center"
+            },
+            "styles": {
+              "kind": "array",
+              "values": [
+                {
+                  "kind": "scalar",
+                  "value": "circular"
+                },
+                {
+                  "kind": "scalar",
+                  "value": "large"
+                },
+                {
+                  "kind": "scalar",
+                  "value": "suggested-action"
+                }
+              ]
+            }
+          },
+          "children": [],
+          "resolution": {
+            "kind": "generic-widget",
+            "rendererType": "button"
+          }
+        },
+        "window.blp#38": {
+          "key": "window.blp#38",
+          "sourceClass": "Gtk.Button",
+          "sourceId": "skip_button",
+          "sourceKind": "object",
+          "origin": {
+            "file": "window.blp",
+            "start": 1032,
+            "end": 1265
+          },
+          "properties": {
+            "tooltip-text": {
+              "kind": "opaque",
+              "sourceText": "_ \"Skip\""
+            },
+            "icon-name": {
+              "kind": "scalar",
+              "value": "media-seek-forward-symbolic"
+            },
+            "action-name": {
+              "kind": "scalar",
+              "value": "win.skip"
+            },
+            "valign": {
+              "kind": "scalar",
+              "value": "center"
+            },
+            "styles": {
+              "kind": "array",
+              "values": [
+                {
+                  "kind": "scalar",
+                  "value": "circular"
+                },
+                {
+                  "kind": "scalar",
+                  "value": "large"
+                }
+              ]
+            }
+          },
+          "children": [],
+          "resolution": {
+            "kind": "generic-widget",
+            "rendererType": "button"
+          }
+        },
+        "window.blp#39": {
+          "key": "window.blp#39",
+          "sourceClass": "Gtk.MenuButton",
+          "sourceId": "menu_button",
+          "sourceKind": "object",
+          "origin": {
+            "file": "window.blp",
+            "start": 1299,
+            "end": 1584
+          },
+          "properties": {
+            "primary": {
+              "kind": "scalar",
+              "value": true
+            },
+            "tooltip-text": {
+              "kind": "opaque",
+              "sourceText": "_ \"Main Menu\""
+            },
+            "menu-model": {
+              "kind": "scalar",
+              "value": "app_menu"
+            },
+            "icon-name": {
+              "kind": "scalar",
+              "value": "open-menu-symbolic"
+            },
+            "halign": {
+              "kind": "scalar",
+              "value": "end"
+            },
+            "valign": {
+              "kind": "scalar",
+              "value": "center"
+            },
+            "margin-start": {
+              "kind": "scalar",
+              "value": 12
+            },
+            "styles": {
+              "kind": "array",
+              "values": [
+                {
+                  "kind": "scalar",
+                  "value": "circular"
+                }
+              ]
+            }
+          },
+          "children": [],
+          "resolution": {
+            "kind": "generic-widget",
+            "rendererType": "menu-button"
+          }
+        },
+        "window.blp#40": {
+          "key": "window.blp#40",
+          "sourceClass": "Adw.Breakpoint",
+          "sourceId": "large_text_bp",
+          "sourceKind": "object",
+          "origin": {
+            "file": "window.blp",
+            "start": 1608,
+            "end": 1699
+          },
+          "properties": {},
+          "children": [],
+          "resolution": {
+            "kind": "unsupported-widget",
+            "reason": "renderer-does-not-support-class"
+          }
+        }
+      },
+      "templates": {
+        "SolanumPreferencesWindow": {
+          "key": "SolanumPreferencesWindow",
+          "className": "Adw.PreferencesWindow",
+          "rootKey": "preferences-window.blp#2",
+          "origin": {
+            "file": "preferences-window.blp",
+            "start": 66,
+            "end": 1604
+          }
+        },
+        "SolanumWindow": {
+          "key": "SolanumWindow",
+          "className": "Adw.ApplicationWindow",
+          "rootKey": "window.blp#24",
+          "origin": {
+            "file": "window.blp",
+            "start": 55,
+            "end": 1701
+          }
+        }
+      },
+      "diagnostics": []
+    }
+  },
+  "assets": {}
+}

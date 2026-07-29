@@ -9,8 +9,8 @@ test alone is not enough.
 | State | Apps |
 | --- | --- |
 | Passed | None yet |
-| Needs tuning | Amberol — native/Protota surfaces inspected; StatusPage centering and action layout are being tuned generically. |
-| Not yet validated | Calculator, Calendar, Clocks, Disks, Files, Settings, Software, Text Editor, Weather, Web |
+| Needs tuning | Amberol — native/Protota surfaces inspected; StatusPage centering and action layout are being tuned generically. Calculator — source-bundle import structurally complete after the Phase 1 parser fix (`_buttons` and every declarative sibling retained; 2 honest boundaries: GtkSourceView, MathButtons). Local paired capture 2026-07-29: source-resolved similarity 79.9%, foreground IoU 24.4%, unresolved coverage 3.5%. Dominant deltas: MathButtons keypad contents (Phase 4), bound-visibility state such as the converter showing in Basic mode (Phase 5), header-bar icon-name rendering. |
+| Not yet validated | Calendar, Clocks, Disks, Files, Settings, Software, Text Editor, Weather, Web |
 | Next native capture | Authenticator (GNOME Circle) — Broadway image built on `himachal`; preset still to be created. |
 
 ## Required sequence

@@ -211,7 +211,6 @@ export const App: React.FC = () => {
               className={`adw-button flat${leftOpen ? " active" : ""}`}
               onClick={() => setLeftOpen((v) => !v)}
               title="Toggle Layers Panel (Ctrl+\)"
-              style={leftOpen ? { backgroundColor: "var(--button-active-color)" } : undefined}
             >
               <span style={iconStyle(sidebarShowSymbolic)} />
             </button>
@@ -243,7 +242,6 @@ export const App: React.FC = () => {
               className={`adw-button flat${rightOpen ? " active" : ""}`}
               onClick={() => setRightOpen((v) => !v)}
               title="Toggle Properties Panel (Ctrl+])"
-              style={rightOpen ? { backgroundColor: "var(--button-active-color)" } : undefined}
             >
               <span style={iconStyle(sidebarShowRightSymbolic)} />
             </button>

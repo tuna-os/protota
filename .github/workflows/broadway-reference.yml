@@ -1,6 +1,10 @@
 name: Broadway Reference Capture
 
 on:
+  # A weekly report keeps renderer regressions visible without making every
+  # pull request build ten complete GNOME application images.
+  schedule:
+    - cron: '23 3 * * 1'
   workflow_dispatch:
     inputs:
       app:
@@ -19,8 +23,36 @@ permissions:
 
 jobs:
   native-reference:
+    if: (github.event_name == 'schedule' && matrix.scheduled) || matrix.app == inputs.app
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        include:
+          - app: calculator
+            scheduled: true
+          - app: calendar
+            scheduled: true
+          - app: clocks
+            scheduled: true
+          - app: disks
+            scheduled: true
+          - app: files
+            scheduled: true
+          - app: settings
+            scheduled: true
+          - app: software
+            scheduled: true
+          - app: text-editor
+            scheduled: true
+          - app: weather
+            scheduled: true
+          - app: web
+            scheduled: true
+          - app: amberol
+            scheduled: false
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -29,7 +61,7 @@ jobs:
           cache: npm
       - run: npm ci
       - name: Load app catalog entry
-        run: node scripts/broadway-app.mjs "${{ inputs.app }}" >> "$GITHUB_ENV"
+        run: node scripts/broadway-app.mjs "${{ matrix.app }}" >> "$GITHUB_ENV"
       - run: npx playwright install chromium --with-deps
       - name: Build native Broadway runner
         run: docker build --build-arg APP_PACKAGE="$BROADWAY_APP_PACKAGE" --build-arg APP_COMMAND="$BROADWAY_APP_COMMAND" --tag protota-broadway-app containers/broadway
@@ -45,5 +77,5 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ inputs.app }}-broadway-reference
+          name: ${{ matrix.app }}-broadway-reference
           path: test-results/

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
-import { blueprintBundleToDocument, blueprintTemplateReferences, blueprintToDocument, blueprintToNode, mockupToBlueprint } from '../utils/blueprint';
+import { blueprintBundleToDocument, blueprintImport, blueprintTemplateReferences, blueprintToDocument, blueprintToNode, mockupToBlueprint } from '../utils/blueprint';
 import { importDocumentFile } from '../utils/exportImport';
 import type { MockupDocument } from '../types/mockup';
 
@@ -61,8 +61,40 @@ describe('Blueprint import', () => {
     expect(imported.screens[0].rootNode.children?.[0].children?.[0]).toMatchObject({ id: 'open', type: 'button', title: 'Open' });
   });
 
-  it('rejects unmapped visual widgets instead of rendering them as a fake box', () => {
-    expect(() => blueprintToNode('Gtk.ImaginaryWidget content {}')).toThrow('Unsupported GTK/Libadwaita widget: Gtk.ImaginaryWidget');
+  it('retains an unmapped widget class as an explicit boundary with a diagnostic, not a fake box', () => {
+    const { roots, diagnostics } = blueprintImport('Gtk.ImaginaryWidget content {}');
+    expect(roots[0]).toMatchObject({ id: 'content', type: 'custom-widget', sourceClass: 'Gtk.ImaginaryWidget' });
+    expect(diagnostics).toEqual([
+      expect.objectContaining({ code: 'renderer-does-not-support-class', sourceClass: 'Gtk.ImaginaryWidget', sourceId: 'content' }),
+    ]);
+  });
+
+  it('keeps an unsupported short-form class and its following sibling', () => {
+    const { roots, diagnostics } = blueprintImport(`
+      Gtk.Box shell {
+        LevelBar meter {}
+        Gtk.Button after { label: "OK"; }
+      }
+    `);
+    expect(roots[0].children?.[0]).toMatchObject({ id: 'meter', type: 'custom-widget', sourceClass: 'LevelBar' });
+    expect(roots[0].children?.[1]).toMatchObject({ id: 'after', type: 'button', title: 'OK' });
+    expect(diagnostics).toEqual([
+      expect.objectContaining({ code: 'renderer-does-not-support-class', sourceClass: 'LevelBar' }),
+    ]);
+  });
+
+  it('parses an object-valued property without corrupting the following sibling', () => {
+    const root = blueprintToNode(`
+      Gtk.Box shell {
+        orientation: vertical;
+        Adw.Bin wrapper { child: Gtk.Label inner { label: "Hi"; }; }
+        Gtk.Button after { label: "After"; }
+      }
+    `);
+    expect(root).toMatchObject({ id: 'shell', type: 'box', orientation: 'vertical' });
+    expect(root.children?.[0]).toMatchObject({ id: 'wrapper', type: 'bin' });
+    expect(root.children?.[0].children?.[0]).toMatchObject({ id: 'inner', type: 'label', title: 'Hi', slot: 'child' });
+    expect(root.children?.[1]).toMatchObject({ id: 'after', type: 'button', title: 'After' });
   });
 
   it('imports the upstream-style toolbar, content slot, and grid fixture with its layout semantics intact', () => {
@@ -110,10 +142,14 @@ describe('Blueprint import', () => {
     ]));
   });
 
-  it('reports source-bundle dependencies instead of silently dropping custom templates', () => {
+  it('retains an unresolved template reference as a boundary and reports the dependency', () => {
     const source = 'Adw.Bin { $HistoryView history {} }';
     expect(blueprintTemplateReferences(source)).toEqual(['HistoryView']);
-    expect(() => blueprintToNode(source)).toThrow('Unresolved Blueprint template reference: $HistoryView');
+    const { roots, diagnostics } = blueprintImport(source);
+    expect(roots[0].children?.[0]).toMatchObject({ id: 'history', type: 'custom-widget', sourceClass: 'HistoryView' });
+    expect(diagnostics).toEqual([
+      expect.objectContaining({ code: 'template-not-in-bundle', sourceClass: 'HistoryView', sourceId: 'history' }),
+    ]);
   });
 
   it('resolves linked Blueprint templates from an official-style source bundle', () => {
@@ -124,6 +160,68 @@ describe('Blueprint import', () => {
 
     expect(imported.screens[0].rootNode.children?.[0]).toMatchObject({ id: 'panel', type: 'box' });
     expect(imported.screens[0].rootNode.children?.[0].children?.[0]).toMatchObject({ id: 'open', type: 'button', title: 'Open' });
+  });
+
+  it('keeps strings containing comment-like text intact and unwraps gettext markers', () => {
+    // Real GNOME sources contain "//" inside string literals (markup link
+    // targets); a naive comment strip destroys the line and every following
+    // brace. Translated properties use _("x") and C_("ctx", "x").
+    const { roots } = blueprintImport(`
+      Gtk.Box shell {
+        Gtk.Label link { label: _("<a href=\\"r:///\\">Refresh rates</a> now"); }
+        Gtk.Button after { label: C_("toolbar", "OK"); }
+      }
+    `);
+    expect(roots[0].children?.[0]).toMatchObject({ id: 'link', type: 'label', title: '<a href="r:///">Refresh rates</a> now' });
+    expect(roots[0].children?.[1]).toMatchObject({ id: 'after', type: 'button', title: 'OK' });
+  });
+
+  it('parses non-visual source objects without giving them renderer boxes', () => {
+    const { roots, diagnostics } = blueprintImport(`
+      Gtk.Box shell {
+        Gtk.Entry field {
+          GestureClick { button: 0; }
+          ShortcutController { Shortcut { trigger: "Menu"; } }
+          PopoverMenu context_menu { halign: start; }
+        }
+        Gtk.Button after { label: "OK"; }
+      }
+    `);
+    expect(roots[0].children?.map(child => child.id)).toEqual(['field', 'after']);
+    expect(roots[0].children?.[0].children).toEqual([]);
+    expect(diagnostics).toEqual([]);
+  });
+
+  it('retains a code-defined template reference with its bindings, siblings, and expand semantics', () => {
+    const imported = blueprintBundleToDocument([
+      { path: 'window.blp', content: `
+        Adw.ApplicationWindow {
+          Gtk.Box {
+            orientation: vertical;
+            $MathDisplay _display { vexpand: true; }
+            $MathButtons _buttons { equation: bind template.equation; converter: "_converter"; vexpand: true; }
+          }
+        }
+      ` },
+      { path: 'display.blp', content: 'template $MathDisplay: Adw.Bin { Gtk.Entry display_entry {} }' },
+    ], 'window.blp');
+
+    const box = imported.screens[0].rootNode.children?.[0];
+    expect(box).toMatchObject({ type: 'box', orientation: 'vertical' });
+    expect(box?.children?.[0]).toMatchObject({ id: '_display', type: 'bin', vexpand: true });
+    expect(box?.children?.[1]).toMatchObject({
+      id: '_buttons', type: 'custom-widget', sourceClass: 'MathButtons', converter: '_converter', vexpand: true,
+    });
+    expect(box?.children?.[1].bindings).toMatchObject({ equation: 'template.equation' });
+    expect(imported.importDiagnostics).toEqual(expect.arrayContaining([
+      expect.objectContaining({ code: 'template-not-in-bundle', sourceClass: 'MathButtons', sourceId: '_buttons' }),
+    ]));
+
+    // Export must re-emit the real source reference, never a Protota class.
+    const exported = mockupToBlueprint(imported);
+    expect(exported).toContain('$MathButtons _buttons');
+    expect(exported).toContain('equation: bind template.equation;');
+    expect(exported).not.toContain('Protota.CustomWidget');
   });
 
   it('keeps an unresolved code-only widget as an explicit layout boundary', () => {
@@ -149,6 +247,10 @@ describe('Blueprint import', () => {
       // GtkSourceView is defined in Calculator's code, rather than this
       // Blueprint bundle; it must remain measurable, not become a fake box.
       expect.objectContaining({ id: 'source_view', type: 'custom-widget', title: 'GtkSourceView' }),
+      // MathButtons is implemented in Vala; the $MathButtons _buttons
+      // reference in math-window.blp must survive template expansion as an
+      // allocated boundary rather than silently disappearing.
+      expect.objectContaining({ id: '_buttons', type: 'custom-widget', sourceClass: 'MathButtons' }),
     ]));
   });
 });

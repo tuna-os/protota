@@ -1,4 +1,6 @@
-import type { MockupDocument, AdwNode, AdwNodeType, Screen, ScreenTemplateType } from '../types/mockup';
+import type { MockupDocument, AdwNode, AdwNodeType, ImportDiagnostic, Screen, ScreenTemplateType } from '../types/mockup';
+
+export type { ImportDiagnostic } from '../types/mockup';
 
 const CLASS_TO_WIDGET_MAP: Record<string, AdwNodeType> = {
   'Adw.ApplicationWindow': 'window',
@@ -100,11 +102,19 @@ const CLASS_TO_WIDGET_MAP: Record<string, AdwNodeType> = {
   'Gtk.TextView': 'entry',
   GtkSourceView: 'entry',
   'GtkSource.View': 'entry',
-  EventControllerKey: 'bin',
-  EventControllerScroll: 'bin',
-  'Gtk.EventControllerKey': 'bin',
-  'Gtk.EventControllerScroll': 'bin',
+  Label: 'label',
+  Image: 'bin',
+  GtkImage: 'bin',
+  'Gtk.Image': 'bin',
 };
+
+/**
+ * Source objects that occupy no layout allocation: gestures, controllers,
+ * shortcuts, models, and popup surfaces. They belong to the source, but they
+ * must not receive renderer boxes or count as unresolved visual coverage.
+ */
+const NON_VISUAL_CLASS_PATTERN =
+  /^(Gtk\.)?(EventController[A-Za-z]*|Gesture[A-Za-z]*|ShortcutController|Shortcut|DropTarget|DragSource|Adjustment|TextBuffer|EntryBuffer|Popover|PopoverMenu|Tooltip)$/;
 
 const WIDGET_CLASS_MAP: Record<string, string> = {
   window: 'Adw.ApplicationWindow',
@@ -165,11 +175,16 @@ function escapeBlueprintString(value: string): string {
 }
 
 function nodeToBlueprint(node: AdwNode, depth: number = 0): string {
-  const className = WIDGET_CLASS_MAP[node.type] || node.type;
+  // An unresolved boundary exports as its real source reference. Replacing
+  // `$MathButtons` with a Protota-invented class would corrupt the app source.
+  const className = node.type === 'custom-widget' && node.sourceClass
+    ? `$${node.sourceClass}`
+    : WIDGET_CLASS_MAP[node.type] || node.type;
   const props: string[] = [];
 
   for (const [k, v] of Object.entries(node)) {
-    if (k === 'id' || k === 'type' || k === 'slot' || k === 'children' || v === undefined || v === false || v === '') continue;
+    if (k === 'id' || k === 'type' || k === 'slot' || k === 'children' || k === 'sourceClass' || k === 'bindings' || v === undefined || v === false || v === '') continue;
+    if (k === 'title' && node.type === 'custom-widget' && v === node.sourceClass) continue;
     if (k === 'title' && (node.type === 'button' || node.type === 'label')) {
       props.push(`label: "${escapeBlueprintString(String(v))}";`);
     } else if (typeof v === 'boolean') {
@@ -179,6 +194,9 @@ function nodeToBlueprint(node: AdwNode, depth: number = 0): string {
     } else {
       props.push(`${k}: "${escapeBlueprintString(String(v))}";`);
     }
+  }
+  for (const [k, expression] of Object.entries(node.bindings ?? {})) {
+    props.push(`${k}: bind ${expression};`);
   }
 
   const children = (node.children || []).map(child => {
@@ -219,15 +237,52 @@ interface Token {
 }
 
 function tokenizeBlueprint(code: string): Token[] {
-  const withoutComments = code.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/.*$/gm, '');
+  // Comments must be stripped with string awareness: real GNOME sources
+  // contain `//` inside string literals (for example markup link targets like
+  // "r:///"), and a regex-based comment pass destroys the rest of the line,
+  // unbalancing every following brace.
   const tokens: Token[] = [];
-  const pattern = /"(?:\\.|[^"\\])*"|-?\d+(?:\.\d+)?|\$?[A-Za-z_][A-Za-z0-9_.-]*|[{}\[\]:;,]/g;
-  for (const match of withoutComments.matchAll(pattern)) {
-    const value = match[0];
-    tokens.push({
-      value,
-      kind: value.startsWith('"') ? 'string' : /^-?\d/.test(value) ? 'number' : /^[{}\[\]:;,]$/.test(value) ? 'punct' : 'word',
-    });
+  const wordPattern = /\$?[A-Za-z_][A-Za-z0-9_.-]*/y;
+  const numberPattern = /-?\d+(?:\.\d+)?/y;
+  let index = 0;
+  while (index < code.length) {
+    const character = code[index];
+    if (character === '/' && code[index + 1] === '/') {
+      const lineEnd = code.indexOf('\n', index);
+      index = lineEnd === -1 ? code.length : lineEnd + 1;
+      continue;
+    }
+    if (character === '/' && code[index + 1] === '*') {
+      const commentEnd = code.indexOf('*/', index + 2);
+      index = commentEnd === -1 ? code.length : commentEnd + 2;
+      continue;
+    }
+    if (character === '"') {
+      let end = index + 1;
+      while (end < code.length && code[end] !== '"') {
+        if (code[end] === '\\') end++;
+        end++;
+      }
+      tokens.push({ value: code.slice(index, end + 1), kind: 'string' });
+      index = end + 1;
+      continue;
+    }
+    numberPattern.lastIndex = index;
+    const number = numberPattern.exec(code);
+    if (number) {
+      tokens.push({ value: number[0], kind: 'number' });
+      index = numberPattern.lastIndex;
+      continue;
+    }
+    wordPattern.lastIndex = index;
+    const word = wordPattern.exec(code);
+    if (word) {
+      tokens.push({ value: word[0], kind: 'word' });
+      index = wordPattern.lastIndex;
+      continue;
+    }
+    if ('{}[]:;,'.includes(character)) tokens.push({ value: character, kind: 'punct' });
+    index++;
   }
   return tokens;
 }
@@ -251,18 +306,44 @@ function propertyNameForNode(rawName: string, nodeType: AdwNodeType): string {
   return rawName.replace(/-([a-z])/g, (_, letter: string) => letter.toUpperCase());
 }
 
-function makeNode(rawClass: string, id: string, properties: Record<string, BlueprintValue>, children: AdwNode[]): AdwNode {
-  const type = CLASS_TO_WIDGET_MAP[rawClass];
-  // A silent fallback makes an imported GNOME UI look plausible while being
-  // structurally wrong. Treat a missing visual widget mapping as a compiler
-  // error so renderer support is added deliberately and generically.
+function makeNode(
+  rawClass: string,
+  id: string,
+  properties: Record<string, BlueprintValue>,
+  bindings: Record<string, string>,
+  children: AdwNode[],
+  diagnostics: ImportDiagnostic[],
+): AdwNode {
+  const isTemplateReference = rawClass.startsWith('$');
+  const sourceClass = isTemplateReference ? rawClass.slice(1) : rawClass;
+  const type = isTemplateReference ? undefined : CLASS_TO_WIDGET_MAP[rawClass];
+  const node: AdwNode = { id, type: type ?? 'custom-widget', children };
+  // A silent fallback or a dropped sibling makes an imported GNOME UI look
+  // plausible while being structurally wrong. An unmapped class survives as
+  // an explicit, labelled custom-widget boundary with a structured reason —
+  // never as a fake generic box, and never as a parse error that hides the
+  // rest of the source tree.
   if (!type) {
-    throw new Error(`Unsupported GTK/Libadwaita widget: ${rawClass}`);
+    node.sourceClass = sourceClass;
+    node.title = sourceClass;
+    diagnostics.push(isTemplateReference
+      ? {
+          code: 'template-not-in-bundle',
+          sourceClass,
+          sourceId: id,
+          message: `$${sourceClass} has no template definition in the imported source; retained as an explicit custom-widget boundary.`,
+        }
+      : {
+          code: 'renderer-does-not-support-class',
+          sourceClass,
+          sourceId: id,
+          message: `${sourceClass} is not in the generic widget registry; retained as an explicit custom-widget boundary.`,
+        });
   }
-  const node: AdwNode = { id, type, children };
   for (const [key, value] of Object.entries(properties)) {
-    node[propertyNameForNode(key, type)] = value;
+    node[propertyNameForNode(key, node.type)] = value;
   }
+  if (Object.keys(bindings).length) node.bindings = bindings;
   return node;
 }
 
@@ -279,93 +360,152 @@ export function blueprintTemplateReferences(code: string): string[] {
   return [...references];
 }
 
-function parseBlueprintRoots(code: string): AdwNode[] {
+function parseBlueprintRoots(code: string, diagnostics: ImportDiagnostic[]): AdwNode[] {
   const tokens = tokenizeBlueprint(code);
   let cursor = 0;
   let generatedId = 0;
   const nextId = () => `imported-${++generatedId}`;
 
-  const parseBlock = (): AdwNode[] => {
-    const nodes: AdwNode[] = [];
-    while (cursor < tokens.length && tokens[cursor].value !== '}') {
-      const first = tokens[cursor];
-      const second = tokens[cursor + 1];
-      const third = tokens[cursor + 2];
+  // Blueprint classes are capitalized (`Grid`, `Adw.Bin`) or template
+  // references (`$MathButtons`); slot and property names are lowercase.
+  // Recognition is syntactic — an unknown class is still an object node, so
+  // it can survive as an explicit boundary instead of vanishing.
+  const isClassWord = (token: Token | undefined): boolean =>
+    token?.kind === 'word' &&
+    (token.value.startsWith('$') || token.value.includes('.') || /^[A-Z]/.test(token.value));
+  const isObjectStart = (index: number): boolean =>
+    isClassWord(tokens[index]) &&
+    (tokens[index + 1]?.value === '{' ||
+      (tokens[index + 1]?.kind === 'word' && tokens[index + 2]?.value === '{'));
 
-      if (first?.value.startsWith('$') && (second?.value === '{' || third?.value === '{')) {
-        throw new Error(`Unresolved Blueprint template reference: ${first.value}. Import its defining UI file with the source bundle.`);
+  const parseObject = (): AdwNode | null => {
+    const rawClass = tokens[cursor++].value;
+    const id = tokens[cursor]?.value === '{' ? nextId() : tokens[cursor++].value;
+    cursor++; // opening '{'
+    const properties: Record<string, BlueprintValue> = {};
+    const bindings: Record<string, string> = {};
+    const children: AdwNode[] = [];
+
+    while (cursor < tokens.length && tokens[cursor].value !== '}') {
+      const key = tokens[cursor];
+
+      if (tokens[cursor + 1]?.value === ':') {
+        cursor += 2;
+        // Object-valued property (`child: Gtk.Label { ... };`) — the value is
+        // a real widget in the named slot, and must not corrupt nesting.
+        if (isObjectStart(cursor)) {
+          const child = parseObject();
+          if (child) children.push({ ...child, slot: key.value });
+          if (tokens[cursor]?.value === ';') cursor++;
+          continue;
+        }
+        // Translated strings: `_("x")` and `C_("ctx", "x")` mark the last
+        // string literal as the display text. Parentheses are not tokens, so
+        // the wrapper word is followed directly by its string arguments.
+        if (tokens[cursor]?.kind === 'word' && /^(N?C?_|N_)$/.test(tokens[cursor].value) && tokens[cursor + 1]?.kind === 'string') {
+          cursor++;
+          let text: BlueprintValue | undefined;
+          while (cursor < tokens.length && tokens[cursor].value !== ';' && tokens[cursor].value !== '}') {
+            if (tokens[cursor].kind === 'string') text = parseValue(tokens[cursor]);
+            cursor++;
+          }
+          if (tokens[cursor]?.value === ';') cursor++;
+          if (text !== undefined) properties[key.value] = text;
+          continue;
+        }
+        // Bindings and expressions are opaque source facts, preserved for
+        // export rather than mistaken for one-token scalars.
+        if (tokens[cursor]?.value === 'bind' || tokens[cursor]?.value === 'bind-property') {
+          cursor++;
+          const parts: string[] = [];
+          while (cursor < tokens.length && tokens[cursor].value !== ';' && tokens[cursor].value !== '}') {
+            parts.push(tokens[cursor++].value);
+          }
+          if (tokens[cursor]?.value === ';') cursor++;
+          bindings[key.value] = parts.join(' ');
+          continue;
+        }
+        const value = parseValue(tokens[cursor++]);
+        if (value !== undefined) properties[key.value] = value;
+        // A multi-token expression tail we do not model may not swallow the
+        // following sibling; consume it up to the statement terminator.
+        while (cursor < tokens.length && !['{', ';', ',', '}'].includes(tokens[cursor].value)) cursor++;
+        if (tokens[cursor]?.value === ';' || tokens[cursor]?.value === ',') cursor++;
+        continue;
       }
 
-      // Gtk/Adw object: `Gtk.Button save_button { ... }`.
-      if (first?.kind === 'word' && (first.value.includes('.') || CLASS_TO_WIDGET_MAP[first.value]) && (second?.value === '{' || third?.value === '{')) {
-        const rawClass = first.value;
-        cursor++;
-        const id = tokens[cursor]?.value === '{' ? nextId() : tokens[cursor++]?.value || nextId();
-        if (tokens[cursor]?.value !== '{') continue;
-        cursor++;
-        const properties: Record<string, BlueprintValue> = {};
-        const children: AdwNode[] = [];
-        while (cursor < tokens.length && tokens[cursor].value !== '}') {
-          const key = tokens[cursor];
+      if (key?.kind === 'word' && tokens[cursor + 1]?.value === '[') {
+        // Blueprint arrays (for example `styles [ "card" ]`) are metadata.
+        // Consume them without letting them swallow following source widgets.
+        cursor += 2;
+        while (cursor < tokens.length && tokens[cursor]?.value !== ']') cursor++;
+        if (tokens[cursor]?.value === ']') cursor++;
+        if (tokens[cursor]?.value === ';' || tokens[cursor]?.value === ',') cursor++;
+        continue;
+      }
+
+      if (key?.value === 'layout' && tokens[cursor + 1]?.value === '{') {
+        cursor += 2;
+        while (cursor < tokens.length && tokens[cursor]?.value !== '}') {
+          const layoutKey = tokens[cursor];
           if (tokens[cursor + 1]?.value === ':') {
             cursor += 2;
             const value = parseValue(tokens[cursor++]);
-            if (value !== undefined) properties[key.value] = value;
+            if (value !== undefined) properties[layoutKey.value] = value;
             if (tokens[cursor]?.value === ';' || tokens[cursor]?.value === ',') cursor++;
-          } else if (key?.kind === 'word' && tokens[cursor + 1]?.value === '[') {
-            // Blueprint arrays (for example `styles [ "card" ]`) are
-            // metadata. Consume them without letting them swallow following
-            // source widgets in the enclosing object.
-            cursor += 2;
-            while (cursor < tokens.length && tokens[cursor]?.value !== ']') cursor++;
-            if (tokens[cursor]?.value === ']') cursor++;
-            if (tokens[cursor]?.value === ';' || tokens[cursor]?.value === ',') cursor++;
-          } else if (key?.value === 'layout' && tokens[cursor + 1]?.value === '{') {
-            cursor += 2;
-            while (cursor < tokens.length && tokens[cursor]?.value !== '}') {
-              const layoutKey = tokens[cursor];
-              if (tokens[cursor + 1]?.value === ':') {
-                cursor += 2;
-                const value = parseValue(tokens[cursor++]);
-                if (value !== undefined) properties[layoutKey.value] = value;
-                if (tokens[cursor]?.value === ';' || tokens[cursor]?.value === ',') cursor++;
-              } else cursor++;
-            }
-            if (tokens[cursor]?.value === '}') cursor++;
-          } else {
-            // Delegate the rest of this object body to the regular parser so
-            // direct children with an id (`Gtk.Box content {}`) are not
-            // mistaken for a named Blueprint slot.
-            children.push(...parseBlock());
-          }
+          } else cursor++;
         }
         if (tokens[cursor]?.value === '}') cursor++;
-        nodes.push(makeNode(rawClass, id, properties, children));
         continue;
       }
-      nodes.push(...parseBlockItem());
+
+      if (isObjectStart(cursor)) {
+        const child = parseObject();
+        if (child) children.push(child);
+        continue;
+      }
+
+      // Slot blocks such as `content { Gtk.Box { ... } }` retain both their
+      // widgets and their parent-defined structural role.
+      if (key?.kind === 'word' && tokens[cursor + 1]?.value === '{') {
+        const slot = key.value;
+        cursor += 2;
+        children.push(...parseBlock().map(child => ({ ...child, slot })));
+        if (tokens[cursor]?.value === '}') cursor++;
+        continue;
+      }
+
+      cursor++;
     }
-    return nodes;
+    if (tokens[cursor]?.value === '}') cursor++;
+    if (NON_VISUAL_CLASS_PATTERN.test(rawClass)) return null;
+    return makeNode(rawClass, id, properties, bindings, children, diagnostics);
   };
 
-  const parseBlockItem = (): AdwNode[] => {
-    // Slot blocks such as `content { Gtk.Box { ... } }` retain both their
-    // widgets and their parent-defined structural role.
-    if (tokens[cursor]?.kind === 'word' && tokens[cursor + 1]?.value === '{') {
-      const slot = tokens[cursor].value;
-      cursor += 2;
-      const children = parseBlock();
-      if (tokens[cursor]?.value === '}') cursor++;
-      return children.map(child => ({ ...child, slot }));
+  const parseBlock = (): AdwNode[] => {
+    const nodes: AdwNode[] = [];
+    while (cursor < tokens.length && tokens[cursor].value !== '}') {
+      if (isObjectStart(cursor)) {
+        const node = parseObject();
+        if (node) nodes.push(node);
+        continue;
+      }
+      if (tokens[cursor]?.kind === 'word' && tokens[cursor + 1]?.value === '{') {
+        const slot = tokens[cursor].value;
+        cursor += 2;
+        nodes.push(...parseBlock().map(child => ({ ...child, slot })));
+        if (tokens[cursor]?.value === '}') cursor++;
+        continue;
+      }
+      cursor++;
     }
-    cursor++;
-    return [];
+    return nodes;
   };
 
   return parseBlock();
 }
 
-function parseGtkBuilderRoots(code: string): AdwNode[] {
+function parseGtkBuilderRoots(code: string, diagnostics: ImportDiagnostic[]): AdwNode[] {
   const roots: AdwNode[] = [];
   const stack: AdwNode[] = [];
   let generatedId = 0;
@@ -381,7 +521,7 @@ function parseGtkBuilderRoots(code: string): AdwNode[] {
       const className = /class=["']([^"']+)["']/.exec(match[1])?.[1];
       if (!className) continue;
       const id = /id=["']([^"']+)["']/.exec(match[1])?.[1] || `imported-${++generatedId}`;
-      addNode(makeNode(className, id, {}, []));
+      addNode(makeNode(className, id, {}, {}, [], diagnostics));
       continue;
     }
     const current = stack[stack.length - 1];
@@ -394,11 +534,27 @@ function parseGtkBuilderRoots(code: string): AdwNode[] {
   return roots;
 }
 
+export interface BlueprintImportResult {
+  roots: AdwNode[];
+  diagnostics: ImportDiagnostic[];
+}
+
+/**
+ * Parse a Blueprint or GtkBuilder document into its top-level widget trees,
+ * with an import report. Unsupported classes and unresolved template
+ * references survive as explicit `custom-widget` boundaries; each one is
+ * recorded as a diagnostic rather than dropped or faked.
+ */
+export function blueprintImport(code: string): BlueprintImportResult {
+  const diagnostics: ImportDiagnostic[] = [];
+  const roots = /<object\s/.test(code) ? parseGtkBuilderRoots(code, diagnostics) : parseBlueprintRoots(code, diagnostics);
+  if (!roots.length) throw new Error('No GTK or Libadwaita widgets found in the supplied code.');
+  return { roots, diagnostics };
+}
+
 /** Parse a Blueprint or GtkBuilder document into its top-level widget trees. */
 export function blueprintToNodes(code: string): AdwNode[] {
-  const roots = /<object\s/.test(code) ? parseGtkBuilderRoots(code) : parseBlueprintRoots(code);
-  if (!roots.length) throw new Error('No GTK or Libadwaita widgets found in the supplied code.');
-  return roots;
+  return blueprintImport(code).roots;
 }
 
 /** Backwards-compatible single-root import API. */
@@ -408,7 +564,7 @@ export function blueprintToNode(code: string): AdwNode {
 
 /** Import all top-level widgets as editable screens in a Protota document. */
 export function blueprintToDocument(code: string, title = 'Imported GNOME App'): MockupDocument {
-  const roots = blueprintToNodes(code);
+  const { roots, diagnostics } = blueprintImport(code);
   const inferType = (root: AdwNode): ScreenTemplateType => root.type === 'preferences-dialog' ? 'preferences' : root.type === 'dialog' ? 'dialog' : 'standard';
   const screens: Screen[] = roots.map((root, index) => ({
     id: `imported-screen-${index + 1}`,
@@ -418,7 +574,7 @@ export function blueprintToDocument(code: string, title = 'Imported GNOME App'):
     height: 720,
     rootNode: root,
   }));
-  return { id: 'imported-document', title, colorScheme: 'auto', edges: [], screens };
+  return { id: 'imported-document', title, colorScheme: 'auto', edges: [], screens, importDiagnostics: diagnostics };
 }
 
 export interface BlueprintSourceFile {
@@ -464,10 +620,12 @@ function collectTemplates(files: BlueprintSourceFile[]): Map<string, BlueprintTe
 
 function expandBundleTemplates(source: string, templates: Map<string, BlueprintTemplate>, stack: string[] = []): string {
   const reference = /\$([A-Za-z_][A-Za-z0-9_-]*)\s+([A-Za-z_][A-Za-z0-9_-]*)\s*\{/g;
-  return source.replace(reference, (_match, name: string, id: string) => {
+  return source.replace(reference, (match, name: string, id: string) => {
     const template = templates.get(name);
     if (!template) {
-      return `Protota.CustomWidget ${id} { title: "${name}";`;
+      // Leave the reference in source form; the parser retains it as an
+      // explicit custom-widget boundary with its real class and instance ID.
+      return match;
     }
     if (stack.includes(name)) throw new Error(`Recursive Blueprint template reference: $${[...stack, name].join(' → $')}`);
     return `${template.className} ${id} {${expandBundleTemplates(template.body, templates, [...stack, name])}`;

@@ -174,6 +174,13 @@ function childSlot(parent: AdwNode, child: AdwNode, index: number): string | und
 
 function nodeLayout(node: AdwNode): React.CSSProperties | undefined {
   const placement: React.CSSProperties = {};
+  // GTK expand semantics: an expanding child (including an unresolved
+  // custom-widget boundary such as Calculator's MathButtons) consumes the
+  // parent's spare allocation instead of collapsing to a fallback minimum.
+  if (node.vexpand || node.hexpand) {
+    placement.flexGrow = 1;
+    placement.alignSelf = 'stretch';
+  }
   if (node.minWidth !== undefined) placement.minWidth = node.minWidth;
   if (node.minHeight !== undefined) placement.minHeight = node.minHeight;
   if (node.widthRequest !== undefined) placement.width = node.widthRequest;

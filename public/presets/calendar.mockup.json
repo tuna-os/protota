@@ -25,28 +25,53 @@
                   "id": "cal-hdr",
                   "type": "header-bar",
                   "children": [
-                    { "id": "cal-title", "type": "window-title", "title": "July 2026", "subtitle": "GNOME Calendar" },
-                    { "id": "cal-today", "type": "button", "title": "Today", "suggested": true },
-                    { "id": "cal-prev", "type": "button", "title": "Previous", "iconName": "go-previous-symbolic", "flat": true },
-                    { "id": "cal-next", "type": "button", "title": "Next", "iconName": "go-next-symbolic", "flat": true },
-                    { "id": "cal-add", "type": "button", "title": "New Event", "iconName": "appointment-new-symbolic", "suggested": true },
+                    { "id": "cal-sidebar-toggle", "type": "button", "title": "Toggle Sidebar", "iconName": "sidebar-show-symbolic", "flat": true },
+                    { "id": "cal-title", "type": "window-title", "title": "March 2026 ▾" },
                     { "id": "cal-search", "type": "button", "title": "Search", "iconName": "edit-find-symbolic", "flat": true },
                     { "id": "cal-menu", "type": "menu-button", "iconName": "open-menu-symbolic", "title": "Menu" }
                   ]
                 },
                 {
                   "id": "cal-body",
-                  "type": "clamp",
+                  "type": "box",
+                  "orientation": "vertical",
+                  "spacing": 12,
                   "children": [
                     {
-                      "id": "cal-group",
-                      "type": "preferences-group",
-                      "title": "Upcoming Agenda — Wednesday, July 29",
-                      "description": "Scheduled events and reminders",
+                      "id": "cal-grid-header",
+                      "type": "box",
+                      "orientation": "horizontal",
+                      "spacing": 12,
                       "children": [
-                        { "id": "cal-event1", "type": "action-row", "title": "Team Standup", "subtitle": "10:00 AM — 10:30 AM · Video Call", "iconName": "appointment-soon-symbolic", "activatable": true },
-                        { "id": "cal-event2", "type": "action-row", "title": "Design Review (Protota)", "subtitle": "2:00 PM — 3:00 PM · Conference Room B", "iconName": "appointment-soon-symbolic", "activatable": true },
-                        { "id": "cal-event3", "type": "action-row", "title": "GNOME Core Release Sync", "subtitle": "4:00 PM — 4:45 PM · Online", "iconName": "appointment-missed-symbolic", "activatable": true }
+                        { "id": "d1", "type": "label", "title": "SUN" },
+                        { "id": "d2", "type": "label", "title": "MON" },
+                        { "id": "d3", "type": "label", "title": "TUE" },
+                        { "id": "d4", "type": "label", "title": "WED" },
+                        { "id": "d5", "type": "label", "title": "THU" },
+                        { "id": "d6", "type": "label", "title": "FRI" },
+                        { "id": "d7", "type": "label", "title": "SAT" }
+                      ]
+                    },
+                    {
+                      "id": "cal-events",
+                      "type": "preferences-group",
+                      "title": "Scheduled Events (March 2026)",
+                      "children": [
+                        { "id": "e1", "type": "action-row", "title": "Daylight Saving Time starts", "subtitle": "Sun, Mar 8 · All day", "iconName": "appointment-soon-symbolic" },
+                        { "id": "e2", "type": "action-row", "title": "Commonwealth Day", "subtitle": "Mon, Mar 9 · All day", "iconName": "appointment-soon-symbolic" },
+                        { "id": "e3", "type": "action-row", "title": "Weekly Standup", "subtitle": "Wed, Mar 11 · 09:30 AM", "iconName": "appointment-soon-symbolic" },
+                        { "id": "e4", "type": "action-row", "title": "GNOME 50.0 release sync", "subtitle": "Wed, Mar 18 · 10:00 AM", "iconName": "appointment-soon-symbolic" }
+                      ]
+                    },
+                    {
+                      "id": "cal-bottom-bar",
+                      "type": "box",
+                      "orientation": "horizontal",
+                      "spacing": 12,
+                      "children": [
+                        { "id": "b-today", "type": "button", "title": "Today", "flat": true },
+                        { "id": "b-mode", "type": "toggle-group", "title": "Month / Week" },
+                        { "id": "b-add", "type": "button", "title": "Add Event", "iconName": "appointment-new-symbolic", "suggested": true }
                       ]
                     }
                   ]

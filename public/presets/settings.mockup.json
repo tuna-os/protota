@@ -9,7 +9,7 @@
     "screens": [
       {
         "id": "settings-main",
-        "title": "Settings — Network & Appearance",
+        "title": "Settings — Appearance",
         "type": "sidebar",
         "width": 980,
         "height": 680,
@@ -25,8 +25,8 @@
                   "id": "s-hdr",
                   "type": "header-bar",
                   "children": [
-                    { "id": "s-title", "type": "window-title", "title": "Settings", "subtitle": "System Preferences" },
-                    { "id": "s-search", "type": "search-entry", "placeholder": "Search Settings…" },
+                    { "id": "s-search-btn", "type": "button", "title": "Search", "iconName": "edit-find-symbolic", "flat": true },
+                    { "id": "s-title", "type": "window-title", "title": "Appearance" },
                     { "id": "s-menu", "type": "menu-button", "iconName": "open-menu-symbolic", "title": "Menu" }
                   ]
                 },
@@ -38,12 +38,18 @@
                       "id": "s-sidebar",
                       "type": "list-box",
                       "children": [
-                        { "id": "s-nav-wifi", "type": "action-row", "title": "Wi-Fi", "iconName": "network-wireless-symbolic", "activatable": true },
-                        { "id": "s-nav-bt", "type": "action-row", "title": "Bluetooth", "iconName": "bluetooth-symbolic", "activatable": true },
-                        { "id": "s-nav-disp", "type": "action-row", "title": "Displays", "iconName": "video-display-symbolic", "activatable": true },
-                        { "id": "s-nav-sound", "type": "action-row", "title": "Sound", "iconName": "audio-card-symbolic", "activatable": true },
-                        { "id": "s-nav-power", "type": "action-row", "title": "Power", "iconName": "battery-good-symbolic", "activatable": true },
-                        { "id": "s-nav-about", "type": "action-row", "title": "About", "iconName": "help-about-symbolic", "activatable": true }
+                        { "id": "s-net", "type": "action-row", "title": "Network", "iconName": "network-wireless-symbolic", "activatable": true },
+                        { "id": "s-bt", "type": "action-row", "title": "Bluetooth", "iconName": "bluetooth-symbolic", "activatable": true },
+                        { "id": "s-disp", "type": "action-row", "title": "Displays", "iconName": "video-display-symbolic", "activatable": true },
+                        { "id": "s-sound", "type": "action-row", "title": "Sound", "iconName": "audio-card-symbolic", "activatable": true },
+                        { "id": "s-power", "type": "action-row", "title": "Power", "iconName": "battery-good-symbolic", "activatable": true },
+                        { "id": "s-multi", "type": "action-row", "title": "Multitasking", "iconName": "view-grid-symbolic", "activatable": true },
+                        { "id": "s-appr", "type": "action-row", "title": "Appearance", "iconName": "preferences-desktop-wallpaper-symbolic", "activatable": true },
+                        { "id": "s-apps", "type": "action-row", "title": "Apps", "iconName": "application-x-executable-symbolic", "activatable": true },
+                        { "id": "s-notif", "type": "action-row", "title": "Notifications", "iconName": "preferences-system-notifications-symbolic", "activatable": true },
+                        { "id": "s-search", "type": "action-row", "title": "Search", "iconName": "edit-find-symbolic", "activatable": true },
+                        { "id": "s-accounts", "type": "action-row", "title": "Online Accounts", "iconName": "user-bookmarks-symbolic", "activatable": true },
+                        { "id": "s-sharing", "type": "action-row", "title": "Sharing", "iconName": "folder-publicshare-symbolic", "activatable": true }
                       ]
                     },
                     {
@@ -53,24 +59,30 @@
                       "spacing": 18,
                       "children": [
                         {
-                          "id": "s-group-wifi",
+                          "id": "s-group-style",
                           "type": "preferences-group",
-                          "title": "Wi-Fi Networks",
-                          "description": "Connect to wireless access points",
+                          "title": "Style",
                           "children": [
-                            { "id": "s-wifi-toggle", "type": "switch-row", "title": "Wi-Fi", "subtitle": "Enable wireless network adapter", "active": true },
-                            { "id": "s-wifi-row1", "type": "action-row", "title": "Home Network (5GHz)", "subtitle": "Connected · 100 Mbps", "iconName": "network-wireless-symbolic", "activatable": true },
-                            { "id": "s-wifi-row2", "type": "action-row", "title": "Guest Wi-Fi", "subtitle": "WPA3 Encrypted", "iconName": "network-wireless-symbolic", "activatable": true }
+                            {
+                              "id": "s-toggles",
+                              "type": "toggle-group",
+                              "title": "Appearance Theme",
+                              "children": [
+                                { "id": "s-t-default", "type": "toggle", "title": "Default" },
+                                { "id": "s-t-dark", "type": "toggle", "title": "Dark" }
+                              ]
+                            }
                           ]
                         },
                         {
-                          "id": "s-group-disp",
+                          "id": "s-group-bg",
                           "type": "preferences-group",
-                          "title": "Display & Appearance",
-                          "description": "Screen resolution and color schedule",
+                          "title": "Background",
+                          "description": "+ Add Picture…",
                           "children": [
-                            { "id": "s-disp-res", "type": "combo-row", "title": "Resolution", "subtitle": "3840 × 2160 (16:9)" },
-                            { "id": "s-disp-night", "type": "switch-row", "title": "Night Light", "subtitle": "Reduces eye strain by softening blue light", "active": false }
+                            { "id": "s-bg-1", "type": "action-row", "title": "Adwaita Default (Blue Mesh)", "iconName": "preferences-desktop-wallpaper-symbolic" },
+                            { "id": "s-bg-2", "type": "action-row", "title": "Vibrant Sunset (Orange)", "iconName": "preferences-desktop-wallpaper-symbolic" },
+                            { "id": "s-bg-3", "type": "action-row", "title": "Dark Waves (Purple)", "iconName": "preferences-desktop-wallpaper-symbolic" }
                           ]
                         }
                       ]

@@ -57,6 +57,7 @@ export const WIDGET_SCHEMAS: Record<AdwNodeType, PropSchema[]> = {
   clamp: [
     { key: 'title', label: 'Content', type: 'string', defaultValue: '' },
   ],
+  bin: [],
   box: [
     {
       key: 'orientation',

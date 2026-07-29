@@ -16,6 +16,7 @@ const CLASS_TO_WIDGET_MAP: Record<string, AdwNodeType> = {
   'Adw.TabView': 'tab-view',
   'Adw.OverlaySplitView': 'overlay-split',
   'Adw.Clamp': 'clamp',
+  'Adw.Bin': 'bin',
   'Adw.ActionRow': 'action-row',
   'Adw.SwitchRow': 'switch-row',
   'Adw.ComboRow': 'combo-row',
@@ -46,6 +47,14 @@ const CLASS_TO_WIDGET_MAP: Record<string, AdwNodeType> = {
   'Gtk.ListBox': 'list-box',
   'Gtk.Label': 'label',
   'Gtk.Inscription': 'inscription',
+  // Blueprint's short widget names are common in real application templates.
+  Bin: 'bin',
+  Box: 'box',
+  Grid: 'grid',
+  Button: 'button',
+  ToggleButton: 'toggle',
+  MenuButton: 'menu-button',
+  Entry: 'entry',
   // GtkBuilder uses GObject names while Blueprint uses namespace-qualified names.
   AdwApplicationWindow: 'window',
   AdwWindow: 'window',
@@ -82,6 +91,7 @@ const WIDGET_CLASS_MAP: Record<string, string> = {
   'tab-view': 'Adw.TabView',
   'overlay-split': 'Adw.OverlaySplitView',
   clamp: 'Adw.Clamp',
+  bin: 'Adw.Bin',
   'action-row': 'Adw.ActionRow',
   'switch-row': 'Adw.SwitchRow',
   'combo-row': 'Adw.ComboRow',
@@ -200,7 +210,7 @@ function parseValue(token: Token | undefined): BlueprintValue | undefined {
 }
 
 function propertyNameForNode(rawName: string, nodeType: AdwNodeType): string {
-  if ((rawName === 'label' || rawName === 'text') && (nodeType === 'button' || nodeType === 'label' || nodeType === 'inscription')) return 'title';
+  if ((rawName === 'label' || rawName === 'text') && (nodeType === 'button' || nodeType === 'toggle' || nodeType === 'label' || nodeType === 'inscription')) return 'title';
   if (rawName === 'icon-name') return 'iconName';
   if (rawName === 'show-title-buttons') return 'showTitleButtons';
   if (rawName === 'selected') return 'selectedIndex';
@@ -236,7 +246,7 @@ function parseBlueprintRoots(code: string): AdwNode[] {
       const third = tokens[cursor + 2];
 
       // Gtk/Adw object: `Gtk.Button save_button { ... }`.
-      if (first?.kind === 'word' && first.value.includes('.') && (second?.value === '{' || third?.value === '{')) {
+      if (first?.kind === 'word' && (first.value.includes('.') || CLASS_TO_WIDGET_MAP[first.value]) && (second?.value === '{' || third?.value === '{')) {
         const rawClass = first.value;
         cursor++;
         const id = tokens[cursor]?.value === '{' ? nextId() : tokens[cursor++]?.value || nextId();
@@ -251,6 +261,18 @@ function parseBlueprintRoots(code: string): AdwNode[] {
             const value = parseValue(tokens[cursor++]);
             if (value !== undefined) properties[key.value] = value;
             if (tokens[cursor]?.value === ';' || tokens[cursor]?.value === ',') cursor++;
+          } else if (key?.value === 'layout' && tokens[cursor + 1]?.value === '{') {
+            cursor += 2;
+            while (cursor < tokens.length && tokens[cursor]?.value !== '}') {
+              const layoutKey = tokens[cursor];
+              if (tokens[cursor + 1]?.value === ':') {
+                cursor += 2;
+                const value = parseValue(tokens[cursor++]);
+                if (value !== undefined) properties[layoutKey.value] = value;
+                if (tokens[cursor]?.value === ';' || tokens[cursor]?.value === ',') cursor++;
+              } else cursor++;
+            }
+            if (tokens[cursor]?.value === '}') cursor++;
           } else {
             // Delegate the rest of this object body to the regular parser so
             // direct children with an id (`Gtk.Box content {}`) are not

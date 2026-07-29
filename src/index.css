@@ -352,6 +352,10 @@ body,
 /* ---- Div-only widget types (no custom element available) ---- */
 
 /* Box — directional container. Uses flexbox with Adwaita spacing scale. */
+.protota-div-bin {
+  display: block;
+}
+
 .protota-div-box {
   display: flex;
   flex-direction: column;

@@ -30,6 +30,7 @@ const TAG_MAP: Record<string, string | null> = {
   'tab-view':            'adw-tab-view',
   'overlay-split':       'adw-overlay-split-view',
   clamp:                 'adw-clamp',
+  bin:                   null,
   'action-row':          'adw-action-row',
   'switch-row':          'adw-switch-row',
   'combo-row':           'adw-combo-row',
@@ -65,7 +66,7 @@ const TAG_MAP: Record<string, string | null> = {
 
 /** Div-only types: render a semantic container with Adwaita-styled layout. */
 const DIV_TYPES = new Set([
-  'box', 'grid', 'center-box', 'search-entry', 'switch-widget',
+  'bin', 'box', 'grid', 'center-box', 'search-entry', 'switch-widget',
   'check-button', 'list-box', 'label', 'inscription',
 ]);
 

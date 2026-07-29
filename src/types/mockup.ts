@@ -26,6 +26,7 @@ export type AdwNodeType =
 
   // Layout
   | 'clamp'            // AdwClamp — max-width container
+  | 'bin'              // AdwBin — single-child container
   | 'box'              // GtkBox — directional container
   | 'grid'             // GtkGrid — rows/columns (Calculator and keypads)
   | 'center-box'       // GtkCenterBox — start/center/end layout
@@ -200,6 +201,10 @@ export const LEGAL_CHILDREN: Record<AdwNodeType, AdwNodeType[]> = {
   clamp: [
     'box', 'label', 'status-page', 'list-box', 'button',
     'preferences-group', 'flow-box', 'inscription', 'spinner',
+  ],
+  bin: [
+    'box', 'grid', 'clamp', 'label', 'status-page', 'list-box', 'flow-box',
+    'toast-overlay', 'view-stack', 'tab-view', 'button',
   ],
   box: [
     'label', 'button', 'entry', 'search-entry', 'inscription',

@@ -90,4 +90,22 @@ describe('Blueprint import', () => {
     expect(imported.screens[0].rootNode.children?.[0]).toMatchObject({ type: 'toolbar-view' });
     expect(mockupToBlueprint(imported)).toContain('Adw.ToolbarView');
   });
+
+  it('imports the real Blueprint template syntax used by GNOME Calculator button panels', () => {
+    const imported = blueprintToNode(`
+      template $BasicButtonPanel: Adw.Bin {
+        Grid basic {
+          Button clear { label: "C"; layout { column: 0; row: 0; } }
+          ToggleButton superscript { label: "↑n"; layout { column: 1; row: 0; } }
+        }
+      }
+    `);
+
+    expect(imported).toMatchObject({ type: 'bin' });
+    expect(imported.children?.[0]).toMatchObject({ type: 'grid' });
+    expect(imported.children?.[0].children).toEqual(expect.arrayContaining([
+      expect.objectContaining({ type: 'button', title: 'C', column: 0, row: 0 }),
+      expect.objectContaining({ type: 'toggle', title: '↑n', column: 1, row: 0 }),
+    ]));
+  });
 });

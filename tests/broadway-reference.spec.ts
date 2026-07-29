@@ -21,27 +21,36 @@ test.describe('Broadway reference captures', () => {
       await testInfo.attach(name, { path, contentType });
     };
 
-    await page.setViewportSize(viewport);
-    await page.goto('/');
-    await page.evaluate(async (id) => {
-      const response = await fetch(`./presets/${id}.mockup.json`);
-      const preset = await response.json();
-      localStorage.setItem('protota_doc_v1', JSON.stringify(preset.document));
-    }, presetId);
-    await page.reload();
-    await expect(page.locator('adw-window')).toBeVisible();
-    const prototaPng = await page.screenshot();
-    await attachArtifact(`protota-${appId}.png`, prototaPng, 'image/png');
-
-    const referencePage = await browser.newPage({ viewport });
+    // Broadway's generated DOM has no GTK widget semantics, but its first
+    // translated child is the native app surface. Capture that surface rather
+    // than the browser page (which includes Broadway's outer canvas margin).
+    const referencePage = await browser.newPage({ viewport: { width: Math.max(viewport.width, 1280), height: Math.max(viewport.height, 900) } });
     await referencePage.goto(broadwayUrl!);
     await referencePage.waitForTimeout(2_000);
-    const broadwayPng = await referencePage.screenshot();
+    const nativeSurface = referencePage.locator('body > div > div');
+    await expect(nativeSurface).toBeVisible();
+    const broadwayPng = await nativeSurface.screenshot();
     await attachArtifact(`broadway-${appId}.png`, broadwayPng, 'image/png');
     await referencePage.close();
 
-    const actual = PNG.sync.read(prototaPng);
     const reference = PNG.sync.read(broadwayPng);
+    await page.goto('/');
+    await page.evaluate(async ({ id, width, height }) => {
+      const response = await fetch(`./presets/${id}.mockup.json`);
+      const preset = await response.json();
+      // Render the editable document at the native app surface dimensions.
+      // This is a renderer contract, not an app-specific layout adjustment.
+      preset.document.screens[0].width = width;
+      preset.document.screens[0].height = height;
+      localStorage.setItem('protota_doc_v1', JSON.stringify(preset.document));
+    }, { id: presetId, width: reference.width, height: reference.height });
+    await page.reload();
+    const prototaSurface = page.locator('adw-window');
+    await expect(prototaSurface).toBeVisible();
+    const prototaPng = await prototaSurface.screenshot();
+    await attachArtifact(`protota-${appId}.png`, prototaPng, 'image/png');
+
+    const actual = PNG.sync.read(prototaPng);
     expect([actual.width, actual.height], 'Protota and Broadway must use the catalogued viewport').toEqual([reference.width, reference.height]);
 
     const diff = new PNG({ width: actual.width, height: actual.height });

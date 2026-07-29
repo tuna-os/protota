@@ -79,6 +79,11 @@ export const WIDGET_SCHEMAS: Record<AdwNodeType, PropSchema[]> = {
     { key: 'columnSpacing', label: 'Column spacing', type: 'number', defaultValue: 6 },
   ],
   'center-box': [],
+  stack: [],
+  'stack-page': [
+    { key: 'title', label: 'Page title', type: 'string', defaultValue: '' },
+  ],
+  'scrolled-window': [],
 
   // === Preferences rows ===
   'action-row': [

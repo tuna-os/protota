@@ -149,6 +149,9 @@ describe('Blueprint import', () => {
       // GtkSourceView is defined in Calculator's code, rather than this
       // Blueprint bundle; it must remain measurable, not become a fake box.
       expect.objectContaining({ id: 'source_view', type: 'custom-widget', title: 'GtkSourceView' }),
+      // MathButtons is implemented in Vala, but its source-declared slot must
+      // survive generic GtkStack/GtkScrolledWindow parsing and retain space.
+      expect.objectContaining({ id: '_buttons', type: 'custom-widget', title: 'MathButtons' }),
     ]));
   });
 });

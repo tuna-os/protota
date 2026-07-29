@@ -57,6 +57,9 @@ const TAG_MAP: Record<string, string | null> = {
   box:                   null,
   grid:                  null,
   'center-box':          null,
+  stack:                 null,
+  'stack-page':          null,
+  'scrolled-window':     null,
   'search-entry':        null,
   'switch-widget':       null,
   'check-button':        null,
@@ -67,7 +70,7 @@ const TAG_MAP: Record<string, string | null> = {
 
 /** Div-only types: render a semantic container with Adwaita-styled layout. */
 const DIV_TYPES = new Set([
-  'bin', 'custom-widget', 'box', 'grid', 'center-box', 'search-entry', 'switch-widget',
+  'bin', 'custom-widget', 'box', 'grid', 'center-box', 'stack', 'stack-page', 'scrolled-window', 'search-entry', 'switch-widget',
   'check-button', 'list-box', 'label', 'inscription',
 ]);
 
@@ -188,6 +191,7 @@ function nodeLayout(node: AdwNode): React.CSSProperties | undefined {
       ...placement,
     };
   }
+  if (node.type === 'scrolled-window') return { overflow: 'auto', ...placement };
   return Object.keys(placement).length ? placement : undefined;
 }
 

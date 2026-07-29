@@ -31,6 +31,9 @@ export type AdwNodeType =
   | 'box'              // GtkBox — directional container
   | 'grid'             // GtkGrid — rows/columns (Calculator and keypads)
   | 'center-box'       // GtkCenterBox — start/center/end layout
+  | 'stack'            // GtkStack — visible page container
+  | 'stack-page'       // GtkStackPage — named stack child
+  | 'scrolled-window'  // GtkScrolledWindow — viewport with overflow
 
   // Preferences rows (boxed-list children)
   | 'action-row'       // AdwActionRow — title + subtitle + prefix/suffix
@@ -228,6 +231,15 @@ export const LEGAL_CHILDREN: Record<AdwNodeType, AdwNodeType[]> = {
   'center-box': [
     'button', 'label', 'window-title', 'view-switcher',
     'search-entry', 'entry', 'spinner', 'inscription',
+  ],
+  stack: [
+    'stack-page', 'box', 'grid', 'clamp', 'status-page', 'list-box', 'scrolled-window',
+  ],
+  'stack-page': [
+    'box', 'grid', 'clamp', 'status-page', 'list-box', 'scrolled-window',
+  ],
+  'scrolled-window': [
+    'box', 'grid', 'stack', 'stack-page', 'list-box', 'flow-box', 'custom-widget', 'label',
   ],
 
   // === Preferences rows ===

@@ -11,6 +11,7 @@ export const ViewportCanvas: React.FC = () => {
   const [zoom, setZoom] = useState(1);
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [isPanning, setIsPanning] = useState(false);
+  const [spaceHeld, setSpaceHeld] = useState(false);
   const startPan = useRef({ x: 0, y: 0 });
   const spaceDown = useRef(false);
   const canvasRef = useRef<HTMLDivElement>(null);
@@ -56,12 +57,14 @@ export const ViewportCanvas: React.FC = () => {
         if (!canvasRef.current?.contains(e.target as Node)) return;
         e.preventDefault();
         spaceDown.current = true;
+        setSpaceHeld(true);
       }
     };
     const onKeyUp = (e: KeyboardEvent) => {
       if (e.code === "Space") {
         if (!canvasRef.current?.contains(e.target as Node)) return;
         spaceDown.current = false;
+        setSpaceHeld(false);
         setIsPanning(false);
       }
     };
@@ -136,7 +139,10 @@ export const ViewportCanvas: React.FC = () => {
     };
   }, []);
 
-  const handleCanvasClick = useCallback(() => selectNode(null), [selectNode]);
+  const handleCanvasClick = useCallback(() => {
+    canvasRef.current?.focus();
+    selectNode(null);
+  }, [selectNode]);
 
   const [phoshScreenId, setPhoshScreenId] = useState<string | null>(null);
   const [desktopScreenId, setDesktopScreenId] = useState<string | null>(null);
@@ -147,6 +153,7 @@ export const ViewportCanvas: React.FC = () => {
   return (
     <div
       ref={canvasRef}
+      tabIndex={0}
       className="protota-canvas"
       onWheel={handleWheel}
       onMouseDown={handleMouseDown}
@@ -158,6 +165,7 @@ export const ViewportCanvas: React.FC = () => {
         flex: 1,
         overflow: "hidden",
         position: "relative",
+        outline: "none",
         cursor: isPanning ? "grabbing" : "default",
       }}
     >
@@ -337,6 +345,7 @@ export const ViewportCanvas: React.FC = () => {
           display: "inline-flex",
           gap: "40px",
           padding: "60px",
+          pointerEvents: spaceHeld || isPanning ? "none" : undefined,
         }}
       >
         {doc.screens.map((screen) => (

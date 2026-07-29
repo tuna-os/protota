@@ -41,10 +41,10 @@
                       "id": "calc-history-list",
                       "type": "list-box",
                       "children": [
-                        { "id": "calc-h1", "type": "action-row", "title": "30 × 5", "subtitle": "= 150" },
-                        { "id": "calc-h2", "type": "action-row", "title": "150 ÷ 15", "subtitle": "= 10" },
-                        { "id": "calc-h3", "type": "action-row", "title": "10 × 9.8", "subtitle": "= 98" },
-                        { "id": "calc-h4", "type": "action-row", "title": "98 − 80", "subtitle": "= 18" }
+                        { "id": "calc-h1", "type": "action-row", "title": "30×5", "subtitle": "= 150" },
+                        { "id": "calc-h2", "type": "action-row", "title": "150÷15", "subtitle": "= 10" },
+                        { "id": "calc-h3", "type": "action-row", "title": "10×9.8", "subtitle": "= 98" },
+                        { "id": "calc-h4", "type": "action-row", "title": "98−80", "subtitle": "= 18" }
                       ]
                     },
                     { "id": "calc-display", "type": "entry", "value": "18", "placeholder": "0" },

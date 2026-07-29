@@ -1,0 +1,59 @@
+{
+  "version": 1,
+  "exportedAt": "2026-07-29T00:00:00Z",
+  "document": {
+    "id": "preset-web",
+    "title": "GNOME Web (Epiphany)",
+    "colorScheme": "auto",
+    "edges": [],
+    "screens": [
+      {
+        "id": "web-main",
+        "title": "Web — Epiphany Browser",
+        "type": "standard",
+        "width": 1020,
+        "height": 680,
+        "rootNode": {
+          "id": "web-root",
+          "type": "window",
+          "children": [
+            {
+              "id": "web-toolbar",
+              "type": "toolbar-view",
+              "children": [
+                {
+                  "id": "web-hdr",
+                  "type": "header-bar",
+                  "children": [
+                    { "id": "web-back", "type": "button", "title": "Back", "iconName": "go-previous-symbolic", "flat": true },
+                    { "id": "web-fwd", "type": "button", "title": "Forward", "iconName": "go-next-symbolic", "flat": true },
+                    { "id": "web-reload", "type": "button", "title": "Reload", "iconName": "view-refresh-symbolic", "flat": true },
+                    { "id": "web-url", "type": "entry", "value": "https://apps.gnome.org", "placeholder": "Search or type web address…" },
+                    { "id": "web-menu", "type": "menu-button", "iconName": "open-menu-symbolic", "title": "Menu" }
+                  ]
+                },
+                {
+                  "id": "web-body",
+                  "type": "clamp",
+                  "children": [
+                    {
+                      "id": "web-status",
+                      "type": "status-page",
+                      "title": "Welcome to GNOME Web",
+                      "description": "Simple, clean, and elegant web browsing designed for GNOME.",
+                      "iconName": "web-browser-symbolic",
+                      "children": [
+                        { "id": "web-start", "type": "button", "title": "Start Browsing", "suggested": true }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "assets": {}
+}

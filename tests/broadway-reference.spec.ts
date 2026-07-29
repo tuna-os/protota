@@ -56,6 +56,11 @@ test.describe('Broadway reference captures', () => {
       localStorage.setItem('protota_doc_v1', JSON.stringify(preset.document));
     }, { id: presetId, width: reference.width, height: reference.height });
     await page.reload();
+    // These are editor affordances, not part of the rendered GTK document.
+    // Hide them before taking the surface crop so they cannot overlap it.
+    await page.locator('.protota-zoom-bar, .protota-screen-label').evaluateAll((elements) => {
+      for (const element of elements) (element as HTMLElement).style.display = 'none';
+    });
     const prototaSurface = page.locator('adw-window');
     await expect(prototaSurface).toBeVisible();
     const prototaPng = await prototaSurface.screenshot();

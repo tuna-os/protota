@@ -753,3 +753,15 @@ adw-status-page .adw-status-page-child {
   mask-image: var(--icon-window-close);
   -webkit-mask-image: var(--icon-window-close);
 }
+
+/* AdwStatusPage metrics matched to libadwaita, measured against native GNOME
+   Weather: a 128px icon with generous space below it, and a wider gap before
+   the action area than the shipped web defaults use. */
+adw-status-page .adw-status-page-icon {
+  width: 128px;
+  height: 128px;
+  margin-bottom: 31px;
+}
+adw-status-page .adw-status-page-child {
+  margin-top: 37px;
+}

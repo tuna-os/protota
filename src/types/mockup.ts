@@ -80,8 +80,9 @@ export type AdwNodeType =
  * Protota cannot render is retained with its source identity and reason.
  */
 export type ImportDiagnosticCode =
-  | 'template-not-in-bundle'          // $Class reference with no template definition in the imported source
-  | 'renderer-does-not-support-class'; // known-syntax GTK/Adw class outside the generic widget registry
+  | 'template-not-in-bundle'           // $Class reference with no template definition in the imported source
+  | 'renderer-does-not-support-class'  // known-syntax GTK/Adw class outside the generic widget registry
+  | 'static-source-expansion';         // code-defined composite projected from language construction facts
 
 export interface ImportDiagnostic {
   code: ImportDiagnosticCode;
@@ -143,6 +144,8 @@ export interface AdwNode {
   /** GTK expand semantics — the node claims its parent's spare allocation. */
   hexpand?: boolean;
   vexpand?: boolean;
+  /** GTK visibility. `false` renders nothing, exactly like a hidden widget. */
+  visible?: boolean;
   /**
    * Source-declared class of a `custom-widget` boundary (e.g. "MathButtons").
    * Never overloaded into a display label; export must re-emit `$MathButtons`,

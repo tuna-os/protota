@@ -68,12 +68,12 @@
     "source": "https://gitlab.gnome.org/GNOME/gnome-calculator",
     "sourceImport": {
       "repository": "https://gitlab.gnome.org/GNOME/gnome-calculator.git",
-      "uiPath": "src/ui",
+      "uiPath": "src",
       "entry": "math-window.blp"
     },
     "suite": "core",
     "status": "preset",
-    "visualStatus": "not-validated"
+    "visualStatus": "needs-tuning"
   },
   "decoder": {
     "name": "Decoder",

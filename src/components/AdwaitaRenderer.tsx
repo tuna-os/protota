@@ -172,7 +172,11 @@ function childSlot(parent: AdwNode, child: AdwNode, index: number): string | und
   return undefined;
 }
 
-function nodeLayout(node: AdwNode): React.CSSProperties | undefined {
+/**
+ * Placement layout: how this node sits inside ITS PARENT's flex/grid context.
+ * Applied to the wrapper div, which is the parent's direct child.
+ */
+function placementLayout(node: AdwNode): React.CSSProperties | undefined {
   const placement: React.CSSProperties = {};
   // GTK expand semantics: an expanding child (including an unresolved
   // custom-widget boundary such as Calculator's MathButtons) consumes the
@@ -180,6 +184,7 @@ function nodeLayout(node: AdwNode): React.CSSProperties | undefined {
   if (node.vexpand || node.hexpand) {
     placement.flexGrow = 1;
     placement.alignSelf = 'stretch';
+    placement.minHeight = 0;
   }
   if (node.minWidth !== undefined) placement.minWidth = node.minWidth;
   if (node.minHeight !== undefined) placement.minHeight = node.minHeight;
@@ -187,19 +192,36 @@ function nodeLayout(node: AdwNode): React.CSSProperties | undefined {
   if (node.heightRequest !== undefined) placement.height = node.heightRequest;
   if (node.column !== undefined) placement.gridColumn = `${node.column + 1} / span ${node.columnSpan ?? 1}`;
   if (node.row !== undefined) placement.gridRow = `${node.row + 1} / span ${node.rowSpan ?? 1}`;
+  return Object.keys(placement).length ? placement : undefined;
+}
+
+/**
+ * Container layout: how this node arranges ITS OWN children. Applied to the
+ * rendered element only — putting it on the wrapper as well would nest two
+ * copies of the same layout and squeeze the element into its own grid cell.
+ */
+function containerLayout(node: AdwNode): React.CSSProperties | undefined {
   if (node.type === 'box') {
-    return { gap: node.spacing ?? 12, ...placement };
+    return { gap: node.spacing ?? 12 };
   }
   if (node.type === 'grid') {
+    // GtkGrid has no declared column count; derive it from the children's
+    // explicit attach positions and spans, as GTK does.
+    const derivedColumns = Math.max(1, ...(node.children ?? []).map((child) =>
+      (typeof child.column === 'number' ? child.column : 0) + (typeof child.columnSpan === 'number' ? child.columnSpan : 1)));
     return {
-      gridTemplateColumns: `repeat(${node.columns ?? 1}, minmax(0, 1fr))`,
+      gridTemplateColumns: `repeat(${node.columns ?? derivedColumns}, minmax(0, 1fr))`,
       rowGap: node.rowSpacing ?? node.spacing ?? 6,
       columnGap: node.columnSpacing ?? node.spacing ?? 6,
-      ...placement,
     };
   }
-  if (node.type === 'scrolled-window') return { overflow: 'auto', ...placement };
-  return Object.keys(placement).length ? placement : undefined;
+  if (node.type === 'scrolled-window') return { overflow: 'auto' };
+  return undefined;
+}
+
+/** GTK label markup (Pango) is not renderable text; show the plain string. */
+function plainText(text: string): string {
+  return text.replace(/<[^>]+>/g, '');
 }
 
 export const AdwaitaRenderer: React.FC<Props> = ({
@@ -219,6 +241,10 @@ export const AdwaitaRenderer: React.FC<Props> = ({
     }
   }, [node.type, screenWidth, screenHeight]);
 
+  // GTK visibility: a hidden widget takes no space and draws nothing. This
+  // must come after every hook so React's hook order stays stable.
+  if (node.visible === false) return null;
+
   const tag = TAG_MAP[node.type] || 'div';
   const attrs = nodeProps(node, inheritedSlot);
 
@@ -229,7 +255,13 @@ export const AdwaitaRenderer: React.FC<Props> = ({
     ? `theme-${doc.colorScheme}` : '';
   if (themeClass) attrs['class'] = themeClass;
 
-  const children = node.children?.map((child, index) => (
+  // GtkStack shows exactly one child. The visible child is the named one when
+  // the source declares it, otherwise the first child — GTK's default.
+  const visibleChildren = node.type === 'stack' && node.children?.length
+    ? [node.children.find((child) => typeof node.visibleChildName === 'string' && (child.id === node.visibleChildName || child.title === node.visibleChildName)) ?? node.children[0]]
+    : node.children;
+
+  const children = visibleChildren?.map((child, index) => (
     <AdwaitaRenderer
       key={child.id}
       node={child}
@@ -245,8 +277,13 @@ export const AdwaitaRenderer: React.FC<Props> = ({
     />
   ) : null;
 
-  // Div-only types get Adwaita-styled classes for layout/structure
-  const divClass = DIV_TYPES.has(node.type) ? `protota-div-${node.type}` : '';
+  // Div-only types get Adwaita-styled classes for layout/structure.
+  // A custom-widget with projected children is a resolved composite: render it
+  // as a plain container, not a striped unresolved boundary.
+  const isExpandedBoundary = node.type === 'custom-widget' && (node.children?.length ?? 0) > 0;
+  const divClass = DIV_TYPES.has(node.type)
+    ? isExpandedBoundary ? 'protota-div-custom-widget-expanded' : `protota-div-${node.type}`
+    : '';
 
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -257,10 +294,10 @@ export const AdwaitaRenderer: React.FC<Props> = ({
     <div
       onClick={handleClick}
       slot={node.slot ?? inheritedSlot}
-      className={`adw-node-wrapper${isSelected ? ' selected-outline' : ''} ${divClass}`}
+      className={`adw-node-wrapper${isSelected ? ' selected-outline' : ''}`}
       style={{
         ...(isSelected ? { position: 'relative' } : {}),
-        ...nodeLayout(node),
+        ...placementLayout(node),
       }}
     >
       {isSelected && (
@@ -271,15 +308,16 @@ export const AdwaitaRenderer: React.FC<Props> = ({
         ref: elRef,
         ...attrs,
         'data-protota-type': node.type,
+        ...(isExpandedBoundary ? { 'data-protota-expanded': 'true' } : {}),
         ...(node.type === 'window' && screenWidth ? { 'data-protota-render-surface': 'true' } : {}),
-        style: nodeLayout(node),
+        style: containerLayout(node),
         className: divClass || undefined,
       },
         iconPrefix,
         ...(children ?? []),
         // For label/inscription — render text content
         ...(node.type === 'label' || node.type === 'inscription' || (node.type === 'custom-widget' && (!node.children || node.children.length === 0))
-          ? [node.title || '']
+          ? [plainText(String(node.title || ''))]
           : []),
       )}
 

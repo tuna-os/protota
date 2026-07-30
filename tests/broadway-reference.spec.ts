@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 import { readdirSync, readFileSync, writeFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { join, relative } from 'node:path';
 import pixelmatch from 'pixelmatch';
 import { PNG } from 'pngjs';
 import { blueprintBundleToDocument } from '../src/utils/blueprint';
@@ -70,9 +70,14 @@ function unresolvedWidgetMask(width: number, height: number, rectangles: Array<{
 
 function sourceBundleDocument() {
   if (!sourceRoot || !sourceEntry) return null;
-  const files = readdirSync(sourceRoot)
-    .filter(path => path.endsWith('.blp'))
-    .map(path => ({ path, content: readFileSync(join(sourceRoot, path), 'utf8') }));
+  // Recursive: declarative UI files plus language sources for static
+  // enrichment (Phase 4), wherever the app keeps them under the source root.
+  const files = readdirSync(sourceRoot, { recursive: true, withFileTypes: true })
+    .filter(entry => entry.isFile() && /\.(blp|ui|vala)$/i.test(entry.name))
+    .map(entry => {
+      const absolute = join(entry.parentPath, entry.name);
+      return { path: relative(sourceRoot, absolute), content: readFileSync(absolute, 'utf8') };
+    });
   return blueprintBundleToDocument(files, sourceEntry, `GNOME ${appId}`);
 }
 
@@ -118,6 +123,10 @@ test.describe('Broadway reference captures', () => {
       // This is a renderer contract, not an app-specific layout adjustment.
       preset.document.screens[0].width = width;
       preset.document.screens[0].height = height;
+      // The editor persists an edited document as Blueprint source under its
+      // own key, which takes precedence over this injected JSON document.
+      // Clear it so the comparison always renders this run's import.
+      localStorage.clear();
       localStorage.setItem('protota_doc_v1', JSON.stringify(preset.document));
     }, { id: presetId, width: reference.width, height: reference.height, document: sourceDocument });
     await page.reload();
@@ -150,7 +159,9 @@ test.describe('Broadway reference captures', () => {
       const surface = document.querySelector<HTMLElement>('[data-protota-render-surface="true"]');
       if (!surface) return [];
       const surfaceRect = surface.getBoundingClientRect();
-      return Array.from(surface.querySelectorAll<HTMLElement>('[data-protota-type="custom-widget"]')).map((element) => {
+      // An expanded composite renders projected source contents; only
+      // childless boundaries remain unresolved coverage.
+      return Array.from(surface.querySelectorAll<HTMLElement>('[data-protota-type="custom-widget"]:not([data-protota-expanded])')).map((element) => {
         const rect = element.getBoundingClientRect();
         return { x: rect.x - surfaceRect.x, y: rect.y - surfaceRect.y, width: rect.width, height: rect.height };
       });

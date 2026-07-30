@@ -389,6 +389,19 @@ body,
   text-align: center;
 }
 
+/* A custom-widget whose contents were projected from source construction
+   facts is a resolved composite — a plain container, not a striped boundary. */
+.protota-div-custom-widget-expanded {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+}
+.protota-div-custom-widget-expanded > * {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
 .protota-div-box {
   display: flex;
   flex-direction: column;

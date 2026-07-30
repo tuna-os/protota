@@ -1,4 +1,5 @@
 import type { MockupDocument, AdwNode, AdwNodeType, ImportDiagnostic, Screen, ScreenTemplateType } from '../types/mockup';
+import { extractValaFacts, type ValaClassFacts } from './vala';
 
 export type { ImportDiagnostic } from '../types/mockup';
 
@@ -182,8 +183,14 @@ function nodeToBlueprint(node: AdwNode, depth: number = 0): string {
     : WIDGET_CLASS_MAP[node.type] || node.type;
   const props: string[] = [];
 
+  // A source-referenced boundary exports as its reference alone. Its children
+  // and expand flags are Protota's projection of code the app owns; writing
+  // them back would flatten the app's source.
+  const isSourceReference = node.type === 'custom-widget' && !!node.sourceClass;
+
   for (const [k, v] of Object.entries(node)) {
     if (k === 'id' || k === 'type' || k === 'slot' || k === 'children' || k === 'sourceClass' || k === 'bindings' || v === undefined || v === false || v === '') continue;
+    if (isSourceReference && (k === 'vexpand' || k === 'hexpand')) continue;
     if (k === 'title' && node.type === 'custom-widget' && v === node.sourceClass) continue;
     if (k === 'title' && (node.type === 'button' || node.type === 'label')) {
       props.push(`label: "${escapeBlueprintString(String(v))}";`);
@@ -199,7 +206,7 @@ function nodeToBlueprint(node: AdwNode, depth: number = 0): string {
     props.push(`${k}: bind ${expression};`);
   }
 
-  const children = (node.children || []).map(child => {
+  const children = (isSourceReference ? [] : node.children || []).map(child => {
     if (!child.slot) return nodeToBlueprint(child, depth + 1);
     return `${indent(depth + 1)}${child.slot} {\n` +
       nodeToBlueprint(child, depth + 2) +
@@ -450,7 +457,10 @@ function parseBlueprintRoots(code: string, diagnostics: ImportDiagnostic[]): Adw
           const layoutKey = tokens[cursor];
           if (tokens[cursor + 1]?.value === ':') {
             cursor += 2;
-            const value = parseValue(tokens[cursor++]);
+            let value = parseValue(tokens[cursor++]);
+            // GtkBuilder layout values are strings ("0"); grid placement math
+            // needs real numbers.
+            if (typeof value === 'string' && /^-?\d+$/.test(value)) value = Number(value);
             if (value !== undefined) properties[layoutKey.value] = value;
             if (tokens[cursor]?.value === ';' || tokens[cursor]?.value === ',') cursor++;
           } else cursor++;
@@ -628,18 +638,142 @@ function expandBundleTemplates(source: string, templates: Map<string, BlueprintT
       return match;
     }
     if (stack.includes(name)) throw new Error(`Recursive Blueprint template reference: $${[...stack, name].join(' → $')}`);
-    return `${template.className} ${id} {${expandBundleTemplates(template.body, templates, [...stack, name])}`;
+    // Inside an inlined body, `template.` refers to this template's class.
+    // Qualify it so bindings keep their owner through expansion; inner
+    // templates already qualified theirs during their own expansion.
+    const body = expandBundleTemplates(template.body, templates, [...stack, name])
+      .replace(/\b(bind(?:-property)?)\s+template\./g, `$1 $${name}.`);
+    return `${template.className} ${id} {${body}`;
   });
+}
+
+/** Vala spellings that make the argument the receiver's sole child slot. */
+const VALA_SELF_CHILD_METHODS = new Set(['set_child', 'set_content', 'child', 'content']);
+
+function formatBlueprintValue(value: string | number | boolean): string {
+  return typeof value === 'string' ? `"${escapeBlueprintString(value)}"` : String(value);
+}
+
+/**
+ * Project a code-defined composite as Blueprint source, using only the
+ * construction facts a language adapter discovered: the widget installed as
+ * the class's own child, the children deterministically inserted into it, and
+ * their literal properties. Classes whose declarative template exists in the
+ * bundle are emitted as `$Template` references so normal template expansion
+ * resolves their contents; everything else stays a boundary.
+ */
+function valaCompositeSnippet(
+  facts: ValaClassFacts,
+  templates: Map<string, BlueprintTemplate>,
+): string | null {
+  const rootInsertion = facts.insertions.find(insertion => insertion.parent === 'this' && VALA_SELF_CHILD_METHODS.has(insertion.method));
+  if (!rootInsertion) return null;
+  const emitVariable = (variable: string): string | null => {
+    const constructedClass = facts.constructions[variable];
+    if (!constructedClass) return null;
+    const short = constructedClass.split('.').pop() ?? constructedClass;
+    if (templates.has(short)) return `$${short} ${variable} {}`;
+    const properties = facts.propertyAssignments
+      .filter(assignment => assignment.target === variable)
+      .map(assignment => `${assignment.property.replace(/_/g, '-')}: ${formatBlueprintValue(assignment.value)};`)
+      .join(' ');
+    const children = facts.insertions
+      .filter(insertion => insertion.parent === variable)
+      .map(insertion => emitVariable(insertion.child))
+      .filter(Boolean)
+      .join(' ');
+    if (CLASS_TO_WIDGET_MAP[constructedClass] || CLASS_TO_WIDGET_MAP[short]) {
+      return `${constructedClass} ${variable} { ${properties} ${children} }`;
+    }
+    // A nested code-defined class stays a boundary here; the enrichment walk
+    // revisits it with its own facts.
+    return `$${short} ${variable} {}`;
+  };
+  return emitVariable(rootInsertion.child);
+}
+
+/**
+ * Phase 4 static enrichment: give code-defined boundaries their statically
+ * discoverable contents. Structural only — facts come from language syntax,
+ * never from application names or invented widgets.
+ */
+function enrichWithValaFacts(doc: MockupDocument, valaFiles: BlueprintSourceFile[], templates: Map<string, BlueprintTemplate>): void {
+  const factsByClass = new Map<string, ValaClassFacts>();
+  for (const file of valaFiles) {
+    for (const facts of extractValaFacts(file.content)) factsByClass.set(facts.className, facts);
+  }
+  if (!factsByClass.size) return;
+  const diagnostics = doc.importDiagnostics ?? (doc.importDiagnostics = []);
+
+  const expandNode = (node: AdwNode, seen: ReadonlySet<string>): void => {
+    node.children?.forEach(child => expandNode(child, seen));
+    if (node.type !== 'custom-widget' || !node.sourceClass || node.children?.length) return;
+    const facts = factsByClass.get(node.sourceClass);
+    if (!facts || seen.has(node.sourceClass)) return;
+    // Expand flags set in code are geometry evidence for the boundary itself.
+    for (const assignment of facts.propertyAssignments) {
+      if (assignment.target !== 'this' || assignment.value !== true) continue;
+      if (assignment.property === 'vexpand' || assignment.property === 'vexpand_set') node.vexpand = true;
+      if (assignment.property === 'hexpand' || assignment.property === 'hexpand_set') node.hexpand = true;
+    }
+    const snippet = valaCompositeSnippet(facts, templates);
+    if (!snippet) return;
+    const childDiagnostics: ImportDiagnostic[] = [];
+    const roots = parseBlueprintRoots(expandBundleTemplates(snippet, templates), childDiagnostics);
+    if (!roots.length) return;
+    node.children = roots;
+    diagnostics.push(...childDiagnostics, {
+      code: 'static-source-expansion',
+      sourceClass: node.sourceClass,
+      sourceId: node.id,
+      message: `${node.sourceClass} composite discovered from Vala construction facts; contents projected from declarative templates in the source bundle.`,
+    });
+    const nested = new Set(seen);
+    nested.add(node.sourceClass);
+    roots.forEach(child => expandNode(child, nested));
+  };
+
+  // A binding to a template property with a declared literal default has a
+  // statically known initial value. Projecting it (e.g. `visible: bind
+  // $Class.box-visible` with `default = false`) is source evidence, not a
+  // guess; runtime state changes stay out of reach until a runtime profile.
+  const resolveBindingDefaults = (node: AdwNode): void => {
+    for (const [property, expression] of Object.entries(node.bindings ?? {})) {
+      const reference = /^\$([A-Za-z_][A-Za-z0-9_]*)\.([A-Za-z0-9_-]+)(\s+inverted)?$/.exec(expression);
+      if (!reference) continue;
+      const owner = factsByClass.get(reference[1]);
+      const declaredDefault = owner?.propertyDefaults[reference[2].replace(/-/g, '_')];
+      if (typeof declaredDefault !== 'boolean') continue;
+      const value = reference[3] ? !declaredDefault : declaredDefault;
+      if (property === 'visible' && node.visible === undefined) node.visible = value;
+    }
+    node.children?.forEach(resolveBindingDefaults);
+  };
+
+  doc.screens.forEach(screen => expandNode(screen.rootNode, new Set()));
+  doc.screens.forEach(screen => resolveBindingDefaults(screen.rootNode));
+  // An expanded composite is no longer an unresolved boundary.
+  const expandedKeys = new Set(
+    diagnostics.filter(d => d.code === 'static-source-expansion').map(d => `${d.sourceClass}:${d.sourceId}`),
+  );
+  doc.importDiagnostics = diagnostics.filter(d => !(d.code === 'template-not-in-bundle' && expandedKeys.has(`${d.sourceClass}:${d.sourceId}`)));
 }
 
 /**
  * Import an official app's declarative UI bundle. The entry source is expanded
- * only through templates declared in the supplied files; code-only widgets are
- * intentionally errors rather than invented visual stand-ins.
+ * only through templates declared in the supplied files. Optional Vala sources
+ * enrich code-defined boundaries with statically discoverable structure;
+ * everything else remains an explicit boundary rather than an invented visual
+ * stand-in.
  */
 export function blueprintBundleToDocument(files: BlueprintSourceFile[], entryPath: string, title?: string): MockupDocument {
-  const entry = files.find(file => file.path === entryPath);
+  const declarativeFiles = files.filter(file => /\.(blp|ui)$/i.test(file.path));
+  const valaFiles = files.filter(file => /\.vala$/i.test(file.path));
+  const entry = declarativeFiles.find(file => file.path === entryPath || file.path.endsWith(`/${entryPath}`));
   if (!entry) throw new Error(`Blueprint entry file not found in source bundle: ${entryPath}`);
-  const expanded = expandBundleTemplates(entry.content, collectTemplates(files));
-  return blueprintToDocument(expanded, title || entry.path.replace(/^.*\//, '').replace(/\.blp$/i, ''));
+  const templates = collectTemplates(declarativeFiles);
+  const expanded = expandBundleTemplates(entry.content, templates);
+  const doc = blueprintToDocument(expanded, title || entry.path.replace(/^.*\//, '').replace(/\.blp$/i, ''));
+  if (valaFiles.length) enrichWithValaFacts(doc, valaFiles, templates);
+  return doc;
 }

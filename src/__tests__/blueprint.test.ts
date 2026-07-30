@@ -236,9 +236,9 @@ describe('Blueprint import', () => {
 
   it.skipIf(!process.env.OFFICIAL_SOURCE_ROOT)('imports the official Calculator Blueprint bundle without a hand-authored preset', () => {
     const sourceRoot = process.env.OFFICIAL_SOURCE_ROOT!;
-    const files = readdirSync(sourceRoot)
-      .filter(path => path.endsWith('.blp'))
-      .map(path => ({ path, content: readFileSync(join(sourceRoot, path), 'utf8') }));
+    const files = readdirSync(sourceRoot, { recursive: true, withFileTypes: true })
+      .filter(entry => entry.isFile() && /\.(blp|ui|vala)$/i.test(entry.name))
+      .map(entry => ({ path: join(entry.parentPath, entry.name).slice(sourceRoot.length + 1), content: readFileSync(join(entry.parentPath, entry.name), 'utf8') }));
 
     const imported = blueprintBundleToDocument(files, 'math-window.blp', 'GNOME Calculator');
     expect(imported.screens[0].rootNode).toMatchObject({ type: 'window' });
@@ -252,5 +252,25 @@ describe('Blueprint import', () => {
       // allocated boundary rather than silently disappearing.
       expect.objectContaining({ id: '_buttons', type: 'custom-widget', sourceClass: 'MathButtons' }),
     ]));
+
+    // Phase 4: when the bundle includes the Vala sources, the keypad renders
+    // from its official declarative button templates — discovered through
+    // construction facts, with no Calculator-specific branch.
+    const hasValaSources = files.some(file => file.path.endsWith('.vala'));
+    if (hasValaSources) {
+      const allNodes = nodes(imported.screens[0].rootNode);
+      const buttons = allNodes.find(node => node.id === '_buttons');
+      expect(buttons?.vexpand).toBe(true);
+      const stack = buttons?.children?.[0];
+      expect(stack).toMatchObject({ id: 'panel_stack', type: 'stack' });
+      const basic = stack?.children?.[0];
+      expect(basic?.id).toBe('bas_panel');
+      const basicNodes = nodes(basic!);
+      expect(basicNodes).toEqual(expect.arrayContaining([
+        expect.objectContaining({ type: 'button', title: 'C' }),
+        expect.objectContaining({ type: 'button', title: '7' }),
+        expect.objectContaining({ type: 'button', title: '=' }),
+      ]));
+    }
   });
 });

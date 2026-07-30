@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exportedAt": "2026-07-30T03:55:43.110Z",
+  "exportedAt": "2026-07-30T04:19:52.140Z",
   "generatedBy": "scripts/generate-preset.mjs",
   "document": {
     "id": "text-editor-preset",
@@ -269,7 +269,7 @@
                                       "actionName": "session.new-draft",
                                       "halign": "center",
                                       "useUnderline": true,
-                                      "title": "_New Empty File",
+                                      "title": "New Empty File",
                                       "slot": "child"
                                     }
                                   ],
@@ -347,7 +347,7 @@
                                           "slot": "suffix"
                                         }
                                       ],
-                                      "title": "_Document Type",
+                                      "title": "Document Type",
                                       "tooltipText": "Change Document Type",
                                       "useUnderline": true,
                                       "activatable": true,
@@ -361,7 +361,7 @@
                                       "id": "encoding_row",
                                       "type": "combo-row",
                                       "children": [],
-                                      "title": "_Encoding",
+                                      "title": "Encoding",
                                       "useUnderline": true,
                                       "useMarkup": false,
                                       "enableSearch": true,
@@ -376,7 +376,7 @@
                                       "id": "template-imported-58",
                                       "type": "combo-row",
                                       "children": [],
-                                      "title": "_Line Feed",
+                                      "title": "Line Feed",
                                       "useUnderline": true,
                                       "useMarkup": false,
                                       "model": "newline_model",
@@ -395,7 +395,7 @@
                                       "id": "auto_indent_row",
                                       "type": "switch-row",
                                       "children": [],
-                                      "title": "A_uto Indentation",
+                                      "title": "Auto Indentation",
                                       "useUnderline": true,
                                       "bindings": {
                                         "active": "properties.auto-indent"
@@ -405,7 +405,7 @@
                                       "id": "template-imported-60",
                                       "type": "combo-row",
                                       "children": [],
-                                      "title": "_Character",
+                                      "title": "Character",
                                       "useUnderline": true,
                                       "model": "indent_model",
                                       "expression": "",
@@ -417,7 +417,7 @@
                                       "id": "tab_width",
                                       "type": "spin-row",
                                       "children": [],
-                                      "title": "Spaces Per _Tab",
+                                      "title": "Spaces Per Tab",
                                       "useUnderline": true,
                                       "climbRate": 1,
                                       "digits": 0,
@@ -430,7 +430,7 @@
                                       "id": "spaces_per_indent_row",
                                       "type": "spin-row",
                                       "children": [],
-                                      "title": "Spaces Per _Indent",
+                                      "title": "Spaces Per Indent",
                                       "useUnderline": true,
                                       "climbRate": 1,
                                       "digits": 0,
@@ -594,7 +594,7 @@
                           }
                         }
                       ],
-                      "title": "Custom _Font",
+                      "title": "Custom Font",
                       "useUnderline": true,
                       "bindings": {
                         "expanded": "use_custom_font.active"
@@ -620,7 +620,7 @@
                       "type": "custom-widget",
                       "children": [],
                       "sourceClass": "EditorPreferencesSwitch",
-                      "title": "Display _Line Numbers",
+                      "title": "Display Line Numbers",
                       "useUnderline": true,
                       "schemaKey": "show-line-numbers"
                     },
@@ -629,7 +629,7 @@
                       "type": "custom-widget",
                       "children": [],
                       "sourceClass": "EditorPreferencesSwitch",
-                      "title": "_Highlight Current Line",
+                      "title": "Highlight Current Line",
                       "useUnderline": true,
                       "schemaKey": "highlight-current-line"
                     },
@@ -638,7 +638,7 @@
                       "type": "custom-widget",
                       "children": [],
                       "sourceClass": "EditorPreferencesSwitch",
-                      "title": "Display _Overview Map",
+                      "title": "Display Overview Map",
                       "useUnderline": true,
                       "schemaKey": "show-map"
                     }
@@ -653,7 +653,7 @@
                       "type": "custom-widget",
                       "children": [],
                       "sourceClass": "EditorPreferencesSwitch",
-                      "title": "Check _Spelling",
+                      "title": "Check Spelling",
                       "useUnderline": true,
                       "schemaKey": "spellcheck"
                     }
@@ -668,7 +668,7 @@
                       "type": "custom-widget",
                       "children": [],
                       "sourceClass": "EditorPreferencesSwitch",
-                      "title": "Show _Right Margin",
+                      "title": "Show Right Margin",
                       "useUnderline": true,
                       "schemaKey": "show-right-margin"
                     },
@@ -677,7 +677,7 @@
                       "type": "custom-widget",
                       "children": [],
                       "sourceClass": "EditorPreferencesSpin",
-                      "title": "_Margin Position",
+                      "title": "Margin Position",
                       "useUnderline": true,
                       "schemaKey": "right-margin-position"
                     },
@@ -686,7 +686,7 @@
                       "type": "custom-widget",
                       "children": [],
                       "sourceClass": "EditorPreferencesSwitch",
-                      "title": "_Wrap Lines Automatically (Alt+W)",
+                      "title": "Wrap Lines Automatically (Alt+W)",
                       "useUnderline": true,
                       "schemaKey": "wrap-text"
                     }
@@ -702,7 +702,7 @@
                       "type": "custom-widget",
                       "children": [],
                       "sourceClass": "EditorPreferencesSwitch",
-                      "title": "A_uto Indentation",
+                      "title": "Auto Indentation",
                       "useUnderline": true,
                       "schemaKey": "auto-indent"
                     },
@@ -710,7 +710,7 @@
                       "id": "character_row",
                       "type": "combo-row",
                       "children": [],
-                      "title": "_Character",
+                      "title": "Character",
                       "useUnderline": true,
                       "model": "indent_model",
                       "expression": ""
@@ -719,7 +719,7 @@
                       "id": "tab_width",
                       "type": "spin-row",
                       "children": [],
-                      "title": "Spaces Per _Tab",
+                      "title": "Spaces Per Tab",
                       "useUnderline": true,
                       "climbRate": 1,
                       "digits": 0,
@@ -729,7 +729,7 @@
                       "id": "indent_width",
                       "type": "spin-row",
                       "children": [],
-                      "title": "Spaces Per _Indent",
+                      "title": "Spaces Per Indent",
                       "useUnderline": true,
                       "climbRate": 1,
                       "digits": 0,
@@ -747,7 +747,7 @@
                       "type": "custom-widget",
                       "children": [],
                       "sourceClass": "EditorPreferencesSwitch",
-                      "title": "_Discover Document Settings",
+                      "title": "Discover Document Settings",
                       "useUnderline": true,
                       "subtitle": "Apply settings using modelines, editorconfig, or sensible defaults",
                       "schemaKey": "discover-settings"
@@ -756,7 +756,7 @@
                       "id": "restore_session",
                       "type": "switch-row",
                       "children": [],
-                      "title": "_Restore Session",
+                      "title": "Restore Session",
                       "useUnderline": true,
                       "subtitle": "Return to your previous session when Text Editor is started",
                       "bindings": {
@@ -776,7 +776,7 @@
                       "children": [],
                       "actionName": "app.clear-history",
                       "focusOnClick": false,
-                      "title": "_Clear History",
+                      "title": "Clear History",
                       "useUnderline": true,
                       "destructive": true
                     }

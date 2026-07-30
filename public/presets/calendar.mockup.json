@@ -1,19 +1,18 @@
 {
   "version": 1,
-  "exportedAt": "2026-07-30T03:48:54.951Z",
+  "exportedAt": "2026-07-30T04:19:48.693Z",
   "generatedBy": "scripts/generate-preset.mjs",
   "document": {
-    "id": "imported-document",
-    "title": "calendar",
+    "id": "calendar-preset",
+    "title": "GNOME Calendar",
     "colorScheme": "auto",
-    "edges": [],
     "screens": [
       {
-        "id": "imported-screen-1",
-        "title": "Calendar",
+        "id": "month",
+        "title": "Month",
         "type": "standard",
         "width": 1024,
-        "height": 720,
+        "height": 700,
         "rootNode": {
           "id": "imported-1",
           "type": "window",
@@ -454,7 +453,7 @@
                                               "type": "menu-button",
                                               "children": [],
                                               "popover": "popover_date_chooser",
-                                              "title": "_Choose Date",
+                                              "title": "Choose Date",
                                               "useUnderline": true,
                                               "canShrink": true,
                                               "tooltipText": "Choose a Date",
@@ -562,7 +561,7 @@
                               "children": [
                                 {
                                   "id": "month_page",
-                                  "type": "custom-widget",
+                                  "type": "stack-page",
                                   "children": [
                                     {
                                       "id": "month_view",
@@ -640,15 +639,14 @@
                                       "slot": "child"
                                     }
                                   ],
-                                  "sourceClass": "Adw.ViewStackPage",
-                                  "title": "_Month",
                                   "name": "month",
+                                  "title": "Month",
                                   "useUnderline": true,
                                   "iconName": "calendar-month-symbolic"
                                 },
                                 {
                                   "id": "week_page",
-                                  "type": "custom-widget",
+                                  "type": "stack-page",
                                   "children": [
                                     {
                                       "id": "week_view",
@@ -786,15 +784,14 @@
                                       "slot": "child"
                                     }
                                   ],
-                                  "sourceClass": "Adw.ViewStackPage",
-                                  "title": "_Week",
                                   "name": "week",
+                                  "title": "Week",
                                   "useUnderline": true,
                                   "iconName": "calendar-week-symbolic"
                                 },
                                 {
                                   "id": "agenda_page",
-                                  "type": "custom-widget",
+                                  "type": "stack-page",
                                   "children": [
                                     {
                                       "id": "agenda_view",
@@ -1115,9 +1112,8 @@
                                       "slot": "child"
                                     }
                                   ],
-                                  "sourceClass": "Adw.ViewStackPage",
-                                  "title": "_Agenda",
                                   "name": "agenda",
+                                  "title": "Agenda",
                                   "useUnderline": true,
                                   "iconName": "calendar-agenda-symbolic",
                                   "visible": false
@@ -1126,7 +1122,8 @@
                               "hexpand": true,
                               "vexpand": true,
                               "notify": ":",
-                              "slot": "content"
+                              "slot": "content",
+                              "visibleChildName": "month"
                             },
                             {
                               "id": "imported-79",
@@ -1157,7 +1154,7 @@
                                   "type": "button",
                                   "children": [],
                                   "actionName": "win.today",
-                                  "title": "_Today",
+                                  "title": "Today",
                                   "iconName": "calendar-today-symbolic"
                                 },
                                 {
@@ -1218,508 +1215,1218 @@
         }
       },
       {
-        "id": "imported-screen-2",
-        "title": "calendar 2",
-        "type": "dialog",
+        "id": "week",
+        "title": "Week",
+        "type": "standard",
         "width": 1024,
-        "height": 720,
+        "height": 700,
         "rootNode": {
-          "id": "event_editor",
-          "type": "dialog",
+          "id": "imported-1",
+          "type": "window",
           "children": [
             {
-              "id": "imported-96",
-              "type": "toolbar-view",
+              "id": "overlay",
+              "type": "toast-overlay",
               "children": [
                 {
-                  "id": "imported-97",
-                  "type": "header-bar",
+                  "id": "drop_overlay",
+                  "type": "custom-widget",
                   "children": [
                     {
-                      "id": "cancel_button",
-                      "type": "button",
+                      "id": "drop_status_page",
+                      "type": "status-page",
                       "children": [],
-                      "useUnderline": true,
-                      "title": "_Cancel"
+                      "title": "Drop Event Files to Import",
+                      "iconName": "calendar-month-symbolic",
+                      "slot": "overlayed"
                     },
                     {
-                      "id": "done_button",
-                      "type": "button",
-                      "children": [],
-                      "useUnderline": true,
-                      "title": "_Done",
-                      "actionName": "event-editor.save",
-                      "suggested": true
-                    }
-                  ],
-                  "showStartTitleButtons": false,
-                  "showEndTitleButtons": false
-                },
-                {
-                  "id": "imported-98",
-                  "type": "box",
-                  "children": [
-                    {
-                      "id": "imported-99",
-                      "type": "banner",
-                      "children": [],
-                      "title": "This event is in a read-only calendar. It cannot be edited or deleted.",
-                      "bindings": {
-                        "revealed": "$GcalEventEditorDialog.writable inverted"
-                      }
-                    },
-                    {
-                      "id": "imported-100",
-                      "type": "preferences-page",
+                      "id": "split_view",
+                      "type": "overlay-split",
                       "children": [
                         {
-                          "id": "imported-101",
-                          "type": "preferences-group",
+                          "id": "imported-21",
+                          "type": "toolbar-view",
                           "children": [
                             {
-                              "id": "summary_section",
-                              "type": "bin",
-                              "children": [
-                                {
-                                  "id": "imported-102",
-                                  "type": "list-box",
-                                  "children": [
-                                    {
-                                      "id": "summary_entry",
-                                      "type": "entry-row",
-                                      "children": [],
-                                      "title": "Title"
-                                    },
-                                    {
-                                      "id": "location_entry",
-                                      "type": "entry-row",
-                                      "children": [],
-                                      "title": "Location"
-                                    }
-                                  ],
-                                  "selectionMode": "none"
-                                }
-                              ],
-                              "bindings": {
-                                "sensitive": "$GcalEventEditorDialog.writable"
-                              }
-                            }
-                          ]
-                        },
-                        {
-                          "id": "imported-103",
-                          "type": "preferences-group",
-                          "children": [
+                              "id": "imported-22",
+                              "type": "header-bar",
+                              "children": []
+                            },
                             {
-                              "id": "calendar_combo_row",
-                              "type": "combo-row",
-                              "children": [],
-                              "title": "Calendar",
-                              "titleLines": 1,
-                              "bindings": {
-                                "sensitive": "$GcalEventEditorDialog.writable"
-                              }
-                            }
-                          ]
-                        },
-                        {
-                          "id": "imported-105",
-                          "type": "preferences-group",
-                          "children": [
-                            {
-                              "id": "schedule_section",
+                              "id": "imported-23",
                               "type": "box",
                               "children": [
                                 {
-                                  "id": "schedule_type_toggle_group",
-                                  "type": "toggle-group",
+                                  "id": "date_chooser",
+                                  "type": "bin",
                                   "children": [
                                     {
-                                      "id": "imported-106",
-                                      "type": "toggle",
-                                      "children": [],
-                                      "title": "_All Day",
-                                      "useUnderline": true,
-                                      "name": "all-day"
-                                    },
-                                    {
-                                      "id": "imported-107",
-                                      "type": "toggle",
-                                      "children": [],
-                                      "title": "_Time Slot",
-                                      "useUnderline": true,
-                                      "name": "time-slot"
-                                    }
-                                  ],
-                                  "activeName": "time-slot",
-                                  "homogeneous": true
-                                },
-                                {
-                                  "id": "start_date_group",
-                                  "type": "preferences-group",
-                                  "children": [
-                                    {
-                                      "id": "start_date_row",
-                                      "type": "entry-row",
+                                      "id": "imported-24",
+                                      "type": "grid",
                                       "children": [
                                         {
-                                          "id": "imported-109",
-                                          "type": "menu-button",
+                                          "id": "month_choice",
+                                          "type": "box",
+                                          "children": [
+                                            {
+                                              "id": "down_button",
+                                              "type": "button",
+                                              "children": [],
+                                              "iconName": "pan-start-symbolic",
+                                              "canFocus": false,
+                                              "circular": true,
+                                              "flat": true
+                                            },
+                                            {
+                                              "id": "button",
+                                              "type": "button",
+                                              "children": [
+                                                {
+                                                  "id": "stack",
+                                                  "type": "stack",
+                                                  "children": [
+                                                    {
+                                                      "id": "imported-26",
+                                                      "type": "stack-page",
+                                                      "children": [
+                                                        {
+                                                          "id": "label1",
+                                                          "type": "label",
+                                                          "children": [],
+                                                          "slot": "child"
+                                                        }
+                                                      ],
+                                                      "name": "label1"
+                                                    },
+                                                    {
+                                                      "id": "imported-27",
+                                                      "type": "stack-page",
+                                                      "children": [
+                                                        {
+                                                          "id": "label2",
+                                                          "type": "label",
+                                                          "children": [],
+                                                          "slot": "child"
+                                                        }
+                                                      ],
+                                                      "name": "label2"
+                                                    }
+                                                  ],
+                                                  "hexpand": true,
+                                                  "vexpand": true
+                                                }
+                                              ],
+                                              "accessibleRole": "none",
+                                              "flat": true
+                                            },
+                                            {
+                                              "id": "up_button",
+                                              "type": "button",
+                                              "children": [],
+                                              "iconName": "pan-end-symbolic",
+                                              "canFocus": false,
+                                              "circular": true,
+                                              "flat": true
+                                            }
+                                          ],
+                                          "spacing": 6,
+                                          "accessibleRole": "spin_button",
+                                          "halign": "fill",
+                                          "minValue": 0,
+                                          "maxValue": 11,
+                                          "animate": false,
+                                          "value": 0,
+                                          "wrap": true,
+                                          "notify": ":",
+                                          "column": 0,
+                                          "row": 0,
+                                          "orientation": "horizontal",
+                                          "bindings": {
+                                            "visible": "$get_split_choice_visible template.show-heading , template.split-month-year as bool"
+                                          }
+                                        },
+                                        {
+                                          "id": "year_choice",
+                                          "type": "box",
+                                          "children": [
+                                            {
+                                              "id": "down_button",
+                                              "type": "button",
+                                              "children": [],
+                                              "iconName": "pan-start-symbolic",
+                                              "canFocus": false,
+                                              "circular": true,
+                                              "flat": true
+                                            },
+                                            {
+                                              "id": "button",
+                                              "type": "button",
+                                              "children": [
+                                                {
+                                                  "id": "stack",
+                                                  "type": "stack",
+                                                  "children": [
+                                                    {
+                                                      "id": "imported-29",
+                                                      "type": "stack-page",
+                                                      "children": [
+                                                        {
+                                                          "id": "label1",
+                                                          "type": "label",
+                                                          "children": [],
+                                                          "slot": "child"
+                                                        }
+                                                      ],
+                                                      "name": "label1"
+                                                    },
+                                                    {
+                                                      "id": "imported-30",
+                                                      "type": "stack-page",
+                                                      "children": [
+                                                        {
+                                                          "id": "label2",
+                                                          "type": "label",
+                                                          "children": [],
+                                                          "slot": "child"
+                                                        }
+                                                      ],
+                                                      "name": "label2"
+                                                    }
+                                                  ],
+                                                  "hexpand": true,
+                                                  "vexpand": true
+                                                }
+                                              ],
+                                              "accessibleRole": "none",
+                                              "flat": true
+                                            },
+                                            {
+                                              "id": "up_button",
+                                              "type": "button",
+                                              "children": [],
+                                              "iconName": "pan-end-symbolic",
+                                              "canFocus": false,
+                                              "circular": true,
+                                              "flat": true
+                                            }
+                                          ],
+                                          "spacing": 6,
+                                          "accessibleRole": "spin_button",
+                                          "halign": "fill",
+                                          "minValue": 1,
+                                          "maxValue": 9999,
+                                          "animate": false,
+                                          "value": 0,
+                                          "notify": ":",
+                                          "column": 1,
+                                          "row": 0,
+                                          "orientation": "horizontal",
+                                          "bindings": {
+                                            "visible": "$get_split_choice_visible template.show-heading , template.split-month-year as bool"
+                                          }
+                                        },
+                                        {
+                                          "id": "combined_choice",
+                                          "type": "box",
+                                          "children": [
+                                            {
+                                              "id": "down_button",
+                                              "type": "button",
+                                              "children": [],
+                                              "iconName": "pan-start-symbolic",
+                                              "canFocus": false,
+                                              "circular": true,
+                                              "flat": true
+                                            },
+                                            {
+                                              "id": "button",
+                                              "type": "button",
+                                              "children": [
+                                                {
+                                                  "id": "stack",
+                                                  "type": "stack",
+                                                  "children": [
+                                                    {
+                                                      "id": "imported-32",
+                                                      "type": "stack-page",
+                                                      "children": [
+                                                        {
+                                                          "id": "label1",
+                                                          "type": "label",
+                                                          "children": [],
+                                                          "slot": "child"
+                                                        }
+                                                      ],
+                                                      "name": "label1"
+                                                    },
+                                                    {
+                                                      "id": "imported-33",
+                                                      "type": "stack-page",
+                                                      "children": [
+                                                        {
+                                                          "id": "label2",
+                                                          "type": "label",
+                                                          "children": [],
+                                                          "slot": "child"
+                                                        }
+                                                      ],
+                                                      "name": "label2"
+                                                    }
+                                                  ],
+                                                  "hexpand": true,
+                                                  "vexpand": true
+                                                }
+                                              ],
+                                              "accessibleRole": "none",
+                                              "flat": true
+                                            },
+                                            {
+                                              "id": "up_button",
+                                              "type": "button",
+                                              "children": [],
+                                              "iconName": "pan-end-symbolic",
+                                              "canFocus": false,
+                                              "circular": true,
+                                              "flat": true
+                                            }
+                                          ],
+                                          "spacing": 6,
+                                          "accessibleRole": "spin_button",
+                                          "halign": "fill",
+                                          "minValue": 12,
+                                          "maxValue": 119999,
+                                          "popover": "popover",
+                                          "animate": false,
+                                          "value": 0,
+                                          "notify": ":",
+                                          "column": 0,
+                                          "columnSpan": 2,
+                                          "row": 0,
+                                          "orientation": "horizontal",
+                                          "bindings": {
+                                            "visible": "$get_combined_choice_visible template.show-heading , template.split-month-year as bool"
+                                          }
+                                        },
+                                        {
+                                          "id": "grid",
+                                          "type": "grid",
                                           "children": [],
-                                          "iconName": "calendar-month-symbolic",
-                                          "valign": "center",
-                                          "tooltipText": "Edit Date",
-                                          "flat": true
+                                          "rowHomogeneous": true,
+                                          "columnHomogeneous": true,
+                                          "column": 0,
+                                          "columnSpan": 2,
+                                          "row": 1
                                         }
                                       ],
-                                      "title": "Start Date",
-                                      "notify": ":"
+                                      "orientation": "vertical"
+                                    }
+                                  ],
+                                  "splitMonthYear": true,
+                                  "vexpand": false,
+                                  "bindings": {
+                                    "active-date": "template.active-date no-sync-create bidirectional"
+                                  }
+                                },
+                                {
+                                  "id": "calendars_list",
+                                  "type": "bin",
+                                  "children": [
+                                    {
+                                      "id": "imported-34",
+                                      "type": "scrolled-window",
+                                      "children": [
+                                        {
+                                          "id": "imported-35",
+                                          "type": "clamp",
+                                          "children": [
+                                            {
+                                              "id": "calendar_listbox",
+                                              "type": "list-box",
+                                              "children": [],
+                                              "hexpand": true,
+                                              "selectionMode": "none",
+                                              "slot": "child"
+                                            }
+                                          ],
+                                          "maximumSize": 800,
+                                          "tighteningThreshold": 800,
+                                          "slot": "child"
+                                        }
+                                      ],
+                                      "hscrollbarPolicy": "never",
+                                      "propagateNaturalHeight": true,
+                                      "propagateNaturalWidth": true,
+                                      "slot": "child"
                                     }
                                   ]
-                                },
-                                {
-                                  "id": "end_date_group",
-                                  "type": "preferences-group",
-                                  "children": [
-                                    {
-                                      "id": "end_date_row",
-                                      "type": "entry-row",
-                                      "children": [
-                                        {
-                                          "id": "imported-122",
-                                          "type": "menu-button",
-                                          "children": [],
-                                          "iconName": "calendar-month-symbolic",
-                                          "valign": "center",
-                                          "tooltipText": "Edit Date",
-                                          "flat": true
-                                        }
-                                      ],
-                                      "title": "End Date",
-                                      "notify": ":"
-                                    }
-                                  ]
-                                },
-                                {
-                                  "id": "start_date_time_chooser",
-                                  "type": "preferences-group",
-                                  "children": [
-                                    {
-                                      "id": "date_row",
-                                      "type": "entry-row",
-                                      "children": [
-                                        {
-                                          "id": "imported-135",
-                                          "type": "menu-button",
-                                          "children": [],
-                                          "iconName": "calendar-month-symbolic",
-                                          "valign": "center",
-                                          "tooltipText": "Edit Date",
-                                          "flat": true
-                                        }
-                                      ],
-                                      "title": "Date",
-                                      "notify": ":"
-                                    },
-                                    {
-                                      "id": "time_row",
-                                      "type": "entry-row",
-                                      "children": [
-                                        {
-                                          "id": "imported-148",
-                                          "type": "menu-button",
-                                          "children": [],
-                                          "iconName": "clock-alt-symbolic",
-                                          "valign": "center",
-                                          "tooltipText": "Edit Time",
-                                          "flat": true
-                                        }
-                                      ],
-                                      "title": "Time"
-                                    }
-                                  ],
-                                  "dateLabel": "Start Date",
-                                  "timeLabel": "Start Time",
-                                  "notify": ":"
-                                },
-                                {
-                                  "id": "end_date_time_chooser",
-                                  "type": "preferences-group",
-                                  "children": [
-                                    {
-                                      "id": "date_row",
-                                      "type": "entry-row",
-                                      "children": [
-                                        {
-                                          "id": "imported-159",
-                                          "type": "menu-button",
-                                          "children": [],
-                                          "iconName": "calendar-month-symbolic",
-                                          "valign": "center",
-                                          "tooltipText": "Edit Date",
-                                          "flat": true
-                                        }
-                                      ],
-                                      "title": "Date",
-                                      "notify": ":"
-                                    },
-                                    {
-                                      "id": "time_row",
-                                      "type": "entry-row",
-                                      "children": [
-                                        {
-                                          "id": "imported-172",
-                                          "type": "menu-button",
-                                          "children": [],
-                                          "iconName": "clock-alt-symbolic",
-                                          "valign": "center",
-                                          "tooltipText": "Edit Time",
-                                          "flat": true
-                                        }
-                                      ],
-                                      "title": "Time"
-                                    }
-                                  ],
-                                  "dateLabel": "End Date",
-                                  "timeLabel": "End Time",
-                                  "notify": ":"
-                                },
-                                {
-                                  "id": "imported-182",
-                                  "type": "preferences-group",
-                                  "children": [
-                                    {
-                                      "id": "repeat_combo",
-                                      "type": "combo-row",
-                                      "children": [],
-                                      "title": "Repeat",
-                                      "valign": "center",
-                                      "notify": ":"
-                                    },
-                                    {
-                                      "id": "repeat_duration_combo",
-                                      "type": "combo-row",
-                                      "children": [],
-                                      "title": "End Repeat",
-                                      "valign": "center",
-                                      "notify": ":"
-                                    },
-                                    {
-                                      "id": "imported-185",
-                                      "type": "action-row",
-                                      "children": [
-                                        {
-                                          "id": "number_of_occurrences_spin",
-                                          "type": "entry",
-                                          "children": [],
-                                          "visible": false,
-                                          "numeric": true,
-                                          "adjustment": "number_of_occurrences_adjustment",
-                                          "valign": "center"
-                                        }
-                                      ],
-                                      "title": "Number of Occurrences",
-                                      "activatableWidget": "number_of_occurrences_spin",
-                                      "bindings": {
-                                        "visible": "number_of_occurrences_spin.visible"
-                                      }
-                                    },
-                                    {
-                                      "id": "imported-186",
-                                      "type": "action-row",
-                                      "children": [
-                                        {
-                                          "id": "until_date_selector",
-                                          "type": "entry",
-                                          "children": [],
-                                          "widthChars": 11,
-                                          "maxWidthChars": 11,
-                                          "secondaryIconName": "pan-down-symbolic",
-                                          "inputHints": "no_emoji",
-                                          "visible": false,
-                                          "valign": "center",
-                                          "notify": ":"
-                                        }
-                                      ],
-                                      "title": "End Repeat Date",
-                                      "activatableWidget": "until_date_selector",
-                                      "bindings": {
-                                        "visible": "until_date_selector.visible"
-                                      }
-                                    }
-                                  ],
-                                  "marginTop": 12
                                 }
                               ],
                               "orientation": "vertical",
-                              "spacing": 12,
-                              "bindings": {
-                                "sensitive": "$GcalEventEditorDialog.writable"
-                              }
-                            }
-                          ]
-                        },
-                        {
-                          "id": "imported-198",
-                          "type": "preferences-group",
-                          "children": [
-                            {
-                              "id": "reminders_section",
-                              "type": "box",
-                              "children": [
-                                {
-                                  "id": "alarms_listbox",
-                                  "type": "list-box",
-                                  "children": [
-                                    {
-                                      "id": "new_alarm_row",
-                                      "type": "button-row",
-                                      "children": [],
-                                      "title": "Add Reminder",
-                                      "startIconName": "add-reminder-symbolic"
-                                    }
-                                  ],
-                                  "selectionMode": "none"
-                                }
-                              ],
-                              "orientation": "vertical",
-                              "bindings": {
-                                "sensitive": "$GcalEventEditorDialog.writable"
-                              }
+                              "slot": "content"
                             }
                           ],
-                          "title": "Reminders"
+                          "slot": "sidebar"
                         },
                         {
-                          "id": "imported-199",
-                          "type": "preferences-group",
+                          "id": "main_toolbar",
+                          "type": "toolbar-view",
                           "children": [
                             {
-                              "id": "notes_section",
+                              "id": "header_bar",
+                              "type": "header-bar",
+                              "children": [
+                                {
+                                  "id": "sidebar_button",
+                                  "type": "button",
+                                  "children": [],
+                                  "iconName": "sidebar-show-symbolic",
+                                  "tooltipText": "Toggle Sidebar",
+                                  "bindings": {
+                                    "active": "split_view.show-sidebar bidirectional"
+                                  }
+                                },
+                                {
+                                  "id": "sync_indicator",
+                                  "type": "bin",
+                                  "children": [
+                                    {
+                                      "id": "stack",
+                                      "type": "stack",
+                                      "children": [
+                                        {
+                                          "id": "imported-38",
+                                          "type": "stack-page",
+                                          "children": [
+                                            {
+                                              "id": "imported-39",
+                                              "type": "box",
+                                              "children": [],
+                                              "orientation": "horizontal",
+                                              "slot": "child"
+                                            }
+                                          ],
+                                          "name": "empty"
+                                        },
+                                        {
+                                          "id": "imported-40",
+                                          "type": "stack-page",
+                                          "children": [
+                                            {
+                                              "id": "refreshing_spinner",
+                                              "type": "spinner",
+                                              "children": [],
+                                              "tooltipText": "Synchronizing Remote Calendars",
+                                              "slot": "child"
+                                            }
+                                          ],
+                                          "name": "spinner"
+                                        },
+                                        {
+                                          "id": "imported-41",
+                                          "type": "stack-page",
+                                          "children": [
+                                            {
+                                              "id": "success_image",
+                                              "type": "bin",
+                                              "children": [],
+                                              "iconName": "checkmark-small-symbolic",
+                                              "slot": "child"
+                                            }
+                                          ],
+                                          "name": "success"
+                                        }
+                                      ],
+                                      "transitionType": "crossfade",
+                                      "transitionDuration": 250,
+                                      "slot": "child"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "id": "navigation_button_title",
+                                  "type": "bin",
+                                  "children": [
+                                    {
+                                      "id": "stack",
+                                      "type": "stack",
+                                      "children": [
+                                        {
+                                          "id": "imported-42",
+                                          "type": "stack-page",
+                                          "children": [
+                                            {
+                                              "id": "button",
+                                              "type": "menu-button",
+                                              "children": [],
+                                              "popover": "popover_date_chooser",
+                                              "title": "Choose Date",
+                                              "useUnderline": true,
+                                              "canShrink": true,
+                                              "tooltipText": "Choose a Date",
+                                              "alwaysShowArrow": true,
+                                              "slot": "child"
+                                            }
+                                          ],
+                                          "name": "active"
+                                        },
+                                        {
+                                          "id": "imported-43",
+                                          "type": "stack-page",
+                                          "children": [
+                                            {
+                                              "id": "static_label",
+                                              "type": "label",
+                                              "children": [],
+                                              "marginStart": 9,
+                                              "marginEnd": 9,
+                                              "bindings": {
+                                                "label": "button.label no-sync-create"
+                                              },
+                                              "slot": "child"
+                                            }
+                                          ],
+                                          "name": "inactive"
+                                        }
+                                      ],
+                                      "hhomogeneous": false,
+                                      "visibleChildName": "active",
+                                      "slot": "child"
+                                    }
+                                  ],
+                                  "bindings": {
+                                    "active-date": "template.active-date no-sync-create bidirectional",
+                                    "active": "split_view.show-sidebar inverted"
+                                  },
+                                  "slot": "title-widget"
+                                },
+                                {
+                                  "id": "menu_button",
+                                  "type": "menu-button",
+                                  "children": [],
+                                  "iconName": "open-menu-symbolic",
+                                  "popover": "win_menu",
+                                  "tooltipText": "Main Menu",
+                                  "primary": true
+                                },
+                                {
+                                  "id": "search_button",
+                                  "type": "bin",
+                                  "children": [
+                                    {
+                                      "id": "stack",
+                                      "type": "stack",
+                                      "children": [
+                                        {
+                                          "id": "imported-45",
+                                          "type": "stack-page",
+                                          "children": [
+                                            {
+                                              "id": "button",
+                                              "type": "button",
+                                              "children": [],
+                                              "halign": "start",
+                                              "iconName": "edit-find-symbolic",
+                                              "tooltipText": "Search Events",
+                                              "slot": "child"
+                                            }
+                                          ],
+                                          "name": "button"
+                                        },
+                                        {
+                                          "id": "imported-48",
+                                          "type": "stack-page",
+                                          "children": [
+                                            {
+                                              "id": "entry",
+                                              "type": "search-entry",
+                                              "children": [],
+                                              "placeholderText": "Search events",
+                                              "maxWidthChars": 0,
+                                              "widthChars": 0,
+                                              "searchDelay": 500,
+                                              "slot": "child"
+                                            }
+                                          ],
+                                          "name": "entry"
+                                        }
+                                      ],
+                                      "hhomogeneous": false,
+                                      "vhomogeneous": true,
+                                      "interpolateSize": true,
+                                      "transitionType": "crossfade",
+                                      "transitionDuration": 200
+                                    }
+                                  ],
+                                  "tooltipText": "Search"
+                                }
+                              ]
+                            },
+                            {
+                              "id": "views_stack",
+                              "type": "view-stack",
+                              "children": [
+                                {
+                                  "id": "month_page",
+                                  "type": "stack-page",
+                                  "children": [
+                                    {
+                                      "id": "month_view",
+                                      "type": "bin",
+                                      "children": [
+                                        {
+                                          "id": "imported-55",
+                                          "type": "box",
+                                          "children": [
+                                            {
+                                              "id": "label_0",
+                                              "type": "label",
+                                              "children": [],
+                                              "marginStart": 6,
+                                              "hexpand": true,
+                                              "xalign": 0
+                                            },
+                                            {
+                                              "id": "label_1",
+                                              "type": "label",
+                                              "children": [],
+                                              "marginStart": 6,
+                                              "hexpand": true,
+                                              "xalign": 0
+                                            },
+                                            {
+                                              "id": "label_2",
+                                              "type": "label",
+                                              "children": [],
+                                              "marginStart": 6,
+                                              "hexpand": true,
+                                              "xalign": 0
+                                            },
+                                            {
+                                              "id": "label_3",
+                                              "type": "label",
+                                              "children": [],
+                                              "marginStart": 6,
+                                              "hexpand": true,
+                                              "xalign": 0
+                                            },
+                                            {
+                                              "id": "label_4",
+                                              "type": "label",
+                                              "children": [],
+                                              "marginStart": 6,
+                                              "hexpand": true,
+                                              "xalign": 0
+                                            },
+                                            {
+                                              "id": "label_5",
+                                              "type": "label",
+                                              "children": [],
+                                              "marginStart": 6,
+                                              "hexpand": true,
+                                              "xalign": 0
+                                            },
+                                            {
+                                              "id": "label_6",
+                                              "type": "label",
+                                              "children": [],
+                                              "marginStart": 6,
+                                              "hexpand": true,
+                                              "xalign": 0
+                                            }
+                                          ],
+                                          "homogeneous": true,
+                                          "orientation": "horizontal"
+                                        }
+                                      ],
+                                      "overflow": "hidden",
+                                      "bindings": {
+                                        "active-date": "template.active-date no-sync-create bidirectional"
+                                      },
+                                      "slot": "child"
+                                    }
+                                  ],
+                                  "name": "month",
+                                  "title": "Month",
+                                  "useUnderline": true,
+                                  "iconName": "calendar-month-symbolic"
+                                },
+                                {
+                                  "id": "week_page",
+                                  "type": "stack-page",
+                                  "children": [
+                                    {
+                                      "id": "week_view",
+                                      "type": "box",
+                                      "children": [
+                                        {
+                                          "id": "imported-56",
+                                          "type": "box",
+                                          "children": [
+                                            {
+                                              "id": "expand_button_box",
+                                              "type": "box",
+                                              "children": [
+                                                {
+                                                  "id": "imported-57",
+                                                  "type": "button",
+                                                  "children": [],
+                                                  "hexpand": true,
+                                                  "halign": "center",
+                                                  "valign": "end",
+                                                  "marginBottom": 6,
+                                                  "iconName": "go-down-symbolic",
+                                                  "flat": true,
+                                                  "circular": true,
+                                                  "bindings": {
+                                                    "visible": "header.can-expand",
+                                                    "active": "header.expanded bidirectional"
+                                                  }
+                                                }
+                                              ],
+                                              "hexpand": false,
+                                              "orientation": "horizontal"
+                                            },
+                                            {
+                                              "id": "header",
+                                              "type": "bin",
+                                              "children": [
+                                                {
+                                                  "id": "main_box",
+                                                  "type": "box",
+                                                  "children": [
+                                                    {
+                                                      "id": "imported-58",
+                                                      "type": "box",
+                                                      "children": [
+                                                        {
+                                                          "id": "weekdays_box",
+                                                          "type": "box",
+                                                          "children": [],
+                                                          "homogeneous": true,
+                                                          "orientation": "horizontal"
+                                                        },
+                                                        {
+                                                          "id": "scrolledwindow",
+                                                          "type": "scrolled-window",
+                                                          "children": [
+                                                            {
+                                                              "id": "imported-60",
+                                                              "type": "bin",
+                                                              "children": [
+                                                                {
+                                                                  "id": "grid",
+                                                                  "type": "grid",
+                                                                  "children": [],
+                                                                  "columnHomogeneous": true,
+                                                                  "hexpand": true,
+                                                                  "columnSpacing": 6,
+                                                                  "rowSpacing": 2,
+                                                                  "marginStart": 6
+                                                                }
+                                                              ]
+                                                            }
+                                                          ],
+                                                          "hscrollbarPolicy": "never",
+                                                          "vscrollbarPolicy": "never",
+                                                          "propagateNaturalHeight": true,
+                                                          "marginBottom": 2
+                                                        }
+                                                      ],
+                                                      "orientation": "vertical"
+                                                    }
+                                                  ],
+                                                  "hexpand": true,
+                                                  "vexpand": false,
+                                                  "orientation": "vertical"
+                                                }
+                                              ],
+                                              "hexpand": true
+                                            }
+                                          ],
+                                          "orientation": "horizontal"
+                                        },
+                                        {
+                                          "id": "scrolled_window",
+                                          "type": "scrolled-window",
+                                          "children": [
+                                            {
+                                              "id": "imported-67",
+                                              "type": "bin",
+                                              "children": [
+                                                {
+                                                  "id": "content",
+                                                  "type": "box",
+                                                  "children": [
+                                                    {
+                                                      "id": "hours_bar",
+                                                      "type": "custom-widget",
+                                                      "children": [],
+                                                      "sourceClass": "GcalWeekHourBar",
+                                                      "title": "GcalWeekHourBar"
+                                                    },
+                                                    {
+                                                      "id": "week_grid",
+                                                      "type": "custom-widget",
+                                                      "children": [],
+                                                      "sourceClass": "GcalWeekGrid",
+                                                      "title": "GcalWeekGrid",
+                                                      "hexpand": true,
+                                                      "vexpand": true
+                                                    }
+                                                  ],
+                                                  "orientation": "horizontal"
+                                                }
+                                              ]
+                                            }
+                                          ],
+                                          "hexpand": true,
+                                          "vexpand": true
+                                        }
+                                      ],
+                                      "orientation": "vertical",
+                                      "bindings": {
+                                        "active-date": "template.active-date no-sync-create bidirectional"
+                                      },
+                                      "slot": "child"
+                                    }
+                                  ],
+                                  "name": "week",
+                                  "title": "Week",
+                                  "useUnderline": true,
+                                  "iconName": "calendar-week-symbolic"
+                                },
+                                {
+                                  "id": "agenda_page",
+                                  "type": "stack-page",
+                                  "children": [
+                                    {
+                                      "id": "agenda_view",
+                                      "type": "box",
+                                      "children": [
+                                        {
+                                          "id": "date_chooser",
+                                          "type": "bin",
+                                          "children": [
+                                            {
+                                              "id": "imported-68",
+                                              "type": "grid",
+                                              "children": [
+                                                {
+                                                  "id": "month_choice",
+                                                  "type": "box",
+                                                  "children": [
+                                                    {
+                                                      "id": "down_button",
+                                                      "type": "button",
+                                                      "children": [],
+                                                      "iconName": "pan-start-symbolic",
+                                                      "canFocus": false,
+                                                      "circular": true,
+                                                      "flat": true
+                                                    },
+                                                    {
+                                                      "id": "button",
+                                                      "type": "button",
+                                                      "children": [
+                                                        {
+                                                          "id": "stack",
+                                                          "type": "stack",
+                                                          "children": [
+                                                            {
+                                                              "id": "imported-70",
+                                                              "type": "stack-page",
+                                                              "children": [
+                                                                {
+                                                                  "id": "label1",
+                                                                  "type": "label",
+                                                                  "children": [],
+                                                                  "slot": "child"
+                                                                }
+                                                              ],
+                                                              "name": "label1"
+                                                            },
+                                                            {
+                                                              "id": "imported-71",
+                                                              "type": "stack-page",
+                                                              "children": [
+                                                                {
+                                                                  "id": "label2",
+                                                                  "type": "label",
+                                                                  "children": [],
+                                                                  "slot": "child"
+                                                                }
+                                                              ],
+                                                              "name": "label2"
+                                                            }
+                                                          ],
+                                                          "hexpand": true,
+                                                          "vexpand": true
+                                                        }
+                                                      ],
+                                                      "accessibleRole": "none",
+                                                      "flat": true
+                                                    },
+                                                    {
+                                                      "id": "up_button",
+                                                      "type": "button",
+                                                      "children": [],
+                                                      "iconName": "pan-end-symbolic",
+                                                      "canFocus": false,
+                                                      "circular": true,
+                                                      "flat": true
+                                                    }
+                                                  ],
+                                                  "spacing": 6,
+                                                  "accessibleRole": "spin_button",
+                                                  "halign": "fill",
+                                                  "minValue": 0,
+                                                  "maxValue": 11,
+                                                  "animate": false,
+                                                  "value": 0,
+                                                  "wrap": true,
+                                                  "notify": ":",
+                                                  "column": 0,
+                                                  "row": 0,
+                                                  "orientation": "horizontal",
+                                                  "bindings": {
+                                                    "visible": "$get_split_choice_visible template.show-heading , template.split-month-year as bool"
+                                                  }
+                                                },
+                                                {
+                                                  "id": "year_choice",
+                                                  "type": "box",
+                                                  "children": [
+                                                    {
+                                                      "id": "down_button",
+                                                      "type": "button",
+                                                      "children": [],
+                                                      "iconName": "pan-start-symbolic",
+                                                      "canFocus": false,
+                                                      "circular": true,
+                                                      "flat": true
+                                                    },
+                                                    {
+                                                      "id": "button",
+                                                      "type": "button",
+                                                      "children": [
+                                                        {
+                                                          "id": "stack",
+                                                          "type": "stack",
+                                                          "children": [
+                                                            {
+                                                              "id": "imported-73",
+                                                              "type": "stack-page",
+                                                              "children": [
+                                                                {
+                                                                  "id": "label1",
+                                                                  "type": "label",
+                                                                  "children": [],
+                                                                  "slot": "child"
+                                                                }
+                                                              ],
+                                                              "name": "label1"
+                                                            },
+                                                            {
+                                                              "id": "imported-74",
+                                                              "type": "stack-page",
+                                                              "children": [
+                                                                {
+                                                                  "id": "label2",
+                                                                  "type": "label",
+                                                                  "children": [],
+                                                                  "slot": "child"
+                                                                }
+                                                              ],
+                                                              "name": "label2"
+                                                            }
+                                                          ],
+                                                          "hexpand": true,
+                                                          "vexpand": true
+                                                        }
+                                                      ],
+                                                      "accessibleRole": "none",
+                                                      "flat": true
+                                                    },
+                                                    {
+                                                      "id": "up_button",
+                                                      "type": "button",
+                                                      "children": [],
+                                                      "iconName": "pan-end-symbolic",
+                                                      "canFocus": false,
+                                                      "circular": true,
+                                                      "flat": true
+                                                    }
+                                                  ],
+                                                  "spacing": 6,
+                                                  "accessibleRole": "spin_button",
+                                                  "halign": "fill",
+                                                  "minValue": 1,
+                                                  "maxValue": 9999,
+                                                  "animate": false,
+                                                  "value": 0,
+                                                  "notify": ":",
+                                                  "column": 1,
+                                                  "row": 0,
+                                                  "orientation": "horizontal",
+                                                  "bindings": {
+                                                    "visible": "$get_split_choice_visible template.show-heading , template.split-month-year as bool"
+                                                  }
+                                                },
+                                                {
+                                                  "id": "combined_choice",
+                                                  "type": "box",
+                                                  "children": [
+                                                    {
+                                                      "id": "down_button",
+                                                      "type": "button",
+                                                      "children": [],
+                                                      "iconName": "pan-start-symbolic",
+                                                      "canFocus": false,
+                                                      "circular": true,
+                                                      "flat": true
+                                                    },
+                                                    {
+                                                      "id": "button",
+                                                      "type": "button",
+                                                      "children": [
+                                                        {
+                                                          "id": "stack",
+                                                          "type": "stack",
+                                                          "children": [
+                                                            {
+                                                              "id": "imported-76",
+                                                              "type": "stack-page",
+                                                              "children": [
+                                                                {
+                                                                  "id": "label1",
+                                                                  "type": "label",
+                                                                  "children": [],
+                                                                  "slot": "child"
+                                                                }
+                                                              ],
+                                                              "name": "label1"
+                                                            },
+                                                            {
+                                                              "id": "imported-77",
+                                                              "type": "stack-page",
+                                                              "children": [
+                                                                {
+                                                                  "id": "label2",
+                                                                  "type": "label",
+                                                                  "children": [],
+                                                                  "slot": "child"
+                                                                }
+                                                              ],
+                                                              "name": "label2"
+                                                            }
+                                                          ],
+                                                          "hexpand": true,
+                                                          "vexpand": true
+                                                        }
+                                                      ],
+                                                      "accessibleRole": "none",
+                                                      "flat": true
+                                                    },
+                                                    {
+                                                      "id": "up_button",
+                                                      "type": "button",
+                                                      "children": [],
+                                                      "iconName": "pan-end-symbolic",
+                                                      "canFocus": false,
+                                                      "circular": true,
+                                                      "flat": true
+                                                    }
+                                                  ],
+                                                  "spacing": 6,
+                                                  "accessibleRole": "spin_button",
+                                                  "halign": "fill",
+                                                  "minValue": 12,
+                                                  "maxValue": 119999,
+                                                  "popover": "popover",
+                                                  "animate": false,
+                                                  "value": 0,
+                                                  "notify": ":",
+                                                  "column": 0,
+                                                  "columnSpan": 2,
+                                                  "row": 0,
+                                                  "orientation": "horizontal",
+                                                  "bindings": {
+                                                    "visible": "$get_combined_choice_visible template.show-heading , template.split-month-year as bool"
+                                                  }
+                                                },
+                                                {
+                                                  "id": "grid",
+                                                  "type": "grid",
+                                                  "children": [],
+                                                  "rowHomogeneous": true,
+                                                  "columnHomogeneous": true,
+                                                  "column": 0,
+                                                  "columnSpan": 2,
+                                                  "row": 1
+                                                }
+                                              ],
+                                              "orientation": "vertical"
+                                            }
+                                          ],
+                                          "splitMonthYear": false,
+                                          "vexpand": false,
+                                          "valign": "end",
+                                          "bindings": {
+                                            "active-date": "$GcalAgendaView.active-date no-sync-create bidirectional"
+                                          }
+                                        },
+                                        {
+                                          "id": "scrolled_window",
+                                          "type": "scrolled-window",
+                                          "children": [
+                                            {
+                                              "id": "list_box",
+                                              "type": "list-box",
+                                              "children": [
+                                                {
+                                                  "id": "no_events_row",
+                                                  "type": "custom-widget",
+                                                  "children": [
+                                                    {
+                                                      "id": "imported-78",
+                                                      "type": "label",
+                                                      "children": [],
+                                                      "title": "No events",
+                                                      "xalign": 0,
+                                                      "slot": "child"
+                                                    }
+                                                  ],
+                                                  "sourceClass": "ListBoxRow",
+                                                  "title": "ListBoxRow",
+                                                  "activatable": false
+                                                }
+                                              ],
+                                              "hexpand": true,
+                                              "selectionMode": "none",
+                                              "vexpand": true
+                                            }
+                                          ],
+                                          "hexpand": true,
+                                          "vexpand": true
+                                        }
+                                      ],
+                                      "orientation": "vertical",
+                                      "vexpand": true,
+                                      "bindings": {
+                                        "active-date": "template.active-date no-sync-create bidirectional"
+                                      },
+                                      "slot": "child"
+                                    }
+                                  ],
+                                  "name": "agenda",
+                                  "title": "Agenda",
+                                  "useUnderline": true,
+                                  "iconName": "calendar-agenda-symbolic",
+                                  "visible": false
+                                }
+                              ],
+                              "hexpand": true,
+                              "vexpand": true,
+                              "notify": ":",
+                              "slot": "content",
+                              "visibleChildName": "week"
+                            },
+                            {
+                              "id": "imported-79",
                               "type": "custom-widget",
                               "children": [
                                 {
-                                  "id": "imported-200",
-                                  "type": "box",
+                                  "id": "previous_date_button",
+                                  "type": "button",
+                                  "children": [],
+                                  "actionName": "win.previous-date",
+                                  "bindings": {
+                                    "icon-name": "$get_previous_date_icon views_stack.visible-child as string",
+                                    "tooltip-text": "$get_previous_date_tooltip views_stack.visible-child-name as string"
+                                  }
+                                },
+                                {
+                                  "id": "next_date_button",
+                                  "type": "button",
+                                  "children": [],
+                                  "actionName": "win.next-date",
+                                  "bindings": {
+                                    "icon-name": "$get_next_date_icon views_stack.visible-child as string",
+                                    "tooltip-text": "$get_next_date_tooltip views_stack.visible-child-name as string"
+                                  }
+                                },
+                                {
+                                  "id": "imported-80",
+                                  "type": "button",
+                                  "children": [],
+                                  "actionName": "win.today",
+                                  "title": "Today",
+                                  "iconName": "calendar-today-symbolic"
+                                },
+                                {
+                                  "id": "view_switcher_bin",
+                                  "type": "bin",
                                   "children": [
                                     {
-                                      "id": "notes_text",
-                                      "type": "entry",
+                                      "id": "view_switcher_wide",
+                                      "type": "view-switcher",
                                       "children": [],
-                                      "heightRequest": 250,
-                                      "hexpand": true,
-                                      "topMargin": 6,
-                                      "bottomMargin": 6,
-                                      "leftMargin": 6,
-                                      "rightMargin": 6,
-                                      "sensitive": true,
-                                      "wrapMode": "word_char",
-                                      "acceptsTab": false
+                                      "stack": "views_stack",
+                                      "policy": "wide",
+                                      "slot": "child"
                                     }
-                                  ],
-                                  "orientation": "horizontal"
+                                  ]
+                                },
+                                {
+                                  "id": "imported-82",
+                                  "type": "button",
+                                  "children": [],
+                                  "iconName": "list-add-symbolic",
+                                  "actionName": "win.new-event",
+                                  "tooltipText": "Add Event"
+                                },
+                                {
+                                  "id": "imported-83",
+                                  "type": "button",
+                                  "children": [],
+                                  "iconName": "x-office-calendar-symbolic",
+                                  "tooltipText": "Manage Calendars",
+                                  "actionName": "win.show-calendars"
                                 }
                               ],
-                              "sourceClass": "Adw.PreferencesRow",
-                              "title": "Adw.PreferencesRow",
-                              "activatable": false,
-                              "focusable": false,
-                              "vexpand": true,
-                              "bindings": {
-                                "sensitive": "$GcalEventEditorDialog.writable"
-                              }
+                              "sourceClass": "ActionBar",
+                              "title": "ActionBar"
                             }
                           ],
-                          "title": "Notes"
-                        },
-                        {
-                          "id": "delete_group",
-                          "type": "preferences-group",
-                          "children": [
-                            {
-                              "id": "imported-201",
-                              "type": "button-row",
-                              "children": [],
-                              "title": "Delete Event",
-                              "destructive": true
-                            }
-                          ]
+                          "slot": "content"
                         }
                       ],
-                      "vexpand": true
+                      "pinSidebar": true,
+                      "showSidebar": false,
+                      "slot": "child"
                     }
                   ],
-                  "orientation": "vertical",
-                  "slot": "content"
+                  "sourceClass": "GcalDropOverlay",
+                  "title": "GcalDropOverlay"
                 }
               ]
             }
           ],
-          "contentWidth": 700,
-          "contentHeight": 1000
+          "title": "Calendar",
+          "defaultWidth": 800,
+          "defaultHeight": 600,
+          "widthRequest": 360,
+          "heightRequest": 600,
+          "notify": ":"
         }
       }
     ],
-    "importDiagnostics": [
+    "edges": [
       {
-        "code": "renderer-does-not-support-class",
-        "sourceClass": "Adw.ViewStackPage",
-        "sourceId": "month_page",
-        "message": "Adw.ViewStackPage is not in the generic widget registry; retained as an explicit custom-widget boundary."
-      },
-      {
-        "code": "template-not-in-bundle",
-        "sourceClass": "GcalWeekHourBar",
-        "sourceId": "hours_bar",
-        "message": "$GcalWeekHourBar has no template definition in the imported source; retained as an explicit custom-widget boundary."
-      },
-      {
-        "code": "template-not-in-bundle",
-        "sourceClass": "GcalWeekGrid",
-        "sourceId": "week_grid",
-        "message": "$GcalWeekGrid has no template definition in the imported source; retained as an explicit custom-widget boundary."
-      },
-      {
-        "code": "renderer-does-not-support-class",
-        "sourceClass": "Adw.ViewStackPage",
-        "sourceId": "week_page",
-        "message": "Adw.ViewStackPage is not in the generic widget registry; retained as an explicit custom-widget boundary."
-      },
-      {
-        "code": "renderer-does-not-support-class",
-        "sourceClass": "ListBoxRow",
-        "sourceId": "no_events_row",
-        "message": "ListBoxRow is not in the generic widget registry; retained as an explicit custom-widget boundary."
-      },
-      {
-        "code": "renderer-does-not-support-class",
-        "sourceClass": "Adw.ViewStackPage",
-        "sourceId": "agenda_page",
-        "message": "Adw.ViewStackPage is not in the generic widget registry; retained as an explicit custom-widget boundary."
-      },
-      {
-        "code": "renderer-does-not-support-class",
-        "sourceClass": "ActionBar",
-        "sourceId": "imported-79",
-        "message": "ActionBar is not in the generic widget registry; retained as an explicit custom-widget boundary."
-      },
-      {
-        "code": "template-not-in-bundle",
-        "sourceClass": "GcalDropOverlay",
-        "sourceId": "drop_overlay",
-        "message": "$GcalDropOverlay has no template definition in the imported source; retained as an explicit custom-widget boundary."
-      },
-      {
-        "code": "renderer-does-not-support-class",
-        "sourceClass": "CenterBox",
-        "sourceId": "imported-92",
-        "message": "CenterBox is not in the generic widget registry; retained as an explicit custom-widget boundary."
-      },
-      {
-        "code": "renderer-does-not-support-class",
-        "sourceClass": "Adw.PreferencesRow",
-        "sourceId": "notes_section",
-        "message": "Adw.PreferencesRow is not in the generic widget registry; retained as an explicit custom-widget boundary."
+        "id": "edge-1",
+        "sourceId": "month",
+        "targetId": "week"
       }
     ]
   },

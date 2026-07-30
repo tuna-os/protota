@@ -1,19 +1,18 @@
 {
   "version": 1,
-  "exportedAt": "2026-07-30T03:48:56.242Z",
+  "exportedAt": "2026-07-30T04:19:49.731Z",
   "generatedBy": "scripts/generate-preset.mjs",
   "document": {
-    "id": "imported-document",
-    "title": "files",
+    "id": "files-preset",
+    "title": "GNOME Files",
     "colorScheme": "auto",
-    "edges": [],
     "screens": [
       {
-        "id": "imported-screen-1",
-        "title": "files 1",
+        "id": "browser",
+        "title": "Files",
         "type": "standard",
-        "width": 1024,
-        "height": 720,
+        "width": 950,
+        "height": 640,
         "rootNode": {
           "id": "imported-1",
           "type": "window",
@@ -42,9 +41,9 @@
                                   "id": "imported-5",
                                   "type": "button",
                                   "children": [],
-                                  "tooltip_text": "Search Everywhere",
-                                  "action_name": "slot.search-global",
-                                  "icon_name": "edit-find-symbolic",
+                                  "tooltipText": "Search Everywhere",
+                                  "actionName": "slot.search-global",
+                                  "iconName": "edit-find-symbolic",
                                   "slot": "start"
                                 },
                                 {
@@ -59,7 +58,7 @@
                                   "type": "menu-button",
                                   "children": [],
                                   "tooltipText": "Main Menu",
-                                  "icon_name": "open-menu-symbolic",
+                                  "iconName": "open-menu-symbolic",
                                   "menuModel": "app_menu",
                                   "slot": "end"
                                 }
@@ -88,7 +87,7 @@
                                           "slot": "child"
                                         }
                                       ],
-                                      "tooltip_text": "Show File Operations",
+                                      "tooltipText": "Show File Operations",
                                       "direction": "right",
                                       "popover": "operations_popover",
                                       "flat": true,
@@ -180,7 +179,7 @@
                                                       "type": "button",
                                                       "children": [],
                                                       "iconName": "window-close-symbolic",
-                                                      "tooltip_text": "Cancel"
+                                                      "tooltipText": "Cancel"
                                                     }
                                                   ],
                                                   "orientation": "horizontal",
@@ -206,7 +205,7 @@
                                           ],
                                           "valign": "center",
                                           "hexpand": false,
-                                          "transition_type": "crossfade"
+                                          "transitionType": "crossfade"
                                         },
                                         {
                                           "id": "search_button_stack",
@@ -216,11 +215,11 @@
                                               "id": "search_button",
                                               "type": "button",
                                               "children": [],
-                                              "tooltip_text": "Search Current Folder",
+                                              "tooltipText": "Search Current Folder",
                                               "halign": "center",
                                               "valign": "center",
-                                              "action_name": "slot.search-visible",
-                                              "icon_name": "nautilus-folder-search-symbolic",
+                                              "actionName": "slot.search-visible",
+                                              "iconName": "nautilus-folder-search-symbolic",
                                               "bindings": {
                                                 "active": "expression"
                                               }
@@ -267,19 +266,19 @@
                                                   "id": "back_button",
                                                   "type": "button",
                                                   "children": [],
-                                                  "tooltip_text": "Back",
+                                                  "tooltipText": "Back",
                                                   "valign": "center",
-                                                  "action_name": "slot.back",
-                                                  "icon_name": "go-previous-symbolic"
+                                                  "actionName": "slot.back",
+                                                  "iconName": "go-previous-symbolic"
                                                 },
                                                 {
                                                   "id": "forward_button",
                                                   "type": "button",
                                                   "children": [],
-                                                  "tooltip_text": "Forward",
+                                                  "tooltipText": "Forward",
                                                   "valign": "center",
-                                                  "action_name": "slot.forward",
-                                                  "icon_name": "go-next-symbolic"
+                                                  "actionName": "slot.forward",
+                                                  "iconName": "go-next-symbolic"
                                                 }
                                               ],
                                               "spacing": 6,
@@ -316,7 +315,7 @@
                                           "halign": "center",
                                           "valign": "center",
                                           "dropdownTooltip": "View Options",
-                                          "action_name": "slot.files-view-mode-toggle",
+                                          "actionName": "slot.files-view-mode-toggle",
                                           "bindings": {
                                             "icon-name": "expression",
                                             "tooltip-text": "expression"
@@ -336,7 +335,7 @@
                                       "type": "button",
                                       "children": [],
                                       "iconName": "folder-new-symbolic",
-                                      "tooltip_text": "New Folder",
+                                      "tooltipText": "New Folder",
                                       "actionName": "view.new-folder",
                                       "focusOnClick": false,
                                       "bindings": {
@@ -390,7 +389,7 @@
                                   "id": "connect_button",
                                   "type": "button",
                                   "children": [],
-                                  "title": "Con_nect",
+                                  "title": "Connect",
                                   "useUnderline": true,
                                   "canShrink": true,
                                   "sensitive": false,
@@ -429,19 +428,19 @@
                                           "id": "back_button",
                                           "type": "button",
                                           "children": [],
-                                          "tooltip_text": "Back",
+                                          "tooltipText": "Back",
                                           "valign": "center",
-                                          "action_name": "slot.back",
-                                          "icon_name": "go-previous-symbolic"
+                                          "actionName": "slot.back",
+                                          "iconName": "go-previous-symbolic"
                                         },
                                         {
                                           "id": "forward_button",
                                           "type": "button",
                                           "children": [],
-                                          "tooltip_text": "Forward",
+                                          "tooltipText": "Forward",
                                           "valign": "center",
-                                          "action_name": "slot.forward",
-                                          "icon_name": "go-next-symbolic"
+                                          "actionName": "slot.forward",
+                                          "iconName": "go-next-symbolic"
                                         }
                                       ],
                                       "spacing": 6,
@@ -466,7 +465,7 @@
                                       "halign": "center",
                                       "valign": "center",
                                       "dropdownTooltip": "View Options",
-                                      "action_name": "slot.files-view-mode-toggle",
+                                      "actionName": "slot.files-view-mode-toggle",
                                       "bindings": {
                                         "icon-name": "expression",
                                         "tooltip-text": "expression"
@@ -511,182 +510,1047 @@
             "title": "expression"
           }
         }
+      },
+      {
+        "id": "properties",
+        "title": "Properties",
+        "type": "standard",
+        "width": 480,
+        "height": 640,
+        "rootNode": {
+          "id": "imported-1",
+          "type": "window",
+          "children": [
+            {
+              "id": "toast_overlay",
+              "type": "toast-overlay",
+              "children": [
+                {
+                  "id": "nav_view",
+                  "type": "navigation-view",
+                  "children": [
+                    {
+                      "id": "imported-2",
+                      "type": "bin",
+                      "children": [
+                        {
+                          "id": "imported-3",
+                          "type": "toolbar-view",
+                          "children": [
+                            {
+                              "id": "imported-4",
+                              "type": "header-bar",
+                              "children": [
+                                {
+                                  "id": "star_button",
+                                  "type": "button",
+                                  "children": [],
+                                  "visible": false,
+                                  "valign": "start",
+                                  "slot": "start"
+                                }
+                              ],
+                              "showTitle": false,
+                              "slot": "top"
+                            },
+                            {
+                              "id": "imported-5",
+                              "type": "preferences-page",
+                              "children": [
+                                {
+                                  "id": "imported-6",
+                                  "type": "preferences-group",
+                                  "children": [
+                                    {
+                                      "id": "imported-7",
+                                      "type": "box",
+                                      "children": [
+                                        {
+                                          "id": "imported-8",
+                                          "type": "center-box",
+                                          "children": [
+                                            {
+                                              "id": "icon_stack",
+                                              "type": "stack",
+                                              "children": [
+                                                {
+                                                  "id": "imported-9",
+                                                  "type": "stack-page",
+                                                  "children": [
+                                                    {
+                                                      "id": "icon_image",
+                                                      "type": "bin",
+                                                      "children": [],
+                                                      "iconName": "image-missing",
+                                                      "slot": "child"
+                                                    }
+                                                  ]
+                                                },
+                                                {
+                                                  "id": "imported-10",
+                                                  "type": "stack-page",
+                                                  "children": [
+                                                    {
+                                                      "id": "icon_overlay",
+                                                      "type": "bin",
+                                                      "children": [
+                                                        {
+                                                          "id": "imported-11",
+                                                          "type": "custom-widget",
+                                                          "children": [
+                                                            {
+                                                              "id": "imported-12",
+                                                              "type": "bin",
+                                                              "children": [],
+                                                              "bindings": {
+                                                                "paintable": "expression",
+                                                                "pixel-size": "expression"
+                                                              }
+                                                            }
+                                                          ],
+                                                          "sourceClass": "GtkFrame",
+                                                          "title": "GtkFrame"
+                                                        },
+                                                        {
+                                                          "id": "imported-13",
+                                                          "type": "bin",
+                                                          "children": [
+                                                            {
+                                                              "id": "select_icon_button",
+                                                              "type": "button",
+                                                              "children": [],
+                                                              "tooltipText": "Set Custom Icon",
+                                                              "focusable": true,
+                                                              "iconName": "document-edit-symbolic",
+                                                              "circular": true,
+                                                              "slot": "child"
+                                                            }
+                                                          ],
+                                                          "halign": "end",
+                                                          "valign": "end",
+                                                          "slot": "overlay"
+                                                        },
+                                                        {
+                                                          "id": "imported-14",
+                                                          "type": "bin",
+                                                          "children": [
+                                                            {
+                                                              "id": "reset_icon_button",
+                                                              "type": "button",
+                                                              "children": [],
+                                                              "tooltipText": "Remove Custom Icon",
+                                                              "focusable": true,
+                                                              "iconName": "remove-custom-icon-symbolic",
+                                                              "circular": true,
+                                                              "slot": "child"
+                                                            }
+                                                          ],
+                                                          "halign": "end",
+                                                          "valign": "start",
+                                                          "slot": "overlay"
+                                                        }
+                                                      ],
+                                                      "slot": "child"
+                                                    }
+                                                  ]
+                                                }
+                                              ],
+                                              "halign": "center",
+                                              "valign": "start",
+                                              "hhomogeneous": false,
+                                              "vhomogeneous": false,
+                                              "slot": "center"
+                                            }
+                                          ]
+                                        },
+                                        {
+                                          "id": "imported-15",
+                                          "type": "box",
+                                          "children": [
+                                            {
+                                              "id": "name_value_label",
+                                              "type": "label",
+                                              "children": [],
+                                              "selectable": true,
+                                              "ellipsize": "end",
+                                              "maxWidthChars": 24,
+                                              "wrap": true,
+                                              "wrapMode": "PANGO_WRAP_WORD_CHAR",
+                                              "lines": 3,
+                                              "justify": "center"
+                                            },
+                                            {
+                                              "id": "type_value_label",
+                                              "type": "label",
+                                              "children": [],
+                                              "ellipsize": "end",
+                                              "selectable": true,
+                                              "visible": false
+                                            },
+                                            {
+                                              "id": "type_file_system_label",
+                                              "type": "label",
+                                              "children": [],
+                                              "ellipsize": "end",
+                                              "title": "Unknown Filesystem",
+                                              "selectable": true,
+                                              "visible": false
+                                            },
+                                            {
+                                              "id": "size_value_label",
+                                              "type": "label",
+                                              "children": [],
+                                              "visible": false,
+                                              "selectable": true,
+                                              "ellipsize": "end"
+                                            },
+                                            {
+                                              "id": "contents_box",
+                                              "type": "box",
+                                              "children": [
+                                                {
+                                                  "id": "contents_value_label",
+                                                  "type": "label",
+                                                  "children": [],
+                                                  "selectable": true,
+                                                  "ellipsize": "end",
+                                                  "justify": "center"
+                                                },
+                                                {
+                                                  "id": "contents_spinner",
+                                                  "type": "spinner",
+                                                  "children": [],
+                                                  "visible": false
+                                                }
+                                              ],
+                                              "halign": "center",
+                                              "visible": false,
+                                              "spacing": 12,
+                                              "orientation": "horizontal"
+                                            },
+                                            {
+                                              "id": "free_space_value_label",
+                                              "type": "label",
+                                              "children": [],
+                                              "visible": false,
+                                              "selectable": true,
+                                              "ellipsize": "end",
+                                              "maxWidthChars": 24
+                                            }
+                                          ],
+                                          "orientation": "vertical",
+                                          "spacing": 6
+                                        }
+                                      ],
+                                      "orientation": "vertical",
+                                      "spacing": 12
+                                    }
+                                  ]
+                                },
+                                {
+                                  "id": "disk_group",
+                                  "type": "preferences-group",
+                                  "children": [
+                                    {
+                                      "id": "volume_usage_row",
+                                      "type": "custom-widget",
+                                      "children": [
+                                        {
+                                          "id": "imported-16",
+                                          "type": "box",
+                                          "children": [
+                                            {
+                                              "id": "disk_space_level_bar",
+                                              "type": "custom-widget",
+                                              "children": [],
+                                              "sourceClass": "GtkLevelBar",
+                                              "title": "GtkLevelBar",
+                                              "hexpand": true
+                                            },
+                                            {
+                                              "id": "imported-17",
+                                              "type": "box",
+                                              "children": [
+                                                {
+                                                  "id": "imported-18",
+                                                  "type": "box",
+                                                  "children": [
+                                                    {
+                                                      "id": "disk_space_capacity_value",
+                                                      "type": "label",
+                                                      "children": []
+                                                    },
+                                                    {
+                                                      "id": "imported-19",
+                                                      "type": "label",
+                                                      "children": [],
+                                                      "title": "total"
+                                                    }
+                                                  ],
+                                                  "spacing": 3,
+                                                  "orientation": "horizontal"
+                                                },
+                                                {
+                                                  "id": "imported-20",
+                                                  "type": "box",
+                                                  "children": [
+                                                    {
+                                                      "id": "imported-21",
+                                                      "type": "label",
+                                                      "children": [],
+                                                      "title": "●",
+                                                      "accessibleRole": "presentation"
+                                                    },
+                                                    {
+                                                      "id": "disk_space_used_value",
+                                                      "type": "label",
+                                                      "children": []
+                                                    },
+                                                    {
+                                                      "id": "imported-22",
+                                                      "type": "label",
+                                                      "children": [],
+                                                      "title": "used"
+                                                    }
+                                                  ],
+                                                  "spacing": 3,
+                                                  "orientation": "horizontal"
+                                                },
+                                                {
+                                                  "id": "imported-23",
+                                                  "type": "box",
+                                                  "children": [
+                                                    {
+                                                      "id": "imported-24",
+                                                      "type": "label",
+                                                      "children": [],
+                                                      "title": "●",
+                                                      "accessibleRole": "presentation"
+                                                    },
+                                                    {
+                                                      "id": "disk_space_free_value",
+                                                      "type": "label",
+                                                      "children": []
+                                                    },
+                                                    {
+                                                      "id": "imported-25",
+                                                      "type": "label",
+                                                      "children": [],
+                                                      "title": "free"
+                                                    }
+                                                  ],
+                                                  "spacing": 3,
+                                                  "orientation": "horizontal"
+                                                }
+                                              ],
+                                              "spacing": 12,
+                                              "halign": "center",
+                                              "orientation": "horizontal"
+                                            }
+                                          ],
+                                          "marginBottom": 12,
+                                          "marginEnd": 12,
+                                          "marginStart": 12,
+                                          "marginTop": 18,
+                                          "spacing": 12,
+                                          "orientation": "vertical"
+                                        }
+                                      ],
+                                      "sourceClass": "AdwPreferencesRow",
+                                      "title": "AdwPreferencesRow",
+                                      "activatable": false,
+                                      "selectable": false
+                                    },
+                                    {
+                                      "id": "open_in_disks_button_row",
+                                      "type": "button-row",
+                                      "children": [],
+                                      "title": "Open in Disks",
+                                      "endIconName": "external-link-symbolic",
+                                      "useUnderline": true
+                                    }
+                                  ],
+                                  "visible": false
+                                },
+                                {
+                                  "id": "locations_group",
+                                  "type": "preferences-group",
+                                  "children": [
+                                    {
+                                      "id": "link_target_row",
+                                      "type": "action-row",
+                                      "children": [
+                                        {
+                                          "id": "open_link_target_button",
+                                          "type": "button",
+                                          "children": [],
+                                          "tooltipText": "Open Link Target",
+                                          "iconName": "folder-open-symbolic",
+                                          "valign": "center",
+                                          "flat": true,
+                                          "slot": "suffix"
+                                        }
+                                      ],
+                                      "title": "Link Target",
+                                      "visible": false,
+                                      "selectable": false,
+                                      "subtitleSelectable": true,
+                                      "useUnderline": true,
+                                      "useMarkup": false
+                                    },
+                                    {
+                                      "id": "parent_folder_row",
+                                      "type": "action-row",
+                                      "children": [
+                                        {
+                                          "id": "open_parent_folder_button",
+                                          "type": "button",
+                                          "children": [],
+                                          "tooltipText": "Open Parent Folder",
+                                          "iconName": "folder-open-symbolic",
+                                          "valign": "center",
+                                          "flat": true,
+                                          "slot": "suffix"
+                                        }
+                                      ],
+                                      "title": "Parent Folder",
+                                      "visible": false,
+                                      "selectable": false,
+                                      "subtitleSelectable": true,
+                                      "useUnderline": true,
+                                      "useMarkup": false
+                                    }
+                                  ],
+                                  "visible": false
+                                },
+                                {
+                                  "id": "trashed_group",
+                                  "type": "preferences-group",
+                                  "children": [
+                                    {
+                                      "id": "original_folder_row",
+                                      "type": "action-row",
+                                      "children": [],
+                                      "title": "Original Folder",
+                                      "selectable": false,
+                                      "subtitleSelectable": true,
+                                      "useMarkup": false
+                                    },
+                                    {
+                                      "id": "trashed_on_row",
+                                      "type": "action-row",
+                                      "children": [],
+                                      "title": "Trashed On",
+                                      "selectable": false,
+                                      "subtitleSelectable": true,
+                                      "subtitleLines": 1,
+                                      "useMarkup": false
+                                    }
+                                  ],
+                                  "visible": false
+                                },
+                                {
+                                  "id": "times_group",
+                                  "type": "preferences-group",
+                                  "children": [
+                                    {
+                                      "id": "accessed_row",
+                                      "type": "action-row",
+                                      "children": [],
+                                      "title": "Accessed",
+                                      "visible": false,
+                                      "selectable": false,
+                                      "subtitleSelectable": true,
+                                      "subtitleLines": 1,
+                                      "useMarkup": false
+                                    },
+                                    {
+                                      "id": "modified_row",
+                                      "type": "action-row",
+                                      "children": [],
+                                      "title": "Modified",
+                                      "visible": false,
+                                      "selectable": false,
+                                      "subtitleSelectable": true,
+                                      "subtitleLines": 1,
+                                      "useMarkup": false
+                                    },
+                                    {
+                                      "id": "created_row",
+                                      "type": "action-row",
+                                      "children": [],
+                                      "title": "Created",
+                                      "visible": false,
+                                      "selectable": false,
+                                      "subtitleSelectable": true,
+                                      "subtitleLines": 1,
+                                      "useMarkup": false
+                                    }
+                                  ],
+                                  "visible": false
+                                },
+                                {
+                                  "id": "imported-26",
+                                  "type": "preferences-group",
+                                  "children": [
+                                    {
+                                      "id": "permissions_navigation_row",
+                                      "type": "action-row",
+                                      "children": [
+                                        {
+                                          "id": "permissions_value_label",
+                                          "type": "label",
+                                          "children": [],
+                                          "ellipsize": "end"
+                                        },
+                                        {
+                                          "id": "imported-27",
+                                          "type": "bin",
+                                          "children": [],
+                                          "iconName": "go-next-symbolic"
+                                        }
+                                      ],
+                                      "activatable": true,
+                                      "selectable": false,
+                                      "title": "Permissions",
+                                      "useUnderline": true
+                                    },
+                                    {
+                                      "id": "execution_row",
+                                      "type": "switch-row",
+                                      "children": [],
+                                      "visible": false,
+                                      "activatable": true,
+                                      "title": "Executable as Program",
+                                      "useUnderline": true
+                                    }
+                                  ]
+                                },
+                                {
+                                  "id": "extension_models_group",
+                                  "type": "preferences-group",
+                                  "children": [
+                                    {
+                                      "id": "extension_models_list_box",
+                                      "type": "list-box",
+                                      "children": [],
+                                      "selectionMode": "none"
+                                    }
+                                  ],
+                                  "visible": false
+                                }
+                              ],
+                              "slot": "content"
+                            }
+                          ],
+                          "slot": "child"
+                        }
+                      ],
+                      "title": "Properties",
+                      "tag": "main"
+                    },
+                    {
+                      "id": "imported-28",
+                      "type": "bin",
+                      "children": [
+                        {
+                          "id": "imported-29",
+                          "type": "toolbar-view",
+                          "children": [
+                            {
+                              "id": "imported-30",
+                              "type": "header-bar",
+                              "children": [],
+                              "slot": "top"
+                            },
+                            {
+                              "id": "permissions_stack",
+                              "type": "stack",
+                              "children": [
+                                {
+                                  "id": "imported-31",
+                                  "type": "stack-page",
+                                  "children": [
+                                    {
+                                      "id": "unknown_permissions_page",
+                                      "type": "status-page",
+                                      "children": [],
+                                      "iconName": "dialog-error-symbolic",
+                                      "title": "Unknown Permissions",
+                                      "description": "The permissions of the selected files could not be determined",
+                                      "slot": "child"
+                                    }
+                                  ],
+                                  "name": "permission-indeterminable"
+                                },
+                                {
+                                  "id": "imported-32",
+                                  "type": "stack-page",
+                                  "children": [
+                                    {
+                                      "id": "imported-33",
+                                      "type": "box",
+                                      "children": [
+                                        {
+                                          "id": "owner_permission_banner",
+                                          "type": "banner",
+                                          "children": [],
+                                          "title": "Only the owner can edit these permissions"
+                                        },
+                                        {
+                                          "id": "imported-34",
+                                          "type": "preferences-page",
+                                          "children": [
+                                            {
+                                              "id": "imported-35",
+                                              "type": "preferences-group",
+                                              "children": [
+                                                {
+                                                  "id": "owner_row",
+                                                  "type": "combo-row",
+                                                  "children": [],
+                                                  "activatable": false,
+                                                  "title": "Owner",
+                                                  "useUnderline": true,
+                                                  "useMarkup": false,
+                                                  "expression": ""
+                                                },
+                                                {
+                                                  "id": "owner_access_row",
+                                                  "type": "combo-row",
+                                                  "children": [],
+                                                  "visible": false,
+                                                  "activatable": false,
+                                                  "title": "Access",
+                                                  "useMarkup": false
+                                                },
+                                                {
+                                                  "id": "owner_folder_access_row",
+                                                  "type": "combo-row",
+                                                  "children": [],
+                                                  "visible": false,
+                                                  "activatable": false,
+                                                  "title": "Folder Access",
+                                                  "useMarkup": false
+                                                },
+                                                {
+                                                  "id": "owner_file_access_row",
+                                                  "type": "combo-row",
+                                                  "children": [],
+                                                  "visible": false,
+                                                  "activatable": false,
+                                                  "title": "File Access",
+                                                  "useMarkup": false
+                                                }
+                                              ]
+                                            },
+                                            {
+                                              "id": "imported-36",
+                                              "type": "preferences-group",
+                                              "children": [
+                                                {
+                                                  "id": "group_row",
+                                                  "type": "combo-row",
+                                                  "children": [],
+                                                  "sensitive": false,
+                                                  "activatable": false,
+                                                  "title": "Group",
+                                                  "useUnderline": true,
+                                                  "useMarkup": false,
+                                                  "expression": ""
+                                                },
+                                                {
+                                                  "id": "group_access_row",
+                                                  "type": "combo-row",
+                                                  "children": [],
+                                                  "visible": false,
+                                                  "activatable": false,
+                                                  "title": "Access",
+                                                  "useMarkup": false
+                                                },
+                                                {
+                                                  "id": "group_folder_access_row",
+                                                  "type": "combo-row",
+                                                  "children": [],
+                                                  "visible": false,
+                                                  "activatable": false,
+                                                  "title": "Folder Access",
+                                                  "useMarkup": false
+                                                },
+                                                {
+                                                  "id": "group_file_access_row",
+                                                  "type": "combo-row",
+                                                  "children": [],
+                                                  "visible": false,
+                                                  "activatable": false,
+                                                  "title": "File Access",
+                                                  "useMarkup": false
+                                                }
+                                              ]
+                                            },
+                                            {
+                                              "id": "imported-37",
+                                              "type": "preferences-group",
+                                              "children": [
+                                                {
+                                                  "id": "others_access_row",
+                                                  "type": "combo-row",
+                                                  "children": [],
+                                                  "visible": false,
+                                                  "activatable": false,
+                                                  "title": "Access",
+                                                  "useMarkup": false
+                                                },
+                                                {
+                                                  "id": "others_folder_access_row",
+                                                  "type": "combo-row",
+                                                  "children": [],
+                                                  "visible": false,
+                                                  "activatable": false,
+                                                  "title": "Folder Access",
+                                                  "useMarkup": false
+                                                },
+                                                {
+                                                  "id": "others_file_access_row",
+                                                  "type": "combo-row",
+                                                  "children": [],
+                                                  "visible": false,
+                                                  "activatable": false,
+                                                  "title": "File Access",
+                                                  "useMarkup": false
+                                                }
+                                              ],
+                                              "title": "Other Users"
+                                            },
+                                            {
+                                              "id": "security_context_group",
+                                              "type": "preferences-group",
+                                              "children": [
+                                                {
+                                                  "id": "security_context_row",
+                                                  "type": "action-row",
+                                                  "children": [],
+                                                  "title": "Security Context",
+                                                  "selectable": false,
+                                                  "subtitleSelectable": true,
+                                                  "subtitleLines": 1,
+                                                  "useMarkup": false
+                                                }
+                                              ],
+                                              "visible": false
+                                            },
+                                            {
+                                              "id": "change_permissions_enclosed_files_group",
+                                              "type": "preferences-group",
+                                              "children": [
+                                                {
+                                                  "id": "imported-38",
+                                                  "type": "button-row",
+                                                  "children": [],
+                                                  "title": "Change Permissions for Enclosed Files…",
+                                                  "useUnderline": true
+                                                }
+                                              ],
+                                              "visible": false
+                                            }
+                                          ]
+                                        }
+                                      ],
+                                      "orientation": "vertical",
+                                      "slot": "child"
+                                    }
+                                  ],
+                                  "name": "permissions-box"
+                                }
+                              ],
+                              "slot": "content"
+                            }
+                          ],
+                          "slot": "child"
+                        }
+                      ],
+                      "tag": "permissions",
+                      "title": "Set Custom Permissions"
+                    },
+                    {
+                      "id": "imported-39",
+                      "type": "bin",
+                      "children": [
+                        {
+                          "id": "imported-40",
+                          "type": "toolbar-view",
+                          "children": [
+                            {
+                              "id": "imported-41",
+                              "type": "header-bar",
+                              "children": [],
+                              "slot": "top"
+                            },
+                            {
+                              "id": "imported-42",
+                              "type": "preferences-page",
+                              "children": [
+                                {
+                                  "id": "imported-43",
+                                  "type": "preferences-group",
+                                  "children": [
+                                    {
+                                      "id": "extension_list_box",
+                                      "type": "list-box",
+                                      "children": [],
+                                      "selectionMode": "none"
+                                    }
+                                  ]
+                                }
+                              ],
+                              "slot": "content"
+                            }
+                          ],
+                          "slot": "child"
+                        }
+                      ],
+                      "tag": "extension"
+                    }
+                  ],
+                  "slot": "child"
+                }
+              ]
+            }
+          ],
+          "title": "Properties",
+          "modal": true,
+          "widthRequest": 360,
+          "heightRequest": 294,
+          "defaultWidth": 480
+        }
+      },
+      {
+        "id": "new-folder",
+        "title": "New Folder",
+        "type": "dialog",
+        "width": 400,
+        "height": 220,
+        "rootNode": {
+          "id": "imported-1",
+          "type": "dialog",
+          "children": [
+            {
+              "id": "imported-2",
+              "type": "toolbar-view",
+              "children": [
+                {
+                  "id": "imported-3",
+                  "type": "header-bar",
+                  "children": [],
+                  "slot": "top"
+                },
+                {
+                  "id": "imported-4",
+                  "type": "preferences-page",
+                  "children": [
+                    {
+                      "id": "imported-5",
+                      "type": "preferences-group",
+                      "children": [
+                        {
+                          "id": "name_entry",
+                          "type": "entry-row",
+                          "children": [],
+                          "title": "Folder Name",
+                          "useUnderline": true
+                        },
+                        {
+                          "id": "imported-6",
+                          "type": "bin",
+                          "children": [
+                            {
+                              "id": "imported-7",
+                              "type": "label",
+                              "children": [],
+                              "marginTop": 6,
+                              "xalign": 0,
+                              "bindings": {
+                                "label": "validator.feedback-text"
+                              },
+                              "slot": "child"
+                            }
+                          ],
+                          "transitionType": "crossfade",
+                          "bindings": {
+                            "reveal-child": "validator.has-feedback"
+                          }
+                        },
+                        {
+                          "id": "imported-8",
+                          "type": "button",
+                          "children": [],
+                          "title": "Create",
+                          "useUnderline": true,
+                          "marginTop": 6,
+                          "halign": "center",
+                          "suggested": true,
+                          "bindings": {
+                            "sensitive": "validator.passed"
+                          }
+                        }
+                      ]
+                    }
+                  ],
+                  "slot": "content"
+                }
+              ],
+              "slot": "child"
+            }
+          ],
+          "title": "New Folder",
+          "contentWidth": 450
+        }
+      },
+      {
+        "id": "compress",
+        "title": "Compress",
+        "type": "dialog",
+        "width": 440,
+        "height": 440,
+        "rootNode": {
+          "id": "imported-1",
+          "type": "dialog",
+          "children": [
+            {
+              "id": "imported-2",
+              "type": "toolbar-view",
+              "children": [
+                {
+                  "id": "imported-3",
+                  "type": "header-bar",
+                  "children": [
+                    {
+                      "id": "imported-4",
+                      "type": "button",
+                      "children": [],
+                      "title": "Cancel",
+                      "useUnderline": true,
+                      "slot": "start"
+                    },
+                    {
+                      "id": "activation_button",
+                      "type": "button",
+                      "children": [],
+                      "title": "Compress",
+                      "useUnderline": true,
+                      "suggested": true,
+                      "bindings": {
+                        "sensitive": "expression"
+                      },
+                      "slot": "end"
+                    }
+                  ],
+                  "showStartTitleButtons": false,
+                  "showEndTitleButtons": false,
+                  "slot": "top"
+                },
+                {
+                  "id": "imported-5",
+                  "type": "preferences-page",
+                  "children": [
+                    {
+                      "id": "imported-6",
+                      "type": "preferences-group",
+                      "children": [
+                        {
+                          "id": "name_entry",
+                          "type": "entry-row",
+                          "children": [],
+                          "title": "Archive Name",
+                          "useUnderline": true
+                        },
+                        {
+                          "id": "imported-7",
+                          "type": "bin",
+                          "children": [
+                            {
+                              "id": "imported-8",
+                              "type": "label",
+                              "children": [],
+                              "marginTop": 6,
+                              "xalign": 0,
+                              "bindings": {
+                                "label": "validator.feedback-text"
+                              },
+                              "slot": "child"
+                            }
+                          ],
+                          "bindings": {
+                            "reveal-child": "validator.has-feedback"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "id": "imported-9",
+                      "type": "preferences-group",
+                      "children": [
+                        {
+                          "id": "extension_combo_row",
+                          "type": "combo-row",
+                          "children": [],
+                          "title": "Compression Method",
+                          "useUnderline": true
+                        }
+                      ]
+                    },
+                    {
+                      "id": "passphrase_group",
+                      "type": "preferences-group",
+                      "children": [
+                        {
+                          "id": "passphrase_entry",
+                          "type": "password-row",
+                          "children": [],
+                          "title": "Password",
+                          "useUnderline": true
+                        },
+                        {
+                          "id": "passphrase_confirm_entry",
+                          "type": "password-row",
+                          "children": [],
+                          "title": "Confirm Password",
+                          "useUnderline": true,
+                          "activatesDefault": true
+                        }
+                      ],
+                      "title": "Encryption",
+                      "description": "Encrypt contents of the archive with a password when the compression method supports password-protection."
+                    }
+                  ],
+                  "slot": "content"
+                }
+              ],
+              "slot": "child"
+            }
+          ],
+          "title": "Compress Files and Folders",
+          "contentHeight": 440,
+          "contentWidth": 500,
+          "defaultWidget": "activation_button"
+        }
       }
     ],
-    "importDiagnostics": [
+    "edges": [
       {
-        "code": "renderer-does-not-support-class",
-        "sourceClass": "NautilusSidebar",
-        "sourceId": "places_sidebar",
-        "message": "NautilusSidebar is not in the generic widget registry; retained as an explicit custom-widget boundary."
+        "id": "edge-1",
+        "sourceId": "browser",
+        "targetId": "properties"
       },
       {
-        "code": "renderer-does-not-support-class",
-        "sourceClass": "AdwTabBar",
-        "sourceId": "tab_bar",
-        "message": "AdwTabBar is not in the generic widget registry; retained as an explicit custom-widget boundary."
+        "id": "edge-2",
+        "sourceId": "browser",
+        "targetId": "new-folder"
       },
       {
-        "code": "renderer-does-not-support-class",
-        "sourceClass": "GtkActionBar",
-        "sourceId": "action_bar",
-        "message": "GtkActionBar is not in the generic widget registry; retained as an explicit custom-widget boundary."
-      },
-      {
-        "code": "renderer-does-not-support-class",
-        "sourceClass": "NautilusShortcutManager",
-        "sourceId": "imported-2",
-        "message": "NautilusShortcutManager is not in the generic widget registry; retained as an explicit custom-widget boundary."
-      },
-      {
-        "code": "renderer-does-not-support-class",
-        "sourceClass": "GtkListView",
-        "sourceId": "batch_listview",
-        "message": "GtkListView is not in the generic widget registry; retained as an explicit custom-widget boundary."
-      },
-      {
-        "code": "renderer-does-not-support-class",
-        "sourceClass": "NautilusDateEntryRow",
-        "sourceId": "single_date_row",
-        "message": "NautilusDateEntryRow is not in the generic widget registry; retained as an explicit custom-widget boundary."
-      },
-      {
-        "code": "renderer-does-not-support-class",
-        "sourceClass": "NautilusDateEntryRow",
-        "sourceId": "from_entry_row",
-        "message": "NautilusDateEntryRow is not in the generic widget registry; retained as an explicit custom-widget boundary."
-      },
-      {
-        "code": "renderer-does-not-support-class",
-        "sourceClass": "NautilusDateEntryRow",
-        "sourceId": "to_entry_row",
-        "message": "NautilusDateEntryRow is not in the generic widget registry; retained as an explicit custom-widget boundary."
-      },
-      {
-        "code": "renderer-does-not-support-class",
-        "sourceClass": "NautilusSidebar",
-        "sourceId": "places_sidebar",
-        "message": "NautilusSidebar is not in the generic widget registry; retained as an explicit custom-widget boundary."
-      },
-      {
-        "code": "renderer-does-not-support-class",
-        "sourceClass": "NautilusViewControls",
-        "sourceId": "view_controls",
-        "message": "NautilusViewControls is not in the generic widget registry; retained as an explicit custom-widget boundary."
-      },
-      {
-        "code": "renderer-does-not-support-class",
-        "sourceClass": "NautilusShortcutManager",
-        "sourceId": "template-imported-46",
-        "message": "NautilusShortcutManager is not in the generic widget registry; retained as an explicit custom-widget boundary."
-      },
-      {
-        "code": "renderer-does-not-support-class",
-        "sourceClass": "GtkPicture",
-        "sourceId": "dest_icon",
-        "message": "GtkPicture is not in the generic widget registry; retained as an explicit custom-widget boundary."
-      },
-      {
-        "code": "renderer-does-not-support-class",
-        "sourceClass": "GtkPicture",
-        "sourceId": "src_icon",
-        "message": "GtkPicture is not in the generic widget registry; retained as an explicit custom-widget boundary."
-      },
-      {
-        "code": "renderer-does-not-support-class",
-        "sourceClass": "GtkExpander",
-        "sourceId": "expander",
-        "message": "GtkExpander is not in the generic widget registry; retained as an explicit custom-widget boundary."
-      },
-      {
-        "code": "renderer-does-not-support-class",
-        "sourceClass": "NautilusFloatingBar",
-        "sourceId": "floating_bar",
-        "message": "NautilusFloatingBar is not in the generic widget registry; retained as an explicit custom-widget boundary."
-      },
-      {
-        "code": "renderer-does-not-support-class",
-        "sourceClass": "GtkPicture",
-        "sourceId": "icon",
-        "message": "GtkPicture is not in the generic widget registry; retained as an explicit custom-widget boundary."
-      },
-      {
-        "code": "renderer-does-not-support-class",
-        "sourceClass": "NautilusViewCell",
-        "sourceId": "template-imported-82",
-        "message": "NautilusViewCell is not in the generic widget registry; retained as an explicit custom-widget boundary."
-      },
-      {
-        "code": "renderer-does-not-support-class",
-        "sourceClass": "GtkTreeExpander",
-        "sourceId": "expander",
-        "message": "GtkTreeExpander is not in the generic widget registry; retained as an explicit custom-widget boundary."
-      },
-      {
-        "code": "renderer-does-not-support-class",
-        "sourceClass": "GtkPicture",
-        "sourceId": "icon",
-        "message": "GtkPicture is not in the generic widget registry; retained as an explicit custom-widget boundary."
-      },
-      {
-        "code": "renderer-does-not-support-class",
-        "sourceClass": "NautilusViewCell",
-        "sourceId": "template-imported-85",
-        "message": "NautilusViewCell is not in the generic widget registry; retained as an explicit custom-widget boundary."
-      },
-      {
-        "code": "renderer-does-not-support-class",
-        "sourceClass": "NautilusViewCell",
-        "sourceId": "template-imported-90",
-        "message": "NautilusViewCell is not in the generic widget registry; retained as an explicit custom-widget boundary."
-      },
-      {
-        "code": "renderer-does-not-support-class",
-        "sourceClass": "GtkListView",
-        "sourceId": "sidebar_list",
-        "message": "GtkListView is not in the generic widget registry; retained as an explicit custom-widget boundary."
-      },
-      {
-        "code": "renderer-does-not-support-class",
-        "sourceClass": "GtkProgressBar",
-        "sourceId": "progress_bar",
-        "message": "GtkProgressBar is not in the generic widget registry; retained as an explicit custom-widget boundary."
-      },
-      {
-        "code": "renderer-does-not-support-class",
-        "sourceClass": "GtkFrame",
-        "sourceId": "template-imported-112",
-        "message": "GtkFrame is not in the generic widget registry; retained as an explicit custom-widget boundary."
-      },
-      {
-        "code": "renderer-does-not-support-class",
-        "sourceClass": "GtkLevelBar",
-        "sourceId": "disk_space_level_bar",
-        "message": "GtkLevelBar is not in the generic widget registry; retained as an explicit custom-widget boundary."
-      },
-      {
-        "code": "renderer-does-not-support-class",
-        "sourceClass": "AdwPreferencesRow",
-        "sourceId": "volume_usage_row",
-        "message": "AdwPreferencesRow is not in the generic widget registry; retained as an explicit custom-widget boundary."
-      },
-      {
-        "code": "renderer-does-not-support-class",
-        "sourceClass": "GtkListBoxRow",
-        "sourceId": "template-imported-145",
-        "message": "GtkListBoxRow is not in the generic widget registry; retained as an explicit custom-widget boundary."
-      },
-      {
-        "code": "renderer-does-not-support-class",
-        "sourceClass": "NautilusPathBar",
-        "sourceId": "path_bar",
-        "message": "NautilusPathBar is not in the generic widget registry; retained as an explicit custom-widget boundary."
-      },
-      {
-        "code": "renderer-does-not-support-class",
-        "sourceClass": "NautilusLocationEntry",
-        "sourceId": "location_entry",
-        "message": "NautilusLocationEntry is not in the generic widget registry; retained as an explicit custom-widget boundary."
+        "id": "edge-3",
+        "sourceId": "browser",
+        "targetId": "compress"
       }
     ]
   },

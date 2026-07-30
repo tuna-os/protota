@@ -1,19 +1,18 @@
 {
   "version": 1,
-  "exportedAt": "2026-07-30T03:49:01.076Z",
+  "exportedAt": "2026-07-30T04:19:50.831Z",
   "generatedBy": "scripts/generate-preset.mjs",
   "document": {
-    "id": "imported-document",
-    "title": "disks",
+    "id": "disks-preset",
+    "title": "GNOME Disks",
     "colorScheme": "auto",
-    "edges": [],
     "screens": [
       {
-        "id": "imported-screen-1",
-        "title": "disks 1",
+        "id": "main",
+        "title": "Disks",
         "type": "standard",
-        "width": 1024,
-        "height": 720,
+        "width": 950,
+        "height": 640,
         "rootNode": {
           "id": "imported-1",
           "type": "window",
@@ -224,14 +223,299 @@
             }
           ]
         }
+      },
+      {
+        "id": "create-image",
+        "title": "Create Disk Image",
+        "type": "dialog",
+        "width": 440,
+        "height": 400,
+        "rootNode": {
+          "id": "imported-1",
+          "type": "dialog",
+          "children": [
+            {
+              "id": "imported-2",
+              "type": "toolbar-view",
+              "children": [
+                {
+                  "id": "imported-3",
+                  "type": "header-bar",
+                  "children": [
+                    {
+                      "id": "imported-4",
+                      "type": "button",
+                      "children": [],
+                      "title": "Cancel",
+                      "useUnderline": true,
+                      "actionName": "window.close"
+                    },
+                    {
+                      "id": "create_image_button",
+                      "type": "button",
+                      "children": [],
+                      "title": "Create",
+                      "useUnderline": true,
+                      "suggested": true
+                    }
+                  ],
+                  "showStartTitleButtons": false,
+                  "showEndTitleButtons": false
+                },
+                {
+                  "id": "imported-5",
+                  "type": "preferences-page",
+                  "children": [
+                    {
+                      "id": "imported-6",
+                      "type": "preferences-group",
+                      "children": [
+                        {
+                          "id": "name_entry",
+                          "type": "entry-row",
+                          "children": [],
+                          "title": "Name",
+                          "useUnderline": true
+                        },
+                        {
+                          "id": "location_entry",
+                          "type": "action-row",
+                          "children": [
+                            {
+                              "id": "imported-7",
+                              "type": "button",
+                              "children": [],
+                              "tooltipText": "Select Location",
+                              "valign": "center",
+                              "iconName": "folder-open-symbolic",
+                              "flat": true
+                            }
+                          ],
+                          "title": "Location"
+                        },
+                        {
+                          "id": "source_label",
+                          "type": "action-row",
+                          "children": [],
+                          "title": "Source"
+                        }
+                      ]
+                    }
+                  ],
+                  "slot": "content"
+                }
+              ]
+            }
+          ],
+          "contentWidth": 440,
+          "title": "Create Disk Image"
+        }
+      },
+      {
+        "id": "benchmark",
+        "title": "Benchmark",
+        "type": "dialog",
+        "width": 480,
+        "height": 520,
+        "rootNode": {
+          "id": "imported-1",
+          "type": "dialog",
+          "children": [
+            {
+              "id": "imported-2",
+              "type": "toolbar-view",
+              "children": [
+                {
+                  "id": "imported-3",
+                  "type": "header-bar",
+                  "children": [
+                    {
+                      "id": "close_button",
+                      "type": "button",
+                      "children": [],
+                      "title": "Cancel",
+                      "useUnderline": true,
+                      "actionName": "window.close"
+                    },
+                    {
+                      "id": "cancel_button",
+                      "type": "button",
+                      "children": [],
+                      "title": "Cancel",
+                      "useUnderline": true,
+                      "bindings": {
+                        "visible": "close_button.visible inverted"
+                      }
+                    },
+                    {
+                      "id": "imported-4",
+                      "type": "button",
+                      "children": [],
+                      "title": "Start…",
+                      "useUnderline": true,
+                      "suggested": true,
+                      "bindings": {
+                        "visible": "close_button.visible bidirectional"
+                      }
+                    },
+                    {
+                      "id": "window_title",
+                      "type": "window-title",
+                      "children": [],
+                      "title": "Benchmark",
+                      "slot": "title-widget"
+                    }
+                  ],
+                  "bindings": {
+                    "show-end-title-buttons": "close_button.visible inverted"
+                  }
+                },
+                {
+                  "id": "pages_stack",
+                  "type": "stack",
+                  "children": [
+                    {
+                      "id": "imported-5",
+                      "type": "stack-page",
+                      "children": [
+                        {
+                          "id": "imported-6",
+                          "type": "preferences-page",
+                          "children": [
+                            {
+                              "id": "imported-7",
+                              "type": "preferences-group",
+                              "children": [
+                                {
+                                  "id": "sample_row",
+                                  "type": "spin-row",
+                                  "children": [],
+                                  "title": "Transfer Samples",
+                                  "useUnderline": true
+                                },
+                                {
+                                  "id": "sample_size_row",
+                                  "type": "spin-row",
+                                  "children": [],
+                                  "title": "Transfer Sample Size",
+                                  "useUnderline": true
+                                },
+                                {
+                                  "id": "access_samples_row",
+                                  "type": "spin-row",
+                                  "children": [],
+                                  "title": "Access Time Samples",
+                                  "useUnderline": true
+                                }
+                              ]
+                            },
+                            {
+                              "id": "imported-11",
+                              "type": "preferences-group",
+                              "children": [
+                                {
+                                  "id": "write_bench_switch",
+                                  "type": "switch-row",
+                                  "children": [],
+                                  "title": "Write Benchmark",
+                                  "useUnderline": true,
+                                  "subtitle": "Data should be backed up before using this feature"
+                                }
+                              ]
+                            }
+                          ],
+                          "description": "Benchmarking measures the transfer rate for different areas of the disk. It also measures seek times from one area to another.",
+                          "slot": "child"
+                        }
+                      ],
+                      "name": "options"
+                    },
+                    {
+                      "id": "imported-12",
+                      "type": "stack-page",
+                      "children": [
+                        {
+                          "id": "imported-13",
+                          "type": "preferences-page",
+                          "children": [
+                            {
+                              "id": "imported-14",
+                              "type": "preferences-group",
+                              "children": [
+                                {
+                                  "id": "benchmark_graph",
+                                  "type": "custom-widget",
+                                  "children": [],
+                                  "sourceClass": "GduBenchmarkGraph",
+                                  "title": "GduBenchmarkGraph"
+                                }
+                              ]
+                            },
+                            {
+                              "id": "imported-15",
+                              "type": "preferences-group",
+                              "children": [
+                                {
+                                  "id": "sample_size_action_row",
+                                  "type": "action-row",
+                                  "children": [],
+                                  "title": "Sample Size",
+                                  "subtitle": "-"
+                                },
+                                {
+                                  "id": "read_rate_row",
+                                  "type": "action-row",
+                                  "children": [],
+                                  "title": "Average Read Rate",
+                                  "subtitle": "-",
+                                  "useMarkup": true
+                                },
+                                {
+                                  "id": "write_rate_row",
+                                  "type": "action-row",
+                                  "children": [],
+                                  "title": "Average Write Rate",
+                                  "subtitle": "-",
+                                  "useMarkup": true
+                                },
+                                {
+                                  "id": "access_time_row",
+                                  "type": "action-row",
+                                  "children": [],
+                                  "title": "Average Access Time",
+                                  "subtitle": "-",
+                                  "useMarkup": true
+                                }
+                              ]
+                            }
+                          ],
+                          "slot": "child"
+                        }
+                      ],
+                      "name": "results"
+                    }
+                  ],
+                  "transitionType": "crossfade",
+                  "slot": "content"
+                }
+              ],
+              "slot": "child"
+            }
+          ],
+          "title": "Benchmark"
+        }
       }
     ],
-    "importDiagnostics": [
+    "edges": [
       {
-        "code": "template-not-in-bundle",
-        "sourceClass": "GduSpaceAllocationBar",
-        "sourceId": "space_allocation_bar",
-        "message": "$GduSpaceAllocationBar has no template definition in the imported source; retained as an explicit custom-widget boundary."
+        "id": "edge-1",
+        "sourceId": "main",
+        "targetId": "create-image"
+      },
+      {
+        "id": "edge-2",
+        "sourceId": "main",
+        "targetId": "benchmark"
       }
     ]
   },

@@ -1,19 +1,18 @@
 {
   "version": 1,
-  "exportedAt": "2026-07-30T03:48:57.312Z",
+  "exportedAt": "2026-07-30T04:19:47.613Z",
   "generatedBy": "scripts/generate-preset.mjs",
   "document": {
-    "id": "imported-document",
-    "title": "clocks",
+    "id": "clocks-preset",
+    "title": "GNOME Clocks",
     "colorScheme": "auto",
-    "edges": [],
     "screens": [
       {
-        "id": "imported-screen-1",
-        "title": "clocks 1",
+        "id": "world",
+        "title": "World",
         "type": "standard",
-        "width": 1024,
-        "height": 720,
+        "width": 360,
+        "height": 600,
         "rootNode": {
           "id": "imported-1",
           "type": "window",
@@ -58,27 +57,25 @@
                                       "children": [
                                         {
                                           "id": "template-imported-26",
-                                          "type": "custom-widget",
+                                          "type": "stack-page",
                                           "children": [
                                             {
                                               "id": "template-imported-27",
                                               "type": "button",
                                               "children": [],
-                                              "action_name": "win.new",
-                                              "icon_name": "list-add-symbolic",
+                                              "actionName": "win.new",
+                                              "iconName": "list-add-symbolic",
                                               "bindings": {
                                                 "tooltip-text": "ClocksHeaderBar.new-label"
                                               },
                                               "slot": "child"
                                             }
                                           ],
-                                          "sourceClass": "AdwViewStackPage",
-                                          "title": "AdwViewStackPage",
                                           "name": "new"
                                         },
                                         {
                                           "id": "template-imported-28",
-                                          "type": "custom-widget",
+                                          "type": "stack-page",
                                           "children": [
                                             {
                                               "id": "template-imported-29",
@@ -87,8 +84,6 @@
                                               "slot": "child"
                                             }
                                           ],
-                                          "sourceClass": "AdwViewStackPage",
-                                          "title": "AdwViewStackPage",
                                           "name": "empty"
                                         }
                                       ]
@@ -97,8 +92,8 @@
                                       "id": "template-imported-30",
                                       "type": "menu-button",
                                       "children": [],
-                                      "menu_model": "primary-menu",
-                                      "icon_name": "open-menu-symbolic",
+                                      "menuModel": "primary-menu",
+                                      "iconName": "open-menu-symbolic",
                                       "tooltipText": "Main Menu",
                                       "primary": true,
                                       "slot": "end"
@@ -108,7 +103,7 @@
                               ],
                               "sourceClass": "ClocksHeaderBar",
                               "stack": "stack",
-                              "switcher_bar": "switcher_bar",
+                              "switcherBar": "switcher_bar",
                               "slot": "top"
                             },
                             {
@@ -117,7 +112,7 @@
                               "children": [
                                 {
                                   "id": "imported-3",
-                                  "type": "custom-widget",
+                                  "type": "stack-page",
                                   "children": [
                                     {
                                       "id": "world",
@@ -136,14 +131,14 @@
                                                   "type": "button",
                                                   "children": [],
                                                   "actionName": "win.new",
-                                                  "title": "_Add World Clock…",
+                                                  "title": "Add World Clock…",
                                                   "useUnderline": true,
                                                   "canShrink": true,
                                                   "halign": "center",
                                                   "suggested": true
                                                 }
                                               ],
-                                              "icon_name": "globe-centered-symbolic"
+                                              "iconName": "globe-centered-symbolic"
                                             },
                                             {
                                               "id": "list_view",
@@ -171,22 +166,22 @@
                                           ],
                                           "hhomogeneous": false,
                                           "vhomogeneous": false,
-                                          "transitionType": "crossfade"
+                                          "transitionType": "crossfade",
+                                          "visibleChildName": "world"
                                         }
                                       ],
                                       "sourceClass": "ClocksWorldFace",
                                       "slot": "child"
                                     }
                                   ],
-                                  "sourceClass": "AdwViewStackPage",
-                                  "title": "_World",
                                   "name": "world",
+                                  "title": "World",
                                   "useUnderline": true,
                                   "iconName": "globe-symbolic"
                                 },
                                 {
                                   "id": "imported-4",
-                                  "type": "custom-widget",
+                                  "type": "stack-page",
                                   "children": [
                                     {
                                       "id": "alarm",
@@ -205,14 +200,14 @@
                                                   "type": "button",
                                                   "children": [],
                                                   "actionName": "win.new",
-                                                  "title": "Add A_larm…",
+                                                  "title": "Add Alarm…",
                                                   "useUnderline": true,
                                                   "canShrink": true,
                                                   "halign": "center",
                                                   "suggested": true
                                                 }
                                               ],
-                                              "icon_name": "alarm-centered-symbolic"
+                                              "iconName": "alarm-centered-symbolic"
                                             },
                                             {
                                               "id": "list_view",
@@ -240,22 +235,22 @@
                                             }
                                           ],
                                           "hhomogeneous": false,
-                                          "vhomogeneous": false
+                                          "vhomogeneous": false,
+                                          "visibleChildName": "world"
                                         }
                                       ],
                                       "sourceClass": "ClocksAlarmFace",
                                       "slot": "child"
                                     }
                                   ],
-                                  "sourceClass": "AdwViewStackPage",
-                                  "title": "Ala_rms",
                                   "name": "alarm",
+                                  "title": "Alarms",
                                   "useUnderline": true,
                                   "iconName": "alarm-symbolic"
                                 },
                                 {
                                   "id": "imported-5",
-                                  "type": "custom-widget",
+                                  "type": "stack-page",
                                   "children": [
                                     {
                                       "id": "stopwatch",
@@ -335,7 +330,7 @@
                                                         }
                                                       ],
                                                       "halign": "center",
-                                                      "margin_bottom": 18,
+                                                      "marginBottom": 18,
                                                       "orientation": "horizontal"
                                                     },
                                                     {
@@ -346,9 +341,9 @@
                                                           "id": "start_btn",
                                                           "type": "button",
                                                           "children": [],
-                                                          "title": "St_art",
-                                                          "width_request": 120,
-                                                          "use_underline": true,
+                                                          "title": "Start",
+                                                          "widthRequest": 120,
+                                                          "useUnderline": true,
                                                           "hexpand": true,
                                                           "halign": "start",
                                                           "suggested": true
@@ -357,9 +352,9 @@
                                                           "id": "clear_btn",
                                                           "type": "button",
                                                           "children": [],
-                                                          "title": "_Clear",
-                                                          "width_request": 120,
-                                                          "use_underline": true,
+                                                          "title": "Clear",
+                                                          "widthRequest": 120,
+                                                          "useUnderline": true,
                                                           "halign": "end"
                                                         }
                                                       ],
@@ -377,26 +372,26 @@
                                                           "type": "list-box",
                                                           "children": [],
                                                           "valign": "start",
-                                                          "selection_mode": "none",
+                                                          "selectionMode": "none",
                                                           "marginTop": 18,
                                                           "marginBottom": 18,
                                                           "marginStart": 12,
                                                           "marginEnd": 12
                                                         }
                                                       ],
-                                                      "transition_type": "crossfade"
+                                                      "transitionType": "crossfade"
                                                     }
                                                   ],
                                                   "valign": "center",
                                                   "orientation": "vertical"
                                                 }
                                               ],
-                                              "maximum_size": 380
+                                              "maximumSize": 380
                                             }
                                           ],
-                                          "min_content_width": 300,
+                                          "minContentWidth": 300,
                                           "vexpand": true,
-                                          "hscrollbar_policy": "never"
+                                          "hscrollbarPolicy": "never"
                                         }
                                       ],
                                       "sourceClass": "ClocksStopwatchFace",
@@ -404,15 +399,14 @@
                                       "orientation": "vertical"
                                     }
                                   ],
-                                  "sourceClass": "AdwViewStackPage",
-                                  "title": "_Stopwatch",
                                   "name": "stopwatch",
+                                  "title": "Stopwatch",
                                   "useUnderline": true,
                                   "iconName": "stopwatch-symbolic"
                                 },
                                 {
                                   "id": "imported-6",
-                                  "type": "custom-widget",
+                                  "type": "stack-page",
                                   "children": [
                                     {
                                       "id": "timer",
@@ -446,7 +440,7 @@
                                                           "halign": "center",
                                                           "valign": "center",
                                                           "useUnderline": true,
-                                                          "title": "St_art",
+                                                          "title": "Start",
                                                           "suggested": true
                                                         }
                                                       ],
@@ -456,7 +450,7 @@
                                                       "spacing": 26
                                                     }
                                                   ],
-                                                  "hscrollbar_policy": "never",
+                                                  "hscrollbarPolicy": "never",
                                                   "slot": "child"
                                                 }
                                               ],
@@ -479,8 +473,8 @@
                                                           "type": "list-box",
                                                           "children": [],
                                                           "valign": "start",
-                                                          "selection_mode": "none",
-                                                          "activate_on_single_click": false,
+                                                          "selectionMode": "none",
+                                                          "activateOnSingleClick": false,
                                                           "marginTop": 18,
                                                           "marginBottom": 18,
                                                           "marginStart": 12,
@@ -495,22 +489,23 @@
                                               "name": "timers"
                                             }
                                           ],
-                                          "transitionType": "crossfade"
+                                          "transitionType": "crossfade",
+                                          "visibleChildName": "world"
                                         }
                                       ],
                                       "sourceClass": "ClocksTimerFace",
                                       "slot": "child"
                                     }
                                   ],
-                                  "sourceClass": "AdwViewStackPage",
-                                  "title": "_Timer",
                                   "name": "timer",
+                                  "title": "Timer",
                                   "useUnderline": true,
                                   "iconName": "timer-symbolic"
                                 }
                               ],
                               "hexpand": true,
-                              "vexpand": true
+                              "vexpand": true,
+                              "visibleChildName": "world"
                             },
                             {
                               "id": "switcher_bar",
@@ -591,7 +586,8 @@
                                           "hhomogeneous": false,
                                           "vhomogeneous": false,
                                           "column": 0,
-                                          "row": 0
+                                          "row": 0,
+                                          "visibleChildName": "world"
                                         },
                                         {
                                           "id": "day_label",
@@ -603,8 +599,8 @@
                                       ],
                                       "halign": "center",
                                       "valign": "center",
-                                      "margin_start": 12,
-                                      "margin_end": 12,
+                                      "marginStart": 12,
+                                      "marginEnd": 12,
                                       "hexpand": true,
                                       "vexpand": true
                                     },
@@ -645,8 +641,8 @@
                                         }
                                       ],
                                       "halign": "center",
-                                      "margin_bottom": 12,
-                                      "column_spacing": 12
+                                      "marginBottom": 12,
+                                      "columnSpacing": 12
                                     }
                                   ],
                                   "orientation": "vertical"
@@ -686,7 +682,7 @@
                                           "type": "button",
                                           "children": [],
                                           "title": "Stop",
-                                          "width_request": 200,
+                                          "widthRequest": 200,
                                           "destructive": true,
                                           "column": 0,
                                           "row": 0
@@ -696,7 +692,7 @@
                                           "type": "button",
                                           "children": [],
                                           "title": "Snooze",
-                                          "width_request": 200,
+                                          "widthRequest": 200,
                                           "column": 0,
                                           "row": 1
                                         }
@@ -705,8 +701,8 @@
                                       "valign": "center",
                                       "hexpand": true,
                                       "vexpand": true,
-                                      "row_spacing": 24,
-                                      "column_spacing": 24,
+                                      "rowSpacing": 24,
+                                      "columnSpacing": 24,
                                       "column": 0,
                                       "row": 1
                                     },
@@ -728,7 +724,7 @@
                                           "children": [],
                                           "justify": "center",
                                           "wrap": true,
-                                          "margin_top": 24
+                                          "marginTop": 24
                                         }
                                       ],
                                       "halign": "center",
@@ -740,14 +736,14 @@
                                       "row": 0
                                     }
                                   ],
-                                  "margin_start": 6,
-                                  "margin_end": 6,
-                                  "margin_top": 6,
-                                  "margin_bottom": 6,
+                                  "marginStart": 6,
+                                  "marginEnd": 6,
+                                  "marginTop": 6,
+                                  "marginBottom": 6,
                                   "hexpand": true,
                                   "vexpand": true,
-                                  "row_spacing": 48,
-                                  "column_spacing": 24
+                                  "rowSpacing": 48,
+                                  "columnSpacing": 24
                                 }
                               ]
                             }
@@ -767,80 +763,2499 @@
           "widthRequest": 360,
           "heightRequest": 294
         }
+      },
+      {
+        "id": "alarms",
+        "title": "Alarms",
+        "type": "standard",
+        "width": 360,
+        "height": 600,
+        "rootNode": {
+          "id": "imported-1",
+          "type": "window",
+          "children": [
+            {
+              "id": "toast_overlay",
+              "type": "toast-overlay",
+              "children": [
+                {
+                  "id": "navigation_view",
+                  "type": "navigation-view",
+                  "children": [
+                    {
+                      "id": "main_page",
+                      "type": "bin",
+                      "children": [
+                        {
+                          "id": "imported-2",
+                          "type": "toolbar-view",
+                          "children": [
+                            {
+                              "id": "header_bar",
+                              "type": "bin",
+                              "children": [
+                                {
+                                  "id": "header_bar",
+                                  "type": "header-bar",
+                                  "children": [
+                                    {
+                                      "id": "view_switcher_title",
+                                      "type": "view-switcher",
+                                      "children": [],
+                                      "policy": "wide",
+                                      "bindings": {
+                                        "stack": "ClocksHeaderBar.stack"
+                                      },
+                                      "slot": "title"
+                                    },
+                                    {
+                                      "id": "start_button_stack",
+                                      "type": "view-stack",
+                                      "children": [
+                                        {
+                                          "id": "template-imported-26",
+                                          "type": "stack-page",
+                                          "children": [
+                                            {
+                                              "id": "template-imported-27",
+                                              "type": "button",
+                                              "children": [],
+                                              "actionName": "win.new",
+                                              "iconName": "list-add-symbolic",
+                                              "bindings": {
+                                                "tooltip-text": "ClocksHeaderBar.new-label"
+                                              },
+                                              "slot": "child"
+                                            }
+                                          ],
+                                          "name": "new"
+                                        },
+                                        {
+                                          "id": "template-imported-28",
+                                          "type": "stack-page",
+                                          "children": [
+                                            {
+                                              "id": "template-imported-29",
+                                              "type": "bin",
+                                              "children": [],
+                                              "slot": "child"
+                                            }
+                                          ],
+                                          "name": "empty"
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "id": "template-imported-30",
+                                      "type": "menu-button",
+                                      "children": [],
+                                      "menuModel": "primary-menu",
+                                      "iconName": "open-menu-symbolic",
+                                      "tooltipText": "Main Menu",
+                                      "primary": true,
+                                      "slot": "end"
+                                    }
+                                  ]
+                                }
+                              ],
+                              "sourceClass": "ClocksHeaderBar",
+                              "stack": "stack",
+                              "switcherBar": "switcher_bar",
+                              "slot": "top"
+                            },
+                            {
+                              "id": "stack",
+                              "type": "view-stack",
+                              "children": [
+                                {
+                                  "id": "imported-3",
+                                  "type": "stack-page",
+                                  "children": [
+                                    {
+                                      "id": "world",
+                                      "type": "bin",
+                                      "children": [
+                                        {
+                                          "id": "stack",
+                                          "type": "stack",
+                                          "children": [
+                                            {
+                                              "id": "empty_view",
+                                              "type": "status-page",
+                                              "children": [
+                                                {
+                                                  "id": "template-imported-84",
+                                                  "type": "button",
+                                                  "children": [],
+                                                  "actionName": "win.new",
+                                                  "title": "Add World Clock…",
+                                                  "useUnderline": true,
+                                                  "canShrink": true,
+                                                  "halign": "center",
+                                                  "suggested": true
+                                                }
+                                              ],
+                                              "iconName": "globe-centered-symbolic"
+                                            },
+                                            {
+                                              "id": "list_view",
+                                              "type": "scrolled-window",
+                                              "children": [
+                                                {
+                                                  "id": "template-imported-85",
+                                                  "type": "clamp",
+                                                  "children": [
+                                                    {
+                                                      "id": "listbox",
+                                                      "type": "list-box",
+                                                      "children": [],
+                                                      "valign": "start",
+                                                      "selectionMode": "none",
+                                                      "marginTop": 18,
+                                                      "marginBottom": 18,
+                                                      "marginStart": 12,
+                                                      "marginEnd": 12
+                                                    }
+                                                  ]
+                                                }
+                                              ]
+                                            }
+                                          ],
+                                          "hhomogeneous": false,
+                                          "vhomogeneous": false,
+                                          "transitionType": "crossfade",
+                                          "visibleChildName": "alarm"
+                                        }
+                                      ],
+                                      "sourceClass": "ClocksWorldFace",
+                                      "slot": "child"
+                                    }
+                                  ],
+                                  "name": "world",
+                                  "title": "World",
+                                  "useUnderline": true,
+                                  "iconName": "globe-symbolic"
+                                },
+                                {
+                                  "id": "imported-4",
+                                  "type": "stack-page",
+                                  "children": [
+                                    {
+                                      "id": "alarm",
+                                      "type": "bin",
+                                      "children": [
+                                        {
+                                          "id": "stack",
+                                          "type": "stack",
+                                          "children": [
+                                            {
+                                              "id": "empty_view",
+                                              "type": "status-page",
+                                              "children": [
+                                                {
+                                                  "id": "template-imported-5",
+                                                  "type": "button",
+                                                  "children": [],
+                                                  "actionName": "win.new",
+                                                  "title": "Add Alarm…",
+                                                  "useUnderline": true,
+                                                  "canShrink": true,
+                                                  "halign": "center",
+                                                  "suggested": true
+                                                }
+                                              ],
+                                              "iconName": "alarm-centered-symbolic"
+                                            },
+                                            {
+                                              "id": "list_view",
+                                              "type": "scrolled-window",
+                                              "children": [
+                                                {
+                                                  "id": "template-imported-6",
+                                                  "type": "clamp",
+                                                  "children": [
+                                                    {
+                                                      "id": "listbox",
+                                                      "type": "list-box",
+                                                      "children": [],
+                                                      "valign": "start",
+                                                      "selectionMode": "none",
+                                                      "activateOnSingleClick": true,
+                                                      "marginTop": 18,
+                                                      "marginBottom": 18,
+                                                      "marginStart": 12,
+                                                      "marginEnd": 12
+                                                    }
+                                                  ]
+                                                }
+                                              ]
+                                            }
+                                          ],
+                                          "hhomogeneous": false,
+                                          "vhomogeneous": false,
+                                          "visibleChildName": "alarm"
+                                        }
+                                      ],
+                                      "sourceClass": "ClocksAlarmFace",
+                                      "slot": "child"
+                                    }
+                                  ],
+                                  "name": "alarm",
+                                  "title": "Alarms",
+                                  "useUnderline": true,
+                                  "iconName": "alarm-symbolic"
+                                },
+                                {
+                                  "id": "imported-5",
+                                  "type": "stack-page",
+                                  "children": [
+                                    {
+                                      "id": "stopwatch",
+                                      "type": "box",
+                                      "children": [
+                                        {
+                                          "id": "template-imported-32",
+                                          "type": "scrolled-window",
+                                          "children": [
+                                            {
+                                              "id": "template-imported-33",
+                                              "type": "clamp",
+                                              "children": [
+                                                {
+                                                  "id": "container",
+                                                  "type": "box",
+                                                  "children": [
+                                                    {
+                                                      "id": "time_container",
+                                                      "type": "box",
+                                                      "children": [
+                                                        {
+                                                          "id": "hours_label",
+                                                          "type": "label",
+                                                          "children": [],
+                                                          "title": 0,
+                                                          "xalign": 0,
+                                                          "yalign": 0
+                                                        },
+                                                        {
+                                                          "id": "template-imported-34",
+                                                          "type": "label",
+                                                          "children": [],
+                                                          "title": "∶"
+                                                        },
+                                                        {
+                                                          "id": "minutes_label",
+                                                          "type": "label",
+                                                          "children": [],
+                                                          "title": 0,
+                                                          "xalign": 0,
+                                                          "yalign": 0
+                                                        },
+                                                        {
+                                                          "id": "template-imported-35",
+                                                          "type": "label",
+                                                          "children": [],
+                                                          "title": "∶",
+                                                          "xalign": 0,
+                                                          "yalign": 0
+                                                        },
+                                                        {
+                                                          "id": "seconds_label",
+                                                          "type": "label",
+                                                          "children": [],
+                                                          "title": 0,
+                                                          "xalign": 0,
+                                                          "yalign": 0
+                                                        },
+                                                        {
+                                                          "id": "template-imported-36",
+                                                          "type": "label",
+                                                          "children": [],
+                                                          "title": ".",
+                                                          "xalign": 0,
+                                                          "yalign": 0
+                                                        },
+                                                        {
+                                                          "id": "miliseconds_label",
+                                                          "type": "label",
+                                                          "children": [],
+                                                          "marginBottom": 4,
+                                                          "valign": "end",
+                                                          "title": 0,
+                                                          "xalign": 0,
+                                                          "yalign": 0
+                                                        }
+                                                      ],
+                                                      "halign": "center",
+                                                      "marginBottom": 18,
+                                                      "orientation": "horizontal"
+                                                    },
+                                                    {
+                                                      "id": "template-imported-37",
+                                                      "type": "box",
+                                                      "children": [
+                                                        {
+                                                          "id": "start_btn",
+                                                          "type": "button",
+                                                          "children": [],
+                                                          "title": "Start",
+                                                          "widthRequest": 120,
+                                                          "useUnderline": true,
+                                                          "hexpand": true,
+                                                          "halign": "start",
+                                                          "suggested": true
+                                                        },
+                                                        {
+                                                          "id": "clear_btn",
+                                                          "type": "button",
+                                                          "children": [],
+                                                          "title": "Clear",
+                                                          "widthRequest": 120,
+                                                          "useUnderline": true,
+                                                          "halign": "end"
+                                                        }
+                                                      ],
+                                                      "spacing": 12,
+                                                      "marginEnd": 18,
+                                                      "marginStart": 18,
+                                                      "orientation": "horizontal"
+                                                    },
+                                                    {
+                                                      "id": "laps_revealer",
+                                                      "type": "bin",
+                                                      "children": [
+                                                        {
+                                                          "id": "laps_list",
+                                                          "type": "list-box",
+                                                          "children": [],
+                                                          "valign": "start",
+                                                          "selectionMode": "none",
+                                                          "marginTop": 18,
+                                                          "marginBottom": 18,
+                                                          "marginStart": 12,
+                                                          "marginEnd": 12
+                                                        }
+                                                      ],
+                                                      "transitionType": "crossfade"
+                                                    }
+                                                  ],
+                                                  "valign": "center",
+                                                  "orientation": "vertical"
+                                                }
+                                              ],
+                                              "maximumSize": 380
+                                            }
+                                          ],
+                                          "minContentWidth": 300,
+                                          "vexpand": true,
+                                          "hscrollbarPolicy": "never"
+                                        }
+                                      ],
+                                      "sourceClass": "ClocksStopwatchFace",
+                                      "slot": "child",
+                                      "orientation": "vertical"
+                                    }
+                                  ],
+                                  "name": "stopwatch",
+                                  "title": "Stopwatch",
+                                  "useUnderline": true,
+                                  "iconName": "stopwatch-symbolic"
+                                },
+                                {
+                                  "id": "imported-6",
+                                  "type": "stack-page",
+                                  "children": [
+                                    {
+                                      "id": "timer",
+                                      "type": "bin",
+                                      "children": [
+                                        {
+                                          "id": "stack",
+                                          "type": "stack",
+                                          "children": [
+                                            {
+                                              "id": "template-imported-41",
+                                              "type": "stack-page",
+                                              "children": [
+                                                {
+                                                  "id": "template-imported-42",
+                                                  "type": "scrolled-window",
+                                                  "children": [
+                                                    {
+                                                      "id": "template-imported-43",
+                                                      "type": "box",
+                                                      "children": [
+                                                        {
+                                                          "id": "timer_bin",
+                                                          "type": "bin",
+                                                          "children": []
+                                                        },
+                                                        {
+                                                          "id": "start_button",
+                                                          "type": "button",
+                                                          "children": [],
+                                                          "halign": "center",
+                                                          "valign": "center",
+                                                          "useUnderline": true,
+                                                          "title": "Start",
+                                                          "suggested": true
+                                                        }
+                                                      ],
+                                                      "halign": "center",
+                                                      "valign": "center",
+                                                      "orientation": "vertical",
+                                                      "spacing": 26
+                                                    }
+                                                  ],
+                                                  "hscrollbarPolicy": "never",
+                                                  "slot": "child"
+                                                }
+                                              ],
+                                              "name": "empty"
+                                            },
+                                            {
+                                              "id": "template-imported-44",
+                                              "type": "stack-page",
+                                              "children": [
+                                                {
+                                                  "id": "template-imported-45",
+                                                  "type": "scrolled-window",
+                                                  "children": [
+                                                    {
+                                                      "id": "template-imported-46",
+                                                      "type": "clamp",
+                                                      "children": [
+                                                        {
+                                                          "id": "timers_list",
+                                                          "type": "list-box",
+                                                          "children": [],
+                                                          "valign": "start",
+                                                          "selectionMode": "none",
+                                                          "activateOnSingleClick": false,
+                                                          "marginTop": 18,
+                                                          "marginBottom": 18,
+                                                          "marginStart": 12,
+                                                          "marginEnd": 12
+                                                        }
+                                                      ]
+                                                    }
+                                                  ],
+                                                  "slot": "child"
+                                                }
+                                              ],
+                                              "name": "timers"
+                                            }
+                                          ],
+                                          "transitionType": "crossfade",
+                                          "visibleChildName": "alarm"
+                                        }
+                                      ],
+                                      "sourceClass": "ClocksTimerFace",
+                                      "slot": "child"
+                                    }
+                                  ],
+                                  "name": "timer",
+                                  "title": "Timer",
+                                  "useUnderline": true,
+                                  "iconName": "timer-symbolic"
+                                }
+                              ],
+                              "hexpand": true,
+                              "vexpand": true,
+                              "visibleChildName": "alarm"
+                            },
+                            {
+                              "id": "switcher_bar",
+                              "type": "view-switcher",
+                              "children": [],
+                              "stack": "stack",
+                              "slot": "bottom"
+                            }
+                          ]
+                        }
+                      ],
+                      "title": "Clocks"
+                    },
+                    {
+                      "id": "world_subpage",
+                      "type": "bin",
+                      "children": [
+                        {
+                          "id": "world_standalone",
+                          "type": "bin",
+                          "children": [
+                            {
+                              "id": "template-imported-100",
+                              "type": "toolbar-view",
+                              "children": [
+                                {
+                                  "id": "template-imported-101",
+                                  "type": "header-bar",
+                                  "children": [
+                                    {
+                                      "id": "template-imported-102",
+                                      "type": "window-title",
+                                      "children": [],
+                                      "bindings": {
+                                        "title": "ClocksWorldStandalone.title",
+                                        "subtitle": "ClocksWorldStandalone.subtitle"
+                                      },
+                                      "slot": "title-widget"
+                                    }
+                                  ],
+                                  "slot": "top"
+                                },
+                                {
+                                  "id": "template-imported-103",
+                                  "type": "box",
+                                  "children": [
+                                    {
+                                      "id": "template-imported-104",
+                                      "type": "grid",
+                                      "children": [
+                                        {
+                                          "id": "dummy_label",
+                                          "type": "label",
+                                          "children": [],
+                                          "title": "",
+                                          "column": 0,
+                                          "row": 1
+                                        },
+                                        {
+                                          "id": "stack",
+                                          "type": "stack",
+                                          "children": [
+                                            {
+                                              "id": "time_label",
+                                              "type": "label",
+                                              "children": [],
+                                              "justify": "center",
+                                              "wrap": true
+                                            },
+                                            {
+                                              "id": "time_label_small",
+                                              "type": "label",
+                                              "children": [],
+                                              "justify": "center",
+                                              "wrap": true
+                                            }
+                                          ],
+                                          "hhomogeneous": false,
+                                          "vhomogeneous": false,
+                                          "column": 0,
+                                          "row": 0,
+                                          "visibleChildName": "alarm"
+                                        },
+                                        {
+                                          "id": "day_label",
+                                          "type": "label",
+                                          "children": [],
+                                          "column": 0,
+                                          "row": 2
+                                        }
+                                      ],
+                                      "halign": "center",
+                                      "valign": "center",
+                                      "marginStart": 12,
+                                      "marginEnd": 12,
+                                      "hexpand": true,
+                                      "vexpand": true
+                                    },
+                                    {
+                                      "id": "template-imported-105",
+                                      "type": "grid",
+                                      "children": [
+                                        {
+                                          "id": "label3",
+                                          "type": "label",
+                                          "children": [],
+                                          "title": "Sunrise",
+                                          "column": 0,
+                                          "row": 0
+                                        },
+                                        {
+                                          "id": "label4",
+                                          "type": "label",
+                                          "children": [],
+                                          "title": "Sunset",
+                                          "column": 0,
+                                          "row": 1
+                                        },
+                                        {
+                                          "id": "sunrise_label",
+                                          "type": "label",
+                                          "children": [],
+                                          "title": "label",
+                                          "column": 1,
+                                          "row": 0
+                                        },
+                                        {
+                                          "id": "sunset_label",
+                                          "type": "label",
+                                          "children": [],
+                                          "column": 1,
+                                          "row": 1
+                                        }
+                                      ],
+                                      "halign": "center",
+                                      "marginBottom": 12,
+                                      "columnSpacing": 12
+                                    }
+                                  ],
+                                  "orientation": "vertical"
+                                }
+                              ]
+                            }
+                          ],
+                          "sourceClass": "ClocksWorldStandalone",
+                          "widthRequest": 360,
+                          "heightRequest": 294
+                        }
+                      ],
+                      "title": "Clock"
+                    },
+                    {
+                      "id": "alarm_subpage",
+                      "type": "bin",
+                      "children": [
+                        {
+                          "id": "alarm_ringing_panel",
+                          "type": "bin",
+                          "children": [
+                            {
+                              "id": "template-imported-8",
+                              "type": "bin",
+                              "children": [
+                                {
+                                  "id": "template-imported-9",
+                                  "type": "grid",
+                                  "children": [
+                                    {
+                                      "id": "button_grid",
+                                      "type": "grid",
+                                      "children": [
+                                        {
+                                          "id": "stop_button",
+                                          "type": "button",
+                                          "children": [],
+                                          "title": "Stop",
+                                          "widthRequest": 200,
+                                          "destructive": true,
+                                          "column": 0,
+                                          "row": 0
+                                        },
+                                        {
+                                          "id": "snooze_button",
+                                          "type": "button",
+                                          "children": [],
+                                          "title": "Snooze",
+                                          "widthRequest": 200,
+                                          "column": 0,
+                                          "row": 1
+                                        }
+                                      ],
+                                      "halign": "center",
+                                      "valign": "center",
+                                      "hexpand": true,
+                                      "vexpand": true,
+                                      "rowSpacing": 24,
+                                      "columnSpacing": 24,
+                                      "column": 0,
+                                      "row": 1
+                                    },
+                                    {
+                                      "id": "template-imported-10",
+                                      "type": "box",
+                                      "children": [
+                                        {
+                                          "id": "time_label",
+                                          "type": "label",
+                                          "children": [],
+                                          "justify": "center",
+                                          "wrap": true,
+                                          "xalign": 0.5
+                                        },
+                                        {
+                                          "id": "title_label",
+                                          "type": "label",
+                                          "children": [],
+                                          "justify": "center",
+                                          "wrap": true,
+                                          "marginTop": 24
+                                        }
+                                      ],
+                                      "halign": "center",
+                                      "valign": "center",
+                                      "hexpand": true,
+                                      "vexpand": true,
+                                      "orientation": "vertical",
+                                      "column": 0,
+                                      "row": 0
+                                    }
+                                  ],
+                                  "marginStart": 6,
+                                  "marginEnd": 6,
+                                  "marginTop": 6,
+                                  "marginBottom": 6,
+                                  "hexpand": true,
+                                  "vexpand": true,
+                                  "rowSpacing": 48,
+                                  "columnSpacing": 24
+                                }
+                              ]
+                            }
+                          ],
+                          "sourceClass": "ClocksAlarmRingingPanel"
+                        }
+                      ],
+                      "title": "Alarm Ringing",
+                      "canPop": false
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "hideOnClose": true,
+          "widthRequest": 360,
+          "heightRequest": 294
+        }
+      },
+      {
+        "id": "stopwatch",
+        "title": "Stopwatch",
+        "type": "standard",
+        "width": 360,
+        "height": 600,
+        "rootNode": {
+          "id": "imported-1",
+          "type": "window",
+          "children": [
+            {
+              "id": "toast_overlay",
+              "type": "toast-overlay",
+              "children": [
+                {
+                  "id": "navigation_view",
+                  "type": "navigation-view",
+                  "children": [
+                    {
+                      "id": "main_page",
+                      "type": "bin",
+                      "children": [
+                        {
+                          "id": "imported-2",
+                          "type": "toolbar-view",
+                          "children": [
+                            {
+                              "id": "header_bar",
+                              "type": "bin",
+                              "children": [
+                                {
+                                  "id": "header_bar",
+                                  "type": "header-bar",
+                                  "children": [
+                                    {
+                                      "id": "view_switcher_title",
+                                      "type": "view-switcher",
+                                      "children": [],
+                                      "policy": "wide",
+                                      "bindings": {
+                                        "stack": "ClocksHeaderBar.stack"
+                                      },
+                                      "slot": "title"
+                                    },
+                                    {
+                                      "id": "start_button_stack",
+                                      "type": "view-stack",
+                                      "children": [
+                                        {
+                                          "id": "template-imported-26",
+                                          "type": "stack-page",
+                                          "children": [
+                                            {
+                                              "id": "template-imported-27",
+                                              "type": "button",
+                                              "children": [],
+                                              "actionName": "win.new",
+                                              "iconName": "list-add-symbolic",
+                                              "bindings": {
+                                                "tooltip-text": "ClocksHeaderBar.new-label"
+                                              },
+                                              "slot": "child"
+                                            }
+                                          ],
+                                          "name": "new"
+                                        },
+                                        {
+                                          "id": "template-imported-28",
+                                          "type": "stack-page",
+                                          "children": [
+                                            {
+                                              "id": "template-imported-29",
+                                              "type": "bin",
+                                              "children": [],
+                                              "slot": "child"
+                                            }
+                                          ],
+                                          "name": "empty"
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "id": "template-imported-30",
+                                      "type": "menu-button",
+                                      "children": [],
+                                      "menuModel": "primary-menu",
+                                      "iconName": "open-menu-symbolic",
+                                      "tooltipText": "Main Menu",
+                                      "primary": true,
+                                      "slot": "end"
+                                    }
+                                  ]
+                                }
+                              ],
+                              "sourceClass": "ClocksHeaderBar",
+                              "stack": "stack",
+                              "switcherBar": "switcher_bar",
+                              "slot": "top"
+                            },
+                            {
+                              "id": "stack",
+                              "type": "view-stack",
+                              "children": [
+                                {
+                                  "id": "imported-3",
+                                  "type": "stack-page",
+                                  "children": [
+                                    {
+                                      "id": "world",
+                                      "type": "bin",
+                                      "children": [
+                                        {
+                                          "id": "stack",
+                                          "type": "stack",
+                                          "children": [
+                                            {
+                                              "id": "empty_view",
+                                              "type": "status-page",
+                                              "children": [
+                                                {
+                                                  "id": "template-imported-84",
+                                                  "type": "button",
+                                                  "children": [],
+                                                  "actionName": "win.new",
+                                                  "title": "Add World Clock…",
+                                                  "useUnderline": true,
+                                                  "canShrink": true,
+                                                  "halign": "center",
+                                                  "suggested": true
+                                                }
+                                              ],
+                                              "iconName": "globe-centered-symbolic"
+                                            },
+                                            {
+                                              "id": "list_view",
+                                              "type": "scrolled-window",
+                                              "children": [
+                                                {
+                                                  "id": "template-imported-85",
+                                                  "type": "clamp",
+                                                  "children": [
+                                                    {
+                                                      "id": "listbox",
+                                                      "type": "list-box",
+                                                      "children": [],
+                                                      "valign": "start",
+                                                      "selectionMode": "none",
+                                                      "marginTop": 18,
+                                                      "marginBottom": 18,
+                                                      "marginStart": 12,
+                                                      "marginEnd": 12
+                                                    }
+                                                  ]
+                                                }
+                                              ]
+                                            }
+                                          ],
+                                          "hhomogeneous": false,
+                                          "vhomogeneous": false,
+                                          "transitionType": "crossfade",
+                                          "visibleChildName": "stopwatch"
+                                        }
+                                      ],
+                                      "sourceClass": "ClocksWorldFace",
+                                      "slot": "child"
+                                    }
+                                  ],
+                                  "name": "world",
+                                  "title": "World",
+                                  "useUnderline": true,
+                                  "iconName": "globe-symbolic"
+                                },
+                                {
+                                  "id": "imported-4",
+                                  "type": "stack-page",
+                                  "children": [
+                                    {
+                                      "id": "alarm",
+                                      "type": "bin",
+                                      "children": [
+                                        {
+                                          "id": "stack",
+                                          "type": "stack",
+                                          "children": [
+                                            {
+                                              "id": "empty_view",
+                                              "type": "status-page",
+                                              "children": [
+                                                {
+                                                  "id": "template-imported-5",
+                                                  "type": "button",
+                                                  "children": [],
+                                                  "actionName": "win.new",
+                                                  "title": "Add Alarm…",
+                                                  "useUnderline": true,
+                                                  "canShrink": true,
+                                                  "halign": "center",
+                                                  "suggested": true
+                                                }
+                                              ],
+                                              "iconName": "alarm-centered-symbolic"
+                                            },
+                                            {
+                                              "id": "list_view",
+                                              "type": "scrolled-window",
+                                              "children": [
+                                                {
+                                                  "id": "template-imported-6",
+                                                  "type": "clamp",
+                                                  "children": [
+                                                    {
+                                                      "id": "listbox",
+                                                      "type": "list-box",
+                                                      "children": [],
+                                                      "valign": "start",
+                                                      "selectionMode": "none",
+                                                      "activateOnSingleClick": true,
+                                                      "marginTop": 18,
+                                                      "marginBottom": 18,
+                                                      "marginStart": 12,
+                                                      "marginEnd": 12
+                                                    }
+                                                  ]
+                                                }
+                                              ]
+                                            }
+                                          ],
+                                          "hhomogeneous": false,
+                                          "vhomogeneous": false,
+                                          "visibleChildName": "stopwatch"
+                                        }
+                                      ],
+                                      "sourceClass": "ClocksAlarmFace",
+                                      "slot": "child"
+                                    }
+                                  ],
+                                  "name": "alarm",
+                                  "title": "Alarms",
+                                  "useUnderline": true,
+                                  "iconName": "alarm-symbolic"
+                                },
+                                {
+                                  "id": "imported-5",
+                                  "type": "stack-page",
+                                  "children": [
+                                    {
+                                      "id": "stopwatch",
+                                      "type": "box",
+                                      "children": [
+                                        {
+                                          "id": "template-imported-32",
+                                          "type": "scrolled-window",
+                                          "children": [
+                                            {
+                                              "id": "template-imported-33",
+                                              "type": "clamp",
+                                              "children": [
+                                                {
+                                                  "id": "container",
+                                                  "type": "box",
+                                                  "children": [
+                                                    {
+                                                      "id": "time_container",
+                                                      "type": "box",
+                                                      "children": [
+                                                        {
+                                                          "id": "hours_label",
+                                                          "type": "label",
+                                                          "children": [],
+                                                          "title": 0,
+                                                          "xalign": 0,
+                                                          "yalign": 0
+                                                        },
+                                                        {
+                                                          "id": "template-imported-34",
+                                                          "type": "label",
+                                                          "children": [],
+                                                          "title": "∶"
+                                                        },
+                                                        {
+                                                          "id": "minutes_label",
+                                                          "type": "label",
+                                                          "children": [],
+                                                          "title": 0,
+                                                          "xalign": 0,
+                                                          "yalign": 0
+                                                        },
+                                                        {
+                                                          "id": "template-imported-35",
+                                                          "type": "label",
+                                                          "children": [],
+                                                          "title": "∶",
+                                                          "xalign": 0,
+                                                          "yalign": 0
+                                                        },
+                                                        {
+                                                          "id": "seconds_label",
+                                                          "type": "label",
+                                                          "children": [],
+                                                          "title": 0,
+                                                          "xalign": 0,
+                                                          "yalign": 0
+                                                        },
+                                                        {
+                                                          "id": "template-imported-36",
+                                                          "type": "label",
+                                                          "children": [],
+                                                          "title": ".",
+                                                          "xalign": 0,
+                                                          "yalign": 0
+                                                        },
+                                                        {
+                                                          "id": "miliseconds_label",
+                                                          "type": "label",
+                                                          "children": [],
+                                                          "marginBottom": 4,
+                                                          "valign": "end",
+                                                          "title": 0,
+                                                          "xalign": 0,
+                                                          "yalign": 0
+                                                        }
+                                                      ],
+                                                      "halign": "center",
+                                                      "marginBottom": 18,
+                                                      "orientation": "horizontal"
+                                                    },
+                                                    {
+                                                      "id": "template-imported-37",
+                                                      "type": "box",
+                                                      "children": [
+                                                        {
+                                                          "id": "start_btn",
+                                                          "type": "button",
+                                                          "children": [],
+                                                          "title": "Start",
+                                                          "widthRequest": 120,
+                                                          "useUnderline": true,
+                                                          "hexpand": true,
+                                                          "halign": "start",
+                                                          "suggested": true
+                                                        },
+                                                        {
+                                                          "id": "clear_btn",
+                                                          "type": "button",
+                                                          "children": [],
+                                                          "title": "Clear",
+                                                          "widthRequest": 120,
+                                                          "useUnderline": true,
+                                                          "halign": "end"
+                                                        }
+                                                      ],
+                                                      "spacing": 12,
+                                                      "marginEnd": 18,
+                                                      "marginStart": 18,
+                                                      "orientation": "horizontal"
+                                                    },
+                                                    {
+                                                      "id": "laps_revealer",
+                                                      "type": "bin",
+                                                      "children": [
+                                                        {
+                                                          "id": "laps_list",
+                                                          "type": "list-box",
+                                                          "children": [],
+                                                          "valign": "start",
+                                                          "selectionMode": "none",
+                                                          "marginTop": 18,
+                                                          "marginBottom": 18,
+                                                          "marginStart": 12,
+                                                          "marginEnd": 12
+                                                        }
+                                                      ],
+                                                      "transitionType": "crossfade"
+                                                    }
+                                                  ],
+                                                  "valign": "center",
+                                                  "orientation": "vertical"
+                                                }
+                                              ],
+                                              "maximumSize": 380
+                                            }
+                                          ],
+                                          "minContentWidth": 300,
+                                          "vexpand": true,
+                                          "hscrollbarPolicy": "never"
+                                        }
+                                      ],
+                                      "sourceClass": "ClocksStopwatchFace",
+                                      "slot": "child",
+                                      "orientation": "vertical"
+                                    }
+                                  ],
+                                  "name": "stopwatch",
+                                  "title": "Stopwatch",
+                                  "useUnderline": true,
+                                  "iconName": "stopwatch-symbolic"
+                                },
+                                {
+                                  "id": "imported-6",
+                                  "type": "stack-page",
+                                  "children": [
+                                    {
+                                      "id": "timer",
+                                      "type": "bin",
+                                      "children": [
+                                        {
+                                          "id": "stack",
+                                          "type": "stack",
+                                          "children": [
+                                            {
+                                              "id": "template-imported-41",
+                                              "type": "stack-page",
+                                              "children": [
+                                                {
+                                                  "id": "template-imported-42",
+                                                  "type": "scrolled-window",
+                                                  "children": [
+                                                    {
+                                                      "id": "template-imported-43",
+                                                      "type": "box",
+                                                      "children": [
+                                                        {
+                                                          "id": "timer_bin",
+                                                          "type": "bin",
+                                                          "children": []
+                                                        },
+                                                        {
+                                                          "id": "start_button",
+                                                          "type": "button",
+                                                          "children": [],
+                                                          "halign": "center",
+                                                          "valign": "center",
+                                                          "useUnderline": true,
+                                                          "title": "Start",
+                                                          "suggested": true
+                                                        }
+                                                      ],
+                                                      "halign": "center",
+                                                      "valign": "center",
+                                                      "orientation": "vertical",
+                                                      "spacing": 26
+                                                    }
+                                                  ],
+                                                  "hscrollbarPolicy": "never",
+                                                  "slot": "child"
+                                                }
+                                              ],
+                                              "name": "empty"
+                                            },
+                                            {
+                                              "id": "template-imported-44",
+                                              "type": "stack-page",
+                                              "children": [
+                                                {
+                                                  "id": "template-imported-45",
+                                                  "type": "scrolled-window",
+                                                  "children": [
+                                                    {
+                                                      "id": "template-imported-46",
+                                                      "type": "clamp",
+                                                      "children": [
+                                                        {
+                                                          "id": "timers_list",
+                                                          "type": "list-box",
+                                                          "children": [],
+                                                          "valign": "start",
+                                                          "selectionMode": "none",
+                                                          "activateOnSingleClick": false,
+                                                          "marginTop": 18,
+                                                          "marginBottom": 18,
+                                                          "marginStart": 12,
+                                                          "marginEnd": 12
+                                                        }
+                                                      ]
+                                                    }
+                                                  ],
+                                                  "slot": "child"
+                                                }
+                                              ],
+                                              "name": "timers"
+                                            }
+                                          ],
+                                          "transitionType": "crossfade",
+                                          "visibleChildName": "stopwatch"
+                                        }
+                                      ],
+                                      "sourceClass": "ClocksTimerFace",
+                                      "slot": "child"
+                                    }
+                                  ],
+                                  "name": "timer",
+                                  "title": "Timer",
+                                  "useUnderline": true,
+                                  "iconName": "timer-symbolic"
+                                }
+                              ],
+                              "hexpand": true,
+                              "vexpand": true,
+                              "visibleChildName": "stopwatch"
+                            },
+                            {
+                              "id": "switcher_bar",
+                              "type": "view-switcher",
+                              "children": [],
+                              "stack": "stack",
+                              "slot": "bottom"
+                            }
+                          ]
+                        }
+                      ],
+                      "title": "Clocks"
+                    },
+                    {
+                      "id": "world_subpage",
+                      "type": "bin",
+                      "children": [
+                        {
+                          "id": "world_standalone",
+                          "type": "bin",
+                          "children": [
+                            {
+                              "id": "template-imported-100",
+                              "type": "toolbar-view",
+                              "children": [
+                                {
+                                  "id": "template-imported-101",
+                                  "type": "header-bar",
+                                  "children": [
+                                    {
+                                      "id": "template-imported-102",
+                                      "type": "window-title",
+                                      "children": [],
+                                      "bindings": {
+                                        "title": "ClocksWorldStandalone.title",
+                                        "subtitle": "ClocksWorldStandalone.subtitle"
+                                      },
+                                      "slot": "title-widget"
+                                    }
+                                  ],
+                                  "slot": "top"
+                                },
+                                {
+                                  "id": "template-imported-103",
+                                  "type": "box",
+                                  "children": [
+                                    {
+                                      "id": "template-imported-104",
+                                      "type": "grid",
+                                      "children": [
+                                        {
+                                          "id": "dummy_label",
+                                          "type": "label",
+                                          "children": [],
+                                          "title": "",
+                                          "column": 0,
+                                          "row": 1
+                                        },
+                                        {
+                                          "id": "stack",
+                                          "type": "stack",
+                                          "children": [
+                                            {
+                                              "id": "time_label",
+                                              "type": "label",
+                                              "children": [],
+                                              "justify": "center",
+                                              "wrap": true
+                                            },
+                                            {
+                                              "id": "time_label_small",
+                                              "type": "label",
+                                              "children": [],
+                                              "justify": "center",
+                                              "wrap": true
+                                            }
+                                          ],
+                                          "hhomogeneous": false,
+                                          "vhomogeneous": false,
+                                          "column": 0,
+                                          "row": 0,
+                                          "visibleChildName": "stopwatch"
+                                        },
+                                        {
+                                          "id": "day_label",
+                                          "type": "label",
+                                          "children": [],
+                                          "column": 0,
+                                          "row": 2
+                                        }
+                                      ],
+                                      "halign": "center",
+                                      "valign": "center",
+                                      "marginStart": 12,
+                                      "marginEnd": 12,
+                                      "hexpand": true,
+                                      "vexpand": true
+                                    },
+                                    {
+                                      "id": "template-imported-105",
+                                      "type": "grid",
+                                      "children": [
+                                        {
+                                          "id": "label3",
+                                          "type": "label",
+                                          "children": [],
+                                          "title": "Sunrise",
+                                          "column": 0,
+                                          "row": 0
+                                        },
+                                        {
+                                          "id": "label4",
+                                          "type": "label",
+                                          "children": [],
+                                          "title": "Sunset",
+                                          "column": 0,
+                                          "row": 1
+                                        },
+                                        {
+                                          "id": "sunrise_label",
+                                          "type": "label",
+                                          "children": [],
+                                          "title": "label",
+                                          "column": 1,
+                                          "row": 0
+                                        },
+                                        {
+                                          "id": "sunset_label",
+                                          "type": "label",
+                                          "children": [],
+                                          "column": 1,
+                                          "row": 1
+                                        }
+                                      ],
+                                      "halign": "center",
+                                      "marginBottom": 12,
+                                      "columnSpacing": 12
+                                    }
+                                  ],
+                                  "orientation": "vertical"
+                                }
+                              ]
+                            }
+                          ],
+                          "sourceClass": "ClocksWorldStandalone",
+                          "widthRequest": 360,
+                          "heightRequest": 294
+                        }
+                      ],
+                      "title": "Clock"
+                    },
+                    {
+                      "id": "alarm_subpage",
+                      "type": "bin",
+                      "children": [
+                        {
+                          "id": "alarm_ringing_panel",
+                          "type": "bin",
+                          "children": [
+                            {
+                              "id": "template-imported-8",
+                              "type": "bin",
+                              "children": [
+                                {
+                                  "id": "template-imported-9",
+                                  "type": "grid",
+                                  "children": [
+                                    {
+                                      "id": "button_grid",
+                                      "type": "grid",
+                                      "children": [
+                                        {
+                                          "id": "stop_button",
+                                          "type": "button",
+                                          "children": [],
+                                          "title": "Stop",
+                                          "widthRequest": 200,
+                                          "destructive": true,
+                                          "column": 0,
+                                          "row": 0
+                                        },
+                                        {
+                                          "id": "snooze_button",
+                                          "type": "button",
+                                          "children": [],
+                                          "title": "Snooze",
+                                          "widthRequest": 200,
+                                          "column": 0,
+                                          "row": 1
+                                        }
+                                      ],
+                                      "halign": "center",
+                                      "valign": "center",
+                                      "hexpand": true,
+                                      "vexpand": true,
+                                      "rowSpacing": 24,
+                                      "columnSpacing": 24,
+                                      "column": 0,
+                                      "row": 1
+                                    },
+                                    {
+                                      "id": "template-imported-10",
+                                      "type": "box",
+                                      "children": [
+                                        {
+                                          "id": "time_label",
+                                          "type": "label",
+                                          "children": [],
+                                          "justify": "center",
+                                          "wrap": true,
+                                          "xalign": 0.5
+                                        },
+                                        {
+                                          "id": "title_label",
+                                          "type": "label",
+                                          "children": [],
+                                          "justify": "center",
+                                          "wrap": true,
+                                          "marginTop": 24
+                                        }
+                                      ],
+                                      "halign": "center",
+                                      "valign": "center",
+                                      "hexpand": true,
+                                      "vexpand": true,
+                                      "orientation": "vertical",
+                                      "column": 0,
+                                      "row": 0
+                                    }
+                                  ],
+                                  "marginStart": 6,
+                                  "marginEnd": 6,
+                                  "marginTop": 6,
+                                  "marginBottom": 6,
+                                  "hexpand": true,
+                                  "vexpand": true,
+                                  "rowSpacing": 48,
+                                  "columnSpacing": 24
+                                }
+                              ]
+                            }
+                          ],
+                          "sourceClass": "ClocksAlarmRingingPanel"
+                        }
+                      ],
+                      "title": "Alarm Ringing",
+                      "canPop": false
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "hideOnClose": true,
+          "widthRequest": 360,
+          "heightRequest": 294
+        }
+      },
+      {
+        "id": "timer",
+        "title": "Timer",
+        "type": "standard",
+        "width": 360,
+        "height": 600,
+        "rootNode": {
+          "id": "imported-1",
+          "type": "window",
+          "children": [
+            {
+              "id": "toast_overlay",
+              "type": "toast-overlay",
+              "children": [
+                {
+                  "id": "navigation_view",
+                  "type": "navigation-view",
+                  "children": [
+                    {
+                      "id": "main_page",
+                      "type": "bin",
+                      "children": [
+                        {
+                          "id": "imported-2",
+                          "type": "toolbar-view",
+                          "children": [
+                            {
+                              "id": "header_bar",
+                              "type": "bin",
+                              "children": [
+                                {
+                                  "id": "header_bar",
+                                  "type": "header-bar",
+                                  "children": [
+                                    {
+                                      "id": "view_switcher_title",
+                                      "type": "view-switcher",
+                                      "children": [],
+                                      "policy": "wide",
+                                      "bindings": {
+                                        "stack": "ClocksHeaderBar.stack"
+                                      },
+                                      "slot": "title"
+                                    },
+                                    {
+                                      "id": "start_button_stack",
+                                      "type": "view-stack",
+                                      "children": [
+                                        {
+                                          "id": "template-imported-26",
+                                          "type": "stack-page",
+                                          "children": [
+                                            {
+                                              "id": "template-imported-27",
+                                              "type": "button",
+                                              "children": [],
+                                              "actionName": "win.new",
+                                              "iconName": "list-add-symbolic",
+                                              "bindings": {
+                                                "tooltip-text": "ClocksHeaderBar.new-label"
+                                              },
+                                              "slot": "child"
+                                            }
+                                          ],
+                                          "name": "new"
+                                        },
+                                        {
+                                          "id": "template-imported-28",
+                                          "type": "stack-page",
+                                          "children": [
+                                            {
+                                              "id": "template-imported-29",
+                                              "type": "bin",
+                                              "children": [],
+                                              "slot": "child"
+                                            }
+                                          ],
+                                          "name": "empty"
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "id": "template-imported-30",
+                                      "type": "menu-button",
+                                      "children": [],
+                                      "menuModel": "primary-menu",
+                                      "iconName": "open-menu-symbolic",
+                                      "tooltipText": "Main Menu",
+                                      "primary": true,
+                                      "slot": "end"
+                                    }
+                                  ]
+                                }
+                              ],
+                              "sourceClass": "ClocksHeaderBar",
+                              "stack": "stack",
+                              "switcherBar": "switcher_bar",
+                              "slot": "top"
+                            },
+                            {
+                              "id": "stack",
+                              "type": "view-stack",
+                              "children": [
+                                {
+                                  "id": "imported-3",
+                                  "type": "stack-page",
+                                  "children": [
+                                    {
+                                      "id": "world",
+                                      "type": "bin",
+                                      "children": [
+                                        {
+                                          "id": "stack",
+                                          "type": "stack",
+                                          "children": [
+                                            {
+                                              "id": "empty_view",
+                                              "type": "status-page",
+                                              "children": [
+                                                {
+                                                  "id": "template-imported-84",
+                                                  "type": "button",
+                                                  "children": [],
+                                                  "actionName": "win.new",
+                                                  "title": "Add World Clock…",
+                                                  "useUnderline": true,
+                                                  "canShrink": true,
+                                                  "halign": "center",
+                                                  "suggested": true
+                                                }
+                                              ],
+                                              "iconName": "globe-centered-symbolic"
+                                            },
+                                            {
+                                              "id": "list_view",
+                                              "type": "scrolled-window",
+                                              "children": [
+                                                {
+                                                  "id": "template-imported-85",
+                                                  "type": "clamp",
+                                                  "children": [
+                                                    {
+                                                      "id": "listbox",
+                                                      "type": "list-box",
+                                                      "children": [],
+                                                      "valign": "start",
+                                                      "selectionMode": "none",
+                                                      "marginTop": 18,
+                                                      "marginBottom": 18,
+                                                      "marginStart": 12,
+                                                      "marginEnd": 12
+                                                    }
+                                                  ]
+                                                }
+                                              ]
+                                            }
+                                          ],
+                                          "hhomogeneous": false,
+                                          "vhomogeneous": false,
+                                          "transitionType": "crossfade",
+                                          "visibleChildName": "timer"
+                                        }
+                                      ],
+                                      "sourceClass": "ClocksWorldFace",
+                                      "slot": "child"
+                                    }
+                                  ],
+                                  "name": "world",
+                                  "title": "World",
+                                  "useUnderline": true,
+                                  "iconName": "globe-symbolic"
+                                },
+                                {
+                                  "id": "imported-4",
+                                  "type": "stack-page",
+                                  "children": [
+                                    {
+                                      "id": "alarm",
+                                      "type": "bin",
+                                      "children": [
+                                        {
+                                          "id": "stack",
+                                          "type": "stack",
+                                          "children": [
+                                            {
+                                              "id": "empty_view",
+                                              "type": "status-page",
+                                              "children": [
+                                                {
+                                                  "id": "template-imported-5",
+                                                  "type": "button",
+                                                  "children": [],
+                                                  "actionName": "win.new",
+                                                  "title": "Add Alarm…",
+                                                  "useUnderline": true,
+                                                  "canShrink": true,
+                                                  "halign": "center",
+                                                  "suggested": true
+                                                }
+                                              ],
+                                              "iconName": "alarm-centered-symbolic"
+                                            },
+                                            {
+                                              "id": "list_view",
+                                              "type": "scrolled-window",
+                                              "children": [
+                                                {
+                                                  "id": "template-imported-6",
+                                                  "type": "clamp",
+                                                  "children": [
+                                                    {
+                                                      "id": "listbox",
+                                                      "type": "list-box",
+                                                      "children": [],
+                                                      "valign": "start",
+                                                      "selectionMode": "none",
+                                                      "activateOnSingleClick": true,
+                                                      "marginTop": 18,
+                                                      "marginBottom": 18,
+                                                      "marginStart": 12,
+                                                      "marginEnd": 12
+                                                    }
+                                                  ]
+                                                }
+                                              ]
+                                            }
+                                          ],
+                                          "hhomogeneous": false,
+                                          "vhomogeneous": false,
+                                          "visibleChildName": "timer"
+                                        }
+                                      ],
+                                      "sourceClass": "ClocksAlarmFace",
+                                      "slot": "child"
+                                    }
+                                  ],
+                                  "name": "alarm",
+                                  "title": "Alarms",
+                                  "useUnderline": true,
+                                  "iconName": "alarm-symbolic"
+                                },
+                                {
+                                  "id": "imported-5",
+                                  "type": "stack-page",
+                                  "children": [
+                                    {
+                                      "id": "stopwatch",
+                                      "type": "box",
+                                      "children": [
+                                        {
+                                          "id": "template-imported-32",
+                                          "type": "scrolled-window",
+                                          "children": [
+                                            {
+                                              "id": "template-imported-33",
+                                              "type": "clamp",
+                                              "children": [
+                                                {
+                                                  "id": "container",
+                                                  "type": "box",
+                                                  "children": [
+                                                    {
+                                                      "id": "time_container",
+                                                      "type": "box",
+                                                      "children": [
+                                                        {
+                                                          "id": "hours_label",
+                                                          "type": "label",
+                                                          "children": [],
+                                                          "title": 0,
+                                                          "xalign": 0,
+                                                          "yalign": 0
+                                                        },
+                                                        {
+                                                          "id": "template-imported-34",
+                                                          "type": "label",
+                                                          "children": [],
+                                                          "title": "∶"
+                                                        },
+                                                        {
+                                                          "id": "minutes_label",
+                                                          "type": "label",
+                                                          "children": [],
+                                                          "title": 0,
+                                                          "xalign": 0,
+                                                          "yalign": 0
+                                                        },
+                                                        {
+                                                          "id": "template-imported-35",
+                                                          "type": "label",
+                                                          "children": [],
+                                                          "title": "∶",
+                                                          "xalign": 0,
+                                                          "yalign": 0
+                                                        },
+                                                        {
+                                                          "id": "seconds_label",
+                                                          "type": "label",
+                                                          "children": [],
+                                                          "title": 0,
+                                                          "xalign": 0,
+                                                          "yalign": 0
+                                                        },
+                                                        {
+                                                          "id": "template-imported-36",
+                                                          "type": "label",
+                                                          "children": [],
+                                                          "title": ".",
+                                                          "xalign": 0,
+                                                          "yalign": 0
+                                                        },
+                                                        {
+                                                          "id": "miliseconds_label",
+                                                          "type": "label",
+                                                          "children": [],
+                                                          "marginBottom": 4,
+                                                          "valign": "end",
+                                                          "title": 0,
+                                                          "xalign": 0,
+                                                          "yalign": 0
+                                                        }
+                                                      ],
+                                                      "halign": "center",
+                                                      "marginBottom": 18,
+                                                      "orientation": "horizontal"
+                                                    },
+                                                    {
+                                                      "id": "template-imported-37",
+                                                      "type": "box",
+                                                      "children": [
+                                                        {
+                                                          "id": "start_btn",
+                                                          "type": "button",
+                                                          "children": [],
+                                                          "title": "Start",
+                                                          "widthRequest": 120,
+                                                          "useUnderline": true,
+                                                          "hexpand": true,
+                                                          "halign": "start",
+                                                          "suggested": true
+                                                        },
+                                                        {
+                                                          "id": "clear_btn",
+                                                          "type": "button",
+                                                          "children": [],
+                                                          "title": "Clear",
+                                                          "widthRequest": 120,
+                                                          "useUnderline": true,
+                                                          "halign": "end"
+                                                        }
+                                                      ],
+                                                      "spacing": 12,
+                                                      "marginEnd": 18,
+                                                      "marginStart": 18,
+                                                      "orientation": "horizontal"
+                                                    },
+                                                    {
+                                                      "id": "laps_revealer",
+                                                      "type": "bin",
+                                                      "children": [
+                                                        {
+                                                          "id": "laps_list",
+                                                          "type": "list-box",
+                                                          "children": [],
+                                                          "valign": "start",
+                                                          "selectionMode": "none",
+                                                          "marginTop": 18,
+                                                          "marginBottom": 18,
+                                                          "marginStart": 12,
+                                                          "marginEnd": 12
+                                                        }
+                                                      ],
+                                                      "transitionType": "crossfade"
+                                                    }
+                                                  ],
+                                                  "valign": "center",
+                                                  "orientation": "vertical"
+                                                }
+                                              ],
+                                              "maximumSize": 380
+                                            }
+                                          ],
+                                          "minContentWidth": 300,
+                                          "vexpand": true,
+                                          "hscrollbarPolicy": "never"
+                                        }
+                                      ],
+                                      "sourceClass": "ClocksStopwatchFace",
+                                      "slot": "child",
+                                      "orientation": "vertical"
+                                    }
+                                  ],
+                                  "name": "stopwatch",
+                                  "title": "Stopwatch",
+                                  "useUnderline": true,
+                                  "iconName": "stopwatch-symbolic"
+                                },
+                                {
+                                  "id": "imported-6",
+                                  "type": "stack-page",
+                                  "children": [
+                                    {
+                                      "id": "timer",
+                                      "type": "bin",
+                                      "children": [
+                                        {
+                                          "id": "stack",
+                                          "type": "stack",
+                                          "children": [
+                                            {
+                                              "id": "template-imported-41",
+                                              "type": "stack-page",
+                                              "children": [
+                                                {
+                                                  "id": "template-imported-42",
+                                                  "type": "scrolled-window",
+                                                  "children": [
+                                                    {
+                                                      "id": "template-imported-43",
+                                                      "type": "box",
+                                                      "children": [
+                                                        {
+                                                          "id": "timer_bin",
+                                                          "type": "bin",
+                                                          "children": []
+                                                        },
+                                                        {
+                                                          "id": "start_button",
+                                                          "type": "button",
+                                                          "children": [],
+                                                          "halign": "center",
+                                                          "valign": "center",
+                                                          "useUnderline": true,
+                                                          "title": "Start",
+                                                          "suggested": true
+                                                        }
+                                                      ],
+                                                      "halign": "center",
+                                                      "valign": "center",
+                                                      "orientation": "vertical",
+                                                      "spacing": 26
+                                                    }
+                                                  ],
+                                                  "hscrollbarPolicy": "never",
+                                                  "slot": "child"
+                                                }
+                                              ],
+                                              "name": "empty"
+                                            },
+                                            {
+                                              "id": "template-imported-44",
+                                              "type": "stack-page",
+                                              "children": [
+                                                {
+                                                  "id": "template-imported-45",
+                                                  "type": "scrolled-window",
+                                                  "children": [
+                                                    {
+                                                      "id": "template-imported-46",
+                                                      "type": "clamp",
+                                                      "children": [
+                                                        {
+                                                          "id": "timers_list",
+                                                          "type": "list-box",
+                                                          "children": [],
+                                                          "valign": "start",
+                                                          "selectionMode": "none",
+                                                          "activateOnSingleClick": false,
+                                                          "marginTop": 18,
+                                                          "marginBottom": 18,
+                                                          "marginStart": 12,
+                                                          "marginEnd": 12
+                                                        }
+                                                      ]
+                                                    }
+                                                  ],
+                                                  "slot": "child"
+                                                }
+                                              ],
+                                              "name": "timers"
+                                            }
+                                          ],
+                                          "transitionType": "crossfade",
+                                          "visibleChildName": "timer"
+                                        }
+                                      ],
+                                      "sourceClass": "ClocksTimerFace",
+                                      "slot": "child"
+                                    }
+                                  ],
+                                  "name": "timer",
+                                  "title": "Timer",
+                                  "useUnderline": true,
+                                  "iconName": "timer-symbolic"
+                                }
+                              ],
+                              "hexpand": true,
+                              "vexpand": true,
+                              "visibleChildName": "timer"
+                            },
+                            {
+                              "id": "switcher_bar",
+                              "type": "view-switcher",
+                              "children": [],
+                              "stack": "stack",
+                              "slot": "bottom"
+                            }
+                          ]
+                        }
+                      ],
+                      "title": "Clocks"
+                    },
+                    {
+                      "id": "world_subpage",
+                      "type": "bin",
+                      "children": [
+                        {
+                          "id": "world_standalone",
+                          "type": "bin",
+                          "children": [
+                            {
+                              "id": "template-imported-100",
+                              "type": "toolbar-view",
+                              "children": [
+                                {
+                                  "id": "template-imported-101",
+                                  "type": "header-bar",
+                                  "children": [
+                                    {
+                                      "id": "template-imported-102",
+                                      "type": "window-title",
+                                      "children": [],
+                                      "bindings": {
+                                        "title": "ClocksWorldStandalone.title",
+                                        "subtitle": "ClocksWorldStandalone.subtitle"
+                                      },
+                                      "slot": "title-widget"
+                                    }
+                                  ],
+                                  "slot": "top"
+                                },
+                                {
+                                  "id": "template-imported-103",
+                                  "type": "box",
+                                  "children": [
+                                    {
+                                      "id": "template-imported-104",
+                                      "type": "grid",
+                                      "children": [
+                                        {
+                                          "id": "dummy_label",
+                                          "type": "label",
+                                          "children": [],
+                                          "title": "",
+                                          "column": 0,
+                                          "row": 1
+                                        },
+                                        {
+                                          "id": "stack",
+                                          "type": "stack",
+                                          "children": [
+                                            {
+                                              "id": "time_label",
+                                              "type": "label",
+                                              "children": [],
+                                              "justify": "center",
+                                              "wrap": true
+                                            },
+                                            {
+                                              "id": "time_label_small",
+                                              "type": "label",
+                                              "children": [],
+                                              "justify": "center",
+                                              "wrap": true
+                                            }
+                                          ],
+                                          "hhomogeneous": false,
+                                          "vhomogeneous": false,
+                                          "column": 0,
+                                          "row": 0,
+                                          "visibleChildName": "timer"
+                                        },
+                                        {
+                                          "id": "day_label",
+                                          "type": "label",
+                                          "children": [],
+                                          "column": 0,
+                                          "row": 2
+                                        }
+                                      ],
+                                      "halign": "center",
+                                      "valign": "center",
+                                      "marginStart": 12,
+                                      "marginEnd": 12,
+                                      "hexpand": true,
+                                      "vexpand": true
+                                    },
+                                    {
+                                      "id": "template-imported-105",
+                                      "type": "grid",
+                                      "children": [
+                                        {
+                                          "id": "label3",
+                                          "type": "label",
+                                          "children": [],
+                                          "title": "Sunrise",
+                                          "column": 0,
+                                          "row": 0
+                                        },
+                                        {
+                                          "id": "label4",
+                                          "type": "label",
+                                          "children": [],
+                                          "title": "Sunset",
+                                          "column": 0,
+                                          "row": 1
+                                        },
+                                        {
+                                          "id": "sunrise_label",
+                                          "type": "label",
+                                          "children": [],
+                                          "title": "label",
+                                          "column": 1,
+                                          "row": 0
+                                        },
+                                        {
+                                          "id": "sunset_label",
+                                          "type": "label",
+                                          "children": [],
+                                          "column": 1,
+                                          "row": 1
+                                        }
+                                      ],
+                                      "halign": "center",
+                                      "marginBottom": 12,
+                                      "columnSpacing": 12
+                                    }
+                                  ],
+                                  "orientation": "vertical"
+                                }
+                              ]
+                            }
+                          ],
+                          "sourceClass": "ClocksWorldStandalone",
+                          "widthRequest": 360,
+                          "heightRequest": 294
+                        }
+                      ],
+                      "title": "Clock"
+                    },
+                    {
+                      "id": "alarm_subpage",
+                      "type": "bin",
+                      "children": [
+                        {
+                          "id": "alarm_ringing_panel",
+                          "type": "bin",
+                          "children": [
+                            {
+                              "id": "template-imported-8",
+                              "type": "bin",
+                              "children": [
+                                {
+                                  "id": "template-imported-9",
+                                  "type": "grid",
+                                  "children": [
+                                    {
+                                      "id": "button_grid",
+                                      "type": "grid",
+                                      "children": [
+                                        {
+                                          "id": "stop_button",
+                                          "type": "button",
+                                          "children": [],
+                                          "title": "Stop",
+                                          "widthRequest": 200,
+                                          "destructive": true,
+                                          "column": 0,
+                                          "row": 0
+                                        },
+                                        {
+                                          "id": "snooze_button",
+                                          "type": "button",
+                                          "children": [],
+                                          "title": "Snooze",
+                                          "widthRequest": 200,
+                                          "column": 0,
+                                          "row": 1
+                                        }
+                                      ],
+                                      "halign": "center",
+                                      "valign": "center",
+                                      "hexpand": true,
+                                      "vexpand": true,
+                                      "rowSpacing": 24,
+                                      "columnSpacing": 24,
+                                      "column": 0,
+                                      "row": 1
+                                    },
+                                    {
+                                      "id": "template-imported-10",
+                                      "type": "box",
+                                      "children": [
+                                        {
+                                          "id": "time_label",
+                                          "type": "label",
+                                          "children": [],
+                                          "justify": "center",
+                                          "wrap": true,
+                                          "xalign": 0.5
+                                        },
+                                        {
+                                          "id": "title_label",
+                                          "type": "label",
+                                          "children": [],
+                                          "justify": "center",
+                                          "wrap": true,
+                                          "marginTop": 24
+                                        }
+                                      ],
+                                      "halign": "center",
+                                      "valign": "center",
+                                      "hexpand": true,
+                                      "vexpand": true,
+                                      "orientation": "vertical",
+                                      "column": 0,
+                                      "row": 0
+                                    }
+                                  ],
+                                  "marginStart": 6,
+                                  "marginEnd": 6,
+                                  "marginTop": 6,
+                                  "marginBottom": 6,
+                                  "hexpand": true,
+                                  "vexpand": true,
+                                  "rowSpacing": 48,
+                                  "columnSpacing": 24
+                                }
+                              ]
+                            }
+                          ],
+                          "sourceClass": "ClocksAlarmRingingPanel"
+                        }
+                      ],
+                      "title": "Alarm Ringing",
+                      "canPop": false
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "hideOnClose": true,
+          "widthRequest": 360,
+          "heightRequest": 294
+        }
+      },
+      {
+        "id": "alarm-setup",
+        "title": "New Alarm",
+        "type": "dialog",
+        "width": 360,
+        "height": 500,
+        "rootNode": {
+          "id": "imported-1",
+          "type": "dialog",
+          "children": [
+            {
+              "id": "imported-2",
+              "type": "toolbar-view",
+              "children": [
+                {
+                  "id": "imported-3",
+                  "type": "header-bar",
+                  "children": [
+                    {
+                      "id": "imported-4",
+                      "type": "button",
+                      "children": [],
+                      "title": "Cancel",
+                      "useUnderline": true
+                    },
+                    {
+                      "id": "ok_button",
+                      "type": "button",
+                      "children": [],
+                      "title": "Add",
+                      "useUnderline": true,
+                      "suggested": true,
+                      "slot": "end"
+                    }
+                  ],
+                  "showStartTitleButtons": false,
+                  "showEndTitleButtons": false,
+                  "slot": "top"
+                },
+                {
+                  "id": "imported-5",
+                  "type": "box",
+                  "children": [
+                    {
+                      "id": "banner",
+                      "type": "banner",
+                      "children": [],
+                      "title": "You already have an alarm for this time"
+                    },
+                    {
+                      "id": "imported-6",
+                      "type": "preferences-page",
+                      "children": [
+                        {
+                          "id": "imported-7",
+                          "type": "preferences-group",
+                          "children": [
+                            {
+                              "id": "time_box",
+                              "type": "box",
+                              "children": [
+                                {
+                                  "id": "h_spinbutton",
+                                  "type": "entry",
+                                  "children": [],
+                                  "text": 0,
+                                  "xalign": 0.5,
+                                  "orientation": "vertical",
+                                  "numeric": true,
+                                  "wrap": true,
+                                  "widthRequest": 60
+                                },
+                                {
+                                  "id": "label2",
+                                  "type": "label",
+                                  "children": [],
+                                  "title": "∶"
+                                },
+                                {
+                                  "id": "m_spinbutton",
+                                  "type": "entry",
+                                  "children": [],
+                                  "text": 0,
+                                  "xalign": 0.5,
+                                  "orientation": "vertical",
+                                  "numeric": true,
+                                  "wrap": true,
+                                  "widthRequest": 60
+                                },
+                                {
+                                  "id": "am_pm_bin",
+                                  "type": "bin",
+                                  "children": [],
+                                  "visible": false,
+                                  "marginStart": 6,
+                                  "marginEnd": 6
+                                }
+                              ],
+                              "halign": "center",
+                              "marginBottom": 12,
+                              "spacing": 6,
+                              "orientation": "horizontal"
+                            }
+                          ]
+                        },
+                        {
+                          "id": "imported-8",
+                          "type": "preferences-group",
+                          "children": [
+                            {
+                              "id": "repeats",
+                              "type": "custom-widget",
+                              "children": [
+                                {
+                                  "id": "template-imported-2",
+                                  "type": "box",
+                                  "children": [
+                                    {
+                                      "id": "template-imported-3",
+                                      "type": "label",
+                                      "children": [],
+                                      "halign": "start",
+                                      "title": "Repeat",
+                                      "useUnderline": true,
+                                      "hexpand": true
+                                    },
+                                    {
+                                      "id": "box",
+                                      "type": "box",
+                                      "children": [],
+                                      "valign": "center",
+                                      "spacing": 6,
+                                      "orientation": "horizontal"
+                                    }
+                                  ],
+                                  "spacing": 9,
+                                  "marginStart": 12,
+                                  "marginEnd": 12,
+                                  "marginTop": 12,
+                                  "marginBottom": 12,
+                                  "orientation": "vertical"
+                                }
+                              ],
+                              "sourceClass": "ClocksAlarmDayPickerRow",
+                              "title": "AdwPreferencesRow",
+                              "activatable": false,
+                              "selectable": false
+                            },
+                            {
+                              "id": "name_entry",
+                              "type": "entry-row",
+                              "children": [],
+                              "title": "Name"
+                            },
+                            {
+                              "id": "ring_duration",
+                              "type": "combo-row",
+                              "children": [],
+                              "activatable": false,
+                              "title": "Ring Duration"
+                            },
+                            {
+                              "id": "snooze_duration",
+                              "type": "combo-row",
+                              "children": [],
+                              "activatable": false,
+                              "title": "Snooze Duration"
+                            }
+                          ]
+                        },
+                        {
+                          "id": "delete_group",
+                          "type": "preferences-group",
+                          "children": [
+                            {
+                              "id": "imported-9",
+                              "type": "button-row",
+                              "children": [],
+                              "title": "Remove Alarm",
+                              "useUnderline": true,
+                              "destructive": true
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ],
+                  "orientation": "vertical",
+                  "slot": "content"
+                }
+              ],
+              "slot": "child"
+            }
+          ],
+          "contentWidth": 520,
+          "contentHeight": 580,
+          "title": "New Alarm",
+          "focusWidget": "h_spinbutton"
+        }
       }
     ],
-    "importDiagnostics": [
+    "edges": [
       {
-        "code": "renderer-does-not-support-class",
-        "sourceClass": "AdwViewStackPage",
-        "sourceId": "imported-3",
-        "message": "AdwViewStackPage is not in the generic widget registry; retained as an explicit custom-widget boundary."
+        "id": "edge-1",
+        "sourceId": "world",
+        "targetId": "alarms"
       },
       {
-        "code": "renderer-does-not-support-class",
-        "sourceClass": "AdwViewStackPage",
-        "sourceId": "imported-4",
-        "message": "AdwViewStackPage is not in the generic widget registry; retained as an explicit custom-widget boundary."
+        "id": "edge-2",
+        "sourceId": "alarms",
+        "targetId": "stopwatch"
       },
       {
-        "code": "renderer-does-not-support-class",
-        "sourceClass": "AdwViewStackPage",
-        "sourceId": "imported-5",
-        "message": "AdwViewStackPage is not in the generic widget registry; retained as an explicit custom-widget boundary."
+        "id": "edge-3",
+        "sourceId": "stopwatch",
+        "targetId": "timer"
       },
       {
-        "code": "renderer-does-not-support-class",
-        "sourceClass": "AdwViewStackPage",
-        "sourceId": "imported-6",
-        "message": "AdwViewStackPage is not in the generic widget registry; retained as an explicit custom-widget boundary."
-      },
-      {
-        "code": "renderer-does-not-support-class",
-        "sourceClass": "AdwPreferencesRow",
-        "sourceId": "template-imported-1",
-        "message": "AdwPreferencesRow is not in the generic widget registry; retained as an explicit custom-widget boundary."
-      },
-      {
-        "code": "renderer-does-not-support-class",
-        "sourceClass": "GtkListBoxRow",
-        "sourceId": "template-imported-11",
-        "message": "GtkListBoxRow is not in the generic widget registry; retained as an explicit custom-widget boundary."
-      },
-      {
-        "code": "renderer-does-not-support-class",
-        "sourceClass": "ClocksAlarmDayPickerRow",
-        "sourceId": "repeats",
-        "message": "ClocksAlarmDayPickerRow is not in the generic widget registry; retained as an explicit custom-widget boundary."
-      },
-      {
-        "code": "renderer-does-not-support-class",
-        "sourceClass": "AdwViewStackPage",
-        "sourceId": "template-imported-26",
-        "message": "AdwViewStackPage is not in the generic widget registry; retained as an explicit custom-widget boundary."
-      },
-      {
-        "code": "renderer-does-not-support-class",
-        "sourceClass": "AdwViewStackPage",
-        "sourceId": "template-imported-28",
-        "message": "AdwViewStackPage is not in the generic widget registry; retained as an explicit custom-widget boundary."
-      },
-      {
-        "code": "renderer-does-not-support-class",
-        "sourceClass": "GtkListBoxRow",
-        "sourceId": "template-imported-38",
-        "message": "GtkListBoxRow is not in the generic widget registry; retained as an explicit custom-widget boundary."
-      },
-      {
-        "code": "renderer-does-not-support-class",
-        "sourceClass": "GtkListBoxRow",
-        "sourceId": "template-imported-47",
-        "message": "GtkListBoxRow is not in the generic widget registry; retained as an explicit custom-widget boundary."
-      },
-      {
-        "code": "renderer-does-not-support-class",
-        "sourceClass": "GtkListBoxRow",
-        "sourceId": "template-imported-86",
-        "message": "GtkListBoxRow is not in the generic widget registry; retained as an explicit custom-widget boundary."
+        "id": "edge-4",
+        "sourceId": "alarms",
+        "targetId": "alarm-setup"
       }
     ]
   },

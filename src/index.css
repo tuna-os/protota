@@ -425,9 +425,20 @@ adw-window > .adw-node-wrapper > *,
 }
 .protota-div-bin,
 .protota-div-stack,
-.protota-div-stack-page {
+.protota-div-stack-page,
+.protota-div-navigation-view {
   display: flex;
   flex-direction: column;
+  min-height: 0;
+}
+.protota-div-navigation-view > .adw-node-wrapper {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+.protota-div-navigation-view > .adw-node-wrapper > * {
+  flex: 1 1 auto;
   min-height: 0;
 }
 

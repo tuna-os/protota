@@ -29,6 +29,8 @@ const CLASS_TO_WIDGET_MAP: Record<string, AdwNodeType> = {
   'Adw.MultiLayoutView': 'bin',
   'Adw.Layout': 'bin',
   'Adw.LayoutSlot': 'bin',
+  'Adw.ViewStackPage': 'stack-page',
+  ViewStackPage: 'stack-page',
   'Adw.InlineViewSwitcher': 'view-switcher',
   'Adw.ButtonContent': 'label',
   'Adw.Carousel': 'box',
@@ -357,7 +359,9 @@ function parseValue(token: Token | undefined): BlueprintValue | undefined {
   return token.value;
 }
 
-function propertyNameForNode(rawName: string, nodeType: AdwNodeType): string {
+function propertyNameForNode(name: string, nodeType: AdwNodeType): string {
+  // GtkBuilder accepts underscore and dash spellings interchangeably.
+  const rawName = name.replace(/_/g, '-');
   if ((rawName === 'label' || rawName === 'text') && (nodeType === 'button' || nodeType === 'toggle' || nodeType === 'label' || nodeType === 'inscription' || nodeType === 'menu-button' || nodeType === 'split-button')) return 'title';
   if (rawName === 'icon-name') return 'iconName';
   if (rawName === 'show-title-buttons') return 'showTitleButtons';
@@ -413,6 +417,8 @@ function makeNode(
   for (const [key, value] of Object.entries(properties)) {
     node[propertyNameForNode(key, node.type)] = value;
   }
+  // Mnemonic underscores (`_Add`) are keyboard accelerators, not label text.
+  if (node.useUnderline && typeof node.title === 'string') node.title = node.title.replace('_', '');
   // GTK's default GtkBox orientation is horizontal; the renderer's editing
   // default is vertical. Imported boxes must carry GTK's semantics.
   if (node.type === 'box' && node.orientation === undefined) node.orientation = 'horizontal';

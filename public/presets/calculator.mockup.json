@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exportedAt": "2026-07-30T03:53:42.565Z",
+  "exportedAt": "2026-07-30T04:19:54.416Z",
   "generatedBy": "scripts/generate-preset.mjs",
   "document": {
     "id": "calculator-preset",
@@ -21845,7 +21845,7 @@
                       "id": "row_decimals",
                       "type": "spin-row",
                       "children": [],
-                      "title": "Number of _Decimals",
+                      "title": "Number of Decimals",
                       "useUnderline": true,
                       "adjustment": "adjustment_decimals",
                       "numeric": true,
@@ -21855,28 +21855,28 @@
                       "id": "row_trailing_zeroes",
                       "type": "switch-row",
                       "children": [],
-                      "title": "Trailing _Zeroes",
+                      "title": "Trailing Zeroes",
                       "useUnderline": true
                     },
                     {
                       "id": "row_thousands_separators",
                       "type": "switch-row",
                       "children": [],
-                      "title": "_Thousands Separators",
+                      "title": "Thousands Separators",
                       "useUnderline": true
                     },
                     {
                       "id": "row_angle_units",
                       "type": "combo-row",
                       "children": [],
-                      "title": "_Angle Units",
+                      "title": "Angle Units",
                       "useUnderline": true
                     },
                     {
                       "id": "row_word_size",
                       "type": "combo-row",
                       "children": [],
-                      "title": "_Word Size",
+                      "title": "Word Size",
                       "useUnderline": true
                     }
                   ],
@@ -21890,21 +21890,21 @@
                       "id": "row_refresh_interval",
                       "type": "combo-row",
                       "children": [],
-                      "title": "E_xchange Rate Refresh Interval",
+                      "title": "Exchange Rate Refresh Interval",
                       "useUnderline": true
                     },
                     {
                       "id": "row_currency_display",
                       "type": "combo-row",
                       "children": [],
-                      "title": "_Currency Display",
+                      "title": "Currency Display",
                       "useUnderline": true
                     },
                     {
                       "id": "row_currency_completion",
                       "type": "combo-row",
                       "children": [],
-                      "title": "_Show Currencies in Auto-Completion List",
+                      "title": "Show Currencies in Auto-Completion List",
                       "useUnderline": true
                     },
                     {
@@ -21918,7 +21918,7 @@
                           "iconName": "go-next-symbolic"
                         }
                       ],
-                      "title": "_Favorite Currencies",
+                      "title": "Favorite Currencies",
                       "useUnderline": true,
                       "activatableWidget": "image_favorite_currencies"
                     }

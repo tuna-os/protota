@@ -1,0 +1,12 @@
+{
+  "title": "GNOME Disks",
+  "screens": [
+    { "id": "main", "entry": "gdu-window.blp", "title": "Disks", "width": 950, "height": 640 },
+    { "id": "create-image", "entry": "gdu-create-disk-image-dialog.blp", "title": "Create Disk Image", "width": 440, "height": 400 },
+    { "id": "benchmark", "entry": "gdu-benchmark-dialog.blp", "title": "Benchmark", "width": 480, "height": 520 }
+  ],
+  "edges": [
+    { "from": "main", "to": "create-image", "why": "Drive menu → Create Disk Image…" },
+    { "from": "main", "to": "benchmark", "why": "Partition menu → Benchmark…" }
+  ]
+}

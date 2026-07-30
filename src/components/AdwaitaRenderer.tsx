@@ -69,10 +69,13 @@ const TAG_MAP: Record<string, string | null> = {
   inscription:           null,
 };
 
-/** Div-only types: render a semantic container with Adwaita-styled layout. */
+/** Div-only types: render a semantic container with Adwaita-styled layout.
+ * navigation-view is here because the adw-navigation-view element manages
+ * only adw-navigation-page children and hides everything else; the model
+ * already selects the visible page. */
 const DIV_TYPES = new Set([
   'bin', 'custom-widget', 'box', 'grid', 'center-box', 'stack', 'stack-page', 'scrolled-window', 'search-entry', 'switch-widget',
-  'check-button', 'list-box', 'label', 'inscription',
+  'check-button', 'list-box', 'label', 'inscription', 'navigation-view',
 ]);
 
 function nodeProps(node: AdwNode, inheritedSlot?: string): Record<string, string> {
@@ -264,9 +267,11 @@ export const AdwaitaRenderer: React.FC<Props> = ({
   // adw-menu-button is icon-only; a labelled MenuButton renders as a button.
   const tag = isDialogRoot
     ? 'adw-window'
-    : node.type === 'menu-button' && node.title
-      ? 'adw-button'
-      : TAG_MAP[node.type] || 'div';
+    : node.type === 'navigation-view'
+      ? 'div'
+      : node.type === 'menu-button' && node.title
+        ? 'adw-button'
+        : TAG_MAP[node.type] || 'div';
   const attrs = nodeProps(node, inheritedSlot);
 
   // Apply theme class to window/dialog roots based on doc colorScheme
@@ -276,10 +281,14 @@ export const AdwaitaRenderer: React.FC<Props> = ({
     ? `theme-${doc.colorScheme}` : '';
   if (themeClass) attrs['class'] = themeClass;
 
-  // GtkStack shows exactly one child. The visible child is the named one when
-  // the source declares it, otherwise the first child — GTK's default.
-  const visibleChildren = node.type === 'stack' && node.children?.length
-    ? [node.children.find((child) => typeof node.visibleChildName === 'string' && (child.id === node.visibleChildName || child.title === node.visibleChildName)) ?? node.children[0]]
+  // GtkStack, AdwViewStack, and AdwNavigationView show exactly one child.
+  // The visible child is the named one when declared (matched by page name,
+  // builder id, or title), otherwise the first — GTK's default (a
+  // NavigationView starts on its root page).
+  const showsOneChild = node.type === 'stack' || node.type === 'view-stack' || node.type === 'navigation-view';
+  const visibleChildren = showsOneChild && node.children?.length
+    ? [node.children.find((child) => typeof node.visibleChildName === 'string' &&
+        (child.id === node.visibleChildName || child.title === node.visibleChildName || (child as { name?: unknown }).name === node.visibleChildName)) ?? node.children[0]]
     : node.children;
 
   const children = visibleChildren?.map((child, index) => (

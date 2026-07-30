@@ -1,15 +1,14 @@
 {
   "version": 1,
-  "exportedAt": "2026-07-30T03:48:58.394Z",
+  "exportedAt": "2026-07-30T04:19:53.202Z",
   "generatedBy": "scripts/generate-preset.mjs",
   "document": {
-    "id": "imported-document",
+    "id": "weather-preset",
     "title": "GNOME Weather",
     "colorScheme": "auto",
-    "edges": [],
     "screens": [
       {
-        "id": "imported-screen-1",
+        "id": "weather-main",
         "title": "Weather",
         "type": "standard",
         "width": 950,
@@ -35,8 +34,8 @@
                           "type": "menu-button",
                           "children": [],
                           "valign": "center",
-                          "menu_model": "primary-menu",
-                          "icon_name": "open-menu-symbolic",
+                          "menuModel": "primary-menu",
+                          "iconName": "open-menu-symbolic",
                           "slot": "end"
                         }
                       ],
@@ -81,12 +80,12 @@
                               "children": [],
                               "valign": "center",
                               "tooltipText": "Refresh",
-                              "action_name": "win.refresh",
-                              "icon_name": "view-refresh-symbolic",
+                              "actionName": "win.refresh",
+                              "iconName": "view-refresh-symbolic",
                               "slot": "child"
                             }
                           ],
-                          "transition_type": "crossfade",
+                          "transitionType": "crossfade",
                           "slot": "start"
                         },
                         {
@@ -102,13 +101,13 @@
                           "children": [],
                           "tooltipText": "Main Menu",
                           "valign": "center",
-                          "menu_model": "primary-menu",
-                          "icon_name": "open-menu-symbolic",
+                          "menuModel": "primary-menu",
+                          "iconName": "open-menu-symbolic",
                           "primary": true,
                           "slot": "end"
                         }
                       ],
-                      "centering_policy": "strict",
+                      "centeringPolicy": "strict",
                       "slot": "top"
                     },
                     {
@@ -129,66 +128,17 @@
                   ]
                 }
               ],
-              "transition_type": "crossfade"
+              "transitionType": "crossfade"
             }
           ],
           "sourceClass": "Gjs_MainWindow",
           "title": "Gjs_MainWindow",
-          "default_width": 1050,
-          "default_height": 650
+          "defaultWidth": 1050,
+          "defaultHeight": 650
         }
       }
     ],
-    "importDiagnostics": [
-      {
-        "code": "renderer-does-not-support-class",
-        "sourceClass": "Gjs_MainWindow",
-        "sourceId": "imported-1",
-        "message": "Gjs_MainWindow is not in the generic widget registry; retained as an explicit custom-widget boundary."
-      },
-      {
-        "code": "renderer-does-not-support-class",
-        "sourceClass": "Gjs_WeatherView",
-        "sourceId": "template-imported-1",
-        "message": "Gjs_WeatherView is not in the generic widget registry; retained as an explicit custom-widget boundary."
-      },
-      {
-        "code": "renderer-does-not-support-class",
-        "sourceClass": "Gjs_Thermometer",
-        "sourceId": "thermometer",
-        "message": "Gjs_Thermometer is not in the generic widget registry; retained as an explicit custom-widget boundary."
-      },
-      {
-        "code": "renderer-does-not-support-class",
-        "sourceClass": "Gjs_HourlyForecastBox",
-        "sourceId": "forecastHourly",
-        "message": "Gjs_HourlyForecastBox is not in the generic widget registry; retained as an explicit custom-widget boundary."
-      },
-      {
-        "code": "renderer-does-not-support-class",
-        "sourceClass": "AdwViewStackPage",
-        "sourceId": "template-imported-12",
-        "message": "AdwViewStackPage is not in the generic widget registry; retained as an explicit custom-widget boundary."
-      },
-      {
-        "code": "renderer-does-not-support-class",
-        "sourceClass": "Gjs_DailyForecastBox",
-        "sourceId": "forecastDaily",
-        "message": "Gjs_DailyForecastBox is not in the generic widget registry; retained as an explicit custom-widget boundary."
-      },
-      {
-        "code": "renderer-does-not-support-class",
-        "sourceClass": "AdwViewStackPage",
-        "sourceId": "template-imported-14",
-        "message": "AdwViewStackPage is not in the generic widget registry; retained as an explicit custom-widget boundary."
-      },
-      {
-        "code": "renderer-does-not-support-class",
-        "sourceClass": "Gjs_WeatherWidget",
-        "sourceId": "template-imported-9",
-        "message": "Gjs_WeatherWidget is not in the generic widget registry; retained as an explicit custom-widget boundary."
-      }
-    ]
+    "edges": []
   },
   "assets": {}
 }

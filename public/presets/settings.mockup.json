@@ -1,15 +1,14 @@
 {
   "version": 1,
-  "exportedAt": "2026-07-30T03:49:02.285Z",
+  "exportedAt": "2026-07-30T04:19:55.602Z",
   "generatedBy": "scripts/generate-preset.mjs",
   "document": {
-    "id": "imported-document",
+    "id": "settings-preset",
     "title": "settings",
     "colorScheme": "auto",
-    "edges": [],
     "screens": [
       {
-        "id": "imported-screen-1",
+        "id": "settings-main",
         "title": "settings 1",
         "type": "standard",
         "width": 1024,
@@ -147,7 +146,7 @@
         }
       }
     ],
-    "importDiagnostics": []
+    "edges": []
   },
   "assets": {}
 }

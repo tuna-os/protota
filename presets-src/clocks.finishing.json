@@ -1,0 +1,32 @@
+{
+  "title": "GNOME Clocks",
+  "screens": [
+    { "id": "world", "entry": "window.ui", "title": "World", "width": 360, "height": 600,
+      "overrides": [
+        { "id": "stack", "set": { "visibleChildName": "world" },
+          "why": "Default AdwViewStack page; official world.png screenshot." }
+      ] },
+    { "id": "alarms", "entry": "window.ui", "title": "Alarms", "width": 360, "height": 600,
+      "overrides": [
+        { "id": "stack", "set": { "visibleChildName": "alarm" },
+          "why": "Alarm view page; official alarm.png screenshot." }
+      ] },
+    { "id": "stopwatch", "entry": "window.ui", "title": "Stopwatch", "width": 360, "height": 600,
+      "overrides": [
+        { "id": "stack", "set": { "visibleChildName": "stopwatch" },
+          "why": "Stopwatch view page." }
+      ] },
+    { "id": "timer", "entry": "window.ui", "title": "Timer", "width": 360, "height": 600,
+      "overrides": [
+        { "id": "stack", "set": { "visibleChildName": "timer" },
+          "why": "Timer view page." }
+      ] },
+    { "id": "alarm-setup", "entry": "alarm-setup-dialog.ui", "title": "New Alarm", "width": 360, "height": 500 }
+  ],
+  "edges": [
+    { "from": "world", "to": "alarms", "why": "View switcher → Alarms" },
+    { "from": "alarms", "to": "stopwatch", "why": "View switcher → Stopwatch" },
+    { "from": "stopwatch", "to": "timer", "why": "View switcher → Timer" },
+    { "from": "alarms", "to": "alarm-setup", "why": "Add alarm button → setup dialog" }
+  ]
+}

@@ -38,12 +38,36 @@ if (!appId || !sourceRoot || !defaultEntry) {
   process.exit(1);
 }
 
-const files = readdirSync(sourceRoot, { recursive: true, withFileTypes: true })
-  .filter((dirent) => dirent.isFile() && /\.(blp|ui|vala)$/i.test(dirent.name))
+const sourceEntries = readdirSync(sourceRoot, { recursive: true, withFileTypes: true })
+  .filter((dirent) => dirent.isFile());
+
+const files = sourceEntries
+  .filter((dirent) => /\.(blp|ui|vala)$/i.test(dirent.name))
   .map((dirent) => {
     const absolute = join(dirent.parentPath, dirent.name);
     return { path: relative(sourceRoot, absolute), content: readFileSync(absolute, 'utf8') };
   });
+
+/**
+ * Icons an app ships in its own source tree, keyed by icon name. These are
+ * the application's real artwork — embedding them is source-grounded, unlike
+ * substituting a similar-looking symbolic icon. Symbolic variants win because
+ * they follow the current theme; scalable app icons are the fallback.
+ */
+const sourceIcons = new Map();
+for (const dirent of sourceEntries) {
+  if (!dirent.name.endsWith('.svg')) continue;
+  const absolute = join(dirent.parentPath, dirent.name);
+  if (!/icons?\//i.test(relative(sourceRoot, absolute))) continue;
+  const iconName = dirent.name.replace(/-symbolic\.svg$/, '').replace(/\.svg$/, '');
+  const isSymbolic = dirent.name.endsWith('-symbolic.svg');
+  // Application icons (reverse-DNS ids) are shown as full-colour artwork by
+  // GTK; every other icon slot is themed symbolic art.
+  const prefersColour = iconName.includes('.');
+  const existing = sourceIcons.get(iconName);
+  if (existing && (prefersColour ? existing.symbolic === false : existing.symbolic === true)) continue;
+  sourceIcons.set(iconName, { path: relative(sourceRoot, absolute), symbolic: isSymbolic, absolute });
+}
 
 const finishingPath = new URL(`../presets-src/${appId}.finishing.json`, import.meta.url);
 const finishing = existsSync(finishingPath) ? JSON.parse(readFileSync(finishingPath, 'utf8')) : null;
@@ -90,6 +114,22 @@ for (const spec of screenSpecs) {
   screens.push(screen);
 }
 
+// Collect the app-shipped artwork actually referenced by the built screens.
+const sourceIconAssets = {};
+const collectIcons = (node) => {
+  const iconName = typeof node.iconName === 'string' ? node.iconName.replace(/-symbolic$/, '') : null;
+  const icon = iconName ? sourceIcons.get(iconName) : null;
+  if (icon && !sourceIconAssets[iconName]) {
+    sourceIconAssets[iconName] = readFileSync(icon.absolute, 'utf8');
+  }
+  node.children?.forEach(collectIcons);
+};
+screens.forEach((screen) => collectIcons(screen.rootNode));
+const embeddedIconNames = Object.keys(sourceIconAssets);
+if (embeddedIconNames.length) {
+  console.error(`Embedded ${embeddedIconNames.length} app-shipped icon(s): ${embeddedIconNames.join(', ')}`);
+}
+
 const document = {
   id: `${appId}-preset`,
   title: finishing?.title ?? appId,
@@ -109,5 +149,8 @@ writeFileSync(outputPath, JSON.stringify({
   generatedBy: 'scripts/generate-preset.mjs',
   document,
   assets: {},
+  // Artwork the application ships in its own source tree, keyed by icon name.
+  // Source-grounded: never a similar-looking substitute for missing art.
+  sourceIcons: sourceIconAssets,
 }, null, 2) + '\n');
 console.error(`Wrote public/presets/${appId}.mockup.json — ${screens.length} screen(s), ${document.edges.length} edge(s), ${appliedTotal} finishing overrides, ${diagnosticsTotal} import diagnostics`);

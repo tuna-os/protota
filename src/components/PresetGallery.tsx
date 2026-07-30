@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import type { MockupDocument } from '../types/mockup';
 import { persistDocumentSource } from '../store/mockupStore';
 import { blueprintBundleToDocument, type BlueprintSourceFile } from '../utils/blueprint';
+import { registerSourceIcons, SOURCE_ICONS_STORAGE_KEY } from '../utils/adwIcons';
 
 interface PresetMeta {
   id: string;
@@ -53,6 +54,9 @@ export const PresetGallery: React.FC<Props> = ({ isOpen, onClose }) => {
       } else {
         const payload = await fetch(`${import.meta.env.BASE_URL}presets/${id}.mockup.json`).then(response => response.json());
         doc = payload.document;
+        // Artwork the app ships in its own source, embedded by the generator.
+        registerSourceIcons(payload.sourceIcons);
+        localStorage.setItem(SOURCE_ICONS_STORAGE_KEY, JSON.stringify(payload.sourceIcons ?? {}));
       }
       doc.colorScheme = doc.colorScheme || 'auto';
 

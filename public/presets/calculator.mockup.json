@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exportedAt": "2026-07-30T06:43:34.478Z",
+  "exportedAt": "2026-07-30T07:12:58.888Z",
   "generatedBy": "scripts/generate-preset.mjs",
   "document": {
     "id": "calculator-preset",
@@ -21959,5 +21959,6 @@
       }
     ]
   },
-  "assets": {}
+  "assets": {},
+  "sourceIcons": {}
 }

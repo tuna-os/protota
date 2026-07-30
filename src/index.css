@@ -710,3 +710,46 @@ adw-status-page .adw-status-page-child {
   padding: 24px;
   overflow: auto;
 }
+
+/* GTK window controls (minimize / maximize / close) drawn by the shell in the
+   header bar. Circular buttons with symbolic glyphs, matching Adwaita. */
+.protota-window-controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: 6px;
+}
+.protota-window-control {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background-color: var(--headerbar-button-bg, rgba(0, 0, 6, 0.08));
+  display: inline-block;
+  position: relative;
+  flex-shrink: 0;
+}
+.protota-window-control::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-color: var(--window-fg-color, rgba(0, 0, 6, 0.8));
+  mask-repeat: no-repeat;
+  mask-position: center;
+  mask-size: 16px;
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  -webkit-mask-size: 16px;
+  opacity: 0.75;
+}
+.protota-window-control.minimize::before {
+  mask-image: var(--icon-window-minimize);
+  -webkit-mask-image: var(--icon-window-minimize);
+}
+.protota-window-control.maximize::before {
+  mask-image: var(--icon-window-maximize);
+  -webkit-mask-image: var(--icon-window-maximize);
+}
+.protota-window-control.close::before {
+  mask-image: var(--icon-window-close);
+  -webkit-mask-image: var(--icon-window-close);
+}

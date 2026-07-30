@@ -128,6 +128,8 @@ test.describe('Broadway reference captures', () => {
       // Clear it so the comparison always renders this run's import.
       localStorage.clear();
       localStorage.setItem('protota_doc_v1', JSON.stringify(preset.document));
+      // App-shipped artwork embedded by the preset generator.
+      if (preset.sourceIcons) localStorage.setItem('protota_source_icons_v1', JSON.stringify(preset.sourceIcons));
     }, { id: presetId, width: reference.width, height: reference.height, document: sourceDocument });
     await page.reload();
     // The comparison target is the application render surface.  Explicitly

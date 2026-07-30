@@ -135,6 +135,36 @@ const CLASS_TO_WIDGET_MAP: Record<string, AdwNodeType> = {
   // Library widgets the generic renderer genuinely covers. Widgets it does
   // not (AdwTabBar's tab strip, GtkLevelBar's meter) stay explicit
   // boundaries rather than rendering as an empty box that claims support.
+  ProgressBar: 'progress-bar',
+  GtkProgressBar: 'progress-bar',
+  'Gtk.ProgressBar': 'progress-bar',
+  Scale: 'scale',
+  GtkScale: 'scale',
+  'Gtk.Scale': 'scale',
+  LevelBar: 'level-bar',
+  GtkLevelBar: 'level-bar',
+  'Gtk.LevelBar': 'level-bar',
+  'Adw.Avatar': 'avatar',
+  AdwAvatar: 'avatar',
+  Avatar: 'avatar',
+  'Adw.WrapBox': 'wrap-box',
+  AdwWrapBox: 'wrap-box',
+  WrapBox: 'wrap-box',
+  Popover: 'popover',
+  GtkPopover: 'popover',
+  'Gtk.Popover': 'popover',
+  PopoverMenu: 'popover',
+  GtkPopoverMenu: 'popover',
+  'Gtk.PopoverMenu': 'popover',
+  ListBoxRow: 'list-box-row',
+  GtkListBoxRow: 'list-box-row',
+  'Gtk.ListBoxRow': 'list-box-row',
+  CenterBox: 'center-box',
+  GtkCenterBox: 'center-box',
+  'Adw.MessageDialog': 'alert-dialog',
+  AdwMessageDialog: 'alert-dialog',
+  'Adw.ClampScrollable': 'clamp',
+  AdwClampScrollable: 'clamp',
   ListView: 'list-box',
   GtkListView: 'list-box',
   'Gtk.ListView': 'list-box',
@@ -186,7 +216,7 @@ const CLASS_TO_WIDGET_MAP: Record<string, AdwNodeType> = {
  * must not receive renderer boxes or count as unresolved visual coverage.
  */
 const NON_VISUAL_CLASS_PATTERN =
-  /^(Gtk\.|Gio\.|Adw\.)?(EventController[A-Za-z]*|Gesture[A-Za-z]*|ShortcutController|Shortcut|DropTarget|DragSource|Adjustment|TextBuffer|EntryBuffer|Popover|PopoverMenu|Tooltip|StringList|ListStore|SizeGroup|FileFilter|SortListModel|FilterListModel|SingleSelection|MultiSelection|NoSelection|SignalListItemFactory|BuilderListItemFactory|Breakpoint)$/;
+  /^(Gtk\.|Gio\.|Adw\.)?(EventController[A-Za-z]*|Gesture[A-Za-z]*|ShortcutController|Shortcut|DropTarget|DragSource|Adjustment|TextBuffer|EntryBuffer|Tooltip|StringList|ListStore|SizeGroup|FileFilter|SortListModel|FilterListModel|SingleSelection|MultiSelection|NoSelection|SignalListItemFactory|BuilderListItemFactory|Breakpoint)$/;
 
 const WIDGET_CLASS_MAP: Record<string, string> = {
   window: 'Adw.ApplicationWindow',
@@ -233,6 +263,14 @@ const WIDGET_CLASS_MAP: Record<string, string> = {
   'stack-page': 'Gtk.StackPage',
   'scrolled-window': 'Gtk.ScrolledWindow',
   'search-entry': 'Gtk.SearchEntry',
+  'progress-bar': 'Gtk.ProgressBar',
+  scale: 'Gtk.Scale',
+  'level-bar': 'Gtk.LevelBar',
+  'drop-down': 'Gtk.DropDown',
+  avatar: 'Adw.Avatar',
+  'wrap-box': 'Adw.WrapBox',
+  popover: 'Gtk.Popover',
+  'list-box-row': 'Gtk.ListBoxRow',
   'switch-widget': 'Gtk.Switch',
   'check-button': 'Gtk.CheckButton',
   'list-box': 'Gtk.ListBox',

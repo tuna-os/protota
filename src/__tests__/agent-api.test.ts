@@ -73,9 +73,11 @@ describe('MockupBuilder', () => {
   it('rejects illegal child additions', () => {
     const b = new MockupBuilder('Test')
       .addScreen('standard', 'Main')
-      .addWidget('toolbar-view');
+      .addWidget('toolbar-view')
+      .addWidget('header-bar')
+      .addWidget('window-title');
 
-    // button is not a legal child of toolbar-view
+    // AdwWindowTitle is a leaf: it shows a title and subtitle, nothing else.
     expect(() => b.addWidget('button')).toThrow(/legal/);
   });
 

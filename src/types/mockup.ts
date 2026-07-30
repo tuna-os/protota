@@ -50,6 +50,14 @@ export type AdwNodeType =
   | 'preferences-group' // AdwPreferencesGroup — titled section
 
   // Controls
+  | 'progress-bar'     // GtkProgressBar — determinate progress
+  | 'scale'            // GtkScale — slider
+  | 'level-bar'        // GtkLevelBar — capacity/level meter
+  | 'drop-down'        // GtkDropDown — standalone selector
+  | 'avatar'           // AdwAvatar — user/contact image
+  | 'wrap-box'         // AdwWrapBox — reflowing horizontal box
+  | 'popover'          // GtkPopover — surface attached to a widget
+  | 'list-box-row'     // GtkListBoxRow — plain (non-preferences) list row
   | 'button'           // GtkButton — all styles (flat, suggested, destructive…)
   | 'split-button'     // AdwSplitButton — button + dropdown
   | 'menu-button'      // GtkMenuButton — icon button with popover
@@ -200,129 +208,97 @@ export interface MockupDocument {
  * A container only accepts the children that make structural sense in a
  * real Adwaita app. No illegal nesting — mockups always depict buildable UIs.
  */
+/**
+ * Widgets a generic GTK container accepts. GtkBox, GtkGrid, AdwBin and the
+ * rest impose no type restriction, and the presets imported from real GNOME
+ * apps use that freedom throughout — so refusing these combinations would
+ * mean rendering structures the editor will not let a user rebuild. HIG
+ * guidance belongs in the linter, not in a hard structural block.
+ */
+const CONTAINER_CHILDREN: AdwNodeType[] = [
+  'toolbar-view', 'header-bar', 'window-title',
+  'view-stack', 'view-switcher', 'navigation-view', 'tab-view', 'overlay-split',
+  'clamp', 'bin', 'custom-widget', 'box', 'grid', 'center-box', 'stack', 'stack-page',
+  'scrolled-window', 'wrap-box', 'popover',
+  'action-row', 'switch-row', 'combo-row', 'spin-row', 'button-row', 'expander-row',
+  'entry-row', 'password-row', 'list-box-row',
+  'preferences-page', 'preferences-group',
+  'button', 'split-button', 'menu-button', 'search-entry', 'toggle', 'toggle-group',
+  'entry', 'switch-widget', 'check-button', 'progress-bar', 'scale', 'level-bar',
+  'drop-down', 'avatar',
+  'status-page', 'toast-overlay', 'banner', 'spinner',
+  'list-box', 'flow-box', 'label', 'inscription',
+];
+
 export const LEGAL_CHILDREN: Record<AdwNodeType, AdwNodeType[]> = {
   // === Windows ===
-  window: ['toolbar-view'],
+  window: CONTAINER_CHILDREN,
   'preferences-dialog': ['preferences-page'],
-  dialog: ['toolbar-view', 'box', 'preferences-page', 'status-page', 'label'],
+  dialog: CONTAINER_CHILDREN,
   'alert-dialog': ['label', 'button'],
   'about-dialog': [],
 
   // === Chrome ===
-  'toolbar-view': [
-    'header-bar',       // [top]
-    'box', 'clamp', 'label', 'status-page',
-    'view-stack', 'list-box', 'flow-box',
-    'overlay-split',
-    'banner',           // can sit above content
-  ],
-  'header-bar': [
-    'button', 'split-button', 'menu-button', 'toggle',
-    'window-title', 'view-switcher',
-    'search-entry', 'box',
-  ],
+  // header-bar sits in [top]; a banner can sit above the content.
+  'toolbar-view': CONTAINER_CHILDREN,
+  'header-bar': CONTAINER_CHILDREN,
   'window-title': [],
-
+  'progress-bar': [],
+  scale: [],
+  'level-bar': [],
+  'drop-down': [],
+  avatar: [],
+  'wrap-box': CONTAINER_CHILDREN,
+  popover: CONTAINER_CHILDREN,
+  'list-box-row': ['box', 'bin', 'label', 'button', 'menu-button', 'switch-widget', 'check-button', 'avatar', 'progress-bar', 'level-bar', 'spinner', 'entry', 'inscription', 'custom-widget'],
   // === Navigation ===
-  'view-stack': ['box', 'clamp', 'label', 'status-page', 'list-box'],
+  'view-stack': CONTAINER_CHILDREN,
   'view-switcher': [],
-  'navigation-view': [
-    'box', 'clamp', 'label', 'status-page', 'list-box',
-    'toolbar-view', 'preferences-page',
-  ],
-  'tab-view': ['box', 'clamp', 'label', 'status-page', 'toolbar-view'],
-  'overlay-split': [
-    'box', 'clamp', 'label', 'status-page', 'list-box', 'toolbar-view',
-  ],
-
+  'navigation-view': CONTAINER_CHILDREN,
+  'tab-view': CONTAINER_CHILDREN,
+  'overlay-split': CONTAINER_CHILDREN,
   // === Layout ===
-  clamp: [
-    'box', 'label', 'status-page', 'list-box', 'button',
-    'preferences-group', 'flow-box', 'inscription', 'spinner',
-  ],
-  bin: [
-    'box', 'grid', 'clamp', 'label', 'status-page', 'list-box', 'flow-box',
-    'toast-overlay', 'view-stack', 'tab-view', 'button',
-  ],
-  'custom-widget': [],
-  box: [
-    'label', 'button', 'entry', 'search-entry', 'inscription',
-    'spinner', 'toggle', 'switch-widget', 'check-button',
-    'action-row', 'switch-row', 'combo-row', 'spin-row', 'button-row',
-    'expander-row', 'entry-row', 'password-row',
-    'list-box', 'flow-box', 'clamp', 'box', 'center-box',
-    'status-page', 'banner', 'header-bar',
-    'split-button', 'menu-button', 'toggle-group',
-    'view-stack', 'tab-view',
-  ],
-  grid: [
-    'label', 'button', 'entry', 'search-entry', 'inscription', 'spinner',
-    'toggle', 'switch-widget', 'check-button', 'box', 'center-box',
-    'status-page', 'split-button', 'menu-button', 'toggle-group',
-  ],
-  'center-box': [
-    'button', 'label', 'window-title', 'view-switcher',
-    'search-entry', 'entry', 'spinner', 'inscription',
-  ],
-  stack: [
-    'stack-page', 'box', 'grid', 'clamp', 'status-page', 'list-box', 'scrolled-window',
-  ],
-  'stack-page': [
-    'box', 'grid', 'clamp', 'status-page', 'list-box', 'scrolled-window',
-  ],
-  'scrolled-window': [
-    'box', 'grid', 'stack', 'stack-page', 'list-box', 'flow-box', 'custom-widget', 'label',
-  ],
-
+  clamp: CONTAINER_CHILDREN,
+  bin: CONTAINER_CHILDREN,
+  'custom-widget': CONTAINER_CHILDREN,
+  box: CONTAINER_CHILDREN,
+  grid: CONTAINER_CHILDREN,
+  'center-box': CONTAINER_CHILDREN,
+  stack: CONTAINER_CHILDREN,
+  'stack-page': CONTAINER_CHILDREN,
+  'scrolled-window': CONTAINER_CHILDREN,
   // === Preferences rows ===
-  'action-row': [
-    'toggle', 'switch-widget', 'button', 'check-button',
-    'entry', 'label', 'spinner',
-  ],
-  'switch-row': [],
-  'combo-row': [],
-  'spin-row': [],
-  'button-row': [],
-  'expander-row': [
-    'action-row', 'switch-row', 'combo-row', 'spin-row', 'entry-row', 'password-row',
-  ],
-  'entry-row': [],
-  'password-row': [],
-
+  'action-row': ['box', 'bin', 'label', 'button', 'menu-button', 'switch-widget', 'check-button', 'avatar', 'progress-bar', 'level-bar', 'spinner', 'entry', 'inscription', 'custom-widget'],
+  'switch-row': ['box', 'bin', 'label', 'button', 'menu-button', 'switch-widget', 'check-button', 'avatar', 'progress-bar', 'level-bar', 'spinner', 'entry', 'inscription', 'custom-widget'],
+  'combo-row': ['box', 'bin', 'label', 'button', 'menu-button', 'switch-widget', 'check-button', 'avatar', 'progress-bar', 'level-bar', 'spinner', 'entry', 'inscription', 'custom-widget'],
+  'spin-row': ['box', 'bin', 'label', 'button', 'menu-button', 'switch-widget', 'check-button', 'avatar', 'progress-bar', 'level-bar', 'spinner', 'entry', 'inscription', 'custom-widget'],
+  'button-row': ['box', 'bin', 'label', 'button', 'menu-button', 'switch-widget', 'check-button', 'avatar', 'progress-bar', 'level-bar', 'spinner', 'entry', 'inscription', 'custom-widget'],
+  'expander-row': CONTAINER_CHILDREN,
+  'entry-row': ['box', 'bin', 'label', 'button', 'menu-button', 'switch-widget', 'check-button', 'avatar', 'progress-bar', 'level-bar', 'spinner', 'entry', 'inscription', 'custom-widget'],
+  'password-row': ['box', 'bin', 'label', 'button', 'menu-button', 'switch-widget', 'check-button', 'avatar', 'progress-bar', 'level-bar', 'spinner', 'entry', 'inscription', 'custom-widget'],
   // === Preferences structure ===
   'preferences-page': ['preferences-group'],
-  'preferences-group': [
-    'action-row', 'switch-row', 'combo-row', 'spin-row',
-    'button-row', 'expander-row', 'entry-row', 'password-row',
-    'label',
-  ],
-
+  'preferences-group': CONTAINER_CHILDREN,
   // === Controls ===
-  button: [],
-  'split-button': [],
-  'menu-button': [],
-  'search-entry': [],
+  button: ['box', 'label', 'avatar', 'stack', 'inscription', 'bin'],
+  'split-button': ['box', 'label', 'popover', 'bin'],
+  'menu-button': ['box', 'label', 'popover', 'list-box', 'bin', 'inscription'],
+  'search-entry': ['bin', 'custom-widget', 'popover'],
   toggle: [],
   'toggle-group': ['toggle'],
-  entry: [],
+  entry: ['bin', 'custom-widget', 'popover'],
   'switch-widget': [],
   'check-button': [],
 
   // === Feedback ===
-  'status-page': ['button', 'box'],
-  'toast-overlay': [
-    'box', 'clamp', 'status-page', 'list-box', 'toolbar-view', 'view-stack',
-  ],
+  'status-page': ['box', 'button', 'menu-button', 'label', 'clamp', 'list-box', 'bin', 'preferences-group'],
+  'toast-overlay': CONTAINER_CHILDREN,
   banner: [],
   spinner: [],
 
   // === Lists ===
-  'list-box': [
-    'action-row', 'switch-row', 'combo-row', 'spin-row', 'button-row',
-    'expander-row', 'entry-row', 'password-row', 'label',
-  ],
-  'flow-box': ['button', 'label', 'status-page'],
-
+  'list-box': CONTAINER_CHILDREN,
+  'flow-box': CONTAINER_CHILDREN,
   // === Text ===
   label: [],
   inscription: [],

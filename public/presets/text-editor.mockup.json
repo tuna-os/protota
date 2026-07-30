@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exportedAt": "2026-07-30T08:52:50.006Z",
+  "exportedAt": "2026-07-30T09:23:41.777Z",
   "generatedBy": "scripts/generate-preset.mjs",
   "document": {
     "id": "text-editor-preset",
@@ -289,11 +289,11 @@
                           "type": "bin",
                           "children": [
                             {
-                              "id": "template-imported-54",
+                              "id": "template-imported-60",
                               "type": "preferences-page",
                               "children": [
                                 {
-                                  "id": "template-imported-55",
+                                  "id": "template-imported-61",
                                   "type": "preferences-group",
                                   "children": [
                                     {
@@ -334,11 +334,11 @@
                                       }
                                     },
                                     {
-                                      "id": "template-imported-56",
+                                      "id": "template-imported-62",
                                       "type": "action-row",
                                       "children": [
                                         {
-                                          "id": "template-imported-57",
+                                          "id": "template-imported-63",
                                           "type": "bin",
                                           "children": [],
                                           "iconName": "go-next-symbolic",
@@ -373,7 +373,7 @@
                                       }
                                     },
                                     {
-                                      "id": "template-imported-58",
+                                      "id": "template-imported-64",
                                       "type": "combo-row",
                                       "children": [],
                                       "title": "Line Feed",
@@ -388,7 +388,7 @@
                                   ]
                                 },
                                 {
-                                  "id": "template-imported-59",
+                                  "id": "template-imported-65",
                                   "type": "preferences-group",
                                   "children": [
                                     {
@@ -402,7 +402,7 @@
                                       }
                                     },
                                     {
-                                      "id": "template-imported-60",
+                                      "id": "template-imported-66",
                                       "type": "combo-row",
                                       "children": [],
                                       "title": "Character",
@@ -442,7 +442,7 @@
                                   ]
                                 },
                                 {
-                                  "id": "template-imported-61",
+                                  "id": "template-imported-67",
                                   "type": "preferences-group",
                                   "children": [
                                     {

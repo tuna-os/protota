@@ -71,6 +71,14 @@ const TAG_MAP: Record<string, string | null> = {
   clamp:                 'adw-clamp',
   bin:                   null,
   'custom-widget':       null,
+  avatar:                'adw-avatar',
+  'wrap-box':            'adw-wrap-box',
+  'drop-down':           'adw-drop-down',
+  'progress-bar':        null,
+  scale:                 null,
+  'level-bar':           null,
+  popover:               null,
+  'list-box-row':        null,
   'action-row':          'adw-action-row',
   'switch-row':          'adw-switch-row',
   'combo-row':           'adw-combo-row',
@@ -114,6 +122,7 @@ const TAG_MAP: Record<string, string | null> = {
 const DIV_TYPES = new Set([
   'bin', 'custom-widget', 'box', 'grid', 'center-box', 'stack', 'stack-page', 'scrolled-window', 'search-entry', 'switch-widget',
   'check-button', 'list-box', 'label', 'inscription', 'navigation-view',
+  'progress-bar', 'scale', 'level-bar', 'popover', 'list-box-row',
   // adw-overlay-split-view collects [slot="content"] with an unscoped query,
   // so it hoists the content child of any nested toolbar view into its own
   // pane. Render the panes ourselves, as with navigation-view.
@@ -154,6 +163,22 @@ function nodeProps(node: AdwNode, inheritedSlot?: string): Record<string, string
     if (node.title) p.label = node.title;
     if (icon) p.icon = icon;
   }
+  // Bar and meter widgets carry their fill as a CSS custom property so the
+  // stylesheet can draw the trough and the filled portion.
+  if (t === 'progress-bar' || t === 'level-bar' || t === 'scale') {
+    const min = typeof node.min === 'number' ? node.min : 0;
+    const max = typeof node.max === 'number' ? node.max : 1;
+    const raw = typeof node.value === 'number' ? node.value : Number(node.value ?? 0);
+    const span = max - min || 1;
+    const fraction = Math.min(1, Math.max(0, (raw - min) / span));
+    p.style = `--protota-fill: ${(fraction * 100).toFixed(1)}%`;
+    if (node.title) p['aria-label'] = node.title;
+  }
+  if (t === 'avatar') {
+    if (node.title) p.text = node.title;
+    if (node.value) p.size = String(node.value);
+  }
+
   if (t === 'menu-button') {
     // A labelled MenuButton (mode selector, open button) renders its text
     // with a dropdown indicator; adw-menu-button itself is icon-only.

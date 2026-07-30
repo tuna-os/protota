@@ -188,6 +188,40 @@ export const WIDGET_SCHEMAS: Record<AdwNodeType, PropSchema[]> = {
   ],
   spinner: [],
 
+  'progress-bar': [
+    { key: 'value', label: 'Value', type: 'number', defaultValue: 0.5 },
+    { key: 'min', label: 'Minimum', type: 'number', defaultValue: 0 },
+    { key: 'max', label: 'Maximum', type: 'number', defaultValue: 1 },
+  ],
+  scale: [
+    { key: 'value', label: 'Value', type: 'number', defaultValue: 50 },
+    { key: 'min', label: 'Minimum', type: 'number', defaultValue: 0 },
+    { key: 'max', label: 'Maximum', type: 'number', defaultValue: 100 },
+  ],
+  'level-bar': [
+    { key: 'value', label: 'Value', type: 'number', defaultValue: 0.6 },
+    { key: 'min', label: 'Minimum', type: 'number', defaultValue: 0 },
+    { key: 'max', label: 'Maximum', type: 'number', defaultValue: 1 },
+  ],
+  'drop-down': [
+    { key: 'options', label: 'Options', type: 'string', defaultValue: 'One, Two, Three' },
+    { key: 'selectedIndex', label: 'Selected', type: 'number', defaultValue: 0 },
+  ],
+  avatar: [
+    { key: 'title', label: 'Name', type: 'string', defaultValue: 'Ada Lovelace' },
+    { key: 'value', label: 'Size', type: 'number', defaultValue: 48 },
+  ],
+  'wrap-box': [
+    { key: 'spacing', label: 'Spacing', type: 'number', defaultValue: 6 },
+  ],
+  popover: [
+    { key: 'title', label: 'Title', type: 'string', defaultValue: '' },
+  ],
+  'list-box-row': [
+    { key: 'activatable', label: 'Activatable', type: 'boolean', defaultValue: true },
+  ],
+
+
   // === Lists ===
   'list-box': [],
   'flow-box': [],

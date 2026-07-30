@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exportedAt": "2026-07-30T08:52:40.807Z",
+  "exportedAt": "2026-07-30T09:23:32.069Z",
   "generatedBy": "scripts/generate-preset.mjs",
   "document": {
     "id": "amberol-preset",
@@ -207,7 +207,7 @@
                                                 },
                                                 {
                                                   "id": "imported-18",
-                                                  "type": "custom-widget",
+                                                  "type": "center-box",
                                                   "children": [
                                                     {
                                                       "id": "elapsed_label",
@@ -224,8 +224,6 @@
                                                       "styleClasses": "caption numeric"
                                                     }
                                                   ],
-                                                  "sourceClass": "CenterBox",
-                                                  "title": "CenterBox",
                                                   "orientation": "horizontal",
                                                   "widthRequest": 256,
                                                   "halign": "center"
@@ -354,10 +352,8 @@
                                                         },
                                                         {
                                                           "id": "volume_scale",
-                                                          "type": "custom-widget",
+                                                          "type": "scale",
                                                           "children": [],
-                                                          "sourceClass": "Scale",
-                                                          "title": "Scale",
                                                           "hexpand": true,
                                                           "marginEnd": 6
                                                         },
@@ -373,7 +369,7 @@
                                                     },
                                                     {
                                                       "id": "imported-21",
-                                                      "type": "custom-widget",
+                                                      "type": "center-box",
                                                       "children": [
                                                         {
                                                           "id": "start_box",
@@ -442,9 +438,7 @@
                                                           "marginStart": 18,
                                                           "orientation": "horizontal"
                                                         }
-                                                      ],
-                                                      "sourceClass": "CenterBox",
-                                                      "title": "CenterBox"
+                                                      ]
                                                     }
                                                   ],
                                                   "orientation": "vertical",
@@ -553,10 +547,8 @@
                                               "children": [
                                                 {
                                                   "id": "playlist_progress",
-                                                  "type": "custom-widget",
+                                                  "type": "progress-bar",
                                                   "children": [],
-                                                  "sourceClass": "ProgressBar",
-                                                  "title": "ProgressBar",
                                                   "valign": "start",
                                                   "hexpand": true,
                                                   "visible": false,

@@ -42,10 +42,13 @@ test('renderer infers structural slots for header bars and split views', async (
   });
 
   const surface = page.locator('[data-protota-render-surface="true"]');
-  const split = surface.locator('adw-overlay-split-view');
-  await expect(split.locator('.adw-osv-sidebar')).toContainText('Home');
-  await expect(split.locator('.adw-osv-content')).toContainText('Desktop');
-  await expect(split.locator('.adw-osv-sidebar')).toBeVisible();
+  // Split views render their own panes: the web component collects
+  // [slot="content"] with an unscoped query and would hoist a nested toolbar
+  // view's content into the wrong pane.
+  const split = surface.locator('[data-protota-type="overlay-split"]');
+  await expect(split.locator('[slot="sidebar"]')).toContainText('Home');
+  await expect(split.locator('[slot="content"]')).toContainText('Desktop');
+  await expect(split.locator('[slot="sidebar"] > *')).toBeVisible();
 
   const header = surface.locator('adw-header-bar').first();
   await expect(header.locator('.adw-header-bar-start')).toContainText('Back');

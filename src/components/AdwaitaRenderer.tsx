@@ -114,6 +114,10 @@ const TAG_MAP: Record<string, string | null> = {
 const DIV_TYPES = new Set([
   'bin', 'custom-widget', 'box', 'grid', 'center-box', 'stack', 'stack-page', 'scrolled-window', 'search-entry', 'switch-widget',
   'check-button', 'list-box', 'label', 'inscription', 'navigation-view',
+  // adw-overlay-split-view collects [slot="content"] with an unscoped query,
+  // so it hoists the content child of any nested toolbar view into its own
+  // pane. Render the panes ourselves, as with navigation-view.
+  'overlay-split',
 ]);
 
 function nodeProps(node: AdwNode, inheritedSlot?: string): Record<string, string> {
@@ -335,7 +339,7 @@ export const AdwaitaRenderer: React.FC<Props> = ({
   // adw-menu-button is icon-only; a labelled MenuButton renders as a button.
   const tag = isDialogRoot
     ? 'adw-window'
-    : node.type === 'navigation-view'
+    : node.type === 'navigation-view' || node.type === 'overlay-split'
       ? 'div'
       : node.type === 'menu-button' && node.title
         ? 'adw-button'

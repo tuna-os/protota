@@ -284,6 +284,79 @@ function escapeBlueprintString(value: string): string {
   return value.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\n/g, '\\n');
 }
 
+/**
+ * Editor property names are camelCase; Blueprint uses the GObject property
+ * spelling. This is the inverse of propertyNameForNode, and getting it wrong
+ * produces output that does not compile.
+ */
+const EXPORT_PROPERTY_NAMES: Record<string, string> = {
+  iconName: 'icon-name',
+  showTitleButtons: 'show-title-buttons',
+  selectedIndex: 'selected',
+  widthRequest: 'width-request',
+  heightRequest: 'height-request',
+  minWidth: 'width-request',
+  minHeight: 'height-request',
+  columnSpan: 'column-span',
+  rowSpan: 'row-span',
+  rowSpacing: 'row-spacing',
+  columnSpacing: 'column-spacing',
+  visibleChildName: 'visible-child-name',
+};
+
+/**
+ * Editor conveniences that are Adwaita *style classes*, not GObject
+ * properties. Emitting `suggested: true` produces source the compiler
+ * rejects; GTK expresses these as `styles [ "suggested-action" ]`.
+ */
+const STYLE_CLASS_PROPERTIES: Record<string, string> = {
+  suggested: 'suggested-action',
+  destructive: 'destructive-action',
+  flat: 'flat',
+  circular: 'circular',
+};
+
+/** Properties whose value names another object, written as a bare id. */
+const OBJECT_REFERENCE_PROPERTIES = new Set([
+  'menu-model', 'focus-widget', 'default-widget', 'buffer', 'model', 'popover',
+  'adjustment', 'group', 'extra-child', 'stack', 'sort-model', 'filter',
+]);
+
+/** Properties whose values are enum identifiers, written unquoted. */
+const ENUM_PROPERTIES = new Set([
+  'orientation', 'halign', 'valign', 'transition-type', 'ellipsize', 'wrap-mode',
+  'justify', 'overflow', 'top-bar-style', 'bottom-bar-style', 'unit',
+  'vscrollbar-policy', 'hscrollbar-policy', 'direction',
+]);
+
+/** Editor-only bookkeeping that must never reach exported source. */
+const INTERNAL_PROPERTIES = new Set([
+  'id', 'type', 'slot', 'children', 'sourceClass', 'bindings', 'styleClasses',
+  'pages', 'imageId', 'options', 'breakpointCondition',
+]);
+
+/** Grid placement is emitted inside the child's `layout` block, not inline. */
+const LAYOUT_PROPERTIES = new Set(['column', 'row', 'column-span', 'row-span']);
+
+function exportPropertyName(key: string): string {
+  return EXPORT_PROPERTY_NAMES[key] ?? key.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`);
+}
+
+function formatPropertyValue(name: string, value: unknown): string {
+  if (typeof value === 'boolean' || typeof value === 'number') return String(value);
+  const text = String(value);
+  if (ENUM_PROPERTIES.has(name) && /^[a-z][a-z0-9_-]*$/.test(text)) return text;
+  // An object reference is an identifier, not a string literal.
+  if (OBJECT_REFERENCE_PROPERTIES.has(name) && /^[A-Za-z_][\w-]*$/.test(text)) return text;
+  return `"${escapeBlueprintString(text)}"`;
+}
+
+/**
+ * Slots GTK expresses as a child-type annotation (`[top]`) rather than as an
+ * object-valued property (`content: Widget { }`).
+ */
+const ANNOTATION_SLOTS = new Set(['top', 'bottom', 'start', 'end', 'title', 'prefix', 'suffix']);
+
 function nodeToBlueprint(node: AdwNode, depth: number = 0): string {
   // An unresolved boundary exports as its real source reference. Replacing
   // `$MathButtons` with a Protota-invented class would corrupt the app source.
@@ -291,45 +364,73 @@ function nodeToBlueprint(node: AdwNode, depth: number = 0): string {
     ? `$${node.sourceClass}`
     : WIDGET_CLASS_MAP[node.type] || node.type;
   const props: string[] = [];
+  const layout: string[] = [];
 
   // A source-referenced boundary exports as its reference alone. Its children
   // and expand flags are Protota's projection of code the app owns; writing
   // them back would flatten the app's source.
   const isSourceReference = node.type === 'custom-widget' && !!node.sourceClass;
 
-  for (const [k, v] of Object.entries(node)) {
-    if (k === 'id' || k === 'type' || k === 'slot' || k === 'children' || k === 'sourceClass' || k === 'bindings' || v === undefined || v === false || v === '') continue;
-    if (isSourceReference && (k === 'vexpand' || k === 'hexpand')) continue;
-    if (k === 'title' && node.type === 'custom-widget' && v === node.sourceClass) continue;
-    if (k === 'title' && (node.type === 'button' || node.type === 'label')) {
-      props.push(`label: "${escapeBlueprintString(String(v))}";`);
-    } else if (typeof v === 'boolean') {
-      props.push(`${k}: ${v};`);
-    } else if (typeof v === 'number') {
-      props.push(`${k}: ${v};`);
-    } else {
-      props.push(`${k}: "${escapeBlueprintString(String(v))}";`);
+  const styleClasses = typeof node.styleClasses === 'string'
+    ? node.styleClasses.trim().split(/\s+/).filter(Boolean)
+    : [];
+
+  for (const [key, value] of Object.entries(node)) {
+    if (INTERNAL_PROPERTIES.has(key) || value === undefined || value === false || value === '') continue;
+    // Signal handlers imported as properties (`notify::x`) are not properties.
+    if (key.includes('::') || key.startsWith('notify')) continue;
+    if (STYLE_CLASS_PROPERTIES[key]) {
+      if (value === true) styleClasses.push(STYLE_CLASS_PROPERTIES[key]);
+      continue;
     }
+    if (isSourceReference && (key === 'vexpand' || key === 'hexpand')) continue;
+    if (key === 'title' && node.type === 'custom-widget' && value === node.sourceClass) continue;
+
+    if (key === 'title' && (node.type === 'button' || node.type === 'label' ||
+        node.type === 'toggle' || node.type === 'inscription')) {
+      props.push(`label: ${formatPropertyValue('label', value)};`);
+      continue;
+    }
+    const name = exportPropertyName(key);
+    const declaration = `${name}: ${formatPropertyValue(name, value)};`;
+    (LAYOUT_PROPERTIES.has(name) ? layout : props).push(declaration);
   }
-  for (const [k, expression] of Object.entries(node.bindings ?? {})) {
-    props.push(`${k}: bind ${expression};`);
+  for (const [key, expression] of Object.entries(node.bindings ?? {})) {
+    // `expression` is the placeholder for a binding the parser could not
+    // model; emitting it would produce source that does not compile.
+    if (!expression || expression === 'expression') continue;
+    props.push(`${exportPropertyName(key)}: bind ${expression};`);
+  }
+  if (styleClasses.length) {
+    props.push(`styles [ ${[...new Set(styleClasses)].map((name) => `"${name}"`).join(', ')} ]`);
   }
 
-  const children = (isSourceReference ? [] : node.children || []).map(child => {
-    if (!child.slot) return nodeToBlueprint(child, depth + 1);
-    return `${indent(depth + 1)}${child.slot} {\n` +
-      nodeToBlueprint(child, depth + 2) +
-      `${indent(depth + 1)}}\n`;
+  const childSource = (isSourceReference ? [] : node.children || []).map((child) => {
+    const body = nodeToBlueprint(child, depth + 1);
+    if (!child.slot) return body;
+    if (ANNOTATION_SLOTS.has(child.slot)) {
+      // `[top]` annotates the child that follows it.
+      return `${indent(depth + 1)}[${child.slot}]\n${body}`;
+    }
+    // Everything else is an object-valued property: `content: Widget { … };`.
+    const trimmed = body.replace(/^\s+/, '').replace(/\n$/, '');
+    return `${indent(depth + 1)}${child.slot}: ${trimmed};\n`;
   });
-  const idStr = node.id ? ` ${node.id}` : '';
 
-  if (children.length === 0 && props.length === 0) {
-    return `${indent(depth)}${className}${idStr} {}\n`;
+  const idStr = node.id ? ` ${node.id}` : '';
+  if (childSource.length === 0 && props.length === 0 && layout.length === 0) {
+    return `${indent(depth)}${className}${idStr} {\n${indent(depth)}}\n`;
   }
+  const layoutBlock = layout.length
+    ? `${indent(depth + 1)}layout {\n` +
+      layout.map((entry) => `${indent(depth + 2)}${entry}\n`).join('') +
+      `${indent(depth + 1)}}\n`
+    : '';
 
   return `${indent(depth)}${className}${idStr} {\n` +
-    props.map(p => `${indent(depth + 1)}${p}\n`).join('') +
-    children.join('') +
+    props.map((entry) => `${indent(depth + 1)}${entry}\n`).join('') +
+    layoutBlock +
+    childSource.join('') +
     `${indent(depth)}}\n`;
 }
 
@@ -540,6 +641,7 @@ function parseBlueprintRoots(code: string, diagnostics: ImportDiagnostic[]): Adw
     const properties: Record<string, BlueprintValue> = {};
     const bindings: Record<string, string> = {};
     const children: AdwNode[] = [];
+    let pendingSlot: string | undefined;
 
     while (cursor < tokens.length && tokens[cursor].value !== '}') {
       const key = tokens[cursor];
@@ -586,6 +688,14 @@ function parseBlueprintRoots(code: string, diagnostics: ImportDiagnostic[]): Adw
         // following sibling; consume it up to the statement terminator.
         while (cursor < tokens.length && !['{', ';', ',', '}'].includes(tokens[cursor].value)) cursor++;
         if (tokens[cursor]?.value === ';' || tokens[cursor]?.value === ',') cursor++;
+        continue;
+      }
+
+      // Child-type annotation: `[top]` places the object that follows it.
+      // Ignoring these loses the placement of every header-bar button.
+      if (key?.value === '[' && tokens[cursor + 1]?.kind === 'word' && tokens[cursor + 2]?.value === ']') {
+        pendingSlot = tokens[cursor + 1].value;
+        cursor += 3;
         continue;
       }
 
@@ -639,7 +749,8 @@ function parseBlueprintRoots(code: string, diagnostics: ImportDiagnostic[]): Adw
 
       if (isObjectStart(cursor)) {
         const child = parseObject();
-        if (child) children.push(child);
+        if (child) children.push(pendingSlot ? { ...child, slot: pendingSlot } : child);
+        pendingSlot = undefined;
         continue;
       }
 

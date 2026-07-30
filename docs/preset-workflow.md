@@ -125,6 +125,34 @@ Recorded 2026-07-30:
 | weather | first | 2.29% | 97.7% |
 | calculator | basic | 9.59% | 90.3% |
 
+## Export validation
+
+"Design here, ship there" is only trustworthy if what this tool emits builds.
+The upstream compiler is the authority, not our own parser:
+
+```sh
+npx tsx scripts/export-blueprint.mjs      # writes artifacts/blp/<app>-<screen>.blp
+# then, in a container with blueprint-compiler installed:
+for f in *.blp; do blueprint-compiler compile "$f" >/dev/null || echo "FAIL $f"; done
+```
+
+State as of 2026-07-30: **6 of 27** exported screens compile, up from 1. The
+emitter had been producing camelCase property names, `top { }` blocks instead
+of `[top]` annotations, quoted enums and object references, editor-only style
+flags (`suggested: true`), and signal handlers as properties.
+
+The remaining failures share one root cause worth fixing next: the importer
+keeps a source class only for unresolved boundaries, so a widget mapped onto a
+generic renderer type exports as that generic class and loses its real
+properties. A `Gtk.Revealer` imported as `bin` exports as `Adw.Bin` with
+`transition-type`, which the compiler rightly rejects. Retaining `sourceClass`
+on every imported node and preferring it on export is the Phase 3 round-trip
+work in `source-widget-architecture.md`.
+
+Smaller categories: duplicate object IDs after template expansion, and
+object-reference properties (`menu-model`) naming menus the export does not
+carry.
+
 ## Building UIs programmatically (agents)
 
 The same building blocks are a typed API — `src/utils/agent-api.ts`:

@@ -28,7 +28,8 @@ for (const name of readdirSync(presetDir).filter((file) => file.endsWith('.mocku
   payload.document.screens.forEach((screen, index) => {
     const single = { ...payload.document, screens: [screen] };
     const file = join(outDir, `${appId}-${screen.id || index}.blp`);
-    writeFileSync(file, mockupToBlueprint(single));
+    // Validation wants files that compile on their own.
+    writeFileSync(file, mockupToBlueprint(single, { standalone: true }));
     written += 1;
   });
 }

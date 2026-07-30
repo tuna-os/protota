@@ -389,6 +389,13 @@ function formatPropertyValue(name: string, value: unknown): string {
   if (typeof value === 'boolean' || typeof value === 'number') return String(value);
   const text = String(value);
   if (!STRING_PROPERTIES.has(name)) {
+    // Flags are written as `a | b | c`, unquoted. GtkBuilder spells them
+    // "no_emoji|no_spellcheck", which the compiler rejects as a string.
+    if (/^[a-z][a-z0-9_-]*(\s*\|\s*[a-z][a-z0-9_-]*)+$/.test(text)) {
+      // GTK flag members use underscores (`no_emoji`); sources and our own
+      // property-name normalisation both spell them with dashes.
+      return text.split('|').map((flag) => flag.trim().replace(/-/g, '_')).join(' | ');
+    }
     // GtkBuilder writes every value as text, so a numeric property arrives as
     // a string; emitting it quoted is rejected ("Cannot convert string to
     // number").
@@ -411,6 +418,18 @@ interface ExportContext {
   knownIds: Set<string>;
   /** Ids already written, so a flattened template cannot duplicate one. */
   usedIds: Set<string>;
+  /**
+   * Export has two purposes and they disagree on one point. Patching back
+   * into an app's own source must preserve a boundary's instance bindings,
+   * where `template.` still resolves. A standalone file has no template
+   * context, so the same binding stops it compiling.
+   */
+  standalone: boolean;
+}
+
+export interface BlueprintExportOptions {
+  /** Emit a file that compiles on its own, rather than a patch for app source. */
+  standalone?: boolean;
 }
 
 function nodeToBlueprint(node: AdwNode, depth: number = 0, context?: ExportContext): string {
@@ -481,7 +500,8 @@ function nodeToBlueprint(node: AdwNode, depth: number = 0, context?: ExportConte
     // where `template.` still resolves, so its instance bindings are kept. A
     // flattened widget has no template context, and emitting one there
     // produces Blueprint that does not compile.
-    if (!isSourceReference && (expression.startsWith('$') || expression.startsWith('template.'))) continue;
+    const flattened = expression.startsWith('$') || expression.startsWith('template.');
+    if (flattened && (!isSourceReference || context?.standalone)) continue;
     const boundName = exportPropertyName(key);
     if (classProperties && !classProperties.has(boundName)) continue;
     props.push(`${boundName}: bind ${expression};`);
@@ -536,14 +556,14 @@ function nodeToBlueprint(node: AdwNode, depth: number = 0, context?: ExportConte
     `${indent(depth)}}\n`;
 }
 
-export function mockupToBlueprint(doc: MockupDocument): string {
+export function mockupToBlueprint(doc: MockupDocument, options?: BlueprintExportOptions): string {
   const knownIds = new Set<string>();
   const collect = (node: AdwNode) => {
     if (node.id) knownIds.add(node.id);
     node.children?.forEach(collect);
   };
   doc.screens.forEach(screen => collect(screen.rootNode));
-  const context: ExportContext = { knownIds, usedIds: new Set() };
+  const context: ExportContext = { knownIds, usedIds: new Set(), standalone: options?.standalone ?? false };
   return 'using Gtk 4.0;\nusing Adw 1;\n\n' +
     doc.screens.map(screen => nodeToBlueprint(screen.rootNode, 0, context)).join('\n');
 }

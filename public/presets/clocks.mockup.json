@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exportedAt": "2026-07-30T08:45:36.073Z",
+  "exportedAt": "2026-07-30T08:52:45.239Z",
   "generatedBy": "scripts/generate-preset.mjs",
   "document": {
     "id": "clocks-preset",
@@ -3146,7 +3146,7 @@
                           "children": [
                             {
                               "id": "repeats",
-                              "type": "custom-widget",
+                              "type": "action-row",
                               "children": [
                                 {
                                   "id": "template-imported-2",
@@ -3179,7 +3179,6 @@
                                 }
                               ],
                               "sourceClass": "ClocksAlarmDayPickerRow",
-                              "title": "AdwPreferencesRow",
                               "activatable": false,
                               "selectable": false
                             },

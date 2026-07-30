@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exportedAt": "2026-07-30T08:45:43.289Z",
+  "exportedAt": "2026-07-30T08:52:52.093Z",
   "generatedBy": "scripts/generate-preset.mjs",
   "document": {
     "id": "ear-tag-preset",
@@ -311,7 +311,7 @@
                                 },
                                 {
                                   "id": "sidebar_action_bar",
-                                  "type": "custom-widget",
+                                  "type": "box",
                                   "children": [
                                     {
                                       "id": "select_all_button",
@@ -334,8 +334,7 @@
                                       "tooltipText": "Remove selected files"
                                     }
                                   ],
-                                  "sourceClass": "ActionBar",
-                                  "title": "ActionBar"
+                                  "orientation": "horizontal"
                                 }
                               ],
                               "widthRequest": 300,

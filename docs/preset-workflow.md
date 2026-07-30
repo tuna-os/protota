@@ -136,22 +136,23 @@ npx tsx scripts/export-blueprint.mjs      # writes artifacts/blp/<app>-<screen>.
 for f in *.blp; do blueprint-compiler compile "$f" >/dev/null || echo "FAIL $f"; done
 ```
 
-State as of 2026-07-30: **6 of 27** exported screens compile, up from 1. The
+State as of 2026-07-30: **8 of 27** exported screens compile, up from 1. The
 emitter had been producing camelCase property names, `top { }` blocks instead
 of `[top]` annotations, quoted enums and object references, editor-only style
 flags (`suggested: true`), and signal handlers as properties.
 
-The remaining failures share one root cause worth fixing next: the importer
-keeps a source class only for unresolved boundaries, so a widget mapped onto a
-generic renderer type exports as that generic class and loses its real
-properties. A `Gtk.Revealer` imported as `bin` exports as `Adw.Bin` with
-`transition-type`, which the compiler rightly rejects. Retaining `sourceClass`
-on every imported node and preferring it on export is the Phase 3 round-trip
-work in `source-widget-architecture.md`.
+Every imported node now keeps the class the source declared, and export uses
+it when the toolkit actually has that class, so a `Gtk.Revealer` no longer
+exports as `Adw.Bin`. Bindings onto flattened templates, dangling object
+references, and duplicate ids from a template used twice are all handled.
 
-Smaller categories: duplicate object IDs after template expansion, and
-object-reference properties (`menu-model`) naming menus the export does not
-carry.
+The remaining failures are one category: a property emitted onto a class that
+does not have it, because the renderer maps several source classes onto one
+generic type and export cannot tell which properties survived that mapping.
+Fixing it properly needs per-class property knowledge — GObject introspection
+data, or the widget registry in `source-widget-architecture.md` carrying a
+property list per adapter. Until then the compiler count is the honest measure
+of round-trip fidelity.
 
 ## Building UIs programmatically (agents)
 

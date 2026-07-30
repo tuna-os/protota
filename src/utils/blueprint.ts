@@ -322,11 +322,18 @@ const OBJECT_REFERENCE_PROPERTIES = new Set([
   'adjustment', 'group', 'extra-child', 'stack', 'sort-model', 'filter',
 ]);
 
-/** Properties whose values are enum identifiers, written unquoted. */
-const ENUM_PROPERTIES = new Set([
-  'orientation', 'halign', 'valign', 'transition-type', 'ellipsize', 'wrap-mode',
-  'justify', 'overflow', 'top-bar-style', 'bottom-bar-style', 'unit',
-  'vscrollbar-policy', 'hscrollbar-policy', 'direction',
+/**
+ * Properties that genuinely hold text. Everything else whose value looks like
+ * a bare identifier is an enum member: GTK has far too many enum properties to
+ * enumerate, and quoting one produces source the compiler rejects
+ * ("Cannot convert string to Gtk.SelectionMode").
+ */
+const STRING_PROPERTIES = new Set([
+  'title', 'label', 'subtitle', 'description', 'text', 'tooltip-text', 'name',
+  'icon-name', 'action-name', 'action-target', 'placeholder-text', 'value',
+  'category', 'comments', 'website', 'license', 'version', 'developer-name',
+  'application-name', 'translator-credits', 'accessible-role', 'css-name',
+  'menu-title', 'heading', 'body', 'default-response', 'close-response',
 ]);
 
 /** Editor-only bookkeeping that must never reach exported source. */
@@ -345,7 +352,7 @@ function exportPropertyName(key: string): string {
 function formatPropertyValue(name: string, value: unknown): string {
   if (typeof value === 'boolean' || typeof value === 'number') return String(value);
   const text = String(value);
-  if (ENUM_PROPERTIES.has(name) && /^[a-z][a-z0-9_-]*$/.test(text)) return text;
+  if (!STRING_PROPERTIES.has(name) && /^[a-z][a-z0-9_]*(-[a-z0-9_]+)*$/.test(text)) return text;
   // An object reference is an identifier, not a string literal.
   if (OBJECT_REFERENCE_PROPERTIES.has(name) && /^[A-Za-z_][\w-]*$/.test(text)) return text;
   return `"${escapeBlueprintString(text)}"`;
@@ -357,12 +364,28 @@ function formatPropertyValue(name: string, value: unknown): string {
  */
 const ANNOTATION_SLOTS = new Set(['top', 'bottom', 'start', 'end', 'title', 'prefix', 'suffix']);
 
-function nodeToBlueprint(node: AdwNode, depth: number = 0): string {
+interface ExportContext {
+  /** Object ids present in this document, so references can be validated. */
+  knownIds: Set<string>;
+  /** Ids already written, so a flattened template cannot duplicate one. */
+  usedIds: Set<string>;
+}
+
+function nodeToBlueprint(node: AdwNode, depth: number = 0, context?: ExportContext): string {
   // An unresolved boundary exports as its real source reference. Replacing
   // `$MathButtons` with a Protota-invented class would corrupt the app source.
-  const className = node.type === 'custom-widget' && node.sourceClass
-    ? `$${node.sourceClass}`
-    : WIDGET_CLASS_MAP[node.type] || node.type;
+  // Export the class the source declared when we know it; fall back to the
+  // renderer type's canonical class for widgets created in the editor.
+  // Only claim a class the toolkit actually has. An app-defined composite
+  // that was resolved from a template exports as the widget it resolved to,
+  // because `ClocksHeaderBar` means nothing outside that app's source.
+  const declaredClass = typeof node.sourceClass === 'string' ? node.sourceClass : '';
+  const isKnownLibraryClass = !!declaredClass && !!CLASS_TO_WIDGET_MAP[declaredClass];
+  const className = node.type === 'custom-widget' && declaredClass
+    ? `$${declaredClass}`
+    : isKnownLibraryClass
+      ? declaredClass
+      : WIDGET_CLASS_MAP[node.type] || node.type;
   const props: string[] = [];
   const layout: string[] = [];
 
@@ -387,11 +410,17 @@ function nodeToBlueprint(node: AdwNode, depth: number = 0): string {
     if (key === 'title' && node.type === 'custom-widget' && value === node.sourceClass) continue;
 
     if (key === 'title' && (node.type === 'button' || node.type === 'label' ||
-        node.type === 'toggle' || node.type === 'inscription')) {
+        node.type === 'toggle' || node.type === 'inscription' ||
+        node.type === 'menu-button' || node.type === 'split-button')) {
       props.push(`label: ${formatPropertyValue('label', value)};`);
       continue;
     }
     const name = exportPropertyName(key);
+    if (OBJECT_REFERENCE_PROPERTIES.has(name) && context && !context.knownIds.has(String(value))) {
+      // Menus and adjustments live outside the exported widget tree; a
+      // reference to one would not resolve.
+      continue;
+    }
     const declaration = `${name}: ${formatPropertyValue(name, value)};`;
     (LAYOUT_PROPERTIES.has(name) ? layout : props).push(declaration);
   }
@@ -399,6 +428,11 @@ function nodeToBlueprint(node: AdwNode, depth: number = 0): string {
     // `expression` is the placeholder for a binding the parser could not
     // model; emitting it would produce source that does not compile.
     if (!expression || expression === 'expression') continue;
+    // A source-referenced boundary is written back into the app's own source,
+    // where `template.` still resolves, so its instance bindings are kept. A
+    // flattened widget has no template context, and emitting one there
+    // produces Blueprint that does not compile.
+    if (!isSourceReference && (expression.startsWith('$') || expression.startsWith('template.'))) continue;
     props.push(`${exportPropertyName(key)}: bind ${expression};`);
   }
   if (styleClasses.length) {
@@ -406,7 +440,7 @@ function nodeToBlueprint(node: AdwNode, depth: number = 0): string {
   }
 
   const childSource = (isSourceReference ? [] : node.children || []).map((child) => {
-    const body = nodeToBlueprint(child, depth + 1);
+    const body = nodeToBlueprint(child, depth + 1, context);
     if (!child.slot) return body;
     if (ANNOTATION_SLOTS.has(child.slot)) {
       // `[top]` annotates the child that follows it.
@@ -417,7 +451,16 @@ function nodeToBlueprint(node: AdwNode, depth: number = 0): string {
     return `${indent(depth + 1)}${child.slot}: ${trimmed};\n`;
   });
 
-  const idStr = node.id ? ` ${node.id}` : '';
+  let exportedId = node.id;
+  if (context && exportedId) {
+    // Flattening a template used twice would otherwise emit its ids twice.
+    let candidate = exportedId;
+    let suffix = 2;
+    while (context.usedIds.has(candidate)) candidate = `${exportedId}_${suffix++}`;
+    context.usedIds.add(candidate);
+    exportedId = candidate;
+  }
+  const idStr = exportedId ? ` ${exportedId}` : '';
   if (childSource.length === 0 && props.length === 0 && layout.length === 0) {
     return `${indent(depth)}${className}${idStr} {\n${indent(depth)}}\n`;
   }
@@ -435,8 +478,15 @@ function nodeToBlueprint(node: AdwNode, depth: number = 0): string {
 }
 
 export function mockupToBlueprint(doc: MockupDocument): string {
+  const knownIds = new Set<string>();
+  const collect = (node: AdwNode) => {
+    if (node.id) knownIds.add(node.id);
+    node.children?.forEach(collect);
+  };
+  doc.screens.forEach(screen => collect(screen.rootNode));
+  const context: ExportContext = { knownIds, usedIds: new Set() };
   return 'using Gtk 4.0;\nusing Adw 1;\n\n' +
-    doc.screens.map(s => nodeToBlueprint(s.rootNode)).join('\n');
+    doc.screens.map(screen => nodeToBlueprint(screen.rootNode, 0, context)).join('\n');
 }
 
 /**
@@ -582,11 +632,12 @@ function makeNode(
   // GTK's default GtkBox orientation is horizontal; the renderer's editing
   // default is vertical. Imported boxes must carry GTK's semantics.
   if (node.type === 'box' && node.orientation === undefined) node.orientation = 'horizontal';
-  // MultiLayoutView machinery keeps its identity for slot resolution.
-  const canonical = canonicalClassName(sourceClass);
-  if (canonical === 'Adw.MultiLayoutView' || canonical === 'Adw.Layout' || canonical === 'Adw.LayoutSlot' || canonical === 'Adw.ButtonContent') {
-    node.sourceClass = canonical;
-  }
+  // Every imported node keeps the class the source declared. A widget mapped
+  // onto a generic renderer type still has to export as itself: a
+  // Gtk.Revealer rendered as a bin must not export as Adw.Bin, whose
+  // properties it does not have. Rendering stays keyed on `type`; identity is
+  // separate from appearance.
+  if (!isTemplateReference) node.sourceClass = canonicalClassName(sourceClass);
   // A child in the `popover` slot is a popup surface: real, but allocated
   // above the window, never inside the parent's layout.
   if (node.children?.length) node.children = node.children.filter(child => child.slot !== 'popover');

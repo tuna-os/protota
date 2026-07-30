@@ -10,6 +10,8 @@ interface Props {
   screenWidth?: number;
   screenHeight?: number;
   inheritedSlot?: string;
+  /** How this node's parent arranges its children, so alignment can apply. */
+  parentFlow?: ParentFlow;
   /**
    * Id of the header bar that carries the window controls. GTK draws them
    * once per window, on the content-side header — not on every header bar a
@@ -249,12 +251,62 @@ function childSlot(parent: AdwNode, child: AdwNode, index: number): string | und
   return undefined;
 }
 
+/** How a parent arranges children, which decides what alignment means. */
+type ParentFlow = 'row' | 'column' | 'grid';
+
+function parentFlowOf(node: AdwNode): ParentFlow {
+  if (node.type === 'grid') return 'grid';
+  if (node.type === 'box' || node.type === 'center-box' || node.type === 'wrap-box') {
+    return node.orientation === 'horizontal' ? 'row' : 'column';
+  }
+  if (node.type === 'header-bar' || node.type === 'overlay-split' || node.type === 'list-box-row') return 'row';
+  return 'column';
+}
+
+/**
+ * GTK halign/valign in CSS. On the cross axis alignment is `align-self`; on
+ * the main axis of a flex container it is auto margins, which is the only
+ * thing that positions a single child there. Grids use `justify-self` and
+ * `align-self` directly.
+ */
+function alignmentStyle(node: AdwNode, flow: ParentFlow): React.CSSProperties {
+  const style: React.CSSProperties = {};
+  const toSelf = (value: string) =>
+    value === 'fill' ? 'stretch' : value === 'center' ? 'center' : value === 'end' ? 'flex-end' : 'flex-start';
+  const mainAxisMargins = (value: string, axis: 'inline' | 'block') => {
+    const startKey = axis === 'inline' ? 'marginInlineStart' : 'marginBlockStart';
+    const endKey = axis === 'inline' ? 'marginInlineEnd' : 'marginBlockEnd';
+    if (value === 'center') { style[startKey] = 'auto'; style[endKey] = 'auto'; }
+    else if (value === 'end') style[startKey] = 'auto';
+    else if (value === 'start') style[endKey] = 'auto';
+  };
+
+  const halign = typeof node.halign === 'string' ? node.halign : undefined;
+  const valign = typeof node.valign === 'string' ? node.valign : undefined;
+
+  if (flow === 'grid') {
+    if (halign) style.justifySelf = halign === 'fill' ? 'stretch' : halign === 'end' ? 'end' : halign;
+    if (valign) style.alignSelf = toSelf(valign);
+    return style;
+  }
+  if (flow === 'row') {
+    if (valign) style.alignSelf = toSelf(valign);
+    if (halign && halign !== 'fill') mainAxisMargins(halign, 'inline');
+    if (halign === 'fill') style.flexGrow = 1;
+  } else {
+    if (halign) style.alignSelf = toSelf(halign);
+    if (valign && valign !== 'fill') mainAxisMargins(valign, 'block');
+    if (valign === 'fill') style.flexGrow = 1;
+  }
+  return style;
+}
+
 /**
  * Placement layout: how this node sits inside ITS PARENT's flex/grid context.
  * Applied to the wrapper div, which is the parent's direct child.
  */
-function placementLayout(node: AdwNode): React.CSSProperties | undefined {
-  const placement: React.CSSProperties = {};
+function placementLayout(node: AdwNode, flow: ParentFlow = 'column'): React.CSSProperties | undefined {
+  const placement: React.CSSProperties = { ...alignmentStyle(node, flow) };
   // GTK expand semantics: an expanding child (including an unresolved
   // custom-widget boundary such as Calculator's MathButtons) consumes the
   // parent's spare allocation instead of collapsing to a fallback minimum.
@@ -314,7 +366,7 @@ function plainText(text: string): string {
 
 export const AdwaitaRenderer: React.FC<Props> = ({
   node, screenId, screenWidth, screenHeight,
-  inheritedSlot, primaryHeaderBarId,
+  inheritedSlot, primaryHeaderBarId, parentFlow = 'column',
 }) => {
   // The screen root resolves which header bar owns the window controls.
   const primaryHeaderBar = primaryHeaderBarId ?? (screenWidth ? findPrimaryHeaderBarId(node) : undefined);
@@ -395,6 +447,7 @@ export const AdwaitaRenderer: React.FC<Props> = ({
       screenId={screenId}
       inheritedSlot={childSlot(node, child, index)}
       primaryHeaderBarId={primaryHeaderBar}
+      parentFlow={parentFlowOf(node)}
     />
   ));
   // GTK draws window controls in the header bar unless show-title-buttons is
@@ -439,7 +492,7 @@ export const AdwaitaRenderer: React.FC<Props> = ({
       className={`adw-node-wrapper${isSelected ? ' selected-outline' : ''}`}
       style={{
         ...(isSelected ? { position: 'relative' } : {}),
-        ...placementLayout(node),
+        ...placementLayout(node, parentFlow),
       }}
     >
       {isSelected && (
@@ -456,7 +509,7 @@ export const AdwaitaRenderer: React.FC<Props> = ({
         // layout-transparent (display: contents): the element itself is the
         // flex/grid item its parent lays out, so GTK expand and attach
         // semantics propagate instead of stopping at each wrapper.
-        style: { ...containerLayout(node), ...placementLayout(node) },
+        style: { ...containerLayout(node), ...placementLayout(node, parentFlow) },
         className: elementClass || undefined,
       },
         iconPrefix,

@@ -338,8 +338,10 @@ const STRING_PROPERTIES = new Set([
   'title', 'label', 'subtitle', 'description', 'text', 'tooltip-text', 'name',
   'icon-name', 'action-name', 'action-target', 'placeholder-text', 'value',
   'category', 'comments', 'website', 'license', 'version', 'developer-name',
-  'application-name', 'translator-credits', 'accessible-role', 'css-name',
+  'application-name', 'translator-credits', 'css-name',
   'menu-title', 'heading', 'body', 'default-response', 'close-response',
+  'visible-child-name', 'default-widget-name', 'group-name', 'stack-name',
+  'transition-name', 'tag',
 ]);
 
 /** Editor-only bookkeeping that must never reach exported source. */
@@ -386,6 +388,9 @@ function exportPropertyName(key: string): string {
 }
 
 function formatPropertyValue(name: string, value: unknown): string {
+  // A text property stays quoted even when its value happens to be numeric:
+  // a button labelled "0" is a string, not the number zero.
+  if (STRING_PROPERTIES.has(name)) return `"${escapeBlueprintString(String(value))}"`;
   if (typeof value === 'boolean' || typeof value === 'number') return String(value);
   const text = String(value);
   if (!STRING_PROPERTIES.has(name)) {
@@ -411,7 +416,12 @@ function formatPropertyValue(name: string, value: unknown): string {
  * Slots GTK expresses as a child-type annotation (`[top]`) rather than as an
  * object-valued property (`content: Widget { }`).
  */
-const ANNOTATION_SLOTS = new Set(['top', 'bottom', 'start', 'end', 'title', 'prefix', 'suffix']);
+const ANNOTATION_SLOTS = new Set([
+  'top', 'bottom', 'start', 'end', 'title', 'prefix', 'suffix',
+  // GtkOverlay's extra children and GtkListBox's placeholder are child types,
+  // not properties: `overlay: Widget { }` is rejected outright.
+  'overlay', 'placeholder', 'action',
+]);
 
 interface ExportContext {
   /** Object ids present in this document, so references can be validated. */
@@ -492,6 +502,7 @@ function nodeToBlueprint(node: AdwNode, depth: number = 0, context?: ExportConte
     const declaration = `${name}: ${formatPropertyValue(name, value)};`;
     (LAYOUT_PROPERTIES.has(name) ? layout : props).push(declaration);
   }
+  const emittedNames = new Set(props.map((entry) => entry.split(':')[0].trim()));
   for (const [key, expression] of Object.entries(node.bindings ?? {})) {
     // `expression` is the placeholder for a binding the parser could not
     // model; emitting it would produce source that does not compile.
@@ -504,6 +515,13 @@ function nodeToBlueprint(node: AdwNode, depth: number = 0, context?: ExportConte
     if (flattened && (!isSourceReference || context?.standalone)) continue;
     const boundName = exportPropertyName(key);
     if (classProperties && !classProperties.has(boundName)) continue;
+    // The resolved literal already carries this property's value.
+    if (emittedNames.has(boundName)) continue;
+    // A binding whose source object is not in this document cannot resolve.
+    // GtkBuilder bindings name an object id, which a flattened export may not
+    // carry.
+    const bindingSource = expression.split('.')[0].replace(/^\$/, '');
+    if (context?.standalone && bindingSource && !context.knownIds.has(bindingSource)) continue;
     props.push(`${boundName}: bind ${expression};`);
   }
   if (styleClasses.length) {

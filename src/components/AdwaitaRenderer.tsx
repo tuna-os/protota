@@ -18,15 +18,36 @@ interface Props {
   primaryHeaderBarId?: string;
 }
 
-/** The content-side header bar: the last one in document order. */
+/**
+ * The header bar that carries the window controls: the first visible one
+ * outside a split-view sidebar. Sidebar headers sit left of the content and
+ * do not own the controls; header bars inside hidden pages are not shown at
+ * all, so they must not claim them either.
+ */
 function findPrimaryHeaderBarId(node: AdwNode): string | undefined {
-  let found: string | undefined;
-  const visit = (candidate: AdwNode) => {
-    if (candidate.type === 'header-bar') found = candidate.id;
-    candidate.children?.forEach(visit);
+  const search = (candidate: AdwNode, inSidebar: boolean): string | undefined => {
+    if (candidate.visible === false) return undefined;
+    if (candidate.type === 'header-bar' && !inSidebar) return candidate.id;
+    // Only the visible child of a one-at-a-time container is on screen.
+    const shown = (candidate.type === 'stack' || candidate.type === 'view-stack' || candidate.type === 'navigation-view')
+      ? candidate.children?.slice(0, 1) ?? []
+      : candidate.children ?? [];
+    for (const child of shown) {
+      const found = search(child, inSidebar || child.slot === 'sidebar');
+      if (found) return found;
+    }
+    return undefined;
   };
-  visit(node);
-  return found;
+  return search(node, false) ?? (() => {
+    // A window whose only header bars are in sidebars still shows controls.
+    let fallback: string | undefined;
+    const visit = (candidate: AdwNode) => {
+      if (!fallback && candidate.type === 'header-bar') fallback = candidate.id;
+      candidate.children?.forEach(visit);
+    };
+    visit(node);
+    return fallback;
+  })();
 }
 
 /**

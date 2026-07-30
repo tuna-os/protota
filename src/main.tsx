@@ -6,6 +6,10 @@ import './index.css';
 // Import Adwaita web components (CSS + custom elements self-apply)
 import '@gjsify/adwaita-web';
 import { publishIconVariables, restoreStoredSourceIcons } from './utils/adwIcons';
+import { installVariableAdwaitaFonts } from './fonts';
+
+// Real variable-font weights instead of browser-synthesised bold.
+installVariableAdwaitaFonts();
 
 // Icons used by plain CSS rules rather than .adw-icon-- classes.
 publishIconVariables(['window-minimize', 'window-maximize', 'window-close']);

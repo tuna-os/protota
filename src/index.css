@@ -394,8 +394,8 @@ body,
    the window, a ToolbarView's content fills its frame, a split view's panes
    fill their columns, and single-child containers pass allocation through.
    Wrappers are layout-transparent conduits here, not sizing boundaries. */
-adw-application-window,
-adw-window {
+html adw-application-window,
+html adw-window {
   display: flex;
   flex-direction: column;
 }
@@ -485,7 +485,7 @@ adw-status-page {
   box-sizing: border-box;
 }
 
-adw-status-page .adw-status-page-child {
+html adw-status-page .adw-status-page-child {
   display: flex;
   flex-direction: column;
   align-items: stretch;
@@ -757,11 +757,31 @@ adw-status-page .adw-status-page-child {
 /* AdwStatusPage metrics matched to libadwaita, measured against native GNOME
    Weather: a 128px icon with generous space below it, and a wider gap before
    the action area than the shipped web defaults use. */
-adw-status-page .adw-status-page-icon {
+html adw-status-page .adw-status-page-icon {
   width: 128px;
   height: 128px;
   margin-bottom: 31px;
 }
-adw-status-page .adw-status-page-child {
+html adw-status-page .adw-status-page-child {
   margin-top: 37px;
+}
+
+/* AdwClamp is a max-width box that still passes vertical allocation through:
+   a `vexpand: true` child must be able to fill it, as GTK does. The shipped
+   `display: block` traps that growth, leaving dead space at the window
+   bottom (visible as a short Calculator keypad). */
+html adw-clamp {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+html adw-clamp > .adw-node-wrapper {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+html adw-clamp > .adw-node-wrapper > * {
+  flex: 1 1 auto;
+  min-height: 0;
 }

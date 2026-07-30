@@ -268,6 +268,10 @@ function containerLayout(node: AdwNode): React.CSSProperties | undefined {
       gridTemplateColumns: `repeat(${node.columns ?? derivedColumns}, minmax(0, 1fr))`,
       rowGap: node.rowSpacing ?? node.spacing ?? 6,
       columnGap: node.columnSpacing ?? node.spacing ?? 6,
+      // GtkGrid row-homogeneous divides the grid's allocation into equal
+      // rows; without it a keypad collapses to its buttons' minimum height
+      // instead of filling the region GTK gives it.
+      ...(node.rowHomogeneous ? { gridAutoRows: 'minmax(0, 1fr)', height: '100%' } : {}),
     };
   }
   if (node.type === 'scrolled-window') return { overflow: 'auto' };

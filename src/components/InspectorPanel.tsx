@@ -121,6 +121,47 @@ export const InspectorPanel: React.FC = () => {
         </div>
       )}
 
+      {/* Alignment is how GTK positions a widget: there are no coordinates,
+          so these properties are the equivalent of a design tool's align and
+          fill controls. */}
+      <div data-testid="alignment-controls">
+        <span className="protota-field-label" style={{ fontSize: "10px" }}>Alignment</span>
+        <div style={{ display: "flex", gap: "6px", marginTop: "4px" }}>
+          {(["halign", "valign"] as const).map((axis) => (
+            <select
+              key={axis}
+              className="protota-input"
+              aria-label={axis === "halign" ? "Horizontal alignment" : "Vertical alignment"}
+              value={typeof selectedNode[axis] === "string" ? (selectedNode[axis] as string) : ""}
+              onChange={(event) =>
+                updateNodeProps(selectedNode.id, { [axis]: event.target.value || undefined })
+              }
+              style={{ flex: 1 }}
+            >
+              <option value="">{axis === "halign" ? "H: default" : "V: default"}</option>
+              <option value="fill">fill</option>
+              <option value="start">start</option>
+              <option value="center">center</option>
+              <option value="end">end</option>
+            </select>
+          ))}
+        </div>
+        <div style={{ display: "flex", gap: "12px", marginTop: "6px" }}>
+          {(["hexpand", "vexpand"] as const).map((flag) => (
+            <label key={flag} style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "12px" }}>
+              <input
+                type="checkbox"
+                checked={selectedNode[flag] === true}
+                onChange={(event) =>
+                  updateNodeProps(selectedNode.id, { [flag]: event.target.checked || undefined })
+                }
+              />
+              {flag}
+            </label>
+          ))}
+        </div>
+      </div>
+
       <hr className="protota-divider" />
 
       {schema.map((field) => {

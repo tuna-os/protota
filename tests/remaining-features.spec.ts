@@ -74,3 +74,21 @@ test.describe("Slot-aware building", () => {
     await expect(selector.locator("select")).toHaveValue("end");
   });
 });
+
+test.describe("Alignment controls", () => {
+  test("inspector sets halign and expand on the selection", async ({ page }) => {
+    await page.goto("/");
+    await page.waitForSelector("adw-window", { timeout: 10000 });
+
+    await page.locator(".protota-canvas adw-header-bar").first().click({ position: { x: 8, y: 8 } });
+    const controls = page.getByTestId("alignment-controls");
+    await expect(controls).toBeVisible();
+
+    await controls.getByLabel("Horizontal alignment").selectOption("center");
+    await expect(controls.getByLabel("Horizontal alignment")).toHaveValue("center");
+
+    const hexpand = controls.locator("input[type=checkbox]").first();
+    await hexpand.check();
+    await expect(hexpand).toBeChecked();
+  });
+});

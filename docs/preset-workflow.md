@@ -101,6 +101,30 @@ BROADWAY_URL=http://127.0.0.1:8085 BROADWAY_APP_ID=calculator BROADWAY_PRESET_ID
 The Fedora runner covers GNOME versions newer than Ubuntu LTS. Artifacts
 (native PNG, Protota PNG, diff, metrics JSON) land in `test-results/`.
 
+## Fidelity report
+
+Track accuracy over time instead of spot-checking. With the native app
+serving Broadway (locally or through a tunnel):
+
+```sh
+npx tsx scripts/fidelity-report.mjs --broadway http://127.0.0.1:8085 weather
+npx tsx scripts/fidelity-report.mjs --broadway http://127.0.0.1:8085 --screen basic calculator
+```
+
+It records difference ratio, source-resolved similarity, foreground IoU and
+unresolved-boundary coverage into `artifacts/fidelity.json` and prints a
+Markdown table. `--screen` picks which screen of a multi-screen preset
+depicts the captured window. The tool measures; it does not launch
+containers, so the same command works against podman locally or a remote
+host.
+
+Recorded 2026-07-30:
+
+| App | Screen | Difference | Source-resolved |
+| --- | --- | ---: | ---: |
+| weather | first | 2.29% | 97.7% |
+| calculator | basic | 9.59% | 90.3% |
+
 ## Building UIs programmatically (agents)
 
 The same building blocks are a typed API — `src/utils/agent-api.ts`:

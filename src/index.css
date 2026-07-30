@@ -796,3 +796,27 @@ html adw-clamp > .adw-node-wrapper > * {
   flex: 1 1 auto;
   min-height: 0;
 }
+
+/* AdwOverlaySplitView panes. GTK gives the sidebar a fixed-ish width and the
+   content the rest; the sidebar carries the sidebar background. Rendered
+   here rather than by the web component, whose slot query is unscoped and
+   hoists nested toolbar-view content into its own pane. */
+html .protota-div-overlay-split {
+  display: flex;
+  flex-direction: row;
+  min-height: 0;
+  min-width: 0;
+}
+html .protota-div-overlay-split > [slot="sidebar"] > * {
+  flex: 0 0 auto;
+  width: var(--protota-sidebar-width, 240px);
+  min-width: 0;
+  background-color: var(--sidebar-bg-color, rgba(0, 0, 6, 0.04));
+  border-inline-end: 1px solid var(--sidebar-border-color, rgba(0, 0, 6, 0.07));
+}
+html .protota-div-overlay-split > [slot="content"] > *,
+html .protota-div-overlay-split > .adw-node-wrapper:not([slot]) > * {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+}

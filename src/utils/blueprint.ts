@@ -878,6 +878,31 @@ function resolveMultiLayoutViews(node: AdwNode): void {
   delete node.sourceClass;
 }
 
+/**
+ * Resolve `visible: bind <widget-id>.visible [inverted]` against the referenced
+ * widget's declared visibility. GTK widgets are visible unless the source says
+ * otherwise, so a pair of mutually exclusive buttons (one bound to the
+ * inverse of the other) renders as the one the app shows first — real static
+ * evidence, not a guess about runtime state.
+ */
+function resolveWidgetVisibilityBindings(root: AdwNode): void {
+  const byId = new Map<string, AdwNode>();
+  const index = (node: AdwNode) => { byId.set(node.id, node); node.children?.forEach(index); };
+  index(root);
+
+  const apply = (node: AdwNode) => {
+    const expression = node.bindings?.visible;
+    const reference = expression ? /^([A-Za-z_][A-Za-z0-9_]*)\.visible(\s+inverted)?$/.exec(expression) : null;
+    const target = reference ? byId.get(reference[1]) : null;
+    if (reference && target && node.visible === undefined) {
+      const targetVisible = target.visible !== false;
+      node.visible = reference[2] ? !targetVisible : targetVisible;
+    }
+    node.children?.forEach(apply);
+  };
+  apply(root);
+}
+
 export function blueprintToDocument(code: string, title = 'Imported GNOME App'): MockupDocument {
   const { roots: allRoots, diagnostics } = blueprintImport(code);
   // Real UI files declare popovers, panels, and helper widgets as siblings of
@@ -886,6 +911,7 @@ export function blueprintToDocument(code: string, title = 'Imported GNOME App'):
     root.type === 'window' || root.type === 'dialog' || root.type === 'preferences-dialog' || root.type === 'about-dialog');
   const roots = windowRoots.length ? windowRoots : allRoots;
   roots.forEach(resolveMultiLayoutViews);
+  roots.forEach(resolveWidgetVisibilityBindings);
   const inferType = (root: AdwNode): ScreenTemplateType => root.type === 'preferences-dialog' ? 'preferences' : root.type === 'dialog' ? 'dialog' : 'standard';
   const screens: Screen[] = roots.map((root, index) => ({
     id: `imported-screen-${index + 1}`,

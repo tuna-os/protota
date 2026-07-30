@@ -429,6 +429,14 @@ interface ExportContext {
   /** Ids already written, so a flattened template cannot duplicate one. */
   usedIds: Set<string>;
   /**
+   * Original id → exported id. Renaming a duplicate is only half the job: a
+   * property naming the original would otherwise resolve to whichever copy
+   * kept the name, which is a different widget.
+   */
+  idMap: Map<AdwNode, string>;
+  /** Original id → the single exported id references should point at. */
+  renames: Map<string, string>;
+  /**
    * Export has two purposes and they disagree on one point. Patching back
    * into an app's own source must preserve a boundary's instance bindings,
    * where `template.` still resolves. A standalone file has no template
@@ -499,6 +507,13 @@ function nodeToBlueprint(node: AdwNode, depth: number = 0, context?: ExportConte
       // reference to one would not resolve.
       continue;
     }
+    if (OBJECT_REFERENCE_PROPERTIES.has(name) && context) {
+      const renamed = context.renames.get(String(value));
+      if (renamed) {
+        props.push(`${name}: ${renamed};`);
+        continue;
+      }
+    }
     const declaration = `${name}: ${formatPropertyValue(name, value)};`;
     (LAYOUT_PROPERTIES.has(name) ? layout : props).push(declaration);
   }
@@ -548,15 +563,7 @@ function nodeToBlueprint(node: AdwNode, depth: number = 0, context?: ExportConte
     return `${indent(depth + 1)}${slotName}: ${trimmed};\n`;
   });
 
-  let exportedId = node.id;
-  if (context && exportedId) {
-    // Flattening a template used twice would otherwise emit its ids twice.
-    let candidate = exportedId;
-    let suffix = 2;
-    while (context.usedIds.has(candidate)) candidate = `${exportedId}_${suffix++}`;
-    context.usedIds.add(candidate);
-    exportedId = candidate;
-  }
+  const exportedId = context?.idMap.get(node) ?? node.id;
   const idStr = exportedId ? ` ${exportedId}` : '';
   if (childSource.length === 0 && props.length === 0 && layout.length === 0) {
     return `${indent(depth)}${className}${idStr} {\n${indent(depth)}}\n`;
@@ -581,7 +588,28 @@ export function mockupToBlueprint(doc: MockupDocument, options?: BlueprintExport
     node.children?.forEach(collect);
   };
   doc.screens.forEach(screen => collect(screen.rootNode));
-  const context: ExportContext = { knownIds, usedIds: new Set(), standalone: options?.standalone ?? false };
+  // Assign exported ids up front, so a reference emitted before its target is
+  // written still resolves to the right widget.
+  const idMap = new Map<AdwNode, string>();
+  const renames = new Map<string, string>();
+  const usedIds = new Set<string>();
+  const assign = (node: AdwNode) => {
+    if (node.id) {
+      let candidate = node.id;
+      let suffix = 2;
+      while (usedIds.has(candidate)) candidate = `${node.id}_${suffix++}`;
+      usedIds.add(candidate);
+      idMap.set(node, candidate);
+      // The first widget to claim an id is the one references mean.
+      if (!renames.has(node.id)) renames.set(node.id, candidate);
+    }
+    node.children?.forEach(assign);
+  };
+  doc.screens.forEach((screen) => assign(screen.rootNode));
+
+  const context: ExportContext = {
+    knownIds, usedIds, idMap, renames, standalone: options?.standalone ?? false,
+  };
   return 'using Gtk 4.0;\nusing Adw 1;\n\n' +
     doc.screens.map(screen => nodeToBlueprint(screen.rootNode, 0, context)).join('\n');
 }

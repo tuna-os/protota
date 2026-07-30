@@ -136,7 +136,7 @@ npx tsx scripts/export-blueprint.mjs      # writes artifacts/blp/<app>-<screen>.
 for f in *.blp; do blueprint-compiler compile "$f" >/dev/null || echo "FAIL $f"; done
 ```
 
-State as of 2026-07-30: **15 of 27** exported screens compile, up from 1. The
+State as of 2026-07-30: **19 of 27** exported screens compile, up from 1. The
 emitter had been producing camelCase property names, `top { }` blocks instead
 of `[top]` annotations, quoted enums and object references, editor-only style
 flags (`suggested: true`), and signal handlers as properties.
@@ -170,75 +170,3 @@ file on its own has no template context. Validation uses standalone mode.
 Remaining failures are a long tail: menus and adjustments the export does not
 carry, string values for object-typed properties, and widgets whose child is a
 string in source. Tracked in issue #77.
-
-
-## Export validation
-
-"Design here, ship there" is only trustworthy if what this tool emits builds.
-The upstream compiler is the authority, not our parser:
-
-27 Blueprint file(s) in /home/james/dev/tuna-os/protota/artifacts/blp
-FAIL $f
-
-State as of 2026-07-30: **6 of 27** exported screens compile. The emitter was
-producing camelCase property names,  blocks instead of 
-annotations, quoted enums and object references, editor-only style flags
-(), and signal handlers as properties — all now fixed.
-
-The remaining failures share one root cause worth fixing next: **the importer
-keeps the source class only for unresolved boundaries**, so a widget mapped
-onto a generic renderer type exports as that generic class and loses its real
-properties. A  imported as  exports as  with
-, which the compiler rightly rejects. Retaining 
-on every imported node and preferring it on export is the Phase 3 round-trip
-fidelity work described in .
-
-Smaller remaining categories: duplicate object IDs after template expansion,
-and object-reference properties () pointing at menus the export
-does not carry.
-
-## Building UIs programmatically (agents)
-
-The same building blocks are a typed API — `src/utils/agent-api.ts`:
-
-```ts
-import { MockupBuilder } from './src/utils/agent-api';
-
-const doc = new MockupBuilder('My App')
-  .addScreen('standard', 'Main')
-  .addWidget('toolbar-view').addWidget('header-bar', { title: 'My App' }).up()
-  .addScreen('preferences', 'Preferences')
-  .connectScreens('Main', 'Preferences')          // flow edge, drawn on canvas
-  .build();
-
-// Or start from real source / an existing preset:
-const imported = new MockupBuilder('From Source')
-  .importScreens(files, 'window.blp')             // full importer: templates, Vala facts, boundaries
-  .overrideNode('sidebar', { visible: false })    // finishing-style override
-  .build();
-```
-
-`MockupBuilder.fromDocument(doc)` continues from any existing document.
-`validate()` checks child legality before you ship.
-
-GNOME layout is slot-driven, so placement is part of adding a widget:
-
-```ts
-MockupBuilder.slotsFor(header-bar);   // [start, title, end]
-MockupBuilder.childrenFor(list-box);  // widgets a boxed list accepts
-
-builder.addWidget(button, { title: Open, slot: start });
-```
-
-A slot the container does not offer is rejected rather than silently placed
-somewhere else. In the editor the same control is the Slot selector at the
-top of the Inspector.
-
-## In the editor (users)
-
-- **Flows**: select anything in a screen — the Inspector shows the screen's
-  flows with add/remove. The toolbar **Flows** button toggles the arrows.
-- **Save JSON / Code Export / PNG**: toolbar buttons export the document, the
-  generated Blueprint, or a screen image.
-- Importing a `.blp`/`.ui` file via File → Import runs the same importer as
-  the preset pipeline.

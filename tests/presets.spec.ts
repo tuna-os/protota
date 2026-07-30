@@ -67,24 +67,40 @@ test.describe('GNOME Core app presets (#6)', () => {
     }
   });
 
-  test('preset rendering matches snapshot expectations', async ({ page }) => {
-    const presetsToTest = ['calculator', 'settings', 'text-editor', 'files', 'calendar', 'weather', 'clocks', 'disks', 'web', 'software'];
-    for (const presetId of presetsToTest) {
-      await page.evaluate(async (id) => {
-        const res = await fetch(`./presets/${id}.mockup.json`);
-        const data = await res.json();
-        localStorage.setItem('protota_doc_v1', JSON.stringify(data.document));
+  // Structural checks rather than pixel snapshots.
+  //
+  // Snapshotting our own render compares the app to itself: it cannot catch a
+  // fidelity regression (the native app is the oracle for that, via
+  // tests/broadway-reference.spec.ts and scripts/fidelity-report.mjs), and it
+  // is sensitive to the font stack of whoever runs it, so the same commit
+  // passed CI while failing locally. It produced only false signals. What is
+  // worth asserting is that every shipped preset still loads and renders the
+  // structure it claims (#87).
+  for (const presetId of ['calculator', 'settings', 'text-editor', 'files', 'calendar',
+                          'weather', 'clocks', 'disks', 'web', 'software']) {
+    test(`${presetId} preset loads and renders its screens`, async ({ page }) => {
+      const expected = await page.evaluate(async (id) => {
+        const response = await fetch(`./presets/${id}.mockup.json`);
+        const payload = await response.json();
+        localStorage.setItem('protota_doc_v1', JSON.stringify(payload.document));
+        if (payload.sourceIcons) {
+          localStorage.setItem('protota_source_icons_v1', JSON.stringify(payload.sourceIcons));
+        }
+        return { screens: payload.document.screens.length };
       }, presetId);
       await page.reload();
-      await page.waitForSelector('adw-window', { timeout: 10000 });
-      // Deselect any selected node to keep snapshots clean
-      await page.keyboard.press('Escape');
-      await page.waitForTimeout(300);
-      // Multi-screen presets render several windows; snapshot the first.
-      const windowEl = page.locator('adw-window').first();
-      await expect(windowEl).toBeVisible();
-      // Compare rendered window canvas directly against official GNOME application screenshots
-      await expect(windowEl).toHaveScreenshot(`${presetId}.png`, { maxDiffPixelRatio: 0.15 });
-    }
-  });
+      // Published once fonts, runtime icon CSS and custom-element upgrades
+      // have painted, so the assertions below see a settled tree.
+      await page.waitForSelector('html[data-protota-ready]', { timeout: 15000 });
+
+      const surfaces = page.locator('[data-protota-render-surface="true"]');
+      await expect(surfaces).toHaveCount(expected.screens);
+      await expect(surfaces.first()).toBeVisible();
+
+      // A window that rendered nothing would still satisfy a count, so require
+      // real widgets inside the first screen.
+      const widgets = surfaces.first().locator('[data-protota-type]');
+      expect(await widgets.count()).toBeGreaterThan(3);
+    });
+  }
 });

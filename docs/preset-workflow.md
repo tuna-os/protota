@@ -171,6 +171,32 @@ Remaining failures are a long tail: menus and adjustments the export does not
 carry, string values for object-typed properties, and widgets whose child is a
 string in source. Tracked in issue #77.
 
+
+## Export validation
+
+"Design here, ship there" is only trustworthy if what this tool emits builds.
+The upstream compiler is the authority, not our parser:
+
+27 Blueprint file(s) in /home/james/dev/tuna-os/protota/artifacts/blp
+FAIL $f
+
+State as of 2026-07-30: **6 of 27** exported screens compile. The emitter was
+producing camelCase property names,  blocks instead of 
+annotations, quoted enums and object references, editor-only style flags
+(), and signal handlers as properties — all now fixed.
+
+The remaining failures share one root cause worth fixing next: **the importer
+keeps the source class only for unresolved boundaries**, so a widget mapped
+onto a generic renderer type exports as that generic class and loses its real
+properties. A  imported as  exports as  with
+, which the compiler rightly rejects. Retaining 
+on every imported node and preferring it on export is the Phase 3 round-trip
+fidelity work described in .
+
+Smaller remaining categories: duplicate object IDs after template expansion,
+and object-reference properties () pointing at menus the export
+does not carry.
+
 ## Building UIs programmatically (agents)
 
 The same building blocks are a typed API — `src/utils/agent-api.ts`:

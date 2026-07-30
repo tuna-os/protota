@@ -1,0 +1,135 @@
+# Building app presets from official GNOME source
+
+Presets are not hand-drawn: each one is **generated from the app's real
+Blueprint/GtkBuilder (and Vala) source**, then **hand-finished** with a small,
+reviewable set of overrides for state the source cannot settle statically.
+This document is the full workflow — the same one CI, agents, and humans use.
+
+```text
+catalog entry ──▶ import-gnome-app ──▶ finishing file ──▶ capture ──▶ Broadway verify ──▶ PR
+```
+
+## 1. Catalog entry
+
+`tests/fixtures/gnome-app-catalog.json` is the machine-readable source of
+truth. A source-importable app needs:
+
+```jsonc
+"calculator": {
+  "sourceImport": {
+    "repository": "https://gitlab.gnome.org/GNOME/gnome-calculator.git",
+    "tag": "49.2",          // MUST match the native app version used for verification
+    "importRoot": "src",    // directory walked for .blp/.ui/.vala files
+    "entry": "math-window.blp"
+  }
+}
+```
+
+The tag pin matters: the visual oracle (the real app under Broadway) and the
+imported source must be the same version, or you are comparing different UIs.
+
+## 2. Generate
+
+```sh
+npx tsx scripts/import-gnome-app.mjs calculator          # one app
+npx tsx scripts/import-gnome-app.mjs --all               # every catalogued app
+npx tsx scripts/import-gnome-app.mjs calculator --refresh  # re-clone after a tag bump
+```
+
+This clones into `.gnome-source-cache/` (gitignored) and writes
+`public/presets/<app>.mockup.json`. The importer resolves cross-file
+templates, discovers code-built composites from Vala construction facts, and
+keeps anything it cannot honestly render as a labelled `custom-widget`
+boundary — never a fake approximation. The import report (diagnostics count)
+is printed and embedded in the preset.
+
+## 3. Hand-finishing
+
+`presets-src/<app>.finishing.json` records every human decision, each with a
+`why`. It can declare multiple screens (mode variants, dialogs) and flow
+edges:
+
+```jsonc
+{
+  "title": "GNOME Calculator",
+  "screens": [
+    { "id": "basic", "entry": "math-window.blp", "title": "Basic", "width": 360, "height": 460,
+      "overrides": [
+        { "id": "_converter", "set": { "visible": false },
+          "why": "converter.set_visible(mode == CONVERSION); default mode is basic." }
+      ] },
+    { "id": "preferences", "entry": "math-preferences.blp", "title": "Preferences", "width": 460, "height": 420 }
+  ],
+  "edges": [ { "from": "basic", "to": "preferences", "why": "Main menu → Preferences" } ]
+}
+```
+
+Rules of thumb:
+- An override needs a `why` grounded in the app's source or observed runtime
+  behaviour — not taste.
+- Mode variants reuse the same entry and switch the visible stack page via
+  `visibleChildName`.
+- If GNOME renames a node id, generation **fails loudly** listing the stale
+  overrides — that is the drift alarm working.
+- Use the app's official appdata screenshots (`<image>` URLs in its
+  metainfo) to decide which states deserve screens.
+
+## 4. Visual review
+
+```sh
+npm run dev          # in one terminal
+npx tsx scripts/capture-preset.mjs calculator      # writes artifacts/preset-calculator.png
+```
+
+Captures the whole canvas — all screens plus flow arrows — with editor
+chrome hidden. Look at it. A passing test is not a review.
+
+## 5. Broadway verification (pixel metrics vs the real app)
+
+Run the app natively under Broadway and compare (see
+`docs/gnome-app-conformance.md` for recorded results):
+
+```sh
+podman build -f containers/broadway/Dockerfile.fedora \
+  --build-arg APP_PACKAGE=gnome-calculator --build-arg APP_COMMAND=gnome-calculator \
+  -t broadway-app containers/broadway
+podman run -d --rm -p 8085:8085 broadway-app
+BROADWAY_URL=http://127.0.0.1:8085 BROADWAY_APP_ID=calculator BROADWAY_PRESET_ID=calculator \
+  npx playwright test tests/broadway-reference.spec.ts
+```
+
+The Fedora runner covers GNOME versions newer than Ubuntu LTS. Artifacts
+(native PNG, Protota PNG, diff, metrics JSON) land in `test-results/`.
+
+## Building UIs programmatically (agents)
+
+The same building blocks are a typed API — `src/utils/agent-api.ts`:
+
+```ts
+import { MockupBuilder } from './src/utils/agent-api';
+
+const doc = new MockupBuilder('My App')
+  .addScreen('standard', 'Main')
+  .addWidget('toolbar-view').addWidget('header-bar', { title: 'My App' }).up()
+  .addScreen('preferences', 'Preferences')
+  .connectScreens('Main', 'Preferences')          // flow edge, drawn on canvas
+  .build();
+
+// Or start from real source / an existing preset:
+const imported = new MockupBuilder('From Source')
+  .importScreens(files, 'window.blp')             // full importer: templates, Vala facts, boundaries
+  .overrideNode('sidebar', { visible: false })    // finishing-style override
+  .build();
+```
+
+`MockupBuilder.fromDocument(doc)` continues from any existing document.
+`validate()` checks GNOME HIG child legality before you ship.
+
+## In the editor (users)
+
+- **Flows**: select anything in a screen — the Inspector shows the screen's
+  flows with add/remove. The toolbar **Flows** button toggles the arrows.
+- **Save JSON / Code Export / PNG**: toolbar buttons export the document, the
+  generated Blueprint, or a screen image.
+- Importing a `.blp`/`.ui` file via File → Import runs the same importer as
+  the preset pipeline.

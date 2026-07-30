@@ -2,6 +2,50 @@ import { describe, it, expect } from 'vitest';
 import { MockupBuilder, generateMockup } from '../utils/agent-api';
 import { mockupToBlueprint, blueprintToNode } from '../utils/blueprint';
 
+describe('MockupBuilder flow and import tooling', () => {
+  it('connects screens with flow edges by title', () => {
+    const doc = new MockupBuilder('Flow App')
+      .addScreen('standard', 'Main')
+      .addScreen('preferences', 'Preferences')
+      .connectScreens('Main', 'Preferences')
+      .build();
+    expect(doc.edges).toHaveLength(1);
+    expect(doc.edges[0].sourceId).toBe(doc.screens[0].id);
+    expect(doc.edges[0].targetId).toBe(doc.screens[1].id);
+  });
+
+  it('imports Blueprint source as screens and applies finishing overrides', () => {
+    const doc = new MockupBuilder('Imported App')
+      .importScreens([
+        { path: 'window.blp', content: 'Adw.ApplicationWindow { Adw.ToolbarView { Adw.HeaderBar bar {} Gtk.Box body { orientation: vertical; Gtk.Label hint { label: "Hi"; } } } }' },
+      ], 'window.blp', { width: 700, height: 500 })
+      .overrideNode('hint', { visible: false })
+      .build();
+    expect(doc.screens).toHaveLength(1);
+    expect(doc.screens[0].width).toBe(700);
+    const findHint = (node: typeof doc.screens[0]['rootNode']): boolean =>
+      (node.id === 'hint' && node.visible === false) || (node.children ?? []).some(findHint);
+    expect(findHint(doc.screens[0].rootNode)).toBe(true);
+  });
+
+  it('continues building from an existing document', () => {
+    const base = new MockupBuilder('Base').addScreen('standard', 'Main').build();
+    const extended = MockupBuilder.fromDocument(base)
+      .addScreen('dialog', 'Confirm')
+      .connectScreens('Main', 'Confirm')
+      .build();
+    expect(extended.screens).toHaveLength(2);
+    expect(extended.edges).toHaveLength(1);
+    expect(base.screens).toHaveLength(1);
+  });
+
+  it('rejects unknown screens and nodes loudly', () => {
+    const builder = new MockupBuilder('Strict').addScreen('standard', 'Main');
+    expect(() => builder.connectScreens('Main', 'Nowhere')).toThrow(/unknown screen/);
+    expect(() => builder.overrideNode('ghost', { visible: false })).toThrow(/no node/);
+  });
+});
+
 describe('MockupBuilder', () => {
   it('creates a document with a screen', () => {
     const doc = new MockupBuilder('Test App')

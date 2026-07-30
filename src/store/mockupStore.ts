@@ -275,6 +275,9 @@ interface MockupState {
   toggleColorScheme: () => void;
   toggleLint: () => void;
   toggleShowFlows: () => void;
+  /** Connect two screens with a navigation flow edge (#11). */
+  addEdge: (sourceScreenId: string, targetScreenId: string) => void;
+  removeEdge: (edgeId: string) => void;
   setShowAddScreenModal: (show: boolean) => void;
 }
 
@@ -461,6 +464,26 @@ export const useMockupStore = create<MockupState>((set, get) => {
     },
 
     toggleShowFlows: () => set({ showFlows: !get().showFlows }),
+
+    addEdge: (sourceScreenId, targetScreenId) => {
+      if (sourceScreenId === targetScreenId) return;
+      const duplicate = get().doc.edges.some(
+        (edge) => edge.sourceId === sourceScreenId && edge.targetId === targetScreenId,
+      );
+      if (duplicate) return;
+      const nextDoc = produce(get().doc, (draft) => {
+        draft.edges.push({ id: uid('edge'), sourceId: sourceScreenId, targetId: targetScreenId });
+      });
+      // Flow authoring implies the user wants to see the flows.
+      set({ ...pushSnapshot(nextDoc), showFlows: true });
+    },
+
+    removeEdge: (edgeId) => {
+      const nextDoc = produce(get().doc, (draft) => {
+        draft.edges = draft.edges.filter((edge) => edge.id !== edgeId);
+      });
+      set(pushSnapshot(nextDoc));
+    },
   };
 });
 

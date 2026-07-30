@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exportedAt": "2026-07-30T08:52:47.437Z",
+  "exportedAt": "2026-07-30T09:23:39.104Z",
   "generatedBy": "scripts/generate-preset.mjs",
   "document": {
     "id": "files-preset",
@@ -127,7 +127,7 @@
                               "type": "bin",
                               "children": [
                                 {
-                                  "id": "template-imported-148",
+                                  "id": "template-imported-172",
                                   "type": "header-bar",
                                   "children": [
                                     {
@@ -139,7 +139,7 @@
                                           "type": "stack",
                                           "children": [
                                             {
-                                              "id": "template-imported-149",
+                                              "id": "template-imported-173",
                                               "type": "stack-page",
                                               "children": [
                                                 {
@@ -158,11 +158,11 @@
                                               "name": "pathbar"
                                             },
                                             {
-                                              "id": "template-imported-150",
+                                              "id": "template-imported-174",
                                               "type": "stack-page",
                                               "children": [
                                                 {
-                                                  "id": "template-imported-151",
+                                                  "id": "template-imported-175",
                                                   "type": "box",
                                                   "children": [
                                                     {
@@ -173,7 +173,7 @@
                                                       "title": "NautilusLocationEntry"
                                                     },
                                                     {
-                                                      "id": "template-imported-152",
+                                                      "id": "template-imported-176",
                                                       "type": "button",
                                                       "children": [],
                                                       "iconName": "window-close-symbolic",
@@ -187,7 +187,7 @@
                                               "name": "location"
                                             },
                                             {
-                                              "id": "template-imported-153",
+                                              "id": "template-imported-177",
                                               "type": "stack-page",
                                               "children": [
                                                 {
@@ -303,7 +303,7 @@
                                       "slot": "start"
                                     },
                                     {
-                                      "id": "template-imported-154",
+                                      "id": "template-imported-178",
                                       "type": "bin",
                                       "children": [
                                         {
@@ -394,7 +394,7 @@
                                   "valign": "center"
                                 },
                                 {
-                                  "id": "template-imported-89",
+                                  "id": "template-imported-90",
                                   "type": "menu-button",
                                   "children": [],
                                   "tooltipText": "Server Address Information",
@@ -756,10 +756,8 @@
                                           "children": [
                                             {
                                               "id": "disk_space_level_bar",
-                                              "type": "custom-widget",
+                                              "type": "level-bar",
                                               "children": [],
-                                              "sourceClass": "GtkLevelBar",
-                                              "title": "GtkLevelBar",
                                               "hexpand": true
                                             },
                                             {

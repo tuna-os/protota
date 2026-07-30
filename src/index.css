@@ -920,3 +920,84 @@ html .protota-style-title-2 { font-size: 15pt; font-weight: 800; }
 html .protota-style-title-4 { font-size: 12pt; font-weight: 700; }
 html .protota-style-caption { font-size: 8pt; }
 html .protota-style-numeric { font-variant-numeric: tabular-nums; }
+
+/* ---- Bar and meter widgets ----
+   GtkProgressBar, GtkLevelBar and GtkScale have a defined Adwaita
+   appearance: a trough with a filled portion (and a handle for scales).
+   Drawing them is rendering a known widget, not inventing content; the fill
+   comes from the node's value/min/max via --protota-fill. */
+html .protota-div-progress-bar,
+html .protota-div-level-bar {
+  position: relative;
+  height: 4px;
+  border-radius: 999px;
+  background-color: var(--trough-color, rgba(0, 0, 6, 0.15));
+  overflow: hidden;
+  flex-shrink: 0;
+}
+html .protota-div-progress-bar::before,
+html .protota-div-level-bar::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: var(--protota-fill, 0%);
+  background-color: var(--accent-bg-color, #3584e4);
+  border-radius: inherit;
+}
+html .protota-div-level-bar::before {
+  background-color: var(--success-color, #2ec27e);
+}
+html .protota-div-scale {
+  position: relative;
+  height: 18px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+}
+html .protota-div-scale::before {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  height: 4px;
+  border-radius: 999px;
+  background:
+    linear-gradient(to right,
+      var(--accent-bg-color, #3584e4) 0 var(--protota-fill, 0%),
+      var(--trough-color, rgba(0, 0, 6, 0.15)) var(--protota-fill, 0%) 100%);
+}
+html .protota-div-scale::after {
+  content: "";
+  position: absolute;
+  left: var(--protota-fill, 0%);
+  width: 18px;
+  height: 18px;
+  margin-left: -9px;
+  border-radius: 50%;
+  background-color: var(--window-bg-color, #fff);
+  box-shadow: 0 0 0 1px var(--card-shade-color, rgba(0, 0, 6, 0.15)), 0 1px 2px rgba(0, 0, 6, 0.2);
+}
+
+/* A popover is a surface attached to a widget; on the canvas it is drawn
+   in place so a designer can lay out its contents. */
+html .protota-div-popover {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-s, 6px);
+  padding: var(--spacing-s, 6px);
+  border-radius: var(--popover-radius, 12px);
+  background-color: var(--popover-bg-color, #fff);
+  box-shadow: 0 1px 2px rgba(0, 0, 6, 0.12), 0 4px 12px rgba(0, 0, 6, 0.16);
+  min-width: 120px;
+}
+
+/* GtkListBoxRow: a plain row inside a boxed list. */
+html .protota-div-list-box-row {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-m, 12px);
+  padding: var(--spacing-m, 12px);
+  min-height: 34px;
+}
+html .protota-div-list-box-row + .protota-div-list-box-row {
+  border-top: 1px solid var(--separator-color, rgba(0, 0, 6, 0.07));
+}

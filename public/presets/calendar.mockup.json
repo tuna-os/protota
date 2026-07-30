@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exportedAt": "2026-07-30T08:52:43.958Z",
+  "exportedAt": "2026-07-30T09:23:35.733Z",
   "generatedBy": "scripts/generate-preset.mjs",
   "document": {
     "id": "calendar-preset",
@@ -1107,7 +1107,7 @@
                                               "children": [
                                                 {
                                                   "id": "no_events_row",
-                                                  "type": "custom-widget",
+                                                  "type": "list-box-row",
                                                   "children": [
                                                     {
                                                       "id": "imported-78",
@@ -1119,8 +1119,6 @@
                                                       "slot": "child"
                                                     }
                                                   ],
-                                                  "sourceClass": "ListBoxRow",
-                                                  "title": "ListBoxRow",
                                                   "activatable": false
                                                 }
                                               ],
@@ -2345,7 +2343,7 @@
                                               "children": [
                                                 {
                                                   "id": "no_events_row",
-                                                  "type": "custom-widget",
+                                                  "type": "list-box-row",
                                                   "children": [
                                                     {
                                                       "id": "imported-78",
@@ -2357,8 +2355,6 @@
                                                       "slot": "child"
                                                     }
                                                   ],
-                                                  "sourceClass": "ListBoxRow",
-                                                  "title": "ListBoxRow",
                                                   "activatable": false
                                                 }
                                               ],

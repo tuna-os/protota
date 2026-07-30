@@ -72,14 +72,14 @@ describe('Blueprint import', () => {
   it('keeps an unsupported short-form class and its following sibling', () => {
     const { roots, diagnostics } = blueprintImport(`
       Gtk.Box shell {
-        LevelBar meter {}
+        ImaginaryMeter meter {}
         Gtk.Button after { label: "OK"; }
       }
     `);
-    expect(roots[0].children?.[0]).toMatchObject({ id: 'meter', type: 'custom-widget', sourceClass: 'LevelBar' });
+    expect(roots[0].children?.[0]).toMatchObject({ id: 'meter', type: 'custom-widget', sourceClass: 'ImaginaryMeter' });
     expect(roots[0].children?.[1]).toMatchObject({ id: 'after', type: 'button', title: 'OK' });
     expect(diagnostics).toEqual([
-      expect.objectContaining({ code: 'renderer-does-not-support-class', sourceClass: 'LevelBar' }),
+      expect.objectContaining({ code: 'renderer-does-not-support-class', sourceClass: 'ImaginaryMeter' }),
     ]);
   });
 
@@ -182,7 +182,7 @@ describe('Blueprint import', () => {
         Gtk.Entry field {
           GestureClick { button: 0; }
           ShortcutController { Shortcut { trigger: "Menu"; } }
-          PopoverMenu context_menu { halign: start; }
+
         }
         Gtk.Button after { label: "OK"; }
       }

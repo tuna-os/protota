@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exportedAt": "2026-07-30T08:52:42.560Z",
+  "exportedAt": "2026-07-30T09:23:34.095Z",
   "generatedBy": "scripts/generate-preset.mjs",
   "document": {
     "id": "calculator-preset",
@@ -231,7 +231,16 @@
                                 {
                                   "id": "from_entry",
                                   "type": "entry",
-                                  "children": [],
+                                  "children": [
+                                    {
+                                      "id": "from_context_menu",
+                                      "type": "popover",
+                                      "children": [],
+                                      "menuModel": "context_menu_model",
+                                      "halign": "start",
+                                      "hasArrow": false
+                                    }
+                                  ],
                                   "acceptsTab": false,
                                   "wrapMode": "char",
                                   "inputHints": "no_emoji",
@@ -248,7 +257,16 @@
                                 {
                                   "id": "to_entry",
                                   "type": "entry",
-                                  "children": [],
+                                  "children": [
+                                    {
+                                      "id": "to_context_menu",
+                                      "type": "popover",
+                                      "children": [],
+                                      "menuModel": "context_menu_model",
+                                      "halign": "start",
+                                      "hasArrow": false
+                                    }
+                                  ],
                                   "acceptsTab": false,
                                   "wrapMode": "char",
                                   "inputHints": "no_emoji",
@@ -4908,7 +4926,16 @@
                                 {
                                   "id": "from_entry",
                                   "type": "entry",
-                                  "children": [],
+                                  "children": [
+                                    {
+                                      "id": "from_context_menu",
+                                      "type": "popover",
+                                      "children": [],
+                                      "menuModel": "context_menu_model",
+                                      "halign": "start",
+                                      "hasArrow": false
+                                    }
+                                  ],
                                   "acceptsTab": false,
                                   "wrapMode": "char",
                                   "inputHints": "no_emoji",
@@ -4925,7 +4952,16 @@
                                 {
                                   "id": "to_entry",
                                   "type": "entry",
-                                  "children": [],
+                                  "children": [
+                                    {
+                                      "id": "to_context_menu",
+                                      "type": "popover",
+                                      "children": [],
+                                      "menuModel": "context_menu_model",
+                                      "halign": "start",
+                                      "hasArrow": false
+                                    }
+                                  ],
                                   "acceptsTab": false,
                                   "wrapMode": "char",
                                   "inputHints": "no_emoji",
@@ -9585,7 +9621,16 @@
                                 {
                                   "id": "from_entry",
                                   "type": "entry",
-                                  "children": [],
+                                  "children": [
+                                    {
+                                      "id": "from_context_menu",
+                                      "type": "popover",
+                                      "children": [],
+                                      "menuModel": "context_menu_model",
+                                      "halign": "start",
+                                      "hasArrow": false
+                                    }
+                                  ],
                                   "acceptsTab": false,
                                   "wrapMode": "char",
                                   "inputHints": "no_emoji",
@@ -9602,7 +9647,16 @@
                                 {
                                   "id": "to_entry",
                                   "type": "entry",
-                                  "children": [],
+                                  "children": [
+                                    {
+                                      "id": "to_context_menu",
+                                      "type": "popover",
+                                      "children": [],
+                                      "menuModel": "context_menu_model",
+                                      "halign": "start",
+                                      "hasArrow": false
+                                    }
+                                  ],
                                   "acceptsTab": false,
                                   "wrapMode": "char",
                                   "inputHints": "no_emoji",
@@ -14262,7 +14316,16 @@
                                 {
                                   "id": "from_entry",
                                   "type": "entry",
-                                  "children": [],
+                                  "children": [
+                                    {
+                                      "id": "from_context_menu",
+                                      "type": "popover",
+                                      "children": [],
+                                      "menuModel": "context_menu_model",
+                                      "halign": "start",
+                                      "hasArrow": false
+                                    }
+                                  ],
                                   "acceptsTab": false,
                                   "wrapMode": "char",
                                   "inputHints": "no_emoji",
@@ -14279,7 +14342,16 @@
                                 {
                                   "id": "to_entry",
                                   "type": "entry",
-                                  "children": [],
+                                  "children": [
+                                    {
+                                      "id": "to_context_menu",
+                                      "type": "popover",
+                                      "children": [],
+                                      "menuModel": "context_menu_model",
+                                      "halign": "start",
+                                      "hasArrow": false
+                                    }
+                                  ],
                                   "acceptsTab": false,
                                   "wrapMode": "char",
                                   "inputHints": "no_emoji",
@@ -18940,7 +19012,16 @@
                                 {
                                   "id": "from_entry",
                                   "type": "entry",
-                                  "children": [],
+                                  "children": [
+                                    {
+                                      "id": "from_context_menu",
+                                      "type": "popover",
+                                      "children": [],
+                                      "menuModel": "context_menu_model",
+                                      "halign": "start",
+                                      "hasArrow": false
+                                    }
+                                  ],
                                   "acceptsTab": false,
                                   "wrapMode": "char",
                                   "inputHints": "no_emoji",
@@ -18957,7 +19038,16 @@
                                 {
                                   "id": "to_entry",
                                   "type": "entry",
-                                  "children": [],
+                                  "children": [
+                                    {
+                                      "id": "to_context_menu",
+                                      "type": "popover",
+                                      "children": [],
+                                      "menuModel": "context_menu_model",
+                                      "halign": "start",
+                                      "hasArrow": false
+                                    }
+                                  ],
                                   "acceptsTab": false,
                                   "wrapMode": "char",
                                   "inputHints": "no_emoji",

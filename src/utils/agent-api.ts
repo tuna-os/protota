@@ -15,6 +15,7 @@
 
 import type { MockupDocument, AdwNode, AdwNodeType, ScreenTemplateType } from '../types/mockup';
 import { LEGAL_CHILDREN, SCREEN_DEFAULTS } from '../types/mockup';
+import { blueprintBundleToDocument, type BlueprintSourceFile } from './blueprint';
 
 let _nextId = 0;
 function uid(): string {
@@ -103,6 +104,65 @@ export class MockupBuilder {
   /** Set document-level properties. */
   setProps(props: Partial<Pick<MockupDocument, 'colorScheme' | 'title' | 'edges'>>): this {
     Object.assign(this.doc, props);
+    return this;
+  }
+
+  /** Continue building from an existing document (e.g. a loaded preset). */
+  static fromDocument(doc: MockupDocument): MockupBuilder {
+    const builder = new MockupBuilder(doc.title);
+    builder.doc = JSON.parse(JSON.stringify(doc));
+    const lastScreen = builder.doc.screens[builder.doc.screens.length - 1];
+    builder._stack = lastScreen ? [lastScreen.rootNode] : [];
+    return builder;
+  }
+
+  /**
+   * Import screens from official Blueprint/GtkBuilder source — the same
+   * pipeline the preset generator uses (template linking, Vala enrichment
+   * when .vala files are supplied, honest custom-widget boundaries).
+   */
+  importScreens(files: BlueprintSourceFile[], entryPath: string, options?: { title?: string; width?: number; height?: number }): this {
+    const imported = blueprintBundleToDocument(files, entryPath, options?.title ?? this.doc.title);
+    for (const screen of imported.screens) {
+      if (options?.width) screen.width = options.width;
+      if (options?.height) screen.height = options.height;
+      this.doc.screens.push(screen);
+    }
+    const lastScreen = this.doc.screens[this.doc.screens.length - 1];
+    if (lastScreen) this._stack = [lastScreen.rootNode];
+    return this;
+  }
+
+  /** Resolve a screen by id or title. */
+  private findScreen(idOrTitle: string) {
+    return this.doc.screens.find(screen => screen.id === idOrTitle || screen.title === idOrTitle);
+  }
+
+  /**
+   * Connect two screens with a navigation flow edge (#11), rendered as an
+   * arrow on the canvas. Screens are matched by id or title.
+   */
+  connectScreens(from: string, to: string): this {
+    const source = this.findScreen(from);
+    const target = this.findScreen(to);
+    if (!source || !target) throw new Error(`connectScreens: unknown screen "${!source ? from : to}"`);
+    this.doc.edges.push({ id: uid(), sourceId: source.id, targetId: target.id });
+    return this;
+  }
+
+  /**
+   * Finishing-style override on any node by id: the same operation a
+   * presets-src finishing file performs (hide runtime-hidden regions, pick a
+   * visible stack page, set a mode label…).
+   */
+  overrideNode(nodeId: string, props: Partial<AdwNode>): this {
+    let applied = false;
+    const visit = (node: AdwNode) => {
+      if (node.id === nodeId) { Object.assign(node, props); applied = true; }
+      node.children?.forEach(visit);
+    };
+    this.doc.screens.forEach(screen => visit(screen.rootNode));
+    if (!applied) throw new Error(`overrideNode: no node with id "${nodeId}"`);
     return this;
   }
 

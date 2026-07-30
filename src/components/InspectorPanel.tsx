@@ -7,14 +7,23 @@ import { NodeActions } from "./NodeActions";
 import { IconPicker } from "./IconPicker";
 
 export const InspectorPanel: React.FC = () => {
-  const { doc, selectedNodeId, selectedScreenId, updateNodeProps } = useMockupStore();
+  const { doc, selectedNodeId, selectedScreenId, updateNodeProps, addEdge, removeEdge } = useMockupStore();
 
+  const selectedScreen = doc.screens.find((s) => s.id === selectedScreenId);
   const selectedNode: AdwNode | null = (() => {
-    if (!selectedNodeId || !selectedScreenId) return null;
-    const screen = doc.screens.find((s) => s.id === selectedScreenId);
-    if (!screen) return null;
-    return findNodeById([screen.rootNode], selectedNodeId);
+    if (!selectedNodeId || !selectedScreen) return null;
+    return findNodeById([selectedScreen.rootNode], selectedNodeId);
   })();
+  // Flow edges belong to the screen containing the selection.
+  const showFlowEditor = !!selectedScreen && doc.screens.length > 1;
+  const outgoingEdges = showFlowEditor
+    ? doc.edges.filter((edge) => edge.sourceId === selectedScreen.id)
+    : [];
+  const flowTargets = showFlowEditor
+    ? doc.screens.filter((screen) =>
+        screen.id !== selectedScreen.id &&
+        !outgoingEdges.some((edge) => edge.targetId === screen.id))
+    : [];
 
   if (!selectedNode) {
     return (
@@ -38,6 +47,39 @@ export const InspectorPanel: React.FC = () => {
           {selectedNode.type}
         </div>
       </div>
+
+      {showFlowEditor && (
+        <div data-testid="flow-editor">
+          <span className="protota-field-label" style={{ fontSize: "10px" }}>
+            Flows from “{selectedScreen.title}”
+          </span>
+          {outgoingEdges.map((edge) => {
+            const target = doc.screens.find((screen) => screen.id === edge.targetId);
+            return (
+              <div key={edge.id} style={{ display: "flex", alignItems: "center", gap: "6px", marginTop: "4px" }}>
+                <span style={{ flex: 1, fontSize: "12px" }}>→ {target?.title ?? edge.targetId}</span>
+                <button className="adw-button flat" aria-label={`Remove flow to ${target?.title ?? edge.targetId}`} onClick={() => removeEdge(edge.id)}>
+                  ✕
+                </button>
+              </div>
+            );
+          })}
+          {flowTargets.length > 0 && (
+            <select
+              className="protota-input"
+              aria-label="Add flow to screen"
+              value=""
+              onChange={(event) => { if (event.target.value) addEdge(selectedScreen.id, event.target.value); }}
+              style={{ marginTop: "6px", width: "100%" }}
+            >
+              <option value="">Add flow to…</option>
+              {flowTargets.map((screen) => (
+                <option key={screen.id} value={screen.id}>{screen.title}</option>
+              ))}
+            </select>
+          )}
+        </div>
+      )}
 
       <hr className="protota-divider" />
 

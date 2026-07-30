@@ -69,7 +69,9 @@
     "sourceImport": {
       "repository": "https://gitlab.gnome.org/GNOME/gnome-calculator.git",
       "uiPath": "src",
-      "entry": "math-window.blp"
+      "entry": "math-window.blp",
+      "tag": "49.2",
+      "importRoot": "src"
     },
     "suite": "core",
     "status": "preset",
@@ -107,7 +109,9 @@
     "sourceImport": {
       "repository": "https://gitlab.gnome.org/GNOME/gnome-calendar.git",
       "uiPath": "src/gui",
-      "entry": "gcal-window.blp"
+      "entry": "gcal-window.blp",
+      "tag": "49.1",
+      "importRoot": "src"
     },
     "suite": "core",
     "status": "preset",
@@ -126,7 +130,9 @@
     "sourceImport": {
       "repository": "https://gitlab.gnome.org/GNOME/gnome-clocks.git",
       "uiPath": "data/ui",
-      "entry": "window.ui"
+      "entry": "window.ui",
+      "tag": "49.0",
+      "importRoot": "."
     },
     "suite": "core",
     "status": "preset",
@@ -145,7 +151,8 @@
     "sourceImport": {
       "repository": "https://gitlab.gnome.org/GNOME/gnome-disk-utility.git",
       "uiPath": "src/resources/ui",
-      "entry": "gdu-window.blp"
+      "entry": "gdu-window.blp",
+      "importRoot": "src"
     },
     "suite": "core",
     "status": "preset",
@@ -164,7 +171,9 @@
     "sourceImport": {
       "repository": "https://gitlab.gnome.org/GNOME/nautilus.git",
       "uiPath": "src/resources/ui",
-      "entry": "nautilus-window.blp"
+      "entry": "nautilus-window.blp",
+      "tag": "49.1",
+      "importRoot": "src"
     },
     "suite": "core",
     "status": "preset",
@@ -183,7 +192,9 @@
     "sourceImport": {
       "repository": "https://gitlab.gnome.org/GNOME/gnome-control-center.git",
       "uiPath": "shell",
-      "entry": "cc-window.blp"
+      "entry": "cc-window.blp",
+      "tag": "49.1",
+      "importRoot": "."
     },
     "suite": "core",
     "status": "preset",
@@ -221,7 +232,9 @@
     "sourceImport": {
       "repository": "https://gitlab.gnome.org/GNOME/gnome-text-editor.git",
       "uiPath": "src",
-      "entry": "editor-window.ui"
+      "entry": "editor-window.ui",
+      "tag": "49.1",
+      "importRoot": "src"
     },
     "suite": "core",
     "status": "preset",
@@ -240,7 +253,9 @@
     "sourceImport": {
       "repository": "https://gitlab.gnome.org/GNOME/gnome-weather.git",
       "uiPath": "data",
-      "entry": "window.ui"
+      "entry": "window.ui",
+      "tag": "49.0",
+      "importRoot": "data"
     },
     "suite": "core",
     "status": "preset",

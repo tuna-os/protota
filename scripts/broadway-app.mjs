@@ -27,7 +27,9 @@ const environment = {
 };
 if (app.sourceImport) {
   environment.BROADWAY_SOURCE_REPOSITORY = app.sourceImport.repository;
-  environment.BROADWAY_SOURCE_UI_PATH = app.sourceImport.uiPath;
+  // importRoot is the directory the preset generator walks (may include Vala
+  // sources for static enrichment); fall back to the legacy uiPath.
+  environment.BROADWAY_SOURCE_UI_PATH = app.sourceImport.importRoot ?? app.sourceImport.uiPath;
   environment.BROADWAY_SOURCE_ENTRY = app.sourceImport.entry;
 }
 

@@ -33,8 +33,17 @@ downloads the result rather than writing into a local source tree. Unsupported
 GTK/Libadwaita widgets fail import explicitly, so the generated UI is never a
 plausible-but-wrong substitute.
 
+### Building presets and flows
+
+Presets are generated from official app source and hand-finished with
+reviewable override files — see **[docs/preset-workflow.md](docs/preset-workflow.md)**
+for the full toolchain (`scripts/import-gnome-app.mjs`,
+`scripts/capture-preset.mjs`, `presets-src/*.finishing.json`) and for the
+`MockupBuilder` agent API that exposes the same capabilities (source import,
+multi-screen flows, finishing overrides) programmatically.
+
 The `tests/fixtures/gnome-app-catalog.json` catalog connects a GNOME app,
-its source, its preset, and a canonical viewport. The manual **Broadway
+its source (repository + pinned tag), its preset, and a canonical viewport. The manual **Broadway
 Reference Capture** GitHub workflow runs the native app under GTK Broadway
 and uploads its capture alongside the matching Protota preset. This provides
 an external visual oracle while the structural tests keep the renderer honest.

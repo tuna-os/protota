@@ -415,7 +415,11 @@ export const AdwaitaRenderer: React.FC<Props> = ({
         'data-protota-type': node.type,
         ...(isExpandedBoundary ? { 'data-protota-expanded': 'true' } : {}),
         ...((node.type === 'window' || isDialogRoot) && screenWidth ? { 'data-protota-render-surface': 'true' } : {}),
-        style: containerLayout(node),
+        // Placement lives on the rendered element because the wrapper is
+        // layout-transparent (display: contents): the element itself is the
+        // flex/grid item its parent lays out, so GTK expand and attach
+        // semantics propagate instead of stopping at each wrapper.
+        style: { ...containerLayout(node), ...placementLayout(node) },
         className: divClass || undefined,
       },
         iconPrefix,

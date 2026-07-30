@@ -176,8 +176,19 @@ body,
   opacity: 0.7;
 }
 
+/* Renderer wrappers are layout-transparent: the rendered widget element is
+   the flex/grid item its parent lays out, so GTK expand, homogeneity, and
+   attach semantics propagate through the tree instead of stopping at each
+   wrapper. A selected node re-materialises its wrapper so the outline,
+   type badge, and add-buttons have a positioned box to anchor to. */
+.adw-node-wrapper {
+  display: contents;
+}
+
 /* ---- Selection chrome ---- */
 .adw-node-wrapper.selected-outline {
+  display: block;
+  position: relative;
   outline: 2px solid var(--accent-bg-color, #3584e4);
   outline-offset: 2px;
   border-radius: 4px;
@@ -450,7 +461,7 @@ adw-window > .adw-node-wrapper > *,
   min-width: 0;
   min-height: 0;
 }
-.protota-div-custom-widget-expanded > * {
+.protota-div-custom-widget-expanded > .adw-node-wrapper > * {
   flex: 1 1 auto;
   min-height: 0;
 }
@@ -467,7 +478,7 @@ adw-window > .adw-node-wrapper > *,
   align-items: center;
   width: 100%;
 }
-.protota-div-box[orientation="horizontal"] > * {
+.protota-div-box[orientation="horizontal"] > .adw-node-wrapper > * {
   flex: 1;
 }
 

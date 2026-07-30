@@ -1,64 +1,157 @@
-import React, { useState, useRef, useCallback, useEffect } from "react";
+import React, { useState, useRef, useCallback, useEffect, useMemo } from "react";
 import { useMockupStore } from "../store/mockupStore";
-// import { BreakpointBar } from "./BreakpointBar";
 import { AdwaitaRenderer } from "./AdwaitaRenderer";
-import { computerSymbolic, phoneSymbolic } from "@gjsify/adwaita-icons/devices";
+import { BottomBar } from "./BottomBar";
 import { windowCloseSymbolic } from "@gjsify/adwaita-icons/ui";
 import { toDataUri } from "@gjsify/adwaita-icons/utils";
 
+const CANVAS_PADDING = 60;
+const CANVAS_GAP = 40;
+const CANVAS_BOTTOM_BAR_H = 48;
+
+/** Total world-space width of all screens + gaps + padding. */
+function getTotalContentWidth(screens: { width?: number }[]): number {
+  return screens.reduce((sum, s) => sum + (s.width || 800), 0)
+    + CANVAS_GAP * (screens.length - 1) + CANVAS_PADDING * 2;
+}
+
+/**
+ * Compute new pan so that the world point under (mx, my) stays fixed
+ * when zoom changes from oldZoom → newZoom.
+ */
+function zoomAtPoint(
+  mx: number,
+  my: number,
+  oldZoom: number,
+  newZoom: number,
+  oldPan: { x: number; y: number },
+): { x: number; y: number } {
+  const wx = (mx - oldPan.x) / oldZoom;
+  const wy = (my - oldPan.y) / oldZoom;
+  return { x: mx - wx * newZoom, y: my - wy * newZoom };
+}
+
 export const ViewportCanvas: React.FC = () => {
   const { doc, selectNode, showFlows } = useMockupStore();
+
+  // Ref mirror of doc — lets stable callbacks read latest screens without re-creating
+  const docRef = useRef(doc);
+  docRef.current = doc;
+
   const [zoom, setZoom] = useState(1);
   const [pan, setPan] = useState({ x: 0, y: 0 });
+
+  // Ref versions so event handlers always read latest values without re-attaching
+  const zoomRef = useRef(zoom);
+  const panRef = useRef(pan);
+  zoomRef.current = zoom;
+  panRef.current = pan;
   const [isPanning, setIsPanning] = useState(false);
+  const isPanningRef = useRef(false);
+  const [spaceHeld, setSpaceHeld] = useState(false);
   const startPan = useRef({ x: 0, y: 0 });
   const spaceDown = useRef(false);
+  const canvasRef = useRef<HTMLDivElement>(null);
 
-  const handleWheel = useCallback((e: React.WheelEvent) => {
-    if (e.ctrlKey || e.metaKey) {
+  // --- Stable zoom helpers (read from refs, never re-create) ---
+
+  const zoomAtCenter = useCallback((factor: number) => {
+    const el = canvasRef.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    const mx = rect.width / 2;
+    const my = rect.height / 2;
+    const oldZ = zoomRef.current;
+    const newZ = Math.min(Math.max(oldZ * factor, 0.3), 2.5);
+    setPan(zoomAtPoint(mx, my, oldZ, newZ, panRef.current));
+    setZoom(newZ);
+  }, []);
+
+  const resetView = useCallback(() => {
+    const el = canvasRef.current;
+    if (!el || docRef.current.screens.length === 0) return;
+    setPan({
+      x: (el.clientWidth - getTotalContentWidth(docRef.current.screens)) / 2,
+      y: CANVAS_PADDING,
+    });
+    setZoom(1);
+  }, []);
+
+  // --- Wheel handler (stable, reads from refs) ---
+
+  useEffect(() => {
+    const el = canvasRef.current;
+    if (!el) return;
+    const handler = (e: WheelEvent) => {
+      const isOverCanvas = el.contains(e.target as Node);
+      if ((e.ctrlKey || e.metaKey) && isOverCanvas) {
+        e.preventDefault();
+        const rect = el.getBoundingClientRect();
+        const mx = e.clientX - rect.left;
+        const my = e.clientY - rect.top;
+        const factor = e.deltaY > 0 ? 0.9 : 1.1;
+        const oldZ = zoomRef.current;
+        const newZ = Math.min(Math.max(oldZ * factor, 0.3), 2.5);
+        setPan(zoomAtPoint(mx, my, oldZ, newZ, panRef.current));
+        setZoom(newZ);
+      } else if (e.shiftKey && isOverCanvas) {
+        e.preventDefault();
+        setPan((p) => ({ x: p.x - e.deltaY, y: p.y }));
+      } else if (!e.ctrlKey && !e.metaKey && !e.shiftKey) {
+        setPan((p) => ({ x: p.x - e.deltaX, y: p.y - e.deltaY }));
+      }
+    };
+    el.addEventListener("wheel", handler, { passive: false });
+    return () => el.removeEventListener("wheel", handler);
+  }, []);
+
+  // --- Mouse handlers (all stable via refs) ---
+
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    if (e.button === 1 || spaceDown.current) {
       e.preventDefault();
-      const zoomFactor = e.deltaY > 0 ? 0.9 : 1.1;
-      setZoom((z) => Math.min(Math.max(z * zoomFactor, 0.3), 2.5));
-    } else {
-      setPan((p) => ({ x: p.x - e.deltaX, y: p.y - e.deltaY }));
+      isPanningRef.current = true;
+      setIsPanning(true);
+      startPan.current = { x: e.clientX - panRef.current.x, y: e.clientY - panRef.current.y };
     }
   }, []);
 
-  const handleMouseDown = useCallback(
-    (e: React.MouseEvent) => {
-      if (e.button === 1 || spaceDown.current) {
-        e.preventDefault();
-        setIsPanning(true);
-        startPan.current = { x: e.clientX - pan.x, y: e.clientY - pan.y };
-      }
-    },
-    [pan],
-  );
+  const handleMouseMove = useCallback((e: React.MouseEvent) => {
+    if (isPanningRef.current) {
+      setPan({ x: e.clientX - startPan.current.x, y: e.clientY - startPan.current.y });
+    }
+  }, []);
 
-  const handleMouseMove = useCallback(
-    (e: React.MouseEvent) => {
-      if (isPanning) {
-        setPan({ x: e.clientX - startPan.current.x, y: e.clientY - startPan.current.y });
-      }
-    },
-    [isPanning],
-  );
+  const handleMouseUp = useCallback(() => {
+    isPanningRef.current = false;
+    setIsPanning(false);
+  }, []);
 
-  const handleMouseUp = useCallback(() => setIsPanning(false), []);
+  const handleCanvasClick = useCallback(() => {
+    canvasRef.current?.focus();
+    selectNode(null);
+  }, [selectNode]);
 
-  React.useEffect(() => {
+  // --- Keyboard: Escape + Space (pan mode) ---
+
+  useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.code === "Space") {
-        e.preventDefault();
-        spaceDown.current = true;
-      }
       if (e.key === "Escape") {
         selectNode(null);
+      }
+      if (e.code === "Space") {
+        if (!canvasRef.current?.contains(e.target as Node)) return;
+        e.preventDefault();
+        spaceDown.current = true;
+        setSpaceHeld(true);
       }
     };
     const onKeyUp = (e: KeyboardEvent) => {
       if (e.code === "Space") {
+        if (!canvasRef.current?.contains(e.target as Node)) return;
         spaceDown.current = false;
+        setSpaceHeld(false);
+        isPanningRef.current = false;
         setIsPanning(false);
       }
     };
@@ -68,13 +161,58 @@ export const ViewportCanvas: React.FC = () => {
       window.removeEventListener("keydown", onKeyDown);
       window.removeEventListener("keyup", onKeyUp);
     };
-  }, []);
+  }, [selectNode]);
 
-  // Auto-fit zoom on mobile screens (< 768px wide)
+  // --- Keyboard: zoom shortcuts (Ctrl+= / - / 0) — uses stable callbacks, no stale closure ---
+
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (
+        (e.target as HTMLElement)?.tagName === "INPUT" ||
+        (e.target as HTMLElement)?.tagName === "TEXTAREA"
+      )
+        return;
+      const mod = e.ctrlKey || e.metaKey;
+      if (e.key === "=" && mod) {
+        e.preventDefault();
+        zoomAtCenter(1.1);
+      }
+      if (e.key === "-" && mod) {
+        e.preventDefault();
+        zoomAtCenter(0.9);
+      }
+      if (e.key === "0" && mod) {
+        e.preventDefault();
+        resetView();
+      }
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [zoomAtCenter, resetView]);
+
+  // --- Custom events: zoom from MenuBar — uses stable callbacks, no stale closure ---
+
+  useEffect(() => {
+    const onZoomIn = () => zoomAtCenter(1.1);
+    const onZoomOut = () => zoomAtCenter(0.9);
+    const onZoomReset = () => resetView();
+    window.addEventListener("protota:zoom-in", onZoomIn);
+    window.addEventListener("protota:zoom-out", onZoomOut);
+    window.addEventListener("protota:zoom-reset", onZoomReset);
+    return () => {
+      window.removeEventListener("protota:zoom-in", onZoomIn);
+      window.removeEventListener("protota:zoom-out", onZoomOut);
+      window.removeEventListener("protota:zoom-reset", onZoomReset);
+    };
+  }, [zoomAtCenter, resetView]);
+
+  // --- Auto-fit zoom on mobile screens (< 768px wide) ---
+
   useEffect(() => {
     const autoFitMobile = () => {
-      if (window.innerWidth <= 768 && doc.screens.length > 0) {
-        const primaryWidth = doc.screens[0].width || 800;
+      const screens = docRef.current.screens;
+      if (window.innerWidth <= 768 && screens.length > 0) {
+        const primaryWidth = screens[0].width || 800;
         const availableWidth = window.innerWidth - 32;
         if (primaryWidth > availableWidth) {
           const fittedZoom = Math.max(availableWidth / primaryWidth, 0.35);
@@ -88,52 +226,7 @@ export const ViewportCanvas: React.FC = () => {
     return () => window.removeEventListener('resize', autoFitMobile);
   }, [doc.screens]);
 
-  // Zoom keyboard shortcuts (handled here since zoom state is local)
-  useEffect(() => {
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (
-        (e.target as HTMLElement)?.tagName === "INPUT" ||
-        (e.target as HTMLElement)?.tagName === "TEXTAREA"
-      )
-        return;
-      const mod = e.ctrlKey || e.metaKey;
-      if (e.key === "=" && mod) {
-        e.preventDefault();
-        setZoom((z) => Math.min(z * 1.1, 2.5));
-      }
-      if (e.key === "-" && mod) {
-        e.preventDefault();
-        setZoom((z) => Math.max(z * 0.9, 0.3));
-      }
-      if (e.key === "0" && mod) {
-        e.preventDefault();
-        setZoom(1);
-        setPan({ x: 0, y: 0 });
-      }
-    };
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
-  }, []);
-
-  // Listen for zoom events from MenuBar
-  useEffect(() => {
-    const onZoomIn = () => setZoom((z) => Math.min(z * 1.1, 2.5));
-    const onZoomOut = () => setZoom((z) => Math.max(z * 0.9, 0.3));
-    const onZoomReset = () => {
-      setZoom(1);
-      setPan({ x: 0, y: 0 });
-    };
-    window.addEventListener("protota:zoom-in", onZoomIn);
-    window.addEventListener("protota:zoom-out", onZoomOut);
-    window.addEventListener("protota:zoom-reset", onZoomReset);
-    return () => {
-      window.removeEventListener("protota:zoom-in", onZoomIn);
-      window.removeEventListener("protota:zoom-out", onZoomOut);
-      window.removeEventListener("protota:zoom-reset", onZoomReset);
-    };
-  }, []);
-
-  const handleCanvasClick = useCallback(() => selectNode(null), [selectNode]);
+  // --- Screen focus state ---
 
   // Flow-edge geometry: measured from the laid-out screen frames, in the
   // surface's own (pre-transform) coordinates so arrows pan/zoom with it.
@@ -167,14 +260,148 @@ export const ViewportCanvas: React.FC = () => {
 
   const [phoshScreenId, setPhoshScreenId] = useState<string | null>(null);
   const [desktopScreenId, setDesktopScreenId] = useState<string | null>(null);
+  const [focusedScreenIdx, setFocusedScreenIdx] = useState(0);
+
+  const focusedScreenIdxRef = useRef(focusedScreenIdx);
+  focusedScreenIdxRef.current = focusedScreenIdx;
+  const desktopScreenIdRef = useRef(desktopScreenId);
+  desktopScreenIdRef.current = desktopScreenId;
+  const phoshScreenIdRef = useRef(phoshScreenId);
+  phoshScreenIdRef.current = phoshScreenId;
+
+  // Clamp focusedScreenIdx when screens shrink (e.g. deletion)
+  useEffect(() => {
+    if (doc.screens.length > 0 && focusedScreenIdx >= doc.screens.length) {
+      setFocusedScreenIdx(doc.screens.length - 1);
+    }
+  }, [doc.screens.length, focusedScreenIdx]);
 
   const activePhoshScreen = doc.screens.find((s) => s.id === phoshScreenId);
   const activeDesktopScreen = doc.screens.find((s) => s.id === desktopScreenId);
 
+  // Memoized screen list for BottomBar — only recomputes when screen ids/titles change,
+  // not on every node edit inside a screen.
+  const screensForBottomBar = useMemo(
+    () => doc.screens.map((s, i) => ({ id: s.id, title: `${i + 1}: ${s.title}` })),
+    [doc.screens.map((s) => `${s.id}:${s.title}`).join('|')], // eslint-disable-line react-hooks/exhaustive-deps
+  );
+
+  // --- Stable screen-focus callbacks (read from refs) ---
+
+  const panToScreen = useCallback((idx: number) => {
+    const screens = docRef.current.screens;
+    if (!canvasRef.current || screens.length === 0) return;
+    const clampedIdx = Math.max(0, Math.min(idx, screens.length - 1));
+    const screen = screens[clampedIdx];
+    if (!screen) return;
+
+    const canvasW = canvasRef.current.clientWidth;
+    const currentZoom = zoomRef.current;
+
+    let screenX = CANVAS_PADDING;
+    for (let i = 0; i < clampedIdx; i++) {
+      screenX += (screens[i].width || 800) + CANVAS_GAP;
+    }
+
+    const screenW = screen.width || 800;
+    setPan({
+      x: (canvasW - screenW * currentZoom) / 2 - screenX * currentZoom,
+      y: CANVAS_PADDING,
+    });
+  }, []);
+
+  const handleFocusScreen = useCallback((idx: number) => {
+    const screens = docRef.current.screens;
+    if (screens.length === 0) return;
+    if (idx < 0 || idx >= screens.length) return;
+    setFocusedScreenIdx(idx);
+
+    if (desktopScreenIdRef.current !== null) {
+      setDesktopScreenId(screens[idx].id);
+    } else if (phoshScreenIdRef.current !== null) {
+      setPhoshScreenId(screens[idx].id);
+    } else {
+      panToScreen(idx);
+    }
+  }, [panToScreen]);
+
+  const handleFocusPrev = useCallback(() => {
+    handleFocusScreen(focusedScreenIdxRef.current - 1);
+  }, [handleFocusScreen]);
+
+  const handleFocusNext = useCallback(() => {
+    handleFocusScreen(focusedScreenIdxRef.current + 1);
+  }, [handleFocusScreen]);
+
+  // --- Stable BottomBar zoom callbacks (additive, distinct from keyboard multiplicative) ---
+
+  const handleZoomIn = useCallback(() => {
+    const el = canvasRef.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    const mx = rect.width / 2;
+    const my = rect.height / 2;
+    const oldZ = zoomRef.current;
+    const newZ = Math.min(oldZ + 0.1, 2.5);
+    setPan(zoomAtPoint(mx, my, oldZ, newZ, panRef.current));
+    setZoom(newZ);
+  }, []);
+
+  const handleZoomOut = useCallback(() => {
+    const el = canvasRef.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    const mx = rect.width / 2;
+    const my = rect.height / 2;
+    const oldZ = zoomRef.current;
+    const newZ = Math.max(oldZ - 0.1, 0.3);
+    setPan(zoomAtPoint(mx, my, oldZ, newZ, panRef.current));
+    setZoom(newZ);
+  }, []);
+
+  const handleZoomFit = useCallback(() => {
+    const el = canvasRef.current;
+    if (!el || docRef.current.screens.length === 0) return;
+    const screens = docRef.current.screens;
+    const canvasW = el.clientWidth;
+    const canvasH = el.clientHeight;
+    const totalContentW = getTotalContentWidth(screens);
+    const maxContentH = Math.max(...screens.map((s) => s.height || 600))
+      + 28 /* label */ + CANVAS_PADDING * 2;
+    const fitZoom = Math.min(canvasW / totalContentW, canvasH / maxContentH, 1.5);
+    setZoom(fitZoom);
+    const scaledW = totalContentW * fitZoom;
+    const scaledH = maxContentH * fitZoom;
+    setPan({
+      x: (canvasW - scaledW) / 2,
+      y: (canvasH - scaledH - CANVAS_BOTTOM_BAR_H) / 2,
+    });
+  }, []);
+
+  // --- Stable Desktop/Phosh toggle callbacks ---
+
+  const handleToggleDesktop = useCallback(() => {
+    setDesktopScreenId((prev) => {
+      if (prev) return null;
+      setPhoshScreenId(null);
+      return docRef.current.screens[focusedScreenIdxRef.current]?.id || null;
+    });
+  }, []);
+
+  const handleTogglePhone = useCallback(() => {
+    setPhoshScreenId((prev) => {
+      if (prev) return null;
+      setDesktopScreenId(null);
+      return docRef.current.screens[focusedScreenIdxRef.current]?.id || null;
+    });
+  }, []);
+
   return (
     <div
+      ref={canvasRef}
+      tabIndex={0}
       className="protota-canvas"
-      onWheel={handleWheel}
+
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
@@ -184,7 +411,10 @@ export const ViewportCanvas: React.FC = () => {
         flex: 1,
         overflow: "hidden",
         position: "relative",
+        outline: "none",
         cursor: isPanning ? "grabbing" : "default",
+        backgroundImage: "radial-gradient(circle, rgba(128,128,128,0.25) 1px, transparent 1px)",
+        backgroundSize: "20px 20px",
       }}
     >
       {/* GNOME Desktop Fullscreen Live Interactive Preview Mode */}
@@ -238,7 +468,6 @@ export const ViewportCanvas: React.FC = () => {
       )}
 
       {/* Phosh Fullscreen Phone Overlay Mode */}
-      {/* Phosh Fullscreen Phone Overlay Mode */}
       {activePhoshScreen && (
         <div className="protota-phosh-container">
           <div className="protota-phosh-header">
@@ -284,77 +513,25 @@ export const ViewportCanvas: React.FC = () => {
         </div>
       )}
 
-      {/* Zoom Controls */}
-      <div className="protota-zoom-bar">
-        <button
-          className="adw-button icon-only flat"
-          onClick={() => setZoom((z) => Math.max(z - 0.1, 0.3))}
-          title="Zoom Out (Ctrl+-)"
-          aria-label="−"
-        >
-          <span className="adw-icon adw-icon--list-remove"></span>
-        </button>
-        <span
-          style={{ fontSize: "var(--font-size-small, 9pt)", minWidth: "40px", textAlign: "center" }}
-        >
-          {Math.round(zoom * 100)}%
-        </span>
-        <button
-          className="adw-button icon-only flat"
-          onClick={() => setZoom((z) => Math.min(z + 0.1, 2.5))}
-          title="Zoom In (Ctrl+=)"
-          aria-label="+"
-        >
-          <span className="adw-icon adw-icon--list-add"></span>
-        </button>
-        <button
-          className="adw-button flat"
-          onClick={() => {
-            setZoom(1);
-            setPan({ x: 0, y: 0 });
-          }}
-          title="Reset Zoom (Ctrl+0)"
-        >
-          Reset
-        </button>
-        <button
-          className="adw-button suggested-action"
-          onClick={() => setDesktopScreenId(doc.screens[0]?.id || null)}
-          style={{ marginLeft: "8px" }}
-        >
-          <span
-            style={{
-              display: "inline-block",
-              width: "16px",
-              height: "16px",
-              maskImage: toDataUri(computerSymbolic),
-              WebkitMaskImage: toDataUri(computerSymbolic),
-              maskSize: "contain",
-              WebkitMaskSize: "contain",
-              backgroundColor: "currentColor",
-            }}
-          />
-          Desktop
-        </button>
-        <button
-          className="adw-button suggested-action"
-          onClick={() => setPhoshScreenId(doc.screens[0]?.id || null)}
-        >
-          <span
-            style={{
-              display: "inline-block",
-              width: "16px",
-              height: "16px",
-              maskImage: toDataUri(phoneSymbolic),
-              WebkitMaskImage: toDataUri(phoneSymbolic),
-              maskSize: "contain",
-              WebkitMaskSize: "contain",
-              backgroundColor: "currentColor",
-            }}
-          />
-          Phone
-        </button>
-      </div>
+      {/* Bottom Bar — Zoom + Desktop/Phone toggles */}
+      <BottomBar
+        zoom={zoom}
+        onZoomIn={handleZoomIn}
+        onZoomOut={handleZoomOut}
+        onZoomFit={handleZoomFit}
+        onZoomReset={resetView}
+        desktopScreenId={desktopScreenId}
+        onToggleDesktop={handleToggleDesktop}
+        phoshScreenId={phoshScreenId}
+        onTogglePhone={handleTogglePhone}
+        screens={screensForBottomBar}
+        focusedScreenIdx={focusedScreenIdx}
+        canFocusPrev={focusedScreenIdx > 0}
+        canFocusNext={focusedScreenIdx < doc.screens.length - 1}
+        onFocusPrev={handleFocusPrev}
+        onFocusNext={handleFocusNext}
+        onSelectScreen={handleFocusScreen}
+      />
 
       {/* Transformable Canvas Surface */}
       <div
@@ -366,10 +543,11 @@ export const ViewportCanvas: React.FC = () => {
           transition: isPanning ? "none" : "transform 0.05s ease-out",
           display: "inline-flex",
           alignItems: "flex-start",
-          gap: "40px",
-          padding: "60px",
+          gap: `${CANVAS_GAP}px`,
+          padding: `${CANVAS_PADDING}px`,
+          pointerEvents: spaceHeld || isPanning ? "none" : undefined,
           // No max-width: screens keep their real sizes side by side; pan and
-          // zoom handle overflow.
+          // zoom handle overflow. Positioned so the flow overlay can anchor.
           boxSizing: "border-box",
           position: "relative",
         }}
@@ -404,7 +582,7 @@ export const ViewportCanvas: React.FC = () => {
           <div
             key={screen.id}
             data-protota-flow-screen={screen.id}
-            style={{ display: "flex", flexDirection: "column", alignItems: "center" }}
+            style={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}
           >
             <div className="protota-screen-label" style={{ marginBottom: "8px" }}>
               {screen.title}

@@ -9,7 +9,7 @@ test.describe('Icon picker (#13)', () => {
   test.describe('Icon property fields show picker trigger', () => {
     test('status-page icon field opens visual picker', async ({ page }) => {
       // Add a status-page screen which has an icon property
-      await page.getByRole('button', { name: /add screen/i }).click();
+      await page.getByRole('button', { name: /new screen|add screen/i }).click();
       await page.getByRole('radio', { name: /status/i }).click();
       await page.getByRole('button', { name: /create screen/i }).click();
 
@@ -24,7 +24,7 @@ test.describe('Icon picker (#13)', () => {
 
     test('clicking icon trigger opens picker popover', async ({ page }) => {
       // Same setup — add a status-page
-      await page.getByRole('button', { name: /add screen/i }).click();
+      await page.getByRole('button', { name: /new screen|add screen/i }).click();
       await page.getByRole('radio', { name: /status/i }).click();
       await page.getByRole('button', { name: /create screen/i }).click();
 
@@ -45,7 +45,7 @@ test.describe('Icon picker (#13)', () => {
   test.describe('Icon search and selection', () => {
     test('search filters icons by name', async ({ page }) => {
       // Setup: add status-page, open icon picker
-      await page.getByRole('button', { name: /add screen/i }).click();
+      await page.getByRole('button', { name: /new screen|add screen/i }).click();
       await page.getByRole('radio', { name: /status/i }).click();
       await page.getByRole('button', { name: /create screen/i }).click();
       const statusPage = page.locator('adw-status-page').last();
@@ -67,7 +67,7 @@ test.describe('Icon picker (#13)', () => {
     });
 
     test('clicking an icon selects it and closes picker', async ({ page }) => {
-      await page.getByRole('button', { name: /add screen/i }).click();
+      await page.getByRole('button', { name: /new screen|add screen/i }).click();
       await page.getByRole('radio', { name: /status/i }).click();
       await page.getByRole('button', { name: /create screen/i }).click();
       const statusPage = page.locator('adw-status-page').last();
@@ -92,7 +92,7 @@ test.describe('Icon picker (#13)', () => {
 
   test.describe('Icon rendering', () => {
     test('picker icons render using adwaita-web CSS mask-image', async ({ page }) => {
-      await page.getByRole('button', { name: /add screen/i }).click();
+      await page.getByRole('button', { name: /new screen|add screen/i }).click();
       await page.getByRole('radio', { name: /status/i }).click();
       await page.getByRole('button', { name: /create screen/i }).click();
       const statusPage = page.locator('adw-status-page').last();

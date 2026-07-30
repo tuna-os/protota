@@ -22,7 +22,6 @@ export const TopBar: React.FC = () => {
     doc,
     undo,
     redo,
-    setShowAddScreenModal,
     selectedNodeId,
     deleteNode,
     selectNode,
@@ -32,6 +31,7 @@ export const TopBar: React.FC = () => {
     showFlows,
     toggleShowFlows,
     violations,
+    clearCanvas,
   } = useMockupStore();
   const [openMenu, setOpenMenu] = useState<string | null>(null);
   const [showExportModal, setShowExportModal] = useState(false);
@@ -86,9 +86,8 @@ export const TopBar: React.FC = () => {
       label: "File",
       items: [
         {
-          label: "New Screen",
-          action: () => setShowAddScreenModal(true),
-          shortcut: "Ctrl+N",
+          label: "New Project",
+          action: clearCanvas,
         },
         { label: "divider", divider: true },
         {

@@ -1,4 +1,4 @@
-import type { HTMLAttributes } from "react";
+import type { HTMLAttributes, RefAttributes } from "react";
 
 declare module "react" {
   namespace JSX {
@@ -44,6 +44,11 @@ declare module "react" {
       "adw-button": HTMLAttributes<HTMLElement>;
       "adw-entry": HTMLAttributes<HTMLElement>;
       "adw-wrap-box": HTMLAttributes<HTMLElement>;
+      "adw-drop-down": HTMLAttributes<HTMLElement> & RefAttributes<HTMLElement> & {
+        options?: { value: string; label: string }[];
+        selected?: number;
+        "enable-search"?: boolean;
+      };
     }
   }
 }

@@ -47,9 +47,9 @@ test.describe('Interactive canvas (#10)', () => {
       await expect(zoomBar.getByText(/100%/)).toBeVisible();
 
       // Zoom buttons
-      await expect(zoomBar.getByRole('button', { name: '−' })).toBeVisible();
-      await expect(zoomBar.getByRole('button', { name: '+' })).toBeVisible();
-      await expect(zoomBar.getByRole('button', { name: /reset/i })).toBeVisible();
+      await expect(zoomBar.getByRole('button', { name: /zoom out/i })).toBeVisible();
+      await expect(zoomBar.getByRole('button', { name: /zoom in/i })).toBeVisible();
+      await expect(zoomBar.getByRole('button', { name: /reset zoom/i })).toBeVisible();
     });
   });
 

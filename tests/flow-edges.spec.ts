@@ -22,7 +22,7 @@ test.describe('Flow edges (#11)', () => {
 
   test('user can author a flow edge from the inspector', async ({ page }) => {
     // Add a second screen to connect to.
-    await page.getByRole('button', { name: /add screen/i }).click();
+    await page.getByRole('button', { name: /new screen|add screen/i }).click();
     const dialog = page.locator('.protota-modal');
     await dialog.locator('input[type="text"]').fill('Details');
     await dialog.getByRole('button', { name: /create screen/i }).click();

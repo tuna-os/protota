@@ -279,6 +279,7 @@ interface MockupState {
   addEdge: (sourceScreenId: string, targetScreenId: string) => void;
   removeEdge: (edgeId: string) => void;
   setShowAddScreenModal: (show: boolean) => void;
+  clearCanvas: () => void;
 }
 
 export const useMockupStore = create<MockupState>((set, get) => {
@@ -483,6 +484,15 @@ export const useMockupStore = create<MockupState>((set, get) => {
         draft.edges = draft.edges.filter((edge) => edge.id !== edgeId);
       });
       set(pushSnapshot(nextDoc));
+    },
+
+    clearCanvas: () => {
+      const freshDoc: MockupDocument = {
+        ...get().doc,
+        edges: [],
+        screens: [],
+      };
+      set(pushSnapshot(freshDoc));
     },
   };
 });

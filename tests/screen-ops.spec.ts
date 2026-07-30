@@ -11,7 +11,7 @@ test.describe('Screen duplication & context menu (#18, #19)', () => {
     const before = await page.locator('adw-window').count();
 
     // Add a screen first
-    await page.getByRole('button', { name: /add screen/i }).click();
+    await page.getByRole('button', { name: /new screen|add screen/i }).click();
     await page.getByRole('textbox').first().fill('Copy Me');
     await page.getByRole('button', { name: /create/i }).click();
     await page.waitForTimeout(500);

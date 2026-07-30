@@ -105,6 +105,20 @@ body,
   width: 34px;
 }
 
+/* Toolbar icon — masked SVG icon for button content */
+.adw-button .adw-toolbar-icon {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  mask-size: contain;
+  -webkit-mask-size: contain;
+  mask-repeat: no-repeat;
+  -webkit-mask-repeat: no-repeat;
+  mask-position: center;
+  -webkit-mask-position: center;
+  background-color: currentColor;
+}
+
 /* Circular — round icon button */
 .adw-button.circular {
   padding: 0;
@@ -250,13 +264,47 @@ body,
   opacity: 0.85;
 }
 
+/* ---- Screen focus dropdown (opens upward in bottom bar) ---- */
+.protota-zoom-bar .protota-screen-dropdown .adw-drop-down-button {
+  min-width: 32px;
+  justify-content: center !important;
+  padding: var(--spacing-xs, 6px) var(--spacing-s, 9px) !important;
+}
+.protota-zoom-bar .protota-screen-dropdown .adw-drop-down-popover {
+  top: auto !important;
+  bottom: calc(100% + 6px) !important;
+}
+/* Hide the check mark; use bold font for the selected item instead */
+.protota-zoom-bar .protota-screen-dropdown .adw-drop-down-item-check {
+  display: none;
+}
+.protota-zoom-bar .protota-screen-dropdown .adw-drop-down-item.selected .adw-drop-down-item-label {
+  font-weight: 700;
+}
+/* Hide the chevron-down arrow on the trigger button — show only the number */
+.protota-zoom-bar .protota-screen-dropdown .adw-drop-down-arrow {
+  display: none;
+}
+/* Center the number in the trigger button */
+.protota-zoom-bar .protota-screen-dropdown .adw-drop-down-label {
+  flex: 0 0 auto !important;
+  text-align: center !important;
+}
+.protota-zoom-bar .adw-button.disabled {
+  opacity: var(--dim-opacity, 0.55);
+  cursor: default;
+  pointer-events: none;
+}
+
 /* ---- Zoom controls ---- */
 .protota-zoom-bar {
   position: absolute;
   bottom: var(--spacing-m, 12px);
-  left: var(--spacing-m, 12px);
+  left: 50%;
+  transform: translateX(-50%);
   z-index: 100;
-  background: var(--card-bg-color, #ffffff);
+  background: var(--headerbar-bg-color, #ffffff);
+  color: var(--headerbar-fg-color, rgba(0, 0, 6, 0.8));
   padding: var(--spacing-xs, 6px) var(--spacing-m, 12px);
   border-radius: var(--card-radius, 12px);
   box-shadow: 0 2px 8px var(--headerbar-shade-color, rgba(0, 0, 6, 0.12));
@@ -279,6 +327,12 @@ body,
 
 :root[data-protota-capture="true"] .adw-node-wrapper.selected-outline {
   outline: none;
+}
+
+/* Toggle pressed state for mode buttons */
+.adw-button.active,
+.adw-button.flat.active {
+  background-color: var(--button-active-color, rgba(0, 0, 6, 0.19));
 }
 
 /* ---- Modal overlay ---- */
@@ -654,7 +708,8 @@ html adw-status-page .adw-status-page-child {
 
   .protota-zoom-bar {
     bottom: 12px;
-    left: 12px;
+    left: 50%;
+    transform: translateX(-50%);
     padding: 2px 6px;
   }
 

@@ -15,7 +15,7 @@ test.describe('Undo/redo history panel (#20)', () => {
 
   test('Ctrl+Z undoes and Ctrl+Shift+Z redoes', async ({ page }) => {
     // Make an edit: add a screen (which creates a snapshot)
-    await page.getByRole('button', { name: /add screen/i }).click();
+    await page.getByRole('button', { name: /new screen|add screen/i }).click();
     const dialog = page.locator('.protota-modal');
     await dialog.getByRole('textbox').first().fill('Test Screen');
     await dialog.getByRole('button', { name: /create/i }).click();

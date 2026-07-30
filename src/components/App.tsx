@@ -11,9 +11,9 @@ import { AddScreenModal } from "./AddScreenModal";
 import { TopBar } from "./TopBar";
 import {
   sidebarShowSymbolic,
-  goPreviousSymbolic,
-  goNextSymbolic,
-  listAddSymbolic,
+  editUndoSymbolic,
+  editRedoSymbolic,
+  documentNewSymbolic,
   viewGridSymbolic,
   sidebarShowRightSymbolic,
 } from "@gjsify/adwaita-icons/actions";
@@ -220,24 +220,26 @@ export const App: React.FC = () => {
           {/* End slot: Core actions + Properties toggle */}
           <div slot="end" style={{ display: "flex", gap: "2px", alignItems: "center" }}>
             <button className="adw-button flat" onClick={undo} title="Undo (Ctrl+Z)">
-              <span style={iconStyle(goPreviousSymbolic)} />
+              <span style={iconStyle(editUndoSymbolic)} />
             </button>
             <button className="adw-button flat" onClick={redo} title="Redo (Ctrl+Shift+Z)">
-              <span style={iconStyle(goNextSymbolic)} />
+              <span style={iconStyle(editRedoSymbolic)} />
             </button>
             <button
-              className="adw-button suggested-action"
+              className="adw-button flat"
               onClick={() => setShowAddScreenModal(true)}
-              title="Add Screen (Ctrl+N)"
+              title="New Screen (Ctrl+N)"
             >
-              <span style={iconStyle(listAddSymbolic)} />
+              <span style={iconStyle(documentNewSymbolic)} />
+              <span style={{ marginLeft: '4px' }}>New Screen</span>
             </button>
             <button
               className="adw-button flat"
               onClick={() => setShowPresets(true)}
-              title="Presets"
+              title="Load Preset"
             >
               <span style={iconStyle(viewGridSymbolic)} />
+              <span style={{ marginLeft: '4px' }}>Load Preset</span>
             </button>
             <button
               className={`adw-button flat${rightOpen ? " active" : ""}`}

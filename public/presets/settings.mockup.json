@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exportedAt": "2026-07-30T04:19:55.602Z",
+  "exportedAt": "2026-07-30T07:13:31.298Z",
   "generatedBy": "scripts/generate-preset.mjs",
   "document": {
     "id": "settings-preset",
@@ -148,5 +148,6 @@
     ],
     "edges": []
   },
-  "assets": {}
+  "assets": {},
+  "sourceIcons": {}
 }

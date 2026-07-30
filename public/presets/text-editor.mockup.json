@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exportedAt": "2026-07-30T04:19:52.140Z",
+  "exportedAt": "2026-07-30T07:13:23.436Z",
   "generatedBy": "scripts/generate-preset.mjs",
   "document": {
     "id": "text-editor-preset",
@@ -796,5 +796,6 @@
       }
     ]
   },
-  "assets": {}
+  "assets": {},
+  "sourceIcons": {}
 }

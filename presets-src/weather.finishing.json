@@ -3,6 +3,8 @@
   "screen": { "title": "Weather", "width": 950, "height": 640 },
   "overrides": [
     { "id": "imported-1", "set": { "type": "window" },
-      "why": "Gjs_MainWindow extends Adw.ApplicationWindow in src/app/window.js; GJS composite templates omit the parent attribute, which a future JS language adapter would discover statically." }
+      "why": "Gjs_MainWindow extends Adw.ApplicationWindow in src/app/window.ts; GJS composite templates omit the parent attribute, which a future JS language adapter would discover statically." },
+    { "id": "searchViewStatus", "set": { "iconName": "org.gnome.Weather" },
+      "why": "src/app/window.ts:92 sets searchViewStatus.icon_name = pkg.name at runtime. The app's own artwork is not a symbolic icon, so it renders as a labelled placeholder at the real 96px allocation rather than invented art." }
   ]
 }

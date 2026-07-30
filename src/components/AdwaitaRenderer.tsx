@@ -10,6 +10,23 @@ interface Props {
   screenWidth?: number;
   screenHeight?: number;
   inheritedSlot?: string;
+  /**
+   * Id of the header bar that carries the window controls. GTK draws them
+   * once per window, on the content-side header — not on every header bar a
+   * split view happens to contain. Computed per screen at the root.
+   */
+  primaryHeaderBarId?: string;
+}
+
+/** The content-side header bar: the last one in document order. */
+function findPrimaryHeaderBarId(node: AdwNode): string | undefined {
+  let found: string | undefined;
+  const visit = (candidate: AdwNode) => {
+    if (candidate.type === 'header-bar') found = candidate.id;
+    candidate.children?.forEach(visit);
+  };
+  visit(node);
+  return found;
 }
 
 /**
@@ -196,10 +213,17 @@ function placementLayout(node: AdwNode): React.CSSProperties | undefined {
     placement.alignSelf = 'stretch';
     placement.minHeight = 0;
   }
+  // GTK size requests are MINIMUMS, not fixed sizes: a widget grows past its
+  // request to fit content (a button's label must not wrap because the
+  // source asked for a 146px minimum).
   if (node.minWidth !== undefined) placement.minWidth = node.minWidth;
   if (node.minHeight !== undefined) placement.minHeight = node.minHeight;
-  if (node.widthRequest !== undefined) placement.width = node.widthRequest;
-  if (node.heightRequest !== undefined) placement.height = node.heightRequest;
+  if (node.widthRequest !== undefined) {
+    placement.minWidth = Math.max(node.widthRequest, Number(placement.minWidth ?? 0));
+  }
+  if (node.heightRequest !== undefined) {
+    placement.minHeight = Math.max(node.heightRequest, Number(placement.minHeight ?? 0));
+  }
   if (node.column !== undefined) placement.gridColumn = `${node.column + 1} / span ${node.columnSpan ?? 1}`;
   if (node.row !== undefined) placement.gridRow = `${node.row + 1} / span ${node.rowSpan ?? 1}`;
   return Object.keys(placement).length ? placement : undefined;
@@ -236,8 +260,10 @@ function plainText(text: string): string {
 
 export const AdwaitaRenderer: React.FC<Props> = ({
   node, screenId, screenWidth, screenHeight,
-  inheritedSlot,
+  inheritedSlot, primaryHeaderBarId,
 }) => {
+  // The screen root resolves which header bar owns the window controls.
+  const primaryHeaderBar = primaryHeaderBarId ?? (screenWidth ? findPrimaryHeaderBarId(node) : undefined);
   const { selectedNodeId, selectNode, addChildNode, doc } = useMockupStore();
   const isSelected = selectedNodeId === node.id;
 
@@ -314,8 +340,20 @@ export const AdwaitaRenderer: React.FC<Props> = ({
       node={child}
       screenId={screenId}
       inheritedSlot={childSlot(node, child, index)}
+      primaryHeaderBarId={primaryHeaderBar}
     />
   ));
+  // GTK draws window controls in the header bar unless show-title-buttons is
+  // false (Adw.HeaderBar defaults to true). Real app windows always show
+  // them, so a mockup without them never matches a native screenshot.
+  const windowControls = node.type === 'header-bar' && node.showTitleButtons !== false && node.id === primaryHeaderBar ? (
+    <div key="window-controls" slot="end" className="protota-window-controls" aria-hidden="true">
+      <span className="protota-window-control minimize" />
+      <span className="protota-window-control maximize" />
+      <span className="protota-window-control close" />
+    </div>
+  ) : null;
+
   const iconPrefix = node.type === 'action-row' && node.iconName ? (
     <span
       aria-hidden="true"
@@ -357,6 +395,7 @@ export const AdwaitaRenderer: React.FC<Props> = ({
       },
         iconPrefix,
         ...(children ?? []),
+        windowControls,
         // For label/inscription — render text content
         ...(node.type === 'label' || node.type === 'inscription' || (node.type === 'custom-widget' && (!node.children || node.children.length === 0))
           ? [plainText(String(node.title || ''))]

@@ -2,6 +2,7 @@ import React, { useRef, useEffect } from 'react';
 import type { AdwNode } from '../types/mockup';
 import { LEGAL_CHILDREN } from '../types/mockup';
 import { useMockupStore } from '../store/mockupStore';
+import { ensureAdwIcon } from '../utils/adwIcons';
 
 interface Props {
   node: AdwNode;
@@ -68,10 +69,13 @@ const TAG_MAP: Record<string, string | null> = {
   inscription:           null,
 };
 
-/** Div-only types: render a semantic container with Adwaita-styled layout. */
+/** Div-only types: render a semantic container with Adwaita-styled layout.
+ * navigation-view is here because the adw-navigation-view element manages
+ * only adw-navigation-page children and hides everything else; the model
+ * already selects the visible page. */
 const DIV_TYPES = new Set([
   'bin', 'custom-widget', 'box', 'grid', 'center-box', 'stack', 'stack-page', 'scrolled-window', 'search-entry', 'switch-widget',
-  'check-button', 'list-box', 'label', 'inscription',
+  'check-button', 'list-box', 'label', 'inscription', 'navigation-view',
 ]);
 
 function nodeProps(node: AdwNode, inheritedSlot?: string): Record<string, string> {
@@ -109,8 +113,14 @@ function nodeProps(node: AdwNode, inheritedSlot?: string): Record<string, string
     if (icon) p.icon = icon;
   }
   if (t === 'menu-button') {
-    if (icon) p['icon-name'] = icon;
-    if (node.title) p['menu-title'] = node.title;
+    // A labelled MenuButton (mode selector, open button) renders its text
+    // with a dropdown indicator; adw-menu-button itself is icon-only.
+    if (node.title) {
+      p.label = `${node.title} ▾`;
+      if (icon) p.icon = icon;
+    } else if (icon) {
+      p['icon-name'] = icon;
+    }
   }
   if (t === 'split-button') {
     if (node.title) p.label = node.title;
@@ -172,27 +182,56 @@ function childSlot(parent: AdwNode, child: AdwNode, index: number): string | und
   return undefined;
 }
 
-function nodeLayout(node: AdwNode): React.CSSProperties | undefined {
+/**
+ * Placement layout: how this node sits inside ITS PARENT's flex/grid context.
+ * Applied to the wrapper div, which is the parent's direct child.
+ */
+function placementLayout(node: AdwNode): React.CSSProperties | undefined {
   const placement: React.CSSProperties = {};
+  // GTK expand semantics: an expanding child (including an unresolved
+  // custom-widget boundary such as Calculator's MathButtons) consumes the
+  // parent's spare allocation instead of collapsing to a fallback minimum.
+  if (node.vexpand || node.hexpand) {
+    placement.flexGrow = 1;
+    placement.alignSelf = 'stretch';
+    placement.minHeight = 0;
+  }
   if (node.minWidth !== undefined) placement.minWidth = node.minWidth;
   if (node.minHeight !== undefined) placement.minHeight = node.minHeight;
   if (node.widthRequest !== undefined) placement.width = node.widthRequest;
   if (node.heightRequest !== undefined) placement.height = node.heightRequest;
   if (node.column !== undefined) placement.gridColumn = `${node.column + 1} / span ${node.columnSpan ?? 1}`;
   if (node.row !== undefined) placement.gridRow = `${node.row + 1} / span ${node.rowSpan ?? 1}`;
+  return Object.keys(placement).length ? placement : undefined;
+}
+
+/**
+ * Container layout: how this node arranges ITS OWN children. Applied to the
+ * rendered element only — putting it on the wrapper as well would nest two
+ * copies of the same layout and squeeze the element into its own grid cell.
+ */
+function containerLayout(node: AdwNode): React.CSSProperties | undefined {
   if (node.type === 'box') {
-    return { gap: node.spacing ?? 12, ...placement };
+    return { gap: node.spacing ?? 12 };
   }
   if (node.type === 'grid') {
+    // GtkGrid has no declared column count; derive it from the children's
+    // explicit attach positions and spans, as GTK does.
+    const derivedColumns = Math.max(1, ...(node.children ?? []).map((child) =>
+      (typeof child.column === 'number' ? child.column : 0) + (typeof child.columnSpan === 'number' ? child.columnSpan : 1)));
     return {
-      gridTemplateColumns: `repeat(${node.columns ?? 1}, minmax(0, 1fr))`,
+      gridTemplateColumns: `repeat(${node.columns ?? derivedColumns}, minmax(0, 1fr))`,
       rowGap: node.rowSpacing ?? node.spacing ?? 6,
       columnGap: node.columnSpacing ?? node.spacing ?? 6,
-      ...placement,
     };
   }
-  if (node.type === 'scrolled-window') return { overflow: 'auto', ...placement };
-  return Object.keys(placement).length ? placement : undefined;
+  if (node.type === 'scrolled-window') return { overflow: 'auto' };
+  return undefined;
+}
+
+/** GTK label markup (Pango) is not renderable text; show the plain string. */
+function plainText(text: string): string {
+  return text.replace(/<[^>]+>/g, '');
 }
 
 export const AdwaitaRenderer: React.FC<Props> = ({
@@ -205,14 +244,51 @@ export const AdwaitaRenderer: React.FC<Props> = ({
   const legalAdds = LEGAL_CHILDREN[node.type] || [];
   const elRef = useRef<HTMLElement>(null);
 
+  // A dialog used as a canvas screen renders as a window-like surface; the
+  // real dialog elements are modals, hidden until runtime opens them.
+  const isDialogRoot = Boolean(screenWidth) &&
+    (node.type === 'dialog' || node.type === 'preferences-dialog' || node.type === 'about-dialog' || node.type === 'alert-dialog');
+
   useEffect(() => {
-    if ((node.type === 'window' || node.type === 'dialog') && elRef.current && screenWidth) {
+    if ((node.type === 'window' || node.type === 'dialog' || isDialogRoot) && elRef.current && screenWidth) {
       elRef.current.style.width = `${screenWidth}px`;
       if (screenHeight) elRef.current.style.height = `${screenHeight}px`;
     }
-  }, [node.type, screenWidth, screenHeight]);
+  }, [node.type, isDialogRoot, screenWidth, screenHeight]);
 
-  const tag = TAG_MAP[node.type] || 'div';
+  useEffect(() => {
+    ensureAdwIcon(node.iconName);
+  }, [node.iconName]);
+
+  // Selection must use a native listener: the adw-* custom elements build
+  // and reparent internal DOM, and clicks originating there never reach
+  // React's delegated events. Plain DOM bubbling always does. stopPropagation
+  // keeps the innermost node's handler authoritative and suppresses the
+  // canvas's deselect.
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const wrapper = wrapperRef.current;
+    if (!wrapper) return;
+    const handleNativeClick = (event: MouseEvent) => {
+      event.stopPropagation();
+      selectNode(node.id, screenId);
+    };
+    wrapper.addEventListener('click', handleNativeClick);
+    return () => wrapper.removeEventListener('click', handleNativeClick);
+  }, [node.id, screenId, selectNode]);
+
+  // GTK visibility: a hidden widget takes no space and draws nothing. This
+  // must come after every hook so React's hook order stays stable.
+  if (node.visible === false) return null;
+
+  // adw-menu-button is icon-only; a labelled MenuButton renders as a button.
+  const tag = isDialogRoot
+    ? 'adw-window'
+    : node.type === 'navigation-view'
+      ? 'div'
+      : node.type === 'menu-button' && node.title
+        ? 'adw-button'
+        : TAG_MAP[node.type] || 'div';
   const attrs = nodeProps(node, inheritedSlot);
 
   // Apply theme class to window/dialog roots based on doc colorScheme
@@ -222,7 +298,17 @@ export const AdwaitaRenderer: React.FC<Props> = ({
     ? `theme-${doc.colorScheme}` : '';
   if (themeClass) attrs['class'] = themeClass;
 
-  const children = node.children?.map((child, index) => (
+  // GtkStack, AdwViewStack, and AdwNavigationView show exactly one child.
+  // The visible child is the named one when declared (matched by page name,
+  // builder id, or title), otherwise the first — GTK's default (a
+  // NavigationView starts on its root page).
+  const showsOneChild = node.type === 'stack' || node.type === 'view-stack' || node.type === 'navigation-view';
+  const visibleChildren = showsOneChild && node.children?.length
+    ? [node.children.find((child) => typeof node.visibleChildName === 'string' &&
+        (child.id === node.visibleChildName || child.title === node.visibleChildName || (child as { name?: unknown }).name === node.visibleChildName)) ?? node.children[0]]
+    : node.children;
+
+  const children = visibleChildren?.map((child, index) => (
     <AdwaitaRenderer
       key={child.id}
       node={child}
@@ -238,22 +324,22 @@ export const AdwaitaRenderer: React.FC<Props> = ({
     />
   ) : null;
 
-  // Div-only types get Adwaita-styled classes for layout/structure
-  const divClass = DIV_TYPES.has(node.type) ? `protota-div-${node.type}` : '';
-
-  const handleClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    selectNode(node.id, screenId);
-  };
+  // Div-only types get Adwaita-styled classes for layout/structure.
+  // A custom-widget with projected children is a resolved composite: render it
+  // as a plain container, not a striped unresolved boundary.
+  const isExpandedBoundary = node.type === 'custom-widget' && (node.children?.length ?? 0) > 0;
+  const divClass = DIV_TYPES.has(node.type)
+    ? isExpandedBoundary ? 'protota-div-custom-widget-expanded' : `protota-div-${node.type}`
+    : '';
 
   return (
     <div
-      onClick={handleClick}
+      ref={wrapperRef}
       slot={node.slot ?? inheritedSlot}
-      className={`adw-node-wrapper${isSelected ? ' selected-outline' : ''} ${divClass}`}
+      className={`adw-node-wrapper${isSelected ? ' selected-outline' : ''}`}
       style={{
         ...(isSelected ? { position: 'relative' } : {}),
-        ...nodeLayout(node),
+        ...placementLayout(node),
       }}
     >
       {isSelected && (
@@ -264,15 +350,16 @@ export const AdwaitaRenderer: React.FC<Props> = ({
         ref: elRef,
         ...attrs,
         'data-protota-type': node.type,
-        ...(node.type === 'window' && screenWidth ? { 'data-protota-render-surface': 'true' } : {}),
-        style: nodeLayout(node),
+        ...(isExpandedBoundary ? { 'data-protota-expanded': 'true' } : {}),
+        ...((node.type === 'window' || isDialogRoot) && screenWidth ? { 'data-protota-render-surface': 'true' } : {}),
+        style: containerLayout(node),
         className: divClass || undefined,
       },
         iconPrefix,
         ...(children ?? []),
         // For label/inscription — render text content
         ...(node.type === 'label' || node.type === 'inscription' || (node.type === 'custom-widget' && (!node.children || node.children.length === 0))
-          ? [node.title || '']
+          ? [plainText(String(node.title || ''))]
           : []),
       )}
 

@@ -1,0 +1,14 @@
+{
+  "title": "GNOME Files",
+  "screens": [
+    { "id": "browser", "entry": "nautilus-window.ui", "title": "Files", "width": 950, "height": 640 },
+    { "id": "properties", "entry": "nautilus-properties-window.ui", "title": "Properties", "width": 480, "height": 640 },
+    { "id": "new-folder", "entry": "nautilus-new-folder-dialog.ui", "title": "New Folder", "width": 400, "height": 220 },
+    { "id": "compress", "entry": "nautilus-compress-dialog.ui", "title": "Compress", "width": 440, "height": 440 }
+  ],
+  "edges": [
+    { "from": "browser", "to": "properties", "why": "Context menu → Properties" },
+    { "from": "browser", "to": "new-folder", "why": "Context menu → New Folder" },
+    { "from": "browser", "to": "compress", "why": "Context menu → Compress…" }
+  ]
+}

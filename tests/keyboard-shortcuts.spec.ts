@@ -52,7 +52,7 @@ test.describe('Keyboard shortcuts (#14)', () => {
 
     test('Arrow keys move selected element up/down in parent', async ({ page }) => {
       // Select a child element
-      const headerBar = page.locator('adw-header-bar').first();
+      const headerBar = page.locator('.protota-canvas adw-header-bar').first();
       await headerBar.click();
       await expect(page.locator('.selected-outline').first()).toBeVisible({ timeout: 3000 });
 

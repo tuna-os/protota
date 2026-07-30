@@ -1,0 +1,8 @@
+{
+  "title": "GNOME Weather",
+  "screen": { "title": "Weather", "width": 950, "height": 640 },
+  "overrides": [
+    { "id": "imported-1", "set": { "type": "window" },
+      "why": "Gjs_MainWindow extends Adw.ApplicationWindow in src/app/window.js; GJS composite templates omit the parent attribute, which a future JS language adapter would discover statically." }
+  ]
+}

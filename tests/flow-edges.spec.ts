@@ -22,7 +22,7 @@ test.describe('Flow edges (#11)', () => {
 
   test('edges slot is preserved in document model', async ({ page }) => {
     // Export the document
-    const exportBtn = page.getByRole('button', { name: /export/i });
+    const exportBtn = page.getByRole('button', { name: /save json/i });
     const [download] = await Promise.all([
       page.waitForEvent('download', { timeout: 5000 }),
       exportBtn.click(),

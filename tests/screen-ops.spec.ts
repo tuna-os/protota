@@ -23,19 +23,19 @@ test.describe('Screen duplication & context menu (#18, #19)', () => {
 
   test('delete key removes selected element', async ({ page }) => {
     // Select a header bar inside the window
-    const headerBar = page.locator('adw-header-bar').first();
+    const headerBar = page.locator('.protota-canvas adw-header-bar').first();
     await headerBar.click();
     await expect(page.locator('.selected-outline').first()).toBeVisible({ timeout: 3000 });
 
     // Count header bars before
-    const before = await page.locator('adw-header-bar').count();
+    const before = await page.locator('.protota-canvas adw-header-bar').count();
 
     // Press Delete
     await page.keyboard.press('Delete');
     await page.waitForTimeout(300);
 
     // Header bar should be deleted
-    const after = await page.locator('adw-header-bar').count();
+    const after = await page.locator('.protota-canvas adw-header-bar').count();
     expect(after).toBeLessThan(before);
   });
 });

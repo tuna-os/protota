@@ -1,8 +1,9 @@
 import React, { useState, useRef, useEffect } from "react";
 import { persistDocumentSource, useMockupStore } from "../store/mockupStore";
-import { importDocumentFile } from "../utils/exportImport";
+import { exportDocumentFile, importDocumentFile } from "../utils/exportImport";
 import { mockupToBlueprint } from "../utils/blueprint";
 import { downloadPng, renderScreenToPng } from "../utils/pngExport";
+import { ExportModal } from "./ExportModal";
 
 interface MenuItem {
   label: string;
@@ -28,12 +29,14 @@ export const TopBar: React.FC = () => {
     toggleColorScheme,
     lintEnabled,
     toggleLint,
+    showFlows,
+    toggleShowFlows,
     violations,
   } = useMockupStore();
   const [openMenu, setOpenMenu] = useState<string | null>(null);
+  const [showExportModal, setShowExportModal] = useState(false);
   const menuBarRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [showFlows, setShowFlows] = useState(false);
 
   const themeLabel =
     doc.colorScheme === "dark" ? "Light" : doc.colorScheme === "light" ? "Auto" : "Dark";
@@ -147,7 +150,7 @@ export const TopBar: React.FC = () => {
         { label: "divider", divider: true },
         {
           label: `Flows ${showFlows ? "ON" : "OFF"}`,
-          action: () => setShowFlows(!showFlows),
+          action: toggleShowFlows,
         },
         { label: "divider", divider: true },
         {
@@ -218,6 +221,41 @@ export const TopBar: React.FC = () => {
           )}
         </div>
       ))}
+      {/* Direct-access toolbar actions. These are the working contract of
+          issues #5/#8/#11/#12/#17/#24/#25 — visible buttons, not only menu
+          entries. */}
+      <button
+        className={`adw-button flat${showFlows ? " active" : ""}`}
+        data-active={showFlows ? "true" : undefined}
+        onClick={toggleShowFlows}
+        title="Show navigation flow connectors between screens"
+      >
+        Flows
+      </button>
+      <button
+        className={`adw-button flat${lintEnabled ? " active" : ""}`}
+        data-active={lintEnabled ? "true" : undefined}
+        onClick={toggleLint}
+        title={`HIG lint${violations.length ? ` — ${violations.length} issue(s)` : ""}`}
+      >
+        HIG Lint
+      </button>
+      <button className="adw-button flat" onClick={toggleColorScheme} title={`Switch theme (${themeLabel})`}>
+        Theme
+      </button>
+      <button className="adw-button flat" onClick={handleShare} title="Copy a shareable link">
+        Share
+      </button>
+      <button className="adw-button flat" onClick={() => exportDocumentFile(doc)} title="Download the document as .mockup.json">
+        Save JSON
+      </button>
+      <button className="adw-button flat" onClick={() => setShowExportModal(true)} title="View generated Blueprint code">
+        Code Export
+      </button>
+      <button className="adw-button flat" onClick={handleExportPNG} title="Export the focused screen as PNG">
+        PNG
+      </button>
+      <ExportModal isOpen={showExportModal} onClose={() => setShowExportModal(false)} />
       <input
         ref={fileInputRef}
         type="file"

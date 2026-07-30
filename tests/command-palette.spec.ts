@@ -7,8 +7,8 @@ test.describe('Command palette (#15)', () => {
   });
 
   test('Ctrl+K opens command palette', async ({ page }) => {
-    const hdr = page.locator('adw-header-bar').first();
-    await hdr.click();
+    const hdr = page.locator('.protota-canvas adw-header-bar').first();
+    await hdr.click({ position: { x: 8, y: 8 } });
     await page.waitForTimeout(100);
     await page.keyboard.press('Control+k');
     const palette = page.locator('.protota-command-palette');
@@ -17,8 +17,8 @@ test.describe('Command palette (#15)', () => {
 
   test('typing in palette filters widgets', async ({ page }) => {
     // Select a header-bar which accepts buttons
-    const hdr = page.locator('adw-header-bar').first();
-    await hdr.click();
+    const hdr = page.locator('.protota-canvas adw-header-bar').first();
+    await hdr.click({ position: { x: 8, y: 8 } });
     await page.waitForTimeout(100);
     await page.keyboard.press('Control+k');
 
@@ -35,8 +35,8 @@ test.describe('Command palette (#15)', () => {
   });
 
   test('selecting a widget from palette inserts it', async ({ page }) => {
-    const hdr = page.locator('adw-header-bar').first();
-    await hdr.click();
+    const hdr = page.locator('.protota-canvas adw-header-bar').first();
+    await hdr.click({ position: { x: 8, y: 8 } });
     await page.waitForTimeout(100);
     await page.keyboard.press('Control+k');
 
@@ -56,8 +56,8 @@ test.describe('Command palette (#15)', () => {
   });
 
   test('Escape closes palette', async ({ page }) => {
-    const hdr = page.locator('adw-header-bar').first();
-    await hdr.click();
+    const hdr = page.locator('.protota-canvas adw-header-bar').first();
+    await hdr.click({ position: { x: 8, y: 8 } });
     await page.waitForTimeout(100);
     await page.keyboard.press('Control+k');
 

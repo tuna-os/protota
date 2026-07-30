@@ -1,0 +1,66 @@
+{
+  "title": "GNOME Calculator",
+  "screens": [
+    { "id": "basic", "entry": "math-window.blp", "title": "Basic", "width": 360, "height": 460,
+      "overrides": [
+        { "id": "_converter", "set": { "visible": false },
+          "why": "math-window.vala: converter.set_visible (mode == ButtonMode.CONVERSION); default button-mode is basic (GSettings schema)." },
+        { "id": "back_button", "set": { "visible": false },
+          "why": "Only shown when returning from financial/programming modes." },
+        { "id": "menu_button", "set": { "title": "Basic" },
+          "why": "Mode MenuButton label reflects the active mode at runtime." },
+        { "id": "history", "set": { "heightRequest": 190 },
+          "why": "HistoryView fills the display card above the entry line; allocation is runtime-driven (empty list still reserves the card)." },
+        { "id": "spinner", "set": { "visible": false },
+          "why": "The currency-refresh spinner only appears while rates download." }
+      ] },
+    { "id": "advanced", "entry": "math-window.blp", "title": "Advanced", "width": 750, "height": 670,
+      "overrides": [
+        { "id": "_converter", "set": { "visible": false }, "why": "Hidden outside conversion mode." },
+        { "id": "back_button", "set": { "visible": false }, "why": "Only shown returning from financial/programming." },
+        { "id": "menu_button", "set": { "title": "Advanced" }, "why": "Active mode label." },
+        { "id": "history", "set": { "heightRequest": 190 }, "why": "Display card allocation." },
+        { "id": "spinner", "set": { "visible": false }, "why": "Idle spinner." },
+        { "id": "panel_stack", "set": { "visibleChildName": "adv_panel" },
+          "why": "panel_stack.visible_child = load_mode(ADVANCED); official advanced-mode screenshot." }
+      ] },
+    { "id": "financial", "entry": "math-window.blp", "title": "Financial", "width": 680, "height": 460,
+      "overrides": [
+        { "id": "_converter", "set": { "visible": false }, "why": "Hidden outside conversion mode." },
+        { "id": "menu_button", "set": { "title": "Financial" }, "why": "Active mode label." },
+        { "id": "history", "set": { "heightRequest": 190 }, "why": "Display card allocation." },
+        { "id": "spinner", "set": { "visible": false }, "why": "Idle spinner." },
+        { "id": "panel_stack", "set": { "visibleChildName": "fin_panel" },
+          "why": "panel_stack.visible_child = load_mode(FINANCIAL); official financial-mode screenshot." }
+      ] },
+    { "id": "programming", "entry": "math-window.blp", "title": "Programming", "width": 680, "height": 580,
+      "overrides": [
+        { "id": "_converter", "set": { "visible": false }, "why": "Hidden outside conversion mode." },
+        { "id": "menu_button", "set": { "title": "Programming" }, "why": "Active mode label." },
+        { "id": "history", "set": { "heightRequest": 150 }, "why": "Display card allocation." },
+        { "id": "spinner", "set": { "visible": false }, "why": "Idle spinner." },
+        { "id": "panel_stack", "set": { "visibleChildName": "prog_panel" },
+          "why": "panel_stack.visible_child = load_mode(PROGRAMMING); official programming-mode screenshot." }
+      ] },
+    { "id": "conversion", "entry": "math-window.blp", "title": "Conversion", "width": 410, "height": 670,
+      "overrides": [
+        { "id": "display_box", "set": { "visible": false },
+          "why": "math-window.vala: display_box.set_visible (mode != ButtonMode.CONVERSION)." },
+        { "id": "undo_button", "set": { "visible": false }, "why": "Hidden in conversion mode (math-window.vala)." },
+        { "id": "redo_button", "set": { "visible": false }, "why": "Hidden in conversion mode (math-window.vala)." },
+        { "id": "menu_button", "set": { "title": "Conversion" }, "why": "Active mode label." },
+        { "id": "status_stack", "set": { "visible": false },
+          "why": "Exchange-rate status only shows for the currency category; official screenshot shows the angle category." },
+        { "id": "panel_stack", "set": { "visibleChildName": "conv_panel" },
+          "why": "panel_stack.visible_child = load_mode(CONVERSION); official conversion-mode screenshot." }
+      ] },
+    { "id": "preferences", "entry": "math-preferences.blp", "title": "Preferences", "width": 460, "height": 420 }
+  ],
+  "edges": [
+    { "from": "basic", "to": "advanced", "why": "Mode menu → Advanced" },
+    { "from": "basic", "to": "financial", "why": "Mode menu → Financial" },
+    { "from": "basic", "to": "programming", "why": "Mode menu → Programming" },
+    { "from": "basic", "to": "conversion", "why": "Mode menu → Conversion" },
+    { "from": "basic", "to": "preferences", "why": "Main menu → Preferences" }
+  ]
+}

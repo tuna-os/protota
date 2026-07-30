@@ -1,0 +1,18 @@
+{
+  "title": "GNOME Calendar",
+  "screens": [
+    { "id": "month", "entry": "gcal-window.blp", "title": "Month", "width": 1024, "height": 700,
+      "overrides": [
+        { "id": "views_stack", "set": { "visibleChildName": "month" },
+          "why": "Default view per GSettings active-view; official screenshots show month view." }
+      ] },
+    { "id": "week", "entry": "gcal-window.blp", "title": "Week", "width": 1024, "height": 700,
+      "overrides": [
+        { "id": "views_stack", "set": { "visibleChildName": "week" },
+          "why": "Week view page from the header view switcher." }
+      ] }
+  ],
+  "edges": [
+    { "from": "month", "to": "week", "why": "View switcher → Week" }
+  ]
+}

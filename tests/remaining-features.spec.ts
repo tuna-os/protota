@@ -46,7 +46,7 @@ test.describe('Remaining features (#9, #16, #18-#24)', () => {
   });
 
   test('#23 Command palette opens with Ctrl+K', async ({ page }) => {
-    const hdr = page.locator('adw-header-bar').first();
+    const hdr = page.locator('.protota-canvas adw-header-bar').first();
     await hdr.click();
     await page.keyboard.press('Control+k');
     await expect(page.locator('.protota-command-palette')).toBeVisible({ timeout: 3000 });

@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exportedAt": "2026-07-30T09:23:43.857Z",
+  "exportedAt": "2026-07-30T11:22:21.469Z",
   "generatedBy": "scripts/generate-preset.mjs",
   "document": {
     "id": "ear-tag-preset",
@@ -39,7 +39,8 @@
                               "children": [],
                               "iconName": "document-send-symbolic",
                               "pixelSize": 96,
-                              "accessibleRole": "presentation"
+                              "accessibleRole": "presentation",
+                              "sourceClass": "Image"
                             },
                             {
                               "id": "imported-8",
@@ -47,7 +48,8 @@
                               "children": [],
                               "title": "Drop a file to add it to the opened file list",
                               "wrap": true,
-                              "styleClasses": "title-1"
+                              "styleClasses": "title-1",
+                              "sourceClass": "Label"
                             }
                           ],
                           "orientation": "vertical",
@@ -56,12 +58,14 @@
                           "marginTop": 24,
                           "marginBottom": 24,
                           "marginStart": 24,
-                          "marginEnd": 24
+                          "marginEnd": 24,
+                          "sourceClass": "Box"
                         }
                       ],
                       "hexpand": true,
                       "vexpand": true,
-                      "styleClasses": "drag-target"
+                      "styleClasses": "drag-target",
+                      "sourceClass": "Adw.Bin"
                     }
                   ],
                   "receivesDefault": false,
@@ -71,7 +75,9 @@
                   "transitionType": "crossfade",
                   "hexpand": true,
                   "vexpand": true,
-                  "notify": ":"
+                  "notify": ":",
+                  "sourceClass": "Revealer",
+                  "slot": "overlay"
                 },
                 {
                   "id": "toast_overlay",
@@ -93,6 +99,7 @@
                                   "id": "imported-9",
                                   "type": "label",
                                   "children": [],
+                                  "sourceClass": "Label",
                                   "slot": "title-widget"
                                 },
                                 {
@@ -101,11 +108,14 @@
                                   "children": [],
                                   "iconName": "open-menu-symbolic",
                                   "tooltipText": "Menu",
-                                  "menuModel": "primary_menu"
+                                  "menuModel": "primary_menu",
+                                  "sourceClass": "MenuButton",
+                                  "slot": "end"
                                 }
                               ],
                               "flat": true,
-                              "styleClasses": "flat"
+                              "styleClasses": "flat",
+                              "sourceClass": "Adw.HeaderBar"
                             },
                             {
                               "id": "no_file_widget",
@@ -131,7 +141,8 @@
                                               "halign": "center",
                                               "focusable": true,
                                               "suggested": true,
-                                              "styleClasses": "suggested-action pill"
+                                              "styleClasses": "suggested-action pill",
+                                              "sourceClass": "Button"
                                             },
                                             {
                                               "id": "open_folder",
@@ -139,7 +150,8 @@
                                               "children": [],
                                               "title": "Open Folder",
                                               "halign": "center",
-                                              "styleClasses": "pill"
+                                              "styleClasses": "pill",
+                                              "sourceClass": "Button"
                                             },
                                             {
                                               "id": "open_recursive",
@@ -147,27 +159,33 @@
                                               "children": [],
                                               "label": "Include Files from Subfolders",
                                               "tooltipText": "When opening a folder, include files from its subfolders",
-                                              "styleClasses": "subtitle"
+                                              "styleClasses": "subtitle",
+                                              "sourceClass": "CheckButton"
                                             }
                                           ],
                                           "orientation": "vertical",
                                           "halign": "center",
-                                          "spacing": 12
+                                          "spacing": 12,
+                                          "sourceClass": "Box"
                                         }
                                       ],
                                       "iconName": "app.drey.EarTag",
                                       "title": "Ear Tag",
                                       "description": "Open or drag in some audio files to edit their metadata.",
-                                      "styleClasses": "nofiles"
+                                      "styleClasses": "nofiles",
+                                      "sourceClass": "Adw.StatusPage"
                                     }
                                   ],
                                   "hexpand": true,
-                                  "vexpand": true
+                                  "vexpand": true,
+                                  "sourceClass": "WindowHandle"
                                 }
-                              ]
+                              ],
+                              "sourceClass": "Adw.Bin"
                             }
                           ],
-                          "orientation": "vertical"
+                          "orientation": "vertical",
+                          "sourceClass": "Box"
                         },
                         {
                           "id": "split_view",
@@ -185,6 +203,7 @@
                                       "id": "imported-12",
                                       "type": "label",
                                       "children": [],
+                                      "sourceClass": "Label",
                                       "slot": "title-widget"
                                     },
                                     {
@@ -194,7 +213,9 @@
                                       "sensitive": false,
                                       "title": "Save",
                                       "suggested": true,
-                                      "styleClasses": "suggested-action"
+                                      "styleClasses": "suggested-action",
+                                      "sourceClass": "Button",
+                                      "slot": "start"
                                     },
                                     {
                                       "id": "hide_sidebar_button",
@@ -203,9 +224,11 @@
                                       "iconName": "go-previous-symbolic",
                                       "halign": "start",
                                       "tooltipText": "Close file list",
+                                      "sourceClass": "Button",
                                       "bindings": {
                                         "visible": "split_view.collapsed"
-                                      }
+                                      },
+                                      "slot": "end"
                                     },
                                     {
                                       "id": "primary_menu_button",
@@ -213,7 +236,9 @@
                                       "children": [],
                                       "iconName": "open-menu-symbolic",
                                       "tooltipText": "Menu",
-                                      "menuModel": "primary_menu"
+                                      "menuModel": "primary_menu",
+                                      "sourceClass": "MenuButton",
+                                      "slot": "end"
                                     },
                                     {
                                       "id": "insert_button",
@@ -221,24 +246,32 @@
                                       "children": [],
                                       "halign": "end",
                                       "iconName": "list-add-symbolic",
-                                      "tooltipText": "Add file"
+                                      "tooltipText": "Add file",
+                                      "sourceClass": "Button",
+                                      "slot": "end"
                                     },
                                     {
                                       "id": "select_multiple_button",
                                       "type": "button",
                                       "children": [],
                                       "iconName": "selection-mode-symbolic",
-                                      "tooltipText": "Select multiple files"
+                                      "tooltipText": "Select multiple files",
+                                      "sourceClass": "ToggleButton",
+                                      "slot": "end"
                                     },
                                     {
                                       "id": "sidebar_search_button",
                                       "type": "button",
                                       "children": [],
                                       "iconName": "edit-find-symbolic",
-                                      "tooltipText": "Search opened files"
+                                      "tooltipText": "Search opened files",
+                                      "sourceClass": "ToggleButton",
+                                      "slot": "end"
                                     }
                                   ],
-                                  "showEndTitleButtons": false
+                                  "showEndTitleButtons": false,
+                                  "sourceClass": "Adw.HeaderBar",
+                                  "slot": "top"
                                 },
                                 {
                                   "id": "search_bar",
@@ -249,10 +282,13 @@
                                       "type": "search-entry",
                                       "children": [],
                                       "hexpand": true,
-                                      "placeholderText": "Search by title, artist, filename…"
+                                      "placeholderText": "Search by title, artist, filename…",
+                                      "sourceClass": "SearchEntry"
                                     }
                                   ],
-                                  "hexpand": false
+                                  "hexpand": false,
+                                  "sourceClass": "SearchBar",
+                                  "slot": "top"
                                 },
                                 {
                                   "id": "loading_progressbar_revealer",
@@ -262,9 +298,12 @@
                                       "id": "loading_progressbar",
                                       "type": "progress-bar",
                                       "children": [],
-                                      "styleClasses": "osd"
+                                      "styleClasses": "osd",
+                                      "sourceClass": "ProgressBar"
                                     }
-                                  ]
+                                  ],
+                                  "sourceClass": "Revealer",
+                                  "slot": "top"
                                 },
                                 {
                                   "id": "sidebar_list_stack",
@@ -287,13 +326,15 @@
                                       "hscrollbarPolicy": "never",
                                       "vexpand": true,
                                       "minContentWidth": 300,
-                                      "maxContentWidth": 400
+                                      "maxContentWidth": 400,
+                                      "sourceClass": "ScrolledWindow"
                                     },
                                     {
                                       "id": "sidebar_no_files",
                                       "type": "box",
                                       "children": [],
-                                      "orientation": "horizontal"
+                                      "orientation": "horizontal",
+                                      "sourceClass": "Box"
                                     },
                                     {
                                       "id": "no_results",
@@ -302,10 +343,12 @@
                                       "iconName": "system-search-symbolic",
                                       "title": "No Results Found",
                                       "description": "Try a different search query.",
-                                      "styleClasses": "compact"
+                                      "styleClasses": "compact",
+                                      "sourceClass": "Adw.StatusPage"
                                     }
                                   ],
-                                  "transitionType": "crossfade"
+                                  "transitionType": "crossfade",
+                                  "sourceClass": "Stack"
                                 },
                                 {
                                   "id": "sidebar_action_bar",
@@ -316,26 +359,35 @@
                                       "type": "button",
                                       "children": [],
                                       "iconName": "edit-select-all-symbolic",
-                                      "tooltipText": "Select all files"
+                                      "tooltipText": "Select all files",
+                                      "sourceClass": "Button",
+                                      "slot": "start"
                                     },
                                     {
                                       "id": "selected_message_label",
                                       "type": "label",
                                       "children": [],
-                                      "styleClasses": "dim-label"
+                                      "styleClasses": "dim-label",
+                                      "sourceClass": "Label",
+                                      "slot": "center"
                                     },
                                     {
                                       "id": "remove_selected_button",
                                       "type": "button",
                                       "children": [],
                                       "iconName": "user-trash-symbolic",
-                                      "tooltipText": "Remove selected files"
+                                      "tooltipText": "Remove selected files",
+                                      "sourceClass": "Button",
+                                      "slot": "end"
                                     }
                                   ],
-                                  "orientation": "horizontal"
+                                  "orientation": "horizontal",
+                                  "sourceClass": "ActionBar",
+                                  "slot": "bottom"
                                 }
                               ],
                               "widthRequest": 300,
+                              "sourceClass": "Adw.ToolbarView",
                               "slot": "sidebar"
                             },
                             {
@@ -352,18 +404,24 @@
                                       "children": [],
                                       "iconName": "view-queue-symbolic",
                                       "tooltipText": "Show file list",
+                                      "sourceClass": "Button",
                                       "bindings": {
                                         "visible": "split_view.collapsed"
-                                      }
+                                      },
+                                      "slot": "start"
                                     },
                                     {
                                       "id": "window_title",
                                       "type": "window-title",
                                       "children": [],
-                                      "title": "Ear Tag"
+                                      "title": "Ear Tag",
+                                      "sourceClass": "Adw.WindowTitle",
+                                      "slot": "title"
                                     }
                                   ],
-                                  "showStartTitleButtons": false
+                                  "showStartTitleButtons": false,
+                                  "sourceClass": "Adw.HeaderBar",
+                                  "slot": "top"
                                 },
                                 {
                                   "id": "file_view",
@@ -374,7 +432,8 @@
                                       "type": "status-page",
                                       "children": [],
                                       "iconName": "content-loading-symbolic",
-                                      "title": "Loading Files…"
+                                      "title": "Loading Files…",
+                                      "sourceClass": "Adw.StatusPage"
                                     },
                                     {
                                       "id": "content_stack",
@@ -386,7 +445,8 @@
                                           "children": [],
                                           "iconName": "edit-select-all-symbolic",
                                           "title": "Select a File",
-                                          "description": "Select the files you want to edit from the list of opened files."
+                                          "description": "Select the files you want to edit from the list of opened files.",
+                                          "sourceClass": "Adw.StatusPage"
                                         },
                                         {
                                           "id": "content_scroll",
@@ -433,11 +493,13 @@
                                                                               "valign": "center",
                                                                               "halign": "center",
                                                                               "hexpand": true,
-                                                                              "accessibleRole": "presentation"
+                                                                              "accessibleRole": "presentation",
+                                                                              "sourceClass": "Image"
                                                                             }
                                                                           ],
                                                                           "styleClasses": "hover-highlight",
-                                                                          "orientation": "horizontal"
+                                                                          "orientation": "horizontal",
+                                                                          "sourceClass": "Box"
                                                                         },
                                                                         {
                                                                           "id": "drop_highlight",
@@ -451,13 +513,16 @@
                                                                               "pixelSize": 48,
                                                                               "valign": "center",
                                                                               "halign": "center",
-                                                                              "hexpand": true
+                                                                              "hexpand": true,
+                                                                              "sourceClass": "Image"
                                                                             }
                                                                           ],
                                                                           "styleClasses": "drag-target",
-                                                                          "orientation": "horizontal"
+                                                                          "orientation": "horizontal",
+                                                                          "sourceClass": "Box"
                                                                         }
-                                                                      ]
+                                                                      ],
+                                                                      "sourceClass": "Stack"
                                                                     }
                                                                   ],
                                                                   "receivesDefault": false,
@@ -466,7 +531,9 @@
                                                                   "revealChild": false,
                                                                   "transitionType": "crossfade",
                                                                   "hexpand": true,
-                                                                  "vexpand": true
+                                                                  "vexpand": true,
+                                                                  "sourceClass": "Revealer",
+                                                                  "slot": "overlay"
                                                                 },
                                                                 {
                                                                   "id": "button",
@@ -484,7 +551,8 @@
                                                                           "pixelSize": 96,
                                                                           "halign": "center",
                                                                           "valign": "center",
-                                                                          "accessibleRole": "presentation"
+                                                                          "accessibleRole": "presentation",
+                                                                          "sourceClass": "Image"
                                                                         },
                                                                         {
                                                                           "id": "cover_image",
@@ -494,7 +562,8 @@
                                                                           "vexpand": true,
                                                                           "pixelSize": 196,
                                                                           "overflow": "hidden",
-                                                                          "accessibleRole": "presentation"
+                                                                          "accessibleRole": "presentation",
+                                                                          "sourceClass": "Image"
                                                                         }
                                                                       ],
                                                                       "hexpand": true,
@@ -502,6 +571,7 @@
                                                                       "accessibleRole": "presentation",
                                                                       "styleClasses": "cover-image",
                                                                       "pixelSize": "196",
+                                                                      "sourceClass": "Stack",
                                                                       "slot": "child"
                                                                     }
                                                                   ],
@@ -509,7 +579,8 @@
                                                                   "title": "EartagPopoverButton",
                                                                   "popover": "menu_popover"
                                                                 }
-                                                              ]
+                                                              ],
+                                                              "sourceClass": "Overlay"
                                                             }
                                                           ],
                                                           "widthRequest": 196,
@@ -519,7 +590,8 @@
                                                           "hexpand": false,
                                                           "vexpand": false,
                                                           "accessibleRole": "group",
-                                                          "styleClasses": "album-cover"
+                                                          "styleClasses": "album-cover",
+                                                          "sourceClass": "Adw.Bin"
                                                         },
                                                         {
                                                           "id": "previous_file_button_revealer",
@@ -531,14 +603,17 @@
                                                               "children": [],
                                                               "tooltipText": "Previous file",
                                                               "iconName": "go-previous-symbolic",
-                                                              "styleClasses": "osd prev-next-button"
+                                                              "styleClasses": "osd prev-next-button",
+                                                              "sourceClass": "Button"
                                                             }
                                                           ],
                                                           "halign": "start",
                                                           "valign": "center",
                                                           "revealChild": false,
                                                           "transitionType": "crossfade",
-                                                          "styleClasses": "prev-next-button-container"
+                                                          "styleClasses": "prev-next-button-container",
+                                                          "sourceClass": "Revealer",
+                                                          "slot": "overlay"
                                                         },
                                                         {
                                                           "id": "next_file_button_revealer",
@@ -550,16 +625,20 @@
                                                               "children": [],
                                                               "tooltipText": "Next file",
                                                               "iconName": "go-next-symbolic",
-                                                              "styleClasses": "osd"
+                                                              "styleClasses": "osd",
+                                                              "sourceClass": "Button"
                                                             }
                                                           ],
                                                           "halign": "end",
                                                           "valign": "center",
                                                           "revealChild": false,
                                                           "transitionType": "crossfade",
-                                                          "styleClasses": "prev-next-button-container"
+                                                          "styleClasses": "prev-next-button-container",
+                                                          "sourceClass": "Revealer",
+                                                          "slot": "overlay"
                                                         }
-                                                      ]
+                                                      ],
+                                                      "sourceClass": "Overlay"
                                                     },
                                                     {
                                                       "id": "important_data_container",
@@ -600,7 +679,8 @@
                                                         }
                                                       ],
                                                       "orientation": "vertical",
-                                                      "spacing": 6
+                                                      "spacing": 6,
+                                                      "sourceClass": "Box"
                                                     },
                                                     {
                                                       "id": "imported-16",
@@ -638,7 +718,8 @@
                                                           "spacing": 6,
                                                           "hexpand": true,
                                                           "accessibleRole": "list",
-                                                          "orientation": "horizontal"
+                                                          "orientation": "horizontal",
+                                                          "sourceClass": "Box"
                                                         },
                                                         {
                                                           "id": "tag_list",
@@ -689,7 +770,8 @@
                                                           "hexpand": true,
                                                           "valign": "start",
                                                           "selectionMode": "none",
-                                                          "styleClasses": "boxed-list"
+                                                          "styleClasses": "boxed-list",
+                                                          "sourceClass": "ListBox"
                                                         },
                                                         {
                                                           "id": "filename_listbox",
@@ -700,13 +782,15 @@
                                                               "type": "entry-row",
                                                               "children": [],
                                                               "title": "Filename",
-                                                              "showApplyButton": true
+                                                              "showApplyButton": true,
+                                                              "sourceClass": "Adw.EntryRow"
                                                             }
                                                           ],
                                                           "hexpand": true,
                                                           "valign": "start",
                                                           "selectionMode": "none",
-                                                          "styleClasses": "boxed-list"
+                                                          "styleClasses": "boxed-list",
+                                                          "sourceClass": "ListBox"
                                                         },
                                                         {
                                                           "id": "more_tags_group",
@@ -719,7 +803,8 @@
                                                               "hexpand": true,
                                                               "valign": "start",
                                                               "selectionMode": "none",
-                                                              "styleClasses": "boxed-list"
+                                                              "styleClasses": "boxed-list",
+                                                              "sourceClass": "ListBox"
                                                             },
                                                             {
                                                               "id": "tag_selector",
@@ -730,15 +815,18 @@
                                                               "title": "Add tag",
                                                               "halign": "center",
                                                               "marginTop": "6",
-                                                              "styleClasses": "raised pill"
+                                                              "styleClasses": "raised pill",
+                                                              "sourceClass": "MenuButton"
                                                             }
                                                           ],
                                                           "orientation": "vertical",
-                                                          "spacing": 6
+                                                          "spacing": 6,
+                                                          "sourceClass": "Box"
                                                         }
                                                       ],
                                                       "orientation": "vertical",
-                                                      "spacing": 6
+                                                      "spacing": 6,
+                                                      "sourceClass": "Box"
                                                     }
                                                   ],
                                                   "orientation": "vertical",
@@ -747,41 +835,52 @@
                                                   "marginTop": 36,
                                                   "marginBottom": 24,
                                                   "marginStart": 12,
-                                                  "marginEnd": 12
+                                                  "marginEnd": 12,
+                                                  "sourceClass": "Box"
                                                 }
                                               ],
-                                              "maximumSize": 576
+                                              "maximumSize": 576,
+                                              "sourceClass": "Adw.Clamp"
                                             }
                                           ],
                                           "hscrollbarPolicy": "never",
                                           "hexpand": true,
-                                          "vexpand": true
+                                          "vexpand": true,
+                                          "sourceClass": "ScrolledWindow"
                                         }
                                       ],
-                                      "transitionType": "none"
+                                      "transitionType": "none",
+                                      "sourceClass": "Stack"
                                     }
                                   ],
-                                  "transitionType": "none"
+                                  "transitionType": "none",
+                                  "sourceClass": "Stack"
                                 }
                               ],
+                              "sourceClass": "Adw.ToolbarView",
                               "slot": "content"
                             }
-                          ]
+                          ],
+                          "sourceClass": "Adw.OverlaySplitView"
                         }
                       ],
-                      "transitionType": "crossfade"
+                      "transitionType": "crossfade",
+                      "sourceClass": "Stack"
                     }
-                  ]
+                  ],
+                  "sourceClass": "Adw.ToastOverlay"
                 }
               ],
               "hexpand": true,
-              "vexpand": true
+              "vexpand": true,
+              "sourceClass": "Overlay"
             }
           ],
           "defaultWidth": 1000,
           "defaultHeight": 700,
           "widthRequest": 360,
-          "heightRequest": 200
+          "heightRequest": 200,
+          "sourceClass": "Adw.ApplicationWindow"
         }
       }
     ],

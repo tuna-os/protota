@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exportedAt": "2026-07-30T09:23:40.518Z",
+  "exportedAt": "2026-07-30T11:22:17.772Z",
   "generatedBy": "scripts/generate-preset.mjs",
   "document": {
     "id": "settings-preset",
@@ -38,7 +38,8 @@
                               "type": "button",
                               "children": [],
                               "iconName": "edit-find-symbolic",
-                              "tooltipText": "Search"
+                              "tooltipText": "Search",
+                              "sourceClass": "ToggleButton"
                             },
                             {
                               "id": "imported-5",
@@ -47,9 +48,13 @@
                               "iconName": "open-menu-symbolic",
                               "menuModel": "primary_menu",
                               "primary": true,
-                              "tooltipText": "Main Menu"
+                              "tooltipText": "Main Menu",
+                              "sourceClass": "MenuButton",
+                              "slot": "end"
                             }
-                          ]
+                          ],
+                          "sourceClass": "Adw.HeaderBar",
+                          "slot": "top"
                         },
                         {
                           "id": "search_bar",
@@ -60,12 +65,15 @@
                               "type": "search-entry",
                               "children": [],
                               "hexpand": true,
-                              "placeholderText": "Search settings"
+                              "placeholderText": "Search settings",
+                              "sourceClass": "SearchEntry"
                             }
                           ],
+                          "sourceClass": "SearchBar",
                           "bindings": {
                             "search-mode-enabled": "search_button.active bidirectional"
-                          }
+                          },
+                          "slot": "top"
                         },
                         {
                           "id": "imported-7",
@@ -88,10 +96,12 @@
                                           "type": "list-box",
                                           "children": [],
                                           "styleClasses": "navigation-sidebar",
+                                          "sourceClass": "ListBox",
                                           "slot": "child"
                                         }
                                       ],
-                                      "name": "main"
+                                      "name": "main",
+                                      "sourceClass": "StackPage"
                                     },
                                     {
                                       "id": "imported-9",
@@ -108,21 +118,27 @@
                                               "iconName": "edit-find-symbolic",
                                               "title": "No Results Found",
                                               "description": "Try a different search",
-                                              "styleClasses": "compact"
+                                              "styleClasses": "compact",
+                                              "sourceClass": "Adw.StatusPage",
+                                              "slot": "placeholder"
                                             }
                                           ],
                                           "styleClasses": "navigation-sidebar",
+                                          "sourceClass": "ListBox",
                                           "slot": "child"
                                         }
                                       ],
-                                      "name": "search"
+                                      "name": "search",
+                                      "sourceClass": "StackPage"
                                     }
                                   ],
                                   "vhomogeneous": false,
                                   "hhomogeneous": true,
-                                  "transitionType": "slide_left_right"
+                                  "transitionType": "slide_left_right",
+                                  "sourceClass": "Stack"
                                 }
                               ],
+                              "sourceClass": "Adw.Bin",
                               "bindings": {
                                 "search-mode": "search_bar.search-mode-enabled no-sync-create bidirectional",
                                 "search-query": "search_entry.text no-sync-create"
@@ -130,22 +146,27 @@
                             }
                           ],
                           "hscrollbarPolicy": "never",
+                          "sourceClass": "ScrolledWindow",
                           "slot": "content"
                         }
                       ],
+                      "sourceClass": "Adw.ToolbarView",
                       "slot": "child"
                     }
                   ],
                   "title": "Settings",
+                  "sourceClass": "Adw.NavigationPage",
                   "slot": "sidebar"
                 }
               ],
               "notify": ":",
+              "sourceClass": "Adw.NavigationSplitView",
               "slot": "content"
             }
           ],
           "defaultWidth": 980,
-          "defaultHeight": 640
+          "defaultHeight": 640,
+          "sourceClass": "Adw.ApplicationWindow"
         }
       }
     ],

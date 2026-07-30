@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exportedAt": "2026-07-30T09:23:39.104Z",
+  "exportedAt": "2026-07-30T11:22:16.561Z",
   "generatedBy": "scripts/generate-preset.mjs",
   "document": {
     "id": "files-preset",
@@ -44,6 +44,7 @@
                                   "tooltipText": "Search Everywhere",
                                   "actionName": "slot.search-global",
                                   "iconName": "edit-find-symbolic",
+                                  "sourceClass": "Gtk.ToggleButton",
                                   "slot": "start"
                                 },
                                 {
@@ -51,6 +52,7 @@
                                   "type": "window-title",
                                   "children": [],
                                   "title": "Files",
+                                  "sourceClass": "Adw.WindowTitle",
                                   "slot": "title-widget"
                                 },
                                 {
@@ -60,9 +62,11 @@
                                   "tooltipText": "Main Menu",
                                   "iconName": "open-menu-symbolic",
                                   "menuModel": "app_menu",
+                                  "sourceClass": "Gtk.MenuButton",
                                   "slot": "end"
                                 }
                               ],
+                              "sourceClass": "Adw.HeaderBar",
                               "slot": "top"
                             },
                             {
@@ -82,6 +86,7 @@
                                           "type": "list-box",
                                           "children": [],
                                           "valign": "center",
+                                          "sourceClass": "Gtk.ListView",
                                           "slot": "child"
                                         }
                                       ],
@@ -89,6 +94,7 @@
                                       "direction": "right",
                                       "popover": "operations_popover",
                                       "flat": true,
+                                      "sourceClass": "Gtk.MenuButton",
                                       "slot": "child"
                                     }
                                   ],
@@ -98,6 +104,7 @@
                                 }
                               ],
                               "orientation": "horizontal",
+                              "sourceClass": "Gtk.Box",
                               "slot": "bottom"
                             },
                             {
@@ -113,6 +120,7 @@
                               "slot": "content"
                             }
                           ],
+                          "sourceClass": "Adw.ToolbarView",
                           "bindings": {
                             "reveal-bottom-bars": "progress_indicator.reveal"
                           },
@@ -155,7 +163,8 @@
                                                   "slot": "child"
                                                 }
                                               ],
-                                              "name": "pathbar"
+                                              "name": "pathbar",
+                                              "sourceClass": "Gtk.StackPage"
                                             },
                                             {
                                               "id": "template-imported-174",
@@ -177,14 +186,17 @@
                                                       "type": "button",
                                                       "children": [],
                                                       "iconName": "window-close-symbolic",
-                                                      "tooltipText": "Cancel"
+                                                      "tooltipText": "Cancel",
+                                                      "sourceClass": "Gtk.Button"
                                                     }
                                                   ],
                                                   "orientation": "horizontal",
+                                                  "sourceClass": "Gtk.Box",
                                                   "slot": "child"
                                                 }
                                               ],
-                                              "name": "location"
+                                              "name": "location",
+                                              "sourceClass": "Gtk.StackPage"
                                             },
                                             {
                                               "id": "template-imported-177",
@@ -195,15 +207,18 @@
                                                   "type": "box",
                                                   "children": [],
                                                   "orientation": "vertical",
+                                                  "sourceClass": "Gtk.Box",
                                                   "slot": "child"
                                                 }
                                               ],
-                                              "name": "search"
+                                              "name": "search",
+                                              "sourceClass": "Gtk.StackPage"
                                             }
                                           ],
                                           "valign": "center",
                                           "hexpand": false,
-                                          "transitionType": "crossfade"
+                                          "transitionType": "crossfade",
+                                          "sourceClass": "Gtk.Stack"
                                         },
                                         {
                                           "id": "search_button_stack",
@@ -218,6 +233,7 @@
                                               "valign": "center",
                                               "actionName": "slot.search-visible",
                                               "iconName": "nautilus-folder-search-symbolic",
+                                              "sourceClass": "Gtk.ToggleButton",
                                               "bindings": {
                                                 "active": "expression"
                                               }
@@ -225,15 +241,18 @@
                                             {
                                               "id": "search_button_placeholder",
                                               "type": "bin",
-                                              "children": []
+                                              "children": [],
+                                              "sourceClass": "Adw.Bin"
                                             }
                                           ],
                                           "hhomogeneous": true,
-                                          "transitionType": "crossfade"
+                                          "transitionType": "crossfade",
+                                          "sourceClass": "Gtk.Stack"
                                         }
                                       ],
                                       "spacing": 6,
                                       "orientation": "horizontal",
+                                      "sourceClass": "Gtk.Box",
                                       "slot": "title"
                                     },
                                     {
@@ -242,6 +261,7 @@
                                       "children": [],
                                       "tooltipText": "Show Sidebar",
                                       "iconName": "sidebar-show-symbolic",
+                                      "sourceClass": "Gtk.ToggleButton",
                                       "bindings": {
                                         "visible": "NautilusToolbar.show-sidebar-button",
                                         "active": "NautilusToolbar.sidebar-button-active"
@@ -267,7 +287,8 @@
                                                   "tooltipText": "Back",
                                                   "valign": "center",
                                                   "actionName": "slot.back",
-                                                  "iconName": "go-previous-symbolic"
+                                                  "iconName": "go-previous-symbolic",
+                                                  "sourceClass": "Gtk.Button"
                                                 },
                                                 {
                                                   "id": "forward_button",
@@ -276,11 +297,13 @@
                                                   "tooltipText": "Forward",
                                                   "valign": "center",
                                                   "actionName": "slot.forward",
-                                                  "iconName": "go-next-symbolic"
+                                                  "iconName": "go-next-symbolic",
+                                                  "sourceClass": "Gtk.Button"
                                                 }
                                               ],
                                               "spacing": 6,
                                               "orientation": "horizontal",
+                                              "sourceClass": "Gtk.Box",
                                               "slot": "child"
                                             }
                                           ],
@@ -292,11 +315,13 @@
                                         {
                                           "id": "history_controls_placeholder",
                                           "type": "bin",
-                                          "children": []
+                                          "children": [],
+                                          "sourceClass": "Adw.Bin"
                                         }
                                       ],
                                       "hhomogeneous": true,
                                       "transitionType": "crossfade",
+                                      "sourceClass": "Gtk.Stack",
                                       "bindings": {
                                         "visible": "NautilusToolbar.show-history-controls"
                                       },
@@ -314,6 +339,7 @@
                                           "valign": "center",
                                           "dropdownTooltip": "View Options",
                                           "actionName": "slot.files-view-mode-toggle",
+                                          "sourceClass": "Adw.SplitButton",
                                           "bindings": {
                                             "icon-name": "expression",
                                             "tooltip-text": "expression"
@@ -336,12 +362,14 @@
                                       "tooltipText": "New Folder",
                                       "actionName": "view.new-folder",
                                       "focusOnClick": false,
+                                      "sourceClass": "Gtk.Button",
                                       "bindings": {
                                         "visible": "NautilusToolbar.show-new-folder-button"
                                       },
                                       "slot": "end"
                                     }
-                                  ]
+                                  ],
+                                  "sourceClass": "Adw.HeaderBar"
                                 }
                               ],
                               "sourceClass": "NautilusToolbar",
@@ -357,7 +385,7 @@
                               "id": "tab_bar",
                               "type": "custom-widget",
                               "children": [],
-                              "sourceClass": "AdwTabBar",
+                              "sourceClass": "Adw.TabBar",
                               "title": "AdwTabBar",
                               "view": "tab_view",
                               "slot": "top"
@@ -367,6 +395,7 @@
                               "type": "tab-view",
                               "children": [],
                               "menuModel": "tab_menu_model",
+                              "sourceClass": "Adw.TabView",
                               "slot": "content"
                             },
                             {
@@ -381,7 +410,8 @@
                                   "inputHints": "no-spellcheck | no-emoji",
                                   "widthChars": 10,
                                   "maxWidthChars": 34,
-                                  "placeholderText": "Server address"
+                                  "placeholderText": "Server address",
+                                  "sourceClass": "Gtk.Entry"
                                 },
                                 {
                                   "id": "connect_button",
@@ -391,7 +421,8 @@
                                   "useUnderline": true,
                                   "canShrink": true,
                                   "sensitive": false,
-                                  "valign": "center"
+                                  "valign": "center",
+                                  "sourceClass": "Gtk.Button"
                                 },
                                 {
                                   "id": "template-imported-90",
@@ -401,7 +432,8 @@
                                   "popover": "server_adresses_popover",
                                   "iconName": "info-outline-symbolic",
                                   "flat": true,
-                                  "circular": true
+                                  "circular": true,
+                                  "sourceClass": "Gtk.MenuButton"
                                 }
                               ],
                               "sourceClass": "NautilusNetworkAddressBar",
@@ -429,7 +461,8 @@
                                           "tooltipText": "Back",
                                           "valign": "center",
                                           "actionName": "slot.back",
-                                          "iconName": "go-previous-symbolic"
+                                          "iconName": "go-previous-symbolic",
+                                          "sourceClass": "Gtk.Button"
                                         },
                                         {
                                           "id": "forward_button",
@@ -438,11 +471,13 @@
                                           "tooltipText": "Forward",
                                           "valign": "center",
                                           "actionName": "slot.forward",
-                                          "iconName": "go-next-symbolic"
+                                          "iconName": "go-next-symbolic",
+                                          "sourceClass": "Gtk.Button"
                                         }
                                       ],
                                       "spacing": 6,
                                       "orientation": "horizontal",
+                                      "sourceClass": "Gtk.Box",
                                       "slot": "child"
                                     }
                                   ],
@@ -464,6 +499,7 @@
                                       "valign": "center",
                                       "dropdownTooltip": "View Options",
                                       "actionName": "slot.files-view-mode-toggle",
+                                      "sourceClass": "Adw.SplitButton",
                                       "bindings": {
                                         "icon-name": "expression",
                                         "tooltip-text": "expression"
@@ -480,9 +516,11 @@
                               ],
                               "revealed": false,
                               "orientation": "horizontal",
+                              "sourceClass": "Gtk.ActionBar",
                               "slot": "bottom"
                             }
                           ],
+                          "sourceClass": "Adw.ToolbarView",
                           "slot": "content"
                         }
                       ],
@@ -491,9 +529,11 @@
                       "maxSidebarWidth": 240,
                       "sidebarWidthUnit": "px",
                       "sidebarWidthFraction": 0.2,
+                      "sourceClass": "Adw.OverlaySplitView",
                       "slot": "child"
                     }
                   ],
+                  "sourceClass": "Adw.ToastOverlay",
                   "slot": "child"
                 }
               ],
@@ -503,6 +543,7 @@
           ],
           "heightRequest": 380,
           "showMenubar": false,
+          "sourceClass": "Adw.ApplicationWindow",
           "bindings": {
             "title": "expression"
           }
@@ -544,10 +585,12 @@
                                   "children": [],
                                   "visible": false,
                                   "valign": "start",
+                                  "sourceClass": "Gtk.Button",
                                   "slot": "start"
                                 }
                               ],
                               "showTitle": false,
+                              "sourceClass": "Adw.HeaderBar",
                               "slot": "top"
                             },
                             {
@@ -579,9 +622,11 @@
                                                       "type": "bin",
                                                       "children": [],
                                                       "iconName": "image-missing",
+                                                      "sourceClass": "Gtk.Image",
                                                       "slot": "child"
                                                     }
-                                                  ]
+                                                  ],
+                                                  "sourceClass": "Gtk.StackPage"
                                                 },
                                                 {
                                                   "id": "imported-10",
@@ -599,12 +644,14 @@
                                                               "id": "imported-12",
                                                               "type": "bin",
                                                               "children": [],
+                                                              "sourceClass": "Gtk.Image",
                                                               "bindings": {
                                                                 "paintable": "expression",
                                                                 "pixel-size": "expression"
                                                               }
                                                             }
-                                                          ]
+                                                          ],
+                                                          "sourceClass": "Gtk.Frame"
                                                         },
                                                         {
                                                           "id": "imported-13",
@@ -618,11 +665,13 @@
                                                               "focusable": true,
                                                               "iconName": "document-edit-symbolic",
                                                               "circular": true,
+                                                              "sourceClass": "Gtk.Button",
                                                               "slot": "child"
                                                             }
                                                           ],
                                                           "halign": "end",
                                                           "valign": "end",
+                                                          "sourceClass": "Adw.Bin",
                                                           "slot": "overlay"
                                                         },
                                                         {
@@ -637,26 +686,32 @@
                                                               "focusable": true,
                                                               "iconName": "remove-custom-icon-symbolic",
                                                               "circular": true,
+                                                              "sourceClass": "Gtk.Button",
                                                               "slot": "child"
                                                             }
                                                           ],
                                                           "halign": "end",
                                                           "valign": "start",
+                                                          "sourceClass": "Adw.Bin",
                                                           "slot": "overlay"
                                                         }
                                                       ],
+                                                      "sourceClass": "Gtk.Overlay",
                                                       "slot": "child"
                                                     }
-                                                  ]
+                                                  ],
+                                                  "sourceClass": "Gtk.StackPage"
                                                 }
                                               ],
                                               "halign": "center",
                                               "valign": "start",
                                               "hhomogeneous": false,
                                               "vhomogeneous": false,
+                                              "sourceClass": "Gtk.Stack",
                                               "slot": "center"
                                             }
-                                          ]
+                                          ],
+                                          "sourceClass": "Gtk.CenterBox"
                                         },
                                         {
                                           "id": "imported-15",
@@ -672,7 +727,8 @@
                                               "wrap": true,
                                               "wrapMode": "PANGO_WRAP_WORD_CHAR",
                                               "lines": 3,
-                                              "justify": "center"
+                                              "justify": "center",
+                                              "sourceClass": "Gtk.Label"
                                             },
                                             {
                                               "id": "type_value_label",
@@ -680,7 +736,8 @@
                                               "children": [],
                                               "ellipsize": "end",
                                               "selectable": true,
-                                              "visible": false
+                                              "visible": false,
+                                              "sourceClass": "Gtk.Label"
                                             },
                                             {
                                               "id": "type_file_system_label",
@@ -689,7 +746,8 @@
                                               "ellipsize": "end",
                                               "title": "Unknown Filesystem",
                                               "selectable": true,
-                                              "visible": false
+                                              "visible": false,
+                                              "sourceClass": "Gtk.Label"
                                             },
                                             {
                                               "id": "size_value_label",
@@ -697,7 +755,8 @@
                                               "children": [],
                                               "visible": false,
                                               "selectable": true,
-                                              "ellipsize": "end"
+                                              "ellipsize": "end",
+                                              "sourceClass": "Gtk.Label"
                                             },
                                             {
                                               "id": "contents_box",
@@ -709,19 +768,22 @@
                                                   "children": [],
                                                   "selectable": true,
                                                   "ellipsize": "end",
-                                                  "justify": "center"
+                                                  "justify": "center",
+                                                  "sourceClass": "Gtk.Label"
                                                 },
                                                 {
                                                   "id": "contents_spinner",
                                                   "type": "spinner",
                                                   "children": [],
-                                                  "visible": false
+                                                  "visible": false,
+                                                  "sourceClass": "Adw.Spinner"
                                                 }
                                               ],
                                               "halign": "center",
                                               "visible": false,
                                               "spacing": 12,
-                                              "orientation": "horizontal"
+                                              "orientation": "horizontal",
+                                              "sourceClass": "Gtk.Box"
                                             },
                                             {
                                               "id": "free_space_value_label",
@@ -730,17 +792,21 @@
                                               "visible": false,
                                               "selectable": true,
                                               "ellipsize": "end",
-                                              "maxWidthChars": 24
+                                              "maxWidthChars": 24,
+                                              "sourceClass": "Gtk.Label"
                                             }
                                           ],
                                           "orientation": "vertical",
-                                          "spacing": 6
+                                          "spacing": 6,
+                                          "sourceClass": "Gtk.Box"
                                         }
                                       ],
                                       "orientation": "vertical",
-                                      "spacing": 12
+                                      "spacing": 12,
+                                      "sourceClass": "Gtk.Box"
                                     }
-                                  ]
+                                  ],
+                                  "sourceClass": "Adw.PreferencesGroup"
                                 },
                                 {
                                   "id": "disk_group",
@@ -758,7 +824,8 @@
                                               "id": "disk_space_level_bar",
                                               "type": "level-bar",
                                               "children": [],
-                                              "hexpand": true
+                                              "hexpand": true,
+                                              "sourceClass": "Gtk.LevelBar"
                                             },
                                             {
                                               "id": "imported-17",
@@ -771,17 +838,20 @@
                                                     {
                                                       "id": "disk_space_capacity_value",
                                                       "type": "label",
-                                                      "children": []
+                                                      "children": [],
+                                                      "sourceClass": "Gtk.Label"
                                                     },
                                                     {
                                                       "id": "imported-19",
                                                       "type": "label",
                                                       "children": [],
-                                                      "title": "total"
+                                                      "title": "total",
+                                                      "sourceClass": "Gtk.Label"
                                                     }
                                                   ],
                                                   "spacing": 3,
-                                                  "orientation": "horizontal"
+                                                  "orientation": "horizontal",
+                                                  "sourceClass": "Gtk.Box"
                                                 },
                                                 {
                                                   "id": "imported-20",
@@ -792,22 +862,26 @@
                                                       "type": "label",
                                                       "children": [],
                                                       "title": "●",
-                                                      "accessibleRole": "presentation"
+                                                      "accessibleRole": "presentation",
+                                                      "sourceClass": "Gtk.Label"
                                                     },
                                                     {
                                                       "id": "disk_space_used_value",
                                                       "type": "label",
-                                                      "children": []
+                                                      "children": [],
+                                                      "sourceClass": "Gtk.Label"
                                                     },
                                                     {
                                                       "id": "imported-22",
                                                       "type": "label",
                                                       "children": [],
-                                                      "title": "used"
+                                                      "title": "used",
+                                                      "sourceClass": "Gtk.Label"
                                                     }
                                                   ],
                                                   "spacing": 3,
-                                                  "orientation": "horizontal"
+                                                  "orientation": "horizontal",
+                                                  "sourceClass": "Gtk.Box"
                                                 },
                                                 {
                                                   "id": "imported-23",
@@ -818,27 +892,32 @@
                                                       "type": "label",
                                                       "children": [],
                                                       "title": "●",
-                                                      "accessibleRole": "presentation"
+                                                      "accessibleRole": "presentation",
+                                                      "sourceClass": "Gtk.Label"
                                                     },
                                                     {
                                                       "id": "disk_space_free_value",
                                                       "type": "label",
-                                                      "children": []
+                                                      "children": [],
+                                                      "sourceClass": "Gtk.Label"
                                                     },
                                                     {
                                                       "id": "imported-25",
                                                       "type": "label",
                                                       "children": [],
-                                                      "title": "free"
+                                                      "title": "free",
+                                                      "sourceClass": "Gtk.Label"
                                                     }
                                                   ],
                                                   "spacing": 3,
-                                                  "orientation": "horizontal"
+                                                  "orientation": "horizontal",
+                                                  "sourceClass": "Gtk.Box"
                                                 }
                                               ],
                                               "spacing": 12,
                                               "halign": "center",
-                                              "orientation": "horizontal"
+                                              "orientation": "horizontal",
+                                              "sourceClass": "Gtk.Box"
                                             }
                                           ],
                                           "marginBottom": 12,
@@ -846,11 +925,13 @@
                                           "marginStart": 12,
                                           "marginTop": 18,
                                           "spacing": 12,
-                                          "orientation": "vertical"
+                                          "orientation": "vertical",
+                                          "sourceClass": "Gtk.Box"
                                         }
                                       ],
                                       "activatable": false,
-                                      "selectable": false
+                                      "selectable": false,
+                                      "sourceClass": "Adw.PreferencesRow"
                                     },
                                     {
                                       "id": "open_in_disks_button_row",
@@ -858,10 +939,12 @@
                                       "children": [],
                                       "title": "Open in Disks",
                                       "endIconName": "external-link-symbolic",
-                                      "useUnderline": true
+                                      "useUnderline": true,
+                                      "sourceClass": "Adw.ButtonRow"
                                     }
                                   ],
-                                  "visible": false
+                                  "visible": false,
+                                  "sourceClass": "Adw.PreferencesGroup"
                                 },
                                 {
                                   "id": "locations_group",
@@ -879,6 +962,7 @@
                                           "iconName": "folder-open-symbolic",
                                           "valign": "center",
                                           "flat": true,
+                                          "sourceClass": "Gtk.Button",
                                           "slot": "suffix"
                                         }
                                       ],
@@ -887,7 +971,8 @@
                                       "selectable": false,
                                       "subtitleSelectable": true,
                                       "useUnderline": true,
-                                      "useMarkup": false
+                                      "useMarkup": false,
+                                      "sourceClass": "Adw.ActionRow"
                                     },
                                     {
                                       "id": "parent_folder_row",
@@ -901,6 +986,7 @@
                                           "iconName": "folder-open-symbolic",
                                           "valign": "center",
                                           "flat": true,
+                                          "sourceClass": "Gtk.Button",
                                           "slot": "suffix"
                                         }
                                       ],
@@ -909,10 +995,12 @@
                                       "selectable": false,
                                       "subtitleSelectable": true,
                                       "useUnderline": true,
-                                      "useMarkup": false
+                                      "useMarkup": false,
+                                      "sourceClass": "Adw.ActionRow"
                                     }
                                   ],
-                                  "visible": false
+                                  "visible": false,
+                                  "sourceClass": "Adw.PreferencesGroup"
                                 },
                                 {
                                   "id": "trashed_group",
@@ -925,7 +1013,8 @@
                                       "title": "Original Folder",
                                       "selectable": false,
                                       "subtitleSelectable": true,
-                                      "useMarkup": false
+                                      "useMarkup": false,
+                                      "sourceClass": "Adw.ActionRow"
                                     },
                                     {
                                       "id": "trashed_on_row",
@@ -935,10 +1024,12 @@
                                       "selectable": false,
                                       "subtitleSelectable": true,
                                       "subtitleLines": 1,
-                                      "useMarkup": false
+                                      "useMarkup": false,
+                                      "sourceClass": "Adw.ActionRow"
                                     }
                                   ],
-                                  "visible": false
+                                  "visible": false,
+                                  "sourceClass": "Adw.PreferencesGroup"
                                 },
                                 {
                                   "id": "times_group",
@@ -953,7 +1044,8 @@
                                       "selectable": false,
                                       "subtitleSelectable": true,
                                       "subtitleLines": 1,
-                                      "useMarkup": false
+                                      "useMarkup": false,
+                                      "sourceClass": "Adw.ActionRow"
                                     },
                                     {
                                       "id": "modified_row",
@@ -964,7 +1056,8 @@
                                       "selectable": false,
                                       "subtitleSelectable": true,
                                       "subtitleLines": 1,
-                                      "useMarkup": false
+                                      "useMarkup": false,
+                                      "sourceClass": "Adw.ActionRow"
                                     },
                                     {
                                       "id": "created_row",
@@ -975,10 +1068,12 @@
                                       "selectable": false,
                                       "subtitleSelectable": true,
                                       "subtitleLines": 1,
-                                      "useMarkup": false
+                                      "useMarkup": false,
+                                      "sourceClass": "Adw.ActionRow"
                                     }
                                   ],
-                                  "visible": false
+                                  "visible": false,
+                                  "sourceClass": "Adw.PreferencesGroup"
                                 },
                                 {
                                   "id": "imported-26",
@@ -992,19 +1087,22 @@
                                           "id": "permissions_value_label",
                                           "type": "label",
                                           "children": [],
-                                          "ellipsize": "end"
+                                          "ellipsize": "end",
+                                          "sourceClass": "Gtk.Label"
                                         },
                                         {
                                           "id": "imported-27",
                                           "type": "bin",
                                           "children": [],
-                                          "iconName": "go-next-symbolic"
+                                          "iconName": "go-next-symbolic",
+                                          "sourceClass": "Gtk.Image"
                                         }
                                       ],
                                       "activatable": true,
                                       "selectable": false,
                                       "title": "Permissions",
-                                      "useUnderline": true
+                                      "useUnderline": true,
+                                      "sourceClass": "Adw.ActionRow"
                                     },
                                     {
                                       "id": "execution_row",
@@ -1013,9 +1111,11 @@
                                       "visible": false,
                                       "activatable": true,
                                       "title": "Executable as Program",
-                                      "useUnderline": true
+                                      "useUnderline": true,
+                                      "sourceClass": "Adw.SwitchRow"
                                     }
-                                  ]
+                                  ],
+                                  "sourceClass": "Adw.PreferencesGroup"
                                 },
                                 {
                                   "id": "extension_models_group",
@@ -1025,20 +1125,25 @@
                                       "id": "extension_models_list_box",
                                       "type": "list-box",
                                       "children": [],
-                                      "selectionMode": "none"
+                                      "selectionMode": "none",
+                                      "sourceClass": "Gtk.ListBox"
                                     }
                                   ],
-                                  "visible": false
+                                  "visible": false,
+                                  "sourceClass": "Adw.PreferencesGroup"
                                 }
                               ],
+                              "sourceClass": "Adw.PreferencesPage",
                               "slot": "content"
                             }
                           ],
+                          "sourceClass": "Adw.ToolbarView",
                           "slot": "child"
                         }
                       ],
                       "title": "Properties",
-                      "tag": "main"
+                      "tag": "main",
+                      "sourceClass": "Adw.NavigationPage"
                     },
                     {
                       "id": "imported-28",
@@ -1052,6 +1157,7 @@
                               "id": "imported-30",
                               "type": "header-bar",
                               "children": [],
+                              "sourceClass": "Adw.HeaderBar",
                               "slot": "top"
                             },
                             {
@@ -1069,10 +1175,12 @@
                                       "iconName": "dialog-error-symbolic",
                                       "title": "Unknown Permissions",
                                       "description": "The permissions of the selected files could not be determined",
+                                      "sourceClass": "Adw.StatusPage",
                                       "slot": "child"
                                     }
                                   ],
-                                  "name": "permission-indeterminable"
+                                  "name": "permission-indeterminable",
+                                  "sourceClass": "Gtk.StackPage"
                                 },
                                 {
                                   "id": "imported-32",
@@ -1086,7 +1194,8 @@
                                           "id": "owner_permission_banner",
                                           "type": "banner",
                                           "children": [],
-                                          "title": "Only the owner can edit these permissions"
+                                          "title": "Only the owner can edit these permissions",
+                                          "sourceClass": "Adw.Banner"
                                         },
                                         {
                                           "id": "imported-34",
@@ -1104,7 +1213,8 @@
                                                   "title": "Owner",
                                                   "useUnderline": true,
                                                   "useMarkup": false,
-                                                  "expression": ""
+                                                  "expression": "",
+                                                  "sourceClass": "Adw.ComboRow"
                                                 },
                                                 {
                                                   "id": "owner_access_row",
@@ -1113,7 +1223,8 @@
                                                   "visible": false,
                                                   "activatable": false,
                                                   "title": "Access",
-                                                  "useMarkup": false
+                                                  "useMarkup": false,
+                                                  "sourceClass": "Adw.ComboRow"
                                                 },
                                                 {
                                                   "id": "owner_folder_access_row",
@@ -1122,7 +1233,8 @@
                                                   "visible": false,
                                                   "activatable": false,
                                                   "title": "Folder Access",
-                                                  "useMarkup": false
+                                                  "useMarkup": false,
+                                                  "sourceClass": "Adw.ComboRow"
                                                 },
                                                 {
                                                   "id": "owner_file_access_row",
@@ -1131,9 +1243,11 @@
                                                   "visible": false,
                                                   "activatable": false,
                                                   "title": "File Access",
-                                                  "useMarkup": false
+                                                  "useMarkup": false,
+                                                  "sourceClass": "Adw.ComboRow"
                                                 }
-                                              ]
+                                              ],
+                                              "sourceClass": "Adw.PreferencesGroup"
                                             },
                                             {
                                               "id": "imported-36",
@@ -1148,7 +1262,8 @@
                                                   "title": "Group",
                                                   "useUnderline": true,
                                                   "useMarkup": false,
-                                                  "expression": ""
+                                                  "expression": "",
+                                                  "sourceClass": "Adw.ComboRow"
                                                 },
                                                 {
                                                   "id": "group_access_row",
@@ -1157,7 +1272,8 @@
                                                   "visible": false,
                                                   "activatable": false,
                                                   "title": "Access",
-                                                  "useMarkup": false
+                                                  "useMarkup": false,
+                                                  "sourceClass": "Adw.ComboRow"
                                                 },
                                                 {
                                                   "id": "group_folder_access_row",
@@ -1166,7 +1282,8 @@
                                                   "visible": false,
                                                   "activatable": false,
                                                   "title": "Folder Access",
-                                                  "useMarkup": false
+                                                  "useMarkup": false,
+                                                  "sourceClass": "Adw.ComboRow"
                                                 },
                                                 {
                                                   "id": "group_file_access_row",
@@ -1175,9 +1292,11 @@
                                                   "visible": false,
                                                   "activatable": false,
                                                   "title": "File Access",
-                                                  "useMarkup": false
+                                                  "useMarkup": false,
+                                                  "sourceClass": "Adw.ComboRow"
                                                 }
-                                              ]
+                                              ],
+                                              "sourceClass": "Adw.PreferencesGroup"
                                             },
                                             {
                                               "id": "imported-37",
@@ -1190,7 +1309,8 @@
                                                   "visible": false,
                                                   "activatable": false,
                                                   "title": "Access",
-                                                  "useMarkup": false
+                                                  "useMarkup": false,
+                                                  "sourceClass": "Adw.ComboRow"
                                                 },
                                                 {
                                                   "id": "others_folder_access_row",
@@ -1199,7 +1319,8 @@
                                                   "visible": false,
                                                   "activatable": false,
                                                   "title": "Folder Access",
-                                                  "useMarkup": false
+                                                  "useMarkup": false,
+                                                  "sourceClass": "Adw.ComboRow"
                                                 },
                                                 {
                                                   "id": "others_file_access_row",
@@ -1208,10 +1329,12 @@
                                                   "visible": false,
                                                   "activatable": false,
                                                   "title": "File Access",
-                                                  "useMarkup": false
+                                                  "useMarkup": false,
+                                                  "sourceClass": "Adw.ComboRow"
                                                 }
                                               ],
-                                              "title": "Other Users"
+                                              "title": "Other Users",
+                                              "sourceClass": "Adw.PreferencesGroup"
                                             },
                                             {
                                               "id": "security_context_group",
@@ -1225,10 +1348,12 @@
                                                   "selectable": false,
                                                   "subtitleSelectable": true,
                                                   "subtitleLines": 1,
-                                                  "useMarkup": false
+                                                  "useMarkup": false,
+                                                  "sourceClass": "Adw.ActionRow"
                                                 }
                                               ],
-                                              "visible": false
+                                              "visible": false,
+                                              "sourceClass": "Adw.PreferencesGroup"
                                             },
                                             {
                                               "id": "change_permissions_enclosed_files_group",
@@ -1239,29 +1364,37 @@
                                                   "type": "button-row",
                                                   "children": [],
                                                   "title": "Change Permissions for Enclosed Files…",
-                                                  "useUnderline": true
+                                                  "useUnderline": true,
+                                                  "sourceClass": "Adw.ButtonRow"
                                                 }
                                               ],
-                                              "visible": false
+                                              "visible": false,
+                                              "sourceClass": "Adw.PreferencesGroup"
                                             }
-                                          ]
+                                          ],
+                                          "sourceClass": "Adw.PreferencesPage"
                                         }
                                       ],
                                       "orientation": "vertical",
+                                      "sourceClass": "Gtk.Box",
                                       "slot": "child"
                                     }
                                   ],
-                                  "name": "permissions-box"
+                                  "name": "permissions-box",
+                                  "sourceClass": "Gtk.StackPage"
                                 }
                               ],
+                              "sourceClass": "Gtk.Stack",
                               "slot": "content"
                             }
                           ],
+                          "sourceClass": "Adw.ToolbarView",
                           "slot": "child"
                         }
                       ],
                       "tag": "permissions",
-                      "title": "Set Custom Permissions"
+                      "title": "Set Custom Permissions",
+                      "sourceClass": "Adw.NavigationPage"
                     },
                     {
                       "id": "imported-39",
@@ -1275,6 +1408,7 @@
                               "id": "imported-41",
                               "type": "header-bar",
                               "children": [],
+                              "sourceClass": "Adw.HeaderBar",
                               "slot": "top"
                             },
                             {
@@ -1289,30 +1423,38 @@
                                       "id": "extension_list_box",
                                       "type": "list-box",
                                       "children": [],
-                                      "selectionMode": "none"
+                                      "selectionMode": "none",
+                                      "sourceClass": "Gtk.ListBox"
                                     }
-                                  ]
+                                  ],
+                                  "sourceClass": "Adw.PreferencesGroup"
                                 }
                               ],
+                              "sourceClass": "Adw.PreferencesPage",
                               "slot": "content"
                             }
                           ],
+                          "sourceClass": "Adw.ToolbarView",
                           "slot": "child"
                         }
                       ],
-                      "tag": "extension"
+                      "tag": "extension",
+                      "sourceClass": "Adw.NavigationPage"
                     }
                   ],
+                  "sourceClass": "Adw.NavigationView",
                   "slot": "child"
                 }
-              ]
+              ],
+              "sourceClass": "Adw.ToastOverlay"
             }
           ],
           "title": "Properties",
           "modal": true,
           "widthRequest": 360,
           "heightRequest": 294,
-          "defaultWidth": 480
+          "defaultWidth": 480,
+          "sourceClass": "Adw.Window"
         }
       },
       {
@@ -1333,6 +1475,7 @@
                   "id": "imported-3",
                   "type": "header-bar",
                   "children": [],
+                  "sourceClass": "Adw.HeaderBar",
                   "slot": "top"
                 },
                 {
@@ -1348,7 +1491,8 @@
                           "type": "entry-row",
                           "children": [],
                           "title": "Folder Name",
-                          "useUnderline": true
+                          "useUnderline": true,
+                          "sourceClass": "Adw.EntryRow"
                         },
                         {
                           "id": "imported-6",
@@ -1360,6 +1504,7 @@
                               "children": [],
                               "marginTop": 6,
                               "xalign": 0,
+                              "sourceClass": "Gtk.Label",
                               "bindings": {
                                 "label": "validator.feedback-text"
                               },
@@ -1367,6 +1512,7 @@
                             }
                           ],
                           "transitionType": "crossfade",
+                          "sourceClass": "Gtk.Revealer",
                           "bindings": {
                             "reveal-child": "validator.has-feedback"
                           }
@@ -1380,21 +1526,26 @@
                           "marginTop": 6,
                           "halign": "center",
                           "suggested": true,
+                          "sourceClass": "Gtk.Button",
                           "bindings": {
                             "sensitive": "validator.passed"
                           }
                         }
-                      ]
+                      ],
+                      "sourceClass": "Adw.PreferencesGroup"
                     }
                   ],
+                  "sourceClass": "Adw.PreferencesPage",
                   "slot": "content"
                 }
               ],
+              "sourceClass": "Adw.ToolbarView",
               "slot": "child"
             }
           ],
           "title": "New Folder",
-          "contentWidth": 450
+          "contentWidth": 450,
+          "sourceClass": "Adw.Dialog"
         }
       },
       {
@@ -1421,6 +1572,7 @@
                       "children": [],
                       "title": "Cancel",
                       "useUnderline": true,
+                      "sourceClass": "Gtk.Button",
                       "slot": "start"
                     },
                     {
@@ -1430,6 +1582,7 @@
                       "title": "Compress",
                       "useUnderline": true,
                       "suggested": true,
+                      "sourceClass": "Gtk.Button",
                       "bindings": {
                         "sensitive": "expression"
                       },
@@ -1438,6 +1591,7 @@
                   ],
                   "showStartTitleButtons": false,
                   "showEndTitleButtons": false,
+                  "sourceClass": "Adw.HeaderBar",
                   "slot": "top"
                 },
                 {
@@ -1453,7 +1607,8 @@
                           "type": "entry-row",
                           "children": [],
                           "title": "Archive Name",
-                          "useUnderline": true
+                          "useUnderline": true,
+                          "sourceClass": "Adw.EntryRow"
                         },
                         {
                           "id": "imported-7",
@@ -1465,17 +1620,20 @@
                               "children": [],
                               "marginTop": 6,
                               "xalign": 0,
+                              "sourceClass": "Gtk.Label",
                               "bindings": {
                                 "label": "validator.feedback-text"
                               },
                               "slot": "child"
                             }
                           ],
+                          "sourceClass": "Gtk.Revealer",
                           "bindings": {
                             "reveal-child": "validator.has-feedback"
                           }
                         }
-                      ]
+                      ],
+                      "sourceClass": "Adw.PreferencesGroup"
                     },
                     {
                       "id": "imported-9",
@@ -1486,9 +1644,11 @@
                           "type": "combo-row",
                           "children": [],
                           "title": "Compression Method",
-                          "useUnderline": true
+                          "useUnderline": true,
+                          "sourceClass": "Adw.ComboRow"
                         }
-                      ]
+                      ],
+                      "sourceClass": "Adw.PreferencesGroup"
                     },
                     {
                       "id": "passphrase_group",
@@ -1499,7 +1659,8 @@
                           "type": "password-row",
                           "children": [],
                           "title": "Password",
-                          "useUnderline": true
+                          "useUnderline": true,
+                          "sourceClass": "Adw.PasswordEntryRow"
                         },
                         {
                           "id": "passphrase_confirm_entry",
@@ -1507,23 +1668,28 @@
                           "children": [],
                           "title": "Confirm Password",
                           "useUnderline": true,
-                          "activatesDefault": true
+                          "activatesDefault": true,
+                          "sourceClass": "Adw.PasswordEntryRow"
                         }
                       ],
                       "title": "Encryption",
-                      "description": "Encrypt contents of the archive with a password when the compression method supports password-protection."
+                      "description": "Encrypt contents of the archive with a password when the compression method supports password-protection.",
+                      "sourceClass": "Adw.PreferencesGroup"
                     }
                   ],
+                  "sourceClass": "Adw.PreferencesPage",
                   "slot": "content"
                 }
               ],
+              "sourceClass": "Adw.ToolbarView",
               "slot": "child"
             }
           ],
           "title": "Compress Files and Folders",
           "contentHeight": 440,
           "contentWidth": 500,
-          "defaultWidget": "activation_button"
+          "defaultWidget": "activation_button",
+          "sourceClass": "Adw.Dialog"
         }
       }
     ],

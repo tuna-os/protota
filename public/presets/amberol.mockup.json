@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exportedAt": "2026-07-30T09:23:32.069Z",
+  "exportedAt": "2026-07-30T11:22:10.019Z",
   "generatedBy": "scripts/generate-preset.mjs",
   "document": {
     "id": "amberol-preset",
@@ -45,7 +45,9 @@
                                       "id": "imported-5",
                                       "type": "header-bar",
                                       "children": [],
-                                      "showTitle": false
+                                      "showTitle": false,
+                                      "sourceClass": "Adw.HeaderBar",
+                                      "slot": "top"
                                     },
                                     {
                                       "id": "imported-6",
@@ -66,7 +68,8 @@
                                                   "title": "Restore Playlist",
                                                   "actionName": "queue.restore-playlist",
                                                   "suggested": true,
-                                                  "styleClasses": "suggested-action pill"
+                                                  "styleClasses": "suggested-action pill",
+                                                  "sourceClass": "Button"
                                                 },
                                                 {
                                                   "id": "add_folder_button",
@@ -74,7 +77,8 @@
                                                   "children": [],
                                                   "title": "Add Folder",
                                                   "actionName": "queue.add-folder",
-                                                  "styleClasses": "pill"
+                                                  "styleClasses": "pill",
+                                                  "sourceClass": "Button"
                                                 },
                                                 {
                                                   "id": "imported-8",
@@ -82,13 +86,15 @@
                                                   "children": [],
                                                   "title": "Add Song",
                                                   "actionName": "queue.add-song",
-                                                  "styleClasses": "pill"
+                                                  "styleClasses": "pill",
+                                                  "sourceClass": "Button"
                                                 }
                                               ],
                                               "orientation": "vertical",
                                               "halign": "center",
                                               "homogeneous": true,
                                               "spacing": 12,
+                                              "sourceClass": "Box",
                                               "slot": "child"
                                             }
                                           ],
@@ -96,19 +102,23 @@
                                           "marginEnd": 12,
                                           "title": "Amberol",
                                           "description": "Select a file or a folder, or drag files from your file manager to the application window to add songs to the playlist",
+                                          "sourceClass": "Adw.StatusPage",
                                           "slot": "child"
                                         }
                                       ],
                                       "maximumSize": 450,
                                       "vexpand": true,
                                       "valign": "fill",
+                                      "sourceClass": "Adw.Clamp",
                                       "slot": "content"
                                     }
                                   ],
+                                  "sourceClass": "Adw.ToolbarView",
                                   "slot": "child"
                                 }
                               ],
-                              "name": "initial-view"
+                              "name": "initial-view",
+                              "sourceClass": "StackPage"
                             },
                             {
                               "id": "imported-9",
@@ -126,7 +136,9 @@
                                           "id": "imported-11",
                                           "type": "header-bar",
                                           "children": [],
-                                          "showTitle": false
+                                          "showTitle": false,
+                                          "sourceClass": "Adw.HeaderBar",
+                                          "slot": "top"
                                         },
                                         {
                                           "id": "main_box",
@@ -156,10 +168,12 @@
                                                               "iconName": "folder-music-symbolic",
                                                               "pixelSize": 64,
                                                               "styleClasses": "card dim-label",
+                                                              "sourceClass": "Image",
                                                               "slot": "child"
                                                             }
                                                           ],
-                                                          "name": "no-image"
+                                                          "name": "no-image",
+                                                          "sourceClass": "StackPage"
                                                         },
                                                         {
                                                           "id": "imported-15",
@@ -174,16 +188,20 @@
                                                               "slot": "child"
                                                             }
                                                           ],
-                                                          "name": "cover-image"
+                                                          "name": "cover-image",
+                                                          "sourceClass": "StackPage"
                                                         }
-                                                      ]
+                                                      ],
+                                                      "sourceClass": "Stack"
                                                     }
                                                   ],
                                                   "halign": "center",
                                                   "valign": "center",
-                                                  "orientation": "horizontal"
+                                                  "orientation": "horizontal",
+                                                  "sourceClass": "Box"
                                                 }
-                                              ]
+                                              ],
+                                              "sourceClass": "Widget"
                                             },
                                             {
                                               "id": "imported-16",
@@ -203,7 +221,8 @@
                                                     }
                                                   ],
                                                   "halign": "center",
-                                                  "orientation": "horizontal"
+                                                  "orientation": "horizontal",
+                                                  "sourceClass": "Box"
                                                 },
                                                 {
                                                   "id": "imported-18",
@@ -214,24 +233,30 @@
                                                       "type": "label",
                                                       "children": [],
                                                       "title": "0:00",
-                                                      "styleClasses": "caption numeric"
+                                                      "styleClasses": "caption numeric",
+                                                      "sourceClass": "Label",
+                                                      "slot": "start"
                                                     },
                                                     {
                                                       "id": "remaining_label",
                                                       "type": "label",
                                                       "children": [],
                                                       "title": "0:00",
-                                                      "styleClasses": "caption numeric"
+                                                      "styleClasses": "caption numeric",
+                                                      "sourceClass": "Label",
+                                                      "slot": "end"
                                                     }
                                                   ],
                                                   "orientation": "horizontal",
                                                   "widthRequest": 256,
-                                                  "halign": "center"
+                                                  "halign": "center",
+                                                  "sourceClass": "CenterBox"
                                                 }
                                               ],
                                               "orientation": "vertical",
                                               "spacing": 2,
-                                              "widthRequest": 256
+                                              "widthRequest": 256,
+                                              "sourceClass": "Box"
                                             },
                                             {
                                               "id": "song_details",
@@ -276,13 +301,16 @@
                                                       "orientation": "vertical",
                                                       "valign": "center",
                                                       "marginStart": 6,
-                                                      "marginEnd": 6
+                                                      "marginEnd": 6,
+                                                      "sourceClass": "Box"
                                                     }
                                                   ],
                                                   "orientation": "vertical",
-                                                  "spacing": 12
+                                                  "spacing": 12,
+                                                  "sourceClass": "Box"
                                                 }
-                                              ]
+                                              ],
+                                              "sourceClass": "Widget"
                                             },
                                             {
                                               "id": "playback_control",
@@ -305,7 +333,8 @@
                                                           "valign": "center",
                                                           "tooltipText": "Play the Previous Song",
                                                           "circular": true,
-                                                          "styleClasses": "circular"
+                                                          "styleClasses": "circular",
+                                                          "sourceClass": "Button"
                                                         },
                                                         {
                                                           "id": "play_button",
@@ -316,7 +345,8 @@
                                                           "valign": "center",
                                                           "tooltipText": "Toggle Play",
                                                           "circular": true,
-                                                          "styleClasses": "circular large"
+                                                          "styleClasses": "circular large",
+                                                          "sourceClass": "Button"
                                                         },
                                                         {
                                                           "id": "next_button",
@@ -327,13 +357,15 @@
                                                           "valign": "center",
                                                           "tooltipText": "Play the Next Song",
                                                           "circular": true,
-                                                          "styleClasses": "circular"
+                                                          "styleClasses": "circular",
+                                                          "sourceClass": "Button"
                                                         }
                                                       ],
                                                       "spacing": 24,
                                                       "halign": "center",
                                                       "hexpand": true,
-                                                      "orientation": "horizontal"
+                                                      "orientation": "horizontal",
+                                                      "sourceClass": "Box"
                                                     },
                                                     {
                                                       "id": "volume_control",
@@ -348,24 +380,28 @@
                                                           "valign": "center",
                                                           "flat": true,
                                                           "circular": true,
-                                                          "styleClasses": "flat circular"
+                                                          "styleClasses": "flat circular",
+                                                          "sourceClass": "Button"
                                                         },
                                                         {
                                                           "id": "volume_scale",
                                                           "type": "scale",
                                                           "children": [],
                                                           "hexpand": true,
-                                                          "marginEnd": 6
+                                                          "marginEnd": 6,
+                                                          "sourceClass": "Scale"
                                                         },
                                                         {
                                                           "id": "volume_high_image",
                                                           "type": "bin",
                                                           "children": [],
                                                           "iconName": "audio-volume-high-symbolic",
-                                                          "marginEnd": 10
+                                                          "marginEnd": 10,
+                                                          "sourceClass": "Image"
                                                         }
                                                       ],
-                                                      "hexpand": "true"
+                                                      "hexpand": "true",
+                                                      "sourceClass": "Widget"
                                                     },
                                                     {
                                                       "id": "imported-21",
@@ -384,7 +420,8 @@
                                                               "valign": "center",
                                                               "tooltipText": "Toggle Playlist",
                                                               "circular": true,
-                                                              "styleClasses": "circular"
+                                                              "styleClasses": "circular",
+                                                              "sourceClass": "ToggleButton"
                                                             },
                                                             {
                                                               "id": "shuffle_button",
@@ -395,13 +432,16 @@
                                                               "valign": "center",
                                                               "tooltipText": "Shuffle the Playlist",
                                                               "circular": true,
-                                                              "styleClasses": "circular"
+                                                              "styleClasses": "circular",
+                                                              "sourceClass": "ToggleButton"
                                                             }
                                                           ],
                                                           "halign": "start",
                                                           "spacing": 12,
                                                           "marginEnd": 18,
-                                                          "orientation": "horizontal"
+                                                          "orientation": "horizontal",
+                                                          "sourceClass": "Box",
+                                                          "slot": "start"
                                                         },
                                                         {
                                                           "id": "end_box",
@@ -416,7 +456,8 @@
                                                               "valign": "center",
                                                               "tooltipText": "Enable Repeat",
                                                               "circular": true,
-                                                              "styleClasses": "circular"
+                                                              "styleClasses": "circular",
+                                                              "sourceClass": "Button"
                                                             },
                                                             {
                                                               "id": "menu_button",
@@ -430,25 +471,31 @@
                                                               "tooltipText": "Main Menu",
                                                               "direction": "up",
                                                               "circular": true,
-                                                              "styleClasses": "circular"
+                                                              "styleClasses": "circular",
+                                                              "sourceClass": "MenuButton"
                                                             }
                                                           ],
                                                           "halign": "end",
                                                           "spacing": 12,
                                                           "marginStart": 18,
-                                                          "orientation": "horizontal"
+                                                          "orientation": "horizontal",
+                                                          "sourceClass": "Box",
+                                                          "slot": "end"
                                                         }
-                                                      ]
+                                                      ],
+                                                      "sourceClass": "CenterBox"
                                                     }
                                                   ],
                                                   "orientation": "vertical",
                                                   "spacing": 6,
-                                                  "widthRequest": 256
+                                                  "widthRequest": 256,
+                                                  "sourceClass": "Box"
                                                 }
                                               ],
                                               "halign": "center",
                                               "marginTop": "0",
-                                              "marginBottom": "24"
+                                              "marginBottom": "24",
+                                              "sourceClass": "Widget"
                                             }
                                           ],
                                           "orientation": "vertical",
@@ -456,9 +503,11 @@
                                           "vexpand": true,
                                           "spacing": 6,
                                           "styleClasses": "main-box",
+                                          "sourceClass": "Box",
                                           "slot": "content"
                                         }
                                       ],
+                                      "sourceClass": "Adw.ToolbarView",
                                       "slot": "content"
                                     },
                                     {
@@ -480,7 +529,9 @@
                                                   "iconName": "system-search-symbolic",
                                                   "actionName": "queue.search",
                                                   "valign": "center",
-                                                  "tooltipText": "Search Songs in the Playlist"
+                                                  "tooltipText": "Search Songs in the Playlist",
+                                                  "sourceClass": "ToggleButton",
+                                                  "slot": "start"
                                                 },
                                                 {
                                                   "id": "queue_length_box",
@@ -492,18 +543,21 @@
                                                       "children": [],
                                                       "ellipsize": "end",
                                                       "title": "Playlist",
-                                                      "styleClasses": "heading"
+                                                      "styleClasses": "heading",
+                                                      "sourceClass": "Label"
                                                     },
                                                     {
                                                       "id": "queue_length_label",
                                                       "type": "label",
                                                       "children": [],
                                                       "ellipsize": "end",
-                                                      "styleClasses": "caption"
+                                                      "styleClasses": "caption",
+                                                      "sourceClass": "Label"
                                                     }
                                                   ],
                                                   "orientation": "vertical",
                                                   "valign": "center",
+                                                  "sourceClass": "Box",
                                                   "slot": "title-widget"
                                                 },
                                                 {
@@ -514,7 +568,9 @@
                                                   "iconName": "go-previous-symbolic",
                                                   "actionName": "queue.toggle",
                                                   "valign": "center",
-                                                  "tooltipText": "Close the Playlist"
+                                                  "tooltipText": "Close the Playlist",
+                                                  "sourceClass": "Button",
+                                                  "slot": "end"
                                                 },
                                                 {
                                                   "id": "select_button",
@@ -523,9 +579,13 @@
                                                   "iconName": "selection-mode-symbolic",
                                                   "actionName": "queue.select",
                                                   "valign": "center",
-                                                  "tooltipText": "Select Songs in the Playlist"
+                                                  "tooltipText": "Select Songs in the Playlist",
+                                                  "sourceClass": "ToggleButton",
+                                                  "slot": "end"
                                                 }
-                                              ]
+                                              ],
+                                              "sourceClass": "Adw.HeaderBar",
+                                              "slot": "top"
                                             },
                                             {
                                               "id": "playlist_searchbar",
@@ -537,9 +597,12 @@
                                                   "children": [],
                                                   "placeholderText": "Search songs",
                                                   "hexpand": true,
+                                                  "sourceClass": "SearchEntry",
                                                   "slot": "child"
                                                 }
-                                              ]
+                                              ],
+                                              "sourceClass": "SearchBar",
+                                              "slot": "top"
                                             },
                                             {
                                               "id": "playlist_overlay",
@@ -552,7 +615,9 @@
                                                   "valign": "start",
                                                   "hexpand": true,
                                                   "visible": false,
-                                                  "styleClasses": "osd"
+                                                  "styleClasses": "osd",
+                                                  "sourceClass": "ProgressBar",
+                                                  "slot": "overlay"
                                                 },
                                                 {
                                                   "id": "imported-25",
@@ -564,15 +629,18 @@
                                                       "children": [],
                                                       "singleClickActivate": true,
                                                       "styleClasses": "navigation-sidebar",
+                                                      "sourceClass": "ListView",
                                                       "slot": "child"
                                                     }
                                                   ],
                                                   "hscrollbarPolicy": "never",
                                                   "vscrollbarPolicy": "automatic",
                                                   "propagateNaturalHeight": true,
-                                                  "vexpand": true
+                                                  "vexpand": true,
+                                                  "sourceClass": "ScrolledWindow"
                                                 }
                                               ],
+                                              "sourceClass": "Overlay",
                                               "slot": "content"
                                             },
                                             {
@@ -584,46 +652,59 @@
                                                   "type": "button",
                                                   "children": [],
                                                   "iconName": "edit-select-all-symbolic",
-                                                  "tooltipText": "Select All Songs"
+                                                  "tooltipText": "Select All Songs",
+                                                  "sourceClass": "Button"
                                                 },
                                                 {
                                                   "id": "queue_selected_label",
                                                   "type": "label",
                                                   "children": [],
-                                                  "styleClasses": "caption"
+                                                  "styleClasses": "caption",
+                                                  "sourceClass": "Label",
+                                                  "slot": "center"
                                                 },
                                                 {
                                                   "id": "queue_remove_button",
                                                   "type": "button",
                                                   "children": [],
                                                   "iconName": "app-remove-symbolic",
-                                                  "tooltipText": "Remove Selected Songs"
+                                                  "tooltipText": "Remove Selected Songs",
+                                                  "sourceClass": "Button",
+                                                  "slot": "end"
                                                 }
                                               ],
                                               "revealed": false,
                                               "flat": true,
                                               "styleClasses": "flat",
-                                              "orientation": "horizontal"
+                                              "orientation": "horizontal",
+                                              "sourceClass": "ActionBar",
+                                              "slot": "bottom"
                                             }
                                           ],
-                                          "styleClasses": "playlist-background"
+                                          "styleClasses": "playlist-background",
+                                          "sourceClass": "Adw.ToolbarView"
                                         }
                                       ],
+                                      "sourceClass": "Widget",
                                       "slot": "sidebar"
                                     }
                                   ],
                                   "maxSidebarWidth": 330,
                                   "sidebarWidthFraction": 0.4,
+                                  "sourceClass": "Adw.OverlaySplitView",
                                   "slot": "child"
                                 }
                               ],
-                              "name": "main-view"
+                              "name": "main-view",
+                              "sourceClass": "StackPage"
                             }
                           ],
                           "transitionType": "crossfade",
+                          "sourceClass": "Stack",
                           "slot": "child"
                         }
                       ],
+                      "sourceClass": "Adw.ToastOverlay",
                       "slot": "child"
                     }
                   ],
@@ -631,13 +712,15 @@
                   "title": "Drop a song to add it to the playlist"
                 }
               ],
+              "sourceClass": "WindowHandle",
               "slot": "content"
             }
           ],
           "handleMenubarAccel": true,
           "widthRequest": 360,
           "heightRequest": 660,
-          "defaultWidth": 800
+          "defaultWidth": 800,
+          "sourceClass": "Adw.ApplicationWindow"
         }
       }
     ],

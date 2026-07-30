@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exportedAt": "2026-07-30T09:23:38.000Z",
+  "exportedAt": "2026-07-30T11:22:15.314Z",
   "generatedBy": "scripts/generate-preset.mjs",
   "document": {
     "id": "disks-preset",
@@ -34,6 +34,7 @@
                           "type": "window-title",
                           "children": [],
                           "title": "Disks",
+                          "sourceClass": "Adw.WindowTitle",
                           "slot": "title-widget"
                         },
                         {
@@ -41,7 +42,9 @@
                           "type": "menu-button",
                           "children": [],
                           "visible": false,
-                          "iconName": "process-working-symbolic"
+                          "iconName": "process-working-symbolic",
+                          "sourceClass": "MenuButton",
+                          "slot": "start"
                         },
                         {
                           "id": "sidebar_menu",
@@ -50,9 +53,13 @@
                           "primary": true,
                           "iconName": "open-menu-symbolic",
                           "menuModel": "main_menu",
-                          "tooltipText": "Main Menu"
+                          "tooltipText": "Main Menu",
+                          "sourceClass": "MenuButton",
+                          "slot": "end"
                         }
-                      ]
+                      ],
+                      "sourceClass": "Adw.HeaderBar",
+                      "slot": "top"
                     },
                     {
                       "id": "imported-6",
@@ -64,13 +71,16 @@
                           "children": [],
                           "vexpand": true,
                           "selectionMode": "single",
-                          "styleClasses": "navigation-sidebar"
+                          "styleClasses": "navigation-sidebar",
+                          "sourceClass": "ListBox"
                         }
                       ],
                       "hscrollbarPolicy": "never",
+                      "sourceClass": "ScrolledWindow",
                       "slot": "content"
                     }
                   ],
+                  "sourceClass": "Adw.ToolbarView",
                   "slot": "sidebar"
                 },
                 {
@@ -87,15 +97,19 @@
                           "children": [],
                           "iconName": "sidebar-show-symbolic",
                           "tooltipText": "Show Sidebar",
+                          "sourceClass": "ToggleButton",
                           "bindings": {
                             "visible": "split_view.collapsed bidirectional",
                             "active": "split_view.show-sidebar bidirectional"
-                          }
+                          },
+                          "slot": "start"
                         }
                       ],
                       "showTitle": false,
                       "flat": true,
-                      "styleClasses": "flat"
+                      "styleClasses": "flat",
+                      "sourceClass": "Adw.HeaderBar",
+                      "slot": "top"
                     },
                     {
                       "id": "main_stack",
@@ -111,10 +125,12 @@
                               "children": [],
                               "title": "No Device Selected",
                               "iconName": "drive-multidisk-symbolic",
+                              "sourceClass": "Adw.StatusPage",
                               "slot": "child"
                             }
                           ],
-                          "name": "empty_page"
+                          "name": "empty_page",
+                          "sourceClass": "StackPage"
                         },
                         {
                           "id": "imported-11",
@@ -145,39 +161,87 @@
                                                   "type": "grid",
                                                   "children": [
                                                     {
-                                                      "id": "icon",
+                                                      "id": "drive_image",
                                                       "type": "bin",
                                                       "children": [],
-                                                      "column": 0,
-                                                      "row": 0,
-                                                      "sourceClass": "Adw.LayoutSlot"
+                                                      "pixelSize": 96,
+                                                      "styleClasses": "icon-dropshadow",
+                                                      "sourceClass": "Image"
                                                     },
                                                     {
-                                                      "id": "labels",
-                                                      "type": "bin",
-                                                      "children": [],
-                                                      "column": 1,
-                                                      "row": 0,
-                                                      "sourceClass": "Adw.LayoutSlot"
+                                                      "id": "imported-24",
+                                                      "type": "box",
+                                                      "children": [
+                                                        {
+                                                          "id": "imported-25",
+                                                          "type": "label",
+                                                          "children": [],
+                                                          "wrap": true,
+                                                          "styleClasses": "title-1",
+                                                          "sourceClass": "Label",
+                                                          "bindings": {
+                                                            "halign": "$get_alignment_from_layout_name layout_view.layout-name",
+                                                            "label": "$GduDriveHeader.drive-name"
+                                                          }
+                                                        },
+                                                        {
+                                                          "id": "imported-26",
+                                                          "type": "label",
+                                                          "children": [],
+                                                          "wrap": true,
+                                                          "sourceClass": "Label",
+                                                          "bindings": {
+                                                            "halign": "$get_alignment_from_layout_name layout_view.layout-name",
+                                                            "label": "$GduDriveHeader.drive-path"
+                                                          }
+                                                        }
+                                                      ],
+                                                      "orientation": "vertical",
+                                                      "hexpand": true,
+                                                      "valign": "center",
+                                                      "sourceClass": "Box"
                                                     },
                                                     {
-                                                      "id": "buttons",
-                                                      "type": "bin",
-                                                      "children": [],
-                                                      "column": 2,
-                                                      "row": 0,
-                                                      "sourceClass": "Adw.LayoutSlot"
+                                                      "id": "imported-27",
+                                                      "type": "box",
+                                                      "children": [
+                                                        {
+                                                          "id": "imported-28",
+                                                          "type": "button",
+                                                          "children": [],
+                                                          "tooltipText": "Drive Information",
+                                                          "iconName": "help-about-symbolic",
+                                                          "actionName": "view.show-drive-dialog",
+                                                          "sourceClass": "Button"
+                                                        },
+                                                        {
+                                                          "id": "imported-29",
+                                                          "type": "menu-button",
+                                                          "children": [],
+                                                          "tooltipText": "Drive Options",
+                                                          "menuModel": "drive_menu",
+                                                          "iconName": "view-more-symbolic",
+                                                          "sourceClass": "MenuButton"
+                                                        }
+                                                      ],
+                                                      "valign": "center",
+                                                      "spacing": 12,
+                                                      "orientation": "horizontal",
+                                                      "sourceClass": "Box"
                                                     }
                                                   ],
                                                   "columnSpacing": 12,
+                                                  "sourceClass": "Grid",
                                                   "slot": "content"
                                                 }
                                               ],
                                               "slot": "child"
                                             }
-                                          ]
+                                          ],
+                                          "sourceClass": "Adw.Bin"
                                         }
-                                      ]
+                                      ],
+                                      "sourceClass": "Adw.PreferencesGroup"
                                     },
                                     {
                                       "id": "imported-30",
@@ -191,7 +255,8 @@
                                           "title": "GduSpaceAllocationBar"
                                         }
                                       ],
-                                      "title": "Space Allocation"
+                                      "title": "Space Allocation",
+                                      "sourceClass": "Adw.PreferencesGroup"
                                     },
                                     {
                                       "id": "imported-31",
@@ -202,29 +267,38 @@
                                           "type": "list-box",
                                           "children": [],
                                           "selectionMode": "none",
-                                          "styleClasses": "boxed-list"
+                                          "styleClasses": "boxed-list",
+                                          "sourceClass": "ListBox"
                                         }
                                       ],
-                                      "title": "Volumes"
+                                      "title": "Volumes",
+                                      "sourceClass": "Adw.PreferencesGroup"
                                     }
-                                  ]
+                                  ],
+                                  "sourceClass": "Adw.PreferencesPage"
                                 }
                               ],
+                              "sourceClass": "Adw.Bin",
                               "slot": "child"
                             }
                           ],
-                          "name": "drive_page"
+                          "name": "drive_page",
+                          "sourceClass": "StackPage"
                         }
                       ],
+                      "sourceClass": "Stack",
                       "slot": "content"
                     }
                   ],
+                  "sourceClass": "Adw.ToolbarView",
                   "slot": "content"
                 }
               ],
-              "sidebarWidthFraction": 0.3
+              "sidebarWidthFraction": 0.3,
+              "sourceClass": "Adw.OverlaySplitView"
             }
-          ]
+          ],
+          "sourceClass": "Adw.ApplicationWindow"
         }
       },
       {
@@ -251,7 +325,9 @@
                       "children": [],
                       "title": "Cancel",
                       "useUnderline": true,
-                      "actionName": "window.close"
+                      "actionName": "window.close",
+                      "sourceClass": "Button",
+                      "slot": "start"
                     },
                     {
                       "id": "create_image_button",
@@ -260,11 +336,15 @@
                       "title": "Create",
                       "useUnderline": true,
                       "suggested": true,
-                      "styleClasses": "suggested-action"
+                      "styleClasses": "suggested-action",
+                      "sourceClass": "Button",
+                      "slot": "end"
                     }
                   ],
                   "showStartTitleButtons": false,
-                  "showEndTitleButtons": false
+                  "showEndTitleButtons": false,
+                  "sourceClass": "Adw.HeaderBar",
+                  "slot": "top"
                 },
                 {
                   "id": "imported-5",
@@ -279,7 +359,8 @@
                           "type": "entry-row",
                           "children": [],
                           "title": "Name",
-                          "useUnderline": true
+                          "useUnderline": true,
+                          "sourceClass": "Adw.EntryRow"
                         },
                         {
                           "id": "location_entry",
@@ -293,29 +374,37 @@
                               "valign": "center",
                               "iconName": "folder-open-symbolic",
                               "flat": true,
-                              "styleClasses": "flat"
+                              "styleClasses": "flat",
+                              "sourceClass": "Button",
+                              "slot": "suffix"
                             }
                           ],
                           "title": "Location",
-                          "styleClasses": "property"
+                          "styleClasses": "property",
+                          "sourceClass": "Adw.ActionRow"
                         },
                         {
                           "id": "source_label",
                           "type": "action-row",
                           "children": [],
                           "title": "Source",
-                          "styleClasses": "property"
+                          "styleClasses": "property",
+                          "sourceClass": "Adw.ActionRow"
                         }
-                      ]
+                      ],
+                      "sourceClass": "Adw.PreferencesGroup"
                     }
                   ],
+                  "sourceClass": "Adw.PreferencesPage",
                   "slot": "content"
                 }
-              ]
+              ],
+              "sourceClass": "Adw.ToolbarView"
             }
           ],
           "contentWidth": 440,
-          "title": "Create Disk Image"
+          "title": "Create Disk Image",
+          "sourceClass": "Adw.Dialog"
         }
       },
       {
@@ -342,7 +431,9 @@
                       "children": [],
                       "title": "Cancel",
                       "useUnderline": true,
-                      "actionName": "window.close"
+                      "actionName": "window.close",
+                      "sourceClass": "Button",
+                      "slot": "start"
                     },
                     {
                       "id": "cancel_button",
@@ -350,9 +441,11 @@
                       "children": [],
                       "title": "Cancel",
                       "useUnderline": true,
+                      "sourceClass": "Button",
                       "bindings": {
                         "visible": "close_button.visible inverted"
                       },
+                      "slot": "start",
                       "visible": false
                     },
                     {
@@ -363,21 +456,26 @@
                       "useUnderline": true,
                       "suggested": true,
                       "styleClasses": "suggested-action",
+                      "sourceClass": "Button",
                       "bindings": {
                         "visible": "close_button.visible bidirectional"
-                      }
+                      },
+                      "slot": "end"
                     },
                     {
                       "id": "window_title",
                       "type": "window-title",
                       "children": [],
                       "title": "Benchmark",
+                      "sourceClass": "Adw.WindowTitle",
                       "slot": "title-widget"
                     }
                   ],
+                  "sourceClass": "Adw.HeaderBar",
                   "bindings": {
                     "show-end-title-buttons": "close_button.visible inverted"
-                  }
+                  },
+                  "slot": "top"
                 },
                 {
                   "id": "pages_stack",
@@ -400,23 +498,27 @@
                                   "type": "spin-row",
                                   "children": [],
                                   "title": "Transfer Samples",
-                                  "useUnderline": true
+                                  "useUnderline": true,
+                                  "sourceClass": "Adw.SpinRow"
                                 },
                                 {
                                   "id": "sample_size_row",
                                   "type": "spin-row",
                                   "children": [],
                                   "title": "Transfer Sample Size",
-                                  "useUnderline": true
+                                  "useUnderline": true,
+                                  "sourceClass": "Adw.SpinRow"
                                 },
                                 {
                                   "id": "access_samples_row",
                                   "type": "spin-row",
                                   "children": [],
                                   "title": "Access Time Samples",
-                                  "useUnderline": true
+                                  "useUnderline": true,
+                                  "sourceClass": "Adw.SpinRow"
                                 }
-                              ]
+                              ],
+                              "sourceClass": "Adw.PreferencesGroup"
                             },
                             {
                               "id": "imported-11",
@@ -428,16 +530,20 @@
                                   "children": [],
                                   "title": "Write Benchmark",
                                   "useUnderline": true,
-                                  "subtitle": "Data should be backed up before using this feature"
+                                  "subtitle": "Data should be backed up before using this feature",
+                                  "sourceClass": "Adw.SwitchRow"
                                 }
-                              ]
+                              ],
+                              "sourceClass": "Adw.PreferencesGroup"
                             }
                           ],
                           "description": "Benchmarking measures the transfer rate for different areas of the disk. It also measures seek times from one area to another.",
+                          "sourceClass": "Adw.PreferencesPage",
                           "slot": "child"
                         }
                       ],
-                      "name": "options"
+                      "name": "options",
+                      "sourceClass": "StackPage"
                     },
                     {
                       "id": "imported-12",
@@ -458,7 +564,8 @@
                                   "sourceClass": "GduBenchmarkGraph",
                                   "title": "GduBenchmarkGraph"
                                 }
-                              ]
+                              ],
+                              "sourceClass": "Adw.PreferencesGroup"
                             },
                             {
                               "id": "imported-15",
@@ -470,7 +577,8 @@
                                   "children": [],
                                   "title": "Sample Size",
                                   "subtitle": "-",
-                                  "styleClasses": "property"
+                                  "styleClasses": "property",
+                                  "sourceClass": "Adw.ActionRow"
                                 },
                                 {
                                   "id": "read_rate_row",
@@ -479,7 +587,8 @@
                                   "title": "Average Read Rate",
                                   "subtitle": "-",
                                   "useMarkup": true,
-                                  "styleClasses": "property"
+                                  "styleClasses": "property",
+                                  "sourceClass": "Adw.ActionRow"
                                 },
                                 {
                                   "id": "write_rate_row",
@@ -488,7 +597,8 @@
                                   "title": "Average Write Rate",
                                   "subtitle": "-",
                                   "useMarkup": true,
-                                  "styleClasses": "property"
+                                  "styleClasses": "property",
+                                  "sourceClass": "Adw.ActionRow"
                                 },
                                 {
                                   "id": "access_time_row",
@@ -497,25 +607,32 @@
                                   "title": "Average Access Time",
                                   "subtitle": "-",
                                   "useMarkup": true,
-                                  "styleClasses": "property"
+                                  "styleClasses": "property",
+                                  "sourceClass": "Adw.ActionRow"
                                 }
-                              ]
+                              ],
+                              "sourceClass": "Adw.PreferencesGroup"
                             }
                           ],
+                          "sourceClass": "Adw.PreferencesPage",
                           "slot": "child"
                         }
                       ],
-                      "name": "results"
+                      "name": "results",
+                      "sourceClass": "StackPage"
                     }
                   ],
                   "transitionType": "crossfade",
+                  "sourceClass": "Stack",
                   "slot": "content"
                 }
               ],
+              "sourceClass": "Adw.ToolbarView",
               "slot": "child"
             }
           ],
-          "title": "Benchmark"
+          "title": "Benchmark",
+          "sourceClass": "Adw.Dialog"
         }
       }
     ],

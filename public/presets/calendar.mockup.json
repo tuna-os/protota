@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exportedAt": "2026-07-30T09:23:35.733Z",
+  "exportedAt": "2026-07-30T11:22:12.727Z",
   "generatedBy": "scripts/generate-preset.mjs",
   "document": {
     "id": "calendar-preset",
@@ -32,6 +32,7 @@
                       "title": "Drop Event Files to Import",
                       "iconName": "calendar-month-symbolic",
                       "styleClasses": "drop-overlay-area compact",
+                      "sourceClass": "Adw.StatusPage",
                       "slot": "overlayed"
                     },
                     {
@@ -45,7 +46,9 @@
                             {
                               "id": "imported-22",
                               "type": "header-bar",
-                              "children": []
+                              "children": [],
+                              "sourceClass": "Adw.HeaderBar",
+                              "slot": "top"
                             },
                             {
                               "id": "imported-23",
@@ -71,7 +74,8 @@
                                               "canFocus": false,
                                               "circular": true,
                                               "flat": true,
-                                              "styleClasses": "back-button circular flat"
+                                              "styleClasses": "back-button circular flat",
+                                              "sourceClass": "Button"
                                             },
                                             {
                                               "id": "button",
@@ -89,10 +93,12 @@
                                                           "id": "label1",
                                                           "type": "label",
                                                           "children": [],
+                                                          "sourceClass": "Label",
                                                           "slot": "child"
                                                         }
                                                       ],
-                                                      "name": "label1"
+                                                      "name": "label1",
+                                                      "sourceClass": "StackPage"
                                                     },
                                                     {
                                                       "id": "imported-27",
@@ -102,19 +108,23 @@
                                                           "id": "label2",
                                                           "type": "label",
                                                           "children": [],
+                                                          "sourceClass": "Label",
                                                           "slot": "child"
                                                         }
                                                       ],
-                                                      "name": "label2"
+                                                      "name": "label2",
+                                                      "sourceClass": "StackPage"
                                                     }
                                                   ],
                                                   "hexpand": true,
-                                                  "vexpand": true
+                                                  "vexpand": true,
+                                                  "sourceClass": "Stack"
                                                 }
                                               ],
                                               "accessibleRole": "none",
                                               "flat": true,
-                                              "styleClasses": "flat pill popup"
+                                              "styleClasses": "flat pill popup",
+                                              "sourceClass": "ToggleButton"
                                             },
                                             {
                                               "id": "up_button",
@@ -124,7 +134,8 @@
                                               "canFocus": false,
                                               "circular": true,
                                               "flat": true,
-                                              "styleClasses": "circular flat forward-button"
+                                              "styleClasses": "circular flat forward-button",
+                                              "sourceClass": "Button"
                                             }
                                           ],
                                           "spacing": 6,
@@ -139,6 +150,7 @@
                                           "column": 0,
                                           "row": 0,
                                           "orientation": "horizontal",
+                                          "sourceClass": "Box",
                                           "bindings": {
                                             "visible": "$get_split_choice_visible template.show-heading , template.split-month-year as bool"
                                           }
@@ -155,7 +167,8 @@
                                               "canFocus": false,
                                               "circular": true,
                                               "flat": true,
-                                              "styleClasses": "back-button circular flat"
+                                              "styleClasses": "back-button circular flat",
+                                              "sourceClass": "Button"
                                             },
                                             {
                                               "id": "button",
@@ -173,10 +186,12 @@
                                                           "id": "label1",
                                                           "type": "label",
                                                           "children": [],
+                                                          "sourceClass": "Label",
                                                           "slot": "child"
                                                         }
                                                       ],
-                                                      "name": "label1"
+                                                      "name": "label1",
+                                                      "sourceClass": "StackPage"
                                                     },
                                                     {
                                                       "id": "imported-30",
@@ -186,19 +201,23 @@
                                                           "id": "label2",
                                                           "type": "label",
                                                           "children": [],
+                                                          "sourceClass": "Label",
                                                           "slot": "child"
                                                         }
                                                       ],
-                                                      "name": "label2"
+                                                      "name": "label2",
+                                                      "sourceClass": "StackPage"
                                                     }
                                                   ],
                                                   "hexpand": true,
-                                                  "vexpand": true
+                                                  "vexpand": true,
+                                                  "sourceClass": "Stack"
                                                 }
                                               ],
                                               "accessibleRole": "none",
                                               "flat": true,
-                                              "styleClasses": "flat pill popup"
+                                              "styleClasses": "flat pill popup",
+                                              "sourceClass": "ToggleButton"
                                             },
                                             {
                                               "id": "up_button",
@@ -208,7 +227,8 @@
                                               "canFocus": false,
                                               "circular": true,
                                               "flat": true,
-                                              "styleClasses": "circular flat forward-button"
+                                              "styleClasses": "circular flat forward-button",
+                                              "sourceClass": "Button"
                                             }
                                           ],
                                           "spacing": 6,
@@ -222,6 +242,7 @@
                                           "column": 1,
                                           "row": 0,
                                           "orientation": "horizontal",
+                                          "sourceClass": "Box",
                                           "bindings": {
                                             "visible": "$get_split_choice_visible template.show-heading , template.split-month-year as bool"
                                           }
@@ -238,7 +259,8 @@
                                               "canFocus": false,
                                               "circular": true,
                                               "flat": true,
-                                              "styleClasses": "back-button circular flat"
+                                              "styleClasses": "back-button circular flat",
+                                              "sourceClass": "Button"
                                             },
                                             {
                                               "id": "button",
@@ -256,10 +278,12 @@
                                                           "id": "label1",
                                                           "type": "label",
                                                           "children": [],
+                                                          "sourceClass": "Label",
                                                           "slot": "child"
                                                         }
                                                       ],
-                                                      "name": "label1"
+                                                      "name": "label1",
+                                                      "sourceClass": "StackPage"
                                                     },
                                                     {
                                                       "id": "imported-33",
@@ -269,19 +293,23 @@
                                                           "id": "label2",
                                                           "type": "label",
                                                           "children": [],
+                                                          "sourceClass": "Label",
                                                           "slot": "child"
                                                         }
                                                       ],
-                                                      "name": "label2"
+                                                      "name": "label2",
+                                                      "sourceClass": "StackPage"
                                                     }
                                                   ],
                                                   "hexpand": true,
-                                                  "vexpand": true
+                                                  "vexpand": true,
+                                                  "sourceClass": "Stack"
                                                 }
                                               ],
                                               "accessibleRole": "none",
                                               "flat": true,
-                                              "styleClasses": "flat pill popup"
+                                              "styleClasses": "flat pill popup",
+                                              "sourceClass": "ToggleButton"
                                             },
                                             {
                                               "id": "up_button",
@@ -291,7 +319,8 @@
                                               "canFocus": false,
                                               "circular": true,
                                               "flat": true,
-                                              "styleClasses": "circular flat forward-button"
+                                              "styleClasses": "circular flat forward-button",
+                                              "sourceClass": "Button"
                                             }
                                           ],
                                           "spacing": 6,
@@ -307,6 +336,7 @@
                                           "columnSpan": 2,
                                           "row": 0,
                                           "orientation": "horizontal",
+                                          "sourceClass": "Box",
                                           "bindings": {
                                             "visible": "$get_combined_choice_visible template.show-heading , template.split-month-year as bool"
                                           }
@@ -319,14 +349,17 @@
                                           "columnHomogeneous": true,
                                           "column": 0,
                                           "columnSpan": 2,
-                                          "row": 1
+                                          "row": 1,
+                                          "sourceClass": "Grid"
                                         }
                                       ],
-                                      "orientation": "vertical"
+                                      "orientation": "vertical",
+                                      "sourceClass": "Grid"
                                     }
                                   ],
                                   "splitMonthYear": true,
                                   "vexpand": false,
+                                  "sourceClass": "Adw.Bin",
                                   "bindings": {
                                     "active-date": "template.active-date no-sync-create bidirectional"
                                   }
@@ -350,26 +383,32 @@
                                               "hexpand": true,
                                               "selectionMode": "none",
                                               "styleClasses": "navigation-sidebar calendar-list",
+                                              "sourceClass": "ListBox",
                                               "slot": "child"
                                             }
                                           ],
                                           "maximumSize": 800,
                                           "tighteningThreshold": 800,
+                                          "sourceClass": "Adw.Clamp",
                                           "slot": "child"
                                         }
                                       ],
                                       "hscrollbarPolicy": "never",
                                       "propagateNaturalHeight": true,
                                       "propagateNaturalWidth": true,
+                                      "sourceClass": "ScrolledWindow",
                                       "slot": "child"
                                     }
-                                  ]
+                                  ],
+                                  "sourceClass": "Adw.Bin"
                                 }
                               ],
                               "orientation": "vertical",
+                              "sourceClass": "Box",
                               "slot": "content"
                             }
                           ],
+                          "sourceClass": "Adw.ToolbarView",
                           "slot": "sidebar"
                         },
                         {
@@ -386,9 +425,11 @@
                                   "children": [],
                                   "iconName": "sidebar-show-symbolic",
                                   "tooltipText": "Toggle Sidebar",
+                                  "sourceClass": "ToggleButton",
                                   "bindings": {
                                     "active": "split_view.show-sidebar bidirectional"
-                                  }
+                                  },
+                                  "slot": "start"
                                 },
                                 {
                                   "id": "sync_indicator",
@@ -407,10 +448,12 @@
                                               "type": "box",
                                               "children": [],
                                               "orientation": "horizontal",
+                                              "sourceClass": "Box",
                                               "slot": "child"
                                             }
                                           ],
-                                          "name": "empty"
+                                          "name": "empty",
+                                          "sourceClass": "StackPage"
                                         },
                                         {
                                           "id": "imported-40",
@@ -421,10 +464,12 @@
                                               "type": "spinner",
                                               "children": [],
                                               "tooltipText": "Synchronizing Remote Calendars",
+                                              "sourceClass": "Adw.Spinner",
                                               "slot": "child"
                                             }
                                           ],
-                                          "name": "spinner"
+                                          "name": "spinner",
+                                          "sourceClass": "StackPage"
                                         },
                                         {
                                           "id": "imported-41",
@@ -435,17 +480,22 @@
                                               "type": "bin",
                                               "children": [],
                                               "iconName": "checkmark-small-symbolic",
+                                              "sourceClass": "Image",
                                               "slot": "child"
                                             }
                                           ],
-                                          "name": "success"
+                                          "name": "success",
+                                          "sourceClass": "StackPage"
                                         }
                                       ],
                                       "transitionType": "crossfade",
                                       "transitionDuration": 250,
+                                      "sourceClass": "Stack",
                                       "slot": "child"
                                     }
-                                  ]
+                                  ],
+                                  "sourceClass": "Adw.Bin",
+                                  "slot": "start"
                                 },
                                 {
                                   "id": "navigation_button_title",
@@ -469,10 +519,12 @@
                                               "canShrink": true,
                                               "tooltipText": "Choose a Date",
                                               "alwaysShowArrow": true,
+                                              "sourceClass": "MenuButton",
                                               "slot": "child"
                                             }
                                           ],
-                                          "name": "active"
+                                          "name": "active",
+                                          "sourceClass": "StackPage"
                                         },
                                         {
                                           "id": "imported-43",
@@ -485,20 +537,24 @@
                                               "styleClasses": "heading",
                                               "marginStart": 9,
                                               "marginEnd": 9,
+                                              "sourceClass": "Label",
                                               "bindings": {
                                                 "label": "button.label no-sync-create"
                                               },
                                               "slot": "child"
                                             }
                                           ],
-                                          "name": "inactive"
+                                          "name": "inactive",
+                                          "sourceClass": "StackPage"
                                         }
                                       ],
                                       "hhomogeneous": false,
                                       "visibleChildName": "active",
+                                      "sourceClass": "Stack",
                                       "slot": "child"
                                     }
                                   ],
+                                  "sourceClass": "Adw.Bin",
                                   "bindings": {
                                     "active-date": "template.active-date no-sync-create bidirectional",
                                     "active": "split_view.show-sidebar inverted"
@@ -512,7 +568,9 @@
                                   "iconName": "open-menu-symbolic",
                                   "popover": "win_menu",
                                   "tooltipText": "Main Menu",
-                                  "primary": true
+                                  "primary": true,
+                                  "sourceClass": "MenuButton",
+                                  "slot": "end"
                                 },
                                 {
                                   "id": "search_button",
@@ -533,10 +591,12 @@
                                               "halign": "start",
                                               "iconName": "edit-find-symbolic",
                                               "tooltipText": "Search Events",
+                                              "sourceClass": "Button",
                                               "slot": "child"
                                             }
                                           ],
-                                          "name": "button"
+                                          "name": "button",
+                                          "sourceClass": "StackPage"
                                         },
                                         {
                                           "id": "imported-48",
@@ -550,10 +610,12 @@
                                               "maxWidthChars": 0,
                                               "widthChars": 0,
                                               "searchDelay": 500,
+                                              "sourceClass": "SearchEntry",
                                               "slot": "child"
                                             }
                                           ],
-                                          "name": "entry"
+                                          "name": "entry",
+                                          "sourceClass": "StackPage"
                                         }
                                       ],
                                       "hhomogeneous": false,
@@ -561,12 +623,17 @@
                                       "interpolateSize": true,
                                       "transitionType": "crossfade",
                                       "transitionDuration": 200,
-                                      "styleClasses": "suggestionbutton"
+                                      "styleClasses": "suggestionbutton",
+                                      "sourceClass": "Stack"
                                     }
                                   ],
-                                  "tooltipText": "Search"
+                                  "tooltipText": "Search",
+                                  "sourceClass": "Adw.Bin",
+                                  "slot": "end"
                                 }
-                              ]
+                              ],
+                              "sourceClass": "Adw.HeaderBar",
+                              "slot": "top"
                             },
                             {
                               "id": "views_stack",
@@ -590,7 +657,8 @@
                                               "children": [],
                                               "marginStart": 6,
                                               "hexpand": true,
-                                              "xalign": 0
+                                              "xalign": 0,
+                                              "sourceClass": "Label"
                                             },
                                             {
                                               "id": "label_1",
@@ -598,7 +666,8 @@
                                               "children": [],
                                               "marginStart": 6,
                                               "hexpand": true,
-                                              "xalign": 0
+                                              "xalign": 0,
+                                              "sourceClass": "Label"
                                             },
                                             {
                                               "id": "label_2",
@@ -606,7 +675,8 @@
                                               "children": [],
                                               "marginStart": 6,
                                               "hexpand": true,
-                                              "xalign": 0
+                                              "xalign": 0,
+                                              "sourceClass": "Label"
                                             },
                                             {
                                               "id": "label_3",
@@ -614,7 +684,8 @@
                                               "children": [],
                                               "marginStart": 6,
                                               "hexpand": true,
-                                              "xalign": 0
+                                              "xalign": 0,
+                                              "sourceClass": "Label"
                                             },
                                             {
                                               "id": "label_4",
@@ -622,7 +693,8 @@
                                               "children": [],
                                               "marginStart": 6,
                                               "hexpand": true,
-                                              "xalign": 0
+                                              "xalign": 0,
+                                              "sourceClass": "Label"
                                             },
                                             {
                                               "id": "label_5",
@@ -630,7 +702,8 @@
                                               "children": [],
                                               "marginStart": 6,
                                               "hexpand": true,
-                                              "xalign": 0
+                                              "xalign": 0,
+                                              "sourceClass": "Label"
                                             },
                                             {
                                               "id": "label_6",
@@ -638,16 +711,20 @@
                                               "children": [],
                                               "marginStart": 6,
                                               "hexpand": true,
-                                              "xalign": 0
+                                              "xalign": 0,
+                                              "sourceClass": "Label"
                                             }
                                           ],
                                           "styleClasses": "header heading month-header view",
                                           "homogeneous": true,
-                                          "orientation": "horizontal"
+                                          "orientation": "horizontal",
+                                          "sourceClass": "Box",
+                                          "slot": "header"
                                         }
                                       ],
                                       "overflow": "hidden",
                                       "styleClasses": "month-view",
+                                      "sourceClass": "Widget",
                                       "bindings": {
                                         "active-date": "template.active-date no-sync-create bidirectional"
                                       },
@@ -657,7 +734,8 @@
                                   "name": "month",
                                   "title": "Month",
                                   "useUnderline": true,
-                                  "iconName": "calendar-month-symbolic"
+                                  "iconName": "calendar-month-symbolic",
+                                  "sourceClass": "Adw.ViewStackPage"
                                 },
                                 {
                                   "id": "week_page",
@@ -687,6 +765,7 @@
                                                   "flat": true,
                                                   "circular": true,
                                                   "styleClasses": "flat circular week-header-expander",
+                                                  "sourceClass": "ToggleButton",
                                                   "bindings": {
                                                     "visible": "header.can-expand",
                                                     "active": "header.expanded bidirectional"
@@ -694,7 +773,8 @@
                                                 }
                                               ],
                                               "hexpand": false,
-                                              "orientation": "horizontal"
+                                              "orientation": "horizontal",
+                                              "sourceClass": "Box"
                                             },
                                             {
                                               "id": "header",
@@ -713,7 +793,8 @@
                                                           "type": "box",
                                                           "children": [],
                                                           "homogeneous": true,
-                                                          "orientation": "horizontal"
+                                                          "orientation": "horizontal",
+                                                          "sourceClass": "Box"
                                                         },
                                                         {
                                                           "id": "scrolledwindow",
@@ -731,30 +812,37 @@
                                                                   "hexpand": true,
                                                                   "columnSpacing": 6,
                                                                   "rowSpacing": 2,
-                                                                  "marginStart": 6
+                                                                  "marginStart": 6,
+                                                                  "sourceClass": "Grid"
                                                                 }
-                                                              ]
+                                                              ],
+                                                              "sourceClass": "Viewport"
                                                             }
                                                           ],
                                                           "hscrollbarPolicy": "never",
                                                           "vscrollbarPolicy": "never",
                                                           "propagateNaturalHeight": true,
-                                                          "marginBottom": 2
+                                                          "marginBottom": 2,
+                                                          "sourceClass": "ScrolledWindow"
                                                         }
                                                       ],
-                                                      "orientation": "vertical"
+                                                      "orientation": "vertical",
+                                                      "sourceClass": "Box"
                                                     }
                                                   ],
                                                   "hexpand": true,
                                                   "vexpand": false,
                                                   "orientation": "vertical",
-                                                  "styleClasses": "week-header"
+                                                  "styleClasses": "week-header",
+                                                  "sourceClass": "Box"
                                                 }
                                               ],
-                                              "hexpand": true
+                                              "hexpand": true,
+                                              "sourceClass": "Widget"
                                             }
                                           ],
-                                          "orientation": "horizontal"
+                                          "orientation": "horizontal",
+                                          "sourceClass": "Box"
                                         },
                                         {
                                           "id": "scrolled_window",
@@ -786,17 +874,21 @@
                                                     }
                                                   ],
                                                   "orientation": "horizontal",
-                                                  "styleClasses": "week-main-content"
+                                                  "styleClasses": "week-main-content",
+                                                  "sourceClass": "Box"
                                                 }
-                                              ]
+                                              ],
+                                              "sourceClass": "Viewport"
                                             }
                                           ],
                                           "hexpand": true,
-                                          "vexpand": true
+                                          "vexpand": true,
+                                          "sourceClass": "ScrolledWindow"
                                         }
                                       ],
                                       "orientation": "vertical",
                                       "styleClasses": "week-view",
+                                      "sourceClass": "Box",
                                       "bindings": {
                                         "active-date": "template.active-date no-sync-create bidirectional"
                                       },
@@ -806,7 +898,8 @@
                                   "name": "week",
                                   "title": "Week",
                                   "useUnderline": true,
-                                  "iconName": "calendar-week-symbolic"
+                                  "iconName": "calendar-week-symbolic",
+                                  "sourceClass": "Adw.ViewStackPage"
                                 },
                                 {
                                   "id": "agenda_page",
@@ -836,7 +929,8 @@
                                                       "canFocus": false,
                                                       "circular": true,
                                                       "flat": true,
-                                                      "styleClasses": "back-button circular flat"
+                                                      "styleClasses": "back-button circular flat",
+                                                      "sourceClass": "Button"
                                                     },
                                                     {
                                                       "id": "button",
@@ -854,10 +948,12 @@
                                                                   "id": "label1",
                                                                   "type": "label",
                                                                   "children": [],
+                                                                  "sourceClass": "Label",
                                                                   "slot": "child"
                                                                 }
                                                               ],
-                                                              "name": "label1"
+                                                              "name": "label1",
+                                                              "sourceClass": "StackPage"
                                                             },
                                                             {
                                                               "id": "imported-71",
@@ -867,19 +963,23 @@
                                                                   "id": "label2",
                                                                   "type": "label",
                                                                   "children": [],
+                                                                  "sourceClass": "Label",
                                                                   "slot": "child"
                                                                 }
                                                               ],
-                                                              "name": "label2"
+                                                              "name": "label2",
+                                                              "sourceClass": "StackPage"
                                                             }
                                                           ],
                                                           "hexpand": true,
-                                                          "vexpand": true
+                                                          "vexpand": true,
+                                                          "sourceClass": "Stack"
                                                         }
                                                       ],
                                                       "accessibleRole": "none",
                                                       "flat": true,
-                                                      "styleClasses": "flat pill popup"
+                                                      "styleClasses": "flat pill popup",
+                                                      "sourceClass": "ToggleButton"
                                                     },
                                                     {
                                                       "id": "up_button",
@@ -889,7 +989,8 @@
                                                       "canFocus": false,
                                                       "circular": true,
                                                       "flat": true,
-                                                      "styleClasses": "circular flat forward-button"
+                                                      "styleClasses": "circular flat forward-button",
+                                                      "sourceClass": "Button"
                                                     }
                                                   ],
                                                   "spacing": 6,
@@ -904,6 +1005,7 @@
                                                   "column": 0,
                                                   "row": 0,
                                                   "orientation": "horizontal",
+                                                  "sourceClass": "Box",
                                                   "bindings": {
                                                     "visible": "$get_split_choice_visible template.show-heading , template.split-month-year as bool"
                                                   }
@@ -920,7 +1022,8 @@
                                                       "canFocus": false,
                                                       "circular": true,
                                                       "flat": true,
-                                                      "styleClasses": "back-button circular flat"
+                                                      "styleClasses": "back-button circular flat",
+                                                      "sourceClass": "Button"
                                                     },
                                                     {
                                                       "id": "button",
@@ -938,10 +1041,12 @@
                                                                   "id": "label1",
                                                                   "type": "label",
                                                                   "children": [],
+                                                                  "sourceClass": "Label",
                                                                   "slot": "child"
                                                                 }
                                                               ],
-                                                              "name": "label1"
+                                                              "name": "label1",
+                                                              "sourceClass": "StackPage"
                                                             },
                                                             {
                                                               "id": "imported-74",
@@ -951,19 +1056,23 @@
                                                                   "id": "label2",
                                                                   "type": "label",
                                                                   "children": [],
+                                                                  "sourceClass": "Label",
                                                                   "slot": "child"
                                                                 }
                                                               ],
-                                                              "name": "label2"
+                                                              "name": "label2",
+                                                              "sourceClass": "StackPage"
                                                             }
                                                           ],
                                                           "hexpand": true,
-                                                          "vexpand": true
+                                                          "vexpand": true,
+                                                          "sourceClass": "Stack"
                                                         }
                                                       ],
                                                       "accessibleRole": "none",
                                                       "flat": true,
-                                                      "styleClasses": "flat pill popup"
+                                                      "styleClasses": "flat pill popup",
+                                                      "sourceClass": "ToggleButton"
                                                     },
                                                     {
                                                       "id": "up_button",
@@ -973,7 +1082,8 @@
                                                       "canFocus": false,
                                                       "circular": true,
                                                       "flat": true,
-                                                      "styleClasses": "circular flat forward-button"
+                                                      "styleClasses": "circular flat forward-button",
+                                                      "sourceClass": "Button"
                                                     }
                                                   ],
                                                   "spacing": 6,
@@ -987,6 +1097,7 @@
                                                   "column": 1,
                                                   "row": 0,
                                                   "orientation": "horizontal",
+                                                  "sourceClass": "Box",
                                                   "bindings": {
                                                     "visible": "$get_split_choice_visible template.show-heading , template.split-month-year as bool"
                                                   }
@@ -1003,7 +1114,8 @@
                                                       "canFocus": false,
                                                       "circular": true,
                                                       "flat": true,
-                                                      "styleClasses": "back-button circular flat"
+                                                      "styleClasses": "back-button circular flat",
+                                                      "sourceClass": "Button"
                                                     },
                                                     {
                                                       "id": "button",
@@ -1021,10 +1133,12 @@
                                                                   "id": "label1",
                                                                   "type": "label",
                                                                   "children": [],
+                                                                  "sourceClass": "Label",
                                                                   "slot": "child"
                                                                 }
                                                               ],
-                                                              "name": "label1"
+                                                              "name": "label1",
+                                                              "sourceClass": "StackPage"
                                                             },
                                                             {
                                                               "id": "imported-77",
@@ -1034,19 +1148,23 @@
                                                                   "id": "label2",
                                                                   "type": "label",
                                                                   "children": [],
+                                                                  "sourceClass": "Label",
                                                                   "slot": "child"
                                                                 }
                                                               ],
-                                                              "name": "label2"
+                                                              "name": "label2",
+                                                              "sourceClass": "StackPage"
                                                             }
                                                           ],
                                                           "hexpand": true,
-                                                          "vexpand": true
+                                                          "vexpand": true,
+                                                          "sourceClass": "Stack"
                                                         }
                                                       ],
                                                       "accessibleRole": "none",
                                                       "flat": true,
-                                                      "styleClasses": "flat pill popup"
+                                                      "styleClasses": "flat pill popup",
+                                                      "sourceClass": "ToggleButton"
                                                     },
                                                     {
                                                       "id": "up_button",
@@ -1056,7 +1174,8 @@
                                                       "canFocus": false,
                                                       "circular": true,
                                                       "flat": true,
-                                                      "styleClasses": "circular flat forward-button"
+                                                      "styleClasses": "circular flat forward-button",
+                                                      "sourceClass": "Button"
                                                     }
                                                   ],
                                                   "spacing": 6,
@@ -1072,6 +1191,7 @@
                                                   "columnSpan": 2,
                                                   "row": 0,
                                                   "orientation": "horizontal",
+                                                  "sourceClass": "Box",
                                                   "bindings": {
                                                     "visible": "$get_combined_choice_visible template.show-heading , template.split-month-year as bool"
                                                   }
@@ -1084,15 +1204,18 @@
                                                   "columnHomogeneous": true,
                                                   "column": 0,
                                                   "columnSpan": 2,
-                                                  "row": 1
+                                                  "row": 1,
+                                                  "sourceClass": "Grid"
                                                 }
                                               ],
-                                              "orientation": "vertical"
+                                              "orientation": "vertical",
+                                              "sourceClass": "Grid"
                                             }
                                           ],
                                           "splitMonthYear": false,
                                           "vexpand": false,
                                           "valign": "end",
+                                          "sourceClass": "Adw.Bin",
                                           "bindings": {
                                             "active-date": "$GcalAgendaView.active-date no-sync-create bidirectional"
                                           }
@@ -1116,23 +1239,28 @@
                                                       "title": "No events",
                                                       "xalign": 0,
                                                       "styleClasses": "no-events dimmed",
+                                                      "sourceClass": "Label",
                                                       "slot": "child"
                                                     }
                                                   ],
-                                                  "activatable": false
+                                                  "activatable": false,
+                                                  "sourceClass": "ListBoxRow"
                                                 }
                                               ],
                                               "hexpand": true,
                                               "selectionMode": "none",
-                                              "vexpand": true
+                                              "vexpand": true,
+                                              "sourceClass": "ListBox"
                                             }
                                           ],
                                           "hexpand": true,
-                                          "vexpand": true
+                                          "vexpand": true,
+                                          "sourceClass": "ScrolledWindow"
                                         }
                                       ],
                                       "orientation": "vertical",
                                       "vexpand": true,
+                                      "sourceClass": "Box",
                                       "bindings": {
                                         "active-date": "template.active-date no-sync-create bidirectional"
                                       },
@@ -1143,13 +1271,15 @@
                                   "title": "Agenda",
                                   "useUnderline": true,
                                   "iconName": "calendar-agenda-symbolic",
-                                  "visible": false
+                                  "visible": false,
+                                  "sourceClass": "Adw.ViewStackPage"
                                 }
                               ],
                               "hexpand": true,
                               "vexpand": true,
                               "notify": ":",
                               "styleClasses": "view",
+                              "sourceClass": "Adw.ViewStack",
                               "slot": "content",
                               "visibleChildName": "month"
                             },
@@ -1162,28 +1292,34 @@
                                   "type": "button",
                                   "children": [],
                                   "actionName": "win.previous-date",
+                                  "sourceClass": "Button",
                                   "bindings": {
                                     "icon-name": "$get_previous_date_icon views_stack.visible-child as string",
                                     "tooltip-text": "$get_previous_date_tooltip views_stack.visible-child-name as string"
-                                  }
+                                  },
+                                  "slot": "start"
                                 },
                                 {
                                   "id": "next_date_button",
                                   "type": "button",
                                   "children": [],
                                   "actionName": "win.next-date",
+                                  "sourceClass": "Button",
                                   "bindings": {
                                     "icon-name": "$get_next_date_icon views_stack.visible-child as string",
                                     "tooltip-text": "$get_next_date_tooltip views_stack.visible-child-name as string"
-                                  }
+                                  },
+                                  "slot": "start"
                                 },
                                 {
                                   "id": "imported-80",
                                   "type": "button",
                                   "children": [],
                                   "actionName": "win.today",
+                                  "sourceClass": "Button",
                                   "title": "Today",
-                                  "iconName": "calendar-today-symbolic"
+                                  "iconName": "calendar-today-symbolic",
+                                  "slot": "start"
                                 },
                                 {
                                   "id": "view_switcher_bin",
@@ -1195,9 +1331,12 @@
                                       "children": [],
                                       "stack": "views_stack",
                                       "policy": "wide",
+                                      "sourceClass": "Adw.ViewSwitcher",
                                       "slot": "child"
                                     }
-                                  ]
+                                  ],
+                                  "sourceClass": "Adw.Bin",
+                                  "slot": "center"
                                 },
                                 {
                                   "id": "imported-82",
@@ -1205,7 +1344,9 @@
                                   "children": [],
                                   "iconName": "list-add-symbolic",
                                   "actionName": "win.new-event",
-                                  "tooltipText": "Add Event"
+                                  "tooltipText": "Add Event",
+                                  "sourceClass": "Button",
+                                  "slot": "end"
                                 },
                                 {
                                   "id": "imported-83",
@@ -1213,26 +1354,33 @@
                                   "children": [],
                                   "iconName": "x-office-calendar-symbolic",
                                   "tooltipText": "Manage Calendars",
-                                  "actionName": "win.show-calendars"
+                                  "actionName": "win.show-calendars",
+                                  "sourceClass": "Button",
+                                  "slot": "end"
                                 }
                               ],
-                              "orientation": "horizontal"
+                              "orientation": "horizontal",
+                              "sourceClass": "ActionBar",
+                              "slot": "bottom"
                             }
                           ],
                           "styleClasses": "view",
+                          "sourceClass": "Adw.ToolbarView",
                           "slot": "content"
                         }
                       ],
                       "pinSidebar": true,
                       "showSidebar": false,
                       "styleClasses": "drop-target",
+                      "sourceClass": "Adw.OverlaySplitView",
                       "slot": "child"
                     }
                   ],
                   "sourceClass": "GcalDropOverlay",
                   "title": "GcalDropOverlay"
                 }
-              ]
+              ],
+              "sourceClass": "Adw.ToastOverlay"
             }
           ],
           "title": "Calendar",
@@ -1240,7 +1388,8 @@
           "defaultHeight": 600,
           "widthRequest": 360,
           "heightRequest": 600,
-          "notify": ":"
+          "notify": ":",
+          "sourceClass": "Adw.ApplicationWindow"
         }
       },
       {
@@ -1268,6 +1417,7 @@
                       "title": "Drop Event Files to Import",
                       "iconName": "calendar-month-symbolic",
                       "styleClasses": "drop-overlay-area compact",
+                      "sourceClass": "Adw.StatusPage",
                       "slot": "overlayed"
                     },
                     {
@@ -1281,7 +1431,9 @@
                             {
                               "id": "imported-22",
                               "type": "header-bar",
-                              "children": []
+                              "children": [],
+                              "sourceClass": "Adw.HeaderBar",
+                              "slot": "top"
                             },
                             {
                               "id": "imported-23",
@@ -1307,7 +1459,8 @@
                                               "canFocus": false,
                                               "circular": true,
                                               "flat": true,
-                                              "styleClasses": "back-button circular flat"
+                                              "styleClasses": "back-button circular flat",
+                                              "sourceClass": "Button"
                                             },
                                             {
                                               "id": "button",
@@ -1325,10 +1478,12 @@
                                                           "id": "label1",
                                                           "type": "label",
                                                           "children": [],
+                                                          "sourceClass": "Label",
                                                           "slot": "child"
                                                         }
                                                       ],
-                                                      "name": "label1"
+                                                      "name": "label1",
+                                                      "sourceClass": "StackPage"
                                                     },
                                                     {
                                                       "id": "imported-27",
@@ -1338,19 +1493,23 @@
                                                           "id": "label2",
                                                           "type": "label",
                                                           "children": [],
+                                                          "sourceClass": "Label",
                                                           "slot": "child"
                                                         }
                                                       ],
-                                                      "name": "label2"
+                                                      "name": "label2",
+                                                      "sourceClass": "StackPage"
                                                     }
                                                   ],
                                                   "hexpand": true,
-                                                  "vexpand": true
+                                                  "vexpand": true,
+                                                  "sourceClass": "Stack"
                                                 }
                                               ],
                                               "accessibleRole": "none",
                                               "flat": true,
-                                              "styleClasses": "flat pill popup"
+                                              "styleClasses": "flat pill popup",
+                                              "sourceClass": "ToggleButton"
                                             },
                                             {
                                               "id": "up_button",
@@ -1360,7 +1519,8 @@
                                               "canFocus": false,
                                               "circular": true,
                                               "flat": true,
-                                              "styleClasses": "circular flat forward-button"
+                                              "styleClasses": "circular flat forward-button",
+                                              "sourceClass": "Button"
                                             }
                                           ],
                                           "spacing": 6,
@@ -1375,6 +1535,7 @@
                                           "column": 0,
                                           "row": 0,
                                           "orientation": "horizontal",
+                                          "sourceClass": "Box",
                                           "bindings": {
                                             "visible": "$get_split_choice_visible template.show-heading , template.split-month-year as bool"
                                           }
@@ -1391,7 +1552,8 @@
                                               "canFocus": false,
                                               "circular": true,
                                               "flat": true,
-                                              "styleClasses": "back-button circular flat"
+                                              "styleClasses": "back-button circular flat",
+                                              "sourceClass": "Button"
                                             },
                                             {
                                               "id": "button",
@@ -1409,10 +1571,12 @@
                                                           "id": "label1",
                                                           "type": "label",
                                                           "children": [],
+                                                          "sourceClass": "Label",
                                                           "slot": "child"
                                                         }
                                                       ],
-                                                      "name": "label1"
+                                                      "name": "label1",
+                                                      "sourceClass": "StackPage"
                                                     },
                                                     {
                                                       "id": "imported-30",
@@ -1422,19 +1586,23 @@
                                                           "id": "label2",
                                                           "type": "label",
                                                           "children": [],
+                                                          "sourceClass": "Label",
                                                           "slot": "child"
                                                         }
                                                       ],
-                                                      "name": "label2"
+                                                      "name": "label2",
+                                                      "sourceClass": "StackPage"
                                                     }
                                                   ],
                                                   "hexpand": true,
-                                                  "vexpand": true
+                                                  "vexpand": true,
+                                                  "sourceClass": "Stack"
                                                 }
                                               ],
                                               "accessibleRole": "none",
                                               "flat": true,
-                                              "styleClasses": "flat pill popup"
+                                              "styleClasses": "flat pill popup",
+                                              "sourceClass": "ToggleButton"
                                             },
                                             {
                                               "id": "up_button",
@@ -1444,7 +1612,8 @@
                                               "canFocus": false,
                                               "circular": true,
                                               "flat": true,
-                                              "styleClasses": "circular flat forward-button"
+                                              "styleClasses": "circular flat forward-button",
+                                              "sourceClass": "Button"
                                             }
                                           ],
                                           "spacing": 6,
@@ -1458,6 +1627,7 @@
                                           "column": 1,
                                           "row": 0,
                                           "orientation": "horizontal",
+                                          "sourceClass": "Box",
                                           "bindings": {
                                             "visible": "$get_split_choice_visible template.show-heading , template.split-month-year as bool"
                                           }
@@ -1474,7 +1644,8 @@
                                               "canFocus": false,
                                               "circular": true,
                                               "flat": true,
-                                              "styleClasses": "back-button circular flat"
+                                              "styleClasses": "back-button circular flat",
+                                              "sourceClass": "Button"
                                             },
                                             {
                                               "id": "button",
@@ -1492,10 +1663,12 @@
                                                           "id": "label1",
                                                           "type": "label",
                                                           "children": [],
+                                                          "sourceClass": "Label",
                                                           "slot": "child"
                                                         }
                                                       ],
-                                                      "name": "label1"
+                                                      "name": "label1",
+                                                      "sourceClass": "StackPage"
                                                     },
                                                     {
                                                       "id": "imported-33",
@@ -1505,19 +1678,23 @@
                                                           "id": "label2",
                                                           "type": "label",
                                                           "children": [],
+                                                          "sourceClass": "Label",
                                                           "slot": "child"
                                                         }
                                                       ],
-                                                      "name": "label2"
+                                                      "name": "label2",
+                                                      "sourceClass": "StackPage"
                                                     }
                                                   ],
                                                   "hexpand": true,
-                                                  "vexpand": true
+                                                  "vexpand": true,
+                                                  "sourceClass": "Stack"
                                                 }
                                               ],
                                               "accessibleRole": "none",
                                               "flat": true,
-                                              "styleClasses": "flat pill popup"
+                                              "styleClasses": "flat pill popup",
+                                              "sourceClass": "ToggleButton"
                                             },
                                             {
                                               "id": "up_button",
@@ -1527,7 +1704,8 @@
                                               "canFocus": false,
                                               "circular": true,
                                               "flat": true,
-                                              "styleClasses": "circular flat forward-button"
+                                              "styleClasses": "circular flat forward-button",
+                                              "sourceClass": "Button"
                                             }
                                           ],
                                           "spacing": 6,
@@ -1543,6 +1721,7 @@
                                           "columnSpan": 2,
                                           "row": 0,
                                           "orientation": "horizontal",
+                                          "sourceClass": "Box",
                                           "bindings": {
                                             "visible": "$get_combined_choice_visible template.show-heading , template.split-month-year as bool"
                                           }
@@ -1555,14 +1734,17 @@
                                           "columnHomogeneous": true,
                                           "column": 0,
                                           "columnSpan": 2,
-                                          "row": 1
+                                          "row": 1,
+                                          "sourceClass": "Grid"
                                         }
                                       ],
-                                      "orientation": "vertical"
+                                      "orientation": "vertical",
+                                      "sourceClass": "Grid"
                                     }
                                   ],
                                   "splitMonthYear": true,
                                   "vexpand": false,
+                                  "sourceClass": "Adw.Bin",
                                   "bindings": {
                                     "active-date": "template.active-date no-sync-create bidirectional"
                                   }
@@ -1586,26 +1768,32 @@
                                               "hexpand": true,
                                               "selectionMode": "none",
                                               "styleClasses": "navigation-sidebar calendar-list",
+                                              "sourceClass": "ListBox",
                                               "slot": "child"
                                             }
                                           ],
                                           "maximumSize": 800,
                                           "tighteningThreshold": 800,
+                                          "sourceClass": "Adw.Clamp",
                                           "slot": "child"
                                         }
                                       ],
                                       "hscrollbarPolicy": "never",
                                       "propagateNaturalHeight": true,
                                       "propagateNaturalWidth": true,
+                                      "sourceClass": "ScrolledWindow",
                                       "slot": "child"
                                     }
-                                  ]
+                                  ],
+                                  "sourceClass": "Adw.Bin"
                                 }
                               ],
                               "orientation": "vertical",
+                              "sourceClass": "Box",
                               "slot": "content"
                             }
                           ],
+                          "sourceClass": "Adw.ToolbarView",
                           "slot": "sidebar"
                         },
                         {
@@ -1622,9 +1810,11 @@
                                   "children": [],
                                   "iconName": "sidebar-show-symbolic",
                                   "tooltipText": "Toggle Sidebar",
+                                  "sourceClass": "ToggleButton",
                                   "bindings": {
                                     "active": "split_view.show-sidebar bidirectional"
-                                  }
+                                  },
+                                  "slot": "start"
                                 },
                                 {
                                   "id": "sync_indicator",
@@ -1643,10 +1833,12 @@
                                               "type": "box",
                                               "children": [],
                                               "orientation": "horizontal",
+                                              "sourceClass": "Box",
                                               "slot": "child"
                                             }
                                           ],
-                                          "name": "empty"
+                                          "name": "empty",
+                                          "sourceClass": "StackPage"
                                         },
                                         {
                                           "id": "imported-40",
@@ -1657,10 +1849,12 @@
                                               "type": "spinner",
                                               "children": [],
                                               "tooltipText": "Synchronizing Remote Calendars",
+                                              "sourceClass": "Adw.Spinner",
                                               "slot": "child"
                                             }
                                           ],
-                                          "name": "spinner"
+                                          "name": "spinner",
+                                          "sourceClass": "StackPage"
                                         },
                                         {
                                           "id": "imported-41",
@@ -1671,17 +1865,22 @@
                                               "type": "bin",
                                               "children": [],
                                               "iconName": "checkmark-small-symbolic",
+                                              "sourceClass": "Image",
                                               "slot": "child"
                                             }
                                           ],
-                                          "name": "success"
+                                          "name": "success",
+                                          "sourceClass": "StackPage"
                                         }
                                       ],
                                       "transitionType": "crossfade",
                                       "transitionDuration": 250,
+                                      "sourceClass": "Stack",
                                       "slot": "child"
                                     }
-                                  ]
+                                  ],
+                                  "sourceClass": "Adw.Bin",
+                                  "slot": "start"
                                 },
                                 {
                                   "id": "navigation_button_title",
@@ -1705,10 +1904,12 @@
                                               "canShrink": true,
                                               "tooltipText": "Choose a Date",
                                               "alwaysShowArrow": true,
+                                              "sourceClass": "MenuButton",
                                               "slot": "child"
                                             }
                                           ],
-                                          "name": "active"
+                                          "name": "active",
+                                          "sourceClass": "StackPage"
                                         },
                                         {
                                           "id": "imported-43",
@@ -1721,20 +1922,24 @@
                                               "styleClasses": "heading",
                                               "marginStart": 9,
                                               "marginEnd": 9,
+                                              "sourceClass": "Label",
                                               "bindings": {
                                                 "label": "button.label no-sync-create"
                                               },
                                               "slot": "child"
                                             }
                                           ],
-                                          "name": "inactive"
+                                          "name": "inactive",
+                                          "sourceClass": "StackPage"
                                         }
                                       ],
                                       "hhomogeneous": false,
                                       "visibleChildName": "active",
+                                      "sourceClass": "Stack",
                                       "slot": "child"
                                     }
                                   ],
+                                  "sourceClass": "Adw.Bin",
                                   "bindings": {
                                     "active-date": "template.active-date no-sync-create bidirectional",
                                     "active": "split_view.show-sidebar inverted"
@@ -1748,7 +1953,9 @@
                                   "iconName": "open-menu-symbolic",
                                   "popover": "win_menu",
                                   "tooltipText": "Main Menu",
-                                  "primary": true
+                                  "primary": true,
+                                  "sourceClass": "MenuButton",
+                                  "slot": "end"
                                 },
                                 {
                                   "id": "search_button",
@@ -1769,10 +1976,12 @@
                                               "halign": "start",
                                               "iconName": "edit-find-symbolic",
                                               "tooltipText": "Search Events",
+                                              "sourceClass": "Button",
                                               "slot": "child"
                                             }
                                           ],
-                                          "name": "button"
+                                          "name": "button",
+                                          "sourceClass": "StackPage"
                                         },
                                         {
                                           "id": "imported-48",
@@ -1786,10 +1995,12 @@
                                               "maxWidthChars": 0,
                                               "widthChars": 0,
                                               "searchDelay": 500,
+                                              "sourceClass": "SearchEntry",
                                               "slot": "child"
                                             }
                                           ],
-                                          "name": "entry"
+                                          "name": "entry",
+                                          "sourceClass": "StackPage"
                                         }
                                       ],
                                       "hhomogeneous": false,
@@ -1797,12 +2008,17 @@
                                       "interpolateSize": true,
                                       "transitionType": "crossfade",
                                       "transitionDuration": 200,
-                                      "styleClasses": "suggestionbutton"
+                                      "styleClasses": "suggestionbutton",
+                                      "sourceClass": "Stack"
                                     }
                                   ],
-                                  "tooltipText": "Search"
+                                  "tooltipText": "Search",
+                                  "sourceClass": "Adw.Bin",
+                                  "slot": "end"
                                 }
-                              ]
+                              ],
+                              "sourceClass": "Adw.HeaderBar",
+                              "slot": "top"
                             },
                             {
                               "id": "views_stack",
@@ -1826,7 +2042,8 @@
                                               "children": [],
                                               "marginStart": 6,
                                               "hexpand": true,
-                                              "xalign": 0
+                                              "xalign": 0,
+                                              "sourceClass": "Label"
                                             },
                                             {
                                               "id": "label_1",
@@ -1834,7 +2051,8 @@
                                               "children": [],
                                               "marginStart": 6,
                                               "hexpand": true,
-                                              "xalign": 0
+                                              "xalign": 0,
+                                              "sourceClass": "Label"
                                             },
                                             {
                                               "id": "label_2",
@@ -1842,7 +2060,8 @@
                                               "children": [],
                                               "marginStart": 6,
                                               "hexpand": true,
-                                              "xalign": 0
+                                              "xalign": 0,
+                                              "sourceClass": "Label"
                                             },
                                             {
                                               "id": "label_3",
@@ -1850,7 +2069,8 @@
                                               "children": [],
                                               "marginStart": 6,
                                               "hexpand": true,
-                                              "xalign": 0
+                                              "xalign": 0,
+                                              "sourceClass": "Label"
                                             },
                                             {
                                               "id": "label_4",
@@ -1858,7 +2078,8 @@
                                               "children": [],
                                               "marginStart": 6,
                                               "hexpand": true,
-                                              "xalign": 0
+                                              "xalign": 0,
+                                              "sourceClass": "Label"
                                             },
                                             {
                                               "id": "label_5",
@@ -1866,7 +2087,8 @@
                                               "children": [],
                                               "marginStart": 6,
                                               "hexpand": true,
-                                              "xalign": 0
+                                              "xalign": 0,
+                                              "sourceClass": "Label"
                                             },
                                             {
                                               "id": "label_6",
@@ -1874,16 +2096,20 @@
                                               "children": [],
                                               "marginStart": 6,
                                               "hexpand": true,
-                                              "xalign": 0
+                                              "xalign": 0,
+                                              "sourceClass": "Label"
                                             }
                                           ],
                                           "styleClasses": "header heading month-header view",
                                           "homogeneous": true,
-                                          "orientation": "horizontal"
+                                          "orientation": "horizontal",
+                                          "sourceClass": "Box",
+                                          "slot": "header"
                                         }
                                       ],
                                       "overflow": "hidden",
                                       "styleClasses": "month-view",
+                                      "sourceClass": "Widget",
                                       "bindings": {
                                         "active-date": "template.active-date no-sync-create bidirectional"
                                       },
@@ -1893,7 +2119,8 @@
                                   "name": "month",
                                   "title": "Month",
                                   "useUnderline": true,
-                                  "iconName": "calendar-month-symbolic"
+                                  "iconName": "calendar-month-symbolic",
+                                  "sourceClass": "Adw.ViewStackPage"
                                 },
                                 {
                                   "id": "week_page",
@@ -1923,6 +2150,7 @@
                                                   "flat": true,
                                                   "circular": true,
                                                   "styleClasses": "flat circular week-header-expander",
+                                                  "sourceClass": "ToggleButton",
                                                   "bindings": {
                                                     "visible": "header.can-expand",
                                                     "active": "header.expanded bidirectional"
@@ -1930,7 +2158,8 @@
                                                 }
                                               ],
                                               "hexpand": false,
-                                              "orientation": "horizontal"
+                                              "orientation": "horizontal",
+                                              "sourceClass": "Box"
                                             },
                                             {
                                               "id": "header",
@@ -1949,7 +2178,8 @@
                                                           "type": "box",
                                                           "children": [],
                                                           "homogeneous": true,
-                                                          "orientation": "horizontal"
+                                                          "orientation": "horizontal",
+                                                          "sourceClass": "Box"
                                                         },
                                                         {
                                                           "id": "scrolledwindow",
@@ -1967,30 +2197,37 @@
                                                                   "hexpand": true,
                                                                   "columnSpacing": 6,
                                                                   "rowSpacing": 2,
-                                                                  "marginStart": 6
+                                                                  "marginStart": 6,
+                                                                  "sourceClass": "Grid"
                                                                 }
-                                                              ]
+                                                              ],
+                                                              "sourceClass": "Viewport"
                                                             }
                                                           ],
                                                           "hscrollbarPolicy": "never",
                                                           "vscrollbarPolicy": "never",
                                                           "propagateNaturalHeight": true,
-                                                          "marginBottom": 2
+                                                          "marginBottom": 2,
+                                                          "sourceClass": "ScrolledWindow"
                                                         }
                                                       ],
-                                                      "orientation": "vertical"
+                                                      "orientation": "vertical",
+                                                      "sourceClass": "Box"
                                                     }
                                                   ],
                                                   "hexpand": true,
                                                   "vexpand": false,
                                                   "orientation": "vertical",
-                                                  "styleClasses": "week-header"
+                                                  "styleClasses": "week-header",
+                                                  "sourceClass": "Box"
                                                 }
                                               ],
-                                              "hexpand": true
+                                              "hexpand": true,
+                                              "sourceClass": "Widget"
                                             }
                                           ],
-                                          "orientation": "horizontal"
+                                          "orientation": "horizontal",
+                                          "sourceClass": "Box"
                                         },
                                         {
                                           "id": "scrolled_window",
@@ -2022,17 +2259,21 @@
                                                     }
                                                   ],
                                                   "orientation": "horizontal",
-                                                  "styleClasses": "week-main-content"
+                                                  "styleClasses": "week-main-content",
+                                                  "sourceClass": "Box"
                                                 }
-                                              ]
+                                              ],
+                                              "sourceClass": "Viewport"
                                             }
                                           ],
                                           "hexpand": true,
-                                          "vexpand": true
+                                          "vexpand": true,
+                                          "sourceClass": "ScrolledWindow"
                                         }
                                       ],
                                       "orientation": "vertical",
                                       "styleClasses": "week-view",
+                                      "sourceClass": "Box",
                                       "bindings": {
                                         "active-date": "template.active-date no-sync-create bidirectional"
                                       },
@@ -2042,7 +2283,8 @@
                                   "name": "week",
                                   "title": "Week",
                                   "useUnderline": true,
-                                  "iconName": "calendar-week-symbolic"
+                                  "iconName": "calendar-week-symbolic",
+                                  "sourceClass": "Adw.ViewStackPage"
                                 },
                                 {
                                   "id": "agenda_page",
@@ -2072,7 +2314,8 @@
                                                       "canFocus": false,
                                                       "circular": true,
                                                       "flat": true,
-                                                      "styleClasses": "back-button circular flat"
+                                                      "styleClasses": "back-button circular flat",
+                                                      "sourceClass": "Button"
                                                     },
                                                     {
                                                       "id": "button",
@@ -2090,10 +2333,12 @@
                                                                   "id": "label1",
                                                                   "type": "label",
                                                                   "children": [],
+                                                                  "sourceClass": "Label",
                                                                   "slot": "child"
                                                                 }
                                                               ],
-                                                              "name": "label1"
+                                                              "name": "label1",
+                                                              "sourceClass": "StackPage"
                                                             },
                                                             {
                                                               "id": "imported-71",
@@ -2103,19 +2348,23 @@
                                                                   "id": "label2",
                                                                   "type": "label",
                                                                   "children": [],
+                                                                  "sourceClass": "Label",
                                                                   "slot": "child"
                                                                 }
                                                               ],
-                                                              "name": "label2"
+                                                              "name": "label2",
+                                                              "sourceClass": "StackPage"
                                                             }
                                                           ],
                                                           "hexpand": true,
-                                                          "vexpand": true
+                                                          "vexpand": true,
+                                                          "sourceClass": "Stack"
                                                         }
                                                       ],
                                                       "accessibleRole": "none",
                                                       "flat": true,
-                                                      "styleClasses": "flat pill popup"
+                                                      "styleClasses": "flat pill popup",
+                                                      "sourceClass": "ToggleButton"
                                                     },
                                                     {
                                                       "id": "up_button",
@@ -2125,7 +2374,8 @@
                                                       "canFocus": false,
                                                       "circular": true,
                                                       "flat": true,
-                                                      "styleClasses": "circular flat forward-button"
+                                                      "styleClasses": "circular flat forward-button",
+                                                      "sourceClass": "Button"
                                                     }
                                                   ],
                                                   "spacing": 6,
@@ -2140,6 +2390,7 @@
                                                   "column": 0,
                                                   "row": 0,
                                                   "orientation": "horizontal",
+                                                  "sourceClass": "Box",
                                                   "bindings": {
                                                     "visible": "$get_split_choice_visible template.show-heading , template.split-month-year as bool"
                                                   }
@@ -2156,7 +2407,8 @@
                                                       "canFocus": false,
                                                       "circular": true,
                                                       "flat": true,
-                                                      "styleClasses": "back-button circular flat"
+                                                      "styleClasses": "back-button circular flat",
+                                                      "sourceClass": "Button"
                                                     },
                                                     {
                                                       "id": "button",
@@ -2174,10 +2426,12 @@
                                                                   "id": "label1",
                                                                   "type": "label",
                                                                   "children": [],
+                                                                  "sourceClass": "Label",
                                                                   "slot": "child"
                                                                 }
                                                               ],
-                                                              "name": "label1"
+                                                              "name": "label1",
+                                                              "sourceClass": "StackPage"
                                                             },
                                                             {
                                                               "id": "imported-74",
@@ -2187,19 +2441,23 @@
                                                                   "id": "label2",
                                                                   "type": "label",
                                                                   "children": [],
+                                                                  "sourceClass": "Label",
                                                                   "slot": "child"
                                                                 }
                                                               ],
-                                                              "name": "label2"
+                                                              "name": "label2",
+                                                              "sourceClass": "StackPage"
                                                             }
                                                           ],
                                                           "hexpand": true,
-                                                          "vexpand": true
+                                                          "vexpand": true,
+                                                          "sourceClass": "Stack"
                                                         }
                                                       ],
                                                       "accessibleRole": "none",
                                                       "flat": true,
-                                                      "styleClasses": "flat pill popup"
+                                                      "styleClasses": "flat pill popup",
+                                                      "sourceClass": "ToggleButton"
                                                     },
                                                     {
                                                       "id": "up_button",
@@ -2209,7 +2467,8 @@
                                                       "canFocus": false,
                                                       "circular": true,
                                                       "flat": true,
-                                                      "styleClasses": "circular flat forward-button"
+                                                      "styleClasses": "circular flat forward-button",
+                                                      "sourceClass": "Button"
                                                     }
                                                   ],
                                                   "spacing": 6,
@@ -2223,6 +2482,7 @@
                                                   "column": 1,
                                                   "row": 0,
                                                   "orientation": "horizontal",
+                                                  "sourceClass": "Box",
                                                   "bindings": {
                                                     "visible": "$get_split_choice_visible template.show-heading , template.split-month-year as bool"
                                                   }
@@ -2239,7 +2499,8 @@
                                                       "canFocus": false,
                                                       "circular": true,
                                                       "flat": true,
-                                                      "styleClasses": "back-button circular flat"
+                                                      "styleClasses": "back-button circular flat",
+                                                      "sourceClass": "Button"
                                                     },
                                                     {
                                                       "id": "button",
@@ -2257,10 +2518,12 @@
                                                                   "id": "label1",
                                                                   "type": "label",
                                                                   "children": [],
+                                                                  "sourceClass": "Label",
                                                                   "slot": "child"
                                                                 }
                                                               ],
-                                                              "name": "label1"
+                                                              "name": "label1",
+                                                              "sourceClass": "StackPage"
                                                             },
                                                             {
                                                               "id": "imported-77",
@@ -2270,19 +2533,23 @@
                                                                   "id": "label2",
                                                                   "type": "label",
                                                                   "children": [],
+                                                                  "sourceClass": "Label",
                                                                   "slot": "child"
                                                                 }
                                                               ],
-                                                              "name": "label2"
+                                                              "name": "label2",
+                                                              "sourceClass": "StackPage"
                                                             }
                                                           ],
                                                           "hexpand": true,
-                                                          "vexpand": true
+                                                          "vexpand": true,
+                                                          "sourceClass": "Stack"
                                                         }
                                                       ],
                                                       "accessibleRole": "none",
                                                       "flat": true,
-                                                      "styleClasses": "flat pill popup"
+                                                      "styleClasses": "flat pill popup",
+                                                      "sourceClass": "ToggleButton"
                                                     },
                                                     {
                                                       "id": "up_button",
@@ -2292,7 +2559,8 @@
                                                       "canFocus": false,
                                                       "circular": true,
                                                       "flat": true,
-                                                      "styleClasses": "circular flat forward-button"
+                                                      "styleClasses": "circular flat forward-button",
+                                                      "sourceClass": "Button"
                                                     }
                                                   ],
                                                   "spacing": 6,
@@ -2308,6 +2576,7 @@
                                                   "columnSpan": 2,
                                                   "row": 0,
                                                   "orientation": "horizontal",
+                                                  "sourceClass": "Box",
                                                   "bindings": {
                                                     "visible": "$get_combined_choice_visible template.show-heading , template.split-month-year as bool"
                                                   }
@@ -2320,15 +2589,18 @@
                                                   "columnHomogeneous": true,
                                                   "column": 0,
                                                   "columnSpan": 2,
-                                                  "row": 1
+                                                  "row": 1,
+                                                  "sourceClass": "Grid"
                                                 }
                                               ],
-                                              "orientation": "vertical"
+                                              "orientation": "vertical",
+                                              "sourceClass": "Grid"
                                             }
                                           ],
                                           "splitMonthYear": false,
                                           "vexpand": false,
                                           "valign": "end",
+                                          "sourceClass": "Adw.Bin",
                                           "bindings": {
                                             "active-date": "$GcalAgendaView.active-date no-sync-create bidirectional"
                                           }
@@ -2352,23 +2624,28 @@
                                                       "title": "No events",
                                                       "xalign": 0,
                                                       "styleClasses": "no-events dimmed",
+                                                      "sourceClass": "Label",
                                                       "slot": "child"
                                                     }
                                                   ],
-                                                  "activatable": false
+                                                  "activatable": false,
+                                                  "sourceClass": "ListBoxRow"
                                                 }
                                               ],
                                               "hexpand": true,
                                               "selectionMode": "none",
-                                              "vexpand": true
+                                              "vexpand": true,
+                                              "sourceClass": "ListBox"
                                             }
                                           ],
                                           "hexpand": true,
-                                          "vexpand": true
+                                          "vexpand": true,
+                                          "sourceClass": "ScrolledWindow"
                                         }
                                       ],
                                       "orientation": "vertical",
                                       "vexpand": true,
+                                      "sourceClass": "Box",
                                       "bindings": {
                                         "active-date": "template.active-date no-sync-create bidirectional"
                                       },
@@ -2379,13 +2656,15 @@
                                   "title": "Agenda",
                                   "useUnderline": true,
                                   "iconName": "calendar-agenda-symbolic",
-                                  "visible": false
+                                  "visible": false,
+                                  "sourceClass": "Adw.ViewStackPage"
                                 }
                               ],
                               "hexpand": true,
                               "vexpand": true,
                               "notify": ":",
                               "styleClasses": "view",
+                              "sourceClass": "Adw.ViewStack",
                               "slot": "content",
                               "visibleChildName": "week"
                             },
@@ -2398,28 +2677,34 @@
                                   "type": "button",
                                   "children": [],
                                   "actionName": "win.previous-date",
+                                  "sourceClass": "Button",
                                   "bindings": {
                                     "icon-name": "$get_previous_date_icon views_stack.visible-child as string",
                                     "tooltip-text": "$get_previous_date_tooltip views_stack.visible-child-name as string"
-                                  }
+                                  },
+                                  "slot": "start"
                                 },
                                 {
                                   "id": "next_date_button",
                                   "type": "button",
                                   "children": [],
                                   "actionName": "win.next-date",
+                                  "sourceClass": "Button",
                                   "bindings": {
                                     "icon-name": "$get_next_date_icon views_stack.visible-child as string",
                                     "tooltip-text": "$get_next_date_tooltip views_stack.visible-child-name as string"
-                                  }
+                                  },
+                                  "slot": "start"
                                 },
                                 {
                                   "id": "imported-80",
                                   "type": "button",
                                   "children": [],
                                   "actionName": "win.today",
+                                  "sourceClass": "Button",
                                   "title": "Today",
-                                  "iconName": "calendar-today-symbolic"
+                                  "iconName": "calendar-today-symbolic",
+                                  "slot": "start"
                                 },
                                 {
                                   "id": "view_switcher_bin",
@@ -2431,9 +2716,12 @@
                                       "children": [],
                                       "stack": "views_stack",
                                       "policy": "wide",
+                                      "sourceClass": "Adw.ViewSwitcher",
                                       "slot": "child"
                                     }
-                                  ]
+                                  ],
+                                  "sourceClass": "Adw.Bin",
+                                  "slot": "center"
                                 },
                                 {
                                   "id": "imported-82",
@@ -2441,7 +2729,9 @@
                                   "children": [],
                                   "iconName": "list-add-symbolic",
                                   "actionName": "win.new-event",
-                                  "tooltipText": "Add Event"
+                                  "tooltipText": "Add Event",
+                                  "sourceClass": "Button",
+                                  "slot": "end"
                                 },
                                 {
                                   "id": "imported-83",
@@ -2449,26 +2739,33 @@
                                   "children": [],
                                   "iconName": "x-office-calendar-symbolic",
                                   "tooltipText": "Manage Calendars",
-                                  "actionName": "win.show-calendars"
+                                  "actionName": "win.show-calendars",
+                                  "sourceClass": "Button",
+                                  "slot": "end"
                                 }
                               ],
-                              "orientation": "horizontal"
+                              "orientation": "horizontal",
+                              "sourceClass": "ActionBar",
+                              "slot": "bottom"
                             }
                           ],
                           "styleClasses": "view",
+                          "sourceClass": "Adw.ToolbarView",
                           "slot": "content"
                         }
                       ],
                       "pinSidebar": true,
                       "showSidebar": false,
                       "styleClasses": "drop-target",
+                      "sourceClass": "Adw.OverlaySplitView",
                       "slot": "child"
                     }
                   ],
                   "sourceClass": "GcalDropOverlay",
                   "title": "GcalDropOverlay"
                 }
-              ]
+              ],
+              "sourceClass": "Adw.ToastOverlay"
             }
           ],
           "title": "Calendar",
@@ -2476,7 +2773,8 @@
           "defaultHeight": 600,
           "widthRequest": 360,
           "heightRequest": 600,
-          "notify": ":"
+          "notify": ":",
+          "sourceClass": "Adw.ApplicationWindow"
         }
       }
     ],

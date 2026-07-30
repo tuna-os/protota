@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exportedAt": "2026-07-30T09:23:36.958Z",
+  "exportedAt": "2026-07-30T11:22:13.904Z",
   "generatedBy": "scripts/generate-preset.mjs",
   "document": {
     "id": "clocks-preset",
@@ -46,6 +46,7 @@
                                       "type": "view-switcher",
                                       "children": [],
                                       "policy": "wide",
+                                      "sourceClass": "Adw.ViewSwitcher",
                                       "bindings": {
                                         "stack": "ClocksHeaderBar.stack"
                                       },
@@ -65,13 +66,15 @@
                                               "children": [],
                                               "actionName": "win.new",
                                               "iconName": "list-add-symbolic",
+                                              "sourceClass": "Gtk.Button",
                                               "bindings": {
                                                 "tooltip-text": "ClocksHeaderBar.new-label"
                                               },
                                               "slot": "child"
                                             }
                                           ],
-                                          "name": "new"
+                                          "name": "new",
+                                          "sourceClass": "Adw.ViewStackPage"
                                         },
                                         {
                                           "id": "template-imported-28",
@@ -81,12 +84,15 @@
                                               "id": "template-imported-29",
                                               "type": "bin",
                                               "children": [],
+                                              "sourceClass": "Adw.Bin",
                                               "slot": "child"
                                             }
                                           ],
-                                          "name": "empty"
+                                          "name": "empty",
+                                          "sourceClass": "Adw.ViewStackPage"
                                         }
-                                      ]
+                                      ],
+                                      "sourceClass": "Adw.ViewStack"
                                     },
                                     {
                                       "id": "template-imported-30",
@@ -96,9 +102,11 @@
                                       "iconName": "open-menu-symbolic",
                                       "tooltipText": "Main Menu",
                                       "primary": true,
+                                      "sourceClass": "Gtk.MenuButton",
                                       "slot": "end"
                                     }
-                                  ]
+                                  ],
+                                  "sourceClass": "Adw.HeaderBar"
                                 }
                               ],
                               "sourceClass": "ClocksHeaderBar",
@@ -135,10 +143,12 @@
                                                   "useUnderline": true,
                                                   "canShrink": true,
                                                   "halign": "center",
-                                                  "suggested": true
+                                                  "suggested": true,
+                                                  "sourceClass": "Gtk.Button"
                                                 }
                                               ],
-                                              "iconName": "globe-centered-symbolic"
+                                              "iconName": "globe-centered-symbolic",
+                                              "sourceClass": "Adw.StatusPage"
                                             },
                                             {
                                               "id": "list_view",
@@ -157,16 +167,20 @@
                                                       "marginTop": 18,
                                                       "marginBottom": 18,
                                                       "marginStart": 12,
-                                                      "marginEnd": 12
+                                                      "marginEnd": 12,
+                                                      "sourceClass": "Gtk.ListBox"
                                                     }
-                                                  ]
+                                                  ],
+                                                  "sourceClass": "Adw.Clamp"
                                                 }
-                                              ]
+                                              ],
+                                              "sourceClass": "Gtk.ScrolledWindow"
                                             }
                                           ],
                                           "hhomogeneous": false,
                                           "vhomogeneous": false,
                                           "transitionType": "crossfade",
+                                          "sourceClass": "Gtk.Stack",
                                           "visibleChildName": "world"
                                         }
                                       ],
@@ -177,7 +191,8 @@
                                   "name": "world",
                                   "title": "World",
                                   "useUnderline": true,
-                                  "iconName": "globe-symbolic"
+                                  "iconName": "globe-symbolic",
+                                  "sourceClass": "Adw.ViewStackPage"
                                 },
                                 {
                                   "id": "imported-4",
@@ -204,10 +219,12 @@
                                                   "useUnderline": true,
                                                   "canShrink": true,
                                                   "halign": "center",
-                                                  "suggested": true
+                                                  "suggested": true,
+                                                  "sourceClass": "Gtk.Button"
                                                 }
                                               ],
-                                              "iconName": "alarm-centered-symbolic"
+                                              "iconName": "alarm-centered-symbolic",
+                                              "sourceClass": "Adw.StatusPage"
                                             },
                                             {
                                               "id": "list_view",
@@ -227,15 +244,19 @@
                                                       "marginTop": 18,
                                                       "marginBottom": 18,
                                                       "marginStart": 12,
-                                                      "marginEnd": 12
+                                                      "marginEnd": 12,
+                                                      "sourceClass": "Gtk.ListBox"
                                                     }
-                                                  ]
+                                                  ],
+                                                  "sourceClass": "Adw.Clamp"
                                                 }
-                                              ]
+                                              ],
+                                              "sourceClass": "Gtk.ScrolledWindow"
                                             }
                                           ],
                                           "hhomogeneous": false,
                                           "vhomogeneous": false,
+                                          "sourceClass": "Gtk.Stack",
                                           "visibleChildName": "world"
                                         }
                                       ],
@@ -246,7 +267,8 @@
                                   "name": "alarm",
                                   "title": "Alarms",
                                   "useUnderline": true,
-                                  "iconName": "alarm-symbolic"
+                                  "iconName": "alarm-symbolic",
+                                  "sourceClass": "Adw.ViewStackPage"
                                 },
                                 {
                                   "id": "imported-5",
@@ -278,13 +300,15 @@
                                                           "children": [],
                                                           "title": 0,
                                                           "xalign": 0,
-                                                          "yalign": 0
+                                                          "yalign": 0,
+                                                          "sourceClass": "Gtk.Label"
                                                         },
                                                         {
                                                           "id": "template-imported-34",
                                                           "type": "label",
                                                           "children": [],
-                                                          "title": "∶"
+                                                          "title": "∶",
+                                                          "sourceClass": "Gtk.Label"
                                                         },
                                                         {
                                                           "id": "minutes_label",
@@ -292,7 +316,8 @@
                                                           "children": [],
                                                           "title": 0,
                                                           "xalign": 0,
-                                                          "yalign": 0
+                                                          "yalign": 0,
+                                                          "sourceClass": "Gtk.Label"
                                                         },
                                                         {
                                                           "id": "template-imported-35",
@@ -300,7 +325,8 @@
                                                           "children": [],
                                                           "title": "∶",
                                                           "xalign": 0,
-                                                          "yalign": 0
+                                                          "yalign": 0,
+                                                          "sourceClass": "Gtk.Label"
                                                         },
                                                         {
                                                           "id": "seconds_label",
@@ -308,7 +334,8 @@
                                                           "children": [],
                                                           "title": 0,
                                                           "xalign": 0,
-                                                          "yalign": 0
+                                                          "yalign": 0,
+                                                          "sourceClass": "Gtk.Label"
                                                         },
                                                         {
                                                           "id": "template-imported-36",
@@ -316,7 +343,8 @@
                                                           "children": [],
                                                           "title": ".",
                                                           "xalign": 0,
-                                                          "yalign": 0
+                                                          "yalign": 0,
+                                                          "sourceClass": "Gtk.Label"
                                                         },
                                                         {
                                                           "id": "miliseconds_label",
@@ -326,12 +354,14 @@
                                                           "valign": "end",
                                                           "title": 0,
                                                           "xalign": 0,
-                                                          "yalign": 0
+                                                          "yalign": 0,
+                                                          "sourceClass": "Gtk.Label"
                                                         }
                                                       ],
                                                       "halign": "center",
                                                       "marginBottom": 18,
-                                                      "orientation": "horizontal"
+                                                      "orientation": "horizontal",
+                                                      "sourceClass": "Gtk.Box"
                                                     },
                                                     {
                                                       "id": "template-imported-37",
@@ -346,7 +376,8 @@
                                                           "useUnderline": true,
                                                           "hexpand": true,
                                                           "halign": "start",
-                                                          "suggested": true
+                                                          "suggested": true,
+                                                          "sourceClass": "Gtk.Button"
                                                         },
                                                         {
                                                           "id": "clear_btn",
@@ -355,13 +386,15 @@
                                                           "title": "Clear",
                                                           "widthRequest": 120,
                                                           "useUnderline": true,
-                                                          "halign": "end"
+                                                          "halign": "end",
+                                                          "sourceClass": "Gtk.Button"
                                                         }
                                                       ],
                                                       "spacing": 12,
                                                       "marginEnd": 18,
                                                       "marginStart": 18,
-                                                      "orientation": "horizontal"
+                                                      "orientation": "horizontal",
+                                                      "sourceClass": "Gtk.Box"
                                                     },
                                                     {
                                                       "id": "laps_revealer",
@@ -376,22 +409,27 @@
                                                           "marginTop": 18,
                                                           "marginBottom": 18,
                                                           "marginStart": 12,
-                                                          "marginEnd": 12
+                                                          "marginEnd": 12,
+                                                          "sourceClass": "Gtk.ListBox"
                                                         }
                                                       ],
-                                                      "transitionType": "crossfade"
+                                                      "transitionType": "crossfade",
+                                                      "sourceClass": "Gtk.Revealer"
                                                     }
                                                   ],
                                                   "valign": "center",
-                                                  "orientation": "vertical"
+                                                  "orientation": "vertical",
+                                                  "sourceClass": "Gtk.Box"
                                                 }
                                               ],
-                                              "maximumSize": 380
+                                              "maximumSize": 380,
+                                              "sourceClass": "Adw.Clamp"
                                             }
                                           ],
                                           "minContentWidth": 300,
                                           "vexpand": true,
-                                          "hscrollbarPolicy": "never"
+                                          "hscrollbarPolicy": "never",
+                                          "sourceClass": "Gtk.ScrolledWindow"
                                         }
                                       ],
                                       "sourceClass": "ClocksStopwatchFace",
@@ -402,7 +440,8 @@
                                   "name": "stopwatch",
                                   "title": "Stopwatch",
                                   "useUnderline": true,
-                                  "iconName": "stopwatch-symbolic"
+                                  "iconName": "stopwatch-symbolic",
+                                  "sourceClass": "Adw.ViewStackPage"
                                 },
                                 {
                                   "id": "imported-6",
@@ -431,7 +470,8 @@
                                                         {
                                                           "id": "timer_bin",
                                                           "type": "bin",
-                                                          "children": []
+                                                          "children": [],
+                                                          "sourceClass": "Adw.Bin"
                                                         },
                                                         {
                                                           "id": "start_button",
@@ -441,20 +481,24 @@
                                                           "valign": "center",
                                                           "useUnderline": true,
                                                           "title": "Start",
-                                                          "suggested": true
+                                                          "suggested": true,
+                                                          "sourceClass": "Gtk.Button"
                                                         }
                                                       ],
                                                       "halign": "center",
                                                       "valign": "center",
                                                       "orientation": "vertical",
-                                                      "spacing": 26
+                                                      "spacing": 26,
+                                                      "sourceClass": "Gtk.Box"
                                                     }
                                                   ],
                                                   "hscrollbarPolicy": "never",
+                                                  "sourceClass": "Gtk.ScrolledWindow",
                                                   "slot": "child"
                                                 }
                                               ],
-                                              "name": "empty"
+                                              "name": "empty",
+                                              "sourceClass": "Gtk.StackPage"
                                             },
                                             {
                                               "id": "template-imported-44",
@@ -478,18 +522,23 @@
                                                           "marginTop": 18,
                                                           "marginBottom": 18,
                                                           "marginStart": 12,
-                                                          "marginEnd": 12
+                                                          "marginEnd": 12,
+                                                          "sourceClass": "Gtk.ListBox"
                                                         }
-                                                      ]
+                                                      ],
+                                                      "sourceClass": "Adw.Clamp"
                                                     }
                                                   ],
+                                                  "sourceClass": "Gtk.ScrolledWindow",
                                                   "slot": "child"
                                                 }
                                               ],
-                                              "name": "timers"
+                                              "name": "timers",
+                                              "sourceClass": "Gtk.StackPage"
                                             }
                                           ],
                                           "transitionType": "crossfade",
+                                          "sourceClass": "Gtk.Stack",
                                           "visibleChildName": "world"
                                         }
                                       ],
@@ -500,11 +549,13 @@
                                   "name": "timer",
                                   "title": "Timer",
                                   "useUnderline": true,
-                                  "iconName": "timer-symbolic"
+                                  "iconName": "timer-symbolic",
+                                  "sourceClass": "Adw.ViewStackPage"
                                 }
                               ],
                               "hexpand": true,
                               "vexpand": true,
+                              "sourceClass": "Adw.ViewStack",
                               "visibleChildName": "world"
                             },
                             {
@@ -512,12 +563,15 @@
                               "type": "view-switcher",
                               "children": [],
                               "stack": "stack",
+                              "sourceClass": "Adw.ViewSwitcherBar",
                               "slot": "bottom"
                             }
-                          ]
+                          ],
+                          "sourceClass": "Adw.ToolbarView"
                         }
                       ],
-                      "title": "Clocks"
+                      "title": "Clocks",
+                      "sourceClass": "Adw.NavigationPage"
                     },
                     {
                       "id": "world_subpage",
@@ -539,6 +593,7 @@
                                       "id": "template-imported-102",
                                       "type": "window-title",
                                       "children": [],
+                                      "sourceClass": "Adw.WindowTitle",
                                       "bindings": {
                                         "title": "ClocksWorldStandalone.title",
                                         "subtitle": "ClocksWorldStandalone.subtitle"
@@ -546,6 +601,7 @@
                                       "slot": "title-widget"
                                     }
                                   ],
+                                  "sourceClass": "Adw.HeaderBar",
                                   "slot": "top"
                                 },
                                 {
@@ -562,7 +618,8 @@
                                           "children": [],
                                           "title": "",
                                           "column": 0,
-                                          "row": 1
+                                          "row": 1,
+                                          "sourceClass": "Gtk.Label"
                                         },
                                         {
                                           "id": "stack",
@@ -573,20 +630,23 @@
                                               "type": "label",
                                               "children": [],
                                               "justify": "center",
-                                              "wrap": true
+                                              "wrap": true,
+                                              "sourceClass": "Gtk.Label"
                                             },
                                             {
                                               "id": "time_label_small",
                                               "type": "label",
                                               "children": [],
                                               "justify": "center",
-                                              "wrap": true
+                                              "wrap": true,
+                                              "sourceClass": "Gtk.Label"
                                             }
                                           ],
                                           "hhomogeneous": false,
                                           "vhomogeneous": false,
                                           "column": 0,
                                           "row": 0,
+                                          "sourceClass": "Gtk.Stack",
                                           "visibleChildName": "world"
                                         },
                                         {
@@ -594,7 +654,8 @@
                                           "type": "label",
                                           "children": [],
                                           "column": 0,
-                                          "row": 2
+                                          "row": 2,
+                                          "sourceClass": "Gtk.Label"
                                         }
                                       ],
                                       "halign": "center",
@@ -602,7 +663,8 @@
                                       "marginStart": 12,
                                       "marginEnd": 12,
                                       "hexpand": true,
-                                      "vexpand": true
+                                      "vexpand": true,
+                                      "sourceClass": "Gtk.Grid"
                                     },
                                     {
                                       "id": "template-imported-105",
@@ -614,7 +676,8 @@
                                           "children": [],
                                           "title": "Sunrise",
                                           "column": 0,
-                                          "row": 0
+                                          "row": 0,
+                                          "sourceClass": "Gtk.Label"
                                         },
                                         {
                                           "id": "label4",
@@ -622,7 +685,8 @@
                                           "children": [],
                                           "title": "Sunset",
                                           "column": 0,
-                                          "row": 1
+                                          "row": 1,
+                                          "sourceClass": "Gtk.Label"
                                         },
                                         {
                                           "id": "sunrise_label",
@@ -630,24 +694,29 @@
                                           "children": [],
                                           "title": "label",
                                           "column": 1,
-                                          "row": 0
+                                          "row": 0,
+                                          "sourceClass": "Gtk.Label"
                                         },
                                         {
                                           "id": "sunset_label",
                                           "type": "label",
                                           "children": [],
                                           "column": 1,
-                                          "row": 1
+                                          "row": 1,
+                                          "sourceClass": "Gtk.Label"
                                         }
                                       ],
                                       "halign": "center",
                                       "marginBottom": 12,
-                                      "columnSpacing": 12
+                                      "columnSpacing": 12,
+                                      "sourceClass": "Gtk.Grid"
                                     }
                                   ],
-                                  "orientation": "vertical"
+                                  "orientation": "vertical",
+                                  "sourceClass": "Gtk.Box"
                                 }
-                              ]
+                              ],
+                              "sourceClass": "Adw.ToolbarView"
                             }
                           ],
                           "sourceClass": "ClocksWorldStandalone",
@@ -655,7 +724,8 @@
                           "heightRequest": 294
                         }
                       ],
-                      "title": "Clock"
+                      "title": "Clock",
+                      "sourceClass": "Adw.NavigationPage"
                     },
                     {
                       "id": "alarm_subpage",
@@ -685,7 +755,8 @@
                                           "widthRequest": 200,
                                           "destructive": true,
                                           "column": 0,
-                                          "row": 0
+                                          "row": 0,
+                                          "sourceClass": "Gtk.Button"
                                         },
                                         {
                                           "id": "snooze_button",
@@ -694,7 +765,8 @@
                                           "title": "Snooze",
                                           "widthRequest": 200,
                                           "column": 0,
-                                          "row": 1
+                                          "row": 1,
+                                          "sourceClass": "Gtk.Button"
                                         }
                                       ],
                                       "halign": "center",
@@ -704,7 +776,8 @@
                                       "rowSpacing": 24,
                                       "columnSpacing": 24,
                                       "column": 0,
-                                      "row": 1
+                                      "row": 1,
+                                      "sourceClass": "Gtk.Grid"
                                     },
                                     {
                                       "id": "template-imported-10",
@@ -716,7 +789,8 @@
                                           "children": [],
                                           "justify": "center",
                                           "wrap": true,
-                                          "xalign": 0.5
+                                          "xalign": 0.5,
+                                          "sourceClass": "Gtk.Label"
                                         },
                                         {
                                           "id": "title_label",
@@ -724,7 +798,8 @@
                                           "children": [],
                                           "justify": "center",
                                           "wrap": true,
-                                          "marginTop": 24
+                                          "marginTop": 24,
+                                          "sourceClass": "Gtk.Label"
                                         }
                                       ],
                                       "halign": "center",
@@ -733,7 +808,8 @@
                                       "vexpand": true,
                                       "orientation": "vertical",
                                       "column": 0,
-                                      "row": 0
+                                      "row": 0,
+                                      "sourceClass": "Gtk.Box"
                                     }
                                   ],
                                   "marginStart": 6,
@@ -743,25 +819,31 @@
                                   "hexpand": true,
                                   "vexpand": true,
                                   "rowSpacing": 48,
-                                  "columnSpacing": 24
+                                  "columnSpacing": 24,
+                                  "sourceClass": "Gtk.Grid"
                                 }
-                              ]
+                              ],
+                              "sourceClass": "Gtk.WindowHandle"
                             }
                           ],
                           "sourceClass": "ClocksAlarmRingingPanel"
                         }
                       ],
                       "title": "Alarm Ringing",
-                      "canPop": false
+                      "canPop": false,
+                      "sourceClass": "Adw.NavigationPage"
                     }
-                  ]
+                  ],
+                  "sourceClass": "Adw.NavigationView"
                 }
-              ]
+              ],
+              "sourceClass": "Adw.ToastOverlay"
             }
           ],
           "hideOnClose": true,
           "widthRequest": 360,
-          "heightRequest": 294
+          "heightRequest": 294,
+          "sourceClass": "Adw.ApplicationWindow"
         }
       },
       {
@@ -803,6 +885,7 @@
                                       "type": "view-switcher",
                                       "children": [],
                                       "policy": "wide",
+                                      "sourceClass": "Adw.ViewSwitcher",
                                       "bindings": {
                                         "stack": "ClocksHeaderBar.stack"
                                       },
@@ -822,13 +905,15 @@
                                               "children": [],
                                               "actionName": "win.new",
                                               "iconName": "list-add-symbolic",
+                                              "sourceClass": "Gtk.Button",
                                               "bindings": {
                                                 "tooltip-text": "ClocksHeaderBar.new-label"
                                               },
                                               "slot": "child"
                                             }
                                           ],
-                                          "name": "new"
+                                          "name": "new",
+                                          "sourceClass": "Adw.ViewStackPage"
                                         },
                                         {
                                           "id": "template-imported-28",
@@ -838,12 +923,15 @@
                                               "id": "template-imported-29",
                                               "type": "bin",
                                               "children": [],
+                                              "sourceClass": "Adw.Bin",
                                               "slot": "child"
                                             }
                                           ],
-                                          "name": "empty"
+                                          "name": "empty",
+                                          "sourceClass": "Adw.ViewStackPage"
                                         }
-                                      ]
+                                      ],
+                                      "sourceClass": "Adw.ViewStack"
                                     },
                                     {
                                       "id": "template-imported-30",
@@ -853,9 +941,11 @@
                                       "iconName": "open-menu-symbolic",
                                       "tooltipText": "Main Menu",
                                       "primary": true,
+                                      "sourceClass": "Gtk.MenuButton",
                                       "slot": "end"
                                     }
-                                  ]
+                                  ],
+                                  "sourceClass": "Adw.HeaderBar"
                                 }
                               ],
                               "sourceClass": "ClocksHeaderBar",
@@ -892,10 +982,12 @@
                                                   "useUnderline": true,
                                                   "canShrink": true,
                                                   "halign": "center",
-                                                  "suggested": true
+                                                  "suggested": true,
+                                                  "sourceClass": "Gtk.Button"
                                                 }
                                               ],
-                                              "iconName": "globe-centered-symbolic"
+                                              "iconName": "globe-centered-symbolic",
+                                              "sourceClass": "Adw.StatusPage"
                                             },
                                             {
                                               "id": "list_view",
@@ -914,16 +1006,20 @@
                                                       "marginTop": 18,
                                                       "marginBottom": 18,
                                                       "marginStart": 12,
-                                                      "marginEnd": 12
+                                                      "marginEnd": 12,
+                                                      "sourceClass": "Gtk.ListBox"
                                                     }
-                                                  ]
+                                                  ],
+                                                  "sourceClass": "Adw.Clamp"
                                                 }
-                                              ]
+                                              ],
+                                              "sourceClass": "Gtk.ScrolledWindow"
                                             }
                                           ],
                                           "hhomogeneous": false,
                                           "vhomogeneous": false,
                                           "transitionType": "crossfade",
+                                          "sourceClass": "Gtk.Stack",
                                           "visibleChildName": "alarm"
                                         }
                                       ],
@@ -934,7 +1030,8 @@
                                   "name": "world",
                                   "title": "World",
                                   "useUnderline": true,
-                                  "iconName": "globe-symbolic"
+                                  "iconName": "globe-symbolic",
+                                  "sourceClass": "Adw.ViewStackPage"
                                 },
                                 {
                                   "id": "imported-4",
@@ -961,10 +1058,12 @@
                                                   "useUnderline": true,
                                                   "canShrink": true,
                                                   "halign": "center",
-                                                  "suggested": true
+                                                  "suggested": true,
+                                                  "sourceClass": "Gtk.Button"
                                                 }
                                               ],
-                                              "iconName": "alarm-centered-symbolic"
+                                              "iconName": "alarm-centered-symbolic",
+                                              "sourceClass": "Adw.StatusPage"
                                             },
                                             {
                                               "id": "list_view",
@@ -984,15 +1083,19 @@
                                                       "marginTop": 18,
                                                       "marginBottom": 18,
                                                       "marginStart": 12,
-                                                      "marginEnd": 12
+                                                      "marginEnd": 12,
+                                                      "sourceClass": "Gtk.ListBox"
                                                     }
-                                                  ]
+                                                  ],
+                                                  "sourceClass": "Adw.Clamp"
                                                 }
-                                              ]
+                                              ],
+                                              "sourceClass": "Gtk.ScrolledWindow"
                                             }
                                           ],
                                           "hhomogeneous": false,
                                           "vhomogeneous": false,
+                                          "sourceClass": "Gtk.Stack",
                                           "visibleChildName": "alarm"
                                         }
                                       ],
@@ -1003,7 +1106,8 @@
                                   "name": "alarm",
                                   "title": "Alarms",
                                   "useUnderline": true,
-                                  "iconName": "alarm-symbolic"
+                                  "iconName": "alarm-symbolic",
+                                  "sourceClass": "Adw.ViewStackPage"
                                 },
                                 {
                                   "id": "imported-5",
@@ -1035,13 +1139,15 @@
                                                           "children": [],
                                                           "title": 0,
                                                           "xalign": 0,
-                                                          "yalign": 0
+                                                          "yalign": 0,
+                                                          "sourceClass": "Gtk.Label"
                                                         },
                                                         {
                                                           "id": "template-imported-34",
                                                           "type": "label",
                                                           "children": [],
-                                                          "title": "∶"
+                                                          "title": "∶",
+                                                          "sourceClass": "Gtk.Label"
                                                         },
                                                         {
                                                           "id": "minutes_label",
@@ -1049,7 +1155,8 @@
                                                           "children": [],
                                                           "title": 0,
                                                           "xalign": 0,
-                                                          "yalign": 0
+                                                          "yalign": 0,
+                                                          "sourceClass": "Gtk.Label"
                                                         },
                                                         {
                                                           "id": "template-imported-35",
@@ -1057,7 +1164,8 @@
                                                           "children": [],
                                                           "title": "∶",
                                                           "xalign": 0,
-                                                          "yalign": 0
+                                                          "yalign": 0,
+                                                          "sourceClass": "Gtk.Label"
                                                         },
                                                         {
                                                           "id": "seconds_label",
@@ -1065,7 +1173,8 @@
                                                           "children": [],
                                                           "title": 0,
                                                           "xalign": 0,
-                                                          "yalign": 0
+                                                          "yalign": 0,
+                                                          "sourceClass": "Gtk.Label"
                                                         },
                                                         {
                                                           "id": "template-imported-36",
@@ -1073,7 +1182,8 @@
                                                           "children": [],
                                                           "title": ".",
                                                           "xalign": 0,
-                                                          "yalign": 0
+                                                          "yalign": 0,
+                                                          "sourceClass": "Gtk.Label"
                                                         },
                                                         {
                                                           "id": "miliseconds_label",
@@ -1083,12 +1193,14 @@
                                                           "valign": "end",
                                                           "title": 0,
                                                           "xalign": 0,
-                                                          "yalign": 0
+                                                          "yalign": 0,
+                                                          "sourceClass": "Gtk.Label"
                                                         }
                                                       ],
                                                       "halign": "center",
                                                       "marginBottom": 18,
-                                                      "orientation": "horizontal"
+                                                      "orientation": "horizontal",
+                                                      "sourceClass": "Gtk.Box"
                                                     },
                                                     {
                                                       "id": "template-imported-37",
@@ -1103,7 +1215,8 @@
                                                           "useUnderline": true,
                                                           "hexpand": true,
                                                           "halign": "start",
-                                                          "suggested": true
+                                                          "suggested": true,
+                                                          "sourceClass": "Gtk.Button"
                                                         },
                                                         {
                                                           "id": "clear_btn",
@@ -1112,13 +1225,15 @@
                                                           "title": "Clear",
                                                           "widthRequest": 120,
                                                           "useUnderline": true,
-                                                          "halign": "end"
+                                                          "halign": "end",
+                                                          "sourceClass": "Gtk.Button"
                                                         }
                                                       ],
                                                       "spacing": 12,
                                                       "marginEnd": 18,
                                                       "marginStart": 18,
-                                                      "orientation": "horizontal"
+                                                      "orientation": "horizontal",
+                                                      "sourceClass": "Gtk.Box"
                                                     },
                                                     {
                                                       "id": "laps_revealer",
@@ -1133,22 +1248,27 @@
                                                           "marginTop": 18,
                                                           "marginBottom": 18,
                                                           "marginStart": 12,
-                                                          "marginEnd": 12
+                                                          "marginEnd": 12,
+                                                          "sourceClass": "Gtk.ListBox"
                                                         }
                                                       ],
-                                                      "transitionType": "crossfade"
+                                                      "transitionType": "crossfade",
+                                                      "sourceClass": "Gtk.Revealer"
                                                     }
                                                   ],
                                                   "valign": "center",
-                                                  "orientation": "vertical"
+                                                  "orientation": "vertical",
+                                                  "sourceClass": "Gtk.Box"
                                                 }
                                               ],
-                                              "maximumSize": 380
+                                              "maximumSize": 380,
+                                              "sourceClass": "Adw.Clamp"
                                             }
                                           ],
                                           "minContentWidth": 300,
                                           "vexpand": true,
-                                          "hscrollbarPolicy": "never"
+                                          "hscrollbarPolicy": "never",
+                                          "sourceClass": "Gtk.ScrolledWindow"
                                         }
                                       ],
                                       "sourceClass": "ClocksStopwatchFace",
@@ -1159,7 +1279,8 @@
                                   "name": "stopwatch",
                                   "title": "Stopwatch",
                                   "useUnderline": true,
-                                  "iconName": "stopwatch-symbolic"
+                                  "iconName": "stopwatch-symbolic",
+                                  "sourceClass": "Adw.ViewStackPage"
                                 },
                                 {
                                   "id": "imported-6",
@@ -1188,7 +1309,8 @@
                                                         {
                                                           "id": "timer_bin",
                                                           "type": "bin",
-                                                          "children": []
+                                                          "children": [],
+                                                          "sourceClass": "Adw.Bin"
                                                         },
                                                         {
                                                           "id": "start_button",
@@ -1198,20 +1320,24 @@
                                                           "valign": "center",
                                                           "useUnderline": true,
                                                           "title": "Start",
-                                                          "suggested": true
+                                                          "suggested": true,
+                                                          "sourceClass": "Gtk.Button"
                                                         }
                                                       ],
                                                       "halign": "center",
                                                       "valign": "center",
                                                       "orientation": "vertical",
-                                                      "spacing": 26
+                                                      "spacing": 26,
+                                                      "sourceClass": "Gtk.Box"
                                                     }
                                                   ],
                                                   "hscrollbarPolicy": "never",
+                                                  "sourceClass": "Gtk.ScrolledWindow",
                                                   "slot": "child"
                                                 }
                                               ],
-                                              "name": "empty"
+                                              "name": "empty",
+                                              "sourceClass": "Gtk.StackPage"
                                             },
                                             {
                                               "id": "template-imported-44",
@@ -1235,18 +1361,23 @@
                                                           "marginTop": 18,
                                                           "marginBottom": 18,
                                                           "marginStart": 12,
-                                                          "marginEnd": 12
+                                                          "marginEnd": 12,
+                                                          "sourceClass": "Gtk.ListBox"
                                                         }
-                                                      ]
+                                                      ],
+                                                      "sourceClass": "Adw.Clamp"
                                                     }
                                                   ],
+                                                  "sourceClass": "Gtk.ScrolledWindow",
                                                   "slot": "child"
                                                 }
                                               ],
-                                              "name": "timers"
+                                              "name": "timers",
+                                              "sourceClass": "Gtk.StackPage"
                                             }
                                           ],
                                           "transitionType": "crossfade",
+                                          "sourceClass": "Gtk.Stack",
                                           "visibleChildName": "alarm"
                                         }
                                       ],
@@ -1257,11 +1388,13 @@
                                   "name": "timer",
                                   "title": "Timer",
                                   "useUnderline": true,
-                                  "iconName": "timer-symbolic"
+                                  "iconName": "timer-symbolic",
+                                  "sourceClass": "Adw.ViewStackPage"
                                 }
                               ],
                               "hexpand": true,
                               "vexpand": true,
+                              "sourceClass": "Adw.ViewStack",
                               "visibleChildName": "alarm"
                             },
                             {
@@ -1269,12 +1402,15 @@
                               "type": "view-switcher",
                               "children": [],
                               "stack": "stack",
+                              "sourceClass": "Adw.ViewSwitcherBar",
                               "slot": "bottom"
                             }
-                          ]
+                          ],
+                          "sourceClass": "Adw.ToolbarView"
                         }
                       ],
-                      "title": "Clocks"
+                      "title": "Clocks",
+                      "sourceClass": "Adw.NavigationPage"
                     },
                     {
                       "id": "world_subpage",
@@ -1296,6 +1432,7 @@
                                       "id": "template-imported-102",
                                       "type": "window-title",
                                       "children": [],
+                                      "sourceClass": "Adw.WindowTitle",
                                       "bindings": {
                                         "title": "ClocksWorldStandalone.title",
                                         "subtitle": "ClocksWorldStandalone.subtitle"
@@ -1303,6 +1440,7 @@
                                       "slot": "title-widget"
                                     }
                                   ],
+                                  "sourceClass": "Adw.HeaderBar",
                                   "slot": "top"
                                 },
                                 {
@@ -1319,7 +1457,8 @@
                                           "children": [],
                                           "title": "",
                                           "column": 0,
-                                          "row": 1
+                                          "row": 1,
+                                          "sourceClass": "Gtk.Label"
                                         },
                                         {
                                           "id": "stack",
@@ -1330,20 +1469,23 @@
                                               "type": "label",
                                               "children": [],
                                               "justify": "center",
-                                              "wrap": true
+                                              "wrap": true,
+                                              "sourceClass": "Gtk.Label"
                                             },
                                             {
                                               "id": "time_label_small",
                                               "type": "label",
                                               "children": [],
                                               "justify": "center",
-                                              "wrap": true
+                                              "wrap": true,
+                                              "sourceClass": "Gtk.Label"
                                             }
                                           ],
                                           "hhomogeneous": false,
                                           "vhomogeneous": false,
                                           "column": 0,
                                           "row": 0,
+                                          "sourceClass": "Gtk.Stack",
                                           "visibleChildName": "alarm"
                                         },
                                         {
@@ -1351,7 +1493,8 @@
                                           "type": "label",
                                           "children": [],
                                           "column": 0,
-                                          "row": 2
+                                          "row": 2,
+                                          "sourceClass": "Gtk.Label"
                                         }
                                       ],
                                       "halign": "center",
@@ -1359,7 +1502,8 @@
                                       "marginStart": 12,
                                       "marginEnd": 12,
                                       "hexpand": true,
-                                      "vexpand": true
+                                      "vexpand": true,
+                                      "sourceClass": "Gtk.Grid"
                                     },
                                     {
                                       "id": "template-imported-105",
@@ -1371,7 +1515,8 @@
                                           "children": [],
                                           "title": "Sunrise",
                                           "column": 0,
-                                          "row": 0
+                                          "row": 0,
+                                          "sourceClass": "Gtk.Label"
                                         },
                                         {
                                           "id": "label4",
@@ -1379,7 +1524,8 @@
                                           "children": [],
                                           "title": "Sunset",
                                           "column": 0,
-                                          "row": 1
+                                          "row": 1,
+                                          "sourceClass": "Gtk.Label"
                                         },
                                         {
                                           "id": "sunrise_label",
@@ -1387,24 +1533,29 @@
                                           "children": [],
                                           "title": "label",
                                           "column": 1,
-                                          "row": 0
+                                          "row": 0,
+                                          "sourceClass": "Gtk.Label"
                                         },
                                         {
                                           "id": "sunset_label",
                                           "type": "label",
                                           "children": [],
                                           "column": 1,
-                                          "row": 1
+                                          "row": 1,
+                                          "sourceClass": "Gtk.Label"
                                         }
                                       ],
                                       "halign": "center",
                                       "marginBottom": 12,
-                                      "columnSpacing": 12
+                                      "columnSpacing": 12,
+                                      "sourceClass": "Gtk.Grid"
                                     }
                                   ],
-                                  "orientation": "vertical"
+                                  "orientation": "vertical",
+                                  "sourceClass": "Gtk.Box"
                                 }
-                              ]
+                              ],
+                              "sourceClass": "Adw.ToolbarView"
                             }
                           ],
                           "sourceClass": "ClocksWorldStandalone",
@@ -1412,7 +1563,8 @@
                           "heightRequest": 294
                         }
                       ],
-                      "title": "Clock"
+                      "title": "Clock",
+                      "sourceClass": "Adw.NavigationPage"
                     },
                     {
                       "id": "alarm_subpage",
@@ -1442,7 +1594,8 @@
                                           "widthRequest": 200,
                                           "destructive": true,
                                           "column": 0,
-                                          "row": 0
+                                          "row": 0,
+                                          "sourceClass": "Gtk.Button"
                                         },
                                         {
                                           "id": "snooze_button",
@@ -1451,7 +1604,8 @@
                                           "title": "Snooze",
                                           "widthRequest": 200,
                                           "column": 0,
-                                          "row": 1
+                                          "row": 1,
+                                          "sourceClass": "Gtk.Button"
                                         }
                                       ],
                                       "halign": "center",
@@ -1461,7 +1615,8 @@
                                       "rowSpacing": 24,
                                       "columnSpacing": 24,
                                       "column": 0,
-                                      "row": 1
+                                      "row": 1,
+                                      "sourceClass": "Gtk.Grid"
                                     },
                                     {
                                       "id": "template-imported-10",
@@ -1473,7 +1628,8 @@
                                           "children": [],
                                           "justify": "center",
                                           "wrap": true,
-                                          "xalign": 0.5
+                                          "xalign": 0.5,
+                                          "sourceClass": "Gtk.Label"
                                         },
                                         {
                                           "id": "title_label",
@@ -1481,7 +1637,8 @@
                                           "children": [],
                                           "justify": "center",
                                           "wrap": true,
-                                          "marginTop": 24
+                                          "marginTop": 24,
+                                          "sourceClass": "Gtk.Label"
                                         }
                                       ],
                                       "halign": "center",
@@ -1490,7 +1647,8 @@
                                       "vexpand": true,
                                       "orientation": "vertical",
                                       "column": 0,
-                                      "row": 0
+                                      "row": 0,
+                                      "sourceClass": "Gtk.Box"
                                     }
                                   ],
                                   "marginStart": 6,
@@ -1500,25 +1658,31 @@
                                   "hexpand": true,
                                   "vexpand": true,
                                   "rowSpacing": 48,
-                                  "columnSpacing": 24
+                                  "columnSpacing": 24,
+                                  "sourceClass": "Gtk.Grid"
                                 }
-                              ]
+                              ],
+                              "sourceClass": "Gtk.WindowHandle"
                             }
                           ],
                           "sourceClass": "ClocksAlarmRingingPanel"
                         }
                       ],
                       "title": "Alarm Ringing",
-                      "canPop": false
+                      "canPop": false,
+                      "sourceClass": "Adw.NavigationPage"
                     }
-                  ]
+                  ],
+                  "sourceClass": "Adw.NavigationView"
                 }
-              ]
+              ],
+              "sourceClass": "Adw.ToastOverlay"
             }
           ],
           "hideOnClose": true,
           "widthRequest": 360,
-          "heightRequest": 294
+          "heightRequest": 294,
+          "sourceClass": "Adw.ApplicationWindow"
         }
       },
       {
@@ -1560,6 +1724,7 @@
                                       "type": "view-switcher",
                                       "children": [],
                                       "policy": "wide",
+                                      "sourceClass": "Adw.ViewSwitcher",
                                       "bindings": {
                                         "stack": "ClocksHeaderBar.stack"
                                       },
@@ -1579,13 +1744,15 @@
                                               "children": [],
                                               "actionName": "win.new",
                                               "iconName": "list-add-symbolic",
+                                              "sourceClass": "Gtk.Button",
                                               "bindings": {
                                                 "tooltip-text": "ClocksHeaderBar.new-label"
                                               },
                                               "slot": "child"
                                             }
                                           ],
-                                          "name": "new"
+                                          "name": "new",
+                                          "sourceClass": "Adw.ViewStackPage"
                                         },
                                         {
                                           "id": "template-imported-28",
@@ -1595,12 +1762,15 @@
                                               "id": "template-imported-29",
                                               "type": "bin",
                                               "children": [],
+                                              "sourceClass": "Adw.Bin",
                                               "slot": "child"
                                             }
                                           ],
-                                          "name": "empty"
+                                          "name": "empty",
+                                          "sourceClass": "Adw.ViewStackPage"
                                         }
-                                      ]
+                                      ],
+                                      "sourceClass": "Adw.ViewStack"
                                     },
                                     {
                                       "id": "template-imported-30",
@@ -1610,9 +1780,11 @@
                                       "iconName": "open-menu-symbolic",
                                       "tooltipText": "Main Menu",
                                       "primary": true,
+                                      "sourceClass": "Gtk.MenuButton",
                                       "slot": "end"
                                     }
-                                  ]
+                                  ],
+                                  "sourceClass": "Adw.HeaderBar"
                                 }
                               ],
                               "sourceClass": "ClocksHeaderBar",
@@ -1649,10 +1821,12 @@
                                                   "useUnderline": true,
                                                   "canShrink": true,
                                                   "halign": "center",
-                                                  "suggested": true
+                                                  "suggested": true,
+                                                  "sourceClass": "Gtk.Button"
                                                 }
                                               ],
-                                              "iconName": "globe-centered-symbolic"
+                                              "iconName": "globe-centered-symbolic",
+                                              "sourceClass": "Adw.StatusPage"
                                             },
                                             {
                                               "id": "list_view",
@@ -1671,16 +1845,20 @@
                                                       "marginTop": 18,
                                                       "marginBottom": 18,
                                                       "marginStart": 12,
-                                                      "marginEnd": 12
+                                                      "marginEnd": 12,
+                                                      "sourceClass": "Gtk.ListBox"
                                                     }
-                                                  ]
+                                                  ],
+                                                  "sourceClass": "Adw.Clamp"
                                                 }
-                                              ]
+                                              ],
+                                              "sourceClass": "Gtk.ScrolledWindow"
                                             }
                                           ],
                                           "hhomogeneous": false,
                                           "vhomogeneous": false,
                                           "transitionType": "crossfade",
+                                          "sourceClass": "Gtk.Stack",
                                           "visibleChildName": "stopwatch"
                                         }
                                       ],
@@ -1691,7 +1869,8 @@
                                   "name": "world",
                                   "title": "World",
                                   "useUnderline": true,
-                                  "iconName": "globe-symbolic"
+                                  "iconName": "globe-symbolic",
+                                  "sourceClass": "Adw.ViewStackPage"
                                 },
                                 {
                                   "id": "imported-4",
@@ -1718,10 +1897,12 @@
                                                   "useUnderline": true,
                                                   "canShrink": true,
                                                   "halign": "center",
-                                                  "suggested": true
+                                                  "suggested": true,
+                                                  "sourceClass": "Gtk.Button"
                                                 }
                                               ],
-                                              "iconName": "alarm-centered-symbolic"
+                                              "iconName": "alarm-centered-symbolic",
+                                              "sourceClass": "Adw.StatusPage"
                                             },
                                             {
                                               "id": "list_view",
@@ -1741,15 +1922,19 @@
                                                       "marginTop": 18,
                                                       "marginBottom": 18,
                                                       "marginStart": 12,
-                                                      "marginEnd": 12
+                                                      "marginEnd": 12,
+                                                      "sourceClass": "Gtk.ListBox"
                                                     }
-                                                  ]
+                                                  ],
+                                                  "sourceClass": "Adw.Clamp"
                                                 }
-                                              ]
+                                              ],
+                                              "sourceClass": "Gtk.ScrolledWindow"
                                             }
                                           ],
                                           "hhomogeneous": false,
                                           "vhomogeneous": false,
+                                          "sourceClass": "Gtk.Stack",
                                           "visibleChildName": "stopwatch"
                                         }
                                       ],
@@ -1760,7 +1945,8 @@
                                   "name": "alarm",
                                   "title": "Alarms",
                                   "useUnderline": true,
-                                  "iconName": "alarm-symbolic"
+                                  "iconName": "alarm-symbolic",
+                                  "sourceClass": "Adw.ViewStackPage"
                                 },
                                 {
                                   "id": "imported-5",
@@ -1792,13 +1978,15 @@
                                                           "children": [],
                                                           "title": 0,
                                                           "xalign": 0,
-                                                          "yalign": 0
+                                                          "yalign": 0,
+                                                          "sourceClass": "Gtk.Label"
                                                         },
                                                         {
                                                           "id": "template-imported-34",
                                                           "type": "label",
                                                           "children": [],
-                                                          "title": "∶"
+                                                          "title": "∶",
+                                                          "sourceClass": "Gtk.Label"
                                                         },
                                                         {
                                                           "id": "minutes_label",
@@ -1806,7 +1994,8 @@
                                                           "children": [],
                                                           "title": 0,
                                                           "xalign": 0,
-                                                          "yalign": 0
+                                                          "yalign": 0,
+                                                          "sourceClass": "Gtk.Label"
                                                         },
                                                         {
                                                           "id": "template-imported-35",
@@ -1814,7 +2003,8 @@
                                                           "children": [],
                                                           "title": "∶",
                                                           "xalign": 0,
-                                                          "yalign": 0
+                                                          "yalign": 0,
+                                                          "sourceClass": "Gtk.Label"
                                                         },
                                                         {
                                                           "id": "seconds_label",
@@ -1822,7 +2012,8 @@
                                                           "children": [],
                                                           "title": 0,
                                                           "xalign": 0,
-                                                          "yalign": 0
+                                                          "yalign": 0,
+                                                          "sourceClass": "Gtk.Label"
                                                         },
                                                         {
                                                           "id": "template-imported-36",
@@ -1830,7 +2021,8 @@
                                                           "children": [],
                                                           "title": ".",
                                                           "xalign": 0,
-                                                          "yalign": 0
+                                                          "yalign": 0,
+                                                          "sourceClass": "Gtk.Label"
                                                         },
                                                         {
                                                           "id": "miliseconds_label",
@@ -1840,12 +2032,14 @@
                                                           "valign": "end",
                                                           "title": 0,
                                                           "xalign": 0,
-                                                          "yalign": 0
+                                                          "yalign": 0,
+                                                          "sourceClass": "Gtk.Label"
                                                         }
                                                       ],
                                                       "halign": "center",
                                                       "marginBottom": 18,
-                                                      "orientation": "horizontal"
+                                                      "orientation": "horizontal",
+                                                      "sourceClass": "Gtk.Box"
                                                     },
                                                     {
                                                       "id": "template-imported-37",
@@ -1860,7 +2054,8 @@
                                                           "useUnderline": true,
                                                           "hexpand": true,
                                                           "halign": "start",
-                                                          "suggested": true
+                                                          "suggested": true,
+                                                          "sourceClass": "Gtk.Button"
                                                         },
                                                         {
                                                           "id": "clear_btn",
@@ -1869,13 +2064,15 @@
                                                           "title": "Clear",
                                                           "widthRequest": 120,
                                                           "useUnderline": true,
-                                                          "halign": "end"
+                                                          "halign": "end",
+                                                          "sourceClass": "Gtk.Button"
                                                         }
                                                       ],
                                                       "spacing": 12,
                                                       "marginEnd": 18,
                                                       "marginStart": 18,
-                                                      "orientation": "horizontal"
+                                                      "orientation": "horizontal",
+                                                      "sourceClass": "Gtk.Box"
                                                     },
                                                     {
                                                       "id": "laps_revealer",
@@ -1890,22 +2087,27 @@
                                                           "marginTop": 18,
                                                           "marginBottom": 18,
                                                           "marginStart": 12,
-                                                          "marginEnd": 12
+                                                          "marginEnd": 12,
+                                                          "sourceClass": "Gtk.ListBox"
                                                         }
                                                       ],
-                                                      "transitionType": "crossfade"
+                                                      "transitionType": "crossfade",
+                                                      "sourceClass": "Gtk.Revealer"
                                                     }
                                                   ],
                                                   "valign": "center",
-                                                  "orientation": "vertical"
+                                                  "orientation": "vertical",
+                                                  "sourceClass": "Gtk.Box"
                                                 }
                                               ],
-                                              "maximumSize": 380
+                                              "maximumSize": 380,
+                                              "sourceClass": "Adw.Clamp"
                                             }
                                           ],
                                           "minContentWidth": 300,
                                           "vexpand": true,
-                                          "hscrollbarPolicy": "never"
+                                          "hscrollbarPolicy": "never",
+                                          "sourceClass": "Gtk.ScrolledWindow"
                                         }
                                       ],
                                       "sourceClass": "ClocksStopwatchFace",
@@ -1916,7 +2118,8 @@
                                   "name": "stopwatch",
                                   "title": "Stopwatch",
                                   "useUnderline": true,
-                                  "iconName": "stopwatch-symbolic"
+                                  "iconName": "stopwatch-symbolic",
+                                  "sourceClass": "Adw.ViewStackPage"
                                 },
                                 {
                                   "id": "imported-6",
@@ -1945,7 +2148,8 @@
                                                         {
                                                           "id": "timer_bin",
                                                           "type": "bin",
-                                                          "children": []
+                                                          "children": [],
+                                                          "sourceClass": "Adw.Bin"
                                                         },
                                                         {
                                                           "id": "start_button",
@@ -1955,20 +2159,24 @@
                                                           "valign": "center",
                                                           "useUnderline": true,
                                                           "title": "Start",
-                                                          "suggested": true
+                                                          "suggested": true,
+                                                          "sourceClass": "Gtk.Button"
                                                         }
                                                       ],
                                                       "halign": "center",
                                                       "valign": "center",
                                                       "orientation": "vertical",
-                                                      "spacing": 26
+                                                      "spacing": 26,
+                                                      "sourceClass": "Gtk.Box"
                                                     }
                                                   ],
                                                   "hscrollbarPolicy": "never",
+                                                  "sourceClass": "Gtk.ScrolledWindow",
                                                   "slot": "child"
                                                 }
                                               ],
-                                              "name": "empty"
+                                              "name": "empty",
+                                              "sourceClass": "Gtk.StackPage"
                                             },
                                             {
                                               "id": "template-imported-44",
@@ -1992,18 +2200,23 @@
                                                           "marginTop": 18,
                                                           "marginBottom": 18,
                                                           "marginStart": 12,
-                                                          "marginEnd": 12
+                                                          "marginEnd": 12,
+                                                          "sourceClass": "Gtk.ListBox"
                                                         }
-                                                      ]
+                                                      ],
+                                                      "sourceClass": "Adw.Clamp"
                                                     }
                                                   ],
+                                                  "sourceClass": "Gtk.ScrolledWindow",
                                                   "slot": "child"
                                                 }
                                               ],
-                                              "name": "timers"
+                                              "name": "timers",
+                                              "sourceClass": "Gtk.StackPage"
                                             }
                                           ],
                                           "transitionType": "crossfade",
+                                          "sourceClass": "Gtk.Stack",
                                           "visibleChildName": "stopwatch"
                                         }
                                       ],
@@ -2014,11 +2227,13 @@
                                   "name": "timer",
                                   "title": "Timer",
                                   "useUnderline": true,
-                                  "iconName": "timer-symbolic"
+                                  "iconName": "timer-symbolic",
+                                  "sourceClass": "Adw.ViewStackPage"
                                 }
                               ],
                               "hexpand": true,
                               "vexpand": true,
+                              "sourceClass": "Adw.ViewStack",
                               "visibleChildName": "stopwatch"
                             },
                             {
@@ -2026,12 +2241,15 @@
                               "type": "view-switcher",
                               "children": [],
                               "stack": "stack",
+                              "sourceClass": "Adw.ViewSwitcherBar",
                               "slot": "bottom"
                             }
-                          ]
+                          ],
+                          "sourceClass": "Adw.ToolbarView"
                         }
                       ],
-                      "title": "Clocks"
+                      "title": "Clocks",
+                      "sourceClass": "Adw.NavigationPage"
                     },
                     {
                       "id": "world_subpage",
@@ -2053,6 +2271,7 @@
                                       "id": "template-imported-102",
                                       "type": "window-title",
                                       "children": [],
+                                      "sourceClass": "Adw.WindowTitle",
                                       "bindings": {
                                         "title": "ClocksWorldStandalone.title",
                                         "subtitle": "ClocksWorldStandalone.subtitle"
@@ -2060,6 +2279,7 @@
                                       "slot": "title-widget"
                                     }
                                   ],
+                                  "sourceClass": "Adw.HeaderBar",
                                   "slot": "top"
                                 },
                                 {
@@ -2076,7 +2296,8 @@
                                           "children": [],
                                           "title": "",
                                           "column": 0,
-                                          "row": 1
+                                          "row": 1,
+                                          "sourceClass": "Gtk.Label"
                                         },
                                         {
                                           "id": "stack",
@@ -2087,20 +2308,23 @@
                                               "type": "label",
                                               "children": [],
                                               "justify": "center",
-                                              "wrap": true
+                                              "wrap": true,
+                                              "sourceClass": "Gtk.Label"
                                             },
                                             {
                                               "id": "time_label_small",
                                               "type": "label",
                                               "children": [],
                                               "justify": "center",
-                                              "wrap": true
+                                              "wrap": true,
+                                              "sourceClass": "Gtk.Label"
                                             }
                                           ],
                                           "hhomogeneous": false,
                                           "vhomogeneous": false,
                                           "column": 0,
                                           "row": 0,
+                                          "sourceClass": "Gtk.Stack",
                                           "visibleChildName": "stopwatch"
                                         },
                                         {
@@ -2108,7 +2332,8 @@
                                           "type": "label",
                                           "children": [],
                                           "column": 0,
-                                          "row": 2
+                                          "row": 2,
+                                          "sourceClass": "Gtk.Label"
                                         }
                                       ],
                                       "halign": "center",
@@ -2116,7 +2341,8 @@
                                       "marginStart": 12,
                                       "marginEnd": 12,
                                       "hexpand": true,
-                                      "vexpand": true
+                                      "vexpand": true,
+                                      "sourceClass": "Gtk.Grid"
                                     },
                                     {
                                       "id": "template-imported-105",
@@ -2128,7 +2354,8 @@
                                           "children": [],
                                           "title": "Sunrise",
                                           "column": 0,
-                                          "row": 0
+                                          "row": 0,
+                                          "sourceClass": "Gtk.Label"
                                         },
                                         {
                                           "id": "label4",
@@ -2136,7 +2363,8 @@
                                           "children": [],
                                           "title": "Sunset",
                                           "column": 0,
-                                          "row": 1
+                                          "row": 1,
+                                          "sourceClass": "Gtk.Label"
                                         },
                                         {
                                           "id": "sunrise_label",
@@ -2144,24 +2372,29 @@
                                           "children": [],
                                           "title": "label",
                                           "column": 1,
-                                          "row": 0
+                                          "row": 0,
+                                          "sourceClass": "Gtk.Label"
                                         },
                                         {
                                           "id": "sunset_label",
                                           "type": "label",
                                           "children": [],
                                           "column": 1,
-                                          "row": 1
+                                          "row": 1,
+                                          "sourceClass": "Gtk.Label"
                                         }
                                       ],
                                       "halign": "center",
                                       "marginBottom": 12,
-                                      "columnSpacing": 12
+                                      "columnSpacing": 12,
+                                      "sourceClass": "Gtk.Grid"
                                     }
                                   ],
-                                  "orientation": "vertical"
+                                  "orientation": "vertical",
+                                  "sourceClass": "Gtk.Box"
                                 }
-                              ]
+                              ],
+                              "sourceClass": "Adw.ToolbarView"
                             }
                           ],
                           "sourceClass": "ClocksWorldStandalone",
@@ -2169,7 +2402,8 @@
                           "heightRequest": 294
                         }
                       ],
-                      "title": "Clock"
+                      "title": "Clock",
+                      "sourceClass": "Adw.NavigationPage"
                     },
                     {
                       "id": "alarm_subpage",
@@ -2199,7 +2433,8 @@
                                           "widthRequest": 200,
                                           "destructive": true,
                                           "column": 0,
-                                          "row": 0
+                                          "row": 0,
+                                          "sourceClass": "Gtk.Button"
                                         },
                                         {
                                           "id": "snooze_button",
@@ -2208,7 +2443,8 @@
                                           "title": "Snooze",
                                           "widthRequest": 200,
                                           "column": 0,
-                                          "row": 1
+                                          "row": 1,
+                                          "sourceClass": "Gtk.Button"
                                         }
                                       ],
                                       "halign": "center",
@@ -2218,7 +2454,8 @@
                                       "rowSpacing": 24,
                                       "columnSpacing": 24,
                                       "column": 0,
-                                      "row": 1
+                                      "row": 1,
+                                      "sourceClass": "Gtk.Grid"
                                     },
                                     {
                                       "id": "template-imported-10",
@@ -2230,7 +2467,8 @@
                                           "children": [],
                                           "justify": "center",
                                           "wrap": true,
-                                          "xalign": 0.5
+                                          "xalign": 0.5,
+                                          "sourceClass": "Gtk.Label"
                                         },
                                         {
                                           "id": "title_label",
@@ -2238,7 +2476,8 @@
                                           "children": [],
                                           "justify": "center",
                                           "wrap": true,
-                                          "marginTop": 24
+                                          "marginTop": 24,
+                                          "sourceClass": "Gtk.Label"
                                         }
                                       ],
                                       "halign": "center",
@@ -2247,7 +2486,8 @@
                                       "vexpand": true,
                                       "orientation": "vertical",
                                       "column": 0,
-                                      "row": 0
+                                      "row": 0,
+                                      "sourceClass": "Gtk.Box"
                                     }
                                   ],
                                   "marginStart": 6,
@@ -2257,25 +2497,31 @@
                                   "hexpand": true,
                                   "vexpand": true,
                                   "rowSpacing": 48,
-                                  "columnSpacing": 24
+                                  "columnSpacing": 24,
+                                  "sourceClass": "Gtk.Grid"
                                 }
-                              ]
+                              ],
+                              "sourceClass": "Gtk.WindowHandle"
                             }
                           ],
                           "sourceClass": "ClocksAlarmRingingPanel"
                         }
                       ],
                       "title": "Alarm Ringing",
-                      "canPop": false
+                      "canPop": false,
+                      "sourceClass": "Adw.NavigationPage"
                     }
-                  ]
+                  ],
+                  "sourceClass": "Adw.NavigationView"
                 }
-              ]
+              ],
+              "sourceClass": "Adw.ToastOverlay"
             }
           ],
           "hideOnClose": true,
           "widthRequest": 360,
-          "heightRequest": 294
+          "heightRequest": 294,
+          "sourceClass": "Adw.ApplicationWindow"
         }
       },
       {
@@ -2317,6 +2563,7 @@
                                       "type": "view-switcher",
                                       "children": [],
                                       "policy": "wide",
+                                      "sourceClass": "Adw.ViewSwitcher",
                                       "bindings": {
                                         "stack": "ClocksHeaderBar.stack"
                                       },
@@ -2336,13 +2583,15 @@
                                               "children": [],
                                               "actionName": "win.new",
                                               "iconName": "list-add-symbolic",
+                                              "sourceClass": "Gtk.Button",
                                               "bindings": {
                                                 "tooltip-text": "ClocksHeaderBar.new-label"
                                               },
                                               "slot": "child"
                                             }
                                           ],
-                                          "name": "new"
+                                          "name": "new",
+                                          "sourceClass": "Adw.ViewStackPage"
                                         },
                                         {
                                           "id": "template-imported-28",
@@ -2352,12 +2601,15 @@
                                               "id": "template-imported-29",
                                               "type": "bin",
                                               "children": [],
+                                              "sourceClass": "Adw.Bin",
                                               "slot": "child"
                                             }
                                           ],
-                                          "name": "empty"
+                                          "name": "empty",
+                                          "sourceClass": "Adw.ViewStackPage"
                                         }
-                                      ]
+                                      ],
+                                      "sourceClass": "Adw.ViewStack"
                                     },
                                     {
                                       "id": "template-imported-30",
@@ -2367,9 +2619,11 @@
                                       "iconName": "open-menu-symbolic",
                                       "tooltipText": "Main Menu",
                                       "primary": true,
+                                      "sourceClass": "Gtk.MenuButton",
                                       "slot": "end"
                                     }
-                                  ]
+                                  ],
+                                  "sourceClass": "Adw.HeaderBar"
                                 }
                               ],
                               "sourceClass": "ClocksHeaderBar",
@@ -2406,10 +2660,12 @@
                                                   "useUnderline": true,
                                                   "canShrink": true,
                                                   "halign": "center",
-                                                  "suggested": true
+                                                  "suggested": true,
+                                                  "sourceClass": "Gtk.Button"
                                                 }
                                               ],
-                                              "iconName": "globe-centered-symbolic"
+                                              "iconName": "globe-centered-symbolic",
+                                              "sourceClass": "Adw.StatusPage"
                                             },
                                             {
                                               "id": "list_view",
@@ -2428,16 +2684,20 @@
                                                       "marginTop": 18,
                                                       "marginBottom": 18,
                                                       "marginStart": 12,
-                                                      "marginEnd": 12
+                                                      "marginEnd": 12,
+                                                      "sourceClass": "Gtk.ListBox"
                                                     }
-                                                  ]
+                                                  ],
+                                                  "sourceClass": "Adw.Clamp"
                                                 }
-                                              ]
+                                              ],
+                                              "sourceClass": "Gtk.ScrolledWindow"
                                             }
                                           ],
                                           "hhomogeneous": false,
                                           "vhomogeneous": false,
                                           "transitionType": "crossfade",
+                                          "sourceClass": "Gtk.Stack",
                                           "visibleChildName": "timer"
                                         }
                                       ],
@@ -2448,7 +2708,8 @@
                                   "name": "world",
                                   "title": "World",
                                   "useUnderline": true,
-                                  "iconName": "globe-symbolic"
+                                  "iconName": "globe-symbolic",
+                                  "sourceClass": "Adw.ViewStackPage"
                                 },
                                 {
                                   "id": "imported-4",
@@ -2475,10 +2736,12 @@
                                                   "useUnderline": true,
                                                   "canShrink": true,
                                                   "halign": "center",
-                                                  "suggested": true
+                                                  "suggested": true,
+                                                  "sourceClass": "Gtk.Button"
                                                 }
                                               ],
-                                              "iconName": "alarm-centered-symbolic"
+                                              "iconName": "alarm-centered-symbolic",
+                                              "sourceClass": "Adw.StatusPage"
                                             },
                                             {
                                               "id": "list_view",
@@ -2498,15 +2761,19 @@
                                                       "marginTop": 18,
                                                       "marginBottom": 18,
                                                       "marginStart": 12,
-                                                      "marginEnd": 12
+                                                      "marginEnd": 12,
+                                                      "sourceClass": "Gtk.ListBox"
                                                     }
-                                                  ]
+                                                  ],
+                                                  "sourceClass": "Adw.Clamp"
                                                 }
-                                              ]
+                                              ],
+                                              "sourceClass": "Gtk.ScrolledWindow"
                                             }
                                           ],
                                           "hhomogeneous": false,
                                           "vhomogeneous": false,
+                                          "sourceClass": "Gtk.Stack",
                                           "visibleChildName": "timer"
                                         }
                                       ],
@@ -2517,7 +2784,8 @@
                                   "name": "alarm",
                                   "title": "Alarms",
                                   "useUnderline": true,
-                                  "iconName": "alarm-symbolic"
+                                  "iconName": "alarm-symbolic",
+                                  "sourceClass": "Adw.ViewStackPage"
                                 },
                                 {
                                   "id": "imported-5",
@@ -2549,13 +2817,15 @@
                                                           "children": [],
                                                           "title": 0,
                                                           "xalign": 0,
-                                                          "yalign": 0
+                                                          "yalign": 0,
+                                                          "sourceClass": "Gtk.Label"
                                                         },
                                                         {
                                                           "id": "template-imported-34",
                                                           "type": "label",
                                                           "children": [],
-                                                          "title": "∶"
+                                                          "title": "∶",
+                                                          "sourceClass": "Gtk.Label"
                                                         },
                                                         {
                                                           "id": "minutes_label",
@@ -2563,7 +2833,8 @@
                                                           "children": [],
                                                           "title": 0,
                                                           "xalign": 0,
-                                                          "yalign": 0
+                                                          "yalign": 0,
+                                                          "sourceClass": "Gtk.Label"
                                                         },
                                                         {
                                                           "id": "template-imported-35",
@@ -2571,7 +2842,8 @@
                                                           "children": [],
                                                           "title": "∶",
                                                           "xalign": 0,
-                                                          "yalign": 0
+                                                          "yalign": 0,
+                                                          "sourceClass": "Gtk.Label"
                                                         },
                                                         {
                                                           "id": "seconds_label",
@@ -2579,7 +2851,8 @@
                                                           "children": [],
                                                           "title": 0,
                                                           "xalign": 0,
-                                                          "yalign": 0
+                                                          "yalign": 0,
+                                                          "sourceClass": "Gtk.Label"
                                                         },
                                                         {
                                                           "id": "template-imported-36",
@@ -2587,7 +2860,8 @@
                                                           "children": [],
                                                           "title": ".",
                                                           "xalign": 0,
-                                                          "yalign": 0
+                                                          "yalign": 0,
+                                                          "sourceClass": "Gtk.Label"
                                                         },
                                                         {
                                                           "id": "miliseconds_label",
@@ -2597,12 +2871,14 @@
                                                           "valign": "end",
                                                           "title": 0,
                                                           "xalign": 0,
-                                                          "yalign": 0
+                                                          "yalign": 0,
+                                                          "sourceClass": "Gtk.Label"
                                                         }
                                                       ],
                                                       "halign": "center",
                                                       "marginBottom": 18,
-                                                      "orientation": "horizontal"
+                                                      "orientation": "horizontal",
+                                                      "sourceClass": "Gtk.Box"
                                                     },
                                                     {
                                                       "id": "template-imported-37",
@@ -2617,7 +2893,8 @@
                                                           "useUnderline": true,
                                                           "hexpand": true,
                                                           "halign": "start",
-                                                          "suggested": true
+                                                          "suggested": true,
+                                                          "sourceClass": "Gtk.Button"
                                                         },
                                                         {
                                                           "id": "clear_btn",
@@ -2626,13 +2903,15 @@
                                                           "title": "Clear",
                                                           "widthRequest": 120,
                                                           "useUnderline": true,
-                                                          "halign": "end"
+                                                          "halign": "end",
+                                                          "sourceClass": "Gtk.Button"
                                                         }
                                                       ],
                                                       "spacing": 12,
                                                       "marginEnd": 18,
                                                       "marginStart": 18,
-                                                      "orientation": "horizontal"
+                                                      "orientation": "horizontal",
+                                                      "sourceClass": "Gtk.Box"
                                                     },
                                                     {
                                                       "id": "laps_revealer",
@@ -2647,22 +2926,27 @@
                                                           "marginTop": 18,
                                                           "marginBottom": 18,
                                                           "marginStart": 12,
-                                                          "marginEnd": 12
+                                                          "marginEnd": 12,
+                                                          "sourceClass": "Gtk.ListBox"
                                                         }
                                                       ],
-                                                      "transitionType": "crossfade"
+                                                      "transitionType": "crossfade",
+                                                      "sourceClass": "Gtk.Revealer"
                                                     }
                                                   ],
                                                   "valign": "center",
-                                                  "orientation": "vertical"
+                                                  "orientation": "vertical",
+                                                  "sourceClass": "Gtk.Box"
                                                 }
                                               ],
-                                              "maximumSize": 380
+                                              "maximumSize": 380,
+                                              "sourceClass": "Adw.Clamp"
                                             }
                                           ],
                                           "minContentWidth": 300,
                                           "vexpand": true,
-                                          "hscrollbarPolicy": "never"
+                                          "hscrollbarPolicy": "never",
+                                          "sourceClass": "Gtk.ScrolledWindow"
                                         }
                                       ],
                                       "sourceClass": "ClocksStopwatchFace",
@@ -2673,7 +2957,8 @@
                                   "name": "stopwatch",
                                   "title": "Stopwatch",
                                   "useUnderline": true,
-                                  "iconName": "stopwatch-symbolic"
+                                  "iconName": "stopwatch-symbolic",
+                                  "sourceClass": "Adw.ViewStackPage"
                                 },
                                 {
                                   "id": "imported-6",
@@ -2702,7 +2987,8 @@
                                                         {
                                                           "id": "timer_bin",
                                                           "type": "bin",
-                                                          "children": []
+                                                          "children": [],
+                                                          "sourceClass": "Adw.Bin"
                                                         },
                                                         {
                                                           "id": "start_button",
@@ -2712,20 +2998,24 @@
                                                           "valign": "center",
                                                           "useUnderline": true,
                                                           "title": "Start",
-                                                          "suggested": true
+                                                          "suggested": true,
+                                                          "sourceClass": "Gtk.Button"
                                                         }
                                                       ],
                                                       "halign": "center",
                                                       "valign": "center",
                                                       "orientation": "vertical",
-                                                      "spacing": 26
+                                                      "spacing": 26,
+                                                      "sourceClass": "Gtk.Box"
                                                     }
                                                   ],
                                                   "hscrollbarPolicy": "never",
+                                                  "sourceClass": "Gtk.ScrolledWindow",
                                                   "slot": "child"
                                                 }
                                               ],
-                                              "name": "empty"
+                                              "name": "empty",
+                                              "sourceClass": "Gtk.StackPage"
                                             },
                                             {
                                               "id": "template-imported-44",
@@ -2749,18 +3039,23 @@
                                                           "marginTop": 18,
                                                           "marginBottom": 18,
                                                           "marginStart": 12,
-                                                          "marginEnd": 12
+                                                          "marginEnd": 12,
+                                                          "sourceClass": "Gtk.ListBox"
                                                         }
-                                                      ]
+                                                      ],
+                                                      "sourceClass": "Adw.Clamp"
                                                     }
                                                   ],
+                                                  "sourceClass": "Gtk.ScrolledWindow",
                                                   "slot": "child"
                                                 }
                                               ],
-                                              "name": "timers"
+                                              "name": "timers",
+                                              "sourceClass": "Gtk.StackPage"
                                             }
                                           ],
                                           "transitionType": "crossfade",
+                                          "sourceClass": "Gtk.Stack",
                                           "visibleChildName": "timer"
                                         }
                                       ],
@@ -2771,11 +3066,13 @@
                                   "name": "timer",
                                   "title": "Timer",
                                   "useUnderline": true,
-                                  "iconName": "timer-symbolic"
+                                  "iconName": "timer-symbolic",
+                                  "sourceClass": "Adw.ViewStackPage"
                                 }
                               ],
                               "hexpand": true,
                               "vexpand": true,
+                              "sourceClass": "Adw.ViewStack",
                               "visibleChildName": "timer"
                             },
                             {
@@ -2783,12 +3080,15 @@
                               "type": "view-switcher",
                               "children": [],
                               "stack": "stack",
+                              "sourceClass": "Adw.ViewSwitcherBar",
                               "slot": "bottom"
                             }
-                          ]
+                          ],
+                          "sourceClass": "Adw.ToolbarView"
                         }
                       ],
-                      "title": "Clocks"
+                      "title": "Clocks",
+                      "sourceClass": "Adw.NavigationPage"
                     },
                     {
                       "id": "world_subpage",
@@ -2810,6 +3110,7 @@
                                       "id": "template-imported-102",
                                       "type": "window-title",
                                       "children": [],
+                                      "sourceClass": "Adw.WindowTitle",
                                       "bindings": {
                                         "title": "ClocksWorldStandalone.title",
                                         "subtitle": "ClocksWorldStandalone.subtitle"
@@ -2817,6 +3118,7 @@
                                       "slot": "title-widget"
                                     }
                                   ],
+                                  "sourceClass": "Adw.HeaderBar",
                                   "slot": "top"
                                 },
                                 {
@@ -2833,7 +3135,8 @@
                                           "children": [],
                                           "title": "",
                                           "column": 0,
-                                          "row": 1
+                                          "row": 1,
+                                          "sourceClass": "Gtk.Label"
                                         },
                                         {
                                           "id": "stack",
@@ -2844,20 +3147,23 @@
                                               "type": "label",
                                               "children": [],
                                               "justify": "center",
-                                              "wrap": true
+                                              "wrap": true,
+                                              "sourceClass": "Gtk.Label"
                                             },
                                             {
                                               "id": "time_label_small",
                                               "type": "label",
                                               "children": [],
                                               "justify": "center",
-                                              "wrap": true
+                                              "wrap": true,
+                                              "sourceClass": "Gtk.Label"
                                             }
                                           ],
                                           "hhomogeneous": false,
                                           "vhomogeneous": false,
                                           "column": 0,
                                           "row": 0,
+                                          "sourceClass": "Gtk.Stack",
                                           "visibleChildName": "timer"
                                         },
                                         {
@@ -2865,7 +3171,8 @@
                                           "type": "label",
                                           "children": [],
                                           "column": 0,
-                                          "row": 2
+                                          "row": 2,
+                                          "sourceClass": "Gtk.Label"
                                         }
                                       ],
                                       "halign": "center",
@@ -2873,7 +3180,8 @@
                                       "marginStart": 12,
                                       "marginEnd": 12,
                                       "hexpand": true,
-                                      "vexpand": true
+                                      "vexpand": true,
+                                      "sourceClass": "Gtk.Grid"
                                     },
                                     {
                                       "id": "template-imported-105",
@@ -2885,7 +3193,8 @@
                                           "children": [],
                                           "title": "Sunrise",
                                           "column": 0,
-                                          "row": 0
+                                          "row": 0,
+                                          "sourceClass": "Gtk.Label"
                                         },
                                         {
                                           "id": "label4",
@@ -2893,7 +3202,8 @@
                                           "children": [],
                                           "title": "Sunset",
                                           "column": 0,
-                                          "row": 1
+                                          "row": 1,
+                                          "sourceClass": "Gtk.Label"
                                         },
                                         {
                                           "id": "sunrise_label",
@@ -2901,24 +3211,29 @@
                                           "children": [],
                                           "title": "label",
                                           "column": 1,
-                                          "row": 0
+                                          "row": 0,
+                                          "sourceClass": "Gtk.Label"
                                         },
                                         {
                                           "id": "sunset_label",
                                           "type": "label",
                                           "children": [],
                                           "column": 1,
-                                          "row": 1
+                                          "row": 1,
+                                          "sourceClass": "Gtk.Label"
                                         }
                                       ],
                                       "halign": "center",
                                       "marginBottom": 12,
-                                      "columnSpacing": 12
+                                      "columnSpacing": 12,
+                                      "sourceClass": "Gtk.Grid"
                                     }
                                   ],
-                                  "orientation": "vertical"
+                                  "orientation": "vertical",
+                                  "sourceClass": "Gtk.Box"
                                 }
-                              ]
+                              ],
+                              "sourceClass": "Adw.ToolbarView"
                             }
                           ],
                           "sourceClass": "ClocksWorldStandalone",
@@ -2926,7 +3241,8 @@
                           "heightRequest": 294
                         }
                       ],
-                      "title": "Clock"
+                      "title": "Clock",
+                      "sourceClass": "Adw.NavigationPage"
                     },
                     {
                       "id": "alarm_subpage",
@@ -2956,7 +3272,8 @@
                                           "widthRequest": 200,
                                           "destructive": true,
                                           "column": 0,
-                                          "row": 0
+                                          "row": 0,
+                                          "sourceClass": "Gtk.Button"
                                         },
                                         {
                                           "id": "snooze_button",
@@ -2965,7 +3282,8 @@
                                           "title": "Snooze",
                                           "widthRequest": 200,
                                           "column": 0,
-                                          "row": 1
+                                          "row": 1,
+                                          "sourceClass": "Gtk.Button"
                                         }
                                       ],
                                       "halign": "center",
@@ -2975,7 +3293,8 @@
                                       "rowSpacing": 24,
                                       "columnSpacing": 24,
                                       "column": 0,
-                                      "row": 1
+                                      "row": 1,
+                                      "sourceClass": "Gtk.Grid"
                                     },
                                     {
                                       "id": "template-imported-10",
@@ -2987,7 +3306,8 @@
                                           "children": [],
                                           "justify": "center",
                                           "wrap": true,
-                                          "xalign": 0.5
+                                          "xalign": 0.5,
+                                          "sourceClass": "Gtk.Label"
                                         },
                                         {
                                           "id": "title_label",
@@ -2995,7 +3315,8 @@
                                           "children": [],
                                           "justify": "center",
                                           "wrap": true,
-                                          "marginTop": 24
+                                          "marginTop": 24,
+                                          "sourceClass": "Gtk.Label"
                                         }
                                       ],
                                       "halign": "center",
@@ -3004,7 +3325,8 @@
                                       "vexpand": true,
                                       "orientation": "vertical",
                                       "column": 0,
-                                      "row": 0
+                                      "row": 0,
+                                      "sourceClass": "Gtk.Box"
                                     }
                                   ],
                                   "marginStart": 6,
@@ -3014,25 +3336,31 @@
                                   "hexpand": true,
                                   "vexpand": true,
                                   "rowSpacing": 48,
-                                  "columnSpacing": 24
+                                  "columnSpacing": 24,
+                                  "sourceClass": "Gtk.Grid"
                                 }
-                              ]
+                              ],
+                              "sourceClass": "Gtk.WindowHandle"
                             }
                           ],
                           "sourceClass": "ClocksAlarmRingingPanel"
                         }
                       ],
                       "title": "Alarm Ringing",
-                      "canPop": false
+                      "canPop": false,
+                      "sourceClass": "Adw.NavigationPage"
                     }
-                  ]
+                  ],
+                  "sourceClass": "Adw.NavigationView"
                 }
-              ]
+              ],
+              "sourceClass": "Adw.ToastOverlay"
             }
           ],
           "hideOnClose": true,
           "widthRequest": 360,
-          "heightRequest": 294
+          "heightRequest": 294,
+          "sourceClass": "Adw.ApplicationWindow"
         }
       },
       {
@@ -3058,7 +3386,8 @@
                       "type": "button",
                       "children": [],
                       "title": "Cancel",
-                      "useUnderline": true
+                      "useUnderline": true,
+                      "sourceClass": "Gtk.Button"
                     },
                     {
                       "id": "ok_button",
@@ -3067,11 +3396,13 @@
                       "title": "Add",
                       "useUnderline": true,
                       "suggested": true,
+                      "sourceClass": "Gtk.Button",
                       "slot": "end"
                     }
                   ],
                   "showStartTitleButtons": false,
                   "showEndTitleButtons": false,
+                  "sourceClass": "Adw.HeaderBar",
                   "slot": "top"
                 },
                 {
@@ -3082,7 +3413,8 @@
                       "id": "banner",
                       "type": "banner",
                       "children": [],
-                      "title": "You already have an alarm for this time"
+                      "title": "You already have an alarm for this time",
+                      "sourceClass": "Adw.Banner"
                     },
                     {
                       "id": "imported-6",
@@ -3105,13 +3437,15 @@
                                   "orientation": "vertical",
                                   "numeric": true,
                                   "wrap": true,
-                                  "widthRequest": 60
+                                  "widthRequest": 60,
+                                  "sourceClass": "Gtk.SpinButton"
                                 },
                                 {
                                   "id": "label2",
                                   "type": "label",
                                   "children": [],
-                                  "title": "∶"
+                                  "title": "∶",
+                                  "sourceClass": "Gtk.Label"
                                 },
                                 {
                                   "id": "m_spinbutton",
@@ -3122,7 +3456,8 @@
                                   "orientation": "vertical",
                                   "numeric": true,
                                   "wrap": true,
-                                  "widthRequest": 60
+                                  "widthRequest": 60,
+                                  "sourceClass": "Gtk.SpinButton"
                                 },
                                 {
                                   "id": "am_pm_bin",
@@ -3130,15 +3465,18 @@
                                   "children": [],
                                   "visible": false,
                                   "marginStart": 6,
-                                  "marginEnd": 6
+                                  "marginEnd": 6,
+                                  "sourceClass": "Adw.Bin"
                                 }
                               ],
                               "halign": "center",
                               "marginBottom": 12,
                               "spacing": 6,
-                              "orientation": "horizontal"
+                              "orientation": "horizontal",
+                              "sourceClass": "Gtk.Box"
                             }
-                          ]
+                          ],
+                          "sourceClass": "Adw.PreferencesGroup"
                         },
                         {
                           "id": "imported-8",
@@ -3159,7 +3497,8 @@
                                       "halign": "start",
                                       "title": "Repeat",
                                       "useUnderline": true,
-                                      "hexpand": true
+                                      "hexpand": true,
+                                      "sourceClass": "Gtk.Label"
                                     },
                                     {
                                       "id": "box",
@@ -3167,7 +3506,8 @@
                                       "children": [],
                                       "valign": "center",
                                       "spacing": 6,
-                                      "orientation": "horizontal"
+                                      "orientation": "horizontal",
+                                      "sourceClass": "Gtk.Box"
                                     }
                                   ],
                                   "spacing": 9,
@@ -3175,7 +3515,8 @@
                                   "marginEnd": 12,
                                   "marginTop": 12,
                                   "marginBottom": 12,
-                                  "orientation": "vertical"
+                                  "orientation": "vertical",
+                                  "sourceClass": "Gtk.Box"
                                 }
                               ],
                               "sourceClass": "ClocksAlarmDayPickerRow",
@@ -3186,23 +3527,27 @@
                               "id": "name_entry",
                               "type": "entry-row",
                               "children": [],
-                              "title": "Name"
+                              "title": "Name",
+                              "sourceClass": "Adw.EntryRow"
                             },
                             {
                               "id": "ring_duration",
                               "type": "combo-row",
                               "children": [],
                               "activatable": false,
-                              "title": "Ring Duration"
+                              "title": "Ring Duration",
+                              "sourceClass": "Adw.ComboRow"
                             },
                             {
                               "id": "snooze_duration",
                               "type": "combo-row",
                               "children": [],
                               "activatable": false,
-                              "title": "Snooze Duration"
+                              "title": "Snooze Duration",
+                              "sourceClass": "Adw.ComboRow"
                             }
-                          ]
+                          ],
+                          "sourceClass": "Adw.PreferencesGroup"
                         },
                         {
                           "id": "delete_group",
@@ -3214,24 +3559,30 @@
                               "children": [],
                               "title": "Remove Alarm",
                               "useUnderline": true,
-                              "destructive": true
+                              "destructive": true,
+                              "sourceClass": "Adw.ButtonRow"
                             }
-                          ]
+                          ],
+                          "sourceClass": "Adw.PreferencesGroup"
                         }
-                      ]
+                      ],
+                      "sourceClass": "Adw.PreferencesPage"
                     }
                   ],
                   "orientation": "vertical",
+                  "sourceClass": "Gtk.Box",
                   "slot": "content"
                 }
               ],
+              "sourceClass": "Adw.ToolbarView",
               "slot": "child"
             }
           ],
           "contentWidth": 520,
           "contentHeight": 580,
           "title": "New Alarm",
-          "focusWidget": "h_spinbutton"
+          "focusWidget": "h_spinbutton",
+          "sourceClass": "Adw.Dialog"
         }
       }
     ],

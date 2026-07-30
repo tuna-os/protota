@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exportedAt": "2026-07-30T09:23:45.084Z",
+  "exportedAt": "2026-07-30T11:22:22.613Z",
   "generatedBy": "scripts/generate-preset.mjs",
   "document": {
     "id": "graphs-preset",
@@ -31,11 +31,14 @@
                       "children": [],
                       "title": "Drop Here to Import",
                       "iconName": "list-add-symbolic",
-                      "styleClasses": "drag-overlay-status-page"
+                      "styleClasses": "drag-overlay-status-page",
+                      "sourceClass": "Adw.StatusPage"
                     }
                   ],
                   "canTarget": false,
-                  "transitionType": "crossfade"
+                  "transitionType": "crossfade",
+                  "sourceClass": "Revealer",
+                  "slot": "overlay"
                 },
                 {
                   "id": "overlay_split_view",
@@ -64,7 +67,9 @@
                                       "iconName": "list-add-symbolic",
                                       "tooltipText": "Add New Data",
                                       "alwaysShowArrow": true,
-                                      "menuModel": "add_data_menu"
+                                      "menuModel": "add_data_menu",
+                                      "sourceClass": "MenuButton",
+                                      "slot": "start"
                                     },
                                     {
                                       "id": "imported-39",
@@ -73,7 +78,9 @@
                                       "iconName": "open-menu-symbolic",
                                       "menuModel": "primary_menu",
                                       "tooltipText": "Open Application Menu",
-                                      "primary": true
+                                      "primary": true,
+                                      "sourceClass": "MenuButton",
+                                      "slot": "end"
                                     },
                                     {
                                       "id": "figure_settings_button",
@@ -81,9 +88,13 @@
                                       "children": [],
                                       "actionName": "win.figure-settings",
                                       "iconName": "settings-symbolic",
-                                      "tooltipText": "Figure Settings"
+                                      "tooltipText": "Figure Settings",
+                                      "sourceClass": "Button",
+                                      "slot": "end"
                                     }
-                                  ]
+                                  ],
+                                  "sourceClass": "Adw.HeaderBar",
+                                  "slot": "top"
                                 },
                                 {
                                   "id": "imported-40",
@@ -113,9 +124,11 @@
                                                       "title": "No Data",
                                                       "description": "Add data from a file or manually as an equation",
                                                       "styleClasses": "compact",
+                                                      "sourceClass": "Adw.StatusPage",
                                                       "slot": "child"
                                                     }
-                                                  ]
+                                                  ],
+                                                  "sourceClass": "StackPage"
                                                 },
                                                 {
                                                   "id": "imported-45",
@@ -141,25 +154,31 @@
                                                               "hexpand": true,
                                                               "valign": "start",
                                                               "selectionMode": "none",
-                                                              "styleClasses": "boxed-list"
+                                                              "styleClasses": "boxed-list",
+                                                              "sourceClass": "ListBox"
                                                             }
-                                                          ]
+                                                          ],
+                                                          "sourceClass": "Viewport"
                                                         }
                                                       ],
                                                       "vexpand": true,
                                                       "hexpand": true,
                                                       "hscrollbarPolicy": "never",
+                                                      "sourceClass": "ScrolledWindow",
                                                       "slot": "child"
                                                     }
-                                                  ]
+                                                  ],
+                                                  "sourceClass": "StackPage"
                                                 }
-                                              ]
+                                              ],
+                                              "sourceClass": "Stack"
                                             },
                                             {
                                               "id": "imported-47",
                                               "type": "bin",
                                               "children": [],
-                                              "orientation": "horizontal"
+                                              "orientation": "horizontal",
+                                              "sourceClass": "Separator"
                                             },
                                             {
                                               "id": "imported-48",
@@ -172,7 +191,8 @@
                                                   "iconName": "move-tool-symbolic",
                                                   "actionName": "win.mode-pan",
                                                   "hexpand": true,
-                                                  "tooltipText": "Pan Mode. Click and drag to pan"
+                                                  "tooltipText": "Pan Mode. Click and drag to pan",
+                                                  "sourceClass": "ToggleButton"
                                                 },
                                                 {
                                                   "id": "zoom_button",
@@ -181,7 +201,8 @@
                                                   "iconName": "loupe-symbolic",
                                                   "actionName": "win.mode-zoom",
                                                   "hexpand": true,
-                                                  "tooltipText": "Zoom Mode. Select an area on the figure to zoom in"
+                                                  "tooltipText": "Zoom Mode. Select an area on the figure to zoom in",
+                                                  "sourceClass": "ToggleButton"
                                                 },
                                                 {
                                                   "id": "select_button",
@@ -190,7 +211,8 @@
                                                   "iconName": "edit-select-all-symbolic",
                                                   "actionName": "win.mode-select",
                                                   "hexpand": true,
-                                                  "tooltipText": "Select Mode. Click and drag to make a selection of data"
+                                                  "tooltipText": "Select Mode. Click and drag to make a selection of data",
+                                                  "sourceClass": "ToggleButton"
                                                 }
                                               ],
                                               "spacing": 10,
@@ -198,33 +220,41 @@
                                               "marginBottom": 12,
                                               "marginStart": 12,
                                               "marginEnd": 12,
-                                              "orientation": "horizontal"
+                                              "orientation": "horizontal",
+                                              "sourceClass": "Box"
                                             },
                                             {
                                               "id": "imported-49",
                                               "type": "bin",
                                               "children": [],
-                                              "orientation": "horizontal"
+                                              "orientation": "horizontal",
+                                              "sourceClass": "Separator"
                                             },
                                             {
                                               "id": "operations_bin",
                                               "type": "bin",
-                                              "children": []
+                                              "children": [],
+                                              "sourceClass": "Adw.Bin"
                                             }
                                           ],
                                           "orientation": "vertical",
+                                          "sourceClass": "Box",
                                           "slot": "child"
                                         }
                                       ],
+                                      "sourceClass": "Viewport",
                                       "slot": "child"
                                     }
-                                  ]
+                                  ],
+                                  "sourceClass": "ScrolledWindow"
                                 }
                               ],
+                              "sourceClass": "Adw.ToolbarView",
                               "slot": "child"
                             }
                           ],
-                          "title": "Graphs"
+                          "title": "Graphs",
+                          "sourceClass": "Adw.NavigationPage"
                         },
                         {
                           "id": "edit_page",
@@ -237,7 +267,9 @@
                                 {
                                   "id": "imported-51",
                                   "type": "header-bar",
-                                  "children": []
+                                  "children": [],
+                                  "sourceClass": "Adw.HeaderBar",
+                                  "slot": "top"
                                 },
                                 {
                                   "id": "imported-52",
@@ -256,22 +288,28 @@
                                           "marginTop": 12,
                                           "marginBottom": 12,
                                           "marginStart": 12,
-                                          "marginEnd": 12
+                                          "marginEnd": 12,
+                                          "sourceClass": "Box"
                                         }
                                       ],
+                                      "sourceClass": "Viewport",
                                       "slot": "child"
                                     }
                                   ],
-                                  "propagateNaturalHeight": true
+                                  "propagateNaturalHeight": true,
+                                  "sourceClass": "ScrolledWindow"
                                 }
                               ],
+                              "sourceClass": "Adw.ToolbarView",
                               "slot": "child"
                             }
                           ],
-                          "title": "Edit Item"
+                          "title": "Edit Item",
+                          "sourceClass": "Adw.NavigationPage"
                         }
                       ],
                       "widthRequest": 360,
+                      "sourceClass": "Adw.NavigationView",
                       "slot": "sidebar"
                     },
                     {
@@ -286,6 +324,7 @@
                               "id": "content_title",
                               "type": "window-title",
                               "children": [],
+                              "sourceClass": "Adw.WindowTitle",
                               "slot": "title-widget"
                             },
                             {
@@ -294,10 +333,12 @@
                               "children": [],
                               "iconName": "sidebar-show-symbolic",
                               "tooltipText": "Show Sidebar",
+                              "sourceClass": "ToggleButton",
                               "bindings": {
                                 "active": "overlay_split_view.show-sidebar bidirectional",
                                 "visible": "overlay_split_view.collapsed"
-                              }
+                              },
+                              "slot": "start"
                             },
                             {
                               "id": "undo_button",
@@ -305,7 +346,9 @@
                               "children": [],
                               "actionName": "win.undo",
                               "iconName": "edit-undo-symbolic",
-                              "tooltipText": "Undo"
+                              "tooltipText": "Undo",
+                              "sourceClass": "Button",
+                              "slot": "start"
                             },
                             {
                               "id": "redo_button",
@@ -314,9 +357,11 @@
                               "actionName": "win.redo",
                               "iconName": "edit-redo-symbolic",
                               "tooltipText": "Redo",
+                              "sourceClass": "Button",
                               "bindings": {
                                 "visible": "undo_button.visible"
                               },
+                              "slot": "start",
                               "visible": true
                             },
                             {
@@ -326,9 +371,11 @@
                               "actionName": "win.optimize-limits",
                               "iconName": "view-reveal-symbolic",
                               "tooltipText": "Optimize View Limits",
+                              "sourceClass": "Button",
                               "bindings": {
                                 "visible": "undo_button.visible"
                               },
+                              "slot": "end",
                               "visible": true
                             },
                             {
@@ -338,9 +385,11 @@
                               "actionName": "win.view-forward",
                               "iconName": "go-next-symbolic",
                               "tooltipText": "Next View",
+                              "sourceClass": "Button",
                               "bindings": {
                                 "visible": "undo_button.visible"
                               },
+                              "slot": "end",
                               "visible": true
                             },
                             {
@@ -350,12 +399,16 @@
                               "actionName": "win.view-back",
                               "iconName": "go-previous-symbolic",
                               "tooltipText": "Previous View",
+                              "sourceClass": "Button",
                               "bindings": {
                                 "visible": "undo_button.visible"
                               },
+                              "slot": "end",
                               "visible": true
                             }
-                          ]
+                          ],
+                          "sourceClass": "Adw.HeaderBar",
+                          "slot": "top"
                         },
                         {
                           "id": "content_footerbar",
@@ -368,9 +421,11 @@
                               "actionName": "win.undo",
                               "iconName": "edit-undo-symbolic",
                               "tooltipText": "Undo",
+                              "sourceClass": "Button",
                               "bindings": {
                                 "sensitive": "undo_button.sensitive"
-                              }
+                              },
+                              "slot": "start"
                             },
                             {
                               "id": "sidebar_redo_button",
@@ -379,9 +434,11 @@
                               "actionName": "win.redo",
                               "iconName": "edit-redo-symbolic",
                               "tooltipText": "Redo",
+                              "sourceClass": "Button",
                               "bindings": {
                                 "sensitive": "redo_button.sensitive"
-                              }
+                              },
+                              "slot": "start"
                             },
                             {
                               "id": "sidebar_optimize_limits_button",
@@ -389,7 +446,9 @@
                               "children": [],
                               "actionName": "win.optimize-limits",
                               "iconName": "view-reveal-symbolic",
-                              "tooltipText": "Optimize View Limits"
+                              "tooltipText": "Optimize View Limits",
+                              "sourceClass": "Button",
+                              "slot": "end"
                             },
                             {
                               "id": "sidebar_view_forward_button",
@@ -398,9 +457,11 @@
                               "actionName": "win.view-forward",
                               "iconName": "go-next-symbolic",
                               "tooltipText": "Next View",
+                              "sourceClass": "Button",
                               "bindings": {
                                 "sensitive": "view_forward_button.sensitive"
-                              }
+                              },
+                              "slot": "end"
                             },
                             {
                               "id": "sidebar_view_back_button",
@@ -409,14 +470,18 @@
                               "actionName": "win.view-back",
                               "iconName": "go-previous-symbolic",
                               "tooltipText": "Previous View",
+                              "sourceClass": "Button",
                               "bindings": {
                                 "sensitive": "view_back_button.sensitive"
-                              }
+                              },
+                              "slot": "end"
                             }
                           ],
                           "showTitle": false,
                           "showEndTitleButtons": false,
-                          "visible": false
+                          "visible": false,
+                          "sourceClass": "Adw.HeaderBar",
+                          "slot": "bottom"
                         },
                         {
                           "id": "toast_overlay",
@@ -428,17 +493,21 @@
                               "children": [],
                               "iconName": "dialog-error-symbolic",
                               "title": "Canvas Failed to Load",
+                              "sourceClass": "Adw.StatusPage",
                               "slot": "child"
                             }
                           ],
                           "focusable": true,
+                          "sourceClass": "Adw.ToastOverlay",
                           "slot": "content"
                         }
                       ],
                       "styleClasses": "canvas-view",
+                      "sourceClass": "Adw.ToolbarView",
                       "slot": "content"
                     }
                   ],
+                  "sourceClass": "Adw.OverlaySplitView",
                   "bindings": {
                     "enable-show-gesture": "overlay_split_view.collapsed",
                     "enable-hide-gesture": "overlay_split_view.collapsed"
@@ -447,13 +516,15 @@
                 }
               ],
               "styleClasses": "drag-overlay",
+              "sourceClass": "Overlay",
               "slot": "content"
             }
           ],
           "defaultWidth": 1200,
           "defaultHeight": 700,
           "widthRequest": 360,
-          "heightRequest": 200
+          "heightRequest": 200,
+          "sourceClass": "Adw.ApplicationWindow"
         }
       }
     ],

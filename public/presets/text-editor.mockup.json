@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exportedAt": "2026-07-30T09:23:41.777Z",
+  "exportedAt": "2026-07-30T11:22:18.872Z",
   "generatedBy": "scripts/generate-preset.mjs",
   "document": {
     "id": "text-editor-preset",
@@ -45,6 +45,7 @@
                                   "hexpand": true,
                                   "title": "•",
                                   "visible": false,
+                                  "sourceClass": "Gtk.Label",
                                   "slot": "start"
                                 },
                                 {
@@ -52,11 +53,13 @@
                                   "type": "label",
                                   "children": [],
                                   "ellipsize": "middle",
+                                  "sourceClass": "Gtk.Label",
                                   "slot": "center"
                                 }
                               ],
                               "hexpand": true,
-                              "hasTooltip": true
+                              "hasTooltip": true,
+                              "sourceClass": "Gtk.CenterBox"
                             },
                             {
                               "id": "imported-9",
@@ -71,6 +74,7 @@
                                   "visible": false,
                                   "marginEnd": 6,
                                   "pixelSize": 12,
+                                  "sourceClass": "Gtk.Image",
                                   "slot": "start"
                                 },
                                 {
@@ -78,10 +82,12 @@
                                   "type": "label",
                                   "children": [],
                                   "ellipsize": "middle",
+                                  "sourceClass": "Gtk.Label",
                                   "slot": "center"
                                 }
                               ],
-                              "hasTooltip": true
+                              "hasTooltip": true,
+                              "sourceClass": "Gtk.CenterBox"
                             }
                           ],
                           "hexpand": true,
@@ -89,6 +95,7 @@
                           "orientation": "vertical",
                           "marginStart": 12,
                           "marginEnd": 12,
+                          "sourceClass": "Gtk.Box",
                           "slot": "title-widget"
                         },
                         {
@@ -97,6 +104,7 @@
                           "children": [],
                           "tooltipText": "Recently Used Documents",
                           "flat": true,
+                          "sourceClass": "Gtk.MenuButton",
                           "slot": "start",
                           "title": "Open"
                         },
@@ -107,6 +115,7 @@
                           "actionName": "session.new-draft",
                           "iconName": "tab-new-symbolic",
                           "tooltipText": "New Tab",
+                          "sourceClass": "Gtk.Button",
                           "slot": "start"
                         },
                         {
@@ -116,6 +125,7 @@
                           "tooltipText": "Leave Fullscreen",
                           "iconName": "view-restore-symbolic",
                           "actionName": "win.unfullscreen",
+                          "sourceClass": "Gtk.Button",
                           "bindings": {
                             "visible": "EditorWindow.fullscreened"
                           },
@@ -128,6 +138,7 @@
                           "tooltipText": "Main Menu",
                           "iconName": "open-menu-symbolic",
                           "menuModel": "primary_menu_model",
+                          "sourceClass": "Gtk.MenuButton",
                           "slot": "end"
                         },
                         {
@@ -136,12 +147,14 @@
                           "children": [],
                           "tooltipText": "Document Properties",
                           "iconName": "info-outline-symbolic",
+                          "sourceClass": "Gtk.ToggleButton",
                           "bindings": {
                             "active": "split_view.show-sidebar"
                           },
                           "slot": "end"
                         }
                       ],
+                      "sourceClass": "Adw.HeaderBar",
                       "bindings": {
                         "show-start-title-buttons": "EditorWindow.fullscreened",
                         "show-end-title-buttons": "EditorWindow.fullscreened"
@@ -152,7 +165,7 @@
                       "id": "tab_bar",
                       "type": "custom-widget",
                       "children": [],
-                      "sourceClass": "AdwTabBar",
+                      "sourceClass": "Adw.TabBar",
                       "title": "AdwTabBar",
                       "view": "tab_view",
                       "slot": "top",
@@ -180,7 +193,8 @@
                                       "children": [],
                                       "hexpand": true,
                                       "menuModel": "tab_menu",
-                                      "vexpand": true
+                                      "vexpand": true,
+                                      "sourceClass": "Adw.TabView"
                                     },
                                     {
                                       "id": "statusbar",
@@ -196,7 +210,8 @@
                                               "children": [],
                                               "hexpand": true,
                                               "valign": "center",
-                                              "xalign": 0
+                                              "xalign": 0,
+                                              "sourceClass": "Gtk.Label"
                                             },
                                             {
                                               "id": "command_text",
@@ -205,7 +220,8 @@
                                               "widthChars": 6,
                                               "maxWidthChars": 6,
                                               "valign": "center",
-                                              "xalign": 0
+                                              "xalign": 0,
+                                              "sourceClass": "Gtk.Label"
                                             },
                                             {
                                               "id": "selection_count",
@@ -214,7 +230,8 @@
                                               "widthChars": 4,
                                               "maxWidthChars": 4,
                                               "valign": "center",
-                                              "xalign": 0
+                                              "xalign": 0,
+                                              "sourceClass": "Gtk.Label"
                                             },
                                             {
                                               "id": "mode",
@@ -222,7 +239,8 @@
                                               "children": [],
                                               "widthChars": 3,
                                               "maxWidthChars": 3,
-                                              "valign": "center"
+                                              "valign": "center",
+                                              "sourceClass": "Gtk.Label"
                                             },
                                             {
                                               "id": "position",
@@ -231,7 +249,8 @@
                                               "widthChars": 12,
                                               "maxWidthChars": 12,
                                               "valign": "center",
-                                              "xalign": 0
+                                              "xalign": 0,
+                                              "sourceClass": "Gtk.Label"
                                             }
                                           ],
                                           "orientation": "horizontal",
@@ -239,7 +258,8 @@
                                           "marginTop": 3,
                                           "marginBottom": 3,
                                           "marginStart": 12,
-                                          "marginEnd": 12
+                                          "marginEnd": 12,
+                                          "sourceClass": "Gtk.Box"
                                         }
                                       ],
                                       "sourceClass": "EditorStatusbar",
@@ -248,10 +268,12 @@
                                     }
                                   ],
                                   "orientation": "vertical",
+                                  "sourceClass": "Gtk.Box",
                                   "slot": "child"
                                 }
                               ],
-                              "name": "tabs"
+                              "name": "tabs",
+                              "sourceClass": "Gtk.StackPage"
                             },
                             {
                               "id": "imported-5",
@@ -270,18 +292,22 @@
                                       "halign": "center",
                                       "useUnderline": true,
                                       "title": "New Empty File",
+                                      "sourceClass": "Gtk.Button",
                                       "slot": "child"
                                     }
                                   ],
                                   "title": "Open a Document",
                                   "description": "Create a new document (Ctrl+N), or open an existing one (Ctrl+O)",
+                                  "sourceClass": "Adw.StatusPage",
                                   "slot": "child"
                                 }
                               ],
-                              "name": "empty"
+                              "name": "empty",
+                              "sourceClass": "Gtk.StackPage"
                             }
                           ],
                           "hexpand": true,
+                          "sourceClass": "Gtk.Stack",
                           "slot": "content"
                         },
                         {
@@ -303,6 +329,7 @@
                                       "title": "File Name",
                                       "subtitleSelectable": true,
                                       "useMarkup": false,
+                                      "sourceClass": "Adw.ActionRow",
                                       "bindings": {
                                         "subtitle": "expression",
                                         "tooltip-text": "expression"
@@ -319,6 +346,7 @@
                                           "iconName": "document-open-symbolic",
                                           "valign": "center",
                                           "marginStart": 6,
+                                          "sourceClass": "Gtk.Image",
                                           "slot": "suffix"
                                         }
                                       ],
@@ -328,6 +356,7 @@
                                       "actionName": "open-folder",
                                       "useMarkup": false,
                                       "subtitleLines": 1,
+                                      "sourceClass": "Adw.ActionRow",
                                       "bindings": {
                                         "subtitle": "expression",
                                         "tooltip-text": "expression"
@@ -344,6 +373,7 @@
                                           "iconName": "go-next-symbolic",
                                           "valign": "center",
                                           "marginStart": 6,
+                                          "sourceClass": "Gtk.Image",
                                           "slot": "suffix"
                                         }
                                       ],
@@ -353,6 +383,7 @@
                                       "activatable": true,
                                       "actionName": "page.change-language",
                                       "useMarkup": false,
+                                      "sourceClass": "Adw.ActionRow",
                                       "bindings": {
                                         "subtitle": "expression"
                                       }
@@ -368,6 +399,7 @@
                                       "searchMatchMode": "substring",
                                       "model": "encoding_model",
                                       "expression": "",
+                                      "sourceClass": "Adw.ComboRow",
                                       "bindings": {
                                         "selected": "properties.encoding-index"
                                       }
@@ -381,11 +413,13 @@
                                       "useMarkup": false,
                                       "model": "newline_model",
                                       "expression": "",
+                                      "sourceClass": "Adw.ComboRow",
                                       "bindings": {
                                         "selected": "properties.newline-index"
                                       }
                                     }
-                                  ]
+                                  ],
+                                  "sourceClass": "Adw.PreferencesGroup"
                                 },
                                 {
                                   "id": "template-imported-65",
@@ -397,6 +431,7 @@
                                       "children": [],
                                       "title": "Auto Indentation",
                                       "useUnderline": true,
+                                      "sourceClass": "Adw.SwitchRow",
                                       "bindings": {
                                         "active": "properties.auto-indent"
                                       }
@@ -409,6 +444,7 @@
                                       "useUnderline": true,
                                       "model": "indent_model",
                                       "expression": "",
+                                      "sourceClass": "Adw.ComboRow",
                                       "bindings": {
                                         "selected": "properties.indent-style-index"
                                       }
@@ -422,6 +458,7 @@
                                       "climbRate": 1,
                                       "digits": 0,
                                       "numeric": true,
+                                      "sourceClass": "Adw.SpinRow",
                                       "bindings": {
                                         "adjustment": "expression"
                                       }
@@ -435,11 +472,13 @@
                                       "climbRate": 1,
                                       "digits": 0,
                                       "numeric": true,
+                                      "sourceClass": "Adw.SpinRow",
                                       "bindings": {
                                         "adjustment": "expression"
                                       }
                                     }
-                                  ]
+                                  ],
+                                  "sourceClass": "Adw.PreferencesGroup"
                                 },
                                 {
                                   "id": "template-imported-67",
@@ -450,6 +489,7 @@
                                       "type": "action-row",
                                       "children": [],
                                       "title": "Lines",
+                                      "sourceClass": "Adw.ActionRow",
                                       "bindings": {
                                         "subtitle": "expression"
                                       }
@@ -459,6 +499,7 @@
                                       "type": "action-row",
                                       "children": [],
                                       "title": "Words",
+                                      "sourceClass": "Adw.ActionRow",
                                       "bindings": {
                                         "subtitle": "expression"
                                       }
@@ -468,6 +509,7 @@
                                       "type": "action-row",
                                       "children": [],
                                       "title": "Characters, No Spaces",
+                                      "sourceClass": "Adw.ActionRow",
                                       "bindings": {
                                         "subtitle": "expression"
                                       }
@@ -477,14 +519,17 @@
                                       "type": "action-row",
                                       "children": [],
                                       "title": "All Characters",
+                                      "sourceClass": "Adw.ActionRow",
                                       "bindings": {
                                         "subtitle": "expression"
                                       }
                                     }
                                   ],
-                                  "title": "Statistics"
+                                  "title": "Statistics",
+                                  "sourceClass": "Adw.PreferencesGroup"
                                 }
-                              ]
+                              ],
+                              "sourceClass": "Adw.PreferencesPage"
                             }
                           ],
                           "sourceClass": "EditorPropertiesPanel",
@@ -498,6 +543,7 @@
                       "sidebarPosition": "end",
                       "showSidebar": false,
                       "minSidebarWidth": 350,
+                      "sourceClass": "Adw.OverlaySplitView",
                       "slot": "content"
                     }
                   ],
@@ -508,7 +554,8 @@
               ]
             }
           ],
-          "widthRequest": 360
+          "widthRequest": 360,
+          "sourceClass": "Adw.ApplicationWindow"
         }
       },
       {
@@ -537,7 +584,7 @@
                           "id": "buffer",
                           "type": "custom-widget",
                           "children": [],
-                          "sourceClass": "GtkSourceBuffer",
+                          "sourceClass": "Gtk.SourceBuffer",
                           "title": "GtkSourceBuffer",
                           "slot": "buffer"
                         }
@@ -551,7 +598,8 @@
                       "rightMarginPosition": 30,
                       "monospace": true,
                       "showLineNumbers": true,
-                      "marginBottom": 24
+                      "marginBottom": 24,
+                      "sourceClass": "Gtk.SourceView"
                     },
                     {
                       "id": "scheme_group",
@@ -561,10 +609,12 @@
                       "columnSpacing": 12,
                       "rowSpacing": 12,
                       "maxChildrenPerLine": 4,
-                      "selectionMode": "none"
+                      "selectionMode": "none",
+                      "sourceClass": "Gtk.FlowBox"
                     }
                   ],
-                  "title": "Appearance"
+                  "title": "Appearance",
+                  "sourceClass": "Adw.PreferencesGroup"
                 },
                 {
                   "id": "imported-4",
@@ -580,6 +630,7 @@
                           "children": [],
                           "halign": "end",
                           "valign": "center",
+                          "sourceClass": "Gtk.Switch",
                           "slot": "action"
                         },
                         {
@@ -596,11 +647,13 @@
                       ],
                       "title": "Custom Font",
                       "useUnderline": true,
+                      "sourceClass": "Adw.ExpanderRow",
                       "bindings": {
                         "expanded": "use_custom_font.active"
                       }
                     }
-                  ]
+                  ],
+                  "sourceClass": "Adw.PreferencesGroup"
                 },
                 {
                   "id": "imported-6",
@@ -642,7 +695,8 @@
                       "useUnderline": true,
                       "schemaKey": "show-map"
                     }
-                  ]
+                  ],
+                  "sourceClass": "Adw.PreferencesGroup"
                 },
                 {
                   "id": "imported-7",
@@ -657,7 +711,8 @@
                       "useUnderline": true,
                       "schemaKey": "spellcheck"
                     }
-                  ]
+                  ],
+                  "sourceClass": "Adw.PreferencesGroup"
                 },
                 {
                   "id": "imported-9",
@@ -691,7 +746,8 @@
                       "schemaKey": "wrap-text"
                     }
                   ],
-                  "title": "Line Wrap"
+                  "title": "Line Wrap",
+                  "sourceClass": "Adw.PreferencesGroup"
                 },
                 {
                   "id": "imported-12",
@@ -713,7 +769,8 @@
                       "title": "Character",
                       "useUnderline": true,
                       "model": "indent_model",
-                      "expression": ""
+                      "expression": "",
+                      "sourceClass": "Adw.ComboRow"
                     },
                     {
                       "id": "tab_width",
@@ -723,7 +780,8 @@
                       "useUnderline": true,
                       "climbRate": 1,
                       "digits": 0,
-                      "numeric": true
+                      "numeric": true,
+                      "sourceClass": "Adw.SpinRow"
                     },
                     {
                       "id": "indent_width",
@@ -733,10 +791,12 @@
                       "useUnderline": true,
                       "climbRate": 1,
                       "digits": 0,
-                      "numeric": true
+                      "numeric": true,
+                      "sourceClass": "Adw.SpinRow"
                     }
                   ],
-                  "title": "Indentation"
+                  "title": "Indentation",
+                  "sourceClass": "Adw.PreferencesGroup"
                 },
                 {
                   "id": "imported-14",
@@ -759,12 +819,14 @@
                       "title": "Restore Session",
                       "useUnderline": true,
                       "subtitle": "Return to your previous session when Text Editor is started",
+                      "sourceClass": "Adw.SwitchRow",
                       "bindings": {
                         "active": "clear_history_group.sensitive"
                       }
                     }
                   ],
-                  "title": "Behavior"
+                  "title": "Behavior",
+                  "sourceClass": "Adw.PreferencesGroup"
                 },
                 {
                   "id": "clear_history_group",
@@ -778,13 +840,17 @@
                       "focusOnClick": false,
                       "title": "Clear History",
                       "useUnderline": true,
-                      "destructive": true
+                      "destructive": true,
+                      "sourceClass": "Adw.ButtonRow"
                     }
-                  ]
+                  ],
+                  "sourceClass": "Adw.PreferencesGroup"
                 }
-              ]
+              ],
+              "sourceClass": "Adw.PreferencesPage"
             }
-          ]
+          ],
+          "sourceClass": "Adw.PreferencesDialog"
         }
       }
     ],

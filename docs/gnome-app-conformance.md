@@ -13,6 +13,34 @@ test alone is not enough.
 | Not yet validated | Calendar, Clocks, Disks, Files, Settings, Software, Text Editor, Weather, Web |
 | Next native capture | Authenticator (GNOME Circle) — Broadway image built on `himachal`; preset still to be created. |
 
+
+## Fleet state (2026-07-30)
+
+Generated presets, their screen counts, and how many nodes remain explicit
+custom-widget boundaries. A boundary is an honest result -- an
+application-defined composite the importer will not invent -- so the number
+to drive down is the app-defined count, not boundaries in general.
+
+| App | Screens | Nodes | Boundaries | Unresolved classes |
+| --- | ---: | ---: | ---: | --- |
+| text-editor | 2 | 83 | 14 | AdwTabBar, Editor* composites (C) |
+| ear-tag | 1 | 90 | 13 | Eartag* composites (Python/GTK) |
+| amberol | 1 | 74 | 10 | Amberol* composites (Rust) |
+| calendar | 2 | 276 | 8 | Gcal* composites (C) |
+| files | 4 | 178 | 6 | Nautilus* composites (C), AdwTabBar, GtkLevelBar |
+| calculator | 6 | 1939 | 5 | MathButtons instances (Vala; keypad renders) |
+| disks | 3 | 65 | 2 | GduBenchmarkGraph, GduSpaceAllocationBar (C) |
+| clocks | 5 | 380 | 0 | -- |
+| graphs | 1 | 52 | 0 | -- |
+| settings | 1 | 17 | 0 | -- |
+| weather | 1 | 15 | 0 | -- |
+
+Four apps import with no unresolved widgets at all. The largest remaining
+category is C-defined composites: one C language adapter would cover
+Nautilus, Calendar, Text Editor, and Disks together. The rest is two
+GTK/libadwaita widgets the renderer does not draw yet (AdwTabBar's tab
+strip, GtkLevelBar's meter).
+
 ## Required sequence
 
 1. Add the app and its source/launch metadata to the catalogue.

@@ -1,15 +1,15 @@
 {
   "version": 1,
-  "exportedAt": "2026-07-29T13:36:05.374Z",
+  "exportedAt": "2026-07-30T06:55:39.040Z",
+  "generatedBy": "scripts/generate-preset.mjs",
   "document": {
-    "id": "imported-document",
-    "title": "Amberol",
+    "id": "amberol-preset",
+    "title": "amberol",
     "colorScheme": "auto",
-    "edges": [],
     "screens": [
       {
-        "id": "imported-screen-1",
-        "title": "Amberol 1",
+        "id": "amberol-main",
+        "title": "amberol 1",
         "type": "standard",
         "width": 1024,
         "height": 720,
@@ -18,393 +18,616 @@
           "type": "window",
           "children": [
             {
-              "id": "drag_overlay",
-              "type": "custom-widget",
+              "id": "imported-2",
+              "type": "bin",
               "children": [
                 {
-                  "id": "toast_overlay",
-                  "type": "toast-overlay",
+                  "id": "drag_overlay",
+                  "type": "custom-widget",
                   "children": [
                     {
-                      "id": "imported-2",
-                      "type": "stack-page",
+                      "id": "toast_overlay",
+                      "type": "toast-overlay",
                       "children": [
                         {
-                          "id": "imported-3",
-                          "type": "header-bar",
-                          "children": [],
-                          "showTitle": false
-                        },
-                        {
-                          "id": "imported-4",
-                          "type": "clamp",
+                          "id": "main_stack",
+                          "type": "stack",
                           "children": [
                             {
-                              "id": "imported-5",
-                              "type": "box",
+                              "id": "imported-3",
+                              "type": "stack-page",
                               "children": [
                                 {
-                                  "id": "restore_playlist_button",
-                                  "type": "button",
-                                  "children": [],
-                                  "title": "_"
-                                },
-                                {
-                                  "id": "add_folder_button",
-                                  "type": "button",
-                                  "children": [],
-                                  "title": "_"
-                                },
-                                {
-                                  "id": "imported-6",
-                                  "type": "button",
-                                  "children": [],
-                                  "title": "_"
-                                }
-                              ],
-                              "orientation": "vertical",
-                              "halign": "center",
-                              "homogeneous": true,
-                              "spacing": 12,
-                              "slot": "status_page"
-                            }
-                          ],
-                          "maximumSize": 450,
-                          "vexpand": true,
-                          "valign": "fill",
-                          "child": "Adw.StatusPage"
-                        }
-                      ],
-                      "name": "initial-view",
-                      "child": "Adw.ToolbarView",
-                      "slot": "main_stack"
-                    },
-                    {
-                      "id": "imported-7",
-                      "type": "stack-page",
-                      "children": [
-                        {
-                          "id": "imported-8",
-                          "type": "toolbar-view",
-                          "children": [
-                            {
-                              "id": "imported-9",
-                              "type": "header-bar",
-                              "children": [],
-                              "showTitle": false
-                            },
-                            {
-                              "id": "main_box",
-                              "type": "box",
-                              "children": [
-                                {
-                                  "id": "imported-10",
-                                  "type": "box",
+                                  "id": "imported-4",
+                                  "type": "toolbar-view",
                                   "children": [
                                     {
-                                      "id": "cover_stack",
-                                      "type": "stack",
+                                      "id": "imported-5",
+                                      "type": "header-bar",
+                                      "children": [],
+                                      "showTitle": false
+                                    },
+                                    {
+                                      "id": "imported-6",
+                                      "type": "clamp",
+                                      "children": [
+                                        {
+                                          "id": "status_page",
+                                          "type": "status-page",
+                                          "children": [
+                                            {
+                                              "id": "imported-7",
+                                              "type": "box",
+                                              "children": [
+                                                {
+                                                  "id": "restore_playlist_button",
+                                                  "type": "button",
+                                                  "children": [],
+                                                  "title": "Restore Playlist",
+                                                  "actionName": "queue.restore-playlist",
+                                                  "suggested": true
+                                                },
+                                                {
+                                                  "id": "add_folder_button",
+                                                  "type": "button",
+                                                  "children": [],
+                                                  "title": "Add Folder",
+                                                  "actionName": "queue.add-folder"
+                                                },
+                                                {
+                                                  "id": "imported-8",
+                                                  "type": "button",
+                                                  "children": [],
+                                                  "title": "Add Song",
+                                                  "actionName": "queue.add-song"
+                                                }
+                                              ],
+                                              "orientation": "vertical",
+                                              "halign": "center",
+                                              "homogeneous": true,
+                                              "spacing": 12,
+                                              "slot": "child"
+                                            }
+                                          ],
+                                          "marginStart": 12,
+                                          "marginEnd": 12,
+                                          "title": "Amberol",
+                                          "description": "Select a file or a folder, or drag files from your file manager to the application window to add songs to the playlist",
+                                          "slot": "child"
+                                        }
+                                      ],
+                                      "maximumSize": 450,
+                                      "vexpand": true,
+                                      "valign": "fill",
+                                      "slot": "content"
+                                    }
+                                  ],
+                                  "slot": "child"
+                                }
+                              ],
+                              "name": "initial-view"
+                            },
+                            {
+                              "id": "imported-9",
+                              "type": "stack-page",
+                              "children": [
+                                {
+                                  "id": "split_view",
+                                  "type": "overlay-split",
+                                  "children": [
+                                    {
+                                      "id": "imported-10",
+                                      "type": "toolbar-view",
                                       "children": [
                                         {
                                           "id": "imported-11",
-                                          "type": "stack-page",
+                                          "type": "header-bar",
                                           "children": [],
-                                          "name": "no-image",
-                                          "child": "Image"
+                                          "showTitle": false
+                                        },
+                                        {
+                                          "id": "main_box",
+                                          "type": "box",
+                                          "children": [
+                                            {
+                                              "id": "song_cover",
+                                              "type": "bin",
+                                              "children": [
+                                                {
+                                                  "id": "imported-12",
+                                                  "type": "box",
+                                                  "children": [
+                                                    {
+                                                      "id": "cover_stack",
+                                                      "type": "stack",
+                                                      "children": [
+                                                        {
+                                                          "id": "imported-13",
+                                                          "type": "stack-page",
+                                                          "children": [
+                                                            {
+                                                              "id": "imported-14",
+                                                              "type": "bin",
+                                                              "children": [],
+                                                              "overflow": "hidden",
+                                                              "iconName": "folder-music-symbolic",
+                                                              "pixelSize": 64,
+                                                              "slot": "child"
+                                                            }
+                                                          ],
+                                                          "name": "no-image"
+                                                        },
+                                                        {
+                                                          "id": "imported-15",
+                                                          "type": "stack-page",
+                                                          "children": [
+                                                            {
+                                                              "id": "album_image",
+                                                              "type": "custom-widget",
+                                                              "children": [],
+                                                              "sourceClass": "AmberolCoverPicture",
+                                                              "title": "AmberolCoverPicture",
+                                                              "slot": "child"
+                                                            }
+                                                          ],
+                                                          "name": "cover-image"
+                                                        }
+                                                      ]
+                                                    }
+                                                  ],
+                                                  "halign": "center",
+                                                  "valign": "center",
+                                                  "orientation": "horizontal"
+                                                }
+                                              ]
+                                            },
+                                            {
+                                              "id": "imported-16",
+                                              "type": "box",
+                                              "children": [
+                                                {
+                                                  "id": "imported-17",
+                                                  "type": "box",
+                                                  "children": [
+                                                    {
+                                                      "id": "waveform_view",
+                                                      "type": "custom-widget",
+                                                      "children": [],
+                                                      "sourceClass": "AmberolWaveformView",
+                                                      "title": "AmberolWaveformView",
+                                                      "canFocus": "true"
+                                                    }
+                                                  ],
+                                                  "halign": "center",
+                                                  "orientation": "horizontal"
+                                                },
+                                                {
+                                                  "id": "imported-18",
+                                                  "type": "custom-widget",
+                                                  "children": [
+                                                    {
+                                                      "id": "elapsed_label",
+                                                      "type": "label",
+                                                      "children": [],
+                                                      "title": "0:00"
+                                                    },
+                                                    {
+                                                      "id": "remaining_label",
+                                                      "type": "label",
+                                                      "children": [],
+                                                      "title": "0:00"
+                                                    }
+                                                  ],
+                                                  "sourceClass": "CenterBox",
+                                                  "title": "CenterBox",
+                                                  "orientation": "horizontal",
+                                                  "widthRequest": 256,
+                                                  "halign": "center"
+                                                }
+                                              ],
+                                              "orientation": "vertical",
+                                              "spacing": 2,
+                                              "widthRequest": 256
+                                            },
+                                            {
+                                              "id": "song_details",
+                                              "type": "bin",
+                                              "children": [
+                                                {
+                                                  "id": "imported-19",
+                                                  "type": "box",
+                                                  "children": [
+                                                    {
+                                                      "id": "imported-20",
+                                                      "type": "box",
+                                                      "children": [
+                                                        {
+                                                          "id": "song_title_label",
+                                                          "type": "custom-widget",
+                                                          "children": [],
+                                                          "sourceClass": "AmberolMarquee",
+                                                          "title": "AmberolMarquee",
+                                                          "widthChars": "20"
+                                                        },
+                                                        {
+                                                          "id": "song_artist_label",
+                                                          "type": "custom-widget",
+                                                          "children": [],
+                                                          "sourceClass": "AmberolMarquee",
+                                                          "title": "AmberolMarquee",
+                                                          "widthChars": "25"
+                                                        },
+                                                        {
+                                                          "id": "song_album_label",
+                                                          "type": "custom-widget",
+                                                          "children": [],
+                                                          "sourceClass": "AmberolMarquee",
+                                                          "title": "AmberolMarquee",
+                                                          "widthChars": "25"
+                                                        }
+                                                      ],
+                                                      "orientation": "vertical",
+                                                      "valign": "center",
+                                                      "marginStart": 6,
+                                                      "marginEnd": 6
+                                                    }
+                                                  ],
+                                                  "orientation": "vertical",
+                                                  "spacing": 12
+                                                }
+                                              ]
+                                            },
+                                            {
+                                              "id": "playback_control",
+                                              "type": "bin",
+                                              "children": [
+                                                {
+                                                  "id": "center_box",
+                                                  "type": "box",
+                                                  "children": [
+                                                    {
+                                                      "id": "controls_box",
+                                                      "type": "box",
+                                                      "children": [
+                                                        {
+                                                          "id": "previous_button",
+                                                          "type": "button",
+                                                          "children": [],
+                                                          "iconName": "media-skip-backward-symbolic",
+                                                          "actionName": "win.previous",
+                                                          "valign": "center",
+                                                          "tooltipText": "Play the Previous Song",
+                                                          "circular": true
+                                                        },
+                                                        {
+                                                          "id": "play_button",
+                                                          "type": "button",
+                                                          "children": [],
+                                                          "iconName": "media-playback-start-symbolic",
+                                                          "actionName": "win.play",
+                                                          "valign": "center",
+                                                          "tooltipText": "Toggle Play",
+                                                          "circular": true
+                                                        },
+                                                        {
+                                                          "id": "next_button",
+                                                          "type": "button",
+                                                          "children": [],
+                                                          "iconName": "media-skip-forward-symbolic",
+                                                          "actionName": "win.next",
+                                                          "valign": "center",
+                                                          "tooltipText": "Play the Next Song",
+                                                          "circular": true
+                                                        }
+                                                      ],
+                                                      "spacing": 24,
+                                                      "halign": "center",
+                                                      "hexpand": true,
+                                                      "orientation": "horizontal"
+                                                    },
+                                                    {
+                                                      "id": "volume_control",
+                                                      "type": "bin",
+                                                      "children": [
+                                                        {
+                                                          "id": "volume_low_button",
+                                                          "type": "button",
+                                                          "children": [],
+                                                          "iconName": "audio-volume-low-symbolic",
+                                                          "actionName": "volume.toggle-mute",
+                                                          "valign": "center",
+                                                          "flat": true,
+                                                          "circular": true
+                                                        },
+                                                        {
+                                                          "id": "volume_scale",
+                                                          "type": "custom-widget",
+                                                          "children": [],
+                                                          "sourceClass": "Scale",
+                                                          "title": "Scale",
+                                                          "hexpand": true,
+                                                          "marginEnd": 6
+                                                        },
+                                                        {
+                                                          "id": "volume_high_image",
+                                                          "type": "bin",
+                                                          "children": [],
+                                                          "iconName": "audio-volume-high-symbolic",
+                                                          "marginEnd": 10
+                                                        }
+                                                      ],
+                                                      "hexpand": "true"
+                                                    },
+                                                    {
+                                                      "id": "imported-21",
+                                                      "type": "custom-widget",
+                                                      "children": [
+                                                        {
+                                                          "id": "start_box",
+                                                          "type": "box",
+                                                          "children": [
+                                                            {
+                                                              "id": "playlist_button",
+                                                              "type": "button",
+                                                              "children": [],
+                                                              "iconName": "view-queue-symbolic",
+                                                              "actionName": "queue.toggle",
+                                                              "valign": "center",
+                                                              "tooltipText": "Toggle Playlist",
+                                                              "circular": true
+                                                            },
+                                                            {
+                                                              "id": "shuffle_button",
+                                                              "type": "button",
+                                                              "children": [],
+                                                              "iconName": "media-playlist-shuffle-symbolic",
+                                                              "actionName": "queue.shuffle",
+                                                              "valign": "center",
+                                                              "tooltipText": "Shuffle the Playlist",
+                                                              "circular": true
+                                                            }
+                                                          ],
+                                                          "halign": "start",
+                                                          "spacing": 12,
+                                                          "marginEnd": 18,
+                                                          "orientation": "horizontal"
+                                                        },
+                                                        {
+                                                          "id": "end_box",
+                                                          "type": "box",
+                                                          "children": [
+                                                            {
+                                                              "id": "repeat_button",
+                                                              "type": "button",
+                                                              "children": [],
+                                                              "iconName": "media-playlist-consecutive-symbolic",
+                                                              "actionName": "queue.repeat-mode",
+                                                              "valign": "center",
+                                                              "tooltipText": "Enable Repeat",
+                                                              "circular": true
+                                                            },
+                                                            {
+                                                              "id": "menu_button",
+                                                              "type": "menu-button",
+                                                              "children": [],
+                                                              "menuModel": "primary_menu",
+                                                              "iconName": "open-menu-symbolic",
+                                                              "primary": true,
+                                                              "halign": "end",
+                                                              "valign": "center",
+                                                              "tooltipText": "Main Menu",
+                                                              "direction": "up",
+                                                              "circular": true
+                                                            }
+                                                          ],
+                                                          "halign": "end",
+                                                          "spacing": 12,
+                                                          "marginStart": 18,
+                                                          "orientation": "horizontal"
+                                                        }
+                                                      ],
+                                                      "sourceClass": "CenterBox",
+                                                      "title": "CenterBox"
+                                                    }
+                                                  ],
+                                                  "orientation": "vertical",
+                                                  "spacing": 6,
+                                                  "widthRequest": 256
+                                                }
+                                              ],
+                                              "halign": "center",
+                                              "marginTop": "0",
+                                              "marginBottom": "24"
+                                            }
+                                          ],
+                                          "orientation": "vertical",
+                                          "valign": "center",
+                                          "vexpand": true,
+                                          "spacing": 6,
+                                          "slot": "content"
                                         }
-                                      ]
+                                      ],
+                                      "slot": "content"
                                     },
                                     {
-                                      "id": "imported-12",
-                                      "type": "stack-page",
-                                      "children": [],
-                                      "name": "cover-image",
-                                      "child": "Protota.CustomWidget"
+                                      "id": "playlist_view",
+                                      "type": "bin",
+                                      "children": [
+                                        {
+                                          "id": "imported-22",
+                                          "type": "toolbar-view",
+                                          "children": [
+                                            {
+                                              "id": "imported-23",
+                                              "type": "header-bar",
+                                              "children": [
+                                                {
+                                                  "id": "search_button",
+                                                  "type": "button",
+                                                  "children": [],
+                                                  "iconName": "system-search-symbolic",
+                                                  "actionName": "queue.search",
+                                                  "valign": "center",
+                                                  "tooltipText": "Search Songs in the Playlist"
+                                                },
+                                                {
+                                                  "id": "queue_length_box",
+                                                  "type": "box",
+                                                  "children": [
+                                                    {
+                                                      "id": "imported-24",
+                                                      "type": "label",
+                                                      "children": [],
+                                                      "ellipsize": "end",
+                                                      "title": "Playlist"
+                                                    },
+                                                    {
+                                                      "id": "queue_length_label",
+                                                      "type": "label",
+                                                      "children": [],
+                                                      "ellipsize": "end"
+                                                    }
+                                                  ],
+                                                  "orientation": "vertical",
+                                                  "valign": "center",
+                                                  "slot": "title-widget"
+                                                },
+                                                {
+                                                  "id": "back_button",
+                                                  "type": "button",
+                                                  "children": [],
+                                                  "visible": false,
+                                                  "iconName": "go-previous-symbolic",
+                                                  "actionName": "queue.toggle",
+                                                  "valign": "center",
+                                                  "tooltipText": "Close the Playlist"
+                                                },
+                                                {
+                                                  "id": "select_button",
+                                                  "type": "button",
+                                                  "children": [],
+                                                  "iconName": "selection-mode-symbolic",
+                                                  "actionName": "queue.select",
+                                                  "valign": "center",
+                                                  "tooltipText": "Select Songs in the Playlist"
+                                                }
+                                              ]
+                                            },
+                                            {
+                                              "id": "playlist_searchbar",
+                                              "type": "bin",
+                                              "children": [
+                                                {
+                                                  "id": "playlist_searchentry",
+                                                  "type": "search-entry",
+                                                  "children": [],
+                                                  "placeholderText": "Search songs",
+                                                  "hexpand": true,
+                                                  "slot": "child"
+                                                }
+                                              ]
+                                            },
+                                            {
+                                              "id": "playlist_overlay",
+                                              "type": "bin",
+                                              "children": [
+                                                {
+                                                  "id": "playlist_progress",
+                                                  "type": "custom-widget",
+                                                  "children": [],
+                                                  "sourceClass": "ProgressBar",
+                                                  "title": "ProgressBar",
+                                                  "valign": "start",
+                                                  "hexpand": true,
+                                                  "visible": false
+                                                },
+                                                {
+                                                  "id": "imported-25",
+                                                  "type": "scrolled-window",
+                                                  "children": [
+                                                    {
+                                                      "id": "queue_view",
+                                                      "type": "custom-widget",
+                                                      "children": [],
+                                                      "sourceClass": "ListView",
+                                                      "title": "ListView",
+                                                      "singleClickActivate": true,
+                                                      "slot": "child"
+                                                    }
+                                                  ],
+                                                  "hscrollbarPolicy": "never",
+                                                  "vscrollbarPolicy": "automatic",
+                                                  "propagateNaturalHeight": true,
+                                                  "vexpand": true
+                                                }
+                                              ],
+                                              "slot": "content"
+                                            },
+                                            {
+                                              "id": "queue_actionbar",
+                                              "type": "custom-widget",
+                                              "children": [
+                                                {
+                                                  "id": "queue_select_all_button",
+                                                  "type": "button",
+                                                  "children": [],
+                                                  "iconName": "edit-select-all-symbolic",
+                                                  "tooltipText": "Select All Songs"
+                                                },
+                                                {
+                                                  "id": "queue_selected_label",
+                                                  "type": "label",
+                                                  "children": []
+                                                },
+                                                {
+                                                  "id": "queue_remove_button",
+                                                  "type": "button",
+                                                  "children": [],
+                                                  "iconName": "app-remove-symbolic",
+                                                  "tooltipText": "Remove Selected Songs"
+                                                }
+                                              ],
+                                              "sourceClass": "ActionBar",
+                                              "title": "ActionBar",
+                                              "revealed": false,
+                                              "flat": true
+                                            }
+                                          ]
+                                        }
+                                      ],
+                                      "slot": "sidebar"
                                     }
                                   ],
-                                  "halign": "center",
-                                  "valign": "center",
-                                  "slot": "song_cover"
+                                  "maxSidebarWidth": 330,
+                                  "sidebarWidthFraction": 0.4,
+                                  "slot": "child"
                                 }
                               ],
-                              "orientation": "vertical",
-                              "valign": "center",
-                              "vexpand": true,
-                              "spacing": 6
-                            },
-                            {
-                              "id": "imported-13",
-                              "type": "box",
-                              "children": [
-                                {
-                                  "id": "imported-14",
-                                  "type": "box",
-                                  "children": [
-                                    {
-                                      "id": "waveform_view",
-                                      "type": "custom-widget",
-                                      "children": [],
-                                      "title": "AmberolWaveformView",
-                                      "canFocus": "true"
-                                    }
-                                  ],
-                                  "halign": "center"
-                                }
-                              ],
-                              "orientation": "vertical",
-                              "spacing": 2,
-                              "widthRequest": 256
-                            },
-                            {
-                              "id": "imported-15",
-                              "type": "box",
-                              "children": [
-                                {
-                                  "id": "imported-16",
-                                  "type": "box",
-                                  "children": [
-                                    {
-                                      "id": "song_title_label",
-                                      "type": "custom-widget",
-                                      "children": [],
-                                      "title": "AmberolMarquee",
-                                      "widthChars": "20"
-                                    },
-                                    {
-                                      "id": "song_artist_label",
-                                      "type": "custom-widget",
-                                      "children": [],
-                                      "title": "AmberolMarquee",
-                                      "widthChars": "25"
-                                    },
-                                    {
-                                      "id": "song_album_label",
-                                      "type": "custom-widget",
-                                      "children": [],
-                                      "title": "AmberolMarquee",
-                                      "widthChars": "25"
-                                    }
-                                  ],
-                                  "orientation": "vertical",
-                                  "valign": "center",
-                                  "marginStart": 6,
-                                  "marginEnd": 6
-                                }
-                              ],
-                              "orientation": "vertical",
-                              "spacing": 12,
-                              "slot": "song_details"
-                            },
-                            {
-                              "id": "center_box",
-                              "type": "box",
-                              "children": [
-                                {
-                                  "id": "controls_box",
-                                  "type": "box",
-                                  "children": [
-                                    {
-                                      "id": "previous_button",
-                                      "type": "button",
-                                      "children": [],
-                                      "iconName": "media-skip-backward-symbolic",
-                                      "actionName": "win.previous",
-                                      "valign": "center",
-                                      "tooltipText": "_"
-                                    },
-                                    {
-                                      "id": "play_button",
-                                      "type": "button",
-                                      "children": [],
-                                      "iconName": "media-playback-start-symbolic",
-                                      "actionName": "win.play",
-                                      "valign": "center",
-                                      "tooltipText": "_"
-                                    },
-                                    {
-                                      "id": "next_button",
-                                      "type": "button",
-                                      "children": [],
-                                      "iconName": "media-skip-forward-symbolic",
-                                      "actionName": "win.next",
-                                      "valign": "center",
-                                      "tooltipText": "_"
-                                    }
-                                  ],
-                                  "spacing": 24,
-                                  "halign": "center",
-                                  "hexpand": true
-                                },
-                                {
-                                  "id": "volume_low_button",
-                                  "type": "button",
-                                  "children": [],
-                                  "iconName": "audio-volume-low-symbolic",
-                                  "actionName": "volume.toggle-mute",
-                                  "valign": "center",
-                                  "slot": "volume_control"
-                                },
-                                {
-                                  "id": "start_box",
-                                  "type": "box",
-                                  "children": [
-                                    {
-                                      "id": "playlist_button",
-                                      "type": "toggle",
-                                      "children": [],
-                                      "iconName": "view-queue-symbolic",
-                                      "actionName": "queue.toggle",
-                                      "valign": "center",
-                                      "tooltipText": "_"
-                                    },
-                                    {
-                                      "id": "shuffle_button",
-                                      "type": "toggle",
-                                      "children": [],
-                                      "iconName": "media-playlist-shuffle-symbolic",
-                                      "actionName": "queue.shuffle",
-                                      "valign": "center",
-                                      "tooltipText": "_"
-                                    }
-                                  ],
-                                  "halign": "start",
-                                  "spacing": 12,
-                                  "marginEnd": 18,
-                                  "slot": "CenterBox"
-                                },
-                                {
-                                  "id": "end_box",
-                                  "type": "box",
-                                  "children": [
-                                    {
-                                      "id": "repeat_button",
-                                      "type": "button",
-                                      "children": [],
-                                      "iconName": "media-playlist-consecutive-symbolic",
-                                      "actionName": "queue.repeat-mode",
-                                      "valign": "center",
-                                      "tooltipText": "_"
-                                    },
-                                    {
-                                      "id": "menu_button",
-                                      "type": "menu-button",
-                                      "children": [],
-                                      "menuModel": "primary_menu",
-                                      "iconName": "open-menu-symbolic",
-                                      "primary": true,
-                                      "halign": "end",
-                                      "valign": "center",
-                                      "tooltipText": "_"
-                                    }
-                                  ],
-                                  "halign": "end",
-                                  "spacing": 12,
-                                  "marginStart": 18,
-                                  "slot": "CenterBox"
-                                }
-                              ],
-                              "orientation": "vertical",
-                              "spacing": 6,
-                              "widthRequest": 256,
-                              "slot": "playback_control"
+                              "name": "main-view"
                             }
                           ],
-                          "slot": "split_view"
-                        },
-                        {
-                          "id": "imported-17",
-                          "type": "toolbar-view",
-                          "children": [
-                            {
-                              "id": "imported-18",
-                              "type": "header-bar",
-                              "children": [
-                                {
-                                  "id": "search_button",
-                                  "type": "toggle",
-                                  "children": [],
-                                  "iconName": "system-search-symbolic",
-                                  "actionName": "queue.search",
-                                  "valign": "center",
-                                  "tooltipText": "_"
-                                },
-                                {
-                                  "id": "queue_length_box",
-                                  "type": "box",
-                                  "children": [],
-                                  "orientation": "vertical",
-                                  "valign": "center"
-                                },
-                                {
-                                  "id": "back_button",
-                                  "type": "button",
-                                  "children": [],
-                                  "visible": false,
-                                  "iconName": "go-previous-symbolic",
-                                  "actionName": "queue.toggle",
-                                  "valign": "center",
-                                  "tooltipText": "_"
-                                },
-                                {
-                                  "id": "select_button",
-                                  "type": "toggle",
-                                  "children": [],
-                                  "iconName": "selection-mode-symbolic",
-                                  "actionName": "queue.select",
-                                  "valign": "center",
-                                  "tooltipText": "_"
-                                }
-                              ]
-                            },
-                            {
-                              "id": "imported-19",
-                              "type": "scrolled-window",
-                              "children": [],
-                              "hscrollbarPolicy": "never",
-                              "vscrollbarPolicy": "automatic",
-                              "propagateNaturalHeight": true,
-                              "vexpand": true,
-                              "child": "ListView",
-                              "slot": "playlist_overlay"
-                            },
-                            {
-                              "id": "queue_select_all_button",
-                              "type": "button",
-                              "children": [],
-                              "iconName": "edit-select-all-symbolic",
-                              "tooltipText": "_",
-                              "slot": "queue_actionbar"
-                            },
-                            {
-                              "id": "queue_remove_button",
-                              "type": "button",
-                              "children": [],
-                              "iconName": "app-remove-symbolic",
-                              "tooltipText": "_",
-                              "slot": "queue_actionbar"
-                            }
-                          ],
-                          "slot": "playlist_view"
+                          "transitionType": "crossfade",
+                          "slot": "child"
                         }
                       ],
-                      "name": "main-view",
-                      "child": "Adw.OverlaySplitView"
+                      "slot": "child"
                     }
                   ],
-                  "child": "Stack"
+                  "sourceClass": "DragOverlay",
+                  "title": "Drop a song to add it to the playlist"
                 }
               ],
-              "title": "_"
+              "slot": "content"
             }
           ],
           "handleMenubarAccel": true,
           "widthRequest": 360,
           "heightRequest": 660,
-          "defaultWidth": 800,
-          "content": "WindowHandle"
+          "defaultWidth": 800
         }
       }
-    ]
+    ],
+    "edges": []
   },
   "assets": {}
 }

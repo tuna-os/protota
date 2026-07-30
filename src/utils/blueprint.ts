@@ -279,6 +279,11 @@ const WIDGET_CLASS_MAP: Record<string, string> = {
   inscription: 'Gtk.Inscription',
 };
 
+/** The GTK/libadwaita class a renderer type exports as. */
+export function widgetClassForType(type: string): string | null {
+  return WIDGET_CLASS_MAP[type] ?? null;
+}
+
 function indent(n: number): string { return '  '.repeat(n); }
 
 function escapeBlueprintString(value: string): string {

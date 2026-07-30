@@ -35,6 +35,10 @@ plausible-but-wrong substitute.
 
 ### Building presets and flows
 
+**[docs/components.md](docs/components.md)** lists every component Protota can
+build with — the GTK class it exports as, its named slots, editable properties,
+and legal children. It is generated from the code, so it cannot drift.
+
 Presets are generated from official app source and hand-finished with
 reviewable override files — see **[docs/preset-workflow.md](docs/preset-workflow.md)**
 for the full toolchain (`scripts/import-gnome-app.mjs`,

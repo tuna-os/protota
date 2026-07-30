@@ -25,10 +25,14 @@ function zoomAtPoint(
   oldZoom: number,
   newZoom: number,
   oldPan: { x: number; y: number },
+  canvasW: number,
 ): { x: number; y: number } {
-  const wx = (mx - oldPan.x) / oldZoom;
+  const cx = canvasW / 2;
   const wy = (my - oldPan.y) / oldZoom;
-  return { x: mx - wx * newZoom, y: my - wy * newZoom };
+  return {
+    x: (mx - cx) * (1 - newZoom / oldZoom) + oldPan.x * (newZoom / oldZoom),
+    y: my - wy * newZoom,
+  };
 }
 
 export const ViewportCanvas: React.FC = () => {
@@ -63,17 +67,14 @@ export const ViewportCanvas: React.FC = () => {
     const my = rect.height / 2;
     const oldZ = zoomRef.current;
     const newZ = Math.min(Math.max(oldZ * factor, 0.3), 2.5);
-    setPan(zoomAtPoint(mx, my, oldZ, newZ, panRef.current));
+    setPan(zoomAtPoint(mx, my, oldZ, newZ, panRef.current, rect.width));
     setZoom(newZ);
   }, []);
 
   const resetView = useCallback(() => {
     const el = canvasRef.current;
     if (!el || docRef.current.screens.length === 0) return;
-    setPan({
-      x: (el.clientWidth - getTotalContentWidth(docRef.current.screens)) / 2,
-      y: CANVAS_PADDING,
-    });
+    setPan({ x: 0, y: CANVAS_PADDING });
     setZoom(1);
   }, []);
 
@@ -92,7 +93,7 @@ export const ViewportCanvas: React.FC = () => {
         const factor = e.deltaY > 0 ? 0.9 : 1.1;
         const oldZ = zoomRef.current;
         const newZ = Math.min(Math.max(oldZ * factor, 0.3), 2.5);
-        setPan(zoomAtPoint(mx, my, oldZ, newZ, panRef.current));
+        setPan(zoomAtPoint(mx, my, oldZ, newZ, panRef.current, rect.width));
         setZoom(newZ);
       } else if (e.shiftKey && isOverCanvas) {
         e.preventDefault();
@@ -226,6 +227,11 @@ export const ViewportCanvas: React.FC = () => {
     return () => window.removeEventListener('resize', autoFitMobile);
   }, [doc.screens]);
 
+  // --- Center content on initial mount ---
+  useEffect(() => {
+    resetView();
+  }, [resetView]);
+
   // --- Screen focus state ---
 
   // Flow-edge geometry: measured from the laid-out screen frames, in the
@@ -295,8 +301,8 @@ export const ViewportCanvas: React.FC = () => {
     const screen = screens[clampedIdx];
     if (!screen) return;
 
-    const canvasW = canvasRef.current.clientWidth;
     const currentZoom = zoomRef.current;
+    const surfaceW = getTotalContentWidth(docRef.current.screens);
 
     let screenX = CANVAS_PADDING;
     for (let i = 0; i < clampedIdx; i++) {
@@ -305,7 +311,7 @@ export const ViewportCanvas: React.FC = () => {
 
     const screenW = screen.width || 800;
     setPan({
-      x: (canvasW - screenW * currentZoom) / 2 - screenX * currentZoom,
+      x: (surfaceW / 2 - screenX - screenW / 2) * currentZoom,
       y: CANVAS_PADDING,
     });
   }, []);
@@ -343,7 +349,7 @@ export const ViewportCanvas: React.FC = () => {
     const my = rect.height / 2;
     const oldZ = zoomRef.current;
     const newZ = Math.min(oldZ + 0.1, 2.5);
-    setPan(zoomAtPoint(mx, my, oldZ, newZ, panRef.current));
+    setPan(zoomAtPoint(mx, my, oldZ, newZ, panRef.current, rect.width));
     setZoom(newZ);
   }, []);
 
@@ -355,7 +361,7 @@ export const ViewportCanvas: React.FC = () => {
     const my = rect.height / 2;
     const oldZ = zoomRef.current;
     const newZ = Math.max(oldZ - 0.1, 0.3);
-    setPan(zoomAtPoint(mx, my, oldZ, newZ, panRef.current));
+    setPan(zoomAtPoint(mx, my, oldZ, newZ, panRef.current, rect.width));
     setZoom(newZ);
   }, []);
 
@@ -370,10 +376,9 @@ export const ViewportCanvas: React.FC = () => {
       + 28 /* label */ + CANVAS_PADDING * 2;
     const fitZoom = Math.min(canvasW / totalContentW, canvasH / maxContentH, 1.5);
     setZoom(fitZoom);
-    const scaledW = totalContentW * fitZoom;
     const scaledH = maxContentH * fitZoom;
     setPan({
-      x: (canvasW - scaledW) / 2,
+      x: 0,
       y: (canvasH - scaledH - CANVAS_BOTTOM_BAR_H) / 2,
     });
   }, []);
@@ -415,6 +420,9 @@ export const ViewportCanvas: React.FC = () => {
         cursor: isPanning ? "grabbing" : "default",
         backgroundImage: "radial-gradient(circle, rgba(128,128,128,0.25) 1px, transparent 1px)",
         backgroundSize: "20px 20px",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "flex-start",
       }}
     >
       {/* GNOME Desktop Fullscreen Live Interactive Preview Mode */}
@@ -539,8 +547,8 @@ export const ViewportCanvas: React.FC = () => {
         className="protota-canvas-surface"
         style={{
           transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
-          transformOrigin: "0 0",
-          transition: isPanning ? "none" : "transform 0.05s ease-out",
+          transformOrigin: "50% 0",
+          transition: isPanning ? "none" : "transform 0.2s ease",
           display: "inline-flex",
           alignItems: "flex-start",
           gap: `${CANVAS_GAP}px`,

@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exportedAt": "2026-07-30T08:45:32.176Z",
+  "exportedAt": "2026-07-30T08:52:40.807Z",
   "generatedBy": "scripts/generate-preset.mjs",
   "document": {
     "id": "amberol-preset",
@@ -568,10 +568,8 @@
                                                   "children": [
                                                     {
                                                       "id": "queue_view",
-                                                      "type": "custom-widget",
+                                                      "type": "list-box",
                                                       "children": [],
-                                                      "sourceClass": "ListView",
-                                                      "title": "ListView",
                                                       "singleClickActivate": true,
                                                       "styleClasses": "navigation-sidebar",
                                                       "slot": "child"
@@ -587,7 +585,7 @@
                                             },
                                             {
                                               "id": "queue_actionbar",
-                                              "type": "custom-widget",
+                                              "type": "box",
                                               "children": [
                                                 {
                                                   "id": "queue_select_all_button",
@@ -610,11 +608,10 @@
                                                   "tooltipText": "Remove Selected Songs"
                                                 }
                                               ],
-                                              "sourceClass": "ActionBar",
-                                              "title": "ActionBar",
                                               "revealed": false,
                                               "flat": true,
-                                              "styleClasses": "flat"
+                                              "styleClasses": "flat",
+                                              "orientation": "horizontal"
                                             }
                                           ],
                                           "styleClasses": "playlist-background"

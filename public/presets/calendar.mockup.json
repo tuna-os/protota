@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exportedAt": "2026-07-30T08:45:34.897Z",
+  "exportedAt": "2026-07-30T08:52:43.958Z",
   "generatedBy": "scripts/generate-preset.mjs",
   "document": {
     "id": "calendar-preset",
@@ -1157,7 +1157,7 @@
                             },
                             {
                               "id": "imported-79",
-                              "type": "custom-widget",
+                              "type": "box",
                               "children": [
                                 {
                                   "id": "previous_date_button",
@@ -1218,8 +1218,7 @@
                                   "actionName": "win.show-calendars"
                                 }
                               ],
-                              "sourceClass": "ActionBar",
-                              "title": "ActionBar"
+                              "orientation": "horizontal"
                             }
                           ],
                           "styleClasses": "view",
@@ -2396,7 +2395,7 @@
                             },
                             {
                               "id": "imported-79",
-                              "type": "custom-widget",
+                              "type": "box",
                               "children": [
                                 {
                                   "id": "previous_date_button",
@@ -2457,8 +2456,7 @@
                                   "actionName": "win.show-calendars"
                                 }
                               ],
-                              "sourceClass": "ActionBar",
-                              "title": "ActionBar"
+                              "orientation": "horizontal"
                             }
                           ],
                           "styleClasses": "view",

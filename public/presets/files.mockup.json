@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exportedAt": "2026-07-30T08:45:38.556Z",
+  "exportedAt": "2026-07-30T08:52:47.437Z",
   "generatedBy": "scripts/generate-preset.mjs",
   "document": {
     "id": "files-preset",
@@ -79,10 +79,8 @@
                                       "children": [
                                         {
                                           "id": "sidebar_list",
-                                          "type": "custom-widget",
+                                          "type": "list-box",
                                           "children": [],
-                                          "sourceClass": "GtkListView",
-                                          "title": "GtkListView",
                                           "valign": "center",
                                           "slot": "child"
                                         }
@@ -414,7 +412,7 @@
                             },
                             {
                               "id": "action_bar",
-                              "type": "custom-widget",
+                              "type": "box",
                               "children": [
                                 {
                                   "id": "imported-10",
@@ -480,9 +478,8 @@
                                   "slot": "end"
                                 }
                               ],
-                              "sourceClass": "GtkActionBar",
-                              "title": "GtkActionBar",
                               "revealed": false,
+                              "orientation": "horizontal",
                               "slot": "bottom"
                             }
                           ],
@@ -596,7 +593,7 @@
                                                       "children": [
                                                         {
                                                           "id": "imported-11",
-                                                          "type": "custom-widget",
+                                                          "type": "bin",
                                                           "children": [
                                                             {
                                                               "id": "imported-12",
@@ -607,9 +604,7 @@
                                                                 "pixel-size": "expression"
                                                               }
                                                             }
-                                                          ],
-                                                          "sourceClass": "GtkFrame",
-                                                          "title": "GtkFrame"
+                                                          ]
                                                         },
                                                         {
                                                           "id": "imported-13",
@@ -753,7 +748,7 @@
                                   "children": [
                                     {
                                       "id": "volume_usage_row",
-                                      "type": "custom-widget",
+                                      "type": "action-row",
                                       "children": [
                                         {
                                           "id": "imported-16",
@@ -856,8 +851,6 @@
                                           "orientation": "vertical"
                                         }
                                       ],
-                                      "sourceClass": "AdwPreferencesRow",
-                                      "title": "AdwPreferencesRow",
                                       "activatable": false,
                                       "selectable": false
                                     },

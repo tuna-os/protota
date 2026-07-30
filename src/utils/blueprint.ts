@@ -132,6 +132,23 @@ const CLASS_TO_WIDGET_MAP: Record<string, AdwNodeType> = {
   Image: 'bin',
   GtkImage: 'bin',
   'Gtk.Image': 'bin',
+  // Library widgets the generic renderer genuinely covers. Widgets it does
+  // not (AdwTabBar's tab strip, GtkLevelBar's meter) stay explicit
+  // boundaries rather than rendering as an empty box that claims support.
+  ListView: 'list-box',
+  GtkListView: 'list-box',
+  'Gtk.ListView': 'list-box',
+  ColumnView: 'list-box',
+  GtkColumnView: 'list-box',
+  'Gtk.ColumnView': 'list-box',
+  ActionBar: 'box',
+  GtkActionBar: 'box',
+  'Gtk.ActionBar': 'box',
+  Frame: 'bin',
+  GtkFrame: 'bin',
+  'Gtk.Frame': 'bin',
+  'Adw.PreferencesRow': 'action-row',
+  AdwPreferencesRow: 'action-row',
   SearchEntry: 'search-entry',
   GtkSearchEntry: 'search-entry',
   SearchBar: 'bin',

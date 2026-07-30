@@ -167,6 +167,17 @@ required when patching back into the app's own source where `template.` still
 resolves. `mockupToBlueprint(doc, { standalone: true })` drops them, because a
 file on its own has no template context. Validation uses standalone mode.
 
-Remaining failures are a long tail: menus and adjustments the export does not
-carry, string values for object-typed properties, and widgets whose child is a
-string in source. Tracked in issue #77.
+Remaining failures are four distinct causes, each verified against the
+compiler and tracked in issue #77:
+
+| File | Compiler error | Cause |
+| --- | --- | --- |
+| calculator-preferences | Cannot convert string to number | numeric property emitted as a string |
+| ear-tag-main | Gtk.ActionBar has no property `orientation` | `Gtk.ActionBar` is missing from the generated GIR table, so nothing filters it |
+| files-properties | Cannot convert string to Pango.WrapMode | enum-typed properties need coercion; the table stores names, not types |
+| text-editor-preferences | Unexpected tokens | not yet minimised |
+
+The first three share a root: the property table records which properties exist
+but not their *types*, so the emitter cannot tell a number or an enum from a
+string. Extending `scripts/extract-gtk-properties.mjs` to carry types would
+close them together.

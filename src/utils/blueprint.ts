@@ -421,6 +421,8 @@ const ANNOTATION_SLOTS = new Set([
   // GtkOverlay's extra children and GtkListBox's placeholder are child types,
   // not properties: `overlay: Widget { }` is rejected outright.
   'overlay', 'placeholder', 'action',
+  // GtkActionBar's centre child is `[center]`, not a `center:` property.
+  'center',
 ]);
 
 interface ExportContext {

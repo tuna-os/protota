@@ -136,7 +136,7 @@ npx tsx scripts/export-blueprint.mjs      # writes artifacts/blp/<app>-<screen>.
 for f in *.blp; do blueprint-compiler compile "$f" >/dev/null || echo "FAIL $f"; done
 ```
 
-State as of 2026-07-30: **10 of 27** exported screens compile, up from 1. The
+State as of 2026-07-30: **15 of 27** exported screens compile, up from 1. The
 emitter had been producing camelCase property names, `top { }` blocks instead
 of `[top]` annotations, quoted enums and object references, editor-only style
 flags (`suggested: true`), and signal handlers as properties.
@@ -161,9 +161,15 @@ gtk4-devel and libadwaita-devel installed:
 node scripts/extract-gtk-properties.mjs > src/data/props.json   # then convert to the .ts module
 ```
 
-Remaining failures are a long tail rather than a category: menus and
-adjustments the export does not carry, a few widgets whose child is a string in
-source, and template ids that survive flattening.
+Export has two modes, because its two purposes disagree on one point.
+`mockupToBlueprint(doc)` preserves a boundary's instance bindings, which is
+required when patching back into the app's own source where `template.` still
+resolves. `mockupToBlueprint(doc, { standalone: true })` drops them, because a
+file on its own has no template context. Validation uses standalone mode.
+
+Remaining failures are a long tail: menus and adjustments the export does not
+carry, string values for object-typed properties, and widgets whose child is a
+string in source. Tracked in issue #77.
 
 ## Building UIs programmatically (agents)
 

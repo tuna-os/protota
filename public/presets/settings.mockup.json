@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exportedAt": "2026-07-30T07:13:31.298Z",
+  "exportedAt": "2026-07-30T08:45:39.997Z",
   "generatedBy": "scripts/generate-preset.mjs",
   "document": {
     "id": "settings-preset",
@@ -87,6 +87,7 @@
                                           "id": "main_listbox",
                                           "type": "list-box",
                                           "children": [],
+                                          "styleClasses": "navigation-sidebar",
                                           "slot": "child"
                                         }
                                       ],
@@ -106,9 +107,11 @@
                                               "children": [],
                                               "iconName": "edit-find-symbolic",
                                               "title": "No Results Found",
-                                              "description": "Try a different search"
+                                              "description": "Try a different search",
+                                              "styleClasses": "compact"
                                             }
                                           ],
+                                          "styleClasses": "navigation-sidebar",
                                           "slot": "child"
                                         }
                                       ],

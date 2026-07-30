@@ -478,8 +478,25 @@ adw-window > .adw-node-wrapper > *,
   align-items: center;
   width: 100%;
 }
+/* GTK gives spare horizontal space to children that set hexpand; the rest
+   keep their natural size. Expansion comes from the node's own hexpand
+   (applied as flex-grow by the renderer), so children only need to be
+   allowed to shrink here. */
 .protota-div-box[orientation="horizontal"] > .adw-node-wrapper > * {
-  flex: 1;
+  min-width: 0;
+}
+
+/* A scroller's child fills it, as GtkScrolledWindow's viewport does. */
+html .protota-div-scrolled-window {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+}
+html .protota-div-scrolled-window > .adw-node-wrapper > * {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
 }
 
 /* Grid — maps GtkGrid's explicit column model to CSS Grid. */
@@ -820,3 +837,31 @@ html .protota-div-overlay-split > .adw-node-wrapper:not([slot]) > * {
   min-width: 0;
   min-height: 0;
 }
+
+/* GTK/Adwaita style classes carried over from source `styles [ ... ]`. Only
+   the ones Adwaita gives a defined appearance are styled; app-specific
+   classes stay inert but are preserved as provenance. */
+html .protota-style-card {
+  background-color: var(--card-bg-color, #fff);
+  border-radius: var(--card-radius, 12px);
+  box-shadow: 0 0 0 1px var(--card-shade-color, rgba(0, 0, 6, 0.07));
+}
+html .protota-style-boxed-list {
+  background-color: var(--card-bg-color, #fff);
+  border-radius: var(--card-radius, 12px);
+  box-shadow: 0 0 0 1px var(--card-shade-color, rgba(0, 0, 6, 0.07));
+}
+html .protota-style-toolbar {
+  padding: 6px;
+}
+html .protota-style-dim-label {
+  opacity: 0.55;
+}
+html .protota-style-heading {
+  font-weight: 700;
+}
+html .protota-style-title-1 { font-size: 20pt; font-weight: 800; }
+html .protota-style-title-2 { font-size: 15pt; font-weight: 800; }
+html .protota-style-title-4 { font-size: 12pt; font-weight: 700; }
+html .protota-style-caption { font-size: 8pt; }
+html .protota-style-numeric { font-variant-numeric: tabular-nums; }

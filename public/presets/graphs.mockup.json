@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exportedAt": "2026-07-30T07:13:38.390Z",
+  "exportedAt": "2026-07-30T08:45:44.595Z",
   "generatedBy": "scripts/generate-preset.mjs",
   "document": {
     "id": "graphs-preset",
@@ -30,7 +30,8 @@
                       "type": "status-page",
                       "children": [],
                       "title": "Drop Here to Import",
-                      "iconName": "list-add-symbolic"
+                      "iconName": "list-add-symbolic",
+                      "styleClasses": "drag-overlay-status-page"
                     }
                   ],
                   "canTarget": false,
@@ -111,6 +112,7 @@
                                                       "iconName": "list-compact",
                                                       "title": "No Data",
                                                       "description": "Add data from a file or manually as an equation",
+                                                      "styleClasses": "compact",
                                                       "slot": "child"
                                                     }
                                                   ]
@@ -138,7 +140,8 @@
                                                               "vexpand": false,
                                                               "hexpand": true,
                                                               "valign": "start",
-                                                              "selectionMode": "none"
+                                                              "selectionMode": "none",
+                                                              "styleClasses": "boxed-list"
                                                             }
                                                           ]
                                                         }
@@ -313,7 +316,8 @@
                               "tooltipText": "Redo",
                               "bindings": {
                                 "visible": "undo_button.visible"
-                              }
+                              },
+                              "visible": true
                             },
                             {
                               "id": "optimize_limits_button",
@@ -324,7 +328,8 @@
                               "tooltipText": "Optimize View Limits",
                               "bindings": {
                                 "visible": "undo_button.visible"
-                              }
+                              },
+                              "visible": true
                             },
                             {
                               "id": "view_forward_button",
@@ -335,7 +340,8 @@
                               "tooltipText": "Next View",
                               "bindings": {
                                 "visible": "undo_button.visible"
-                              }
+                              },
+                              "visible": true
                             },
                             {
                               "id": "view_back_button",
@@ -346,7 +352,8 @@
                               "tooltipText": "Previous View",
                               "bindings": {
                                 "visible": "undo_button.visible"
-                              }
+                              },
+                              "visible": true
                             }
                           ]
                         },
@@ -428,6 +435,7 @@
                           "slot": "content"
                         }
                       ],
+                      "styleClasses": "canvas-view",
                       "slot": "content"
                     }
                   ],
@@ -438,6 +446,7 @@
                   "slot": "child"
                 }
               ],
+              "styleClasses": "drag-overlay",
               "slot": "content"
             }
           ],

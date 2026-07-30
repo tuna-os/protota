@@ -7,7 +7,7 @@ import { windowCloseSymbolic } from "@gjsify/adwaita-icons/ui";
 import { toDataUri } from "@gjsify/adwaita-icons/utils";
 
 export const ViewportCanvas: React.FC = () => {
-  const { doc, selectNode } = useMockupStore();
+  const { doc, selectNode, showFlows } = useMockupStore();
   const [zoom, setZoom] = useState(1);
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [isPanning, setIsPanning] = useState(false);
@@ -141,7 +141,7 @@ export const ViewportCanvas: React.FC = () => {
   const [flowPaths, setFlowPaths] = useState<Array<{ id: string; d: string }>>([]);
   useEffect(() => {
     const surface = surfaceRef.current;
-    if (!surface || !doc.edges.length) { setFlowPaths([]); return; }
+    if (!surface || !showFlows || !doc.edges.length) { setFlowPaths([]); return; }
     const frames = new Map<string, HTMLElement>();
     surface.querySelectorAll<HTMLElement>('[data-protota-flow-screen]').forEach((element) => {
       frames.set(element.dataset.prototaFlowScreen!, element);
@@ -163,7 +163,7 @@ export const ViewportCanvas: React.FC = () => {
       });
     }
     setFlowPaths(paths);
-  }, [doc]);
+  }, [doc, showFlows]);
 
   const [phoshScreenId, setPhoshScreenId] = useState<string | null>(null);
   const [desktopScreenId, setDesktopScreenId] = useState<string | null>(null);
@@ -290,6 +290,7 @@ export const ViewportCanvas: React.FC = () => {
           className="adw-button icon-only flat"
           onClick={() => setZoom((z) => Math.max(z - 0.1, 0.3))}
           title="Zoom Out (Ctrl+-)"
+          aria-label="−"
         >
           <span className="adw-icon adw-icon--list-remove"></span>
         </button>
@@ -302,6 +303,7 @@ export const ViewportCanvas: React.FC = () => {
           className="adw-button icon-only flat"
           onClick={() => setZoom((z) => Math.min(z + 0.1, 2.5))}
           title="Zoom In (Ctrl+=)"
+          aria-label="+"
         >
           <span className="adw-icon adw-icon--list-add"></span>
         </button>

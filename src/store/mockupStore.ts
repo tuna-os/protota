@@ -259,6 +259,8 @@ interface MockupState {
   historyIndex: number;
   showAddScreenModal: boolean;
   lintEnabled: boolean;
+  /** Flow-edge connectors between screens (#11) drawn on the canvas. */
+  showFlows: boolean;
   violations: LintViolation[];
 
   selectNode: (nodeId: string | null, screenId?: string) => void;
@@ -272,6 +274,7 @@ interface MockupState {
   redo: () => void;
   toggleColorScheme: () => void;
   toggleLint: () => void;
+  toggleShowFlows: () => void;
   setShowAddScreenModal: (show: boolean) => void;
 }
 
@@ -319,6 +322,7 @@ export const useMockupStore = create<MockupState>((set, get) => {
     historyIndex: 0,
     showAddScreenModal: false,
     lintEnabled: false,
+    showFlows: false,
     violations: [],
 
     selectNode: (nodeId, screenId) =>
@@ -455,5 +459,12 @@ export const useMockupStore = create<MockupState>((set, get) => {
       const nextViolations = nextEnabled ? lintDocument(get().doc) : [];
       set({ lintEnabled: nextEnabled, violations: nextViolations });
     },
+
+    toggleShowFlows: () => set({ showFlows: !get().showFlows }),
   };
 });
+
+// Expose the store for Playwright debugging in dev builds only.
+if (import.meta.env.DEV && typeof window !== "undefined") {
+  (window as unknown as Record<string, unknown>).__mockupStore = useMockupStore;
+}

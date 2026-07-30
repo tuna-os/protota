@@ -260,6 +260,23 @@ export const AdwaitaRenderer: React.FC<Props> = ({
     ensureAdwIcon(node.iconName);
   }, [node.iconName]);
 
+  // Selection must use a native listener: the adw-* custom elements build
+  // and reparent internal DOM, and clicks originating there never reach
+  // React's delegated events. Plain DOM bubbling always does. stopPropagation
+  // keeps the innermost node's handler authoritative and suppresses the
+  // canvas's deselect.
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const wrapper = wrapperRef.current;
+    if (!wrapper) return;
+    const handleNativeClick = (event: MouseEvent) => {
+      event.stopPropagation();
+      selectNode(node.id, screenId);
+    };
+    wrapper.addEventListener('click', handleNativeClick);
+    return () => wrapper.removeEventListener('click', handleNativeClick);
+  }, [node.id, screenId, selectNode]);
+
   // GTK visibility: a hidden widget takes no space and draws nothing. This
   // must come after every hook so React's hook order stays stable.
   if (node.visible === false) return null;
@@ -315,14 +332,9 @@ export const AdwaitaRenderer: React.FC<Props> = ({
     ? isExpandedBoundary ? 'protota-div-custom-widget-expanded' : `protota-div-${node.type}`
     : '';
 
-  const handleClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    selectNode(node.id, screenId);
-  };
-
   return (
     <div
-      onClick={handleClick}
+      ref={wrapperRef}
       slot={node.slot ?? inheritedSlot}
       className={`adw-node-wrapper${isSelected ? ' selected-outline' : ''}`}
       style={{

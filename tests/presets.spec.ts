@@ -80,7 +80,8 @@ test.describe('GNOME Core app presets (#6)', () => {
       // Deselect any selected node to keep snapshots clean
       await page.keyboard.press('Escape');
       await page.waitForTimeout(300);
-      const windowEl = page.locator('adw-window');
+      // Multi-screen presets render several windows; snapshot the first.
+      const windowEl = page.locator('adw-window').first();
       await expect(windowEl).toBeVisible();
       // Compare rendered window canvas directly against official GNOME application screenshots
       await expect(windowEl).toHaveScreenshot(`${presetId}.png`, { maxDiffPixelRatio: 0.15 });

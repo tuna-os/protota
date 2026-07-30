@@ -389,6 +389,47 @@ body,
   text-align: center;
 }
 
+/* GTK fill semantics through renderer wrapper divs: a window's child fills
+   the window, a ToolbarView's content fills its frame, a split view's panes
+   fill their columns, and single-child containers pass allocation through.
+   Wrappers are layout-transparent conduits here, not sizing boundaries. */
+adw-application-window,
+adw-window {
+  display: flex;
+  flex-direction: column;
+}
+adw-application-window > .adw-node-wrapper,
+adw-window > .adw-node-wrapper,
+.adw-toolbar-view-content > .adw-node-wrapper,
+.adw-osv-content > .adw-node-wrapper,
+.adw-osv-sidebar > .adw-node-wrapper,
+.protota-div-bin > .adw-node-wrapper,
+.protota-div-stack > .adw-node-wrapper,
+.protota-div-stack-page > .adw-node-wrapper {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+adw-application-window > .adw-node-wrapper > *,
+adw-window > .adw-node-wrapper > *,
+.adw-toolbar-view-content > .adw-node-wrapper > *,
+.adw-osv-content > .adw-node-wrapper > *,
+.adw-osv-sidebar > .adw-node-wrapper > *,
+.protota-div-bin > .adw-node-wrapper > *,
+.protota-div-stack > .adw-node-wrapper > *,
+.protota-div-stack-page > .adw-node-wrapper > * {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+.protota-div-bin,
+.protota-div-stack,
+.protota-div-stack-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
 /* A custom-widget whose contents were projected from source construction
    facts is a resolved composite — a plain container, not a striped boundary. */
 .protota-div-custom-widget-expanded {

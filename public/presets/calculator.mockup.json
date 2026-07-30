@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exportedAt": "2026-07-30T00:51:52.338Z",
+  "exportedAt": "2026-07-30T02:41:37.307Z",
   "generatedBy": "scripts/generate-preset.mjs",
   "document": {
     "id": "imported-document",
@@ -616,17 +616,12 @@
                                   "type": "bin",
                                   "children": [
                                     {
-                                      "id": "imported-1",
-                                      "type": "bin",
-                                      "children": []
-                                    },
-                                    {
                                       "id": "multi_layout_view",
-                                      "type": "custom-widget",
+                                      "type": "stack",
                                       "children": [
                                         {
                                           "id": "imported-2",
-                                          "type": "custom-widget",
+                                          "type": "bin",
                                           "children": [
                                             {
                                               "id": "math_box",
@@ -634,30 +629,24 @@
                                               "children": [
                                                 {
                                                   "id": "advanced",
-                                                  "type": "custom-widget",
-                                                  "children": [],
-                                                  "sourceClass": "Adw.LayoutSlot",
-                                                  "title": "Adw.LayoutSlot"
+                                                  "type": "bin",
+                                                  "children": []
                                                 },
                                                 {
                                                   "id": "basic",
-                                                  "type": "custom-widget",
-                                                  "children": [],
-                                                  "sourceClass": "Adw.LayoutSlot",
-                                                  "title": "Adw.LayoutSlot"
+                                                  "type": "bin",
+                                                  "children": []
                                                 }
                                               ],
                                               "orientation": "horizontal",
                                               "slot": "content"
                                             }
                                           ],
-                                          "sourceClass": "Adw.Layout",
-                                          "title": "Adw.Layout",
                                           "name": "box"
                                         },
                                         {
                                           "id": "imported-5",
-                                          "type": "custom-widget",
+                                          "type": "bin",
                                           "children": [
                                             {
                                               "id": "imported-6",
@@ -665,34 +654,27 @@
                                               "children": [
                                                 {
                                                   "id": "carousel",
-                                                  "type": "custom-widget",
+                                                  "type": "box",
                                                   "children": [
                                                     {
                                                       "id": "advanced",
-                                                      "type": "custom-widget",
+                                                      "type": "bin",
                                                       "children": [],
-                                                      "sourceClass": "Adw.LayoutSlot",
-                                                      "title": "Adw.LayoutSlot",
                                                       "hexpand": true
                                                     },
                                                     {
                                                       "id": "basic",
-                                                      "type": "custom-widget",
+                                                      "type": "bin",
                                                       "children": [],
-                                                      "sourceClass": "Adw.LayoutSlot",
-                                                      "title": "Adw.LayoutSlot",
                                                       "hexpand": true
                                                     }
                                                   ],
-                                                  "sourceClass": "Adw.Carousel",
-                                                  "title": "Adw.Carousel"
+                                                  "orientation": "horizontal"
                                                 },
                                                 {
                                                   "id": "carousel_dots",
-                                                  "type": "custom-widget",
+                                                  "type": "bin",
                                                   "children": [],
-                                                  "sourceClass": "Adw.CarouselIndicatorDots",
-                                                  "title": "Adw.CarouselIndicatorDots",
                                                   "carousel": "carousel"
                                                 }
                                               ],
@@ -700,8 +682,6 @@
                                               "slot": "content"
                                             }
                                           ],
-                                          "sourceClass": "Adw.Layout",
-                                          "title": "Adw.Layout",
                                           "name": "carousel"
                                         },
                                         {
@@ -1565,8 +1545,6 @@
                                           "columnHomogeneous": true
                                         }
                                       ],
-                                      "sourceClass": "Adw.MultiLayoutView",
-                                      "title": "Adw.MultiLayoutView",
                                       "slot": "child"
                                     }
                                   ],
@@ -1578,17 +1556,12 @@
                                   "type": "bin",
                                   "children": [
                                     {
-                                      "id": "imported-20",
-                                      "type": "bin",
-                                      "children": []
-                                    },
-                                    {
                                       "id": "multi_layout_view",
-                                      "type": "custom-widget",
+                                      "type": "stack",
                                       "children": [
                                         {
                                           "id": "imported-21",
-                                          "type": "custom-widget",
+                                          "type": "bin",
                                           "children": [
                                             {
                                               "id": "math_box",
@@ -1596,30 +1569,24 @@
                                               "children": [
                                                 {
                                                   "id": "advanced",
-                                                  "type": "custom-widget",
-                                                  "children": [],
-                                                  "sourceClass": "Adw.LayoutSlot",
-                                                  "title": "Adw.LayoutSlot"
+                                                  "type": "bin",
+                                                  "children": []
                                                 },
                                                 {
                                                   "id": "basic",
-                                                  "type": "custom-widget",
-                                                  "children": [],
-                                                  "sourceClass": "Adw.LayoutSlot",
-                                                  "title": "Adw.LayoutSlot"
+                                                  "type": "bin",
+                                                  "children": []
                                                 }
                                               ],
                                               "orientation": "horizontal",
                                               "slot": "content"
                                             }
                                           ],
-                                          "sourceClass": "Adw.Layout",
-                                          "title": "Adw.Layout",
                                           "name": "box"
                                         },
                                         {
                                           "id": "imported-24",
-                                          "type": "custom-widget",
+                                          "type": "bin",
                                           "children": [
                                             {
                                               "id": "imported-25",
@@ -1627,34 +1594,27 @@
                                               "children": [
                                                 {
                                                   "id": "carousel",
-                                                  "type": "custom-widget",
+                                                  "type": "box",
                                                   "children": [
                                                     {
                                                       "id": "advanced",
-                                                      "type": "custom-widget",
+                                                      "type": "bin",
                                                       "children": [],
-                                                      "sourceClass": "Adw.LayoutSlot",
-                                                      "title": "Adw.LayoutSlot",
                                                       "hexpand": true
                                                     },
                                                     {
                                                       "id": "basic",
-                                                      "type": "custom-widget",
+                                                      "type": "bin",
                                                       "children": [],
-                                                      "sourceClass": "Adw.LayoutSlot",
-                                                      "title": "Adw.LayoutSlot",
                                                       "hexpand": true
                                                     }
                                                   ],
-                                                  "sourceClass": "Adw.Carousel",
-                                                  "title": "Adw.Carousel"
+                                                  "orientation": "horizontal"
                                                 },
                                                 {
                                                   "id": "carousel_dots",
-                                                  "type": "custom-widget",
+                                                  "type": "bin",
                                                   "children": [],
-                                                  "sourceClass": "Adw.CarouselIndicatorDots",
-                                                  "title": "Adw.CarouselIndicatorDots",
                                                   "carousel": "carousel"
                                                 }
                                               ],
@@ -1662,8 +1622,6 @@
                                               "slot": "content"
                                             }
                                           ],
-                                          "sourceClass": "Adw.Layout",
-                                          "title": "Adw.Layout",
                                           "name": "carousel"
                                         },
                                         {
@@ -2277,8 +2235,6 @@
                                           "columnHomogeneous": true
                                         }
                                       ],
-                                      "sourceClass": "Adw.MultiLayoutView",
-                                      "title": "Adw.MultiLayoutView",
                                       "slot": "child"
                                     }
                                   ],
@@ -2290,17 +2246,12 @@
                                   "type": "bin",
                                   "children": [
                                     {
-                                      "id": "imported-33",
-                                      "type": "bin",
-                                      "children": []
-                                    },
-                                    {
                                       "id": "multi_layout_view",
-                                      "type": "custom-widget",
+                                      "type": "stack",
                                       "children": [
                                         {
                                           "id": "imported-34",
-                                          "type": "custom-widget",
+                                          "type": "bin",
                                           "children": [
                                             {
                                               "id": "imported-35",
@@ -2308,10 +2259,8 @@
                                               "children": [
                                                 {
                                                   "id": "bit_panel",
-                                                  "type": "custom-widget",
-                                                  "children": [],
-                                                  "sourceClass": "Adw.LayoutSlot",
-                                                  "title": "Adw.LayoutSlot"
+                                                  "type": "bin",
+                                                  "children": []
                                                 },
                                                 {
                                                   "id": "math_box",
@@ -2319,17 +2268,13 @@
                                                   "children": [
                                                     {
                                                       "id": "advanced",
-                                                      "type": "custom-widget",
-                                                      "children": [],
-                                                      "sourceClass": "Adw.LayoutSlot",
-                                                      "title": "Adw.LayoutSlot"
+                                                      "type": "bin",
+                                                      "children": []
                                                     },
                                                     {
                                                       "id": "basic",
-                                                      "type": "custom-widget",
-                                                      "children": [],
-                                                      "sourceClass": "Adw.LayoutSlot",
-                                                      "title": "Adw.LayoutSlot"
+                                                      "type": "bin",
+                                                      "children": []
                                                     }
                                                   ],
                                                   "orientation": "horizontal"
@@ -2339,13 +2284,11 @@
                                               "slot": "content"
                                             }
                                           ],
-                                          "sourceClass": "Adw.Layout",
-                                          "title": "Adw.Layout",
                                           "name": "box"
                                         },
                                         {
                                           "id": "imported-39",
-                                          "type": "custom-widget",
+                                          "type": "bin",
                                           "children": [
                                             {
                                               "id": "imported-40",
@@ -2353,42 +2296,33 @@
                                               "children": [
                                                 {
                                                   "id": "carousel",
-                                                  "type": "custom-widget",
+                                                  "type": "box",
                                                   "children": [
                                                     {
                                                       "id": "advanced",
-                                                      "type": "custom-widget",
+                                                      "type": "bin",
                                                       "children": [],
-                                                      "sourceClass": "Adw.LayoutSlot",
-                                                      "title": "Adw.LayoutSlot",
                                                       "hexpand": true
                                                     },
                                                     {
                                                       "id": "basic",
-                                                      "type": "custom-widget",
+                                                      "type": "bin",
                                                       "children": [],
-                                                      "sourceClass": "Adw.LayoutSlot",
-                                                      "title": "Adw.LayoutSlot",
                                                       "hexpand": true
                                                     },
                                                     {
                                                       "id": "bit_panel",
-                                                      "type": "custom-widget",
+                                                      "type": "bin",
                                                       "children": [],
-                                                      "sourceClass": "Adw.LayoutSlot",
-                                                      "title": "Adw.LayoutSlot",
                                                       "hexpand": true
                                                     }
                                                   ],
-                                                  "sourceClass": "Adw.Carousel",
-                                                  "title": "Adw.Carousel"
+                                                  "orientation": "horizontal"
                                                 },
                                                 {
                                                   "id": "carousel_dots",
-                                                  "type": "custom-widget",
+                                                  "type": "bin",
                                                   "children": [],
-                                                  "sourceClass": "Adw.CarouselIndicatorDots",
-                                                  "title": "Adw.CarouselIndicatorDots",
                                                   "carousel": "carousel"
                                                 }
                                               ],
@@ -2396,8 +2330,6 @@
                                               "slot": "content"
                                             }
                                           ],
-                                          "sourceClass": "Adw.Layout",
-                                          "title": "Adw.Layout",
                                           "name": "carousel"
                                         },
                                         {
@@ -4174,8 +4106,6 @@
                                           "columnHomogeneous": true
                                         }
                                       ],
-                                      "sourceClass": "Adw.MultiLayoutView",
-                                      "title": "Adw.MultiLayoutView",
                                       "slot": "child"
                                     }
                                   ],
@@ -4630,180 +4560,6 @@
         "sourceClass": "GtkSourceView",
         "sourceId": "source_view",
         "message": "$GtkSourceView has no template definition in the imported source; retained as an explicit custom-widget boundary."
-      },
-      {
-        "code": "renderer-does-not-support-class",
-        "sourceClass": "Adw.LayoutSlot",
-        "sourceId": "imported-3",
-        "message": "Adw.LayoutSlot is not in the generic widget registry; retained as an explicit custom-widget boundary."
-      },
-      {
-        "code": "renderer-does-not-support-class",
-        "sourceClass": "Adw.LayoutSlot",
-        "sourceId": "imported-4",
-        "message": "Adw.LayoutSlot is not in the generic widget registry; retained as an explicit custom-widget boundary."
-      },
-      {
-        "code": "renderer-does-not-support-class",
-        "sourceClass": "Adw.Layout",
-        "sourceId": "imported-2",
-        "message": "Adw.Layout is not in the generic widget registry; retained as an explicit custom-widget boundary."
-      },
-      {
-        "code": "renderer-does-not-support-class",
-        "sourceClass": "Adw.LayoutSlot",
-        "sourceId": "imported-7",
-        "message": "Adw.LayoutSlot is not in the generic widget registry; retained as an explicit custom-widget boundary."
-      },
-      {
-        "code": "renderer-does-not-support-class",
-        "sourceClass": "Adw.LayoutSlot",
-        "sourceId": "imported-8",
-        "message": "Adw.LayoutSlot is not in the generic widget registry; retained as an explicit custom-widget boundary."
-      },
-      {
-        "code": "renderer-does-not-support-class",
-        "sourceClass": "Adw.Carousel",
-        "sourceId": "carousel",
-        "message": "Adw.Carousel is not in the generic widget registry; retained as an explicit custom-widget boundary."
-      },
-      {
-        "code": "renderer-does-not-support-class",
-        "sourceClass": "Adw.CarouselIndicatorDots",
-        "sourceId": "carousel_dots",
-        "message": "Adw.CarouselIndicatorDots is not in the generic widget registry; retained as an explicit custom-widget boundary."
-      },
-      {
-        "code": "renderer-does-not-support-class",
-        "sourceClass": "Adw.Layout",
-        "sourceId": "imported-5",
-        "message": "Adw.Layout is not in the generic widget registry; retained as an explicit custom-widget boundary."
-      },
-      {
-        "code": "renderer-does-not-support-class",
-        "sourceClass": "Adw.MultiLayoutView",
-        "sourceId": "multi_layout_view",
-        "message": "Adw.MultiLayoutView is not in the generic widget registry; retained as an explicit custom-widget boundary."
-      },
-      {
-        "code": "renderer-does-not-support-class",
-        "sourceClass": "Adw.LayoutSlot",
-        "sourceId": "imported-22",
-        "message": "Adw.LayoutSlot is not in the generic widget registry; retained as an explicit custom-widget boundary."
-      },
-      {
-        "code": "renderer-does-not-support-class",
-        "sourceClass": "Adw.LayoutSlot",
-        "sourceId": "imported-23",
-        "message": "Adw.LayoutSlot is not in the generic widget registry; retained as an explicit custom-widget boundary."
-      },
-      {
-        "code": "renderer-does-not-support-class",
-        "sourceClass": "Adw.Layout",
-        "sourceId": "imported-21",
-        "message": "Adw.Layout is not in the generic widget registry; retained as an explicit custom-widget boundary."
-      },
-      {
-        "code": "renderer-does-not-support-class",
-        "sourceClass": "Adw.LayoutSlot",
-        "sourceId": "imported-26",
-        "message": "Adw.LayoutSlot is not in the generic widget registry; retained as an explicit custom-widget boundary."
-      },
-      {
-        "code": "renderer-does-not-support-class",
-        "sourceClass": "Adw.LayoutSlot",
-        "sourceId": "imported-27",
-        "message": "Adw.LayoutSlot is not in the generic widget registry; retained as an explicit custom-widget boundary."
-      },
-      {
-        "code": "renderer-does-not-support-class",
-        "sourceClass": "Adw.Carousel",
-        "sourceId": "carousel",
-        "message": "Adw.Carousel is not in the generic widget registry; retained as an explicit custom-widget boundary."
-      },
-      {
-        "code": "renderer-does-not-support-class",
-        "sourceClass": "Adw.CarouselIndicatorDots",
-        "sourceId": "carousel_dots",
-        "message": "Adw.CarouselIndicatorDots is not in the generic widget registry; retained as an explicit custom-widget boundary."
-      },
-      {
-        "code": "renderer-does-not-support-class",
-        "sourceClass": "Adw.Layout",
-        "sourceId": "imported-24",
-        "message": "Adw.Layout is not in the generic widget registry; retained as an explicit custom-widget boundary."
-      },
-      {
-        "code": "renderer-does-not-support-class",
-        "sourceClass": "Adw.MultiLayoutView",
-        "sourceId": "multi_layout_view",
-        "message": "Adw.MultiLayoutView is not in the generic widget registry; retained as an explicit custom-widget boundary."
-      },
-      {
-        "code": "renderer-does-not-support-class",
-        "sourceClass": "Adw.LayoutSlot",
-        "sourceId": "imported-36",
-        "message": "Adw.LayoutSlot is not in the generic widget registry; retained as an explicit custom-widget boundary."
-      },
-      {
-        "code": "renderer-does-not-support-class",
-        "sourceClass": "Adw.LayoutSlot",
-        "sourceId": "imported-37",
-        "message": "Adw.LayoutSlot is not in the generic widget registry; retained as an explicit custom-widget boundary."
-      },
-      {
-        "code": "renderer-does-not-support-class",
-        "sourceClass": "Adw.LayoutSlot",
-        "sourceId": "imported-38",
-        "message": "Adw.LayoutSlot is not in the generic widget registry; retained as an explicit custom-widget boundary."
-      },
-      {
-        "code": "renderer-does-not-support-class",
-        "sourceClass": "Adw.Layout",
-        "sourceId": "imported-34",
-        "message": "Adw.Layout is not in the generic widget registry; retained as an explicit custom-widget boundary."
-      },
-      {
-        "code": "renderer-does-not-support-class",
-        "sourceClass": "Adw.LayoutSlot",
-        "sourceId": "imported-41",
-        "message": "Adw.LayoutSlot is not in the generic widget registry; retained as an explicit custom-widget boundary."
-      },
-      {
-        "code": "renderer-does-not-support-class",
-        "sourceClass": "Adw.LayoutSlot",
-        "sourceId": "imported-42",
-        "message": "Adw.LayoutSlot is not in the generic widget registry; retained as an explicit custom-widget boundary."
-      },
-      {
-        "code": "renderer-does-not-support-class",
-        "sourceClass": "Adw.LayoutSlot",
-        "sourceId": "imported-43",
-        "message": "Adw.LayoutSlot is not in the generic widget registry; retained as an explicit custom-widget boundary."
-      },
-      {
-        "code": "renderer-does-not-support-class",
-        "sourceClass": "Adw.Carousel",
-        "sourceId": "carousel",
-        "message": "Adw.Carousel is not in the generic widget registry; retained as an explicit custom-widget boundary."
-      },
-      {
-        "code": "renderer-does-not-support-class",
-        "sourceClass": "Adw.CarouselIndicatorDots",
-        "sourceId": "carousel_dots",
-        "message": "Adw.CarouselIndicatorDots is not in the generic widget registry; retained as an explicit custom-widget boundary."
-      },
-      {
-        "code": "renderer-does-not-support-class",
-        "sourceClass": "Adw.Layout",
-        "sourceId": "imported-39",
-        "message": "Adw.Layout is not in the generic widget registry; retained as an explicit custom-widget boundary."
-      },
-      {
-        "code": "renderer-does-not-support-class",
-        "sourceClass": "Adw.MultiLayoutView",
-        "sourceId": "multi_layout_view",
-        "message": "Adw.MultiLayoutView is not in the generic widget registry; retained as an explicit custom-widget boundary."
       },
       {
         "code": "static-source-expansion",

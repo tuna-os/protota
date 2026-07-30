@@ -16,6 +16,24 @@ const CLASS_TO_WIDGET_MAP: Record<string, AdwNodeType> = {
   'Adw.ViewStack': 'view-stack',
   'Adw.ViewSwitcher': 'view-switcher',
   'Adw.NavigationView': 'navigation-view',
+  // NavigationSplitView shares OverlaySplitView's sidebar/content structure.
+  'Adw.NavigationSplitView': 'overlay-split',
+  AdwNavigationSplitView: 'overlay-split',
+  NavigationSplitView: 'overlay-split',
+  'Adw.NavigationPage': 'bin',
+  AdwNavigationPage: 'bin',
+  NavigationPage: 'bin',
+  // MultiLayoutView shows exactly one Layout at a time; Layout bodies are
+  // plain containers and LayoutSlots are placeholders for named children.
+  'Adw.MultiLayoutView': 'stack',
+  'Adw.Layout': 'bin',
+  'Adw.LayoutSlot': 'bin',
+  'Adw.InlineViewSwitcher': 'view-switcher',
+  'Adw.ButtonContent': 'label',
+  'Adw.Carousel': 'box',
+  'Adw.CarouselIndicatorDots': 'bin',
+  'Adw.ViewSwitcherTitle': 'view-switcher',
+  'Adw.ViewSwitcherBar': 'view-switcher',
   'Adw.TabView': 'tab-view',
   'Adw.OverlaySplitView': 'overlay-split',
   'Adw.Clamp': 'clamp',
@@ -111,6 +129,31 @@ const CLASS_TO_WIDGET_MAP: Record<string, AdwNodeType> = {
   Image: 'bin',
   GtkImage: 'bin',
   'Gtk.Image': 'bin',
+  SearchEntry: 'search-entry',
+  GtkSearchEntry: 'search-entry',
+  SearchBar: 'bin',
+  GtkSearchBar: 'bin',
+  'Gtk.SearchBar': 'bin',
+  Switch: 'switch-widget',
+  GtkSwitch: 'switch-widget',
+  CheckButton: 'check-button',
+  GtkCheckButton: 'check-button',
+  SpinButton: 'entry',
+  GtkSpinButton: 'entry',
+  'Gtk.SpinButton': 'entry',
+  Spinner: 'spinner',
+  GtkSpinner: 'spinner',
+  'Gtk.Spinner': 'spinner',
+  Overlay: 'bin',
+  GtkOverlay: 'bin',
+  'Gtk.Overlay': 'bin',
+  Separator: 'bin',
+  GtkSeparator: 'bin',
+  'Gtk.Separator': 'bin',
+  // A plain Gtk.Widget declaration is an empty sizing/styling node.
+  Widget: 'bin',
+  GtkWidget: 'bin',
+  'Gtk.Widget': 'bin',
 };
 
 /**
@@ -119,7 +162,7 @@ const CLASS_TO_WIDGET_MAP: Record<string, AdwNodeType> = {
  * must not receive renderer boxes or count as unresolved visual coverage.
  */
 const NON_VISUAL_CLASS_PATTERN =
-  /^(Gtk\.)?(EventController[A-Za-z]*|Gesture[A-Za-z]*|ShortcutController|Shortcut|DropTarget|DragSource|Adjustment|TextBuffer|EntryBuffer|Popover|PopoverMenu|Tooltip)$/;
+  /^(Gtk\.|Gio\.|Adw\.)?(EventController[A-Za-z]*|Gesture[A-Za-z]*|ShortcutController|Shortcut|DropTarget|DragSource|Adjustment|TextBuffer|EntryBuffer|Popover|PopoverMenu|Tooltip|StringList|ListStore|SizeGroup|FileFilter|SortListModel|FilterListModel|SingleSelection|MultiSelection|NoSelection|SignalListItemFactory|BuilderListItemFactory|Breakpoint)$/;
 
 const WIDGET_CLASS_MAP: Record<string, string> = {
   window: 'Adw.ApplicationWindow',

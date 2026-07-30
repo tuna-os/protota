@@ -57,3 +57,20 @@ test.describe('Remaining features (#9, #16, #18-#24)', () => {
     await expect(page.getByRole('button', { name: /png/i })).toBeVisible();
   });
 });
+
+test.describe("Slot-aware building", () => {
+  test("inspector offers the parent container's named slots", async ({ page }) => {
+    await page.goto("/");
+    await page.waitForSelector("adw-window", { timeout: 10000 });
+
+    // Select a widget inside a header bar; the inspector should offer the
+    // header bar's start/title/end slots.
+    await page.locator(".protota-canvas adw-window-title").first().click({ position: { x: 4, y: 4 } });
+    const selector = page.getByTestId("slot-selector");
+    await expect(selector).toBeVisible();
+    await expect(selector.locator("option")).toContainText(["Default placement", "start", "title", "end"]);
+
+    await selector.locator("select").selectOption("end");
+    await expect(selector.locator("select")).toHaveValue("end");
+  });
+});

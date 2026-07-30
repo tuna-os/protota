@@ -147,7 +147,20 @@ const imported = new MockupBuilder('From Source')
 ```
 
 `MockupBuilder.fromDocument(doc)` continues from any existing document.
-`validate()` checks GNOME HIG child legality before you ship.
+`validate()` checks child legality before you ship.
+
+GNOME layout is slot-driven, so placement is part of adding a widget:
+
+```ts
+MockupBuilder.slotsFor(header-bar);   // [start, title, end]
+MockupBuilder.childrenFor(list-box);  // widgets a boxed list accepts
+
+builder.addWidget(button, { title: Open, slot: start });
+```
+
+A slot the container does not offer is rejected rather than silently placed
+somewhere else. In the editor the same control is the Slot selector at the
+top of the Inspector.
 
 ## In the editor (users)
 

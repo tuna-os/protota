@@ -1,6 +1,7 @@
 import React from "react";
 import { useMockupStore } from "../store/mockupStore";
 import { WIDGET_SCHEMAS } from "../schemas/widgetSchemas";
+import { LEGAL_SLOTS } from "../types/mockup";
 import type { AdwNode } from "../types/mockup";
 import { findNodeById } from "../utils/treeHelpers";
 import { NodeActions } from "./NodeActions";
@@ -14,6 +15,23 @@ export const InspectorPanel: React.FC = () => {
     if (!selectedNodeId || !selectedScreen) return null;
     return findNodeById([selectedScreen.rootNode], selectedNodeId);
   })();
+  // The slot decides where a container places this child — a header bar's
+  // start, a toolbar view's top, a row's suffix. Editable here so users get
+  // the placement control the agent API has.
+  const parentNode: AdwNode | null = (() => {
+    if (!selectedNode || !selectedScreen) return null;
+    const search = (node: AdwNode): AdwNode | null => {
+      if (node.children?.some((child) => child.id === selectedNode.id)) return node;
+      for (const child of node.children ?? []) {
+        const found = search(child);
+        if (found) return found;
+      }
+      return null;
+    };
+    return search(selectedScreen.rootNode);
+  })();
+  const availableSlots: string[] = parentNode ? LEGAL_SLOTS[parentNode.type] ?? [] : [];
+
   // Flow edges belong to the screen containing the selection.
   const showFlowEditor = !!selectedScreen && doc.screens.length > 1;
   const outgoingEdges = showFlowEditor
@@ -78,6 +96,28 @@ export const InspectorPanel: React.FC = () => {
               ))}
             </select>
           )}
+        </div>
+      )}
+
+      {availableSlots.length > 0 && (
+        <div data-testid="slot-selector">
+          <label className="protota-field-label" htmlFor="protota-slot">
+            Slot in {parentNode?.type}
+          </label>
+          <select
+            id="protota-slot"
+            className="protota-input"
+            style={{ width: "100%" }}
+            value={typeof selectedNode.slot === "string" ? selectedNode.slot : ""}
+            onChange={(event) =>
+              updateNodeProps(selectedNode.id, { slot: event.target.value || undefined })
+            }
+          >
+            <option value="">Default placement</option>
+            {availableSlots.map((slot) => (
+              <option key={slot} value={slot}>{slot}</option>
+            ))}
+          </select>
         </div>
       )}
 

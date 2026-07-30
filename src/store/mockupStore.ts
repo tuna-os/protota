@@ -265,7 +265,7 @@ interface MockupState {
 
   selectNode: (nodeId: string | null, screenId?: string) => void;
   updateNodeProps: (nodeId: string, props: Partial<AdwNode>) => void;
-  addChildNode: (parentId: string, type: AdwNodeType) => void;
+  addChildNode: (parentId: string, type: AdwNodeType, slot?: string) => void;
   addScreen: (title: string, type: ScreenTemplateType) => void;
   moveNodeUp: (nodeId: string) => void;
   moveNodeDown: (nodeId: string) => void;
@@ -343,13 +343,16 @@ export const useMockupStore = create<MockupState>((set, get) => {
       set(pushSnapshot(nextDoc));
     },
 
-    addChildNode: (parentId, childType) => {
+    addChildNode: (parentId, childType, slot) => {
       const nextDoc = produce(get().doc, (draft) => {
         const label = childType.replace(/-/g, ' ');
         const newNode: AdwNode = {
           id: uid('node'),
           type: childType,
           title: label.charAt(0).toUpperCase() + label.slice(1),
+          // A named slot decides where a container puts the child, so it is
+          // part of creating it rather than an edit afterwards.
+          ...(slot ? { slot } : {}),
         };
         const addTo = (node: AdwNode): boolean => {
           if (node.id === parentId) {

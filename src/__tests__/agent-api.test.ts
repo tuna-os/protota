@@ -126,3 +126,31 @@ describe('MockupBuilder', () => {
     expect(parsedNode.children?.length).toBeGreaterThan(0);
   });
 });
+
+describe('MockupBuilder slot placement', () => {
+  it('places a widget in a named slot', () => {
+    const doc = new MockupBuilder('Slots')
+      .addScreen('standard', 'Main')
+      .addWidget('toolbar-view')
+      .addWidget('header-bar')
+      .addWidget('button', { title: 'Open', slot: 'start' })
+      .build();
+    const header = doc.screens[0].rootNode.children?.[0].children?.[0];
+    expect(header?.children?.[0]).toMatchObject({ type: 'button', title: 'Open', slot: 'start' });
+  });
+
+  it('rejects a slot the container does not offer', () => {
+    const builder = new MockupBuilder('Slots')
+      .addScreen('standard', 'Main')
+      .addWidget('toolbar-view')
+      .addWidget('header-bar');
+    expect(() => builder.addWidget('button', { slot: 'sidebar' })).toThrow(/not a slot/);
+  });
+
+  it('reports the slots and children a container offers', () => {
+    expect(MockupBuilder.slotsFor('header-bar')).toEqual(['start', 'title', 'end']);
+    expect(MockupBuilder.slotsFor('label')).toEqual([]);
+    expect(MockupBuilder.childrenFor('window-title')).toEqual([]);
+    expect(MockupBuilder.childrenFor('list-box')).toContain('action-row');
+  });
+});

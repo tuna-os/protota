@@ -1,10 +1,13 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { App } from './components/App';
-import './index.css';
 
-// Import Adwaita web components (CSS + custom elements self-apply)
+// Adwaita web components first — their stylesheet self-applies on import —
+// then ours. Our sheet is the override layer, so equal-specificity rules
+// (AdwClamp fill semantics, StatusPage metrics) must come last in the
+// cascade to win.
 import '@gjsify/adwaita-web';
+import './index.css';
 import { publishIconVariables, restoreStoredSourceIcons } from './utils/adwIcons';
 import { installVariableAdwaitaFonts } from './fonts';
 

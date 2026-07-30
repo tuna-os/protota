@@ -10,6 +10,8 @@ const presetId = process.env.BROADWAY_PRESET_ID || 'calculator';
 const appId = process.env.BROADWAY_APP_ID || presetId;
 const sourceRoot = process.env.BROADWAY_SOURCE_ROOT;
 const sourceEntry = process.env.BROADWAY_SOURCE_ENTRY;
+// Which screen of a multi-screen preset depicts the captured native window.
+const screenId = process.env.BROADWAY_SCREEN_ID;
 const viewport = {
   width: Number(process.env.BROADWAY_VIEWPORT_WIDTH || 410),
   height: Number(process.env.BROADWAY_VIEWPORT_HEIGHT || 666),
@@ -117,12 +119,18 @@ test.describe('Broadway reference captures', () => {
     const reference = PNG.sync.read(broadwayPng);
     const sourceDocument = sourceBundleDocument();
     await page.goto('/');
-    await page.evaluate(async ({ id, width, height, document }) => {
+    await page.evaluate(async ({ id, width, height, document, screenId }) => {
       const preset = document ? { document } : await fetch(`./presets/${id}.mockup.json`).then(response => response.json());
+      // A preset may hold several screens (mode variants, dialogs); compare
+      // exactly one against the native window it depicts.
+      const chosen = preset.document.screens.find((screen: { id: string }) => screen.id === screenId)
+        ?? preset.document.screens[0];
+      preset.document.screens = [chosen];
+      preset.document.edges = [];
       // Render the editable document at the native app surface dimensions.
       // This is a renderer contract, not an app-specific layout adjustment.
-      preset.document.screens[0].width = width;
-      preset.document.screens[0].height = height;
+      chosen.width = width;
+      chosen.height = height;
       // The editor persists an edited document as Blueprint source under its
       // own key, which takes precedence over this injected JSON document.
       // Clear it so the comparison always renders this run's import.
@@ -130,7 +138,7 @@ test.describe('Broadway reference captures', () => {
       localStorage.setItem('protota_doc_v1', JSON.stringify(preset.document));
       // App-shipped artwork embedded by the preset generator.
       if (preset.sourceIcons) localStorage.setItem('protota_source_icons_v1', JSON.stringify(preset.sourceIcons));
-    }, { id: presetId, width: reference.width, height: reference.height, document: sourceDocument });
+    }, { id: presetId, width: reference.width, height: reference.height, document: sourceDocument, screenId });
     await page.reload();
     // The comparison target is the application render surface.  Explicitly
     // switch off editor-only chrome that may otherwise be positioned above it.

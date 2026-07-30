@@ -25,7 +25,8 @@ const CLASS_TO_WIDGET_MAP: Record<string, AdwNodeType> = {
   NavigationPage: 'bin',
   // MultiLayoutView shows exactly one Layout at a time; Layout bodies are
   // plain containers and LayoutSlots are placeholders for named children.
-  'Adw.MultiLayoutView': 'stack',
+  // Their identity survives via sourceClass so import can resolve slots.
+  'Adw.MultiLayoutView': 'bin',
   'Adw.Layout': 'bin',
   'Adw.LayoutSlot': 'bin',
   'Adw.InlineViewSwitcher': 'view-switcher',
@@ -147,6 +148,10 @@ const CLASS_TO_WIDGET_MAP: Record<string, AdwNodeType> = {
   Overlay: 'bin',
   GtkOverlay: 'bin',
   'Gtk.Overlay': 'bin',
+  Revealer: 'bin',
+  'Gtk.Revealer': 'bin',
+  WindowHandle: 'bin',
+  'Gtk.WindowHandle': 'bin',
   Separator: 'bin',
   GtkSeparator: 'bin',
   'Gtk.Separator': 'bin',
@@ -360,6 +365,17 @@ function propertyNameForNode(rawName: string, nodeType: AdwNodeType): string {
   return rawName.replace(/-([a-z])/g, (_, letter: string) => letter.toUpperCase());
 }
 
+/** GtkBuilder spells classes as GObject names (`AdwActionRow`); Blueprint as
+ * namespaced names (`Adw.ActionRow`). Both resolve to one canonical entry. */
+function canonicalClassName(rawClass: string): string {
+  const gobject = /^(Adw|Gtk|GtkSource|Gio)([A-Z][A-Za-z0-9]*)$/.exec(rawClass);
+  return gobject ? `${gobject[1]}.${gobject[2]}` : rawClass;
+}
+
+function isNonVisualClass(rawClass: string): boolean {
+  return NON_VISUAL_CLASS_PATTERN.test(rawClass) || NON_VISUAL_CLASS_PATTERN.test(canonicalClassName(rawClass));
+}
+
 function makeNode(
   rawClass: string,
   id: string,
@@ -370,7 +386,7 @@ function makeNode(
 ): AdwNode {
   const isTemplateReference = rawClass.startsWith('$');
   const sourceClass = isTemplateReference ? rawClass.slice(1) : rawClass;
-  const type = isTemplateReference ? undefined : CLASS_TO_WIDGET_MAP[rawClass];
+  const type = isTemplateReference ? undefined : CLASS_TO_WIDGET_MAP[rawClass] ?? CLASS_TO_WIDGET_MAP[canonicalClassName(rawClass)];
   const node: AdwNode = { id, type: type ?? 'custom-widget', children };
   // A silent fallback or a dropped sibling makes an imported GNOME UI look
   // plausible while being structurally wrong. An unmapped class survives as
@@ -400,6 +416,11 @@ function makeNode(
   // GTK's default GtkBox orientation is horizontal; the renderer's editing
   // default is vertical. Imported boxes must carry GTK's semantics.
   if (node.type === 'box' && node.orientation === undefined) node.orientation = 'horizontal';
+  // MultiLayoutView machinery keeps its identity for slot resolution.
+  const canonical = canonicalClassName(sourceClass);
+  if (canonical === 'Adw.MultiLayoutView' || canonical === 'Adw.Layout' || canonical === 'Adw.LayoutSlot') {
+    node.sourceClass = canonical;
+  }
   if (Object.keys(bindings).length) node.bindings = bindings;
   return node;
 }
@@ -554,7 +575,7 @@ function parseBlueprintRoots(code: string, diagnostics: ImportDiagnostic[]): Adw
       cursor++;
     }
     if (tokens[cursor]?.value === '}') cursor++;
-    if (NON_VISUAL_CLASS_PATTERN.test(rawClass)) return null;
+    if (isNonVisualClass(rawClass)) return null;
     return makeNode(rawClass, id, properties, bindings, children, diagnostics);
   };
 
@@ -581,33 +602,200 @@ function parseBlueprintRoots(code: string, diagnostics: ImportDiagnostic[]): Adw
   return parseBlock();
 }
 
-function parseGtkBuilderRoots(code: string, diagnostics: ImportDiagnostic[]): AdwNode[] {
-  const roots: AdwNode[] = [];
-  const stack: AdwNode[] = [];
-  let generatedId = 0;
-  const addNode = (node: AdwNode) => {
-    if (stack.length) (stack[stack.length - 1].children ||= []).push(node);
-    else roots.push(node);
-    stack.push(node);
-  };
-  const tagPattern = /<object\s+([^>]+)>|<\/object>|<property\s+name=["']([^"']+)["'][^>]*>([\s\S]*?)<\/property>/g;
+// ---------------------------------------------------------------------------
+// GtkBuilder XML import
+// ---------------------------------------------------------------------------
+
+interface XmlElement {
+  tag: string;
+  attributes: Record<string, string>;
+  children: XmlElement[];
+  text: string;
+}
+
+function decodeXmlEntities(text: string): string {
+  return text
+    .replace(/&#x([0-9a-fA-F]+);/g, (_, hex: string) => String.fromCodePoint(parseInt(hex, 16)))
+    .replace(/&#(\d+);/g, (_, dec: string) => String.fromCodePoint(Number(dec)))
+    .replace(/&lt;/g, '<').replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"').replace(/&apos;/g, "'")
+    .replace(/&amp;/g, '&');
+}
+
+/** Minimal structural XML parser — elements, attributes, text, comments. */
+function parseXmlElements(code: string): XmlElement[] {
+  const roots: XmlElement[] = [];
+  const stack: XmlElement[] = [];
+  const tagPattern = /<!--[\s\S]*?-->|<!\[CDATA\[[\s\S]*?\]\]>|<\?[\s\S]*?\?>|<!DOCTYPE[^>]*>|<\/?[A-Za-z_][\w.:-]*(?:\s+[^<>]*?)?\/?>|[^<]+/g;
+  const attrPattern = /([\w.:-]+)\s*=\s*"([^"]*)"|([\w.:-]+)\s*=\s*'([^']*)'/g;
   for (const match of code.matchAll(tagPattern)) {
-    if (match[0] === '</object>') { stack.pop(); continue; }
-    if (match[1]) {
-      const className = /class=["']([^"']+)["']/.exec(match[1])?.[1];
-      if (!className) continue;
-      const id = /id=["']([^"']+)["']/.exec(match[1])?.[1] || `imported-${++generatedId}`;
-      addNode(makeNode(className, id, {}, {}, [], diagnostics));
+    const chunk = match[0];
+    if (chunk.startsWith('<!--') || chunk.startsWith('<?') || chunk.startsWith('<!DOCTYPE')) continue;
+    if (chunk.startsWith('<![CDATA[')) {
+      const parent = stack[stack.length - 1];
+      if (parent) parent.text += chunk.slice(9, -3);
       continue;
     }
-    const current = stack[stack.length - 1];
-    if (current && match[2]) {
-      const raw = match[3].trim();
-      const value: BlueprintValue = raw === 'true' ? true : raw === 'false' ? false : /^-?\d+(\.\d+)?$/.test(raw) ? Number(raw) : raw;
-      current[propertyNameForNode(match[2], current.type)] = value;
+    if (!chunk.startsWith('<')) {
+      const parent = stack[stack.length - 1];
+      if (parent) parent.text += decodeXmlEntities(chunk);
+      continue;
     }
+    if (chunk.startsWith('</')) { stack.pop(); continue; }
+    const tag = /^<([A-Za-z_][\w.:-]*)/.exec(chunk)![1];
+    const attributes: Record<string, string> = {};
+    for (const attr of chunk.matchAll(attrPattern)) {
+      attributes[attr[1] ?? attr[3]] = decodeXmlEntities(attr[2] ?? attr[4] ?? '');
+    }
+    const element: XmlElement = { tag, attributes, children: [], text: '' };
+    (stack[stack.length - 1]?.children ?? roots).push(element);
+    if (!chunk.endsWith('/>')) stack.push(element);
   }
   return roots;
+}
+
+function builderScalar(raw: string): BlueprintValue {
+  const text = raw.trim();
+  if (text === 'true' || text === 'True') return true;
+  if (text === 'false' || text === 'False') return false;
+  return /^-?\d+(\.\d+)?$/.test(text) ? Number(text) : text;
+}
+
+/**
+ * Project a GtkBuilder <object>/<template> element to a renderer node.
+ * Structure-preserving: child roles become slots, object-valued properties
+ * become slotted children, style classes and layout properties project onto
+ * the node, and unknown classes survive as explicit boundaries.
+ */
+function builderElementToNode(
+  element: XmlElement,
+  diagnostics: ImportDiagnostic[],
+  nextId: () => string,
+): AdwNode | null {
+  const rawClass = element.tag === 'template'
+    ? element.attributes.parent ?? element.attributes.class ?? 'GtkWidget'
+    : element.attributes.class ?? 'GtkWidget';
+  if (isNonVisualClass(rawClass)) return null;
+  const id = element.attributes.id ?? nextId();
+  const properties: Record<string, BlueprintValue> = {};
+  const bindings: Record<string, string> = {};
+  const children: AdwNode[] = [];
+
+  for (const child of element.children) {
+    if (child.tag === 'property') {
+      const name = child.attributes.name;
+      if (!name) continue;
+      const objectValue = child.children.find(inner => inner.tag === 'object');
+      if (objectValue) {
+        const node = builderElementToNode(objectValue, diagnostics, nextId);
+        if (node) children.push({ ...node, slot: name });
+      } else if (child.attributes['bind-source']) {
+        bindings[name] = `${child.attributes['bind-source']}.${child.attributes['bind-property'] ?? name}`;
+      } else {
+        properties[name] = builderScalar(child.text);
+      }
+      continue;
+    }
+    if (child.tag === 'binding') {
+      const name = child.attributes.name;
+      if (name) bindings[name] = child.text.trim() || 'expression';
+      continue;
+    }
+    if (child.tag === 'child') {
+      const slot = child.attributes.type;
+      for (const inner of child.children) {
+        if (inner.tag !== 'object' && inner.tag !== 'placeholder') continue;
+        if (inner.tag === 'placeholder') continue;
+        const node = builderElementToNode(inner, diagnostics, nextId);
+        if (node) children.push(slot ? { ...node, slot } : node);
+      }
+      continue;
+    }
+    if (child.tag === 'style') {
+      for (const styleClass of child.children) {
+        const name = styleClass.attributes.name;
+        if (name === 'suggested-action') properties.suggested = true;
+        if (name === 'destructive-action') properties.destructive = true;
+        if (name === 'flat') properties.flat = true;
+        if (name === 'circular') properties.circular = true;
+      }
+      continue;
+    }
+    if (child.tag === 'layout') {
+      for (const layoutProperty of child.children) {
+        const name = layoutProperty.attributes.name;
+        if (!name) continue;
+        properties[name] = builderScalar(layoutProperty.text);
+      }
+      continue;
+    }
+    // <signal>, <accessibility>, <attributes>, <items>… are non-structural.
+  }
+  return makeNode(rawClass, id, properties, bindings, children, diagnostics);
+}
+
+function parseGtkBuilderRoots(code: string, diagnostics: ImportDiagnostic[]): AdwNode[] {
+  let generatedId = 0;
+  const nextId = () => `imported-${++generatedId}`;
+  const roots: AdwNode[] = [];
+  const visit = (elements: XmlElement[]) => {
+    for (const element of elements) {
+      if (element.tag === 'interface') { visit(element.children); continue; }
+      if (element.tag === 'object' || element.tag === 'template') {
+        const node = builderElementToNode(element, diagnostics, nextId);
+        if (node) roots.push(node);
+      }
+      // <menu>, <requires>… are non-visual at the interface level.
+    }
+  };
+  visit(parseXmlElements(code));
+  return roots;
+}
+
+/**
+ * GtkBuilder composite templates: an <object class="EditorPage"> instance
+ * resolves against a <template class="EditorPage" parent="…"> defined in
+ * another .ui file of the same bundle — the XML equivalent of Blueprint's
+ * `$Class` template linking.
+ */
+function collectBuilderTemplates(files: BlueprintSourceFile[], diagnostics: ImportDiagnostic[]): Map<string, AdwNode> {
+  const templates = new Map<string, AdwNode>();
+  let generatedId = 0;
+  const nextId = () => `template-imported-${++generatedId}`;
+  for (const file of files) {
+    if (!/<template[\s>]/.test(file.content)) continue;
+    const visit = (elements: XmlElement[]) => {
+      for (const element of elements) {
+        if (element.tag === 'interface') { visit(element.children); continue; }
+        if (element.tag !== 'template') continue;
+        const className = element.attributes.class;
+        if (!className) continue;
+        const node = builderElementToNode(element, diagnostics, nextId);
+        if (node) templates.set(className, node);
+      }
+    };
+    visit(parseXmlElements(file.content));
+  }
+  return templates;
+}
+
+function resolveBuilderTemplates(node: AdwNode, templates: Map<string, AdwNode>, seen: ReadonlySet<string>, resolved: Set<string>): void {
+  node.children?.forEach(child => resolveBuilderTemplates(child, templates, seen, resolved));
+  if (node.type !== 'custom-widget' || !node.sourceClass || node.children?.length) return;
+  const template = templates.get(node.sourceClass);
+  if (!template || seen.has(node.sourceClass)) return;
+  resolved.add(`${node.sourceClass}:${node.id}`);
+  const projected = structuredClone(template);
+  node.type = projected.type;
+  node.children = projected.children ?? [];
+  if (node.title === node.sourceClass) delete node.title;
+  for (const [key, value] of Object.entries(projected)) {
+    if (key === 'id' || key === 'slot' || key === 'children' || node[key] !== undefined) continue;
+    node[key] = value;
+  }
+  const nested = new Set(seen);
+  nested.add(node.sourceClass!);
+  node.children?.forEach(child => resolveBuilderTemplates(child, templates, nested, resolved));
 }
 
 export interface BlueprintImportResult {
@@ -623,7 +811,9 @@ export interface BlueprintImportResult {
  */
 export function blueprintImport(code: string): BlueprintImportResult {
   const diagnostics: ImportDiagnostic[] = [];
-  const roots = /<object\s/.test(code) ? parseGtkBuilderRoots(code, diagnostics) : parseBlueprintRoots(code, diagnostics);
+  const roots = /<(interface|object|template)[\s>]/.test(code)
+    ? parseGtkBuilderRoots(code, diagnostics)
+    : parseBlueprintRoots(code, diagnostics);
   if (!roots.length) throw new Error('No GTK or Libadwaita widgets found in the supplied code.');
   return { roots, diagnostics };
 }
@@ -639,8 +829,45 @@ export function blueprintToNode(code: string): AdwNode {
 }
 
 /** Import all top-level widgets as editable screens in a Protota document. */
+/**
+ * Adw.MultiLayoutView shows one Adw.Layout at a time; every Adw.LayoutSlot in
+ * that layout renders the sibling child whose slot name (or builder ID)
+ * matches. Project the first declared layout — libadwaita's default — and
+ * substitute its slots with the named children.
+ */
+function resolveMultiLayoutViews(node: AdwNode): void {
+  node.children?.forEach(resolveMultiLayoutViews);
+  if (node.sourceClass !== 'Adw.MultiLayoutView' || !node.children?.length) return;
+  const layouts = node.children.filter(child => child.sourceClass === 'Adw.Layout');
+  if (!layouts.length) return;
+  const fillers = node.children.filter(child => child.sourceClass !== 'Adw.Layout');
+  const active = structuredClone(layouts[0]);
+  const substitute = (host: AdwNode): void => {
+    if (!host.children) return;
+    host.children = host.children.map(child => {
+      if (child.sourceClass === 'Adw.LayoutSlot') {
+        const slotName = String(child.id ?? '');
+        const filler = fillers.find(candidate => candidate.slot === slotName || candidate.id === slotName);
+        if (filler) return { ...filler, slot: child.slot };
+        return child;
+      }
+      substitute(child);
+      return child;
+    });
+  };
+  substitute(active);
+  node.children = active.children ?? [];
+  delete node.sourceClass;
+}
+
 export function blueprintToDocument(code: string, title = 'Imported GNOME App'): MockupDocument {
-  const { roots, diagnostics } = blueprintImport(code);
+  const { roots: allRoots, diagnostics } = blueprintImport(code);
+  // Real UI files declare popovers, panels, and helper widgets as siblings of
+  // the window; when a window-like root exists, it is the document's screen.
+  const windowRoots = allRoots.filter(root =>
+    root.type === 'window' || root.type === 'dialog' || root.type === 'preferences-dialog' || root.type === 'about-dialog');
+  const roots = windowRoots.length ? windowRoots : allRoots;
+  roots.forEach(resolveMultiLayoutViews);
   const inferType = (root: AdwNode): ScreenTemplateType => root.type === 'preferences-dialog' ? 'preferences' : root.type === 'dialog' ? 'dialog' : 'standard';
   const screens: Screen[] = roots.map((root, index) => ({
     id: `imported-screen-${index + 1}`,
@@ -838,8 +1065,24 @@ export function blueprintBundleToDocument(files: BlueprintSourceFile[], entryPat
   const entry = declarativeFiles.find(file => file.path === entryPath || file.path.endsWith(`/${entryPath}`));
   if (!entry) throw new Error(`Blueprint entry file not found in source bundle: ${entryPath}`);
   const templates = collectTemplates(declarativeFiles);
-  const expanded = expandBundleTemplates(entry.content, templates);
-  const doc = blueprintToDocument(expanded, title || entry.path.replace(/^.*\//, '').replace(/\.blp$/i, ''));
+  const documentTitle = title || entry.path.replace(/^.*\//, '').replace(/\.(blp|ui)$/i, '');
+  let doc: MockupDocument;
+  if (/\.ui$/i.test(entry.path)) {
+    // GtkBuilder bundle: parse the entry, then resolve composite-template
+    // instances against <template> definitions from the other .ui files.
+    doc = blueprintToDocument(entry.content, documentTitle);
+    const diagnostics = doc.importDiagnostics ?? (doc.importDiagnostics = []);
+    const builderTemplates = collectBuilderTemplates(declarativeFiles.filter(file => file !== entry), diagnostics);
+    const resolvedKeys = new Set<string>();
+    doc.screens.forEach(screen => resolveBuilderTemplates(screen.rootNode, builderTemplates, new Set(), resolvedKeys));
+    // A resolved composite instance is no longer an unresolved boundary,
+    // whichever boundary code the parse assigned it.
+    doc.importDiagnostics = diagnostics.filter(d => d.code === 'static-source-expansion' || !resolvedKeys.has(`${d.sourceClass}:${d.sourceId}`));
+  } else {
+    doc = blueprintToDocument(expandBundleTemplates(entry.content, templates), documentTitle);
+  }
   if (valaFiles.length) enrichWithValaFacts(doc, valaFiles, templates);
+  // Template resolution and enrichment can introduce MultiLayoutView bodies.
+  doc.screens.forEach(screen => resolveMultiLayoutViews(screen.rootNode));
   return doc;
 }

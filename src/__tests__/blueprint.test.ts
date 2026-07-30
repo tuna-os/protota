@@ -234,6 +234,32 @@ describe('Blueprint import', () => {
     });
   });
 
+  it('imports GtkBuilder child roles, styles, layout, and cross-file composite templates', () => {
+    const doc = blueprintBundleToDocument([
+      { path: 'window.ui', content: `<interface>
+        <object class="AdwApplicationWindow" id="window">
+          <child><object class="AdwToolbarView" id="toolbar">
+            <child type="top"><object class="AdwHeaderBar" id="header"/></child>
+            <property name="content"><object class="EditorPage" id="page"/></property>
+          </object></child>
+        </object></interface>` },
+      { path: 'page.ui', content: `<interface><template class="EditorPage" parent="GtkBox">
+        <property name="orientation">vertical</property>
+        <child><object class="GtkButton" id="go"><property name="label">Go &amp; Run</property>
+          <style><class name="suggested-action"/></style>
+          <layout><property name="column">2</property></layout>
+        </object></child></template></interface>` },
+    ], 'window.ui');
+
+    const toolbar = doc.screens[0].rootNode.children?.[0];
+    expect(toolbar).toMatchObject({ id: 'toolbar', type: 'toolbar-view' });
+    expect(toolbar?.children?.[0]).toMatchObject({ id: 'header', type: 'header-bar', slot: 'top' });
+    const page = toolbar?.children?.[1];
+    expect(page).toMatchObject({ id: 'page', slot: 'content', type: 'box', sourceClass: 'EditorPage', orientation: 'vertical' });
+    expect(page?.children?.[0]).toMatchObject({ id: 'go', type: 'button', title: 'Go & Run', suggested: true, column: 2 });
+    expect(doc.importDiagnostics).toEqual([]);
+  });
+
   it.skipIf(!process.env.OFFICIAL_SOURCE_ROOT)('imports the official Calculator Blueprint bundle without a hand-authored preset', () => {
     const sourceRoot = process.env.OFFICIAL_SOURCE_ROOT!;
     const files = readdirSync(sourceRoot, { recursive: true, withFileTypes: true })

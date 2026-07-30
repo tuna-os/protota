@@ -1,0 +1,8 @@
+{
+  "title": "GNOME Text Editor",
+  "screen": { "title": "Text Editor", "width": 950, "height": 700 },
+  "overrides": [
+    { "id": "imported-2", "set": { "visible": false },
+      "why": "The properties sidebar (slot 'properties') is toggled at runtime and hidden on first launch." }
+  ]
+}

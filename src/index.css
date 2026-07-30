@@ -261,7 +261,8 @@ body,
  * from overlaying an otherwise correctly sized window. */
 :root[data-protota-capture="true"] .protota-zoom-bar,
 :root[data-protota-capture="true"] .protota-screen-label,
-:root[data-protota-capture="true"] .protota-type-badge {
+:root[data-protota-capture="true"] .protota-type-badge,
+:root[data-protota-capture="true"] .protota-panel {
   display: none !important;
 }
 

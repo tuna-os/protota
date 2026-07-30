@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exportedAt": "2026-07-30T02:41:36.210Z",
+  "exportedAt": "2026-07-30T02:59:42.704Z",
   "generatedBy": "scripts/generate-preset.mjs",
   "document": {
     "id": "imported-document",
@@ -137,136 +137,39 @@
                                           "children": [
                                             {
                                               "id": "layout_view",
-                                              "type": "stack",
+                                              "type": "bin",
                                               "children": [
                                                 {
-                                                  "id": "imported-14",
-                                                  "type": "bin",
+                                                  "id": "imported-15",
+                                                  "type": "grid",
                                                   "children": [
                                                     {
-                                                      "id": "imported-15",
-                                                      "type": "grid",
-                                                      "children": [
-                                                        {
-                                                          "id": "icon",
-                                                          "type": "bin",
-                                                          "children": [],
-                                                          "column": 0,
-                                                          "row": 0
-                                                        },
-                                                        {
-                                                          "id": "labels",
-                                                          "type": "bin",
-                                                          "children": [],
-                                                          "column": 1,
-                                                          "row": 0
-                                                        },
-                                                        {
-                                                          "id": "buttons",
-                                                          "type": "bin",
-                                                          "children": [],
-                                                          "column": 2,
-                                                          "row": 0
-                                                        }
-                                                      ],
-                                                      "columnSpacing": 12,
-                                                      "slot": "content"
-                                                    }
-                                                  ],
-                                                  "name": "horizontal"
-                                                },
-                                                {
-                                                  "id": "imported-19",
-                                                  "type": "bin",
-                                                  "children": [
-                                                    {
-                                                      "id": "imported-20",
-                                                      "type": "box",
-                                                      "children": [
-                                                        {
-                                                          "id": "icon",
-                                                          "type": "bin",
-                                                          "children": []
-                                                        },
-                                                        {
-                                                          "id": "labels",
-                                                          "type": "bin",
-                                                          "children": []
-                                                        },
-                                                        {
-                                                          "id": "buttons",
-                                                          "type": "bin",
-                                                          "children": [],
-                                                          "halign": "center"
-                                                        }
-                                                      ],
-                                                      "orientation": "vertical",
-                                                      "hexpand": true,
-                                                      "spacing": 12,
-                                                      "slot": "content"
-                                                    }
-                                                  ],
-                                                  "name": "vertical"
-                                                },
-                                                {
-                                                  "id": "drive_image",
-                                                  "type": "bin",
-                                                  "children": [],
-                                                  "pixelSize": 96
-                                                },
-                                                {
-                                                  "id": "imported-24",
-                                                  "type": "box",
-                                                  "children": [
-                                                    {
-                                                      "id": "imported-25",
-                                                      "type": "label",
+                                                      "id": "icon",
+                                                      "type": "bin",
                                                       "children": [],
-                                                      "wrap": true,
-                                                      "bindings": {
-                                                        "halign": "$get_alignment_from_layout_name layout_view.layout-name",
-                                                        "label": "$GduDriveHeader.drive-name"
-                                                      }
+                                                      "column": 0,
+                                                      "row": 0,
+                                                      "sourceClass": "Adw.LayoutSlot"
                                                     },
                                                     {
-                                                      "id": "imported-26",
-                                                      "type": "label",
+                                                      "id": "labels",
+                                                      "type": "bin",
                                                       "children": [],
-                                                      "wrap": true,
-                                                      "bindings": {
-                                                        "halign": "$get_alignment_from_layout_name layout_view.layout-name",
-                                                        "label": "$GduDriveHeader.drive-path"
-                                                      }
-                                                    }
-                                                  ],
-                                                  "orientation": "vertical",
-                                                  "hexpand": true,
-                                                  "valign": "center"
-                                                },
-                                                {
-                                                  "id": "imported-27",
-                                                  "type": "box",
-                                                  "children": [
-                                                    {
-                                                      "id": "imported-28",
-                                                      "type": "button",
-                                                      "children": [],
-                                                      "tooltipText": "Drive Information",
-                                                      "iconName": "help-about-symbolic",
-                                                      "actionName": "view.show-drive-dialog"
+                                                      "column": 1,
+                                                      "row": 0,
+                                                      "sourceClass": "Adw.LayoutSlot"
                                                     },
                                                     {
-                                                      "id": "imported-29",
-                                                      "type": "menu-button",
+                                                      "id": "buttons",
+                                                      "type": "bin",
                                                       "children": [],
-                                                      "tooltipText": "Drive Options",
-                                                      "menuModel": "drive_menu",
-                                                      "iconName": "view-more-symbolic"
+                                                      "column": 2,
+                                                      "row": 0,
+                                                      "sourceClass": "Adw.LayoutSlot"
                                                     }
                                                   ],
-                                                  "valign": "center",
-                                                  "spacing": 12,
-                                                  "orientation": "horizontal"
+                                                  "columnSpacing": 12,
+                                                  "slot": "content"
                                                 }
                                               ],
                                               "slot": "child"
@@ -320,22 +223,6 @@
               "sidebarWidthFraction": 0.3
             }
           ]
-        }
-      },
-      {
-        "id": "imported-screen-2",
-        "title": "disks 2",
-        "type": "standard",
-        "width": 1024,
-        "height": 720,
-        "rootNode": {
-          "id": "readonly_check_button",
-          "type": "check-button",
-          "children": [],
-          "label": "Set up _read-only loop device",
-          "tooltipMarkup": "If checked, the loop device will be read-only. This is useful if you don’t want the underlying file to be modified",
-          "useUnderline": true,
-          "active": true
         }
       }
     ],

@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exportedAt": "2026-07-30T02:41:35.133Z",
+  "exportedAt": "2026-07-30T02:59:45.130Z",
   "generatedBy": "scripts/generate-preset.mjs",
   "document": {
     "id": "imported-document",
@@ -144,22 +144,6 @@
           ],
           "defaultWidth": 980,
           "defaultHeight": 640
-        }
-      },
-      {
-        "id": "imported-screen-2",
-        "title": "settings 2",
-        "type": "standard",
-        "width": 1024,
-        "height": 720,
-        "rootNode": {
-          "id": "development_warning_dialog",
-          "type": "alert-dialog",
-          "children": [],
-          "heading": "Warning: Development Version",
-          "body": "This version of Settings should only be used for development purposes. You may experience incorrect system behavior, data loss, and other unexpected issues. ",
-          "defaultResponse": "ok",
-          "closeResponse": "ok"
         }
       }
     ],

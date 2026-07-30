@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exportedAt": "2026-07-30T02:41:34.084Z",
+  "exportedAt": "2026-07-30T02:59:43.977Z",
   "generatedBy": "scripts/generate-preset.mjs",
   "document": {
     "id": "imported-document",
@@ -1230,21 +1230,6 @@
       {
         "id": "imported-screen-2",
         "title": "calendar 2",
-        "type": "standard",
-        "width": 1024,
-        "height": 720,
-        "rootNode": {
-          "id": "view_switcher_narrow",
-          "type": "view-switcher",
-          "children": [],
-          "flat": true,
-          "stack": "views_stack",
-          "displayMode": "icons"
-        }
-      },
-      {
-        "id": "imported-screen-3",
-        "title": "calendar 3",
         "type": "dialog",
         "width": 1024,
         "height": 720,

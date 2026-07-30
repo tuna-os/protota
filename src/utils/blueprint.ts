@@ -1,5 +1,6 @@
 import type { MockupDocument, AdwNode, AdwNodeType, ImportDiagnostic, Screen, ScreenTemplateType } from '../types/mockup';
 import { extractValaFacts, type ValaClassFacts } from './vala';
+import { GTK_PROPERTY_DATA } from '../data/gtkProperties';
 
 export type { ImportDiagnostic } from '../types/mockup';
 
@@ -342,6 +343,36 @@ const INTERNAL_PROPERTIES = new Set([
   'pages', 'imageId', 'options', 'breakpointCondition',
 ]);
 
+/**
+ * Properties a class accepts, from GObject introspection data, including
+ * everything inherited from its parents. Emitting a property a class does not
+ * have is the single largest cause of exported Blueprint failing to compile,
+ * and no amount of careful guessing substitutes for the toolkit's own answer.
+ */
+const propertyCache = new Map<string, Set<string>>();
+function propertiesOf(className: string): Set<string> | null {
+  const cached = propertyCache.get(className);
+  if (cached) return cached;
+  const data = GTK_PROPERTY_DATA;
+  const table = data.classes;
+  if (!table[className]) return null;
+  const names = new Set<string>();
+  let current: string | null = className;
+  const seen = new Set<string>();
+  while (current && table[current] && !seen.has(current)) {
+    seen.add(current);
+    for (const property of table[current].properties) names.add(property);
+    // Interfaces carry properties as well: GtkBox takes `orientation` from
+    // GtkOrientable rather than from its parent chain.
+    for (const iface of table[current].implements ?? []) {
+      for (const property of data.interfaces[iface] ?? []) names.add(property);
+    }
+    current = table[current].parent;
+  }
+  propertyCache.set(className, names);
+  return names;
+}
+
 /** Grid placement is emitted inside the child's `layout` block, not inline. */
 const LAYOUT_PROPERTIES = new Set(['column', 'row', 'column-span', 'row-span']);
 
@@ -352,7 +383,13 @@ function exportPropertyName(key: string): string {
 function formatPropertyValue(name: string, value: unknown): string {
   if (typeof value === 'boolean' || typeof value === 'number') return String(value);
   const text = String(value);
-  if (!STRING_PROPERTIES.has(name) && /^[a-z][a-z0-9_]*(-[a-z0-9_]+)*$/.test(text)) return text;
+  if (!STRING_PROPERTIES.has(name)) {
+    // GtkBuilder writes every value as text, so a numeric property arrives as
+    // a string; emitting it quoted is rejected ("Cannot convert string to
+    // number").
+    if (/^-?\d+(\.\d+)?$/.test(text)) return text;
+    if (/^[a-z][a-z0-9_]*(-[a-z0-9_]+)*$/.test(text)) return text;
+  }
   // An object reference is an identifier, not a string literal.
   if (OBJECT_REFERENCE_PROPERTIES.has(name) && /^[A-Za-z_][\w-]*$/.test(text)) return text;
   return `"${escapeBlueprintString(text)}"`;
@@ -388,6 +425,7 @@ function nodeToBlueprint(node: AdwNode, depth: number = 0, context?: ExportConte
       : WIDGET_CLASS_MAP[node.type] || node.type;
   const props: string[] = [];
   const layout: string[] = [];
+  const classProperties = className.startsWith('$') ? null : propertiesOf(className);
 
   // A source-referenced boundary exports as its reference alone. Its children
   // and expand flags are Protota's projection of code the app owns; writing
@@ -412,11 +450,17 @@ function nodeToBlueprint(node: AdwNode, depth: number = 0, context?: ExportConte
     if (key === 'title' && (node.type === 'button' || node.type === 'label' ||
         node.type === 'toggle' || node.type === 'inscription' ||
         node.type === 'menu-button' || node.type === 'split-button')) {
-      props.push(`label: ${formatPropertyValue('label', value)};`);
+      if (!classProperties || classProperties.has('label')) {
+        props.push(`label: ${formatPropertyValue('label', value)};`);
+      }
       continue;
     }
     const name = exportPropertyName(key);
-    if (OBJECT_REFERENCE_PROPERTIES.has(name) && context && !context.knownIds.has(String(value))) {
+    // Drop a property the exported class does not have. An unknown class (an
+    // app-defined boundary) is not filtered, since we have no data for it.
+    if (classProperties && !classProperties.has(name) && !LAYOUT_PROPERTIES.has(name)) continue;
+    if (OBJECT_REFERENCE_PROPERTIES.has(name) &&
+        (/^[A-Z]/.test(String(value)) || (context && !context.knownIds.has(String(value))))) {
       // Menus and adjustments live outside the exported widget tree; a
       // reference to one would not resolve.
       continue;
@@ -433,7 +477,9 @@ function nodeToBlueprint(node: AdwNode, depth: number = 0, context?: ExportConte
     // flattened widget has no template context, and emitting one there
     // produces Blueprint that does not compile.
     if (!isSourceReference && (expression.startsWith('$') || expression.startsWith('template.'))) continue;
-    props.push(`${exportPropertyName(key)}: bind ${expression};`);
+    const boundName = exportPropertyName(key);
+    if (classProperties && !classProperties.has(boundName)) continue;
+    props.push(`${boundName}: bind ${expression};`);
   }
   if (styleClasses.length) {
     props.push(`styles [ ${[...new Set(styleClasses)].map((name) => `"${name}"`).join(', ')} ]`);
@@ -447,8 +493,16 @@ function nodeToBlueprint(node: AdwNode, depth: number = 0, context?: ExportConte
       return `${indent(depth + 1)}[${child.slot}]\n${body}`;
     }
     // Everything else is an object-valued property: `content: Widget { … };`.
+    // The name has to be one this class has — Adw.Bin takes `child` where
+    // Adw.ToolbarView takes `content`.
+    let slotName = child.slot;
+    if (classProperties && !classProperties.has(slotName)) {
+      const fallback = ['child', 'content'].find((candidate) => classProperties.has(candidate));
+      if (!fallback) return body;
+      slotName = fallback;
+    }
     const trimmed = body.replace(/^\s+/, '').replace(/\n$/, '');
-    return `${indent(depth + 1)}${child.slot}: ${trimmed};\n`;
+    return `${indent(depth + 1)}${slotName}: ${trimmed};\n`;
   });
 
   let exportedId = node.id;

@@ -136,7 +136,7 @@ npx tsx scripts/export-blueprint.mjs      # writes artifacts/blp/<app>-<screen>.
 for f in *.blp; do blueprint-compiler compile "$f" >/dev/null || echo "FAIL $f"; done
 ```
 
-State as of 2026-07-30: **8 of 27** exported screens compile, up from 1. The
+State as of 2026-07-30: **10 of 27** exported screens compile, up from 1. The
 emitter had been producing camelCase property names, `top { }` blocks instead
 of `[top]` annotations, quoted enums and object references, editor-only style
 flags (`suggested: true`), and signal handlers as properties.
@@ -146,13 +146,24 @@ it when the toolkit actually has that class, so a `Gtk.Revealer` no longer
 exports as `Adw.Bin`. Bindings onto flattened templates, dangling object
 references, and duplicate ids from a template used twice are all handled.
 
-The remaining failures are one category: a property emitted onto a class that
-does not have it, because the renderer maps several source classes onto one
-generic type and export cannot tell which properties survived that mapping.
-Fixing it properly needs per-class property knowledge — GObject introspection
-data, or the widget registry in `source-widget-architecture.md` carrying a
-property list per adapter. Until then the compiler count is the honest measure
-of round-trip fidelity.
+Property validity is no longer guesswork. `scripts/extract-gtk-properties.mjs`
+reads GObject introspection data and writes `src/data/gtkProperties.ts` (484
+classes, 67 interfaces, resolved through parents *and* implemented interfaces —
+`orientation` comes from GtkOrientable, not GtkBox). Export drops any property
+the class does not have, picks the slot property the class actually offers
+(`child` for Adw.Bin, `content` for Adw.ToolbarView), and coerces the numeric
+strings GtkBuilder writes.
+
+Regenerate the table when targeting a newer GNOME, in a container with
+gtk4-devel and libadwaita-devel installed:
+
+```sh
+node scripts/extract-gtk-properties.mjs > src/data/props.json   # then convert to the .ts module
+```
+
+Remaining failures are a long tail rather than a category: menus and
+adjustments the export does not carry, a few widgets whose child is a string in
+source, and template ids that survive flattening.
 
 ## Building UIs programmatically (agents)
 

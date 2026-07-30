@@ -1,0 +1,23 @@
+FROM fedora:43
+
+# Fedora runner for GNOME apps newer than Ubuntu LTS packages. The captured
+# app version must match the imported source tag — record both in the app
+# catalog so the visual oracle stays version-aligned.
+
+ARG APP_PACKAGE=gnome-calculator
+ARG APP_COMMAND=gnome-calculator
+
+RUN dnf install -y --setopt=install_weak_deps=False \
+    dbus-daemon \
+    dbus-tools \
+    gtk4-devel-tools \
+    ${APP_PACKAGE} \
+  && dnf clean all
+
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+ENV APP_COMMAND=${APP_COMMAND}
+
+EXPOSE 8085
+ENTRYPOINT ["/entrypoint.sh"]

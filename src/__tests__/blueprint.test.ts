@@ -138,7 +138,7 @@ describe('Blueprint import', () => {
     expect(imported.children?.[0]).toMatchObject({ type: 'grid' });
     expect(imported.children?.[0].children).toEqual(expect.arrayContaining([
       expect.objectContaining({ type: 'button', title: 'C', column: 0, row: 0 }),
-      expect.objectContaining({ type: 'toggle', title: '↑n', column: 1, row: 0 }),
+      expect.objectContaining({ type: 'button', title: '↑n', column: 1, row: 0 }),
     ]));
   });
 

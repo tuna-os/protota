@@ -66,7 +66,11 @@ const CLASS_TO_WIDGET_MAP: Record<string, AdwNodeType> = {
   StackPage: 'stack-page',
   ScrolledWindow: 'scrolled-window',
   Button: 'button',
-  ToggleButton: 'toggle',
+  // A GtkToggleButton looks and lays out like a button (Adw.Toggle is the
+  // pill-style toggle inside a ToggleGroup, a different widget).
+  ToggleButton: 'button',
+  GtkToggleButton: 'button',
+  'Gtk.ToggleButton': 'button',
   MenuButton: 'menu-button',
   Entry: 'entry',
   // GtkBuilder uses GObject names while Blueprint uses namespace-qualified names.
@@ -306,7 +310,7 @@ function parseValue(token: Token | undefined): BlueprintValue | undefined {
 }
 
 function propertyNameForNode(rawName: string, nodeType: AdwNodeType): string {
-  if ((rawName === 'label' || rawName === 'text') && (nodeType === 'button' || nodeType === 'toggle' || nodeType === 'label' || nodeType === 'inscription')) return 'title';
+  if ((rawName === 'label' || rawName === 'text') && (nodeType === 'button' || nodeType === 'toggle' || nodeType === 'label' || nodeType === 'inscription' || nodeType === 'menu-button' || nodeType === 'split-button')) return 'title';
   if (rawName === 'icon-name') return 'iconName';
   if (rawName === 'show-title-buttons') return 'showTitleButtons';
   if (rawName === 'selected') return 'selectedIndex';
@@ -350,6 +354,9 @@ function makeNode(
   for (const [key, value] of Object.entries(properties)) {
     node[propertyNameForNode(key, node.type)] = value;
   }
+  // GTK's default GtkBox orientation is horizontal; the renderer's editing
+  // default is vertical. Imported boxes must carry GTK's semantics.
+  if (node.type === 'box' && node.orientation === undefined) node.orientation = 'horizontal';
   if (Object.keys(bindings).length) node.bindings = bindings;
   return node;
 }
@@ -442,12 +449,28 @@ function parseBlueprintRoots(code: string, diagnostics: ImportDiagnostic[]): Adw
       }
 
       if (key?.kind === 'word' && tokens[cursor + 1]?.value === '[') {
-        // Blueprint arrays (for example `styles [ "card" ]`) are metadata.
-        // Consume them without letting them swallow following source widgets.
+        // Blueprint arrays. Style classes with widget-property equivalents
+        // (suggested-action, flat, …) project onto the node; the rest is
+        // metadata, consumed so it cannot swallow following source widgets.
+        const arrayValues: string[] = [];
         cursor += 2;
-        while (cursor < tokens.length && tokens[cursor]?.value !== ']') cursor++;
+        while (cursor < tokens.length && tokens[cursor]?.value !== ']') {
+          if (tokens[cursor].kind === 'string') {
+            const parsed = parseValue(tokens[cursor]);
+            if (typeof parsed === 'string') arrayValues.push(parsed);
+          }
+          cursor++;
+        }
         if (tokens[cursor]?.value === ']') cursor++;
         if (tokens[cursor]?.value === ';' || tokens[cursor]?.value === ',') cursor++;
+        if (key.value === 'styles') {
+          for (const styleClass of arrayValues) {
+            if (styleClass === 'suggested-action') properties.suggested = true;
+            if (styleClass === 'destructive-action') properties.destructive = true;
+            if (styleClass === 'flat') properties.flat = true;
+            if (styleClass === 'circular') properties.circular = true;
+          }
+        }
         continue;
       }
 

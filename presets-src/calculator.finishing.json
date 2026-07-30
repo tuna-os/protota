@@ -1,0 +1,16 @@
+{
+  "title": "GNOME Calculator",
+  "screen": { "title": "Calculator", "width": 360, "height": 460 },
+  "overrides": [
+    { "id": "_converter", "set": { "visible": false },
+      "why": "math-window.vala: converter.set_visible (mode == ButtonMode.CONVERSION); default button-mode is basic (GSettings schema)." },
+    { "id": "back_button", "set": { "visible": false },
+      "why": "Only shown when returning from financial/programming modes." },
+    { "id": "menu_button", "set": { "title": "Basic" },
+      "why": "Mode MenuButton label reflects the default basic mode at runtime." },
+    { "id": "history", "set": { "heightRequest": 190 },
+      "why": "HistoryView fills the display card above the entry line; allocation is runtime-driven (empty list still reserves the card)." },
+    { "id": "spinner", "set": { "visible": false },
+      "why": "The currency-refresh spinner only appears while rates download." }
+  ]
+}

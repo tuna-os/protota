@@ -2,6 +2,7 @@ import React, { useRef, useEffect } from 'react';
 import type { AdwNode } from '../types/mockup';
 import { LEGAL_CHILDREN } from '../types/mockup';
 import { useMockupStore } from '../store/mockupStore';
+import { ensureAdwIcon } from '../utils/adwIcons';
 
 interface Props {
   node: AdwNode;
@@ -111,6 +112,11 @@ function nodeProps(node: AdwNode, inheritedSlot?: string): Record<string, string
   if (t === 'menu-button') {
     if (icon) p['icon-name'] = icon;
     if (node.title) p['menu-title'] = node.title;
+  }
+  if (t === 'menu-button' && node.title && !node.iconName) {
+    // A labelled MenuButton (e.g. a mode selector) renders its text with a
+    // dropdown indicator; adw-menu-button itself is icon-only.
+    p.label = `${node.title} ▾`;
   }
   if (t === 'split-button') {
     if (node.title) p.label = node.title;
@@ -241,11 +247,18 @@ export const AdwaitaRenderer: React.FC<Props> = ({
     }
   }, [node.type, screenWidth, screenHeight]);
 
+  useEffect(() => {
+    ensureAdwIcon(node.iconName);
+  }, [node.iconName]);
+
   // GTK visibility: a hidden widget takes no space and draws nothing. This
   // must come after every hook so React's hook order stays stable.
   if (node.visible === false) return null;
 
-  const tag = TAG_MAP[node.type] || 'div';
+  // adw-menu-button is icon-only; a labelled MenuButton renders as a button.
+  const tag = node.type === 'menu-button' && node.title && !node.iconName
+    ? 'adw-button'
+    : TAG_MAP[node.type] || 'div';
   const attrs = nodeProps(node, inheritedSlot);
 
   // Apply theme class to window/dialog roots based on doc colorScheme

@@ -418,8 +418,20 @@ function makeNode(
   if (node.type === 'box' && node.orientation === undefined) node.orientation = 'horizontal';
   // MultiLayoutView machinery keeps its identity for slot resolution.
   const canonical = canonicalClassName(sourceClass);
-  if (canonical === 'Adw.MultiLayoutView' || canonical === 'Adw.Layout' || canonical === 'Adw.LayoutSlot') {
+  if (canonical === 'Adw.MultiLayoutView' || canonical === 'Adw.Layout' || canonical === 'Adw.LayoutSlot' || canonical === 'Adw.ButtonContent') {
     node.sourceClass = canonical;
+  }
+  // A child in the `popover` slot is a popup surface: real, but allocated
+  // above the window, never inside the parent's layout.
+  if (node.children?.length) node.children = node.children.filter(child => child.slot !== 'popover');
+  // Adw.ButtonContent supplies its parent button's icon and label.
+  if (node.type === 'button' || node.type === 'menu-button' || node.type === 'split-button' || node.type === 'toggle') {
+    const content = node.children?.find(child => child.sourceClass === 'Adw.ButtonContent');
+    if (content) {
+      if (node.title === undefined && content.title !== undefined) node.title = content.title;
+      if (node.iconName === undefined && content.iconName !== undefined) node.iconName = content.iconName;
+      node.children = node.children!.filter(child => child !== content);
+    }
   }
   if (Object.keys(bindings).length) node.bindings = bindings;
   return node;
@@ -1067,21 +1079,30 @@ export function blueprintBundleToDocument(files: BlueprintSourceFile[], entryPat
   const templates = collectTemplates(declarativeFiles);
   const documentTitle = title || entry.path.replace(/^.*\//, '').replace(/\.(blp|ui)$/i, '');
   let doc: MockupDocument;
+  let builderTemplates: Map<string, AdwNode> | null = null;
+  // A resolved composite instance is no longer an unresolved boundary,
+  // whichever boundary code the parse assigned it.
+  const resolveBuilderPass = () => {
+    if (!builderTemplates?.size) return;
+    const diagnostics = doc.importDiagnostics ?? (doc.importDiagnostics = []);
+    const resolvedKeys = new Set<string>();
+    doc.screens.forEach(screen => resolveBuilderTemplates(screen.rootNode, builderTemplates!, new Set(), resolvedKeys));
+    doc.importDiagnostics = diagnostics.filter(d => d.code === 'static-source-expansion' || !resolvedKeys.has(`${d.sourceClass}:${d.sourceId}`));
+  };
   if (/\.ui$/i.test(entry.path)) {
     // GtkBuilder bundle: parse the entry, then resolve composite-template
     // instances against <template> definitions from the other .ui files.
     doc = blueprintToDocument(entry.content, documentTitle);
-    const diagnostics = doc.importDiagnostics ?? (doc.importDiagnostics = []);
-    const builderTemplates = collectBuilderTemplates(declarativeFiles.filter(file => file !== entry), diagnostics);
-    const resolvedKeys = new Set<string>();
-    doc.screens.forEach(screen => resolveBuilderTemplates(screen.rootNode, builderTemplates, new Set(), resolvedKeys));
-    // A resolved composite instance is no longer an unresolved boundary,
-    // whichever boundary code the parse assigned it.
-    doc.importDiagnostics = diagnostics.filter(d => d.code === 'static-source-expansion' || !resolvedKeys.has(`${d.sourceClass}:${d.sourceId}`));
+    builderTemplates = collectBuilderTemplates(declarativeFiles.filter(file => file !== entry), doc.importDiagnostics ?? (doc.importDiagnostics = []));
+    resolveBuilderPass();
   } else {
     doc = blueprintToDocument(expandBundleTemplates(entry.content, templates), documentTitle);
   }
-  if (valaFiles.length) enrichWithValaFacts(doc, valaFiles, templates);
+  if (valaFiles.length) {
+    enrichWithValaFacts(doc, valaFiles, templates);
+    // Enrichment can introduce boundaries whose classes are .ui templates.
+    resolveBuilderPass();
+  }
   // Template resolution and enrichment can introduce MultiLayoutView bodies.
   doc.screens.forEach(screen => resolveMultiLayoutViews(screen.rootNode));
   return doc;

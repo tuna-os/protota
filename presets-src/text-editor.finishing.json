@@ -3,6 +3,10 @@
   "screen": { "title": "Text Editor", "width": 950, "height": 700 },
   "overrides": [
     { "id": "imported-2", "set": { "visible": false },
-      "why": "The properties sidebar (slot 'properties') is toggled at runtime and hidden on first launch." }
+      "why": "The properties sidebar (slot 'properties') is toggled at runtime and hidden on first launch." },
+    { "id": "open_menu_button", "set": { "title": "Open", "children": [] },
+      "why": "The Open button's label lives in a runtime GtkStack of AdwButtonContent states; 'Open' is the default state." },
+    { "id": "tab_bar", "set": { "heightRequest": 34 },
+      "why": "AdwTabBar collapses to a slim strip with a single tab; runtime allocation." }
   ]
 }

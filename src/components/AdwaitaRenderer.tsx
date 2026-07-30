@@ -110,13 +110,14 @@ function nodeProps(node: AdwNode, inheritedSlot?: string): Record<string, string
     if (icon) p.icon = icon;
   }
   if (t === 'menu-button') {
-    if (icon) p['icon-name'] = icon;
-    if (node.title) p['menu-title'] = node.title;
-  }
-  if (t === 'menu-button' && node.title && !node.iconName) {
-    // A labelled MenuButton (e.g. a mode selector) renders its text with a
-    // dropdown indicator; adw-menu-button itself is icon-only.
-    p.label = `${node.title} ▾`;
+    // A labelled MenuButton (mode selector, open button) renders its text
+    // with a dropdown indicator; adw-menu-button itself is icon-only.
+    if (node.title) {
+      p.label = `${node.title} ▾`;
+      if (icon) p.icon = icon;
+    } else if (icon) {
+      p['icon-name'] = icon;
+    }
   }
   if (t === 'split-button') {
     if (node.title) p.label = node.title;
@@ -256,7 +257,7 @@ export const AdwaitaRenderer: React.FC<Props> = ({
   if (node.visible === false) return null;
 
   // adw-menu-button is icon-only; a labelled MenuButton renders as a button.
-  const tag = node.type === 'menu-button' && node.title && !node.iconName
+  const tag = node.type === 'menu-button' && node.title
     ? 'adw-button'
     : TAG_MAP[node.type] || 'div';
   const attrs = nodeProps(node, inheritedSlot);

@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exportedAt": "2026-07-30T03:00:30.079Z",
+  "exportedAt": "2026-07-30T03:48:53.524Z",
   "generatedBy": "scripts/generate-preset.mjs",
   "document": {
     "id": "imported-document",
@@ -95,73 +95,11 @@
                         {
                           "id": "open_menu_button",
                           "type": "menu-button",
-                          "children": [
-                            {
-                              "id": "open_menu_popover",
-                              "type": "custom-widget",
-                              "children": [],
-                              "sourceClass": "EditorOpenPopover",
-                              "title": "EditorOpenPopover",
-                              "bindings": {
-                                "model": "expression"
-                              },
-                              "slot": "popover"
-                            },
-                            {
-                              "id": "open_button_stack",
-                              "type": "stack",
-                              "children": [
-                                {
-                                  "id": "imported-10",
-                                  "type": "stack-page",
-                                  "children": [
-                                    {
-                                      "id": "imported-11",
-                                      "type": "box",
-                                      "children": [
-                                        {
-                                          "id": "imported-12",
-                                          "type": "label",
-                                          "children": [],
-                                          "title": "_Open",
-                                          "useUnderline": true
-                                        },
-                                        {
-                                          "id": "imported-13",
-                                          "type": "bin",
-                                          "children": [],
-                                          "iconName": "pan-down-symbolic"
-                                        }
-                                      ],
-                                      "spacing": 3,
-                                      "orientation": "horizontal",
-                                      "slot": "child"
-                                    }
-                                  ],
-                                  "name": "wide"
-                                },
-                                {
-                                  "id": "imported-14",
-                                  "type": "stack-page",
-                                  "children": [
-                                    {
-                                      "id": "imported-15",
-                                      "type": "bin",
-                                      "children": [],
-                                      "iconName": "folder-symbolic",
-                                      "slot": "child"
-                                    }
-                                  ],
-                                  "name": "narrow"
-                                }
-                              ],
-                              "visibleChildName": "wide",
-                              "hhomogeneous": false
-                            }
-                          ],
+                          "children": [],
                           "tooltipText": "Recently Used Documents",
                           "flat": true,
-                          "slot": "start"
+                          "slot": "start",
+                          "title": "Open"
                         },
                         {
                           "id": "new_button",
@@ -218,7 +156,8 @@
                       "sourceClass": "AdwTabBar",
                       "title": "AdwTabBar",
                       "view": "tab_view",
-                      "slot": "top"
+                      "slot": "top",
+                      "heightRequest": 34
                     },
                     {
                       "id": "split_view",

@@ -390,7 +390,11 @@ function makeNode(
 ): AdwNode {
   const isTemplateReference = rawClass.startsWith('$');
   const sourceClass = isTemplateReference ? rawClass.slice(1) : rawClass;
-  const type = isTemplateReference ? undefined : CLASS_TO_WIDGET_MAP[rawClass] ?? CLASS_TO_WIDGET_MAP[canonicalClassName(rawClass)];
+  // Blueprint's `$` marks a type outside the imported namespaces, which
+  // includes real library widgets (GtkSourceView, WebKit views) as well as
+  // app-defined ones. A `$Name` whose class the registry knows is that
+  // widget, not an unresolved boundary.
+  const type = CLASS_TO_WIDGET_MAP[sourceClass] ?? CLASS_TO_WIDGET_MAP[canonicalClassName(sourceClass)];
   const node: AdwNode = { id, type: type ?? 'custom-widget', children };
   // A silent fallback or a dropped sibling makes an imported GNOME UI look
   // plausible while being structurally wrong. An unmapped class survives as
@@ -552,6 +556,10 @@ function parseBlueprintRoots(code: string, diagnostics: ImportDiagnostic[]): Adw
             if (styleClass === 'flat') properties.flat = true;
             if (styleClass === 'circular') properties.circular = true;
           }
+          // Remaining GTK style classes are retained verbatim: the renderer
+          // styles the ones Adwaita defines (card, boxed-list, toolbar,
+          // dim-label, title-N…) and app-specific ones stay as provenance.
+          if (arrayValues.length) properties.styleClasses = arrayValues.join(' ');
         }
         continue;
       }

@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exportedAt": "2026-07-30T08:32:50.061Z",
+  "exportedAt": "2026-07-30T08:45:37.187Z",
   "generatedBy": "scripts/generate-preset.mjs",
   "document": {
     "id": "disks-preset",
@@ -63,7 +63,8 @@
                           "type": "list-box",
                           "children": [],
                           "vexpand": true,
-                          "selectionMode": "single"
+                          "selectionMode": "single",
+                          "styleClasses": "navigation-sidebar"
                         }
                       ],
                       "hscrollbarPolicy": "never",
@@ -93,7 +94,8 @@
                         }
                       ],
                       "showTitle": false,
-                      "flat": true
+                      "flat": true,
+                      "styleClasses": "flat"
                     },
                     {
                       "id": "main_stack",
@@ -199,7 +201,8 @@
                                           "id": "drive_partitions_listbox",
                                           "type": "list-box",
                                           "children": [],
-                                          "selectionMode": "none"
+                                          "selectionMode": "none",
+                                          "styleClasses": "boxed-list"
                                         }
                                       ],
                                       "title": "Volumes"
@@ -256,7 +259,8 @@
                       "children": [],
                       "title": "Create",
                       "useUnderline": true,
-                      "suggested": true
+                      "suggested": true,
+                      "styleClasses": "suggested-action"
                     }
                   ],
                   "showStartTitleButtons": false,
@@ -288,16 +292,19 @@
                               "tooltipText": "Select Location",
                               "valign": "center",
                               "iconName": "folder-open-symbolic",
-                              "flat": true
+                              "flat": true,
+                              "styleClasses": "flat"
                             }
                           ],
-                          "title": "Location"
+                          "title": "Location",
+                          "styleClasses": "property"
                         },
                         {
                           "id": "source_label",
                           "type": "action-row",
                           "children": [],
-                          "title": "Source"
+                          "title": "Source",
+                          "styleClasses": "property"
                         }
                       ]
                     }
@@ -355,6 +362,7 @@
                       "title": "Start…",
                       "useUnderline": true,
                       "suggested": true,
+                      "styleClasses": "suggested-action",
                       "bindings": {
                         "visible": "close_button.visible bidirectional"
                       }
@@ -461,7 +469,8 @@
                                   "type": "action-row",
                                   "children": [],
                                   "title": "Sample Size",
-                                  "subtitle": "-"
+                                  "subtitle": "-",
+                                  "styleClasses": "property"
                                 },
                                 {
                                   "id": "read_rate_row",
@@ -469,7 +478,8 @@
                                   "children": [],
                                   "title": "Average Read Rate",
                                   "subtitle": "-",
-                                  "useMarkup": true
+                                  "useMarkup": true,
+                                  "styleClasses": "property"
                                 },
                                 {
                                   "id": "write_rate_row",
@@ -477,7 +487,8 @@
                                   "children": [],
                                   "title": "Average Write Rate",
                                   "subtitle": "-",
-                                  "useMarkup": true
+                                  "useMarkup": true,
+                                  "styleClasses": "property"
                                 },
                                 {
                                   "id": "access_time_row",
@@ -485,7 +496,8 @@
                                   "children": [],
                                   "title": "Average Access Time",
                                   "subtitle": "-",
-                                  "useMarkup": true
+                                  "useMarkup": true,
+                                  "styleClasses": "property"
                                 }
                               ]
                             }

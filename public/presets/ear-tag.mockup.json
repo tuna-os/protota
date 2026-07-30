@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exportedAt": "2026-07-30T07:13:41.299Z",
+  "exportedAt": "2026-07-30T08:45:43.289Z",
   "generatedBy": "scripts/generate-preset.mjs",
   "document": {
     "id": "ear-tag-preset",
@@ -46,7 +46,8 @@
                               "type": "label",
                               "children": [],
                               "title": "Drop a file to add it to the opened file list",
-                              "wrap": true
+                              "wrap": true,
+                              "styleClasses": "title-1"
                             }
                           ],
                           "orientation": "vertical",
@@ -59,7 +60,8 @@
                         }
                       ],
                       "hexpand": true,
-                      "vexpand": true
+                      "vexpand": true,
+                      "styleClasses": "drag-target"
                     }
                   ],
                   "receivesDefault": false,
@@ -102,7 +104,8 @@
                                   "menuModel": "primary_menu"
                                 }
                               ],
-                              "flat": true
+                              "flat": true,
+                              "styleClasses": "flat"
                             },
                             {
                               "id": "no_file_widget",
@@ -127,21 +130,24 @@
                                               "title": "Open File",
                                               "halign": "center",
                                               "focusable": true,
-                                              "suggested": true
+                                              "suggested": true,
+                                              "styleClasses": "suggested-action pill"
                                             },
                                             {
                                               "id": "open_folder",
                                               "type": "button",
                                               "children": [],
                                               "title": "Open Folder",
-                                              "halign": "center"
+                                              "halign": "center",
+                                              "styleClasses": "pill"
                                             },
                                             {
                                               "id": "open_recursive",
                                               "type": "check-button",
                                               "children": [],
                                               "label": "Include Files from Subfolders",
-                                              "tooltipText": "When opening a folder, include files from its subfolders"
+                                              "tooltipText": "When opening a folder, include files from its subfolders",
+                                              "styleClasses": "subtitle"
                                             }
                                           ],
                                           "orientation": "vertical",
@@ -151,7 +157,8 @@
                                       ],
                                       "iconName": "app.drey.EarTag",
                                       "title": "Ear Tag",
-                                      "description": "Open or drag in some audio files to edit their metadata."
+                                      "description": "Open or drag in some audio files to edit their metadata.",
+                                      "styleClasses": "nofiles"
                                     }
                                   ],
                                   "hexpand": true,
@@ -186,7 +193,8 @@
                                       "children": [],
                                       "sensitive": false,
                                       "title": "Save",
-                                      "suggested": true
+                                      "suggested": true,
+                                      "styleClasses": "suggested-action"
                                     },
                                     {
                                       "id": "hide_sidebar_button",
@@ -255,7 +263,8 @@
                                       "type": "custom-widget",
                                       "children": [],
                                       "sourceClass": "ProgressBar",
-                                      "title": "ProgressBar"
+                                      "title": "ProgressBar",
+                                      "styleClasses": "osd"
                                     }
                                   ]
                                 },
@@ -273,7 +282,8 @@
                                           "children": [],
                                           "sourceClass": "EartagFileList",
                                           "title": "EartagFileList",
-                                          "tabBehavior": "item"
+                                          "tabBehavior": "item",
+                                          "styleClasses": "navigation-sidebar"
                                         }
                                       ],
                                       "hscrollbarPolicy": "never",
@@ -293,7 +303,8 @@
                                       "children": [],
                                       "iconName": "system-search-symbolic",
                                       "title": "No Results Found",
-                                      "description": "Try a different search query."
+                                      "description": "Try a different search query.",
+                                      "styleClasses": "compact"
                                     }
                                   ],
                                   "transitionType": "crossfade"
@@ -312,7 +323,8 @@
                                     {
                                       "id": "selected_message_label",
                                       "type": "label",
-                                      "children": []
+                                      "children": [],
+                                      "styleClasses": "dim-label"
                                     },
                                     {
                                       "id": "remove_selected_button",
@@ -427,6 +439,7 @@
                                                                               "accessibleRole": "presentation"
                                                                             }
                                                                           ],
+                                                                          "styleClasses": "hover-highlight",
                                                                           "orientation": "horizontal"
                                                                         },
                                                                         {
@@ -444,6 +457,7 @@
                                                                               "hexpand": true
                                                                             }
                                                                           ],
+                                                                          "styleClasses": "drag-target",
                                                                           "orientation": "horizontal"
                                                                         }
                                                                       ]
@@ -489,6 +503,7 @@
                                                                       "hexpand": true,
                                                                       "visibleChild": "no_cover",
                                                                       "accessibleRole": "presentation",
+                                                                      "styleClasses": "cover-image",
                                                                       "pixelSize": "196",
                                                                       "slot": "child"
                                                                     }
@@ -506,7 +521,8 @@
                                                           "valign": "start",
                                                           "hexpand": false,
                                                           "vexpand": false,
-                                                          "accessibleRole": "group"
+                                                          "accessibleRole": "group",
+                                                          "styleClasses": "album-cover"
                                                         },
                                                         {
                                                           "id": "previous_file_button_revealer",
@@ -517,13 +533,15 @@
                                                               "type": "button",
                                                               "children": [],
                                                               "tooltipText": "Previous file",
-                                                              "iconName": "go-previous-symbolic"
+                                                              "iconName": "go-previous-symbolic",
+                                                              "styleClasses": "osd prev-next-button"
                                                             }
                                                           ],
                                                           "halign": "start",
                                                           "valign": "center",
                                                           "revealChild": false,
-                                                          "transitionType": "crossfade"
+                                                          "transitionType": "crossfade",
+                                                          "styleClasses": "prev-next-button-container"
                                                         },
                                                         {
                                                           "id": "next_file_button_revealer",
@@ -534,13 +552,15 @@
                                                               "type": "button",
                                                               "children": [],
                                                               "tooltipText": "Next file",
-                                                              "iconName": "go-next-symbolic"
+                                                              "iconName": "go-next-symbolic",
+                                                              "styleClasses": "osd"
                                                             }
                                                           ],
                                                           "halign": "end",
                                                           "valign": "center",
                                                           "revealChild": false,
-                                                          "transitionType": "crossfade"
+                                                          "transitionType": "crossfade",
+                                                          "styleClasses": "prev-next-button-container"
                                                         }
                                                       ]
                                                     },
@@ -556,7 +576,8 @@
                                                           "title": "Title",
                                                           "boundProperty": "title",
                                                           "marginStart": "12",
-                                                          "marginEnd": "12"
+                                                          "marginEnd": "12",
+                                                          "styleClasses": "title-1"
                                                         },
                                                         {
                                                           "id": "artist_entry",
@@ -566,7 +587,8 @@
                                                           "title": "Artist",
                                                           "boundProperty": "artist",
                                                           "marginStart": "12",
-                                                          "marginEnd": "12"
+                                                          "marginEnd": "12",
+                                                          "styleClasses": "title-3 artist"
                                                         },
                                                         {
                                                           "id": "file_info",
@@ -576,7 +598,8 @@
                                                           "title": "EartagFileInfoLabel",
                                                           "justify": "center",
                                                           "wrap": "true",
-                                                          "marginTop": "6"
+                                                          "marginTop": "6",
+                                                          "styleClasses": "caption-header"
                                                         }
                                                       ],
                                                       "orientation": "vertical",
@@ -599,7 +622,8 @@
                                                               "boundProperty": "tracknumber",
                                                               "maxWidthChars": "4",
                                                               "isNumeric": "true",
-                                                              "hexpand": "true"
+                                                              "hexpand": "true",
+                                                              "styleClasses": "card tagentry-small"
                                                             },
                                                             {
                                                               "id": "totaltracknumber_entry",
@@ -610,7 +634,8 @@
                                                               "boundProperty": "totaltracknumber",
                                                               "maxWidthChars": "4",
                                                               "isNumeric": "true",
-                                                              "hexpand": "true"
+                                                              "hexpand": "true",
+                                                              "styleClasses": "card tagentry-small"
                                                             }
                                                           ],
                                                           "spacing": 6,
@@ -666,7 +691,8 @@
                                                           ],
                                                           "hexpand": true,
                                                           "valign": "start",
-                                                          "selectionMode": "none"
+                                                          "selectionMode": "none",
+                                                          "styleClasses": "boxed-list"
                                                         },
                                                         {
                                                           "id": "filename_listbox",
@@ -682,7 +708,8 @@
                                                           ],
                                                           "hexpand": true,
                                                           "valign": "start",
-                                                          "selectionMode": "none"
+                                                          "selectionMode": "none",
+                                                          "styleClasses": "boxed-list"
                                                         },
                                                         {
                                                           "id": "more_tags_group",
@@ -694,7 +721,8 @@
                                                               "children": [],
                                                               "hexpand": true,
                                                               "valign": "start",
-                                                              "selectionMode": "none"
+                                                              "selectionMode": "none",
+                                                              "styleClasses": "boxed-list"
                                                             },
                                                             {
                                                               "id": "tag_selector",
@@ -704,7 +732,8 @@
                                                               "valign": "center",
                                                               "title": "Add tag",
                                                               "halign": "center",
-                                                              "marginTop": "6"
+                                                              "marginTop": "6",
+                                                              "styleClasses": "raised pill"
                                                             }
                                                           ],
                                                           "orientation": "vertical",

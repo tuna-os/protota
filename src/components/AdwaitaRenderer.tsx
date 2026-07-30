@@ -398,6 +398,14 @@ export const AdwaitaRenderer: React.FC<Props> = ({
   const divClass = DIV_TYPES.has(node.type)
     ? isExpandedBoundary ? 'protota-div-custom-widget-expanded' : `protota-div-${node.type}`
     : '';
+  // GTK style classes the source declared. Adwaita defines several that
+  // change a widget's appearance materially (card, boxed-list, toolbar,
+  // dim-label); rendering them is what makes an imported card look like a
+  // card rather than plain background.
+  const styleClasses = typeof node.styleClasses === 'string'
+    ? node.styleClasses.split(/\s+/).filter(Boolean).map((name) => `protota-style-${name}`).join(' ')
+    : '';
+  const elementClass = [divClass, styleClasses].filter(Boolean).join(' ');
 
   return (
     <div
@@ -424,7 +432,7 @@ export const AdwaitaRenderer: React.FC<Props> = ({
         // flex/grid item its parent lays out, so GTK expand and attach
         // semantics propagate instead of stopping at each wrapper.
         style: { ...containerLayout(node), ...placementLayout(node) },
-        className: divClass || undefined,
+        className: elementClass || undefined,
       },
         iconPrefix,
         ...(children ?? []),

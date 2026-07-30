@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exportedAt": "2026-07-30T07:13:35.323Z",
+  "exportedAt": "2026-07-30T08:45:32.176Z",
   "generatedBy": "scripts/generate-preset.mjs",
   "document": {
     "id": "amberol-preset",
@@ -65,21 +65,24 @@
                                                   "children": [],
                                                   "title": "Restore Playlist",
                                                   "actionName": "queue.restore-playlist",
-                                                  "suggested": true
+                                                  "suggested": true,
+                                                  "styleClasses": "suggested-action pill"
                                                 },
                                                 {
                                                   "id": "add_folder_button",
                                                   "type": "button",
                                                   "children": [],
                                                   "title": "Add Folder",
-                                                  "actionName": "queue.add-folder"
+                                                  "actionName": "queue.add-folder",
+                                                  "styleClasses": "pill"
                                                 },
                                                 {
                                                   "id": "imported-8",
                                                   "type": "button",
                                                   "children": [],
                                                   "title": "Add Song",
-                                                  "actionName": "queue.add-song"
+                                                  "actionName": "queue.add-song",
+                                                  "styleClasses": "pill"
                                                 }
                                               ],
                                               "orientation": "vertical",
@@ -152,6 +155,7 @@
                                                               "overflow": "hidden",
                                                               "iconName": "folder-music-symbolic",
                                                               "pixelSize": 64,
+                                                              "styleClasses": "card dim-label",
                                                               "slot": "child"
                                                             }
                                                           ],
@@ -209,13 +213,15 @@
                                                       "id": "elapsed_label",
                                                       "type": "label",
                                                       "children": [],
-                                                      "title": "0:00"
+                                                      "title": "0:00",
+                                                      "styleClasses": "caption numeric"
                                                     },
                                                     {
                                                       "id": "remaining_label",
                                                       "type": "label",
                                                       "children": [],
-                                                      "title": "0:00"
+                                                      "title": "0:00",
+                                                      "styleClasses": "caption numeric"
                                                     }
                                                   ],
                                                   "sourceClass": "CenterBox",
@@ -247,7 +253,8 @@
                                                           "children": [],
                                                           "sourceClass": "AmberolMarquee",
                                                           "title": "AmberolMarquee",
-                                                          "widthChars": "20"
+                                                          "widthChars": "20",
+                                                          "styleClasses": "song-title"
                                                         },
                                                         {
                                                           "id": "song_artist_label",
@@ -255,7 +262,8 @@
                                                           "children": [],
                                                           "sourceClass": "AmberolMarquee",
                                                           "title": "AmberolMarquee",
-                                                          "widthChars": "25"
+                                                          "widthChars": "25",
+                                                          "styleClasses": "song-artist"
                                                         },
                                                         {
                                                           "id": "song_album_label",
@@ -263,7 +271,8 @@
                                                           "children": [],
                                                           "sourceClass": "AmberolMarquee",
                                                           "title": "AmberolMarquee",
-                                                          "widthChars": "25"
+                                                          "widthChars": "25",
+                                                          "styleClasses": "song-album"
                                                         }
                                                       ],
                                                       "orientation": "vertical",
@@ -297,7 +306,8 @@
                                                           "actionName": "win.previous",
                                                           "valign": "center",
                                                           "tooltipText": "Play the Previous Song",
-                                                          "circular": true
+                                                          "circular": true,
+                                                          "styleClasses": "circular"
                                                         },
                                                         {
                                                           "id": "play_button",
@@ -307,7 +317,8 @@
                                                           "actionName": "win.play",
                                                           "valign": "center",
                                                           "tooltipText": "Toggle Play",
-                                                          "circular": true
+                                                          "circular": true,
+                                                          "styleClasses": "circular large"
                                                         },
                                                         {
                                                           "id": "next_button",
@@ -317,7 +328,8 @@
                                                           "actionName": "win.next",
                                                           "valign": "center",
                                                           "tooltipText": "Play the Next Song",
-                                                          "circular": true
+                                                          "circular": true,
+                                                          "styleClasses": "circular"
                                                         }
                                                       ],
                                                       "spacing": 24,
@@ -337,7 +349,8 @@
                                                           "actionName": "volume.toggle-mute",
                                                           "valign": "center",
                                                           "flat": true,
-                                                          "circular": true
+                                                          "circular": true,
+                                                          "styleClasses": "flat circular"
                                                         },
                                                         {
                                                           "id": "volume_scale",
@@ -374,7 +387,8 @@
                                                               "actionName": "queue.toggle",
                                                               "valign": "center",
                                                               "tooltipText": "Toggle Playlist",
-                                                              "circular": true
+                                                              "circular": true,
+                                                              "styleClasses": "circular"
                                                             },
                                                             {
                                                               "id": "shuffle_button",
@@ -384,7 +398,8 @@
                                                               "actionName": "queue.shuffle",
                                                               "valign": "center",
                                                               "tooltipText": "Shuffle the Playlist",
-                                                              "circular": true
+                                                              "circular": true,
+                                                              "styleClasses": "circular"
                                                             }
                                                           ],
                                                           "halign": "start",
@@ -404,7 +419,8 @@
                                                               "actionName": "queue.repeat-mode",
                                                               "valign": "center",
                                                               "tooltipText": "Enable Repeat",
-                                                              "circular": true
+                                                              "circular": true,
+                                                              "styleClasses": "circular"
                                                             },
                                                             {
                                                               "id": "menu_button",
@@ -417,7 +433,8 @@
                                                               "valign": "center",
                                                               "tooltipText": "Main Menu",
                                                               "direction": "up",
-                                                              "circular": true
+                                                              "circular": true,
+                                                              "styleClasses": "circular"
                                                             }
                                                           ],
                                                           "halign": "end",
@@ -444,6 +461,7 @@
                                           "valign": "center",
                                           "vexpand": true,
                                           "spacing": 6,
+                                          "styleClasses": "main-box",
                                           "slot": "content"
                                         }
                                       ],
@@ -479,13 +497,15 @@
                                                       "type": "label",
                                                       "children": [],
                                                       "ellipsize": "end",
-                                                      "title": "Playlist"
+                                                      "title": "Playlist",
+                                                      "styleClasses": "heading"
                                                     },
                                                     {
                                                       "id": "queue_length_label",
                                                       "type": "label",
                                                       "children": [],
-                                                      "ellipsize": "end"
+                                                      "ellipsize": "end",
+                                                      "styleClasses": "caption"
                                                     }
                                                   ],
                                                   "orientation": "vertical",
@@ -539,7 +559,8 @@
                                                   "title": "ProgressBar",
                                                   "valign": "start",
                                                   "hexpand": true,
-                                                  "visible": false
+                                                  "visible": false,
+                                                  "styleClasses": "osd"
                                                 },
                                                 {
                                                   "id": "imported-25",
@@ -552,6 +573,7 @@
                                                       "sourceClass": "ListView",
                                                       "title": "ListView",
                                                       "singleClickActivate": true,
+                                                      "styleClasses": "navigation-sidebar",
                                                       "slot": "child"
                                                     }
                                                   ],
@@ -577,7 +599,8 @@
                                                 {
                                                   "id": "queue_selected_label",
                                                   "type": "label",
-                                                  "children": []
+                                                  "children": [],
+                                                  "styleClasses": "caption"
                                                 },
                                                 {
                                                   "id": "queue_remove_button",
@@ -590,9 +613,11 @@
                                               "sourceClass": "ActionBar",
                                               "title": "ActionBar",
                                               "revealed": false,
-                                              "flat": true
+                                              "flat": true,
+                                              "styleClasses": "flat"
                                             }
-                                          ]
+                                          ],
+                                          "styleClasses": "playlist-background"
                                         }
                                       ],
                                       "slot": "sidebar"

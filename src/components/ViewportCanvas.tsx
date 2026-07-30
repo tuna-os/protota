@@ -135,6 +135,36 @@ export const ViewportCanvas: React.FC = () => {
 
   const handleCanvasClick = useCallback(() => selectNode(null), [selectNode]);
 
+  // Flow-edge geometry: measured from the laid-out screen frames, in the
+  // surface's own (pre-transform) coordinates so arrows pan/zoom with it.
+  const surfaceRef = useRef<HTMLDivElement>(null);
+  const [flowPaths, setFlowPaths] = useState<Array<{ id: string; d: string }>>([]);
+  useEffect(() => {
+    const surface = surfaceRef.current;
+    if (!surface || !doc.edges.length) { setFlowPaths([]); return; }
+    const frames = new Map<string, HTMLElement>();
+    surface.querySelectorAll<HTMLElement>('[data-protota-flow-screen]').forEach((element) => {
+      frames.set(element.dataset.prototaFlowScreen!, element);
+    });
+    const paths: Array<{ id: string; d: string }> = [];
+    for (const edge of doc.edges) {
+      const source = frames.get(edge.sourceId);
+      const target = frames.get(edge.targetId);
+      if (!source || !target) continue;
+      const sx = source.offsetLeft + (source.offsetLeft < target.offsetLeft ? source.offsetWidth : 0);
+      const sy = source.offsetTop + source.offsetHeight / 2;
+      const tx = target.offsetLeft + (source.offsetLeft < target.offsetLeft ? 0 : target.offsetWidth);
+      const ty = target.offsetTop + target.offsetHeight / 2;
+      const bend = Math.max(30, Math.abs(tx - sx) / 3);
+      const direction = source.offsetLeft < target.offsetLeft ? 1 : -1;
+      paths.push({
+        id: edge.id,
+        d: `M ${sx} ${sy} C ${sx + bend * direction} ${sy}, ${tx - bend * direction} ${ty}, ${tx} ${ty}`,
+      });
+    }
+    setFlowPaths(paths);
+  }, [doc]);
+
   const [phoshScreenId, setPhoshScreenId] = useState<string | null>(null);
   const [desktopScreenId, setDesktopScreenId] = useState<string | null>(null);
 
@@ -326,21 +356,52 @@ export const ViewportCanvas: React.FC = () => {
 
       {/* Transformable Canvas Surface */}
       <div
+        ref={surfaceRef}
         className="protota-canvas-surface"
         style={{
           transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
           transformOrigin: "0 0",
           transition: isPanning ? "none" : "transform 0.05s ease-out",
           display: "inline-flex",
+          alignItems: "flex-start",
           gap: "40px",
           padding: "60px",
-          maxWidth: "100%",
+          // No max-width: screens keep their real sizes side by side; pan and
+          // zoom handle overflow.
           boxSizing: "border-box",
+          position: "relative",
         }}
       >
+        {/* Flow edges: navigation connectors between screens (#11). Drawn
+            inside the transformed surface so they pan/zoom with the screens. */}
+        {flowPaths.length > 0 && (
+          <svg
+            className="protota-flow-overlay"
+            style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none", overflow: "visible", zIndex: 5 }}
+          >
+            <defs>
+              <marker id="protota-flow-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--accent-color, #3584e4)" />
+              </marker>
+            </defs>
+            {flowPaths.map((path) => (
+              <path
+                key={path.id}
+                d={path.d}
+                fill="none"
+                stroke="var(--accent-color, #3584e4)"
+                strokeWidth={2}
+                strokeDasharray="6 4"
+                markerEnd="url(#protota-flow-arrow)"
+                opacity={0.85}
+              />
+            ))}
+          </svg>
+        )}
         {doc.screens.map((screen) => (
           <div
             key={screen.id}
+            data-protota-flow-screen={screen.id}
             style={{ display: "flex", flexDirection: "column", alignItems: "center" }}
           >
             <div className="protota-screen-label" style={{ marginBottom: "8px" }}>

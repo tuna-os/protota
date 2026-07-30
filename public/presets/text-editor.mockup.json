@@ -1,15 +1,14 @@
 {
   "version": 1,
-  "exportedAt": "2026-07-30T03:48:53.524Z",
+  "exportedAt": "2026-07-30T03:55:43.110Z",
   "generatedBy": "scripts/generate-preset.mjs",
   "document": {
-    "id": "imported-document",
+    "id": "text-editor-preset",
     "title": "GNOME Text Editor",
     "colorScheme": "auto",
-    "edges": [],
     "screens": [
       {
-        "id": "imported-screen-1",
+        "id": "editor",
         "title": "Text Editor",
         "type": "standard",
         "width": 950,
@@ -511,182 +510,289 @@
           ],
           "widthRequest": 360
         }
+      },
+      {
+        "id": "preferences",
+        "title": "Preferences",
+        "type": "preferences",
+        "width": 560,
+        "height": 640,
+        "rootNode": {
+          "id": "imported-1",
+          "type": "preferences-dialog",
+          "children": [
+            {
+              "id": "imported-2",
+              "type": "preferences-page",
+              "children": [
+                {
+                  "id": "imported-3",
+                  "type": "preferences-group",
+                  "children": [
+                    {
+                      "id": "source_view",
+                      "type": "entry",
+                      "children": [
+                        {
+                          "id": "buffer",
+                          "type": "custom-widget",
+                          "children": [],
+                          "sourceClass": "GtkSourceBuffer",
+                          "title": "GtkSourceBuffer",
+                          "slot": "buffer"
+                        }
+                      ],
+                      "editable": false,
+                      "cursorVisible": false,
+                      "topMargin": 8,
+                      "bottomMargin": 8,
+                      "leftMargin": 12,
+                      "rightMargin": 12,
+                      "rightMarginPosition": 30,
+                      "monospace": true,
+                      "showLineNumbers": true,
+                      "marginBottom": 24
+                    },
+                    {
+                      "id": "scheme_group",
+                      "type": "flow-box",
+                      "children": [],
+                      "hexpand": true,
+                      "columnSpacing": 12,
+                      "rowSpacing": 12,
+                      "maxChildrenPerLine": 4,
+                      "selectionMode": "none"
+                    }
+                  ],
+                  "title": "Appearance"
+                },
+                {
+                  "id": "imported-4",
+                  "type": "preferences-group",
+                  "children": [
+                    {
+                      "id": "imported-5",
+                      "type": "expander-row",
+                      "children": [
+                        {
+                          "id": "use_custom_font",
+                          "type": "switch-widget",
+                          "children": [],
+                          "halign": "end",
+                          "valign": "center",
+                          "slot": "action"
+                        },
+                        {
+                          "id": "custom_font",
+                          "type": "custom-widget",
+                          "children": [],
+                          "sourceClass": "EditorPreferencesFont",
+                          "title": "EditorPreferencesFont",
+                          "schemaKey": "custom-font",
+                          "bindings": {
+                            "sensitive": "use_custom_font.active"
+                          }
+                        }
+                      ],
+                      "title": "Custom _Font",
+                      "useUnderline": true,
+                      "bindings": {
+                        "expanded": "use_custom_font.active"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "id": "imported-6",
+                  "type": "preferences-group",
+                  "children": [
+                    {
+                      "id": "show_grid",
+                      "type": "custom-widget",
+                      "children": [],
+                      "sourceClass": "EditorPreferencesSwitch",
+                      "title": "Show Grid Pattern",
+                      "schemaKey": "show-grid",
+                      "visible": false
+                    },
+                    {
+                      "id": "display_line_numbers",
+                      "type": "custom-widget",
+                      "children": [],
+                      "sourceClass": "EditorPreferencesSwitch",
+                      "title": "Display _Line Numbers",
+                      "useUnderline": true,
+                      "schemaKey": "show-line-numbers"
+                    },
+                    {
+                      "id": "highlight_current_line",
+                      "type": "custom-widget",
+                      "children": [],
+                      "sourceClass": "EditorPreferencesSwitch",
+                      "title": "_Highlight Current Line",
+                      "useUnderline": true,
+                      "schemaKey": "highlight-current-line"
+                    },
+                    {
+                      "id": "map",
+                      "type": "custom-widget",
+                      "children": [],
+                      "sourceClass": "EditorPreferencesSwitch",
+                      "title": "Display _Overview Map",
+                      "useUnderline": true,
+                      "schemaKey": "show-map"
+                    }
+                  ]
+                },
+                {
+                  "id": "imported-7",
+                  "type": "preferences-group",
+                  "children": [
+                    {
+                      "id": "imported-8",
+                      "type": "custom-widget",
+                      "children": [],
+                      "sourceClass": "EditorPreferencesSwitch",
+                      "title": "Check _Spelling",
+                      "useUnderline": true,
+                      "schemaKey": "spellcheck"
+                    }
+                  ]
+                },
+                {
+                  "id": "imported-9",
+                  "type": "preferences-group",
+                  "children": [
+                    {
+                      "id": "imported-10",
+                      "type": "custom-widget",
+                      "children": [],
+                      "sourceClass": "EditorPreferencesSwitch",
+                      "title": "Show _Right Margin",
+                      "useUnderline": true,
+                      "schemaKey": "show-right-margin"
+                    },
+                    {
+                      "id": "right_margin",
+                      "type": "custom-widget",
+                      "children": [],
+                      "sourceClass": "EditorPreferencesSpin",
+                      "title": "_Margin Position",
+                      "useUnderline": true,
+                      "schemaKey": "right-margin-position"
+                    },
+                    {
+                      "id": "imported-11",
+                      "type": "custom-widget",
+                      "children": [],
+                      "sourceClass": "EditorPreferencesSwitch",
+                      "title": "_Wrap Lines Automatically (Alt+W)",
+                      "useUnderline": true,
+                      "schemaKey": "wrap-text"
+                    }
+                  ],
+                  "title": "Line Wrap"
+                },
+                {
+                  "id": "imported-12",
+                  "type": "preferences-group",
+                  "children": [
+                    {
+                      "id": "imported-13",
+                      "type": "custom-widget",
+                      "children": [],
+                      "sourceClass": "EditorPreferencesSwitch",
+                      "title": "A_uto Indentation",
+                      "useUnderline": true,
+                      "schemaKey": "auto-indent"
+                    },
+                    {
+                      "id": "character_row",
+                      "type": "combo-row",
+                      "children": [],
+                      "title": "_Character",
+                      "useUnderline": true,
+                      "model": "indent_model",
+                      "expression": ""
+                    },
+                    {
+                      "id": "tab_width",
+                      "type": "spin-row",
+                      "children": [],
+                      "title": "Spaces Per _Tab",
+                      "useUnderline": true,
+                      "climbRate": 1,
+                      "digits": 0,
+                      "numeric": true
+                    },
+                    {
+                      "id": "indent_width",
+                      "type": "spin-row",
+                      "children": [],
+                      "title": "Spaces Per _Indent",
+                      "useUnderline": true,
+                      "climbRate": 1,
+                      "digits": 0,
+                      "numeric": true
+                    }
+                  ],
+                  "title": "Indentation"
+                },
+                {
+                  "id": "imported-14",
+                  "type": "preferences-group",
+                  "children": [
+                    {
+                      "id": "discover",
+                      "type": "custom-widget",
+                      "children": [],
+                      "sourceClass": "EditorPreferencesSwitch",
+                      "title": "_Discover Document Settings",
+                      "useUnderline": true,
+                      "subtitle": "Apply settings using modelines, editorconfig, or sensible defaults",
+                      "schemaKey": "discover-settings"
+                    },
+                    {
+                      "id": "restore_session",
+                      "type": "switch-row",
+                      "children": [],
+                      "title": "_Restore Session",
+                      "useUnderline": true,
+                      "subtitle": "Return to your previous session when Text Editor is started",
+                      "bindings": {
+                        "active": "clear_history_group.sensitive"
+                      }
+                    }
+                  ],
+                  "title": "Behavior"
+                },
+                {
+                  "id": "clear_history_group",
+                  "type": "preferences-group",
+                  "children": [
+                    {
+                      "id": "imported-15",
+                      "type": "button-row",
+                      "children": [],
+                      "actionName": "app.clear-history",
+                      "focusOnClick": false,
+                      "title": "_Clear History",
+                      "useUnderline": true,
+                      "destructive": true
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
       }
     ],
-    "importDiagnostics": [
+    "edges": [
       {
-        "code": "renderer-does-not-support-class",
-        "sourceClass": "EditorOpenPopover",
-        "sourceId": "open_menu_popover",
-        "message": "EditorOpenPopover is not in the generic widget registry; retained as an explicit custom-widget boundary."
-      },
-      {
-        "code": "renderer-does-not-support-class",
-        "sourceClass": "AdwTabBar",
-        "sourceId": "tab_bar",
-        "message": "AdwTabBar is not in the generic widget registry; retained as an explicit custom-widget boundary."
-      },
-      {
-        "code": "renderer-does-not-support-class",
-        "sourceClass": "EditorFullscreenBox",
-        "sourceId": "fullscreen_box",
-        "message": "EditorFullscreenBox is not in the generic widget registry; retained as an explicit custom-widget boundary."
-      },
-      {
-        "code": "renderer-does-not-support-class",
-        "sourceClass": "EditorFullscreenBox",
-        "sourceId": "imported-23",
-        "message": "EditorFullscreenBox is not in the generic widget registry; retained as an explicit custom-widget boundary."
-      },
-      {
-        "code": "renderer-does-not-support-class",
-        "sourceClass": "AdwBottomSheet",
-        "sourceId": "imported-22",
-        "message": "AdwBottomSheet is not in the generic widget registry; retained as an explicit custom-widget boundary."
-      },
-      {
-        "code": "renderer-does-not-support-class",
-        "sourceClass": "GtkInfoBar",
-        "sourceId": "access_infobar",
-        "message": "GtkInfoBar is not in the generic widget registry; retained as an explicit custom-widget boundary."
-      },
-      {
-        "code": "renderer-does-not-support-class",
-        "sourceClass": "GtkInfoBar",
-        "sourceId": "discard_infobar",
-        "message": "GtkInfoBar is not in the generic widget registry; retained as an explicit custom-widget boundary."
-      },
-      {
-        "code": "renderer-does-not-support-class",
-        "sourceClass": "GtkInfoBar",
-        "sourceId": "encoding_infobar",
-        "message": "GtkInfoBar is not in the generic widget registry; retained as an explicit custom-widget boundary."
-      },
-      {
-        "code": "renderer-does-not-support-class",
-        "sourceClass": "EditorInfoBar",
-        "sourceId": "infobar",
-        "message": "EditorInfoBar is not in the generic widget registry; retained as an explicit custom-widget boundary."
-      },
-      {
-        "code": "renderer-does-not-support-class",
-        "sourceClass": "EditorSourceView",
-        "sourceId": "view",
-        "message": "EditorSourceView is not in the generic widget registry; retained as an explicit custom-widget boundary."
-      },
-      {
-        "code": "renderer-does-not-support-class",
-        "sourceClass": "EditorSourceMap",
-        "sourceId": "map",
-        "message": "EditorSourceMap is not in the generic widget registry; retained as an explicit custom-widget boundary."
-      },
-      {
-        "code": "renderer-does-not-support-class",
-        "sourceClass": "GtkProgressBar",
-        "sourceId": "progress_bar",
-        "message": "GtkProgressBar is not in the generic widget registry; retained as an explicit custom-widget boundary."
-      },
-      {
-        "code": "renderer-does-not-support-class",
-        "sourceClass": "EditorPositionLabel",
-        "sourceId": "position_label",
-        "message": "EditorPositionLabel is not in the generic widget registry; retained as an explicit custom-widget boundary."
-      },
-      {
-        "code": "renderer-does-not-support-class",
-        "sourceClass": "EditorSearchBar",
-        "sourceId": "search_bar",
-        "message": "EditorSearchBar is not in the generic widget registry; retained as an explicit custom-widget boundary."
-      },
-      {
-        "code": "renderer-does-not-support-class",
-        "sourceClass": "GtkSourceBuffer",
-        "sourceId": "buffer",
-        "message": "GtkSourceBuffer is not in the generic widget registry; retained as an explicit custom-widget boundary."
-      },
-      {
-        "code": "renderer-does-not-support-class",
-        "sourceClass": "EditorPreferencesFont",
-        "sourceId": "custom_font",
-        "message": "EditorPreferencesFont is not in the generic widget registry; retained as an explicit custom-widget boundary."
-      },
-      {
-        "code": "renderer-does-not-support-class",
-        "sourceClass": "EditorPreferencesSwitch",
-        "sourceId": "show_grid",
-        "message": "EditorPreferencesSwitch is not in the generic widget registry; retained as an explicit custom-widget boundary."
-      },
-      {
-        "code": "renderer-does-not-support-class",
-        "sourceClass": "EditorPreferencesSwitch",
-        "sourceId": "display_line_numbers",
-        "message": "EditorPreferencesSwitch is not in the generic widget registry; retained as an explicit custom-widget boundary."
-      },
-      {
-        "code": "renderer-does-not-support-class",
-        "sourceClass": "EditorPreferencesSwitch",
-        "sourceId": "highlight_current_line",
-        "message": "EditorPreferencesSwitch is not in the generic widget registry; retained as an explicit custom-widget boundary."
-      },
-      {
-        "code": "renderer-does-not-support-class",
-        "sourceClass": "EditorPreferencesSwitch",
-        "sourceId": "map",
-        "message": "EditorPreferencesSwitch is not in the generic widget registry; retained as an explicit custom-widget boundary."
-      },
-      {
-        "code": "renderer-does-not-support-class",
-        "sourceClass": "EditorPreferencesSwitch",
-        "sourceId": "template-imported-45",
-        "message": "EditorPreferencesSwitch is not in the generic widget registry; retained as an explicit custom-widget boundary."
-      },
-      {
-        "code": "renderer-does-not-support-class",
-        "sourceClass": "EditorPreferencesSwitch",
-        "sourceId": "template-imported-47",
-        "message": "EditorPreferencesSwitch is not in the generic widget registry; retained as an explicit custom-widget boundary."
-      },
-      {
-        "code": "renderer-does-not-support-class",
-        "sourceClass": "EditorPreferencesSpin",
-        "sourceId": "right_margin",
-        "message": "EditorPreferencesSpin is not in the generic widget registry; retained as an explicit custom-widget boundary."
-      },
-      {
-        "code": "renderer-does-not-support-class",
-        "sourceClass": "EditorPreferencesSwitch",
-        "sourceId": "template-imported-48",
-        "message": "EditorPreferencesSwitch is not in the generic widget registry; retained as an explicit custom-widget boundary."
-      },
-      {
-        "code": "renderer-does-not-support-class",
-        "sourceClass": "EditorPreferencesSwitch",
-        "sourceId": "template-imported-50",
-        "message": "EditorPreferencesSwitch is not in the generic widget registry; retained as an explicit custom-widget boundary."
-      },
-      {
-        "code": "renderer-does-not-support-class",
-        "sourceClass": "EditorPreferencesSwitch",
-        "sourceId": "discover",
-        "message": "EditorPreferencesSwitch is not in the generic widget registry; retained as an explicit custom-widget boundary."
-      },
-      {
-        "code": "renderer-does-not-support-class",
-        "sourceClass": "EditorSearchEntry",
-        "sourceId": "search_entry",
-        "message": "EditorSearchEntry is not in the generic widget registry; retained as an explicit custom-widget boundary."
-      },
-      {
-        "code": "renderer-does-not-support-class",
-        "sourceClass": "GtkText",
-        "sourceId": "text",
-        "message": "GtkText is not in the generic widget registry; retained as an explicit custom-widget boundary."
-      },
-      {
-        "code": "renderer-does-not-support-class",
-        "sourceClass": "GtkSourceMap",
-        "sourceId": "map",
-        "message": "GtkSourceMap is not in the generic widget registry; retained as an explicit custom-widget boundary."
+        "id": "edge-1",
+        "sourceId": "editor",
+        "targetId": "preferences"
       }
     ]
   },

@@ -241,12 +241,17 @@ export const AdwaitaRenderer: React.FC<Props> = ({
   const legalAdds = LEGAL_CHILDREN[node.type] || [];
   const elRef = useRef<HTMLElement>(null);
 
+  // A dialog used as a canvas screen renders as a window-like surface; the
+  // real dialog elements are modals, hidden until runtime opens them.
+  const isDialogRoot = Boolean(screenWidth) &&
+    (node.type === 'dialog' || node.type === 'preferences-dialog' || node.type === 'about-dialog' || node.type === 'alert-dialog');
+
   useEffect(() => {
-    if ((node.type === 'window' || node.type === 'dialog') && elRef.current && screenWidth) {
+    if ((node.type === 'window' || node.type === 'dialog' || isDialogRoot) && elRef.current && screenWidth) {
       elRef.current.style.width = `${screenWidth}px`;
       if (screenHeight) elRef.current.style.height = `${screenHeight}px`;
     }
-  }, [node.type, screenWidth, screenHeight]);
+  }, [node.type, isDialogRoot, screenWidth, screenHeight]);
 
   useEffect(() => {
     ensureAdwIcon(node.iconName);
@@ -257,9 +262,11 @@ export const AdwaitaRenderer: React.FC<Props> = ({
   if (node.visible === false) return null;
 
   // adw-menu-button is icon-only; a labelled MenuButton renders as a button.
-  const tag = node.type === 'menu-button' && node.title
-    ? 'adw-button'
-    : TAG_MAP[node.type] || 'div';
+  const tag = isDialogRoot
+    ? 'adw-window'
+    : node.type === 'menu-button' && node.title
+      ? 'adw-button'
+      : TAG_MAP[node.type] || 'div';
   const attrs = nodeProps(node, inheritedSlot);
 
   // Apply theme class to window/dialog roots based on doc colorScheme
@@ -323,7 +330,7 @@ export const AdwaitaRenderer: React.FC<Props> = ({
         ...attrs,
         'data-protota-type': node.type,
         ...(isExpandedBoundary ? { 'data-protota-expanded': 'true' } : {}),
-        ...(node.type === 'window' && screenWidth ? { 'data-protota-render-surface': 'true' } : {}),
+        ...((node.type === 'window' || isDialogRoot) && screenWidth ? { 'data-protota-render-surface': 'true' } : {}),
         style: containerLayout(node),
         className: divClass || undefined,
       },

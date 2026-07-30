@@ -129,3 +129,21 @@ test.describe('Keyboard shortcuts (#14)', () => {
     });
   });
 });
+
+test.describe("Subtree clipboard", () => {
+  test("Ctrl+D duplicates the selected widget beside itself", async ({ page }) => {
+    await page.goto("/");
+    await page.waitForSelector("adw-window", { timeout: 10000 });
+
+    const labels = page.locator('.protota-canvas [data-protota-type="label"]');
+    const before = await labels.count();
+
+    await labels.first().click({ position: { x: 4, y: 4 } });
+    await page.keyboard.press("Control+d");
+    await expect(labels).toHaveCount(before + 1);
+
+    // Undo restores the original tree.
+    await page.keyboard.press("Control+z");
+    await expect(labels).toHaveCount(before);
+  });
+});

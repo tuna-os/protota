@@ -43,6 +43,11 @@ export const App: React.FC = () => {
     moveNodeDown,
     selectNode,
     addChildNode,
+    selectedScreenId,
+    copyNode,
+    cutNode,
+    pasteNode,
+    duplicateNode,
   } = useMockupStore();
 
   const [leftOpen, setLeftOpen] = useState(() => typeof window !== 'undefined' ? window.innerWidth >= 768 : true);
@@ -108,6 +113,23 @@ export const App: React.FC = () => {
       if ((e.key === "z" && mod && e.shiftKey) || (e.key === "Z" && mod)) {
         e.preventDefault();
         redo();
+        return;
+      }
+      // Subtree clipboard, with the shortcuts every design tool uses.
+      if (mod && selectedNodeId && (e.key === "c" || e.key === "x" || e.key === "d")) {
+        e.preventDefault();
+        if (e.key === "c") copyNode(selectedNodeId);
+        else if (e.key === "x") cutNode(selectedNodeId);
+        else {
+          const created = duplicateNode(selectedNodeId);
+          if (created) selectNode(created, selectedScreenId ?? undefined);
+        }
+        return;
+      }
+      if (mod && e.key === "v" && selectedNodeId) {
+        e.preventDefault();
+        const created = pasteNode(selectedNodeId);
+        if (created) selectNode(created, selectedScreenId ?? undefined);
         return;
       }
       if (e.key === "Delete" || e.key === "Backspace") {

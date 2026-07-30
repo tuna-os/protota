@@ -2,10 +2,10 @@ import { create } from 'zustand';
 import { produce } from 'immer';
 import type { MockupDocument, AdwNode, AdwNodeType } from '../types/mockup';
 import type { ScreenTemplateType } from '../types/mockup';
-import { SCREEN_DEFAULTS } from '../types/mockup';
+import { SCREEN_DEFAULTS, LEGAL_CHILDREN } from '../types/mockup';
 import type { LintViolation } from '../utils/higLinter';
 import { lintDocument } from '../utils/higLinter';
-import { findNodeLocation } from '../utils/treeHelpers';
+import { findNodeLocation, findNodeById } from '../utils/treeHelpers';
 import { blueprintToDocument, mockupToBlueprint } from '../utils/blueprint';
 
 const BLUEPRINT_STORAGE_KEY = 'protota_blueprint_v1';
@@ -280,6 +280,32 @@ interface MockupState {
   removeEdge: (edgeId: string) => void;
   setShowAddScreenModal: (show: boolean) => void;
   clearCanvas: () => void;
+  /** Subtree clipboard: the designer workflow of build once, place often. */
+  clipboard: AdwNode | null;
+  copyNode: (nodeId: string) => void;
+  cutNode: (nodeId: string) => void;
+  /** Paste into a container, or beside a leaf. Returns the new node's id. */
+  pasteNode: (targetId: string) => string | null;
+  duplicateNode: (nodeId: string) => string | null;
+}
+
+/** The container holding a node, so paste can fall back to placing beside it. */
+function findParentOf(root: AdwNode, nodeId: string): AdwNode | null {
+  if (root.children?.some((child) => child.id === nodeId)) return root;
+  for (const child of root.children ?? []) {
+    const found = findParentOf(child, nodeId);
+    if (found) return found;
+  }
+  return null;
+}
+
+/** A pasted subtree needs fresh ids, or two nodes would answer to one name. */
+function withFreshIds(node: AdwNode): AdwNode {
+  return {
+    ...node,
+    id: uid(node.type),
+    children: node.children?.map(withFreshIds),
+  };
 }
 
 export const useMockupStore = create<MockupState>((set, get) => {
@@ -487,6 +513,57 @@ export const useMockupStore = create<MockupState>((set, get) => {
         draft.edges = draft.edges.filter((edge) => edge.id !== edgeId);
       });
       set(pushSnapshot(nextDoc));
+    },
+
+    clipboard: null,
+
+    copyNode: (nodeId) => {
+      for (const screen of get().doc.screens) {
+        const found = findNodeById([screen.rootNode], nodeId);
+        if (found) { set({ clipboard: JSON.parse(JSON.stringify(found)) }); return; }
+      }
+    },
+
+    cutNode: (nodeId) => {
+      get().copyNode(nodeId);
+      if (get().clipboard) get().deleteNode(nodeId);
+    },
+
+    pasteNode: (targetId) => {
+      const clipboard = get().clipboard;
+      if (!clipboard) return null;
+      const copy = withFreshIds(clipboard);
+      let placed = false;
+      const nextDoc = produce(get().doc, (draft) => {
+        for (const screen of draft.screens) {
+          const target = findNodeById([screen.rootNode], targetId);
+          if (!target) continue;
+          // Prefer pasting into the target; fall back to beside it when the
+          // target cannot legally hold this widget.
+          const legalHere = (LEGAL_CHILDREN[target.type] ?? []).includes(copy.type);
+          if (legalHere) {
+            target.children = target.children ?? [];
+            target.children.push(copy);
+            placed = true;
+          } else {
+            const location = findNodeLocation(screen.rootNode, targetId);
+            const parent = location ? findParentOf(screen.rootNode, targetId) : null;
+            if (location && parent && (LEGAL_CHILDREN[parent.type] ?? []).includes(copy.type)) {
+              location.parentChildren.splice(location.index + 1, 0, copy);
+              placed = true;
+            }
+          }
+          break;
+        }
+      });
+      if (!placed) return null;
+      set(pushSnapshot(nextDoc));
+      return copy.id;
+    },
+
+    duplicateNode: (nodeId) => {
+      get().copyNode(nodeId);
+      return get().pasteNode(nodeId);
     },
 
     clearCanvas: () => {

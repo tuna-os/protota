@@ -209,6 +209,36 @@ export interface MockupDocument {
  * real Adwaita app. No illegal nesting — mockups always depict buildable UIs.
  */
 /**
+ * Named child slots a container offers. GNOME layout is slot-driven — a
+ * button means something different in a header bar's `start` than in its
+ * `end` — so both the palette and the agent API need these to be data
+ * rather than lore.
+ */
+export const LEGAL_SLOTS: Partial<Record<AdwNodeType, string[]>> = {
+  'header-bar': ['start', 'title', 'end'],
+  'toolbar-view': ['top', 'content', 'bottom'],
+  'overlay-split': ['sidebar', 'content'],
+  'navigation-view': ['content'],
+  'status-page': ['child'],
+  'action-row': ['prefix', 'suffix'],
+  'switch-row': ['prefix', 'suffix'],
+  'combo-row': ['prefix', 'suffix'],
+  'spin-row': ['prefix', 'suffix'],
+  'entry-row': ['prefix', 'suffix'],
+  'password-row': ['prefix', 'suffix'],
+  'expander-row': ['prefix', 'suffix'],
+  'list-box-row': ['child'],
+  bin: ['child'],
+  clamp: ['child'],
+  'scrolled-window': ['child'],
+  'toast-overlay': ['child'],
+  'menu-button': ['popover', 'child'],
+  'split-button': ['popover'],
+  window: ['content'],
+  dialog: ['content'],
+};
+
+/**
  * Widgets a generic GTK container accepts. GtkBox, GtkGrid, AdwBin and the
  * rest impose no type restriction, and the presets imported from real GNOME
  * apps use that freedom throughout — so refusing these combinations would

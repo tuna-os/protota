@@ -14,7 +14,7 @@
  */
 
 import type { MockupDocument, AdwNode, AdwNodeType, ScreenTemplateType } from '../types/mockup';
-import { LEGAL_CHILDREN, SCREEN_DEFAULTS } from '../types/mockup';
+import { LEGAL_CHILDREN, LEGAL_SLOTS, SCREEN_DEFAULTS } from '../types/mockup';
 import { blueprintBundleToDocument, type BlueprintSourceFile } from './blueprint';
 
 let _nextId = 0;
@@ -72,6 +72,15 @@ export class MockupBuilder {
       throw new Error(`"${type}" is not a legal child of "${parent.type}". Legal: ${legal.join(', ')}`);
     }
 
+    // GNOME layout is slot-driven: a button in a header bar's `start` is a
+    // different thing from one in its `end`. Reject a slot the container does
+    // not offer rather than silently placing the widget somewhere else.
+    const slot = props?.slot;
+    const slots = LEGAL_SLOTS[parent.type];
+    if (slot && slots && !slots.includes(slot)) {
+      throw new Error(`"${slot}" is not a slot of "${parent.type}". Slots: ${slots.join(', ')}`);
+    }
+
     const node: AdwNode = {
       id: uid(),
       type,
@@ -81,6 +90,16 @@ export class MockupBuilder {
     parent.children.push(node);
     this._stack.push(node);
     return this;
+  }
+
+  /** Named slots the given container offers, for agents choosing placement. */
+  static slotsFor(type: AdwNodeType): string[] {
+    return LEGAL_SLOTS[type] ?? [];
+  }
+
+  /** Widgets the given container legally accepts. */
+  static childrenFor(type: AdwNodeType): AdwNodeType[] {
+    return LEGAL_CHILDREN[type] ?? [];
   }
 
   /** Navigate into a child container to add nested widgets. */

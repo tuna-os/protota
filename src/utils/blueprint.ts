@@ -1326,6 +1326,74 @@ export interface BlueprintSourceFile {
   content: string;
 }
 
+// ---------------------------------------------------------------------------
+// Host-side write-back helpers (scripts/protota-writeback.mjs)
+//
+// The write-back CLI patches property values and splices subtrees into an
+// app's own Blueprint files. It reuses the exporter's single source of truth
+// for property spelling, value formatting, and slot emission, so a patched
+// file and a fully exported file can never disagree about syntax.
+// ---------------------------------------------------------------------------
+
+/** Renderer types whose editor `title` is the GTK `label` property. */
+const LABELLED_TYPES = new Set(['button', 'label', 'toggle', 'inscription', 'menu-button', 'split-button']);
+
+/**
+ * The Blueprint property names an editor key may correspond to in real
+ * source, most canonical first. `title` on a button is `label`, but GNOME
+ * sources occasionally spell button text as `text`; a patcher must find
+ * either before deciding the property is absent.
+ */
+export function blueprintPropertyCandidates(key: string, nodeType: string): string[] {
+  if (key === 'title' && LABELLED_TYPES.has(nodeType)) return ['label', 'text'];
+  return [exportPropertyName(key)];
+}
+
+/** Format a value exactly as the exporter would for the named property. */
+export function blueprintValueSource(name: string, value: unknown): string {
+  return formatPropertyValue(name, value);
+}
+
+/** The Adwaita style class an editor boolean maps to, or null. */
+export function blueprintStyleClassFor(key: string): string | null {
+  return STYLE_CLASS_PROPERTIES[key] ?? null;
+}
+
+/** True when the property is emitted inside a `layout { }` block. */
+export function isBlueprintLayoutProperty(name: string): boolean {
+  return LAYOUT_PROPERTIES.has(name);
+}
+
+/**
+ * Emit one node (and its subtree) as Blueprint source at the given indent
+ * depth, including its slot decoration — `[top]` annotation or
+ * `slot: Class { … };` object-valued property — exactly as the full exporter
+ * would place a child of `parentClassName`.
+ */
+export function blueprintChildSource(node: AdwNode, depth: number, parentClassName?: string): string {
+  const knownIds = new Set<string>();
+  const idMap = new Map<AdwNode, string>();
+  const usedIds = new Set<string>();
+  const collect = (candidate: AdwNode) => {
+    if (candidate.id) { knownIds.add(candidate.id); usedIds.add(candidate.id); idMap.set(candidate, candidate.id); }
+    candidate.children?.forEach(collect);
+  };
+  collect(node);
+  const context: ExportContext = { knownIds, usedIds, idMap, renames: new Map(), standalone: false };
+  const body = nodeToBlueprint(node, depth, context);
+  if (!node.slot) return body;
+  if (ANNOTATION_SLOTS.has(node.slot)) return `${indent(depth)}[${node.slot}]\n${body}`;
+  const parentProperties = parentClassName && !parentClassName.startsWith('$') ? propertiesOf(parentClassName) : null;
+  let slotName = node.slot;
+  if (parentProperties && !parentProperties.has(slotName)) {
+    const fallback = ['child', 'content'].find((candidate) => parentProperties.has(candidate));
+    if (!fallback) return body;
+    slotName = fallback;
+  }
+  const trimmed = body.replace(/^\s+/, '').replace(/\n$/, '');
+  return `${indent(depth)}${slotName}: ${trimmed};\n`;
+}
+
 interface BlueprintTemplate {
   className: string;
   body: string;

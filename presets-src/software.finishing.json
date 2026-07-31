@@ -1,0 +1,17 @@
+{
+  "title": "GNOME Software",
+  "screen": {
+    "title": "Software",
+    "width": 1024,
+    "height": 720
+  },
+  "overrides": [
+    {
+      "id": "imported-1",
+      "set": {
+        "visible": true
+      },
+      "why": "src/gs-shell.ui declares <property name=\"visible\">False</property> on the GsShell template, because the shell is presented programmatically once the application has finished loading rather than shown by the builder. Imported faithfully the window renders nothing at all, so a designer screen must show it."
+    }
+  ]
+}

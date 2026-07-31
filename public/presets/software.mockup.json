@@ -1,10 +1,10 @@
 {
   "version": 1,
-  "exportedAt": "2026-07-31T01:00:10.489Z",
+  "exportedAt": "2026-07-31T01:05:16.558Z",
   "generatedBy": "scripts/generate-preset.mjs",
   "document": {
     "id": "software-preset",
-    "title": "software",
+    "title": "GNOME Software",
     "colorScheme": "auto",
     "screens": [
       {
@@ -4618,7 +4618,7 @@
               "sourceClass": "Adw.ViewStack"
             }
           ],
-          "visible": false,
+          "visible": true,
           "widthRequest": 360,
           "heightRequest": 400,
           "defaultWidth": 1200,

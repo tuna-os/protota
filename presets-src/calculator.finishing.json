@@ -4,15 +4,24 @@
     { "id": "basic", "entry": "math-window.blp", "title": "Basic", "width": 360, "height": 460,
       "overrides": [
         { "id": "_converter", "set": { "visible": false },
-          "why": "math-window.vala: converter.set_visible (mode == ButtonMode.CONVERSION); default button-mode is basic (GSettings schema)." },
+          "probeEvidence": { "probeVersion": 1, "buildableId": "_converter", "expect": { "mapped": false } },
+          "why": "Native probe (presets-src/calculator.probe.json): _converter is unmapped in the default GSettings button-mode (basic)." },
+        { "id": "converter_box", "set": { "visible": false },
+          "probeEvidence": { "probeVersion": 1, "buildableId": "converter_box", "expect": { "mapped": false } },
+          "why": "Native probe: converter_box is unmapped — GTK's own answer to the GSettings-driven visibility PR #113 documented as probe territory." },
         { "id": "back_button", "set": { "visible": false },
-          "why": "Only shown when returning from financial/programming modes." },
+          "probeEvidence": { "probeVersion": 1, "buildableId": "back_button", "expect": { "mapped": false } },
+          "why": "Native probe: back_button unmapped in basic mode (only shown returning from financial/programming)." },
+        { "id": "panel_stack", "set": { "visibleChildName": "bas_panel" },
+          "probeEvidence": { "probeVersion": 1, "buildableId": "BasicButtonPanel", "expect": { "mapped": true } },
+          "why": "Native probe: BasicButtonPanel is the mapped keypad panel — GSettings button-mode is basic. The code-built panel_stack carries no page names, so the panel template root is the witness." },
         { "id": "menu_button", "set": { "title": "Basic" },
-          "why": "Mode MenuButton label reflects the active mode at runtime." },
+          "why": "Mode MenuButton label reflects the active mode at runtime (not probe-derivable: the probe records no label text)." },
         { "id": "history", "set": { "heightRequest": 190 },
           "why": "HistoryView fills the display card above the entry line; allocation is runtime-driven (empty list still reserves the card)." },
         { "id": "spinner", "set": { "visible": false },
-          "why": "The currency-refresh spinner only appears while rates download." }
+          "probeEvidence": { "probeVersion": 1, "buildableId": "spinner", "expect": { "mapped": false } },
+          "why": "Native probe: the currency-refresh spinner is unmapped while idle." }
       ] },
     { "id": "advanced", "entry": "math-window.blp", "title": "Advanced", "width": 750, "height": 670,
       "overrides": [

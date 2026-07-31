@@ -120,6 +120,19 @@ export function placementLayout(node: AdwNode, flow: ParentFlow = 'column'): CSS
   if (node.heightRequest !== undefined) {
     placement.minHeight = Math.max(node.heightRequest, Number(placement.minHeight ?? 0));
   }
+  // Native runtime evidence (#58): the probe measured the allocation GTK
+  // gave this widget on the very surface the comparison renders. Unlike a
+  // size request, the measured bounds are GTK's finished answer — expansion,
+  // homogeneous shares and sibling pressure are already baked in — so the
+  // boundary takes exactly that region: no flex growth past it, no squeeze
+  // below it. A declared size request larger than the measurement still wins
+  // via min-*, which CSS ranks above width/height.
+  if (node.runtimeEvidence?.bounds) {
+    placement.width = node.runtimeEvidence.bounds.width;
+    placement.height = node.runtimeEvidence.bounds.height;
+    placement.flexGrow = 0;
+    placement.flexShrink = 0;
+  }
   if (node.column !== undefined) placement.gridColumn = `${node.column + 1} / span ${node.columnSpan ?? 1}`;
   if (node.row !== undefined) placement.gridRow = `${node.row + 1} / span ${node.rowSpan ?? 1}`;
   return Object.keys(placement).length ? placement : undefined;
@@ -203,14 +216,14 @@ export function boundaryGeometryFacts(node: AdwNode, parent?: AdwNode): Geometry
   const origins = (node.geometryOrigin ?? {}) as Record<string, string>;
   const declared = (key: string, value: unknown, appliedAs?: string): void => {
     if (value === undefined) return;
-    const fromCode = origins[key] === 'code';
+    const layer = origins[key] === 'code' ? 'code' : origins[key] === 'native' ? 'native' : 'source';
     facts.push({
       // `property` names the applied effect; `origin` names the source
       // property that produced it (a size request applies as a minimum).
       property: appliedAs ?? GEOMETRY_SOURCE_NAMES[key] ?? key,
       value: value as string | number | boolean,
-      origin: `${fromCode ? 'code' : 'source'}:${GEOMETRY_SOURCE_NAMES[key] ?? key}`,
-      confidence: fromCode ? 'code' : 'declared',
+      origin: `${layer}:${GEOMETRY_SOURCE_NAMES[key] ?? key}`,
+      confidence: layer === 'source' ? 'declared' : layer,
     });
   };
 
@@ -259,6 +272,23 @@ export function boundaryGeometryFacts(node: AdwNode, parent?: AdwNode): Geometry
     });
   }
 
+  // Native runtime evidence (#58): the probe's measured answer for this
+  // boundary, GTK's own allocation — the top confidence tier. Inlined here
+  // (rather than importing from runtimeProfile) to keep this module free of
+  // probe-schema dependencies.
+  const native = node.runtimeEvidence;
+  if (native) {
+    if (native.bounds) {
+      const { x, y, width, height } = native.bounds;
+      facts.push({
+        property: 'bounds', value: `${x},${y} ${width}x${height}`,
+        origin: 'native:bounds', confidence: 'native',
+      });
+    }
+    facts.push({ property: 'mapped', value: native.mapped, origin: 'native:mapped', confidence: 'native' });
+    facts.push({ property: 'visible', value: native.visible, origin: 'native:visible', confidence: 'native' });
+  }
+
   // No evidence at all: the boundary keeps the labelled renderer minimum.
   // This is honest — never an invented size.
   if (!facts.length) {
@@ -270,8 +300,14 @@ export function boundaryGeometryFacts(node: AdwNode, parent?: AdwNode): Geometry
   return facts;
 }
 
-/** The weakest confidence among the applied facts, for the DOM marker. */
+/**
+ * The confidence the DOM marker reports: the weakest among the applied static
+ * facts — except that native evidence settles it. A probe-measured allocation
+ * is GTK's own answer for the whole region, so its presence subsumes the
+ * weaker static facts it sits alongside.
+ */
 export function boundaryGeometryConfidence(facts: GeometryFact[]): GeometryConfidence {
+  if (facts.some((fact) => fact.confidence === 'native')) return 'native';
   const rank: GeometryConfidence[] = ['native', 'declared', 'code', 'derived', 'fallback'];
   return facts.reduce<GeometryConfidence>(
     (worst, fact) => (rank.indexOf(fact.confidence) > rank.indexOf(worst) ? fact.confidence : worst),

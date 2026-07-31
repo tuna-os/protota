@@ -166,6 +166,50 @@ Python**. Protota instead ships its own Blueprint/GtkBuilder reader-writer in
    per-keystroke language server in the browser, and the design should not
    promise one.
 
+#### 2.3.1 Level 3 as shipped — the live syntax tier (BLP-L001)
+
+Shape (a) landed (ADR 0001 Part 3 item 2), scoped tighter than "real
+verification" because the browser cannot honestly do more:
+
+- **What runs in the browser**: blueprint-compiler **v0.22.2** — vendored
+  unmodified under `public/vendor/blueprint-compiler/` (LGPL; see the
+  NOTICE there), pinned to the same version the Fedora 45 container in the
+  `blueprint-export` CI job installs — executes under Pyodide in a Web
+  Worker (`src/diagnostics/blueprintSyntax.worker.ts`). Only its
+  **tokenizer and parser** run (`blueprint_check.py` skips the AST
+  validation pass): missing semicolons/braces, malformed constructs,
+  unparseable `$Type` references. Each screen is exported separately
+  (`buildScreenSources`, the same per-screen standalone shape
+  `scripts/export-blueprint.mjs` feeds CI), so errors attribute to a
+  screen; a nearest-preceding-widget-id heuristic anchors them to a node.
+  Results are **error**-tier `BLP-L001`, always prefixed
+  *"Syntax check (browser)"*.
+- **What stays host-only**: everything needing GObject introspection —
+  unknown classes, property names/types, signals, `using` namespace
+  resolution. Typelibs don't exist in the browser; a minimal import-time
+  `gi` stub satisfies `blueprintcompiler.gir`'s imports and *raises* if
+  introspection is actually attempted. The `blueprint-export` CI job
+  (distro blueprint-compiler + GIR data) remains the authority, and the UI
+  never claims "compiles clean" from the browser tier.
+- **Size and loading**: opt-in via a toggle in the panel's Source group —
+  nothing loads at app start. First enable lazily spawns the worker, which
+  downloads the **self-hosted** Pyodide runtime (~14 MB: wasm interpreter +
+  stdlib) from `<base>/pyodide/`, copied out of the `pyodide` npm package
+  at build time by the Vite plugin in `vite.config.ts` — no CDN, so the
+  static-hosting/no-server constraint holds and the check works offline
+  once cached. The worker survives toggling, so re-enabling is instant.
+  If the runtime cannot load (offline first use), the status line reports
+  it and the tier degrades to absent — HIG rules, import diagnostics, and
+  the BLP-E001 round-trip check are unaffected.
+- **Testing**: mapping + client lifecycle are unit-tested with a fake
+  worker (`src/__tests__/live-blueprint.test.ts`); real Pyodide + the
+  vendored compiler run under vitest/node
+  (`src/__tests__/pyodide-blueprint.integration.test.ts` — bad source
+  errors, good source clean, exporter output clean, GIR-level mistakes
+  deliberately NOT flagged); Playwright drives the real runtime end to end
+  (`tests/live-blueprint.spec.ts`: opt-in gating, loading state, a genuine
+  parser diagnostic, badge integration).
+
 ### 2.4 Store shape
 
 ```ts
@@ -266,7 +310,8 @@ Method, so the catalog stays grounded and maintainable:
 
 Plus the three Blueprint-source mappings from §2.3 (`BLP-W001`,
 `BLP-S001`, `BLP-S002`) and the round-trip `BLP-E001` — 26 rule ids total
-in the initial catalog.
+in the initial catalog. The live syntax tier (§2.3.1) later added
+`BLP-L001`.
 
 Deliberately **not** codified (fails the machine-checkable test):
 menu grouping semantics beyond nesting/size, "order items logically",

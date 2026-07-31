@@ -298,6 +298,16 @@ interface MockupState {
   diagnostics: Diagnostic[];
   /** BLP-E001 round-trip results, refreshed at export and cleared on edit. */
   exportCheck: Diagnostic[];
+  /**
+   * Live Blueprint syntax tier (BLP-L001, ADR 0001 Part 3 item 2): opt-in
+   * per session — enabling it lazily loads a ~14 MB Pyodide runtime in a
+   * worker, so it must never default on. Results come from
+   * useLiveBlueprint, which only runs while the Diagnostics panel exists.
+   */
+  liveBlueprintEnabled: boolean;
+  liveBlueprintStatus: 'off' | 'loading' | 'ready' | 'error';
+  liveBlueprintError: string | null;
+  liveBlueprintDiagnostics: Diagnostic[];
   /** Panel tier chips; filtering happens at selection time, not in the engine. */
   tierFilters: Record<DiagnosticTier, boolean>;
   /** Rule ids disabled globally (persisted). */
@@ -364,6 +374,11 @@ interface MockupState {
   applyQuickFix: (d: Diagnostic) => void;
   /** Export round-trip check (BLP-E001); returns the diagnostics it stored. */
   runExportCheck: () => Diagnostic[];
+  /** Opt in/out of the live browser syntax check (BLP-L001). */
+  toggleLiveBlueprint: () => void;
+  /** Status/result updates from the useLiveBlueprint driver. */
+  setLiveBlueprintState: (partial: Partial<Pick<MockupState,
+    'liveBlueprintStatus' | 'liveBlueprintError' | 'liveBlueprintDiagnostics'>>) => void;
   toggleShowFlows: () => void;
   /** Connect two screens with a navigation flow edge (#11). */
   addEdge: (sourceScreenId: string, targetScreenId: string) => void;
@@ -515,6 +530,10 @@ export const useMockupStore = create<MockupState>((set, get) => {
     diagnosticsEnabled: false,
     diagnostics: [],
     exportCheck: [],
+    liveBlueprintEnabled: false,
+    liveBlueprintStatus: 'off',
+    liveBlueprintError: null,
+    liveBlueprintDiagnostics: [],
     tierFilters: { error: true, warning: true, suggestion: true },
     ...(() => { const ignores = loadIgnores(); return { ignoredRules: ignores.rules, ignoredInstances: ignores.instances }; })(),
     showFlows: false,
@@ -803,7 +822,10 @@ export const useMockupStore = create<MockupState>((set, get) => {
       set({
         diagnosticsEnabled: nextEnabled,
         diagnostics: nextEnabled ? runDiagnostics(get().doc) : [],
-        ...(nextEnabled ? {} : { exportCheck: [] }),
+        // Live results describe the panel that is going away; drop them so
+        // the badge never counts stale BLP-L001s. Opt-in survives (the
+        // worker stays warm and resumes when diagnostics come back).
+        ...(nextEnabled ? {} : { exportCheck: [], liveBlueprintDiagnostics: [], liveBlueprintStatus: 'off' as const }),
       });
     },
 
@@ -853,6 +875,22 @@ export const useMockupStore = create<MockupState>((set, get) => {
       set({ exportCheck });
       return exportCheck;
     },
+
+    toggleLiveBlueprint: () => {
+      const liveBlueprintEnabled = !get().liveBlueprintEnabled;
+      // The worker itself survives a toggle (liveBlueprintClient singleton),
+      // so re-enabling never re-downloads the runtime.
+      set(liveBlueprintEnabled
+        ? { liveBlueprintEnabled }
+        : {
+            liveBlueprintEnabled,
+            liveBlueprintStatus: 'off',
+            liveBlueprintError: null,
+            liveBlueprintDiagnostics: [],
+          });
+    },
+
+    setLiveBlueprintState: (partial) => set(partial),
 
     toggleShowFlows: () => set({ showFlows: !get().showFlows }),
 

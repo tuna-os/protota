@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { persistDocumentSource, useMockupStore } from "../store/mockupStore";
 import { LayersPanel } from "./LayersPanel";
+import { WidgetPalette } from "./WidgetPalette";
 import { ViewportCanvas } from "./ViewportCanvas";
 import { InspectorPanel } from "./InspectorPanel";
 import { DiagnosticsPanel } from "./DiagnosticsPanel";
@@ -57,6 +58,8 @@ export const App: React.FC = () => {
   const [rightOpen, setRightOpen] = useState(() => typeof window !== 'undefined' ? window.innerWidth >= 768 : true);
   /** Two-tab right drawer: Properties (inspector) | Diagnostics (design §5.1). */
   const [rightTab, setRightTab] = useState<"properties" | "diagnostics">("properties");
+  /** Two-tab left drawer: Layers (tree) | Widgets (draggable palette, #79). */
+  const [leftTab, setLeftTab] = useState<"layers" | "widgets">("layers");
   const [showShortcuts, setShowShortcuts] = useState(false);
   const [showPresets, setShowPresets] = useState(false);
   const [showIconLibrary, setShowIconLibrary] = useState(false);
@@ -349,7 +352,27 @@ export const App: React.FC = () => {
                 flexDirection: "column",
               }}
             >
-              <LayersPanel />
+              {/* Two-tab segment: Layers | Widgets (#79) */}
+              <div
+                role="tablist"
+                aria-label="Left panel tabs"
+                style={{ display: "flex", gap: "4px", padding: "8px 8px 0 8px", flexShrink: 0 }}
+              >
+                {(["layers", "widgets"] as const).map((tab) => (
+                  <button
+                    key={tab}
+                    role="tab"
+                    aria-selected={leftTab === tab}
+                    data-testid={`left-tab-${tab}`}
+                    className={`adw-button flat${leftTab === tab ? " active" : ""}`}
+                    onClick={() => setLeftTab(tab)}
+                    style={{ flex: 1, fontSize: "12px" }}
+                  >
+                    {tab === "layers" ? "Layers" : "Widgets"}
+                  </button>
+                ))}
+              </div>
+              {leftTab === "layers" ? <LayersPanel /> : <WidgetPalette />}
             </aside>
           )}
 

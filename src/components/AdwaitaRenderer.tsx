@@ -526,6 +526,10 @@ export const AdwaitaRenderer: React.FC<Props> = ({
         ref: elRef,
         ...attrs,
         'data-protota-type': node.type,
+        // Hit-testing anchor for drag-and-drop (#79): the rendered element is
+        // the node's real box (the wrapper is display: contents), so drop
+        // resolution and the insertion indicator both key off this attribute.
+        'data-node-id': node.id,
         ...(nodeDiagnostics.length > 1 && !isSelected
           ? { 'data-protota-diag-count': String(nodeDiagnostics.length) }
           : {}),

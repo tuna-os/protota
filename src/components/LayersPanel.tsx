@@ -1,6 +1,20 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useMockupStore } from '../store/mockupStore';
-import type { AdwNode } from '../types/mockup';
+import type { AdwNode, AdwNodeType } from '../types/mockup';
+import { LEGAL_CHILDREN } from '../types/mockup';
+import { findNodeById, findNodeLocation } from '../utils/treeHelpers';
+import { useDndStore } from '../dnd/dndStore';
+
+/** Where a row drop lands relative to the row (#79). */
+type DropPosition = 'before' | 'inside' | 'after';
+
+interface RowDrop {
+  rowId: string;
+  position: DropPosition;
+  parentId: string;
+  index: number;
+  screenId: string;
+}
 
 /** One visible row of the layer tree, in document order. */
 interface LayerRow {
@@ -12,9 +26,21 @@ interface LayerRow {
   expanded: boolean;
 }
 
+/** The id of the container holding `nodeId`, or null. */
+function findParentIdOf(root: AdwNode, nodeId: string): string | null {
+  if (root.children?.some((child) => child.id === nodeId)) return root.id;
+  for (const child of root.children ?? []) {
+    const found = findParentIdOf(child, nodeId);
+    if (found) return found;
+  }
+  return null;
+}
+
 export const LayersPanel: React.FC = () => {
-  const { doc, selectedNodeId, selectNode, updateNodeProps, moveNodeUp, moveNodeDown } =
-    useMockupStore();
+  const {
+    doc, selectedNodeId, selectNode, updateNodeProps, moveNodeUp, moveNodeDown,
+    moveNode, addChildNode,
+  } = useMockupStore();
 
   // The panel had no expand state before keyboard navigation; collapse is a
   // view concern, so it lives here rather than in the document.
@@ -133,10 +159,116 @@ export const LayersPanel: React.FC = () => {
     }
   };
 
+  // --- Drag to reorder/reparent (#79). Rows are the drop targets: the top
+  // quarter inserts before the row, the bottom quarter after it, and the
+  // middle drops into the row when it is a legal container. The drop commits
+  // one moveNode (tree drags) or addChildNode (palette drags) — one undo
+  // entry, nothing touched during hover.
+  const [dropHint, setDropHint] = useState<RowDrop | null>(null);
+
+  /** What is being dragged: the palette type, or a tree node's type + subtree. */
+  const dragPayload = (): { type: AdwNodeType; dragged: AdwNode | null } | null => {
+    const drag = useDndStore.getState().drag;
+    if (!drag) return null;
+    if (drag.kind === 'palette') return { type: drag.widgetType, dragged: null };
+    for (const screen of doc.screens) {
+      const node = findNodeById([screen.rootNode], drag.nodeId);
+      if (node) return { type: node.type, dragged: node };
+    }
+    return null;
+  };
+
+  const canDropIn = (parent: AdwNode, type: AdwNodeType, dragged: AdwNode | null): boolean => {
+    if (!(LEGAL_CHILDREN[parent.type] ?? []).includes(type)) return false;
+    // A node cannot land in itself or its own descendant.
+    return !dragged || findNodeById([dragged], parent.id) === null;
+  };
+
+  /** Resolve a hover over a row to `{ parent, index }`, or null when illegal. */
+  const resolveRowDrop = (row: LayerRow, e: React.DragEvent): RowDrop | null => {
+    const payload = dragPayload();
+    if (!payload) return null;
+    const screen = doc.screens.find((s) => s.id === row.screenId);
+    if (!screen) return null;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const fraction = (e.clientY - rect.top) / Math.max(rect.height, 1);
+    const primary: DropPosition = fraction < 0.25 ? 'before' : fraction > 0.75 ? 'after' : 'inside';
+    const nearEdge: DropPosition = fraction < 0.5 ? 'before' : 'after';
+    const candidates = [...new Set<DropPosition>([primary, nearEdge, 'inside', 'before', 'after'])];
+
+    for (const position of candidates) {
+      if (position === 'inside') {
+        if (!canDropIn(row.node, payload.type, payload.dragged)) continue;
+        return {
+          rowId: row.node.id, position, parentId: row.node.id,
+          index: row.node.children?.length ?? 0, screenId: row.screenId,
+        };
+      }
+      if (!row.parentId) continue; // screen roots have no siblings
+      const parent = findNodeById([screen.rootNode], row.parentId);
+      if (!parent || !canDropIn(parent, payload.type, payload.dragged)) continue;
+      const loc = findNodeLocation(screen.rootNode, row.node.id);
+      if (!loc) continue;
+      return {
+        rowId: row.node.id, position, parentId: parent.id,
+        index: loc.index + (position === 'after' ? 1 : 0), screenId: row.screenId,
+      };
+    }
+    return null;
+  };
+
+  const handleRowDragStart = (row: LayerRow, e: React.DragEvent) => {
+    if (renamingId) { e.preventDefault(); return; }
+    e.stopPropagation();
+    e.dataTransfer.setData('text/plain', row.node.id);
+    e.dataTransfer.effectAllowed = 'move';
+    useDndStore.getState().startDrag({ kind: 'node', nodeId: row.node.id });
+  };
+
+  const handleRowDragOver = (row: LayerRow, e: React.DragEvent) => {
+    const drop = resolveRowDrop(row, e);
+    if (drop) {
+      e.preventDefault();
+      e.stopPropagation();
+      e.dataTransfer.dropEffect = useDndStore.getState().drag?.kind === 'palette' ? 'copy' : 'move';
+    }
+    setDropHint(drop);
+  };
+
+  const handleRowDrop = (row: LayerRow, e: React.DragEvent) => {
+    const drop = resolveRowDrop(row, e);
+    const drag = useDndStore.getState().drag;
+    setDropHint(null);
+    useDndStore.getState().endDrag();
+    if (!drop || !drag) return;
+    e.preventDefault();
+    e.stopPropagation();
+    if (drag.kind === 'palette') {
+      const id = addChildNode(drop.parentId, drag.widgetType, undefined, drop.index);
+      if (id) selectNode(id, drop.screenId);
+    } else {
+      // Moving to a new parent clears the old slot (the new container decides
+      // placement); reordering under the same parent keeps it.
+      const screen = doc.screens.find((s) => s.id === drop.screenId);
+      const currentParent = screen ? findParentIdOf(screen.rootNode, drag.nodeId) : null;
+      moveNode(drag.nodeId, drop.parentId, drop.index,
+        currentParent === drop.parentId ? undefined : '');
+      selectNode(drag.nodeId, drop.screenId);
+    }
+    // Make the result visible when dropping into a collapsed container.
+    if (drop.position === 'inside') setCollapsed(drop.parentId, false);
+  };
+
+  const handleRowDragEnd = () => {
+    setDropHint(null);
+    useDndStore.getState().endDrag();
+  };
+
   const renderRow = (row: LayerRow) => {
     const { node, depth, hasChildren, expanded } = row;
     const isSelected = selectedNodeId === node.id;
     const isRenaming = renamingId === node.id;
+    const hint = dropHint?.rowId === node.id ? dropHint.position : null;
 
     return (
       <div
@@ -152,10 +284,20 @@ export const LayersPanel: React.FC = () => {
         tabIndex={node.id === focusableId ? 0 : -1}
         data-testid="layer-row"
         data-node-id={node.id}
+        {...(hint ? { 'data-drop-position': hint } : {})}
+        draggable={!isRenaming}
         style={{ marginLeft: `${depth * 14}px` }}
-        className={`protota-tree-item${isSelected ? ' protota-tree-item--selected' : ''}`}
+        className={`protota-tree-item${isSelected ? ' protota-tree-item--selected' : ''}${hint ? ` protota-tree-item--drop-${hint}` : ''}`}
         onClick={() => selectNode(node.id, row.screenId)}
         onDoubleClick={() => beginRename(row)}
+        onDragStart={(e) => handleRowDragStart(row, e)}
+        onDragOver={(e) => handleRowDragOver(row, e)}
+        onDragLeave={(e) => {
+          if (!(e.currentTarget as HTMLElement).contains(e.relatedTarget as Node) &&
+              dropHint?.rowId === node.id) setDropHint(null);
+        }}
+        onDrop={(e) => handleRowDrop(row, e)}
+        onDragEnd={handleRowDragEnd}
       >
         <span style={{ display: 'flex', alignItems: 'center', gap: '4px', minWidth: 0, flex: 1 }}>
           <span

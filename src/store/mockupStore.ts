@@ -8,7 +8,7 @@ import { instanceKey } from '../diagnostics/types';
 import { runDiagnostics } from '../diagnostics/engine';
 import { runRoundTripCheck } from '../diagnostics/blueprintSource';
 import { findNodeLocation, findNodeById } from '../utils/treeHelpers';
-import { toggleSelection, unionSelection } from '../utils/selection';
+import { toggleSelection, unionSelection, filterShallowest } from '../utils/selection';
 import { blueprintToDocument, mockupToBlueprint } from '../utils/blueprint';
 
 const BLUEPRINT_STORAGE_KEY = 'protota_blueprint_v1';
@@ -342,6 +342,17 @@ interface MockupState {
   deleteSelectedNodes: () => void;
   undo: () => void;
   redo: () => void;
+  /**
+   * Run several store mutations as ONE undo snapshot (ADR 0001 Part 3,
+   * penpot-study.md §8). While `fn` runs, per-mutation snapshots are
+   * suspended: `doc` still updates after every mutation (so chained
+   * mutations see each other), but history, persistence, and diagnostics
+   * settle exactly once at commit. Nested calls are no-ops — the inner
+   * function runs inline and the outermost transaction owns the snapshot.
+   * A throw inside `fn` still commits whatever mutated before it (one
+   * undoable step) and then propagates.
+   */
+  runInTransaction: (fn: () => void) => void;
   toggleColorScheme: () => void;
   toggleDiagnostics: () => void;
   setTierFilter: (tier: DiagnosticTier, on: boolean) => void;
@@ -359,13 +370,45 @@ interface MockupState {
   removeEdge: (edgeId: string) => void;
   setShowAddScreenModal: (show: boolean) => void;
   clearCanvas: () => void;
-  /** Subtree clipboard: the designer workflow of build once, place often. */
-  clipboard: AdwNode | null;
+  /**
+   * Forest clipboard (ADR 0001 Part 3 item 3): an ordered list of copied
+   * subtrees. #112 kept the clipboard single-subtree; multi-select made the
+   * natural unit an ordered forest. The single-node actions below are thin
+   * wrappers over the forest ones.
+   */
+  clipboard: AdwNode[];
   copyNode: (nodeId: string) => void;
+  /**
+   * Copy an ordered forest: `nodeIds` are shallowest-filtered (a selected
+   * container swallows its selected descendants, same rule as align and
+   * drag) and stored in the given (selection) order. Unknown ids are
+   * dropped; when nothing resolves the clipboard is left untouched.
+   * Returns the ids of the subtree roots actually copied.
+   */
+  copyNodes: (nodeIds: string[]) => string[];
   cutNode: (nodeId: string) => void;
-  /** Paste into a container, or beside a leaf. Returns the new node's id. */
+  /**
+   * Copy, then delete the copied roots in ONE undo snapshot. Screen roots
+   * are copied but never deleted (they are anchors, as in delete).
+   */
+  cutNodes: (nodeIds: string[]) => void;
+  /** Paste into a container, or beside a leaf. Returns the first new id. */
   pasteNode: (targetId: string) => string | null;
+  /**
+   * Paste the clipboard forest sequentially into/beside `targetId` (which
+   * may live on any screen — cross-screen paste). Each tree resolves
+   * legality individually: into the target when the target may hold it,
+   * else beside the target; a tree that can land in neither place is
+   * reported in `skipped` and the rest still paste. ONE undo snapshot for
+   * the whole paste (none when nothing lands).
+   */
+  pasteNodes: (targetId: string) => { pastedIds: string[]; skipped: AdwNodeType[] };
   duplicateNode: (nodeId: string) => string | null;
+  /**
+   * Duplicate each subtree (shallowest-filtered) beside its own original in
+   * ONE undo snapshot, without touching the clipboard. Returns the new ids.
+   */
+  duplicateNodes: (nodeIds: string[]) => string[];
 }
 
 /** The container holding a node, so paste can fall back to placing beside it. */
@@ -374,6 +417,36 @@ function findParentOf(root: AdwNode, nodeId: string): AdwNode | null {
   for (const child of root.children ?? []) {
     const found = findParentOf(child, nodeId);
     if (found) return found;
+  }
+  return null;
+}
+
+/**
+ * Legality resolution shared by paste and duplicate, applied to an immer
+ * draft: prefer placing the tree INTO the target; fall back to BESIDE it
+ * when the target cannot legally hold the tree but its parent can.
+ * `besideOffset` is how many earlier trees of the same batch already landed
+ * beside the target, so a sequential forest paste keeps clipboard order.
+ * Returns where the tree landed, or null when it cannot legally land.
+ */
+function placeTreeAt(
+  screens: Screen[], targetId: string, tree: AdwNode, besideOffset: number,
+): 'into' | 'beside' | null {
+  for (const screen of screens) {
+    const target = findNodeById([screen.rootNode], targetId);
+    if (!target) continue;
+    if ((LEGAL_CHILDREN[target.type] ?? []).includes(tree.type)) {
+      target.children = target.children ?? [];
+      target.children.push(tree);
+      return 'into';
+    }
+    const location = findNodeLocation(screen.rootNode, targetId);
+    const parent = location ? findParentOf(screen.rootNode, targetId) : null;
+    if (location && parent && (LEGAL_CHILDREN[parent.type] ?? []).includes(tree.type)) {
+      location.parentChildren.splice(location.index + 1 + besideOffset, 0, tree);
+      return 'beside';
+    }
+    return null;
   }
   return null;
 }
@@ -410,7 +483,13 @@ export const useMockupStore = create<MockupState>((set, get) => {
   })();
   const startDoc: MockupDocument = saved || initialDocument;
 
+  /** >0 while runInTransaction runs: per-mutation snapshots are suspended. */
+  let transactionDepth = 0;
+
   const pushSnapshot = (newDoc: MockupDocument): Partial<MockupState> => {
+    // Inside a transaction the document advances but history, persistence,
+    // and diagnostics wait for the single commit snapshot.
+    if (transactionDepth > 0) return { doc: newDoc };
     persistDocumentSource(newDoc);
     const { history, historyIndex } = get();
     const newHistory = history.slice(0, historyIndex + 1);
@@ -692,6 +771,21 @@ export const useMockupStore = create<MockupState>((set, get) => {
       }
     },
 
+    runInTransaction: (fn) => {
+      if (transactionDepth > 0) { fn(); return; } // nested: inline no-op
+      transactionDepth += 1;
+      const before = get().doc;
+      try {
+        fn();
+      } finally {
+        transactionDepth -= 1;
+        const after = get().doc;
+        // An empty transaction pushes nothing; a productive one pushes the
+        // accumulated document as exactly one history entry.
+        if (after !== before) set(pushSnapshot(after));
+      }
+    },
+
     setShowAddScreenModal: (show) => set({ showAddScreenModal: show }),
 
     toggleColorScheme: () => {
@@ -782,56 +876,102 @@ export const useMockupStore = create<MockupState>((set, get) => {
       set(pushSnapshot(nextDoc));
     },
 
-    clipboard: null,
+    clipboard: [],
 
-    copyNode: (nodeId) => {
-      for (const screen of get().doc.screens) {
-        const found = findNodeById([screen.rootNode], nodeId);
-        if (found) { set({ clipboard: JSON.parse(JSON.stringify(found)) }); return; }
+    copyNodes: (nodeIds) => {
+      const { doc } = get();
+      // Selection order is paste order; a selected container swallows its
+      // selected descendants (same shallowest rule as align and drag).
+      const kept = filterShallowest(nodeIds, doc.screens);
+      const trees: AdwNode[] = [];
+      for (const id of kept) {
+        for (const screen of doc.screens) {
+          const found = findNodeById([screen.rootNode], id);
+          if (found) { trees.push(JSON.parse(JSON.stringify(found))); break; }
+        }
       }
+      if (trees.length === 0) return [];
+      set({ clipboard: trees });
+      return trees.map((tree) => tree.id);
     },
 
-    cutNode: (nodeId) => {
-      get().copyNode(nodeId);
-      if (get().clipboard) get().deleteNode(nodeId);
-    },
+    copyNode: (nodeId) => { get().copyNodes([nodeId]); },
 
-    pasteNode: (targetId) => {
-      const clipboard = get().clipboard;
-      if (!clipboard) return null;
-      const copy = withFreshIds(clipboard);
-      let placed = false;
+    cutNodes: (nodeIds) => {
+      const copiedIds = get().copyNodes(nodeIds);
+      if (copiedIds.length === 0) return;
+      let removed = 0;
       const nextDoc = produce(get().doc, (draft) => {
-        for (const screen of draft.screens) {
-          const target = findNodeById([screen.rootNode], targetId);
-          if (!target) continue;
-          // Prefer pasting into the target; fall back to beside it when the
-          // target cannot legally hold this widget.
-          const legalHere = (LEGAL_CHILDREN[target.type] ?? []).includes(copy.type);
-          if (legalHere) {
-            target.children = target.children ?? [];
-            target.children.push(copy);
-            placed = true;
-          } else {
-            const location = findNodeLocation(screen.rootNode, targetId);
-            const parent = location ? findParentOf(screen.rootNode, targetId) : null;
-            if (location && parent && (LEGAL_CHILDREN[parent.type] ?? []).includes(copy.type)) {
-              location.parentChildren.splice(location.index + 1, 0, copy);
-              placed = true;
-            }
+        for (const nodeId of copiedIds) {
+          for (const screen of draft.screens) {
+            if (screen.rootNode.id === nodeId) continue; // roots are anchors
+            const loc = findNodeLocation(screen.rootNode, nodeId);
+            if (loc) { loc.parentChildren.splice(loc.index, 1); removed += 1; break; }
           }
-          break;
         }
       });
-      if (!placed) return null;
-      set(pushSnapshot(nextDoc));
-      return copy.id;
+      if (removed === 0) return;
+      // One snapshot for the whole cut; cut nodes leave the selection.
+      const remaining = get().selectedNodeIds.filter((id) => !copiedIds.includes(id));
+      set({
+        ...pushSnapshot(nextDoc),
+        selectedNodeIds: remaining,
+        selectedNodeId: remaining[remaining.length - 1] ?? null,
+      });
     },
 
-    duplicateNode: (nodeId) => {
-      get().copyNode(nodeId);
-      return get().pasteNode(nodeId);
+    cutNode: (nodeId) => { get().cutNodes([nodeId]); },
+
+    pasteNodes: (targetId) => {
+      const pastedIds: string[] = [];
+      const skipped: AdwNodeType[] = [];
+      const clipboard = get().clipboard;
+      if (clipboard.length === 0) return { pastedIds, skipped };
+      const copies = clipboard.map(withFreshIds);
+      const nextDoc = produce(get().doc, (draft) => {
+        let besideOffset = 0;
+        for (const copy of copies) {
+          const landed = placeTreeAt(draft.screens, targetId, copy, besideOffset);
+          if (landed === null) { skipped.push(copy.type); continue; }
+          if (landed === 'beside') besideOffset += 1;
+          pastedIds.push(copy.id);
+        }
+      });
+      if (pastedIds.length === 0) return { pastedIds, skipped };
+      set(pushSnapshot(nextDoc));
+      return { pastedIds, skipped };
     },
+
+    pasteNode: (targetId) => get().pasteNodes(targetId).pastedIds[0] ?? null,
+
+    duplicateNodes: (nodeIds) => {
+      const { doc } = get();
+      const kept = filterShallowest(nodeIds, doc.screens);
+      const copies: Array<{ sourceId: string; copy: AdwNode }> = [];
+      for (const id of kept) {
+        for (const screen of doc.screens) {
+          const found = findNodeById([screen.rootNode], id);
+          if (found) {
+            copies.push({ sourceId: id, copy: withFreshIds(JSON.parse(JSON.stringify(found))) });
+            break;
+          }
+        }
+      }
+      if (copies.length === 0) return [];
+      const createdIds: string[] = [];
+      const nextDoc = produce(get().doc, (draft) => {
+        for (const { sourceId, copy } of copies) {
+          // Each duplicate lands relative to its OWN original (into it when
+          // legal, else beside it) — never batched into one target.
+          if (placeTreeAt(draft.screens, sourceId, copy, 0)) createdIds.push(copy.id);
+        }
+      });
+      if (createdIds.length === 0) return [];
+      set(pushSnapshot(nextDoc));
+      return createdIds;
+    },
+
+    duplicateNode: (nodeId) => get().duplicateNodes([nodeId])[0] ?? null,
 
     clearCanvas: () => {
       const freshDoc: MockupDocument = {

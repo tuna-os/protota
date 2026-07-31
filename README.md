@@ -66,7 +66,10 @@ current validation state. "Passed" always means the paired screenshots and
 their diff were visually reviewed, not merely that a capture command exited.
 See [GNOME Core source-import loop](docs/gnome-source-import.md) for the
 official-source UI inputs and explicit custom-widget boundaries.
-See [GNOME GUI Specification & Audits](docs/spec/INTENT-MAP.md) for UI layout patterns, intent mappings, and component specifications.
+See [GNOME GUI Specification & Audits](docs/spec/README.md) for UI layout
+patterns, intent mappings, and per-app source audits — a vendored read-only
+snapshot of [gnome-gui-spec](https://github.com/hanthor/gnome-gui-spec), not a
+build input.
 
 ## Pull requests
 

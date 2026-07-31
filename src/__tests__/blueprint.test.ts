@@ -300,3 +300,64 @@ describe('Blueprint import', () => {
     }
   });
 });
+
+// The long tail of #77: each case here is a real compile failure observed in
+// an exported preset screen, reduced to the property that caused it.
+// blueprint-compiler is the authority; these tests pin the shape it accepts.
+describe('Blueprint export long tail', () => {
+  const screen = (rootNode: MockupDocument['screens'][0]['rootNode']): MockupDocument => ({
+    id: 'doc', title: 'Doc', colorScheme: 'light', edges: [],
+    screens: [{ id: 's', title: 'S', type: 'standard', width: 800, height: 600, rootNode }],
+  });
+
+  it('emits a numeric value property unquoted', () => {
+    const exported = mockupToBlueprint(screen({
+      id: 'w', type: 'window', children: [{ id: 'r', type: 'spin-row', value: '9' }],
+    }));
+    expect(exported).toContain('value: 9;');
+  });
+
+  it('filters unknown properties for short Blueprint class names', () => {
+    // ActionBar imports as a box, and boxes default to an orientation — but
+    // Gtk.ActionBar has no such property, and the short name must still
+    // resolve to the introspection table entry that says so.
+    const exported = mockupToBlueprint(screen({
+      id: 'w', type: 'window', children: [{ id: 'bar', type: 'box', sourceClass: 'ActionBar', orientation: 'horizontal' }],
+    }));
+    expect(exported).toContain('ActionBar bar');
+    expect(exported).not.toContain('orientation');
+  });
+
+  it('converts C enum constants to Blueprint member idents', () => {
+    const exported = mockupToBlueprint(screen({
+      id: 'w', type: 'window', children: [{ id: 'l', type: 'label', title: 'x', wrapMode: 'PANGO_WRAP_WORD_CHAR' }],
+    }));
+    expect(exported).toContain('wrap-mode: word_char;');
+  });
+
+  it('quotes start/end icon names rather than emitting object references', () => {
+    const exported = mockupToBlueprint(screen({
+      id: 'w', type: 'window', children: [{ id: 'row', type: 'button-row', title: 'Docs', endIconName: 'external-link-symbolic' }],
+    }));
+    expect(exported).toContain('end-icon-name: "external-link-symbolic";');
+  });
+
+  it('drops a widget reference that cannot resolve in the export', () => {
+    const exported = mockupToBlueprint(screen({
+      id: 'w', type: 'window', children: [{ id: 'sb', type: 'bin', sourceClass: 'Gtk.SearchBar', keyCaptureWidget: 'GsShell' }],
+    }));
+    expect(exported).not.toContain('key-capture-widget');
+  });
+
+  it('drops non-visual buffer children instead of inventing a $ class', () => {
+    const exported = mockupToBlueprint(screen({
+      id: 'w', type: 'window', children: [{
+        id: 'view', type: 'entry', children: [
+          { id: 'buffer', type: 'custom-widget', slot: 'buffer', sourceClass: 'Gtk.SourceBuffer', title: 'GtkSourceBuffer' },
+        ],
+      }],
+    }));
+    expect(exported).not.toContain('SourceBuffer');
+    expect(exported).not.toContain('buffer:');
+  });
+});

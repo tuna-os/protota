@@ -1,5 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { ICON_CATEGORIES, iconClass } from '../data/icons';
+import { ICON_CATALOG } from '../data/iconCatalog';
+import { iconClass } from '../data/icons';
+import { ensureAdwIcon } from '../utils/adwIcons';
+
+// The full installed icon set (module = category), so the picker offers —
+// and search covers — every icon that can actually render, not a curated
+// subset that could drift from the package.
+const ICON_CATEGORIES = ICON_CATALOG;
 
 interface Props {
   value: string;
@@ -145,7 +152,11 @@ export const IconPicker: React.FC<Props> = ({ value, onChange }) => {
                   gridTemplateColumns: 'repeat(auto-fill, minmax(56px, 1fr))',
                   gap: '2px',
                 }}>
-                  {cat.icons.map(name => (
+                  {cat.icons.map(name => {
+                    // Inject the mask rule so every catalog icon renders in
+                    // the grid — same registration the canvas renderer uses.
+                    ensureAdwIcon(name);
+                    return (
                     <button
                       key={name}
                       className="protota-icon-item"
@@ -182,7 +193,8 @@ export const IconPicker: React.FC<Props> = ({ value, onChange }) => {
                         {name.replace(/-symbolic$/, '')}
                       </span>
                     </button>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             ))}

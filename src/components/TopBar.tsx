@@ -167,6 +167,14 @@ export const TopBar: React.FC = () => {
         },
         { label: "divider", divider: true },
         {
+          // Full Adwaita symbolic icon catalog, GNOME Icon Library style.
+          // Lives in View for desktop; the mobile overflow menu inherits it
+          // because mobileMenus spreads these groups.
+          label: "Icon Library",
+          action: () => window.dispatchEvent(new CustomEvent("protota:show-icon-library")),
+        },
+        { label: "divider", divider: true },
+        {
           label: "Show Shortcuts",
           action: () => window.dispatchEvent(new CustomEvent("protota:show-shortcuts")),
           shortcut: "?",

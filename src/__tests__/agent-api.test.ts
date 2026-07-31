@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { MockupBuilder, generateMockup } from '../utils/agent-api';
 import { mockupToBlueprint, blueprintToNode } from '../utils/blueprint';
 
@@ -43,6 +43,70 @@ describe('MockupBuilder flow and import tooling', () => {
     const builder = new MockupBuilder('Strict').addScreen('standard', 'Main');
     expect(() => builder.connectScreens('Main', 'Nowhere')).toThrow(/unknown screen/);
     expect(() => builder.overrideNode('ghost', { visible: false })).toThrow(/no node/);
+  });
+});
+
+describe('MockupBuilder app import front door (#118)', () => {
+  const WINDOW_BLP = 'using Gtk 4.0;\nusing Adw 1;\nAdw.ApplicationWindow { content: Adw.ToolbarView { Adw.HeaderBar bar {} }; }\n';
+  const PANEL_BLP = 'using Gtk 4.0;\ntemplate $DemoPanel : Gtk.Box { Gtk.Button open_button { label: "Open"; } }\n';
+
+  it('imports an app from a file map, running discovery for the entry', () => {
+    const doc = new MockupBuilder('Imported')
+      .importApp({
+        'src/window.blp': WINDOW_BLP,
+        'src/panel.blp': PANEL_BLP,
+        'src/meson.build': "files('window.blp', 'panel.blp')",
+      })
+      .build();
+    expect(doc.screens).toHaveLength(1);
+    const findBar = (node: typeof doc.screens[0]['rootNode']): boolean =>
+      node.id === 'bar' || (node.children ?? []).some(findBar);
+    expect(findBar(doc.screens[0].rootNode)).toBe(true);
+  });
+
+  it('excludes metadata-unreferenced files exactly like the CLI', () => {
+    expect(() => new MockupBuilder('Imported').importApp({
+      'src/window.blp': WINDOW_BLP,
+      'src/meson.build': "files('window.blp')",
+    }, 'src/stray.blp')).toThrow(/not among the discovered files/);
+  });
+
+  it('fails loudly on ambiguous or missing entries instead of guessing', () => {
+    expect(() => new MockupBuilder('X').importApp({
+      'a.blp': WINDOW_BLP,
+      'b.blp': WINDOW_BLP,
+    })).toThrow(/multiple entry candidates/);
+    expect(() => new MockupBuilder('X').importApp({
+      'panel.blp': PANEL_BLP,
+    })).toThrow(/no window-bearing file/);
+    expect(() => new MockupBuilder('X').importApp({})).toThrow(/no \.blp or \.ui files/);
+  });
+
+  it('imports an app from a forge URL with fetch mocked', async () => {
+    const { gzipSync } = await import('node:zlib');
+    const encoder = new TextEncoder();
+    const block = (name: string, size: number) => {
+      const header = new Uint8Array(512);
+      header.set(encoder.encode(name), 0);
+      header.set(encoder.encode(`${size.toString(8).padStart(11, '0')}\0`), 124);
+      header[156] = 0x30;
+      header.set(encoder.encode('ustar'), 257);
+      return header;
+    };
+    const data = encoder.encode(WINDOW_BLP);
+    const padded = new Uint8Array(Math.ceil(data.length / 512) * 512);
+    padded.set(data);
+    const tar = new Uint8Array(512 + padded.length + 1024);
+    tar.set(block('demo-main/src/window.blp', data.length), 0);
+    tar.set(padded, 512);
+    vi.stubGlobal('fetch', vi.fn(async () =>
+      new Response(new Uint8Array(gzipSync(tar)) as unknown as BodyInit, { status: 200 })));
+    try {
+      const builder = await new MockupBuilder('Remote').importAppFromUrl('https://github.com/o/demo');
+      expect(builder.build().screens).toHaveLength(1);
+    } finally {
+      vi.unstubAllGlobals();
+    }
   });
 });
 

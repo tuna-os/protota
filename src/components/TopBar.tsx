@@ -142,6 +142,13 @@ export const TopBar: React.FC = () => {
           action: () => fileInputRef.current?.click(),
           shortcut: "Ctrl+I",
         },
+        {
+          // Import front door (#118): folder / zip / git URL, discovery
+          // in-page. Mobile inherits this entry because mobileMenus spreads
+          // these groups — same wiring pattern as the Icon Library.
+          label: "Import App (Folder / Zip / URL)…",
+          action: () => window.dispatchEvent(new CustomEvent("protota:show-import-app")),
+        },
         { label: "Export as PNG", action: handleExportPNG },
         { label: "Export Blueprint (.blp)", action: handleExportBlueprint, shortcut: "Ctrl+E" },
         { label: "divider", divider: true },

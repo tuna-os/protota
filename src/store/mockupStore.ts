@@ -303,7 +303,12 @@ interface MockupState {
   updateNodeProps: (nodeId: string, props: Partial<AdwNode>) => void;
   /** Screen geometry lives beside rootNode; needed by HIG-E001's quick-fix. */
   updateScreenProps: (screenId: string, props: Partial<Pick<Screen, 'width' | 'height' | 'title'>>) => void;
-  addChildNode: (parentId: string, type: AdwNodeType, slot?: string) => void;
+  /**
+   * Insert a new child into a container, at `index` among its children when
+   * given (clamped), else appended. Returns the new node's id, or null when
+   * the parent does not exist. One undo snapshot.
+   */
+  addChildNode: (parentId: string, type: AdwNodeType, slot?: string, index?: number) => string | null;
   addScreen: (title: string, type: ScreenTemplateType) => void;
   moveNodeUp: (nodeId: string) => void;
   moveNodeDown: (nodeId: string) => void;
@@ -437,28 +442,35 @@ export const useMockupStore = create<MockupState>((set, get) => {
       set(pushSnapshot(nextDoc));
     },
 
-    addChildNode: (parentId, childType, slot) => {
+    addChildNode: (parentId, childType, slot, index) => {
+      const label = childType.replace(/-/g, ' ');
+      const newNode: AdwNode = {
+        id: uid('node'),
+        type: childType,
+        title: label.charAt(0).toUpperCase() + label.slice(1),
+        // A named slot decides where a container puts the child, so it is
+        // part of creating it rather than an edit afterwards.
+        ...(slot ? { slot } : {}),
+      };
+      let placed = false;
       const nextDoc = produce(get().doc, (draft) => {
-        const label = childType.replace(/-/g, ' ');
-        const newNode: AdwNode = {
-          id: uid('node'),
-          type: childType,
-          title: label.charAt(0).toUpperCase() + label.slice(1),
-          // A named slot decides where a container puts the child, so it is
-          // part of creating it rather than an edit afterwards.
-          ...(slot ? { slot } : {}),
-        };
         const addTo = (node: AdwNode): boolean => {
           if (node.id === parentId) {
             node.children = node.children || [];
-            node.children.push(newNode);
+            const at = index === undefined
+              ? node.children.length
+              : Math.max(0, Math.min(index, node.children.length));
+            node.children.splice(at, 0, newNode);
+            placed = true;
             return true;
           }
           return node.children?.some(addTo) ?? false;
         };
         draft.screens.forEach((s) => addTo(s.rootNode));
       });
+      if (!placed) return null;
       set(pushSnapshot(nextDoc));
+      return newNode.id;
     },
 
     addScreen: (title, type) => {

@@ -107,13 +107,16 @@ export const App: React.FC = () => {
     const onToggleLayers = () => setLeftOpen((v) => !v);
     const onToggleProperties = () => setRightOpen((v) => !v);
     const onShowShortcuts = () => setShowShortcuts((v) => !v);
+    const onShowPresets = () => setShowPresets(true);
     window.addEventListener("protota:toggle-layers", onToggleLayers);
     window.addEventListener("protota:toggle-properties", onToggleProperties);
     window.addEventListener("protota:show-shortcuts", onShowShortcuts);
+    window.addEventListener("protota:show-presets", onShowPresets);
     return () => {
       window.removeEventListener("protota:toggle-layers", onToggleLayers);
       window.removeEventListener("protota:toggle-properties", onToggleProperties);
       window.removeEventListener("protota:show-shortcuts", onShowShortcuts);
+      window.removeEventListener("protota:show-presets", onShowPresets);
     };
   }, []);
 
@@ -272,7 +275,7 @@ export const App: React.FC = () => {
               <span style={iconStyle(editRedoSymbolic)} />
             </button>
             <button
-              className="adw-button flat"
+              className="adw-button flat protota-desktop-only"
               onClick={() => setShowAddScreenModal(true)}
               title="New Screen (Ctrl+N)"
             >
@@ -280,7 +283,7 @@ export const App: React.FC = () => {
               <span style={{ marginLeft: '4px' }}>New Screen</span>
             </button>
             <button
-              className="adw-button flat"
+              className="adw-button flat protota-desktop-only"
               onClick={() => setShowPresets(true)}
               title="Load Preset"
             >

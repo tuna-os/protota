@@ -1,4 +1,4 @@
-FROM fedora:43
+FROM fedora:45
 
 # Fedora runner for GNOME apps newer than Ubuntu LTS packages. The captured
 # app version must match the imported source tag — record both in the app

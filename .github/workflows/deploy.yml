@@ -22,7 +22,7 @@ jobs:
     outputs:
       markdown-only: ${{ steps.check.outputs.markdown-only }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - id: check
@@ -50,7 +50,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - uses: actions/setup-node@v4
         with:
@@ -96,7 +96,7 @@ jobs:
       - name: Install blueprint-compiler and GIR data
         run: dnf install -y --setopt=install_weak_deps=False blueprint-compiler gtk4-devel libadwaita-devel gtksourceview5-devel nodejs npm git
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - run: npm ci
 
@@ -122,7 +122,7 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - uses: actions/setup-node@v4
         with:

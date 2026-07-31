@@ -20,6 +20,12 @@ const CLASS_TO_WIDGET_MAP: Record<string, AdwNodeType> = {
   'Adw.NavigationView': 'navigation-view',
   // NavigationSplitView shares OverlaySplitView's sidebar/content structure.
   'Adw.NavigationSplitView': 'overlay-split',
+  // Leaflet is the deprecated predecessor of NavigationSplitView: an adaptive
+  // container showing its children side by side when there is room. Mapping
+  // it is faithful structure, not invention — and leaving it unmapped put the
+  // whole of Software inside one opaque boundary.
+  'Adw.Leaflet': 'overlay-split',
+  'Adw.LeafletPage': 'stack-page',
   AdwNavigationSplitView: 'overlay-split',
   NavigationSplitView: 'overlay-split',
   'Adw.NavigationPage': 'bin',

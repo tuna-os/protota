@@ -23,20 +23,37 @@ export interface DropTarget {
   screenId: string;
 }
 
+/**
+ * Post-drop quantise offer (#79): the drop landed in a box whose `spacing`
+ * is off the Adwaita scale (HIG-W001). Transient editor state — it proposes
+ * the same nearest-scale fix the diagnostic's quick fix applies, and clears
+ * on the next drag or on dismissal.
+ */
+export interface QuantiseHint {
+  parentId: string;
+  screenId: string;
+  spacing: number;
+  nearest: number;
+}
+
 interface DndState {
   drag: DragPayload | null;
   target: DropTarget | null;
+  quantiseHint: QuantiseHint | null;
   startDrag: (drag: DragPayload) => void;
   setTarget: (target: DropTarget | null) => void;
   endDrag: () => void;
+  setQuantiseHint: (hint: QuantiseHint | null) => void;
 }
 
 export const useDndStore = create<DndState>((set) => ({
   drag: null,
   target: null,
-  startDrag: (drag) => set({ drag, target: null }),
+  quantiseHint: null,
+  startDrag: (drag) => set({ drag, target: null, quantiseHint: null }),
   setTarget: (target) => set({ target }),
   endDrag: () => set({ drag: null, target: null }),
+  setQuantiseHint: (quantiseHint) => set({ quantiseHint }),
 }));
 
 /** MIME type marking a palette drag so foreign OS drags are ignored. */

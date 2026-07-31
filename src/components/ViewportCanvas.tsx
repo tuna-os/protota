@@ -5,6 +5,8 @@ import { BottomBar } from "./BottomBar";
 import { useDndStore } from "../dnd/dndStore";
 import { resolveDropTarget } from "../dnd/dropResolution";
 import { DropIndicator } from "../dnd/DropIndicator";
+import { QuantiseHintChip } from "../dnd/QuantiseHint";
+import { noteDropQuantise } from "../dnd/quantise";
 import { findNodeById } from "../utils/treeHelpers";
 import { filterShallowest, screenOf, unionSelection } from "../utils/selection";
 import type { AdwNode, AdwNodeType } from "../types/mockup";
@@ -181,7 +183,10 @@ export const ViewportCanvas: React.FC = () => {
       if (target) {
         const store = useMockupStore.getState();
         const id = store.addChildNode(target.parentId, drag.widgetType, target.slot, target.index);
-        if (id) store.selectNode(id, target.screenId);
+        if (id) {
+          store.selectNode(id, target.screenId);
+          noteDropQuantise(store.doc, target.parentId, target.screenId);
+        }
       }
       endDrag();
     };
@@ -275,6 +280,7 @@ export const ViewportCanvas: React.FC = () => {
         // One mutation, one undo entry. The resolved slot is authoritative:
         // an unslotted container clears any stale slot from the old parent.
         useMockupStore.getState().moveNode(nodeId, target.parentId, target.index, target.slot ?? "");
+        noteDropQuantise(useMockupStore.getState().doc, target.parentId, target.screenId);
       }
       endDrag();
     };
@@ -801,6 +807,9 @@ export const ViewportCanvas: React.FC = () => {
       {/* Drop preview (#79): candidate-container highlight + insertion caret.
           Fixed-positioned, so it lives outside the transformed surface. */}
       <DropIndicator />
+
+      {/* Post-drop spacing quantise offer (#79): transient, one undo step. */}
+      <QuantiseHintChip />
 
       {/* Rubber-band marquee (#79): fixed-positioned editor chrome. */}
       {marquee && (

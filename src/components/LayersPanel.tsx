@@ -4,6 +4,7 @@ import type { AdwNode, AdwNodeType } from '../types/mockup';
 import { LEGAL_CHILDREN } from '../types/mockup';
 import { findNodeById, findNodeLocation } from '../utils/treeHelpers';
 import { useDndStore } from '../dnd/dndStore';
+import { noteDropQuantise } from '../dnd/quantise';
 import { rangeSelection } from '../utils/selection';
 
 /** Where a row drop lands relative to the row (#79). */
@@ -247,7 +248,10 @@ export const LayersPanel: React.FC = () => {
     e.stopPropagation();
     if (drag.kind === 'palette') {
       const id = addChildNode(drop.parentId, drag.widgetType, undefined, drop.index);
-      if (id) selectNode(id, drop.screenId);
+      if (id) {
+        selectNode(id, drop.screenId);
+        noteDropQuantise(useMockupStore.getState().doc, drop.parentId, drop.screenId);
+      }
     } else {
       // Moving to a new parent clears the old slot (the new container decides
       // placement); reordering under the same parent keeps it.
@@ -256,6 +260,7 @@ export const LayersPanel: React.FC = () => {
       moveNode(drag.nodeId, drop.parentId, drop.index,
         currentParent === drop.parentId ? undefined : '');
       selectNode(drag.nodeId, drop.screenId);
+      noteDropQuantise(useMockupStore.getState().doc, drop.parentId, drop.screenId);
     }
     // Make the result visible when dropping into a collapsed container.
     if (drop.position === 'inside') setCollapsed(drop.parentId, false);

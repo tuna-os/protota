@@ -84,6 +84,36 @@ jobs:
           path: test-results/
           retention-days: 7
 
+  # "Design here, ship there" is only trustworthy if what we emit builds.
+  # blueprint-compiler is the authority, so every preset screen must compile.
+  blueprint-export:
+    needs: check-changes
+    if: needs.check-changes.outputs.markdown-only != 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    container: registry.fedoraproject.org/fedora:43
+    steps:
+      - name: Install blueprint-compiler and GIR data
+        run: dnf install -y --setopt=install_weak_deps=False blueprint-compiler gtk4-devel libadwaita-devel gtksourceview5-devel nodejs npm git
+
+      - uses: actions/checkout@v4
+
+      - run: npm ci
+
+      - name: Export every preset screen to Blueprint
+        run: npx tsx scripts/export-blueprint.mjs
+
+      - name: Compile every exported screen
+        run: |
+          fail=0
+          for f in artifacts/blp/*.blp; do
+            if ! blueprint-compiler compile "$f" > /dev/null; then
+              echo "FAIL $f"
+              fail=1
+            fi
+          done
+          exit $fail
+
   deploy:
     needs: check-changes
     if: needs.check-changes.outputs.markdown-only != 'true' && github.event_name == 'push' && github.ref == 'refs/heads/main'

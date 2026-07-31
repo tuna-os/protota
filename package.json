@@ -9,6 +9,7 @@
     "lint": "oxlint",
     "analyze": "react-doctor .",
     "preview": "vite preview",
+    "generate:icon-catalog": "node scripts/generate-icon-catalog.mjs",
     "test": "playwright test",
     "test:unit": "vitest run src/__tests__",
     "test:ui": "playwright test --ui"

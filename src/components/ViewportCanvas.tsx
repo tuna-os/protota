@@ -421,7 +421,11 @@ export const ViewportCanvas: React.FC = () => {
         backgroundImage: "radial-gradient(circle, rgba(128,128,128,0.25) 1px, transparent 1px)",
         backgroundSize: "20px 20px",
         display: "flex",
-        justifyContent: "center",
+        // `safe` falls back to start alignment when the content is wider than
+        // the canvas. Plain `center` overflows equally on both sides, putting
+        // the left edge outside the clipped region and underneath the sidebar,
+        // where it cannot be clicked.
+        justifyContent: "safe center",
         alignItems: "flex-start",
       }}
     >

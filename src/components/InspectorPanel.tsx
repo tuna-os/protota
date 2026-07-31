@@ -7,6 +7,70 @@ import { findNodeById } from "../utils/treeHelpers";
 import { NodeActions } from "./NodeActions";
 import { IconPicker } from "./IconPicker";
 import { MultiSelectPanel } from "./MultiSelectPanel";
+import { SPACING_SCALE, isOnSpacingScale, nearestSpacingValue, stepSpacingValue } from "../utils/spacingScale";
+
+/**
+ * Number field for spacing-scale properties (#79, penpot-study.md §5):
+ * the steppers and arrow keys walk the Adwaita 6/12/18/24 scale the linter
+ * enforces (HIG-W001) — property-time quantisation instead of drag-time
+ * geometry. Typing stays free; off-scale values get the linter's warning
+ * tint plus a one-click snap to the nearest scale value.
+ */
+const SpacingScaleField: React.FC<{
+  fieldKey: string;
+  value: number;
+  onChange: (next: number) => void;
+}> = ({ fieldKey, value, onChange }) => {
+  const offScale = Number.isFinite(value) && !isOnSpacingScale(value);
+  const nearest = nearestSpacingValue(value);
+  return (
+    <div data-testid={`spacing-snap-${fieldKey}`} style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+      <div style={{ display: "flex", gap: "4px" }}>
+        <button
+          className="adw-button flat"
+          data-testid={`spacing-step-down-${fieldKey}`}
+          aria-label="Previous spacing scale value"
+          onClick={() => onChange(stepSpacingValue(value, -1))}
+        >
+          −
+        </button>
+        <input
+          type="number"
+          className="protota-input"
+          style={{ flex: 1, minWidth: 0 }}
+          title={`Adwaita spacing scale: ${SPACING_SCALE.join(" ")}`}
+          value={value}
+          onChange={(e) => onChange(Number(e.target.value))}
+          onKeyDown={(e) => {
+            if (e.key === "ArrowUp" || e.key === "ArrowDown") {
+              e.preventDefault();
+              onChange(stepSpacingValue(value, e.key === "ArrowUp" ? 1 : -1));
+            }
+          }}
+        />
+        <button
+          className="adw-button flat"
+          data-testid={`spacing-step-up-${fieldKey}`}
+          aria-label="Next spacing scale value"
+          onClick={() => onChange(stepSpacingValue(value, 1))}
+        >
+          +
+        </button>
+      </div>
+      {offScale && (
+        <button
+          className="adw-button flat"
+          data-testid={`spacing-off-scale-${fieldKey}`}
+          onClick={() => onChange(nearest)}
+          title="Spacing scale extracted from GNOME Core apps — 6/12/18/24 primary"
+          style={{ alignSelf: "flex-start", fontSize: "11px", color: "#e5a50a", padding: "2px 6px" }}
+        >
+          Off HIG scale — snap to {nearest}px
+        </button>
+      )}
+    </div>
+  );
+};
 
 export const InspectorPanel: React.FC = () => {
   const { doc, selectedNodeId, selectedNodeIds, selectedScreenId, updateNodeProps, addEdge, removeEdge } = useMockupStore();
@@ -200,7 +264,7 @@ export const InspectorPanel: React.FC = () => {
                 <span style={{ fontSize: "13px" }}>Enabled</span>
               </label>
             )}
-            {field.type === "number" && (
+            {field.type === "number" && field.snap !== "spacing" && (
               <input
                 type="number"
                 className="protota-input"
@@ -208,6 +272,13 @@ export const InspectorPanel: React.FC = () => {
                 onChange={(e) =>
                   updateNodeProps(selectedNode.id, { [field.key]: Number(e.target.value) })
                 }
+              />
+            )}
+            {field.type === "number" && field.snap === "spacing" && (
+              <SpacingScaleField
+                fieldKey={field.key}
+                value={Number(value)}
+                onChange={(next) => updateNodeProps(selectedNode.id, { [field.key]: next })}
               />
             )}
             {field.type === "icon" && (

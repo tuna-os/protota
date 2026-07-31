@@ -1,0 +1,18 @@
+using Gtk 4.0;
+using Adw 1;
+
+template $DemoWindow : Adw.ApplicationWindow {
+  title: _("Writeback Demo");
+  content: Adw.ToolbarView toolbar {
+    [top]
+    Adw.HeaderBar header_bar {
+      title-widget: Adw.WindowTitle { title: "Writeback Demo"; };
+    }
+    content: Gtk.Box main_box {
+      orientation: vertical;
+      spacing: 12;
+      $DemoPanel panel {}
+      $ThirdPartyWidget preview {}
+    };
+  };
+}

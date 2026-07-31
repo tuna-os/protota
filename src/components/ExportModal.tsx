@@ -101,6 +101,18 @@ export const ExportModal: React.FC<Props> = ({ isOpen, onClose }) => {
         </pre>
 
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '16px' }}>
+          <button
+            className="protota-btn"
+            data-testid="export-writeback-open"
+            style={{ marginRight: 'auto' }}
+            title="Patch your edits back into a real app checkout (write-back UX bridge)"
+            onClick={() => {
+              onClose();
+              window.dispatchEvent(new CustomEvent('protota:show-writeback'));
+            }}
+          >
+            Patch into Checkout…
+          </button>
           <button className="protota-btn" onClick={handleCopy}>Copy Code</button>
           <button className="protota-btn suggested" onClick={handleDownload}>Download File</button>
           <button className="protota-btn" onClick={onClose}>Close</button>

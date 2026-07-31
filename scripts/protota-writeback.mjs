@@ -55,13 +55,19 @@ const readSwitch = (name) => {
 
 const entryArg = readFlag('--entry');
 const bpcArg = readFlag('--bpc');
+// Self-describing aliases for the positionals; the browser's "Export → Patch
+// into checkout" dialog generates commands in this form.
+const checkoutArg = readFlag('--checkout');
+const documentArg = readFlag('--document');
 const write = readSwitch('--write');
 const allowUnvalidated = readSwitch('--allow-unvalidated');
 const positional = args.filter((argument) => !argument.startsWith('--'));
-const [sourceRootArg, mockupArg] = positional;
+const sourceRootArg = checkoutArg ?? positional[0];
+const mockupArg = documentArg ?? positional[checkoutArg ? 0 : 1];
 
 if (!sourceRootArg || !isDirectory(sourceRootArg) || !mockupArg) {
   console.error('Usage: npx tsx scripts/protota-writeback.mjs <source-root> <edited.mockup.json> [--entry <path>] [--write] [--bpc <command>] [--allow-unvalidated]');
+  console.error('       (--checkout <source-root> and --document <edited.mockup.json> are accepted as flag aliases)');
   process.exit(1);
 }
 

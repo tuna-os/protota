@@ -80,6 +80,7 @@ widget:
 
 | Flag | Meaning |
 | --- | --- |
+| `--checkout <path>` / `--document <file>` | self-describing aliases for the two positionals (the browser's export dialog generates commands in this form) |
 | `--entry <path>` | entry file; required when several window-bearing files exist |
 | `--write` | apply the patches (default is dry-run) |
 | `--bpc <command>` | blueprint-compiler command; `{file}`, `{dir}`, `{name}` placeholders are substituted |
@@ -97,6 +98,40 @@ Validating without a host blueprint-compiler, via a container:
 npx tsx scripts/protota-writeback.mjs ~/src/app edited.mockup.json \
   --bpc 'podman run --rm -v {dir}:/blp:z localhost/bpc sh -c "blueprint-compiler compile /blp/{name}"'
 ```
+
+## Browser paths — "Export → Patch into Checkout…"
+
+The write-back UX bridge (ADR 0001 Part 3 item 1). The editor's export
+surface (File menu, and the Code Export modal) opens a dialog with two ways
+to land edits in a checkout; per the #80 decision the browser never writes
+into a checkout silently — the host action stays explicit, and nothing
+leaves the machine (no proxy, no upload).
+
+**Download + command (every browser).** The dialog downloads the current
+document as `<title>.mockup.json` and generates a copyable one-liner from
+the checkout path you type:
+
+```
+npx tsx scripts/protota-writeback.mjs --checkout ~/src/my-app --document my-app.mockup.json
+```
+
+A second copy button appends the containerized `--bpc` variant above for
+hosts without blueprint-compiler. The command is the normal CLI: dry-run by
+default, `--write` to apply.
+
+**Write patch directly (Chromium, File System Access API).** When
+`window.showDirectoryPicker` exists the dialog also offers "Write patch
+directly…": you grant a read-write handle on the checkout folder, and the
+*same* write-back core the CLI uses (extracted to `src/utils/writeback.ts`;
+`scripts/round-trip-lib.mjs` re-exports it) runs in-page — re-import through
+the handle, three-way diff, CST patch plan. Every touched file is reported
+with per-edit labels and a unified diff before anything happens; writing
+occurs only after an explicit confirm, which is the in-browser equivalent of
+the CLI's `--write` gate. One honest difference: blueprint-compiler cannot
+run in the browser, so directly-written patches are **unvalidated** — the
+dialog says so and prints the `blueprint-compiler compile <file>` commands
+to run on the host afterwards. Non-Chromium browsers simply do not see this
+section and keep the download + command path.
 
 ## Honest limits — what cannot be written back yet
 

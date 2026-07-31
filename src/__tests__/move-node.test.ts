@@ -84,8 +84,8 @@ describe('moveNode', () => {
       history: [doc],
       historyIndex: 0,
       selectedNodeId: null,
-      lintEnabled: false,
-      violations: [],
+      diagnosticsEnabled: false,
+      diagnostics: [],
     });
   });
 

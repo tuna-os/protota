@@ -120,18 +120,12 @@ export const App: React.FC = () => {
       setRightTab("diagnostics");
     };
     const onShowIconLibrary = () => setShowIconLibrary(true);
-    // Enabling diagnostics with the drawer closed opens it on that tab (§5.3).
-    const onShowDiagnostics = () => {
-      setRightOpen(true);
-      setRightTab("diagnostics");
-    };
     window.addEventListener("protota:toggle-layers", onToggleLayers);
     window.addEventListener("protota:toggle-properties", onToggleProperties);
     window.addEventListener("protota:show-shortcuts", onShowShortcuts);
     window.addEventListener("protota:show-presets", onShowPresets);
     window.addEventListener("protota:show-diagnostics", onShowDiagnostics);
     window.addEventListener("protota:show-icon-library", onShowIconLibrary);
-    window.addEventListener("protota:show-diagnostics", onShowDiagnostics);
     return () => {
       window.removeEventListener("protota:toggle-layers", onToggleLayers);
       window.removeEventListener("protota:toggle-properties", onToggleProperties);
@@ -139,7 +133,6 @@ export const App: React.FC = () => {
       window.removeEventListener("protota:show-presets", onShowPresets);
       window.removeEventListener("protota:show-diagnostics", onShowDiagnostics);
       window.removeEventListener("protota:show-icon-library", onShowIconLibrary);
-      window.removeEventListener("protota:show-diagnostics", onShowDiagnostics);
     };
   }, []);
 

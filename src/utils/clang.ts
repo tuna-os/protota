@@ -45,6 +45,13 @@ export interface CClassFacts {
   propertyAssignments: CPropertyAssignment[];
   /** gtk_widget_add_css_class calls with a literal class name. */
   styleClasses: Array<{ target: string; name: string }>;
+  /**
+   * The class installs its own GtkWidgetClass.snapshot vfunc — it paints
+   * itself in code. Such a widget must never dissolve into a base-class
+   * projection: whatever chrome its init constructs, the drawing is the
+   * widget, and erasing the boundary would hide that from every metric.
+   */
+  overridesSnapshot?: boolean;
 }
 
 /** Namespaces whose `_new` really does build a widget we can render. */
@@ -329,6 +336,15 @@ export function extractCFacts(code: string): CClassFacts[] {
     { pattern: /_new_with_label$/, property: 'label' },
     { pattern: /^gtk_label_new$/, property: 'label' },
   ];
+
+  // A GtkWidgetClass.snapshot vfunc assignment in a class's class_init marks
+  // the class as self-painting (`widget_class->snapshot = quux_snapshot;`).
+  const snapshotPattern = /->\s*snapshot\s*=/g;
+  let snapshotAssignment: RegExpExecArray | null;
+  while ((snapshotAssignment = snapshotPattern.exec(source))) {
+    const owner = classAt(snapshotAssignment.index);
+    if (owner) owner.overridesSnapshot = true;
+  }
 
   let inlineCounter = 0;
   /**

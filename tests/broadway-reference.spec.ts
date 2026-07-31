@@ -7,6 +7,12 @@ import { blueprintBundleToDocument } from '../src/utils/blueprint';
 import { applyRuntimeEvidence, matchRuntimeProfile, type ProbeDocument, type RuntimeProfileReport } from '../src/utils/runtimeProfile';
 
 const broadwayUrl = process.env.BROADWAY_URL;
+// Per-app CI gates (#59, ADR 0001 Part 2 step 4): calibrated from measured
+// capture artifacts, enforced on every capture of that app. A regression in a
+// passed app fails CI rather than surfacing in a quarterly audit.
+const appCatalog = JSON.parse(
+  readFileSync(new URL('./fixtures/gnome-app-catalog.json', import.meta.url), 'utf8'),
+) as Record<string, { maxUnresolvedCoverage?: number; minSimilarity?: number }>;
 // Native runtime probe dump (#58), written by the containerized app when the
 // runner is started with a /probe volume. Optional: a missing or unreadable
 // probe file is "no evidence", never a failure (ADR 0001 containment rule).
@@ -75,12 +81,29 @@ function unresolvedWidgetMask(width: number, height: number, rectangles: Array<{
   return mask;
 }
 
+/**
+ * Trim a screenshot that exceeded the target size by a single half-pixel
+ * rounding column/row. Any larger mismatch is a real contract violation and
+ * is returned unchanged for the size assertion to fail loudly.
+ */
+function trimToSize(png: Buffer, width: number, height: number): Buffer {
+  const image = PNG.sync.read(png);
+  if ((image.width === width && image.height === height)
+    || image.width < width || image.height < height
+    || image.width - width > 1 || image.height - height > 1) return png;
+  const trimmed = new PNG({ width, height });
+  for (let y = 0; y < height; y++) {
+    image.data.copy(trimmed.data, y * width * 4, y * image.width * 4, y * image.width * 4 + width * 4);
+  }
+  return PNG.sync.write(trimmed);
+}
+
 function sourceBundleDocument() {
   if (!sourceRoot || !sourceEntry) return null;
   // Recursive: declarative UI files plus language sources for static
   // enrichment (Phase 4), wherever the app keeps them under the source root.
   const files = readdirSync(sourceRoot, { recursive: true, withFileTypes: true })
-    .filter(entry => entry.isFile() && /\.(blp|ui|vala|c)$/i.test(entry.name))
+    .filter(entry => entry.isFile() && /\.(blp|ui|vala|c|py)$/i.test(entry.name))
     .map(entry => {
       const absolute = join(entry.parentPath, entry.name);
       return { path: relative(sourceRoot, absolute), content: readFileSync(absolute, 'utf8') };
@@ -230,7 +253,11 @@ test.describe('Broadway reference captures', () => {
         };
       }
     }
-    const prototaPng = await prototaSurface.screenshot();
+    // An odd-width window centered in the canvas sits on a half-pixel
+    // boundary, and the element screenshot rounds up to one extra column/row;
+    // trim it so both images are exactly the native window's integer size.
+    const rawPrototaPng = await prototaSurface.screenshot();
+    const prototaPng = trimToSize(rawPrototaPng, reference.width, reference.height);
     await attachArtifact(`protota-${appId}.png`, prototaPng, 'image/png');
 
     const actual = PNG.sync.read(prototaPng);
@@ -311,6 +338,17 @@ test.describe('Broadway reference captures', () => {
     const maximumUnresolvedWidgetCoverage = process.env.BROADWAY_MAX_UNRESOLVED_WIDGET_COVERAGE;
     if (maximumUnresolvedWidgetCoverage) {
       expect(unresolvedWidgetCoverage, `Unresolved custom-widget coverage for ${appId}`).toBeLessThanOrEqual(Number(maximumUnresolvedWidgetCoverage));
+    }
+
+    // Catalog-carried per-app gates (#59): each value traces to a committed
+    // measured artifact for this app (see docs/gnome-app-conformance.md).
+    // Environment thresholds above remain available for tighter ad-hoc runs.
+    const gates = appCatalog[appId];
+    if (gates?.maxUnresolvedCoverage !== undefined) {
+      expect(unresolvedWidgetCoverage, `Catalog unresolved-coverage gate for ${appId}`).toBeLessThanOrEqual(gates.maxUnresolvedCoverage);
+    }
+    if (gates?.minSimilarity !== undefined) {
+      expect(sourceResolvedSimilarity, `Catalog source-resolved-similarity gate for ${appId}`).toBeGreaterThanOrEqual(gates.minSimilarity);
     }
   });
 });

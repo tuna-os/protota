@@ -62,6 +62,31 @@ npx tsx scripts/match-runtime-profile.mjs calculator \
 `BROADWAY_PROBE_FILE` enriches its per-app artifacts the same way. In CI the
 Broadway workflow mounts `.probe-local` automatically.
 
+## Per-app container recipes (Wave 3 findings, 2026-07-31)
+
+Some apps need more than the stock `podman run` to produce an honest capture;
+these are measured facts from the fleet sweep, not guesses:
+
+- **gnome-software** and **gnome-control-center** refuse or crash without a
+  connectable system bus and a non-root user. Run with
+  `--userns=keep-id --user 1000` and override
+  `APP_COMMAND='export DBUS_SYSTEM_BUS_ADDRESS=$DBUS_SESSION_BUS_ADDRESS; …'`
+  (PackageKit/fwupd/NetworkManager are absent; plugins degrade gracefully).
+  Settings additionally needs `XDG_CURRENT_DESKTOP=GNOME` and a writable
+  `HOME` (`export HOME=/tmp`).
+- **nautilus** refuses to run as root: same `--userns=keep-id --user 1000`.
+- **gnome-calendar** starts maximized, which defeats the capture's
+  inset-window detection. Prepend
+  `gsettings set org.gnome.calendar window-maximized false;` to
+  `APP_COMMAND`.
+- **Ear Tag** is not packaged at its pinned version by either runner distro;
+  `containers/broadway/Dockerfile.fedora-eartag` meson-installs the pinned
+  source tag into the pinned `fedora:43` GTK stack. This is the template for
+  probing any Circle app the distros do not package.
+- **weather** compares against the generated preset (no
+  `BROADWAY_SOURCE_ROOT`): its GJS composite template omits the window
+  parent class, which only the finishing file restores.
+
 ## Probe output schema
 
 ```jsonc

@@ -4,7 +4,9 @@
     { "id": "month", "entry": "gcal-window.blp", "title": "Month", "width": 1024, "height": 700,
       "overrides": [
         { "id": "views_stack", "set": { "visibleChildName": "month" },
-          "why": "Default view per GSettings active-view; official screenshots show month view." }
+          "probeEvidence": { "probeVersion": 1, "buildableId": "views_stack",
+                             "expect": { "visibleChildName": "month", "mapped": true } },
+          "why": "Native probe (2026-07-31): views_stack shows the month page in the default GSettings active-view; the week/agenda subtrees are unmapped." }
       ] },
     { "id": "week", "entry": "gcal-window.blp", "title": "Week", "width": 1024, "height": 700,
       "overrides": [

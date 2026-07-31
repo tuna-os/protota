@@ -144,6 +144,30 @@ describe('base-class projection', () => {
     });
   });
 
+  it('keeps a snapshot-overriding subclass a boundary even with a renderable base', () => {
+    // The week-hour-bar shape: a GtkBox subclass that appends labels in init
+    // but installs its own snapshot vfunc — it paints itself, so projecting
+    // its base chrome would erase an honestly unrendered drawing.
+    const doc = blueprintBundleToDocument([
+      { path: 'window.ui', content: '<interface><object class="GtkBox" id="shell"><child><object class="QuuxHourStrip" id="hours"/></child></object></interface>' },
+      { path: 'quux-hour-strip.c', content: `
+        G_DEFINE_TYPE (QuuxHourStrip, quux_hour_strip, GTK_TYPE_BOX);
+        static void quux_hour_strip_snapshot (GtkWidget *widget, GtkSnapshot *snapshot) {}
+        static void quux_hour_strip_class_init (QuuxHourStripClass *klass) {
+          GtkWidgetClass *widget_class = GTK_WIDGET_CLASS (klass);
+          widget_class->snapshot = quux_hour_strip_snapshot;
+        }
+        static void quux_hour_strip_init (QuuxHourStrip *self) {
+          GtkWidget *label = gtk_label_new ("");
+          gtk_box_append (GTK_BOX (self), label);
+        }
+      ` },
+    ], 'window.ui');
+    expect(doc.screens[0].rootNode.children?.[0]).toMatchObject({
+      id: 'hours', type: 'custom-widget', sourceClass: 'QuuxHourStrip',
+    });
+  });
+
   it('never projects a popover as a layout child', () => {
     const doc = blueprintBundleToDocument([
       { path: 'window.ui', content: '<interface><object class="GtkBox" id="shell"><child><object class="QuuxStrip" id="strip"/></child></object></interface>' },

@@ -617,6 +617,17 @@ adw-window > .adw-node-wrapper > *,
   min-width: 0;
 }
 
+/* GtkBox homogeneous sizing: every child gets an equal share of the main
+   axis, regardless of its natural size (#55). flex-basis 0 makes the shares
+   equal rather than proportional to content. */
+.protota-div-box[homogeneous] > .adw-node-wrapper > * {
+  flex: 1 1 0;
+  min-height: 0;
+}
+.protota-div-box[homogeneous][orientation="horizontal"] > .adw-node-wrapper > * {
+  min-width: 0;
+}
+
 /* A scroller's child fills it, as GtkScrolledWindow's viewport does. */
 html .protota-div-scrolled-window {
   display: flex;
@@ -982,6 +993,13 @@ html adw-clamp > .adw-node-wrapper {
 html adw-clamp > .adw-node-wrapper > * {
   flex: 1 1 auto;
   min-height: 0;
+  /* Adw.Clamp maximum-size (#55): the renderer publishes the declared limit
+     as --protota-clamp-max; the child is centered and width-capped, as GTK
+     clamps it. Without a declared maximum the variable is unset and the
+     child keeps its full width. */
+  width: 100%;
+  max-width: var(--protota-clamp-max, none);
+  margin-inline: auto;
 }
 
 /* AdwOverlaySplitView panes. GTK gives the sidebar a fixed-ish width and the

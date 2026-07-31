@@ -357,7 +357,7 @@ const STRING_PROPERTIES = new Set([
 /** Editor-only bookkeeping that must never reach exported source. */
 const INTERNAL_PROPERTIES = new Set([
   'id', 'type', 'slot', 'children', 'sourceClass', 'bindings', 'styleClasses',
-  'pages', 'imageId', 'options', 'breakpointCondition',
+  'pages', 'imageId', 'options', 'breakpointCondition', 'geometryOrigin',
 ]);
 
 /**
@@ -1541,8 +1541,14 @@ function enrichWithValaFacts(doc: MockupDocument, valaFiles: BlueprintSourceFile
     // Expand flags set in code are geometry evidence for the boundary itself.
     for (const assignment of facts.propertyAssignments) {
       if (assignment.target !== 'this' || assignment.value !== true) continue;
-      if (assignment.property === 'vexpand' || assignment.property === 'vexpand_set') node.vexpand = true;
-      if (assignment.property === 'hexpand' || assignment.property === 'hexpand_set') node.hexpand = true;
+      const projectFromCode = (property: 'vexpand' | 'hexpand') => {
+        node[property] = true;
+        // Record that code, not the declarative source, produced this fact so
+        // the boundary's geometry audit trail (#55) names the right layer.
+        (node.geometryOrigin ??= {})[property] = 'code';
+      };
+      if (assignment.property === 'vexpand' || assignment.property === 'vexpand_set') projectFromCode('vexpand');
+      if (assignment.property === 'hexpand' || assignment.property === 'hexpand_set') projectFromCode('hexpand');
     }
     const snippet = valaCompositeSnippet(facts, templates);
     if (!snippet) return;

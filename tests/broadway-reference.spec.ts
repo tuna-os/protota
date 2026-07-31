@@ -173,7 +173,16 @@ test.describe('Broadway reference captures', () => {
       // childless boundaries remain unresolved coverage.
       return Array.from(surface.querySelectorAll<HTMLElement>('[data-protota-type="custom-widget"]:not([data-protota-expanded])')).map((element) => {
         const rect = element.getBoundingClientRect();
-        return { x: rect.x - surfaceRect.x, y: rect.y - surfaceRect.y, width: rect.width, height: rect.height };
+        // The boundary's geometry audit trail (#55): which source facts, at
+        // what confidence, produced the allocated rectangle being masked.
+        let geometryFacts: unknown = null;
+        try { geometryFacts = JSON.parse(element.dataset.prototaGeometry ?? 'null'); } catch { /* malformed marker stays null */ }
+        return {
+          x: rect.x - surfaceRect.x, y: rect.y - surfaceRect.y, width: rect.width, height: rect.height,
+          sourceClass: element.dataset.prototaSourceClass ?? null,
+          geometryConfidence: element.dataset.prototaGeometryConfidence ?? null,
+          geometryFacts,
+        };
       });
     });
     const prototaPng = await prototaSurface.screenshot();
@@ -228,6 +237,7 @@ test.describe('Broadway reference captures', () => {
         differentPixels, totalPixels, differenceRatio, ...foreground,
         unresolvedWidgetPixels, unresolvedWidgetCoverage, rawSimilarityCeiling,
         resolvedDifferentPixels, resolvedPixels, sourceResolvedSimilarity,
+        unresolvedWidgets,
       }, null, 2)),
       'application/json',
     );

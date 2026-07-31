@@ -4,6 +4,10 @@ import { LEGAL_CHILDREN } from '../types/mockup';
 import { useMockupStore } from '../store/mockupStore';
 import { ensureAdwIcon } from '../utils/adwIcons';
 import { filterDiagnostics, getDiagnosticsForNode, worstTier } from '../diagnostics/engine';
+import {
+  boundaryGeometryConfidence, boundaryGeometryFacts, containerLayout,
+  parentFlowOf, placementLayout, type ParentFlow,
+} from '../utils/nodeGeometry';
 
 interface Props {
   node: AdwNode;
@@ -13,6 +17,8 @@ interface Props {
   inheritedSlot?: string;
   /** How this node's parent arranges its children, so alignment can apply. */
   parentFlow?: ParentFlow;
+  /** The parent node, so container-driven boundary geometry can be audited. */
+  parentNode?: AdwNode;
   /**
    * Id of the header bar that carries the window controls. GTK draws them
    * once per window, on the content-side header — not on every header bar a
@@ -146,6 +152,9 @@ function nodeProps(node: AdwNode, inheritedSlot?: string): Record<string, string
   // hints.  In particular, GtkBox orientation must survive the model → DOM
   // boundary for every imported Blueprint and preset.
   if (t === 'box' && node.orientation) p.orientation = node.orientation;
+  // GtkBox homogeneous gives every child an equal share of the main axis;
+  // the stylesheet applies the equal split to the box's children.
+  if (t === 'box' && node.homogeneous) p.homogeneous = '';
   if (t === 'overlay-split') p['show-sidebar'] = '';
   const icon = node.iconName?.replace(/-symbolic$/, '');
 
@@ -257,114 +266,6 @@ function childSlot(parent: AdwNode, child: AdwNode, index: number): string | und
   return undefined;
 }
 
-/** How a parent arranges children, which decides what alignment means. */
-type ParentFlow = 'row' | 'column' | 'grid';
-
-function parentFlowOf(node: AdwNode): ParentFlow {
-  if (node.type === 'grid') return 'grid';
-  if (node.type === 'box' || node.type === 'center-box' || node.type === 'wrap-box') {
-    return node.orientation === 'horizontal' ? 'row' : 'column';
-  }
-  if (node.type === 'header-bar' || node.type === 'overlay-split' || node.type === 'list-box-row') return 'row';
-  return 'column';
-}
-
-/**
- * GTK halign/valign in CSS. On the cross axis alignment is `align-self`; on
- * the main axis of a flex container it is auto margins, which is the only
- * thing that positions a single child there. Grids use `justify-self` and
- * `align-self` directly.
- */
-function alignmentStyle(node: AdwNode, flow: ParentFlow): React.CSSProperties {
-  const style: React.CSSProperties = {};
-  const toSelf = (value: string) =>
-    value === 'fill' ? 'stretch' : value === 'center' ? 'center' : value === 'end' ? 'flex-end' : 'flex-start';
-  const mainAxisMargins = (value: string, axis: 'inline' | 'block') => {
-    const startKey = axis === 'inline' ? 'marginInlineStart' : 'marginBlockStart';
-    const endKey = axis === 'inline' ? 'marginInlineEnd' : 'marginBlockEnd';
-    if (value === 'center') { style[startKey] = 'auto'; style[endKey] = 'auto'; }
-    else if (value === 'end') style[startKey] = 'auto';
-    else if (value === 'start') style[endKey] = 'auto';
-  };
-
-  const halign = typeof node.halign === 'string' ? node.halign : undefined;
-  const valign = typeof node.valign === 'string' ? node.valign : undefined;
-
-  if (flow === 'grid') {
-    if (halign) style.justifySelf = halign === 'fill' ? 'stretch' : halign === 'end' ? 'end' : halign;
-    if (valign) style.alignSelf = toSelf(valign);
-    return style;
-  }
-  if (flow === 'row') {
-    if (valign) style.alignSelf = toSelf(valign);
-    if (halign && halign !== 'fill') mainAxisMargins(halign, 'inline');
-    if (halign === 'fill') style.flexGrow = 1;
-  } else {
-    if (halign) style.alignSelf = toSelf(halign);
-    if (valign && valign !== 'fill') mainAxisMargins(valign, 'block');
-    if (valign === 'fill') style.flexGrow = 1;
-  }
-  return style;
-}
-
-/**
- * Placement layout: how this node sits inside ITS PARENT's flex/grid context.
- * Applied to the wrapper div, which is the parent's direct child.
- */
-function placementLayout(node: AdwNode, flow: ParentFlow = 'column'): React.CSSProperties | undefined {
-  const placement: React.CSSProperties = { ...alignmentStyle(node, flow) };
-  // GTK expand semantics: an expanding child (including an unresolved
-  // custom-widget boundary such as Calculator's MathButtons) consumes the
-  // parent's spare allocation instead of collapsing to a fallback minimum.
-  if (node.vexpand || node.hexpand) {
-    placement.flexGrow = 1;
-    placement.alignSelf = 'stretch';
-    placement.minHeight = 0;
-  }
-  // GTK size requests are MINIMUMS, not fixed sizes: a widget grows past its
-  // request to fit content (a button's label must not wrap because the
-  // source asked for a 146px minimum).
-  if (node.minWidth !== undefined) placement.minWidth = node.minWidth;
-  if (node.minHeight !== undefined) placement.minHeight = node.minHeight;
-  if (node.widthRequest !== undefined) {
-    placement.minWidth = Math.max(node.widthRequest, Number(placement.minWidth ?? 0));
-  }
-  if (node.heightRequest !== undefined) {
-    placement.minHeight = Math.max(node.heightRequest, Number(placement.minHeight ?? 0));
-  }
-  if (node.column !== undefined) placement.gridColumn = `${node.column + 1} / span ${node.columnSpan ?? 1}`;
-  if (node.row !== undefined) placement.gridRow = `${node.row + 1} / span ${node.rowSpan ?? 1}`;
-  return Object.keys(placement).length ? placement : undefined;
-}
-
-/**
- * Container layout: how this node arranges ITS OWN children. Applied to the
- * rendered element only — putting it on the wrapper as well would nest two
- * copies of the same layout and squeeze the element into its own grid cell.
- */
-function containerLayout(node: AdwNode): React.CSSProperties | undefined {
-  if (node.type === 'box') {
-    return { gap: node.spacing ?? 12 };
-  }
-  if (node.type === 'grid') {
-    // GtkGrid has no declared column count; derive it from the children's
-    // explicit attach positions and spans, as GTK does.
-    const derivedColumns = Math.max(1, ...(node.children ?? []).map((child) =>
-      (typeof child.column === 'number' ? child.column : 0) + (typeof child.columnSpan === 'number' ? child.columnSpan : 1)));
-    return {
-      gridTemplateColumns: `repeat(${node.columns ?? derivedColumns}, minmax(0, 1fr))`,
-      rowGap: node.rowSpacing ?? node.spacing ?? 6,
-      columnGap: node.columnSpacing ?? node.spacing ?? 6,
-      // GtkGrid row-homogeneous divides the grid's allocation into equal
-      // rows; without it a keypad collapses to its buttons' minimum height
-      // instead of filling the region GTK gives it.
-      ...(node.rowHomogeneous ? { gridAutoRows: 'minmax(0, 1fr)', height: '100%' } : {}),
-    };
-  }
-  if (node.type === 'scrolled-window') return { overflow: 'auto' };
-  return undefined;
-}
-
 /** GTK label markup (Pango) is not renderable text; show the plain string. */
 function plainText(text: string): string {
   return text.replace(/<[^>]+>/g, '');
@@ -372,7 +273,7 @@ function plainText(text: string): string {
 
 export const AdwaitaRenderer: React.FC<Props> = ({
   node, screenId, screenWidth, screenHeight,
-  inheritedSlot, primaryHeaderBarId, parentFlow = 'column',
+  inheritedSlot, primaryHeaderBarId, parentFlow = 'column', parentNode,
 }) => {
   // The screen root resolves which header bar owns the window controls.
   const primaryHeaderBar = primaryHeaderBarId ?? (screenWidth ? findPrimaryHeaderBarId(node) : undefined);
@@ -472,6 +373,7 @@ export const AdwaitaRenderer: React.FC<Props> = ({
       inheritedSlot={childSlot(node, child, index)}
       primaryHeaderBarId={primaryHeaderBar}
       parentFlow={parentFlowOf(node)}
+      parentNode={node}
     />
   ));
   // GTK draws window controls in the header bar unless show-title-buttons is
@@ -539,6 +441,20 @@ export const AdwaitaRenderer: React.FC<Props> = ({
           ? { 'data-protota-diag-count': String(nodeDiagnostics.length) }
           : {}),
         ...(isExpandedBoundary ? { 'data-protota-expanded': 'true' } : {}),
+        // An unresolved boundary publishes the evidence behind its geometry
+        // (#55): each fact's origin and confidence, so the Broadway
+        // comparison artifact can audit where the allocated region came from
+        // instead of trusting an arbitrary placeholder minimum.
+        ...(node.type === 'custom-widget' && !isExpandedBoundary
+          ? (() => {
+              const facts = boundaryGeometryFacts(node, parentNode);
+              return {
+                'data-protota-geometry': JSON.stringify(facts),
+                'data-protota-geometry-confidence': boundaryGeometryConfidence(facts),
+                ...(node.sourceClass ? { 'data-protota-source-class': node.sourceClass } : {}),
+              };
+            })()
+          : {}),
         ...((node.type === 'window' || isDialogRoot) && screenWidth ? { 'data-protota-render-surface': 'true' } : {}),
         // Placement lives on the rendered element because the wrapper is
         // layout-transparent (display: contents): the element itself is the

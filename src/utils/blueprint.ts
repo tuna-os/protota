@@ -224,7 +224,7 @@ const CLASS_TO_WIDGET_MAP: Record<string, AdwNodeType> = {
  * must not receive renderer boxes or count as unresolved visual coverage.
  */
 const NON_VISUAL_CLASS_PATTERN =
-  /^(Gtk\.|Gio\.|Adw\.)?(EventController[A-Za-z]*|Gesture[A-Za-z]*|ShortcutController|Shortcut|DropTarget|DragSource|Adjustment|TextBuffer|EntryBuffer|Tooltip|StringList|ListStore|SizeGroup|FileFilter|SortListModel|FilterListModel|SingleSelection|MultiSelection|NoSelection|SignalListItemFactory|BuilderListItemFactory|Breakpoint)$/;
+  /^(Gtk\.|Gio\.|Adw\.|GtkSource\.)?(EventController[A-Za-z]*|Gesture[A-Za-z]*|ShortcutController|Shortcut|DropTarget|DragSource|Adjustment|TextBuffer|SourceBuffer|Buffer|EntryBuffer|Tooltip|StringList|ListStore|SizeGroup|FileFilter|SortListModel|FilterListModel|SingleSelection|MultiSelection|NoSelection|SignalListItemFactory|BuilderListItemFactory|Breakpoint)$/;
 
 const WIDGET_CLASS_MAP: Record<string, string> = {
   window: 'Adw.ApplicationWindow',
@@ -333,6 +333,9 @@ const STYLE_CLASS_PROPERTIES: Record<string, string> = {
 const OBJECT_REFERENCE_PROPERTIES = new Set([
   'menu-model', 'focus-widget', 'default-widget', 'buffer', 'model', 'popover',
   'adjustment', 'group', 'extra-child', 'stack', 'sort-model', 'filter',
+  // Gtk.SearchBar names the widget whose key events it captures; emitting the
+  // class name as a string is rejected ("Cannot convert string to Gtk.Widget").
+  'key-capture-widget',
 ]);
 
 /**
@@ -343,7 +346,7 @@ const OBJECT_REFERENCE_PROPERTIES = new Set([
  */
 const STRING_PROPERTIES = new Set([
   'title', 'label', 'subtitle', 'description', 'text', 'tooltip-text', 'name',
-  'icon-name', 'action-name', 'action-target', 'placeholder-text', 'value',
+  'icon-name', 'action-name', 'action-target', 'placeholder-text',
   'category', 'comments', 'website', 'license', 'version', 'developer-name',
   'application-name', 'translator-credits', 'css-name',
   'menu-title', 'heading', 'body', 'default-response', 'close-response',
@@ -364,11 +367,18 @@ const INTERNAL_PROPERTIES = new Set([
  * and no amount of careful guessing substitutes for the toolkit's own answer.
  */
 const propertyCache = new Map<string, Set<string>>();
-function propertiesOf(className: string): Set<string> | null {
-  const cached = propertyCache.get(className);
+function propertiesOf(rawClassName: string): Set<string> | null {
+  const cached = propertyCache.get(rawClassName);
   if (cached) return cached;
   const data = GTK_PROPERTY_DATA;
   const table = data.classes;
+  // Blueprint's short names (`ActionBar`) and GObject names (`GtkActionBar`)
+  // both mean the namespaced class the table is keyed on; failing to resolve
+  // them here silently disables property filtering for the whole node.
+  const className = table[rawClassName]
+    ? rawClassName
+    : [canonicalClassName(rawClassName), `Gtk.${rawClassName}`, `Adw.${rawClassName}`]
+        .find((candidate) => table[candidate]) ?? rawClassName;
   if (!table[className]) return null;
   const names = new Set<string>();
   let current: string | null = className;
@@ -384,6 +394,7 @@ function propertiesOf(className: string): Set<string> | null {
     current = table[current].parent;
   }
   propertyCache.set(className, names);
+  propertyCache.set(rawClassName, names);
   return names;
 }
 
@@ -396,10 +407,28 @@ function exportPropertyName(key: string): string {
 
 function formatPropertyValue(name: string, value: unknown): string {
   // A text property stays quoted even when its value happens to be numeric:
-  // a button labelled "0" is a string, not the number zero.
-  if (STRING_PROPERTIES.has(name)) return `"${escapeBlueprintString(String(value))}"`;
+  // a button labelled "0" is a string, not the number zero. Any `*-icon-name`
+  // (start-icon-name, end-icon-name, menu-icon-name…) is icon text; emitting
+  // it bare makes the compiler read it as an object reference.
+  if (STRING_PROPERTIES.has(name) || name.endsWith('icon-name')) {
+    return `"${escapeBlueprintString(String(value))}"`;
+  }
   if (typeof value === 'boolean' || typeof value === 'number') return String(value);
   const text = String(value);
+  // GtkBuilder accepts C enum constant names ("PANGO_WRAP_WORD_CHAR");
+  // Blueprint wants the member ident (word_char). The constant's prefix is the
+  // enum type; the property name's words locate where it ends.
+  if (/^[A-Z][A-Z0-9_]+$/.test(text)) {
+    const segments = text.toLowerCase().split('_');
+    const nameWords = name.split('-');
+    let cut = 0;
+    for (let index = 0; index < segments.length; index++) {
+      if (nameWords.includes(segments[index])) cut = index + 1;
+    }
+    // Without a property-word anchor, the leading segment is the namespace.
+    const member = segments.slice(cut > 0 && cut < segments.length ? cut : 1).join('_');
+    if (member) return member;
+  }
   if (!STRING_PROPERTIES.has(name)) {
     // Flags are written as `a | b | c`, unquoted. GtkBuilder spells them
     // "no_emoji|no_spellcheck", which the compiler rejects as a string.
@@ -469,8 +498,10 @@ function nodeToBlueprint(node: AdwNode, depth: number = 0, context?: ExportConte
   // because `ClocksHeaderBar` means nothing outside that app's source.
   const declaredClass = typeof node.sourceClass === 'string' ? node.sourceClass : '';
   const isKnownLibraryClass = !!declaredClass && !!CLASS_TO_WIDGET_MAP[declaredClass];
+  // A `$` reference names a GType, which has no dots: an unresolved
+  // `Gtk.SourceBuffer` boundary is `$GtkSourceBuffer`.
   const className = node.type === 'custom-widget' && declaredClass
-    ? `$${declaredClass}`
+    ? `$${declaredClass.replace(/\./g, '')}`
     : isKnownLibraryClass
       ? declaredClass
       : WIDGET_CLASS_MAP[node.type] || node.type;
@@ -552,7 +583,12 @@ function nodeToBlueprint(node: AdwNode, depth: number = 0, context?: ExportConte
     props.push(`styles [ ${[...new Set(styleClasses)].map((name) => `"${name}"`).join(', ')} ]`);
   }
 
-  const childSource = (isSourceReference ? [] : node.children || []).map((child) => {
+  const childSource = (isSourceReference ? [] : node.children || [])
+    // Buffers, adjustments and other non-visual objects imported before the
+    // non-visual filter learned their class must not survive into export:
+    // `buffer: $GtkSourceBuffer { }` is source we cannot honestly emit.
+    .filter((child) => !(typeof child.sourceClass === 'string' && isNonVisualClass(child.sourceClass)))
+    .map((child) => {
     const body = nodeToBlueprint(child, depth + 1, context);
     if (!child.slot) return body;
     if (ANNOTATION_SLOTS.has(child.slot)) {
@@ -712,7 +748,9 @@ function propertyNameForNode(name: string, nodeType: AdwNodeType): string {
 /** GtkBuilder spells classes as GObject names (`AdwActionRow`); Blueprint as
  * namespaced names (`Adw.ActionRow`). Both resolve to one canonical entry. */
 function canonicalClassName(rawClass: string): string {
-  const gobject = /^(Adw|Gtk|GtkSource|Gio)([A-Z][A-Za-z0-9]*)$/.exec(rawClass);
+  // GtkSource must be tried before Gtk: `GtkSourceBuffer` is GtkSource.Buffer,
+  // not a Gtk class called SourceBuffer.
+  const gobject = /^(Adw|GtkSource|Gtk|Gio)([A-Z][A-Za-z0-9]*)$/.exec(rawClass);
   return gobject ? `${gobject[1]}.${gobject[2]}` : rawClass;
 }
 

@@ -2,14 +2,32 @@
 
 ## Product contract
 
-Protota is a generic GTK4/Libadwaita mockup renderer. Implement rendering by
-widget class, properties, slots, and layout semantics—not by preset ID, app
-name, or screenshot-shaped per-app components. An unsupported GTK/Libadwaita
-widget must be surfaced explicitly; do not silently substitute a generic box.
+Protota is a prototyping tool for GTK4/Libadwaita built on top of gjsify. Implement mockup rendering by widget class, properties, slots, and layout semantics—not by preset ID, app name, or screenshot-shaped per-app components. An unsupported GTK/Libadwaita widget must be surfaced explicitly; do not silently substitute a generic box.
 
 Presets are conformance inputs. The target is a reversible pipeline:
 
 `Blueprint / GtkBuilder → MockupDocument → generic renderer → Blueprint`
+
+## Icons in toolbars
+
+Icons live in `node_modules/@gjsify/adwaita-icons/` — one file per category (`actions.ts`, `devices.ts`, `places.ts`, `status.ts`, `ui.ts`).
+
+```typescript
+import { editUndoSymbolic } from '@gjsify/adwaita-icons/actions';
+import { toDataUri } from '@gjsify/adwaita-icons/utils';
+```
+
+```tsx
+<span
+  className="adw-toolbar-icon"
+  style={{
+    maskImage: toDataUri(editUndoSymbolic),
+    WebkitMaskImage: toDataUri(editUndoSymbolic),
+  }}
+/>
+```
+
+Never use `background-image` for symbolic icons, it breaks theming. For runtime icons (`icon-name` attributes), use `ensureAdwIcon()` from `src/utils/adwIcons.ts`.
 
 ## Verification
 

@@ -2,6 +2,11 @@ import React, { useState, useRef, useCallback, useEffect, useMemo } from "react"
 import { useMockupStore } from "../store/mockupStore";
 import { AdwaitaRenderer } from "./AdwaitaRenderer";
 import { BottomBar } from "./BottomBar";
+import { useDndStore } from "../dnd/dndStore";
+import { resolveDropTarget } from "../dnd/dropResolution";
+import { DropIndicator } from "../dnd/DropIndicator";
+import { findNodeById } from "../utils/treeHelpers";
+import type { AdwNodeType } from "../types/mockup";
 import { windowCloseSymbolic } from "@gjsify/adwaita-icons/ui";
 import { toDataUri } from "@gjsify/adwaita-icons/utils";
 
@@ -132,6 +137,158 @@ export const ViewportCanvas: React.FC = () => {
     canvasRef.current?.focus();
     selectNode(null);
   }, [selectNode]);
+
+  // --- Drag and drop (#79) ---
+  //
+  // Two mechanisms, per docs/penpot-study.md §4: native HTML5 drag events for
+  // palette → canvas insertion, pointer events for reparenting a node already
+  // on the canvas. Both resolve the drop to container + index (+ slot) — the
+  // constraint model has no coordinates — and both keep the document
+  // untouched until the drop commits exactly one mutation.
+
+  // Native listeners, not React synthetic handlers: the adw-* custom
+  // elements reparent internal DOM, and events originating there never reach
+  // React's delegated listeners (see the selection note in AdwaitaRenderer).
+  // Plain DOM bubbling to the canvas root always works.
+  useEffect(() => {
+    const el = canvasRef.current;
+    if (!el) return;
+
+    const handleDragOver = (e: DragEvent) => {
+      const { drag, setTarget } = useDndStore.getState();
+      if (drag?.kind !== "palette") return;
+      e.preventDefault();
+      const target = resolveDropTarget(
+        docRef.current, e.target as Element, e.clientX, e.clientY,
+        { draggedType: drag.widgetType },
+      );
+      if (e.dataTransfer) e.dataTransfer.dropEffect = target ? "copy" : "none";
+      setTarget(target);
+    };
+
+    const handleDragLeave = (e: DragEvent) => {
+      if (!el.contains(e.relatedTarget as Node)) {
+        useDndStore.getState().setTarget(null);
+      }
+    };
+
+    const handleDrop = (e: DragEvent) => {
+      const { drag, target, endDrag } = useDndStore.getState();
+      if (drag?.kind !== "palette") return;
+      e.preventDefault();
+      // An illegal target shows no indicator and the drop does nothing.
+      if (target) {
+        const store = useMockupStore.getState();
+        const id = store.addChildNode(target.parentId, drag.widgetType, target.slot, target.index);
+        if (id) store.selectNode(id, target.screenId);
+      }
+      endDrag();
+    };
+
+    el.addEventListener("dragover", handleDragOver);
+    el.addEventListener("dragleave", handleDragLeave);
+    el.addEventListener("drop", handleDrop);
+    return () => {
+      el.removeEventListener("dragover", handleDragOver);
+      el.removeEventListener("dragleave", handleDragLeave);
+      el.removeEventListener("drop", handleDrop);
+    };
+  }, []);
+
+  // Reparent drag: pointer-drag the selected node into another container.
+  // A small movement threshold separates click from drag; pointer capture
+  // keeps the gesture alive outside the screen frame; Escape cancels; the
+  // drop commits one moveNode (one undo entry).
+  const handleNodePointerDown = useCallback((e: PointerEvent) => {
+    if (e.button !== 0 || spaceDown.current || isPanningRef.current) return;
+    const sourceEl = (e.target as Element).closest?.("[data-node-id]") as HTMLElement | null;
+    if (!sourceEl) return;
+    const nodeId = sourceEl.dataset.nodeId!;
+    const store = useMockupStore.getState();
+    if (nodeId !== store.selectedNodeId) return;
+    // Screen roots are anchors, not draggable layers.
+    if (store.doc.screens.some((s) => s.rootNode.id === nodeId)) return;
+    let draggedType: AdwNodeType | null = null;
+    for (const screen of store.doc.screens) {
+      const found = findNodeById([screen.rootNode], nodeId);
+      if (found) { draggedType = found.type; break; }
+    }
+    if (!draggedType) return;
+
+    const gesture = {
+      startX: e.clientX, startY: e.clientY,
+      active: false, cancelled: false,
+    };
+    const pointerId = e.pointerId;
+    const dnd = useDndStore.getState();
+
+    const cleanupVisuals = () => {
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+    };
+
+    const onMove = (ev: PointerEvent) => {
+      if (gesture.cancelled) return;
+      if (!gesture.active) {
+        if (Math.hypot(ev.clientX - gesture.startX, ev.clientY - gesture.startY) < 5) return;
+        gesture.active = true;
+        dnd.startDrag({ kind: "node", nodeId });
+        try { sourceEl.setPointerCapture(pointerId); } catch { /* capture is best-effort */ }
+        document.body.style.userSelect = "none";
+      }
+      const hit = document.elementFromPoint(ev.clientX, ev.clientY);
+      const inCanvas = hit && canvasRef.current?.contains(hit);
+      const target = inCanvas
+        ? resolveDropTarget(docRef.current, hit, ev.clientX, ev.clientY, {
+            draggedType: draggedType!,
+            excludeNodeId: nodeId,
+          })
+        : null;
+      dnd.setTarget(target);
+      document.body.style.cursor = target ? "grabbing" : "not-allowed";
+    };
+
+    const onKeyDown = (ev: KeyboardEvent) => {
+      if (ev.key === "Escape" && gesture.active && !gesture.cancelled) {
+        ev.stopPropagation();
+        gesture.cancelled = true;
+        dnd.endDrag();
+        cleanupVisuals();
+      }
+    };
+
+    const onUp = () => {
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerup", onUp);
+      window.removeEventListener("keydown", onKeyDown, true);
+      cleanupVisuals();
+      if (gesture.active) {
+        // The click that follows a completed drag must not re-run selection
+        // or the canvas deselect.
+        const swallowClick = (ce: MouseEvent) => { ce.stopPropagation(); ce.preventDefault(); };
+        window.addEventListener("click", swallowClick, { capture: true, once: true });
+        setTimeout(() => window.removeEventListener("click", swallowClick, true), 150);
+      }
+      const { target, endDrag } = useDndStore.getState();
+      if (gesture.active && !gesture.cancelled && target) {
+        // One mutation, one undo entry. The resolved slot is authoritative:
+        // an unslotted container clears any stale slot from the old parent.
+        useMockupStore.getState().moveNode(nodeId, target.parentId, target.index, target.slot ?? "");
+      }
+      endDrag();
+    };
+
+    window.addEventListener("pointermove", onMove);
+    window.addEventListener("pointerup", onUp);
+    window.addEventListener("keydown", onKeyDown, true);
+  }, []);
+
+  useEffect(() => {
+    const el = canvasRef.current;
+    if (!el) return;
+    el.addEventListener("pointerdown", handleNodePointerDown);
+    return () => el.removeEventListener("pointerdown", handleNodePointerDown);
+  }, [handleNodePointerDown]);
 
   // --- Keyboard: Escape + Space (pan mode) ---
 
@@ -544,6 +701,10 @@ export const ViewportCanvas: React.FC = () => {
         onFocusNext={handleFocusNext}
         onSelectScreen={handleFocusScreen}
       />
+
+      {/* Drop preview (#79): candidate-container highlight + insertion caret.
+          Fixed-positioned, so it lives outside the transformed surface. */}
+      <DropIndicator />
 
       {/* Transformable Canvas Surface */}
       <div

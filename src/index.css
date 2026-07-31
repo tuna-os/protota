@@ -1090,3 +1090,35 @@ html .protota-div-list-box-row {
 html .protota-div-list-box-row + .protota-div-list-box-row {
   border-top: 1px solid var(--separator-color, rgba(0, 0, 6, 0.07));
 }
+
+/* ---- Drag and drop (#79) ---- */
+
+/* Palette entries in the left panel: plain DOM rows that start HTML5 drags. */
+.protota-palette-item {
+  padding: 6px 10px;
+  border-radius: var(--button-radius, 9px);
+  cursor: grab;
+  margin-bottom: 2px;
+  border: 1px solid var(--separator-color, rgba(0, 0, 6, 0.08));
+  background: var(--card-bg-color, rgba(0, 0, 6, 0.02));
+  user-select: none;
+}
+.protota-palette-item:hover {
+  background: var(--button-hover-color, rgba(0, 0, 6, 0.1));
+}
+.protota-palette-item:active {
+  cursor: grabbing;
+}
+
+/* Layer-tree drop indicators: a caret edge for before/after, an accent
+   outline for dropping into the row's container. */
+.protota-tree-item--drop-before {
+  box-shadow: inset 0 2px 0 var(--accent-bg-color, #3584e4);
+}
+.protota-tree-item--drop-after {
+  box-shadow: inset 0 -2px 0 var(--accent-bg-color, #3584e4);
+}
+.protota-tree-item--drop-inside {
+  outline: 2px solid var(--accent-bg-color, #3584e4);
+  outline-offset: -2px;
+}

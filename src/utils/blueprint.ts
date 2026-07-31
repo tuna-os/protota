@@ -1,5 +1,6 @@
 import type { MockupDocument, AdwNode, AdwNodeType, ImportDiagnostic, Screen, ScreenTemplateType } from '../types/mockup';
 import { extractValaFacts, type ValaClassFacts } from './vala';
+import { extractCFacts, type CClassFacts } from './clang';
 import { GTK_PROPERTY_DATA } from '../data/gtkProperties';
 
 export type { ImportDiagnostic } from '../types/mockup';
@@ -1382,14 +1383,40 @@ function valaCompositeSnippet(
 }
 
 /**
+ * C and Vala describe construction differently but yield the same *facts*, so
+ * both feed one enrichment engine rather than two parallel implementations.
+ * Only the extraction is language-specific.
+ */
+function valaShapeOfCFacts(facts: CClassFacts): ValaClassFacts {
+  return {
+    className: facts.className,
+    baseClass: facts.baseClass,
+    templateResource: facts.templateResource,
+    // C has no declared-default syntax; the template is the source of truth.
+    propertyDefaults: {},
+    constructions: facts.constructions,
+    insertions: facts.insertions,
+    propertyAssignments: facts.propertyAssignments,
+  };
+}
+
+/**
  * Phase 4 static enrichment: give code-defined boundaries their statically
  * discoverable contents. Structural only — facts come from language syntax,
  * never from application names or invented widgets.
  */
-function enrichWithValaFacts(doc: MockupDocument, valaFiles: BlueprintSourceFile[], templates: Map<string, BlueprintTemplate>): void {
+function enrichWithValaFacts(doc: MockupDocument, valaFiles: BlueprintSourceFile[], templates: Map<string, BlueprintTemplate>, cFiles: BlueprintSourceFile[] = []): void {
   const factsByClass = new Map<string, ValaClassFacts>();
   for (const file of valaFiles) {
     for (const facts of extractValaFacts(file.content)) factsByClass.set(facts.className, facts);
+  }
+  for (const file of cFiles) {
+    for (const facts of extractCFacts(file.content)) {
+      // A Vala definition wins if an app somehow has both.
+      if (!factsByClass.has(facts.className)) {
+        factsByClass.set(facts.className, valaShapeOfCFacts(facts));
+      }
+    }
   }
   if (!factsByClass.size) return;
   const diagnostics = doc.importDiagnostics ?? (doc.importDiagnostics = []);
@@ -1458,6 +1485,7 @@ function enrichWithValaFacts(doc: MockupDocument, valaFiles: BlueprintSourceFile
 export function blueprintBundleToDocument(files: BlueprintSourceFile[], entryPath: string, title?: string): MockupDocument {
   const declarativeFiles = files.filter(file => /\.(blp|ui)$/i.test(file.path));
   const valaFiles = files.filter(file => /\.vala$/i.test(file.path));
+  const cFiles = files.filter(file => /\.c$/i.test(file.path));
   const entry = declarativeFiles.find(file => file.path === entryPath || file.path.endsWith(`/${entryPath}`));
   if (!entry) throw new Error(`Blueprint entry file not found in source bundle: ${entryPath}`);
   const templates = collectTemplates(declarativeFiles);
@@ -1482,8 +1510,8 @@ export function blueprintBundleToDocument(files: BlueprintSourceFile[], entryPat
   } else {
     doc = blueprintToDocument(expandBundleTemplates(entry.content, templates), documentTitle);
   }
-  if (valaFiles.length) {
-    enrichWithValaFacts(doc, valaFiles, templates);
+  if (valaFiles.length || cFiles.length) {
+    enrichWithValaFacts(doc, valaFiles, templates, cFiles);
     // Enrichment can introduce boundaries whose classes are .ui templates.
     resolveBuilderPass();
   }

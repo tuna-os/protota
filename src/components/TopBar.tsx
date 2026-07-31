@@ -50,6 +50,7 @@ export const TopBar: React.FC = () => {
     toggleDiagnostics,
     diagnostics,
     exportCheck,
+    liveBlueprintDiagnostics,
     ignoredRules,
     ignoredInstances,
     runExportCheck,
@@ -74,7 +75,7 @@ export const TopBar: React.FC = () => {
   // so the number on the toggle always matches "what would I see with all
   // tiers on". Destructive red when any error remains (design §5.3).
   const countable = filterDiagnostics(
-    [...diagnostics, ...exportCheck],
+    [...diagnostics, ...exportCheck, ...liveBlueprintDiagnostics],
     { error: true, warning: true, suggestion: true },
     ignoredRules,
     ignoredInstances,

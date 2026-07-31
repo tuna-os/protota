@@ -1,0 +1,44 @@
+Vendored blueprint-compiler
+===========================
+
+The `blueprintcompiler/` directory is an unmodified copy of the
+blueprint-compiler Python package, version v0.22.2:
+
+  https://gitlab.gnome.org/GNOME/blueprint-compiler
+  tag v0.22.2
+
+blueprint-compiler is Copyright 2021-2025 James Westman and contributors,
+licensed under the GNU Lesser General Public License, version 3 or later
+(SPDX: LGPL-3.0-or-later). The full license text is in COPYING beside this
+file, and every vendored source file keeps its original license header.
+
+Protota does not link against or derive from this code. It is executed
+unmodified as a standalone tool inside a Pyodide (CPython/WebAssembly)
+interpreter in a Web Worker, the same way CI executes the distro-packaged
+`blueprint-compiler` binary. The version is pinned to match the Fedora 45
+container used by the `blueprint-export` CI job (blueprint-compiler
+0.22.2-1.fc45), so browser-side syntax results track the host compiler CI
+treats as the authority.
+
+Files added by Protota (not part of upstream, licensed like the rest of
+this repository):
+
+  gi/__init__.py      - minimal import-time stub for PyGObject's `gi`
+                        module. blueprintcompiler/gir.py imports gi at
+                        module import time; the stub satisfies those
+                        imports so the tokenizer and parser can run.
+                        There is no GObject introspection in the browser:
+                        any attempt to actually use GIRepository raises.
+                        Consequently only *syntax*-level checking runs in
+                        the browser; GIR-backed validation (types,
+                        properties, signals) remains host-only.
+  blueprint_check.py  - driver that tokenizes and parses a .blp source and
+                        returns parse errors as JSON, deliberately skipping
+                        the AST validation pass that requires typelibs.
+  manifest.json       - list of files the worker loads into the Pyodide
+                        filesystem.
+  NOTICE              - this file.
+
+Upgrading: re-vendor `blueprintcompiler/` from the tag matching the version
+installed by .github/workflows/deploy.yml's `blueprint-export` job, then
+regenerate manifest.json (see the note inside it).

@@ -10,9 +10,19 @@ ARG APP_COMMAND=gnome-calculator
 RUN dnf install -y --setopt=install_weak_deps=False \
     dbus-daemon \
     dbus-tools \
+    gcc \
+    gtk4-devel \
     gtk4-devel-tools \
     ${APP_PACKAGE} \
   && dnf clean all
+
+# Read-only runtime probe shim (#58): LD_PRELOADed into the app by
+# entrypoint.sh only when a /probe volume is mounted. Built here so the shim
+# always matches the image's GTK; the web app never ships it.
+COPY probe.c /probe.c
+RUN gcc -shared -fPIC -O2 -Wall -o /opt/probe.so /probe.c \
+      $(pkg-config --cflags --libs gtk4) -pthread \
+  && rm /probe.c
 
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh

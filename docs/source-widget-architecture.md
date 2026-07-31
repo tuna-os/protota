@@ -606,6 +606,14 @@ no Calculator-specific branch.
 - Add the isolated GTK probe and stable source/runtime matching.
 - Use it for geometry and active-state enrichment in Broadway artifacts.
 
+Delivered (#58): `containers/broadway/probe.c` is a read-only LD_PRELOAD shim
+armed only by a mounted `/probe` volume; `src/utils/runtimeProfile.ts` joins
+its dump to the source graph by buildable ID first, structural gtype ordinal
+second, never pixels; the Broadway comparison artifact carries the join as a
+`runtimeProfile` block and per-boundary `native:*` facts at the new top
+`native` confidence tier. Usage, schema, and matching rules:
+`docs/runtime-probe.md`.
+
 Exit condition: exact-ID custom boundaries such as `_buttons` carry auditable
 native allocation evidence.
 

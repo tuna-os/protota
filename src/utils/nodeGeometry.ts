@@ -162,6 +162,8 @@ export function containerLayout(node: AdwNode): CSSProperties | undefined {
 /**
  * Evidence behind an unresolved boundary's geometry (#55). Every fact names
  * the source property (or container rule) that produced it and a confidence:
+ *   - `native`   — measured from the live GTK widget tree by the runtime
+ *                  probe (#58, Phase 5); GTK's own answer, the top tier;
  *   - `declared` — an explicit property on the boundary in declarative source;
  *   - `code`     — projected from a statically extracted code assignment;
  *   - `derived`  — implied by the parent container's GTK allocation model;
@@ -169,7 +171,7 @@ export function containerLayout(node: AdwNode): CSSProperties | undefined {
  * Origins are `<layer>:<property>` so the Broadway comparison artifact can
  * audit exactly which source fact granted the boundary its region.
  */
-export type GeometryConfidence = 'declared' | 'code' | 'derived' | 'fallback';
+export type GeometryConfidence = 'native' | 'declared' | 'code' | 'derived' | 'fallback';
 
 export interface GeometryFact {
   property: string;
@@ -270,8 +272,8 @@ export function boundaryGeometryFacts(node: AdwNode, parent?: AdwNode): Geometry
 
 /** The weakest confidence among the applied facts, for the DOM marker. */
 export function boundaryGeometryConfidence(facts: GeometryFact[]): GeometryConfidence {
-  const rank: GeometryConfidence[] = ['declared', 'code', 'derived', 'fallback'];
+  const rank: GeometryConfidence[] = ['native', 'declared', 'code', 'derived', 'fallback'];
   return facts.reduce<GeometryConfidence>(
     (worst, fact) => (rank.indexOf(fact.confidence) > rank.indexOf(worst) ? fact.confidence : worst),
-    'declared');
+    'native');
 }

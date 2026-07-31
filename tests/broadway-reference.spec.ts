@@ -1,11 +1,16 @@
 import { expect, test } from '@playwright/test';
-import { readdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import pixelmatch from 'pixelmatch';
 import { PNG } from 'pngjs';
 import { blueprintBundleToDocument } from '../src/utils/blueprint';
+import { matchRuntimeProfile, type ProbeDocument, type RuntimeProfileReport } from '../src/utils/runtimeProfile';
 
 const broadwayUrl = process.env.BROADWAY_URL;
+// Native runtime probe dump (#58), written by the containerized app when the
+// runner is started with a /probe volume. Optional: a missing or unreadable
+// probe file is "no evidence", never a failure (ADR 0001 containment rule).
+const probeFile = process.env.BROADWAY_PROBE_FILE;
 const presetId = process.env.BROADWAY_PRESET_ID || 'calculator';
 const appId = process.env.BROADWAY_APP_ID || presetId;
 const sourceRoot = process.env.BROADWAY_SOURCE_ROOT;
@@ -118,6 +123,19 @@ test.describe('Broadway reference captures', () => {
 
     const reference = PNG.sync.read(broadwayPng);
     const sourceDocument = sourceBundleDocument();
+    // Join the probe's live widget records to the source graph — buildable ID
+    // first, structural gtype ordinal second, never pixels. The join needs
+    // source-graph node ids, so it only runs in source-bundle mode.
+    let runtimeProfile: RuntimeProfileReport | null = null;
+    if (probeFile && existsSync(probeFile) && sourceDocument) {
+      try {
+        const probe = JSON.parse(readFileSync(probeFile, 'utf8')) as ProbeDocument;
+        const chosen = sourceDocument.screens.find((screen) => screen.id === screenId) ?? sourceDocument.screens[0];
+        runtimeProfile = matchRuntimeProfile(probe, chosen.rootNode);
+      } catch {
+        runtimeProfile = null; // malformed probe output stays "no evidence"
+      }
+    }
     await page.goto('/');
     await page.evaluate(async ({ id, width, height, document, screenId }) => {
       const preset = document ? { document } : await fetch(`./presets/${id}.mockup.json`).then(response => response.json());
@@ -179,12 +197,29 @@ test.describe('Broadway reference captures', () => {
         try { geometryFacts = JSON.parse(element.dataset.prototaGeometry ?? 'null'); } catch { /* malformed marker stays null */ }
         return {
           x: rect.x - surfaceRect.x, y: rect.y - surfaceRect.y, width: rect.width, height: rect.height,
+          nodeId: element.dataset.nodeId ?? null,
           sourceClass: element.dataset.prototaSourceClass ?? null,
           geometryConfidence: element.dataset.prototaGeometryConfidence ?? null,
           geometryFacts,
         };
       });
     });
+    // Merge native runtime evidence (#58) into each boundary's audit trail:
+    // a matched boundary carries GTK's own allocation as `native:*` facts at
+    // the top `native` confidence tier, alongside the static facts.
+    if (runtimeProfile) {
+      const matchByNodeId = new Map(runtimeProfile.matches.map((match) => [match.nodeId, match]));
+      for (const widget of unresolvedWidgets) {
+        const match = widget.nodeId ? matchByNodeId.get(widget.nodeId) : undefined;
+        if (!match) continue;
+        const staticFacts = Array.isArray(widget.geometryFacts) ? widget.geometryFacts as unknown[] : [];
+        widget.geometryFacts = [...staticFacts, ...match.facts];
+        widget.geometryConfidence = 'native';
+        (widget as Record<string, unknown>).runtimeMatch = {
+          matchedBy: match.matchedBy, buildableId: match.buildableId, gtype: match.gtype, bounds: match.bounds,
+        };
+      }
+    }
     const prototaPng = await prototaSurface.screenshot();
     await attachArtifact(`protota-${appId}.png`, prototaPng, 'image/png');
 
@@ -230,6 +265,11 @@ test.describe('Broadway reference captures', () => {
     const rawSimilarityCeiling = 1 - unresolvedWidgetCoverage;
     const sourceResolvedSimilarity = resolvedPixels === 0 ? 0 : 1 - resolvedDifferentPixels / resolvedPixels;
     await attachArtifact(`diff-${appId}.png`, PNG.sync.write(diff), 'image/png');
+    if (probeFile && existsSync(probeFile)) {
+      // The raw probe dump travels next to the comparison artifact so every
+      // native:* fact in it can be audited against GTK's own records.
+      await attachArtifact(`probe-${appId}.json`, readFileSync(probeFile), 'application/json');
+    }
     await attachArtifact(
       `comparison-${appId}.json`,
       Buffer.from(JSON.stringify({
@@ -238,6 +278,9 @@ test.describe('Broadway reference captures', () => {
         unresolvedWidgetPixels, unresolvedWidgetCoverage, rawSimilarityCeiling,
         resolvedDifferentPixels, resolvedPixels, sourceResolvedSimilarity,
         unresolvedWidgets,
+        // Native runtime probe join (#58): per-source-node evidence and the
+        // per-app match rate, so a weak join is visible in the artifact.
+        runtimeProfile,
       }, null, 2)),
       'application/json',
     );

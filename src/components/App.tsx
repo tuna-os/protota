@@ -6,6 +6,7 @@ import { InspectorPanel } from "./InspectorPanel";
 import { AuditPanel } from "./AuditPanel";
 import { ContextMenu } from "./ContextMenu";
 import { PresetGallery } from "./PresetGallery";
+import { IconLibrary } from "./IconLibrary";
 import { CommandPalette } from "./CommandPalette";
 import { AddScreenModal } from "./AddScreenModal";
 import { TopBar } from "./TopBar";
@@ -54,6 +55,7 @@ export const App: React.FC = () => {
   const [rightOpen, setRightOpen] = useState(() => typeof window !== 'undefined' ? window.innerWidth >= 768 : true);
   const [showShortcuts, setShowShortcuts] = useState(false);
   const [showPresets, setShowPresets] = useState(false);
+  const [showIconLibrary, setShowIconLibrary] = useState(false);
   const [showCommandPalette, setShowCommandPalette] = useState(false);
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -108,15 +110,18 @@ export const App: React.FC = () => {
     const onToggleProperties = () => setRightOpen((v) => !v);
     const onShowShortcuts = () => setShowShortcuts((v) => !v);
     const onShowPresets = () => setShowPresets(true);
+    const onShowIconLibrary = () => setShowIconLibrary(true);
     window.addEventListener("protota:toggle-layers", onToggleLayers);
     window.addEventListener("protota:toggle-properties", onToggleProperties);
     window.addEventListener("protota:show-shortcuts", onShowShortcuts);
     window.addEventListener("protota:show-presets", onShowPresets);
+    window.addEventListener("protota:show-icon-library", onShowIconLibrary);
     return () => {
       window.removeEventListener("protota:toggle-layers", onToggleLayers);
       window.removeEventListener("protota:toggle-properties", onToggleProperties);
       window.removeEventListener("protota:show-shortcuts", onShowShortcuts);
       window.removeEventListener("protota:show-presets", onShowPresets);
+      window.removeEventListener("protota:show-icon-library", onShowIconLibrary);
     };
   }, []);
 
@@ -363,6 +368,8 @@ export const App: React.FC = () => {
       )}
 
       <PresetGallery isOpen={showPresets} onClose={() => setShowPresets(false)} />
+
+      <IconLibrary isOpen={showIconLibrary} onClose={() => setShowIconLibrary(false)} />
 
       <CommandPalette isOpen={showCommandPalette} onClose={() => setShowCommandPalette(false)} />
 

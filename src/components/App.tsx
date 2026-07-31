@@ -9,6 +9,7 @@ import { ContextMenu } from "./ContextMenu";
 import { PresetGallery } from "./PresetGallery";
 import { IconLibrary } from "./IconLibrary";
 import { ImportAppDialog } from "./ImportAppDialog";
+import { ExportWritebackDialog } from "./ExportWritebackDialog";
 import { CommandPalette } from "./CommandPalette";
 import { AddScreenModal } from "./AddScreenModal";
 import { TopBar } from "./TopBar";
@@ -67,6 +68,7 @@ export const App: React.FC = () => {
   const [showPresets, setShowPresets] = useState(false);
   const [showIconLibrary, setShowIconLibrary] = useState(false);
   const [showImportApp, setShowImportApp] = useState(false);
+  const [showWriteback, setShowWriteback] = useState(false);
   const [showCommandPalette, setShowCommandPalette] = useState(false);
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -128,7 +130,9 @@ export const App: React.FC = () => {
     };
     const onShowIconLibrary = () => setShowIconLibrary(true);
     const onShowImportApp = () => setShowImportApp(true);
+    const onShowWriteback = () => setShowWriteback(true);
     window.addEventListener("protota:show-import-app", onShowImportApp);
+    window.addEventListener("protota:show-writeback", onShowWriteback);
     window.addEventListener("protota:toggle-layers", onToggleLayers);
     window.addEventListener("protota:toggle-properties", onToggleProperties);
     window.addEventListener("protota:show-shortcuts", onShowShortcuts);
@@ -143,6 +147,7 @@ export const App: React.FC = () => {
       window.removeEventListener("protota:show-diagnostics", onShowDiagnostics);
       window.removeEventListener("protota:show-icon-library", onShowIconLibrary);
       window.removeEventListener("protota:show-import-app", onShowImportApp);
+      window.removeEventListener("protota:show-writeback", onShowWriteback);
     };
   }, []);
 
@@ -449,6 +454,7 @@ export const App: React.FC = () => {
 
       <IconLibrary isOpen={showIconLibrary} onClose={() => setShowIconLibrary(false)} />
       <ImportAppDialog isOpen={showImportApp} onClose={() => setShowImportApp(false)} />
+      <ExportWritebackDialog isOpen={showWriteback} onClose={() => setShowWriteback(false)} />
 
       <CommandPalette isOpen={showCommandPalette} onClose={() => setShowCommandPalette(false)} />
 

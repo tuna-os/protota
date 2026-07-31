@@ -151,6 +151,13 @@ export const TopBar: React.FC = () => {
         },
         { label: "Export as PNG", action: handleExportPNG },
         { label: "Export Blueprint (.blp)", action: handleExportBlueprint, shortcut: "Ctrl+E" },
+        {
+          // Write-back UX bridge (ADR 0001 Part 3 item 1): download +
+          // generated protota-writeback command, plus the File System
+          // Access direct path on Chromium. Host action stays explicit (#80).
+          label: "Export → Patch into Checkout…",
+          action: () => window.dispatchEvent(new CustomEvent("protota:show-writeback")),
+        },
         { label: "divider", divider: true },
         { label: "Share URL", action: handleShare, shortcut: "Ctrl+S" },
       ],

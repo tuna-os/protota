@@ -3,6 +3,7 @@ import type { AdwNode } from '../types/mockup';
 import { LEGAL_CHILDREN } from '../types/mockup';
 import { useMockupStore } from '../store/mockupStore';
 import { ensureAdwIcon } from '../utils/adwIcons';
+import { filterDiagnostics, getDiagnosticsForNode, worstTier } from '../diagnostics/engine';
 
 interface Props {
   node: AdwNode;
@@ -375,8 +376,21 @@ export const AdwaitaRenderer: React.FC<Props> = ({
 }) => {
   // The screen root resolves which header bar owns the window controls.
   const primaryHeaderBar = primaryHeaderBarId ?? (screenWidth ? findPrimaryHeaderBarId(node) : undefined);
-  const { selectedNodeId, selectNode, addChildNode, doc } = useMockupStore();
+  const {
+    selectedNodeId, selectNode, addChildNode, doc,
+    diagnosticsEnabled, diagnostics, tierFilters, ignoredRules, ignoredInstances,
+  } = useMockupStore();
   const isSelected = selectedNodeId === node.id;
+
+  // Diagnostics outlines (#95, design §5.4): visible (filtered, non-ignored)
+  // diagnostics tint this node by their worst tier. Editor chrome only —
+  // excluded from PNG capture alongside the selection outline.
+  const nodeDiagnostics = diagnosticsEnabled
+    ? getDiagnosticsForNode(
+        filterDiagnostics(diagnostics, tierFilters, ignoredRules, ignoredInstances),
+        screenId, node.id)
+    : [];
+  const diagnosticTier = worstTier(nodeDiagnostics);
 
   const legalAdds = LEGAL_CHILDREN[node.type] || [];
   const elRef = useRef<HTMLElement>(null);
@@ -488,7 +502,11 @@ export const AdwaitaRenderer: React.FC<Props> = ({
   const styleClasses = typeof node.styleClasses === 'string'
     ? node.styleClasses.split(/\s+/).filter(Boolean).map((name) => `protota-style-${name}`).join(' ')
     : '';
-  const elementClass = [divClass, styleClasses].filter(Boolean).join(' ');
+  // Selection outline wins visually over the diagnostic tint (design §5.4).
+  const diagnosticClass = diagnosticTier && !isSelected
+    ? `protota-diag-outline-${diagnosticTier}`
+    : '';
+  const elementClass = [divClass, styleClasses, diagnosticClass].filter(Boolean).join(' ');
 
   return (
     <div
@@ -508,6 +526,9 @@ export const AdwaitaRenderer: React.FC<Props> = ({
         ref: elRef,
         ...attrs,
         'data-protota-type': node.type,
+        ...(nodeDiagnostics.length > 1 && !isSelected
+          ? { 'data-protota-diag-count': String(nodeDiagnostics.length) }
+          : {}),
         ...(isExpandedBoundary ? { 'data-protota-expanded': 'true' } : {}),
         ...((node.type === 'window' || isDialogRoot) && screenWidth ? { 'data-protota-render-surface': 'true' } : {}),
         // Placement lives on the rendered element because the wrapper is

@@ -329,6 +329,54 @@ body,
   outline: none;
 }
 
+/* ---- Diagnostics canvas highlighting (#95, design §5.4) ----
+ * Dotted tier-coloured outlines on the rendered element (the wrapper is
+ * display: contents, so it cannot carry an outline). A corner count dot
+ * appears when a node has multiple diagnostics. */
+.protota-diag-outline-error,
+.protota-diag-outline-warning,
+.protota-diag-outline-suggestion {
+  outline-style: dotted;
+  outline-width: 2px;
+  outline-offset: 1px;
+  border-radius: 4px;
+  position: relative;
+}
+
+.protota-diag-outline-error { outline-color: var(--destructive-bg-color, #e01b24); }
+.protota-diag-outline-warning { outline-color: #e5a50a; }
+.protota-diag-outline-suggestion { outline-color: var(--accent-bg-color, #3584e4); }
+
+[data-protota-diag-count]::after {
+  content: attr(data-protota-diag-count);
+  position: absolute;
+  top: -7px;
+  right: -7px;
+  min-width: 14px;
+  height: 14px;
+  padding: 0 3px;
+  border-radius: 7px;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 14px;
+  text-align: center;
+  color: #fff;
+  background: var(--destructive-bg-color, #e01b24);
+  z-index: 5;
+  pointer-events: none;
+}
+
+/* Diagnostics highlights are editor chrome: never in exported PNGs. */
+:root[data-protota-capture="true"] .protota-diag-outline-error,
+:root[data-protota-capture="true"] .protota-diag-outline-warning,
+:root[data-protota-capture="true"] .protota-diag-outline-suggestion {
+  outline: none !important;
+}
+
+:root[data-protota-capture="true"] [data-protota-diag-count]::after {
+  content: none;
+}
+
 /* Toggle pressed state for mode buttons */
 .adw-button.active,
 .adw-button.flat.active {

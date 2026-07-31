@@ -4,19 +4,26 @@ import { exportDocumentFile, importDocumentFile } from "../utils/exportImport";
 import { mockupToBlueprint } from "../utils/blueprint";
 import { downloadPng, renderScreenToPng } from "../utils/pngExport";
 import { ExportModal } from "./ExportModal";
-import { openMenuSymbolic } from "@gjsify/adwaita-icons/actions";
+import { filterDiagnostics } from "../diagnostics/engine";
+import { openMenuSymbolic, toolsCheckSpellingSymbolic } from "@gjsify/adwaita-icons/actions";
 import { toDataUri } from "@gjsify/adwaita-icons/utils";
 
-const hamburgerIconStyle: React.CSSProperties = {
+const maskIconStyle = (svg: string): React.CSSProperties => ({
   display: "inline-block",
   width: "16px",
   height: "16px",
-  maskImage: toDataUri(openMenuSymbolic),
-  WebkitMaskImage: toDataUri(openMenuSymbolic),
+  maskImage: toDataUri(svg),
+  WebkitMaskImage: toDataUri(svg),
   maskSize: "contain",
   WebkitMaskSize: "contain",
   backgroundColor: "currentColor",
-};
+});
+
+const hamburgerIconStyle = maskIconStyle(openMenuSymbolic);
+// The @gjsify/adwaita-icons package does not ship diagnostics-symbolic
+// (upstream development category); the design's sanctioned fallback is the
+// spell-check icon (design §5.2).
+const diagnosticsIconStyle = maskIconStyle(toolsCheckSpellingSymbolic);
 
 interface MenuItem {
   label: string;
@@ -39,11 +46,15 @@ export const TopBar: React.FC = () => {
     deleteNode,
     selectNode,
     toggleColorScheme,
-    lintEnabled,
-    toggleLint,
+    diagnosticsEnabled,
+    toggleDiagnostics,
+    diagnostics,
+    exportCheck,
+    ignoredRules,
+    ignoredInstances,
+    runExportCheck,
     showFlows,
     toggleShowFlows,
-    violations,
     clearCanvas,
     setShowAddScreenModal,
   } = useMockupStore();
@@ -59,7 +70,29 @@ export const TopBar: React.FC = () => {
     downloadPng(await renderScreenToPng());
   };
 
+  // Badge counts ignore dismissed diagnostics but not the panel's tier chips,
+  // so the number on the toggle always matches "what would I see with all
+  // tiers on". Destructive red when any error remains (design §5.3).
+  const countable = filterDiagnostics(
+    [...diagnostics, ...exportCheck],
+    { error: true, warning: true, suggestion: true },
+    ignoredRules,
+    ignoredInstances,
+  );
+  const errorCount = countable.filter((d) => d.tier === "error").length;
+
+  const handleToggleDiagnostics = () => {
+    if (!diagnosticsEnabled) {
+      // Opening the report belongs with turning it on (design §5.3).
+      window.dispatchEvent(new CustomEvent("protota:show-diagnostics"));
+    }
+    toggleDiagnostics();
+  };
+
   const handleExportBlueprint = () => {
+    // Round-trip fidelity check (BLP-E001, design flow D): export proceeds,
+    // but anything the importer cannot faithfully read back gets a card.
+    runExportCheck();
     const xml = mockupToBlueprint(doc);
     const blob = new Blob([xml], { type: "application/xml" });
     const url = URL.createObjectURL(blob);
@@ -131,8 +164,8 @@ export const TopBar: React.FC = () => {
         { label: "Deselect", action: () => selectNode(null), shortcut: "Esc" },
         { label: "divider", divider: true },
         {
-          label: `HIG Lint ${lintEnabled ? `ON (${violations.length})` : "OFF"}`,
-          action: toggleLint,
+          label: `Diagnostics (HIG Lint) ${diagnosticsEnabled ? `ON (${countable.length})` : "OFF"}`,
+          action: handleToggleDiagnostics,
           shortcut: "Ctrl+.",
         },
       ],
@@ -323,12 +356,35 @@ export const TopBar: React.FC = () => {
         Flows
       </button>
       <button
-        className={`adw-button flat protota-desktop-only${lintEnabled ? " active" : ""}`}
-        data-active={lintEnabled ? "true" : undefined}
-        onClick={toggleLint}
-        title={`HIG lint${violations.length ? ` — ${violations.length} issue(s)` : ""}`}
+        className={`adw-button flat protota-desktop-only${diagnosticsEnabled ? " active" : ""}`}
+        data-active={diagnosticsEnabled ? "true" : undefined}
+        data-testid="diagnostics-toggle"
+        onClick={handleToggleDiagnostics}
+        aria-label="Diagnostics — HIG lint"
+        title={`Diagnostics (HIG lint)${countable.length ? ` — ${countable.length} issue(s)` : ""} (Ctrl+.)`}
+        style={{ display: "flex", alignItems: "center", gap: "4px" }}
       >
-        HIG Lint
+        <span style={diagnosticsIconStyle} />
+        Diagnostics
+        {diagnosticsEnabled && countable.length > 0 && (
+          <span
+            data-testid="diagnostics-badge"
+            style={{
+              fontSize: "10px",
+              fontWeight: 700,
+              minWidth: "16px",
+              padding: "0 4px",
+              borderRadius: "8px",
+              textAlign: "center",
+              color: "#fff",
+              background: errorCount > 0
+                ? "var(--destructive-bg-color, #e01b24)"
+                : "var(--dim-fg-color, rgba(0,0,6,0.55))",
+            }}
+          >
+            {countable.length}
+          </span>
+        )}
       </button>
       <button className="adw-button flat protota-desktop-only" onClick={toggleColorScheme} title={`Switch theme (${themeLabel})`}>
         Theme

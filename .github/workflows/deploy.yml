@@ -17,7 +17,36 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  check-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      markdown-only: ${{ steps.check.outputs.markdown-only }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - id: check
+        run: |
+          if [[ "$GITHUB_EVENT_NAME" == "pull_request" ]]; then
+            BASE="origin/$GITHUB_BASE_REF"
+          else
+            BASE="HEAD~1"
+          fi
+          CHANGED=$(git diff --name-only "$BASE" HEAD 2>/dev/null || echo "")
+          if [[ -z "$CHANGED" ]]; then
+            echo "markdown-only=false" >> "$GITHUB_OUTPUT"
+          else
+            NON_MD=$(echo "$CHANGED" | grep -v '\.md$' || true)
+            if [[ -z "$NON_MD" ]]; then
+              echo "markdown-only=true" >> "$GITHUB_OUTPUT"
+            else
+              echo "markdown-only=false" >> "$GITHUB_OUTPUT"
+            fi
+          fi
+
   test:
+    needs: check-changes
+    if: needs.check-changes.outputs.markdown-only != 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
@@ -56,7 +85,8 @@ jobs:
           retention-days: 7
 
   deploy:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: check-changes
+    if: needs.check-changes.outputs.markdown-only != 'true' && github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     environment:
       name: github-pages

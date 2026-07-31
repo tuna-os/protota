@@ -69,31 +69,44 @@ resolved subtree is a pass-through container, while a leaf boundary
 
 ## Summary
 
-| App | Suite | Nodes | Boundary nodes | Dominant cause | Probe-resolvable? |
+| App | Suite | Nodes | Boundary nodes | Dominant cause | Final classification (Wave 3, 2026-07-31) |
 | --- | --- | ---: | ---: | --- | --- |
-| calculator | core | 1949 | 5 | Vala composite (`MathButtons`, keypad renders) + GSettings mode state | **probe-confirmed** (committed dump, 2026-07-31) |
-| calendar | core | 276 | 6 | `snapshot()`-drawn week grid; runtime month grid | partly — month grid yes, week grid permanent |
+| calculator | core | 1949 | 5 | Vala composite (`MathButtons`, keypad renders) + GSettings mode state | pass-through, **probe-confirmed** (committed dump) |
+| calendar | core | 278 | 6 | `snapshot()`-drawn week grid + hour bar; runtime month grid | **settled**: week grid/hour bar permanent (source-confirmed `snapshot()`), drop overlay pass-through; month-grid state **probe-confirmed** (committed dump) |
 | clocks | core | 380 | 0 | — (runtime list content is default-empty) | n/a |
-| disks | core | 69 | 2 | C custom-drawn graph/meter | no (benchmark graph permanent); allocation bar probe-verified |
-| files | core | 184 | 2 | runtime-populated C composites (sidebar rows, path-bar buttons) | yes — static chrome now resolved; content is probe territory |
-| settings | core | 17 | 0 | panel list and panels are runtime C widgets (no nodes emitted) | yes — entirely probe territory |
-| software | core | 462 | 36 | runtime-populated pages + drawn star/review primitives | **probe-confirmed** (committed dump, 2026-07-31); star/review drawing permanent |
-| text-editor | core | 93 | 1 | C wrapper (pass-through) | state only (switch/spin values) |
+| disks | core | 69 | 2 | C custom-drawn graph/meter | **settled by source**: benchmark graph permanent (`snapshot()`), allocation bar runtime-model content (no version-matched runner exists — see section) |
+| files | core | 184 | 2 | runtime-populated C composites (sidebar rows, path-bar buttons) | pass-through; row content runtime (default bookmarks absent in container) |
+| settings | core | 17 | 0 | panel list and panels are runtime C widgets (no nodes emitted) | n/a (shell honestly empty; no boundary nodes to classify) |
+| software | core | 462 | 36 | runtime-populated pages + drawn star/review primitives | pass-through / permanent drawing, **probe-confirmed** (committed dump) |
+| text-editor | core | 93 | 1 | C wrapper (pass-through) | pass-through (permanent-harmless) |
 | weather | core | 15 | 0 | GJS runtime tree; default screen is the empty search view | n/a (residual delta is font rasterisation/window shadow) |
-| amberol | circle | 74 | 6 | Rust composites (waveform, marquee, cover art) | probe determines; waveform likely permanent |
-| ear-tag | circle | 90 | 12 | Python/GTK composites | yes |
+| amberol | circle | 74 | 6 | Rust composites (waveform, marquee, cover art) | **settled by source**: all four drawn classes override `snapshot()` (permanent); DragOverlay pass-through. No version-matched runner exists — see section |
+| ear-tag | circle | 96 | 2 | Python/GTK composites | **10 of 12 resolved** by the Wave 3 Python adapter; remaining two probe-confirmed (committed dump from the version-matched from-source runner) |
 | graphs | circle | 52 | 0 | — | n/a |
 
-Totals: 70 boundary nodes across the twelve presets. Of these, 28 are
-documented permanently `snapshot()`-drawn (the Calendar week grid, the Disks
-benchmark graph, and — confirmed against pinned source in the Wave 2 pass —
-Software's 20 `GsStarImage` and 5 `GsReviewBar` drawing primitives), 5 are
-permanent-but-harmless (non-visual or pass-through), and the remaining 37 are
-#58 probe territory. Calculator's five nodes were the first settled by a
-committed probe dump (`presets-src/calculator.probe.json`, 2026-07-31);
-Software's 36 are the second (`presets-src/software.probe.json`, same day):
-both stay as honest markers, now with dump-backed allocation and state
-instead of hedges.
+Totals: 60 boundary nodes across the twelve presets, every one
+evidence-classified — the "probe verifies (likely …)" hedges are gone.
+Of the 60: **35** are permanently `snapshot()`-drawn, confirmed against
+pinned source (Calendar's 2 `GcalWeekGrid` + 2 `GcalWeekHourBar`, the Disks
+`GduBenchmarkGraph`, Software's 20 `GsStarImage` + 5 `GsReviewBar`, and
+Amberol's `AmberolWaveformView`, `AmberolCoverPicture` and 3
+`AmberolMarquee`); **21** are pass-through wrappers whose imported or
+code-constructed children render (Calculator's 5 `MathButtons`, Calendar's 2
+`GcalDropOverlay`, Software's 8 `Gs*Page` + `GsUpdatesPausedBanner`, Files'
+2, Text Editor's `EditorFullscreenBox`, Ear Tag's `EartagPopoverButton`,
+Amberol's `DragOverlay`); and **4** are honest markers for runtime-model
+content that no static importer or probe can turn into declarative children
+(Software's 2 `GsDescriptionBox`, Ear Tag's `EartagFileList`, Disks'
+`GduSpaceAllocationBar`). Committed probe dumps:
+`presets-src/calculator.probe.json`, `presets-src/software.probe.json`,
+`presets-src/calendar.probe.json`, `presets-src/ear-tag.probe.json`.
+The Wave 3 pass (2026-07-31) removed ten nodes from the previous 70, all in
+Ear Tag, via a generic Python (PyGObject) language adapter feeding the same
+enrichment engine as C and Vala — no app-specific branches. It also added a
+guard the C sweep needed: a class that installs its own `snapshot()` vfunc is
+never dissolved into its base-class projection (`GcalWeekHourBar` is a
+`GtkBox` of labels *plus* code-drawn hour lines; projecting the box would
+have silently erased a drawn region).
 The third 2026-07-31 regeneration (#59 Wave 2, Software) removed two nodes
 from the previous 72: the importer's non-visual filter learned paintables
 (`Adw.SpinnerPaintable` is an image source assigned to a `paintable`
@@ -150,14 +163,21 @@ MenuButton label and the history-card allocation.
 
 | Boundary | Instances | Why static import stops | Status |
 | --- | ---: | --- | --- |
-| `GcalWeekGrid` | 2 | Drawn with `snapshot()` — named by the maintainer as a permanent honest boundary (#32, #81, 2026-07-31). | **permanent** |
-| `GcalWeekHourBar` | 2 | C-defined composite beside the week grid; no declarative template in the pinned bundle. | probe determines |
+| `GcalWeekGrid` | 2 | Drawn with `snapshot()` — named by the maintainer as a permanent honest boundary (#32, #81, 2026-07-31). The Wave 3 regeneration projects its code-constructed `now_strip` (`Adw.Bin`) chrome *into* the boundary without dissolving it. | **permanent** (source + maintainer) |
+| `GcalWeekHourBar` | 2 | `gcal-week-hour-bar.c` installs its own `snapshot()` vfunc (draws the hour lines via `gcal_week_view_common_snapshot_hour_lines`) over a `GtkBox` of 24 code-constructed labels whose text is runtime locale formatting. | **permanent** drawing (source-confirmed, Wave 3); probe agrees: unmapped in the default month view |
 | `GcalDropOverlay` | 2 | C drag-and-drop overlay; its 135 imported children resolve and render, and the overlay itself contributes nothing until a drag. | pass-through |
 
-Beyond the nodes: the **month grid** is runtime-populated
-(`docs/gnome-app-conformance.md`: "35.2% difference; overlay stacking and
-month grid are runtime-drawn"; #81 names "Calendar's month grid" as probe
-territory). **Probe-resolvable**, unlike the week grid.
+Beyond the nodes: the **month grid** is runtime-populated. **Probed
+2026-07-31** (committed dump `presets-src/calendar.probe.json`, 3147 widgets
+from the version-matched Fedora 43 runner at 49.1): `views_stack` records
+`visible-child-name: month`, and the finishing override that pins the month
+view now carries `probeEvidence` re-validated on every generation. The
+paired capture applies 33 probe suppressions (the unmapped week/agenda
+subtrees and popover contents stop crowding the layout): 0.67% raw
+difference, 99.3% source-resolved similarity — with the honest caveat that
+the month-grid *cells* are runtime widgets the preset does not fake, so the
+foreground overlap remains low (IoU 1.4%) and the raw number is
+background-dominated (see "Metrics that mislead").
 
 ### Clocks (`gnome-clocks` 49.0) — 0 boundary nodes
 
@@ -169,15 +189,23 @@ default `AdwViewStack` pages against official screenshots.
 
 | Boundary | Instances | Why static import stops | Status |
 | --- | ---: | --- | --- |
-| `GduBenchmarkGraph` | 1 | Drawn with `snapshot()` — named by the maintainer as a permanent honest boundary (#32, #81). | **permanent** |
-| `GduSpaceAllocationBar` | 1 | C custom-drawn allocation meter; no declarative template. Expected permanent for the same reason as the graph; the probe run settles it definitively. | probe verifies (likely permanent) |
+| `GduBenchmarkGraph` | 1 | Drawn with `snapshot()` — named by the maintainer (#32, #81) and confirmed against the pinned source in Wave 3: `gdu-benchmark-dialog.c` paints the grid, axes and curves with `gtk_snapshot_append_stroke`/`_fill`/`_layout`. | **permanent** (source-confirmed) |
+| `GduSpaceAllocationBar` | 1 | Settled by source in Wave 3: `gdu-space-allocation-bar.c` is a `GTK_TYPE_WIDGET` final type with its own `measure`/`size_allocate`, whose children are one styled `Adw.Bin` per entry of a runtime partitions `GListModel` (udisks data). Not `snapshot()`-drawn — the earlier "custom-drawn meter" note was imprecise — but its content is runtime block-device state no importer reaches, and its `Gtk.Widget` base is never base-projected by policy. | **permanent as a node**, runtime-model content (source-confirmed) |
+
+A probed capture cannot currently settle anything further here, recorded
+honestly: the catalog pins Disks' source untagged at the post-GTK4-redesign
+default branch (51.beta, `gdu-window.blp`), while the newest packaged
+gnome-disk-utility anywhere in the pinned runner images is 46.x (Fedora 43:
+46.1; Ubuntu 24.04: 46.0) — the pre-redesign UI. There is no version-matched
+runner to probe until a 51 release is packaged; both rows above are settled
+from the pinned source itself.
 
 ### Files (`nautilus` 49.1) — 2 boundary nodes
 
 | Boundary | Instances | Why static import stops | Status |
 | --- | ---: | --- | --- |
 | `NautilusShortcutManager` | 1 | Non-visual near-root wrapper; its 57 imported children render. | pass-through (permanent as a node) |
-| `NautilusSidebar` | 1 | Its static chrome (scrolled window + `navigation-sidebar` list box) now resolves from C construction facts in `nautilus-sidebar.c` init; the node stays as an honest marker because the places rows are runtime bookmark/mount data (#81: probe is the route to the Nautilus sidebar). | pass-through / **probe** for rows |
+| `NautilusSidebar` | 1 | Its static chrome (scrolled window + `navigation-sidebar` list box) now resolves from C construction facts in `nautilus-sidebar.c` init; the node stays as an honest marker because the places rows are runtime bookmark/mount data. | pass-through; rows are runtime data (Wave 3 probed capture: 75% match rate, 18 suppressions applied, 3.1% raw difference — the container has no user bookmarks, so both sides show the default places) |
 
 Two former boundaries left this table in the second 2026-07-31 regeneration
 (#59 Wave 1, app composites), both via the generic base-class projection:
@@ -275,18 +303,52 @@ and window shadow, which no importer or probe addresses.
 
 ### Amberol (Circle, 2026.1) — 6 boundary nodes
 
-`DragOverlay` (pass-through; 71 resolved children), `AmberolCoverPicture`
-(runtime cover art), `AmberolWaveformView` (Rust-drawn waveform — probe
-verifies, likely permanent drawing), `AmberolMarquee` x3 (Rust animated
-label). All are Rust composites with no declarative templates; **probe
-determines** each.
+Settled by source evidence in Wave 3 (the `GsStarImage` precedent — a
+`snapshot()` override in pinned source is a permanent-drawing verdict, no
+probe required):
 
-### Ear Tag (Circle, 1.0.2) — 12 boundary nodes
+| Boundary | Instances | Evidence (pinned 2026.1 source) | Status |
+| --- | ---: | --- | --- |
+| `AmberolWaveformView` | 1 | `waveform_view.rs` `fn snapshot()` paints the waveform bars. | **permanent** drawing (source-confirmed) |
+| `AmberolMarquee` | 3 | `marquee.rs` `fn snapshot()` paints the scrolling label animation. | **permanent** drawing (source-confirmed) |
+| `AmberolCoverPicture` | 1 | `cover_picture.rs` `fn snapshot()` paints the runtime cover-art texture. | **permanent** drawing (source-confirmed) |
+| `DragOverlay` | 1 | `drag_overlay.rs` has an empty `WidgetImpl` (no snapshot); its 71 imported children resolve and render. | pass-through |
 
-`EartagFileList`, `EartagPopoverButton`, `EartagTagEditableLabel` x2,
-`EartagFileInfoLabel`, `EartagTagEntryRow` x7 — Python/GTK composites
-(`docs/gnome-app-conformance.md`). Real widget trees exist at runtime:
-**probe-resolvable**.
+No probed capture exists, recorded honestly: neither pinned runner
+distribution packages Amberol at the pinned 2026.1 (Fedora 43: not packaged;
+Ubuntu 24.04: 0.10.3), and a version-mismatched app is not a valid visual
+oracle. The default surface is unaffected: all four drawn classes sit in the
+non-visible main-view stack page (the app opens on the empty
+drag-songs-here status page), so the compared default screen carries 0%
+unresolved coverage (`artifacts` measurement, Wave 3).
+
+### Ear Tag (Circle, 1.0.2) — 2 boundary nodes (was 12)
+
+Ten of the twelve resolved in Wave 3 via the generic Python (PyGObject)
+language adapter — the same base-class projection that settled Text Editor's
+`EditorPreferences*` rows, now reading Python construction facts:
+
+- `EartagTagEntryRow` ×7 → `Adw.EntryRow` subclass; resolves to `entry-row`
+  keeping its declared titles.
+- `EartagTagEditableLabel` ×2 → resolves transitively through the
+  app-defined `EartagEditableLabel(Gtk.Overlay)` ancestor, whose `__init__`
+  constructs the entry + centered wrap label + edit icon it overlays (the
+  ancestor's init runs for the subclass, so its constructions are inherited
+  source evidence).
+- `EartagFileInfoLabel` → `Gtk.Label` subclass; resolves to a label whose
+  text is runtime file metadata.
+
+| Boundary | Instances | Why static import stops | Status |
+| --- | ---: | --- | --- |
+| `EartagFileList` | 1 | `Gtk.ListView` subclass whose rows are a runtime factory over the opened-files model (`filelist.py`); default-empty with no files loaded. | honest runtime-model boundary; **probe-confirmed** default-empty (committed dump) |
+| `EartagPopoverButton` | 1 | `Gtk.Box` reimplementation of MenuButton; its 3 declared children resolve, the popover is a popup surface. | pass-through |
+
+Probed 2026-07-31 with a **version-matched from-source runner**: Ear Tag
+1.0.2 is not packaged by either pinned distro (Fedora 43: none; Ubuntu
+24.04: 0.6.0), so the pinned source tag is meson-installed into the pinned
+`fedora:43` GTK stack (`containers/broadway/Dockerfile.fedora-eartag`) and
+probed exactly like the packaged runners. Dump committed as
+`presets-src/ear-tag.probe.json`.
 
 ### Graphs (Circle, v2.0.5) — 0 boundary nodes
 
@@ -307,15 +369,23 @@ resolvable is progress to record; a boundary that disappears silently is a
 bug (`docs/source-widget-architecture.md`: renderer work may improve a
 boundary, "they may not disappear").
 
-#58 has landed, and the mechanism for settling probe-territory rows now
-exists end-to-end: run a probed capture (`docs/runtime-probe.md`), commit the
-dump as `presets-src/<app>.probe.json`, record the settled facts as
+#58 has landed, and the mechanism for settling probe-territory rows exists
+end-to-end: run a probed capture (`docs/runtime-probe.md`), commit the dump
+as `presets-src/<app>.probe.json`, record the settled facts as
 `probeEvidence` finishing entries, and update this document's rows in the
-same change — Calculator and Software (both 2026-07-31) are the worked
-examples, their hedges replaced with dump-backed classifications above. Apps
-without a committed probed capture (Calendar, Disks, Files, Text Editor, the
-Circle apps) keep their hedged "probe" / "probe verifies" rows until their
-dumps are captured the same way; a probe result then moves each row to either
-resolved (delete the row, regenerate) or confirmed-permanent (mark it here).
-Once the fleet is probed, the "permanent" set is closed and the
-pixel-accuracy goal of #32 is bounded rather than open-ended.
+same change — Calculator and Software (2026-07-31) were the worked examples,
+Calendar and Ear Tag followed in Wave 3.
+
+**As of the Wave 3 close-out (2026-07-31) the fleet is settled**: every
+boundary row above is classified permanent / pass-through / runtime-model
+with source or probe-dump evidence, and no hedged row remains. The
+"permanent" set is closed, so the pixel-accuracy goal of #32 is bounded
+rather than open-ended. Two honest gaps are recorded rather than papered
+over: Disks and Amberol have no version-matched runner to probe (their rows
+are settled from pinned source instead), and Settings' runtime panel surface
+emits no nodes at all — both re-open only if a matching package or a
+from-source runner (the Ear Tag pattern) makes a probed capture possible.
+New apps enter through the same ladder: catalog entry with pinned
+`sourceImport` → `import-gnome-app.mjs` → boundary rows recorded here →
+probed capture where a version-matched runner exists → per-app gates in the
+catalog.

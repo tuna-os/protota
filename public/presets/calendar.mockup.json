@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exportedAt": "2026-07-30T14:19:18.603Z",
+  "exportedAt": "2026-07-31T22:09:27.746Z",
   "generatedBy": "scripts/generate-preset.mjs",
   "document": {
     "id": "calendar-preset",
@@ -866,7 +866,16 @@
                                                     {
                                                       "id": "week_grid",
                                                       "type": "custom-widget",
-                                                      "children": [],
+                                                      "children": [
+                                                        {
+                                                          "id": "now_strip",
+                                                          "type": "bin",
+                                                          "children": [],
+                                                          "canTarget": false,
+                                                          "styleClasses": "now-strip",
+                                                          "sourceClass": "Adw.Bin"
+                                                        }
+                                                      ],
                                                       "sourceClass": "GcalWeekGrid",
                                                       "title": "GcalWeekGrid",
                                                       "hexpand": true,
@@ -2251,7 +2260,16 @@
                                                     {
                                                       "id": "week_grid",
                                                       "type": "custom-widget",
-                                                      "children": [],
+                                                      "children": [
+                                                        {
+                                                          "id": "now_strip",
+                                                          "type": "bin",
+                                                          "children": [],
+                                                          "canTarget": false,
+                                                          "styleClasses": "now-strip",
+                                                          "sourceClass": "Adw.Bin"
+                                                        }
+                                                      ],
                                                       "sourceClass": "GcalWeekGrid",
                                                       "title": "GcalWeekGrid",
                                                       "hexpand": true,

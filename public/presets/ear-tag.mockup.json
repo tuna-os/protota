@@ -1,18 +1,18 @@
 {
   "version": 1,
-  "exportedAt": "2026-07-30T14:20:08.427Z",
+  "exportedAt": "2026-07-31T22:22:30.283Z",
   "generatedBy": "scripts/generate-preset.mjs",
   "document": {
     "id": "ear-tag-preset",
-    "title": "ear-tag",
+    "title": "Ear Tag",
     "colorScheme": "auto",
     "screens": [
       {
         "id": "ear-tag-main",
-        "title": "ear-tag 1",
+        "title": "Ear Tag",
         "type": "standard",
-        "width": 1024,
-        "height": 720,
+        "width": 900,
+        "height": 650,
         "rootNode": {
           "id": "imported-1",
           "type": "window",
@@ -646,32 +646,119 @@
                                                       "children": [
                                                         {
                                                           "id": "title_entry",
-                                                          "type": "custom-widget",
-                                                          "children": [],
+                                                          "type": "bin",
+                                                          "children": [
+                                                            {
+                                                              "id": "title_entry-entry",
+                                                              "type": "entry",
+                                                              "children": [],
+                                                              "valign": "center",
+                                                              "opacity": 0,
+                                                              "sourceClass": "Gtk.Entry"
+                                                            },
+                                                            {
+                                                              "id": "title_entry-label",
+                                                              "type": "label",
+                                                              "children": [],
+                                                              "canFocus": false,
+                                                              "canTarget": false,
+                                                              "wrap": true,
+                                                              "valign": "center",
+                                                              "lines": 3,
+                                                              "wrapMode": "word_char",
+                                                              "ellipsize": "middle",
+                                                              "maxWidthChars": 128,
+                                                              "justify": "center",
+                                                              "halign": "center",
+                                                              "visible": true,
+                                                              "styleClasses": "dimmed",
+                                                              "sourceClass": "Gtk.Label",
+                                                              "slot": "overlay"
+                                                            },
+                                                            {
+                                                              "id": "title_entry-icon",
+                                                              "type": "bin",
+                                                              "children": [],
+                                                              "iconName": "document-edit-symbolic",
+                                                              "canFocus": false,
+                                                              "canTarget": false,
+                                                              "receivesDefault": false,
+                                                              "halign": "end",
+                                                              "valign": "center",
+                                                              "accessibleRole": "presentation",
+                                                              "styleClasses": "edit-icon",
+                                                              "sourceClass": "Gtk.Image",
+                                                              "slot": "overlay"
+                                                            }
+                                                          ],
                                                           "sourceClass": "EartagTagEditableLabel",
                                                           "title": "Title",
                                                           "boundProperty": "title",
                                                           "marginStart": "12",
                                                           "marginEnd": "12",
-                                                          "styleClasses": "title-1"
+                                                          "styleClasses": "title-1",
+                                                          "accessibleRole": "group"
                                                         },
                                                         {
                                                           "id": "artist_entry",
-                                                          "type": "custom-widget",
-                                                          "children": [],
+                                                          "type": "bin",
+                                                          "children": [
+                                                            {
+                                                              "id": "artist_entry-entry",
+                                                              "type": "entry",
+                                                              "children": [],
+                                                              "valign": "center",
+                                                              "opacity": 0,
+                                                              "sourceClass": "Gtk.Entry"
+                                                            },
+                                                            {
+                                                              "id": "artist_entry-label",
+                                                              "type": "label",
+                                                              "children": [],
+                                                              "canFocus": false,
+                                                              "canTarget": false,
+                                                              "wrap": true,
+                                                              "valign": "center",
+                                                              "lines": 3,
+                                                              "wrapMode": "word_char",
+                                                              "ellipsize": "middle",
+                                                              "maxWidthChars": 128,
+                                                              "justify": "center",
+                                                              "halign": "center",
+                                                              "visible": true,
+                                                              "styleClasses": "dimmed",
+                                                              "sourceClass": "Gtk.Label",
+                                                              "slot": "overlay"
+                                                            },
+                                                            {
+                                                              "id": "artist_entry-icon",
+                                                              "type": "bin",
+                                                              "children": [],
+                                                              "iconName": "document-edit-symbolic",
+                                                              "canFocus": false,
+                                                              "canTarget": false,
+                                                              "receivesDefault": false,
+                                                              "halign": "end",
+                                                              "valign": "center",
+                                                              "accessibleRole": "presentation",
+                                                              "styleClasses": "edit-icon",
+                                                              "sourceClass": "Gtk.Image",
+                                                              "slot": "overlay"
+                                                            }
+                                                          ],
                                                           "sourceClass": "EartagTagEditableLabel",
                                                           "title": "Artist",
                                                           "boundProperty": "artist",
                                                           "marginStart": "12",
                                                           "marginEnd": "12",
-                                                          "styleClasses": "title-3 artist"
+                                                          "styleClasses": "title-3 artist",
+                                                          "accessibleRole": "group"
                                                         },
                                                         {
                                                           "id": "file_info",
-                                                          "type": "custom-widget",
+                                                          "type": "label",
                                                           "children": [],
                                                           "sourceClass": "EartagFileInfoLabel",
-                                                          "title": "EartagFileInfoLabel",
                                                           "justify": "center",
                                                           "wrap": "true",
                                                           "marginTop": "6",
@@ -692,7 +779,7 @@
                                                           "children": [
                                                             {
                                                               "id": "tracknumber_entry",
-                                                              "type": "custom-widget",
+                                                              "type": "entry-row",
                                                               "children": [],
                                                               "sourceClass": "EartagTagEntryRow",
                                                               "title": "Track number",
@@ -704,7 +791,7 @@
                                                             },
                                                             {
                                                               "id": "totaltracknumber_entry",
-                                                              "type": "custom-widget",
+                                                              "type": "entry-row",
                                                               "children": [],
                                                               "sourceClass": "EartagTagEntryRow",
                                                               "title": "Total tracks",
@@ -727,7 +814,7 @@
                                                           "children": [
                                                             {
                                                               "id": "album_entry",
-                                                              "type": "custom-widget",
+                                                              "type": "entry-row",
                                                               "children": [],
                                                               "sourceClass": "EartagTagEntryRow",
                                                               "title": "Album",
@@ -735,7 +822,7 @@
                                                             },
                                                             {
                                                               "id": "albumartist_entry",
-                                                              "type": "custom-widget",
+                                                              "type": "entry-row",
                                                               "children": [],
                                                               "sourceClass": "EartagTagEntryRow",
                                                               "title": "Album artist",
@@ -743,7 +830,7 @@
                                                             },
                                                             {
                                                               "id": "genre_entry",
-                                                              "type": "custom-widget",
+                                                              "type": "entry-row",
                                                               "children": [],
                                                               "sourceClass": "EartagTagEntryRow",
                                                               "title": "Genre",
@@ -751,7 +838,7 @@
                                                             },
                                                             {
                                                               "id": "releasedate_entry",
-                                                              "type": "custom-widget",
+                                                              "type": "entry-row",
                                                               "children": [],
                                                               "sourceClass": "EartagTagEntryRow",
                                                               "title": "Release date",
@@ -760,7 +847,7 @@
                                                             },
                                                             {
                                                               "id": "comment_entry",
-                                                              "type": "custom-widget",
+                                                              "type": "entry-row",
                                                               "children": [],
                                                               "sourceClass": "EartagTagEntryRow",
                                                               "title": "Comment",
@@ -861,7 +948,8 @@
                               "slot": "content"
                             }
                           ],
-                          "sourceClass": "Adw.OverlaySplitView"
+                          "sourceClass": "Adw.OverlaySplitView",
+                          "visible": false
                         }
                       ],
                       "transitionType": "crossfade",

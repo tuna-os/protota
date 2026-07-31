@@ -44,6 +44,8 @@ export interface ValaClassFacts {
   propertyAssignments: ValaPropertyAssignment[];
   /** `x.add_css_class ("name")` calls with a literal class name. */
   styleClasses?: Array<{ target: string; name: string }>;
+  /** The class overrides the snapshot vfunc — it paints itself in code. */
+  overridesSnapshot?: boolean;
 }
 
 /** Calls that make the argument a child of the receiver. */
@@ -186,6 +188,13 @@ export function extractValaFacts(code: string): ValaClassFacts[] {
 
     const facts = current();
     if (!facts) continue;
+
+    // `public override void snapshot (…)` — the class paints itself.
+    if (token.value === 'snapshot' && tokens[index - 1]?.value === 'void'
+      && tokens.slice(Math.max(0, index - 4), index).some((preceding) => preceding.value === 'override')) {
+      facts.overridesSnapshot = true;
+      continue;
+    }
 
     // Declared property default: `public bool x { get; set; default = false; }`.
     if (token.value === 'default' && tokens[index + 1]?.value === '=' && tokens[index + 3]?.value === ';') {

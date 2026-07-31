@@ -18,7 +18,7 @@
  * and the Broadway comparison (docs/preset-workflow.md).
  */
 import { execFileSync } from 'node:child_process';
-import { existsSync, readFileSync, rmSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync, rmSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { join, dirname } from 'node:path';
 
@@ -55,7 +55,27 @@ for (const appId of targets) {
   } else {
     console.error(`${appId}: using cached checkout ${cacheDir}`);
   }
+  // Catalog validation (#59): a stale or incomplete entry must fail loudly.
+  // A missing importRoot/tag used to skip the importer silently — that is
+  // how `software` stayed hand-drawn for the whole project (#93) — and a
+  // stale `entry` filename went unnoticed whenever the finishing file's
+  // screens named their own entries (Files carried `nautilus-window.blp`
+  // long after upstream shipped only `.ui`).
+  if (!source.importRoot) {
+    console.error(`${appId}: catalog sourceImport has no importRoot — the importer would walk nothing. Add it.`);
+    process.exitCode = 1;
+    continue;
+  }
+  if (!source.tag) {
+    console.error(`${appId}: warning — sourceImport has no pinned tag; importing the default branch is not version-aligned with any packaged runner.`);
+  }
   const importRoot = join(cacheDir, source.importRoot ?? source.uiPath ?? '.');
+  const entryExists = readdirSync(importRoot, { recursive: true }).some((file) => String(file).endsWith(source.entry));
+  if (!entryExists) {
+    console.error(`${appId}: catalog entry file "${source.entry}" does not exist under ${importRoot} — the catalog entry is stale.`);
+    process.exitCode = 1;
+    continue;
+  }
   execFileSync('npx', ['tsx', join(repoRoot, 'scripts/generate-preset.mjs'), appId, importRoot, source.entry], {
     stdio: 'inherit',
     cwd: repoRoot,

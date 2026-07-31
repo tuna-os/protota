@@ -1,6 +1,7 @@
 import type { MockupDocument, AdwNode, AdwNodeType, ImportDiagnostic, Screen, ScreenTemplateType } from '../types/mockup';
 import { extractValaFacts, type ValaClassFacts } from './vala';
 import { extractCFacts, type CClassFacts } from './clang';
+import { extractPythonFacts } from './python';
 import { GTK_PROPERTY_DATA } from '../data/gtkProperties';
 
 export type { ImportDiagnostic } from '../types/mockup';
@@ -1537,10 +1538,26 @@ function valaCompositeSnippet(
     return `$${short} ${variable} {}`;
   };
 
-  for (const insertion of facts.insertions) {
-    if (insertion.parent !== 'this' || !VALA_SELF_CHILD_METHODS.has(insertion.method)) continue;
-    const snippet = emitVariable(insertion.child);
-    if (snippet) return { snippet };
+  // A single self-installed child is the composite's whole content (the
+  // FullscreenBox/DragOverlay wrapper shape). With *several* self-installed
+  // children and a renderable declared base, the base projection below keeps
+  // all of them — an Overlay composite's set_child main child plus its
+  // add_overlay layers — where the sole-child shortcut would drop siblings.
+  const selfInsertions = facts.insertions.filter(insertion => insertion.parent === 'this');
+  // The same gate the base projection itself applies: a plain Gtk.Widget base
+  // names a custom-drawn widget and proves nothing renderable.
+  const canonicalDeclaredBase = facts.baseClass ? canonicalClassName(facts.baseClass) : null;
+  const baseIsRenderable = Boolean(
+    !facts.overridesSnapshot
+    && canonicalDeclaredBase && canonicalDeclaredBase !== 'Gtk.Widget' && canonicalDeclaredBase !== 'Widget'
+    && CLASS_TO_WIDGET_MAP[canonicalDeclaredBase],
+  );
+  if (!(selfInsertions.length > 1 && baseIsRenderable)) {
+    for (const insertion of selfInsertions) {
+      if (!VALA_SELF_CHILD_METHODS.has(insertion.method)) continue;
+      const snippet = emitVariable(insertion.child);
+      if (snippet) return { snippet };
+    }
   }
 
   // No sole-child root, but the composite may *be* its declared base widget:
@@ -1551,6 +1568,10 @@ function valaCompositeSnippet(
   // custom-drawn widget and proves nothing renderable, so it is excluded.
   const base = facts.baseClass;
   if (!base) return null;
+  // A snapshot-overriding class paints itself: its base-class chrome is not
+  // its appearance, so it stays an honest boundary (GcalWeekHourBar draws
+  // hour lines over the labels its GtkBox base carries).
+  if (facts.overridesSnapshot) return null;
   const canonicalBase = canonicalClassName(base);
   if (canonicalBase === 'Gtk.Widget' || canonicalBase === 'Widget' || !CLASS_TO_WIDGET_MAP[canonicalBase]) return null;
   const selfChildren = facts.insertions
@@ -1613,6 +1634,7 @@ function valaShapeOfCFacts(facts: CClassFacts): ValaClassFacts {
     insertions: facts.insertions.map(insertion => ({ ...insertion, method: shortCMethod(insertion.method) })),
     propertyAssignments: facts.propertyAssignments,
     styleClasses: facts.styleClasses,
+    overridesSnapshot: facts.overridesSnapshot,
   };
 }
 
@@ -1621,7 +1643,7 @@ function valaShapeOfCFacts(facts: CClassFacts): ValaClassFacts {
  * discoverable contents. Structural only — facts come from language syntax,
  * never from application names or invented widgets.
  */
-function enrichWithValaFacts(doc: MockupDocument, valaFiles: BlueprintSourceFile[], templates: Map<string, BlueprintTemplate>, cFiles: BlueprintSourceFile[] = []): void {
+function enrichWithValaFacts(doc: MockupDocument, valaFiles: BlueprintSourceFile[], templates: Map<string, BlueprintTemplate>, cFiles: BlueprintSourceFile[] = [], pythonFiles: BlueprintSourceFile[] = []): void {
   const factsByClass = new Map<string, ValaClassFacts>();
   for (const file of valaFiles) {
     for (const facts of extractValaFacts(file.content)) factsByClass.set(facts.className, facts);
@@ -1634,14 +1656,46 @@ function enrichWithValaFacts(doc: MockupDocument, valaFiles: BlueprintSourceFile
       }
     }
   }
+  for (const file of pythonFiles) {
+    for (const facts of extractPythonFacts(file.content)) {
+      if (!factsByClass.has(facts.className)) factsByClass.set(facts.className, facts);
+    }
+  }
   if (!factsByClass.size) return;
+
+  /**
+   * A subclass of another *app-defined* class inherits that ancestor's
+   * construction facts: the ancestor's init runs for every instance, so its
+   * constructions/insertions are source evidence for the subclass too
+   * (EartagTagEditableLabel extends EartagEditableLabel, which builds an
+   * entry+label overlay). The chain resolves until a library base class.
+   */
+  const resolveBaseChain = (facts: ValaClassFacts, guard: ReadonlySet<string>): ValaClassFacts => {
+    const base = facts.baseClass;
+    if (!base || guard.has(facts.className)) return facts;
+    const ancestor = factsByClass.get(base) ?? factsByClass.get(base.split('.').pop() ?? base);
+    if (!ancestor || ancestor === facts) return facts;
+    const resolved = resolveBaseChain(ancestor, new Set([...guard, facts.className]));
+    return {
+      ...facts,
+      baseClass: resolved.baseClass,
+      overridesSnapshot: facts.overridesSnapshot || resolved.overridesSnapshot,
+      templateResource: facts.templateResource ?? resolved.templateResource,
+      propertyDefaults: { ...resolved.propertyDefaults, ...facts.propertyDefaults },
+      constructions: { ...resolved.constructions, ...facts.constructions },
+      insertions: [...resolved.insertions, ...facts.insertions],
+      propertyAssignments: [...resolved.propertyAssignments, ...facts.propertyAssignments],
+      styleClasses: [...(resolved.styleClasses ?? []), ...(facts.styleClasses ?? [])],
+    };
+  };
   const diagnostics = doc.importDiagnostics ?? (doc.importDiagnostics = []);
 
   const expandNode = (node: AdwNode, seen: ReadonlySet<string>): void => {
     node.children?.forEach(child => expandNode(child, seen));
     if (node.type !== 'custom-widget' || !node.sourceClass || node.children?.length) return;
-    const facts = factsByClass.get(node.sourceClass);
-    if (!facts || seen.has(node.sourceClass)) return;
+    const declaredFacts = factsByClass.get(node.sourceClass);
+    if (!declaredFacts || seen.has(node.sourceClass)) return;
+    const facts = resolveBaseChain(declaredFacts, new Set());
     // Expand flags set in code are geometry evidence for the boundary itself.
     for (const assignment of facts.propertyAssignments) {
       if (assignment.target !== 'this' || assignment.value !== true) continue;
@@ -1734,6 +1788,7 @@ export function blueprintBundleToDocument(files: BlueprintSourceFile[], entryPat
   const declarativeFiles = files.filter(file => /\.(blp|ui)$/i.test(file.path));
   const valaFiles = files.filter(file => /\.vala$/i.test(file.path));
   const cFiles = files.filter(file => /\.c$/i.test(file.path));
+  const pythonFiles = files.filter(file => /\.py$/i.test(file.path));
   const entry = declarativeFiles.find(file => file.path === entryPath || file.path.endsWith(`/${entryPath}`));
   if (!entry) throw new Error(`Blueprint entry file not found in source bundle: ${entryPath}`);
   const templates = collectTemplates(declarativeFiles);
@@ -1758,8 +1813,8 @@ export function blueprintBundleToDocument(files: BlueprintSourceFile[], entryPat
   } else {
     doc = blueprintToDocument(expandBundleTemplates(entry.content, templates), documentTitle);
   }
-  if (valaFiles.length || cFiles.length) {
-    enrichWithValaFacts(doc, valaFiles, templates, cFiles);
+  if (valaFiles.length || cFiles.length || pythonFiles.length) {
+    enrichWithValaFacts(doc, valaFiles, templates, cFiles, pythonFiles);
     // Enrichment can introduce boundaries whose classes are .ui templates.
     resolveBuilderPass();
   }

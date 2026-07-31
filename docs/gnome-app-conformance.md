@@ -9,12 +9,12 @@ test alone is not enough.
 | State | Apps |
 | --- | --- |
 | Passed | None yet |
-| Needs tuning | Software (2026-07-31 Wave 2 probed pass, local rootless podman capture): 5.1% raw difference, 94.9% source-resolved similarity, probe match rate 90% (259 of 368 joins by buildable id). The honest state: the Protota overview renders the shell chrome plus the probe-revealed section headings; the native container (Fedora 43, session bus aliased as system bus) still populates GTK's bundled metainfo apps as tiles, and that store content is runtime package data the preset does not fake. Residual deltas: tile grid content, the headerbar Explore/Installed/Updates switcher, font rasterisation. Weather (2026-07-30 fidelity pass) — visually near-identical to native: real app artwork embedded from source, window controls, GTK size-request minimums; 4.5% difference with the remainder in font rasterisation and window shadow. Earlier note: Weather — paired capture vs native 49.x (Fedora 43 runner on himachal): 4.4% difference, 95.6% source-resolved similarity; gaps: app-resource status icon, window controls. Text Editor — 0.7% raw difference (whitespace-dominated; real gaps: tab-bar placement, MultiLayoutView default layout selection). Calendar — 35.2% difference; overlay stacking and month grid are runtime-drawn. Amberol — native/Protota surfaces inspected; StatusPage centering and action layout are being tuned generically. Calculator — source-bundle import structurally complete after the Phase 1 parser fix (`_buttons` and every declarative sibling retained; 2 honest boundaries: GtkSourceView, MathButtons). Local paired capture 2026-07-29: source-resolved similarity 79.9%, foreground IoU 24.4%, unresolved coverage 3.5%. Phase 4 (2026-07-30): MathButtons keypad now renders its 24-button basic panel from buttons-basic.blp via Vala construction facts; converter_box hidden via declared property default. Dominant remaining deltas: converter/status region visible because button-mode comes from GSettings at runtime (Phase 5 probe), StatusPage vertical footprint, header-bar icon-name rendering. |
+| Needs tuning | **Wave 3 fleet captures (2026-07-31, local rootless podman, Fedora 43 runners, probed)** — per-app raw difference / source-resolved similarity, all from `comparison-<app>.json` artifacts of the same sweep that calibrated the catalog gates: calculator 10.9% / 89.1% (probe: `_buttons` matched, converter suppressed); calendar 0.7% / 99.3% (unmaximized via gsettings, 33 probe suppressions; month-grid cells are runtime content the preset does not fake — foreground IoU 1.4%, so the raw number is background-dominated); clocks 3.2% / 96.8%; files 3.1% / 96.9% (runs only as non-root: `--userns=keep-id --user 1000`); settings 3.5% / 96.5% (needs `XDG_CURRENT_DESKTOP=GNOME`, non-root, and the session bus aliased as system bus — the Software recipe); software 1.8% / 98.2%; text-editor 1.3% / 98.7% (runner is 49.2 — Fedora 43 no longer ships the pinned 49.1; patch-level drift recorded); weather 2.5% / 97.5% (generated-preset comparison — the GJS composite template omits the window parent class in raw source-bundle mode); ear-tag 2.6% / 97.4% (version-matched **from-source runner**, `Dockerfile.fedora-eartag`, probed: the no-file default state is dump-confirmed). Amberol, Graphs, Disks have no version-matched runner (Fedora doesn't package the Circle apps at their pins; Disks' pinned source is 51.beta vs packaged 46.x) — their gates are coverage-only, measured by `scripts/measure-unresolved-coverage.mjs` (all 0% on the default compared screen). Older per-app notes follow. Software (2026-07-31 Wave 2 probed pass, local rootless podman capture): 5.1% raw difference, 94.9% source-resolved similarity, probe match rate 90% (259 of 368 joins by buildable id). The honest state: the Protota overview renders the shell chrome plus the probe-revealed section headings; the native container (Fedora 43, session bus aliased as system bus) still populates GTK's bundled metainfo apps as tiles, and that store content is runtime package data the preset does not fake. Residual deltas: tile grid content, the headerbar Explore/Installed/Updates switcher, font rasterisation. Weather (2026-07-30 fidelity pass) — visually near-identical to native: real app artwork embedded from source, window controls, GTK size-request minimums; 4.5% difference with the remainder in font rasterisation and window shadow. Earlier note: Weather — paired capture vs native 49.x (Fedora 43 runner on himachal): 4.4% difference, 95.6% source-resolved similarity; gaps: app-resource status icon, window controls. Text Editor — 0.7% raw difference (whitespace-dominated; real gaps: tab-bar placement, MultiLayoutView default layout selection). Calendar — 35.2% difference; overlay stacking and month grid are runtime-drawn. Amberol — native/Protota surfaces inspected; StatusPage centering and action layout are being tuned generically. Calculator — source-bundle import structurally complete after the Phase 1 parser fix (`_buttons` and every declarative sibling retained; 2 honest boundaries: GtkSourceView, MathButtons). Local paired capture 2026-07-29: source-resolved similarity 79.9%, foreground IoU 24.4%, unresolved coverage 3.5%. Phase 4 (2026-07-30): MathButtons keypad now renders its 24-button basic panel from buttons-basic.blp via Vala construction facts; converter_box hidden via declared property default. Dominant remaining deltas: converter/status region visible because button-mode comes from GSettings at runtime (Phase 5 probe), StatusPage vertical footprint, header-bar icon-name rendering. |
 | Not yet validated | Calendar, Clocks, Disks, Files, Settings, Software, Text Editor, Weather, Web |
 | Next native capture | Authenticator (GNOME Circle) — Broadway image built on `himachal`; preset still to be created. |
 
 
-## Fleet state (2026-07-30)
+## Fleet state (2026-07-31, Wave 3)
 
 Generated presets, their screen counts, and how many nodes remain explicit
 custom-widget boundaries. A boundary is an honest result -- an
@@ -24,40 +24,41 @@ to drive down is the app-defined count, not boundaries in general.
 | App | Screens | Nodes | Boundaries | Unresolved classes |
 | --- | ---: | ---: | ---: | --- |
 | text-editor | 2 | 93 | 1 | EditorFullscreenBox (C pass-through) |
-| ear-tag | 1 | 90 | 13 | Eartag* composites (Python/GTK) |
-| amberol | 1 | 74 | 10 | Amberol* composites (Rust) |
-| calendar | 2 | 276 | 8 | Gcal* composites (C) |
+| ear-tag | 1 | 96 | 2 | EartagFileList (runtime rows), EartagPopoverButton (pass-through) — ten Eartag* composites resolved by the Wave 3 Python adapter |
+| amberol | 1 | 74 | 6 | Amberol* drawn classes (`snapshot()`-permanent, source-confirmed) + DragOverlay pass-through |
+| calendar | 2 | 278 | 6 | GcalWeekGrid/GcalWeekHourBar (`snapshot()`-permanent), GcalDropOverlay (pass-through) |
 | files | 4 | 184 | 2 | NautilusShortcutManager, NautilusSidebar (C; static chrome resolved) |
-| calculator | 6 | 1939 | 5 | MathButtons instances (Vala; keypad renders) |
+| calculator | 6 | 1949 | 5 | MathButtons instances (Vala; keypad renders) |
 | software | 1 | 462 | 36 | Gs* pages (pass-through, probe-confirmed) + snapshot-drawn star/review primitives |
-| disks | 3 | 65 | 2 | GduBenchmarkGraph, GduSpaceAllocationBar (C) |
+| disks | 3 | 69 | 2 | GduBenchmarkGraph (`snapshot()`), GduSpaceAllocationBar (runtime partition model) |
 | clocks | 5 | 380 | 0 | -- |
 | graphs | 1 | 52 | 0 | -- |
 | settings | 1 | 17 | 0 | -- |
 | weather | 1 | 15 | 0 | -- |
 
-Four apps import with no unresolved widgets at all. The largest remaining
-category is C-defined composites: one C language adapter would cover
-Nautilus, Calendar, Text Editor, and Disks together. The two stock-widget
+Four apps import with no unresolved widgets at all. The two stock-widget
 renderer gaps this table originally recorded are closed: GtkLevelBar's meter
 renders generically, and AdwTabBar was promoted to a registry widget (#59
 Wave 1, 2026-07-31) — its tab strip derives from the linked AdwTabView's
 declared pages, with runtime-populated views honestly empty until the #58
-probe. Text Editor's and Files' rows above reflect the 2026-07-31
-regenerations (Text Editor also dropped its non-visual `Gtk.SourceBuffer`
-boundary node, which the importer now filters). The second Wave 1 PR
-extended the C adapter generically: a code-defined subclass of a renderable
-library widget resolves to its base class with its code-constructed
-children, which resolved the eleven `EditorPreferences*` rows,
-`NautilusLocationEntry`, and `NautilusPathBar`'s chrome, and gave
-`NautilusSidebar` its scrolled `navigation-sidebar` list chrome. Row/button
-content and GSettings-driven state remain #58 probe territory. The Wave 2
-pass (2026-07-31) added Software with its committed probe dump: paintables
-are filtered as non-visual, constructions read through `g_object_ref_sink`,
-`can-unfold=False` leaflets import as navigation stacks, and the shell's
-page state is carried by probe-evidenced finishing entries — 38 → 36
-boundary nodes, with the star/review drawing primitives confirmed
-`snapshot()`-permanent against pinned source.
+probe. The second Wave 1 PR extended the C adapter generically (base-class
+projection resolved the eleven `EditorPreferences*` rows,
+`NautilusLocationEntry`, `NautilusPathBar` chrome and `NautilusSidebar`
+chrome); the Wave 2 pass added Software with its committed probe dump
+(38 → 36 boundary nodes, star/review drawing confirmed
+`snapshot()`-permanent). The Wave 3 close-out (2026-07-31) finished the
+sweep: a generic Python (PyGObject) language adapter feeds the same
+enrichment engine, resolving ten of Ear Tag's twelve boundaries (7
+`EartagTagEntryRow` → entry rows, 2 `EartagTagEditableLabel` → their
+inherited overlay of entry/label/icon through transitive base-chain
+resolution, `EartagFileInfoLabel` → label), and the engine gained a
+snapshot guard: a class that installs its own `snapshot()` vfunc is never
+dissolved into base-class chrome (which keeps `GcalWeekHourBar` an honest
+boundary). Fleet: 70 → 60 boundary nodes, every one evidence-classified in
+`docs/permanent-boundaries.md` — the classification is closed, and new
+regressions are caught by per-app gates (`maxUnresolvedCoverage`,
+`minSimilarity`) carried in the catalog and enforced by
+`tests/broadway-reference.spec.ts` on every capture.
 
 ## Required sequence
 

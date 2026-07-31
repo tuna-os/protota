@@ -64,6 +64,8 @@ export interface RuntimeMatch {
   buildableId: string | null;
   gtype: string;
   indexPath: number[];
+  mapped: boolean;
+  visible: boolean;
   bounds: ProbeBounds | null;
   facts: GeometryFact[];
 }
@@ -255,6 +257,8 @@ export function matchRuntimeProfile(probe: ProbeDocument, root: AdwNode): Runtim
       buildableId: match.widget.buildableId,
       gtype: match.widget.gtype,
       indexPath: match.widget.indexPath,
+      mapped: match.widget.mapped,
+      visible: match.widget.visible,
       bounds: match.widget.bounds,
       facts: nativeFactsFor(match.widget),
     });
@@ -272,4 +276,98 @@ export function matchRuntimeProfile(probe: ProbeDocument, root: AdwNode): Runtim
     byStructure,
     matches,
   };
+}
+
+export interface AppliedRuntimeEvidence {
+  /** Node ids hidden because the probe saw them unmapped/invisible. */
+  suppressed: string[];
+  /** Unresolved-boundary node ids that took allocation from native bounds. */
+  allocated: string[];
+}
+
+/**
+ * Consume a runtime join in the render path (#55 exit, ADR 0001 consumer 1).
+ * Mutates the document tree the comparison renders:
+ *
+ *   1. A matched node the probe saw unmapped (or invisible) is suppressed —
+ *      `visible: false`, origin `native:visible`. This is what turns
+ *      Calculator's `converter_box` from a hand guess into GTK's own answer,
+ *      and stops the runtime-invisible sibling squeezing its neighbours.
+ *   2. An unresolved boundary (childless `custom-widget`) that matched a
+ *      mapped widget takes its allocation from the native bounds:
+ *      `runtimeEvidence` feeds `placementLayout` (allocation as minimums)
+ *      and `boundaryGeometryFacts` (`native:*` facts, `native` confidence).
+ *
+ * Resolved nodes keep their statically imported geometry: the probe is
+ * evidence for what static import cannot settle, not a pixel overlay.
+ */
+export function applyRuntimeEvidence(root: AdwNode, report: RuntimeProfileReport): AppliedRuntimeEvidence {
+  const nodes: AdwNode[] = [];
+  walkSource(root, nodes);
+  const nodeById = new Map(nodes.map((node) => [node.id, node]));
+  const applied: AppliedRuntimeEvidence = { suppressed: [], allocated: [] };
+  for (const match of report.matches) {
+    const node = nodeById.get(match.nodeId);
+    if (!node) continue;
+    if (!match.mapped || !match.visible) {
+      node.visible = false;
+      node.geometryOrigin = { ...node.geometryOrigin, visible: 'native' };
+      applied.suppressed.push(node.id);
+      continue;
+    }
+    const isUnresolvedBoundary = node.type === 'custom-widget'
+      && (node.children?.length ?? 0) === 0 && (node.pages?.length ?? 0) === 0;
+    if (isUnresolvedBoundary && match.bounds) {
+      node.runtimeEvidence = {
+        probeVersion: report.probeVersion,
+        matchedBy: match.matchedBy,
+        buildableId: match.buildableId,
+        gtype: match.gtype,
+        mapped: match.mapped,
+        visible: match.visible,
+        bounds: match.bounds,
+      };
+      applied.allocated.push(node.id);
+    }
+  }
+  return applied;
+}
+
+/**
+ * A finishing override's recorded probe justification (ADR 0001 consumer 2).
+ * `expect` is what the committed probe dump must still say about
+ * `buildableId` for the entry to remain valid; a dump that no longer says it
+ * (or a missing widget/dump) makes the entry stale, and stale probe entries
+ * fail preset generation loudly, exactly like manual overrides whose node id
+ * no longer matches the source.
+ */
+export interface ProbeEvidenceRef {
+  probeVersion: number;
+  buildableId: string;
+  expect: { mapped?: boolean; visible?: boolean; visibleChildName?: string | null };
+}
+
+export function validateProbeEvidence(ref: ProbeEvidenceRef, probe: ProbeDocument | null): string[] {
+  const label = `probeEvidence[${ref?.buildableId ?? '?'}]`;
+  if (!probe) return [`${label}: no probe dump — a probe-derived entry without its dump is unauditable`];
+  if (!ref || typeof ref.buildableId !== 'string' || !ref.expect || typeof ref.expect !== 'object') {
+    return [`${label}: malformed — needs probeVersion, buildableId and expect`];
+  }
+  if (ref.probeVersion !== probe.probeVersion) {
+    return [`${label}: probeVersion ${ref.probeVersion} does not match dump version ${probe.probeVersion}`];
+  }
+  const widget = (probe.widgets ?? []).find((candidate) => candidate.buildableId === ref.buildableId);
+  if (!widget) return [`${label}: buildable id not present in the probe dump (stale entry)`];
+  const errors: string[] = [];
+  for (const [key, expected] of Object.entries(ref.expect)) {
+    if (key !== 'mapped' && key !== 'visible' && key !== 'visibleChildName') {
+      errors.push(`${label}: '${key}' is not a probe-checkable field`);
+      continue;
+    }
+    const actual = widget[key] ?? null;
+    if (actual !== expected) {
+      errors.push(`${label}: dump says ${key}=${JSON.stringify(actual)}, entry expects ${JSON.stringify(expected)} (stale entry)`);
+    }
+  }
+  return errors;
 }

@@ -4,7 +4,7 @@ import { join, relative } from 'node:path';
 import pixelmatch from 'pixelmatch';
 import { PNG } from 'pngjs';
 import { blueprintBundleToDocument } from '../src/utils/blueprint';
-import { matchRuntimeProfile, type ProbeDocument, type RuntimeProfileReport } from '../src/utils/runtimeProfile';
+import { applyRuntimeEvidence, matchRuntimeProfile, type ProbeDocument, type RuntimeProfileReport } from '../src/utils/runtimeProfile';
 
 const broadwayUrl = process.env.BROADWAY_URL;
 // Native runtime probe dump (#58), written by the containerized app when the
@@ -127,13 +127,20 @@ test.describe('Broadway reference captures', () => {
     // first, structural gtype ordinal second, never pixels. The join needs
     // source-graph node ids, so it only runs in source-bundle mode.
     let runtimeProfile: RuntimeProfileReport | null = null;
+    let appliedEvidence: { suppressed: string[]; allocated: string[] } | null = null;
     if (probeFile && existsSync(probeFile) && sourceDocument) {
       try {
         const probe = JSON.parse(readFileSync(probeFile, 'utf8')) as ProbeDocument;
         const chosen = sourceDocument.screens.find((screen) => screen.id === screenId) ?? sourceDocument.screens[0];
         runtimeProfile = matchRuntimeProfile(probe, chosen.rootNode);
+        // Consume the evidence in the render itself (#55 exit): suppress
+        // widgets the probe saw unmapped (runtime-invisible siblings stop
+        // squeezing their neighbours) and let unresolved boundaries take
+        // their allocation from GTK's own measured bounds.
+        appliedEvidence = applyRuntimeEvidence(chosen.rootNode, runtimeProfile);
       } catch {
         runtimeProfile = null; // malformed probe output stays "no evidence"
+        appliedEvidence = null;
       }
     }
     await page.goto('/');
@@ -206,14 +213,17 @@ test.describe('Broadway reference captures', () => {
     });
     // Merge native runtime evidence (#58) into each boundary's audit trail:
     // a matched boundary carries GTK's own allocation as `native:*` facts at
-    // the top `native` confidence tier, alongside the static facts.
+    // the top `native` confidence tier, alongside the static facts. Facts a
+    // consumed boundary already published through its DOM marker
+    // (applyRuntimeEvidence → boundaryGeometryFacts) are not duplicated.
     if (runtimeProfile) {
       const matchByNodeId = new Map(runtimeProfile.matches.map((match) => [match.nodeId, match]));
       for (const widget of unresolvedWidgets) {
         const match = widget.nodeId ? matchByNodeId.get(widget.nodeId) : undefined;
         if (!match) continue;
-        const staticFacts = Array.isArray(widget.geometryFacts) ? widget.geometryFacts as unknown[] : [];
-        widget.geometryFacts = [...staticFacts, ...match.facts];
+        const staticFacts = Array.isArray(widget.geometryFacts) ? widget.geometryFacts as Array<{ property?: unknown; origin?: unknown }> : [];
+        const present = new Set(staticFacts.map((fact) => `${fact.origin}|${fact.property}`));
+        widget.geometryFacts = [...staticFacts, ...match.facts.filter((fact) => !present.has(`${fact.origin}|${fact.property}`))];
         widget.geometryConfidence = 'native';
         (widget as Record<string, unknown>).runtimeMatch = {
           matchedBy: match.matchedBy, buildableId: match.buildableId, gtype: match.gtype, bounds: match.bounds,
@@ -281,6 +291,9 @@ test.describe('Broadway reference captures', () => {
         // Native runtime probe join (#58): per-source-node evidence and the
         // per-app match rate, so a weak join is visible in the artifact.
         runtimeProfile,
+        // Which nodes the render actually consumed evidence for (#55):
+        // probe-suppressed widgets and boundaries allocated from native bounds.
+        appliedRuntimeEvidence: appliedEvidence,
       }, null, 2)),
       'application/json',
     );

@@ -22,9 +22,13 @@ import { execFileSync, execSync } from 'node:child_process';
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { join, relative, resolve, dirname, basename } from 'node:path';
 import {
+  discoverAppSources,
+  appBundleManifest,
+  isDiscoveryRelevantPath,
+  SKIP_DIRECTORIES,
+} from '../src/utils/appDiscovery.ts';
+import {
   blueprintBundleToDocument,
-  blueprintImport,
-  blueprintTemplateReferences,
   blueprintChildSource,
   blueprintPropertyCandidates,
   blueprintValueSource,
@@ -37,8 +41,6 @@ export { blueprintBundleToDocument };
 // ---------------------------------------------------------------------------
 // Discovery
 // ---------------------------------------------------------------------------
-
-const SKIP_DIRECTORIES = new Set(['.git', 'node_modules', 'builddir', '_build', 'build', '.flatpak-builder', 'subprojects']);
 
 function walkFiles(root) {
   const found = [];
@@ -60,93 +62,24 @@ function walkFiles(root) {
 const toPosix = (path) => path.split('\\').join('/');
 
 /**
- * Discover the declarative UI files of a checkout. Build metadata is the
- * authority when present: gresource XML names the .ui files the app actually
- * ships (mapped back to sibling .blp sources when they exist), and
- * meson.build files name .blp sources handed to blueprint-compiler. When no
- * metadata references any UI file, every .blp/.ui below the root is taken,
- * with an explicit note that this was a glob fallback.
+ * Discover the declarative UI files of a checkout. Walks the filesystem into
+ * an abstract file map and delegates to the shared, environment-free
+ * discovery core (src/utils/appDiscovery.ts) that the browser front door
+ * also consumes — single source of truth for the gresource/meson logic.
  */
 export function discoverSources(sourceRootArg) {
   const sourceRoot = resolve(sourceRootArg);
-  const allFiles = walkFiles(sourceRoot);
-  const onDisk = new Set(allFiles.map((file) => toPosix(relative(sourceRoot, file))));
-  const notes = [];
-  const referenced = new Set();
-
-  const addCandidate = (absolutePath) => {
-    let candidate = absolutePath;
-    if (candidate.endsWith('.ui')) {
-      const sibling = candidate.replace(/\.ui$/, '.blp');
-      if (existsSync(sibling)) candidate = sibling;
-    }
-    if (!/\.(blp|ui)$/.test(candidate) || !existsSync(candidate)) return;
-    referenced.add(toPosix(relative(sourceRoot, candidate)));
-  };
-
-  for (const file of allFiles.filter((path) => path.endsWith('.gresource.xml'))) {
-    const xml = readFileSync(file, 'utf8');
-    for (const match of xml.matchAll(/<file[^>]*>([^<]+)<\/file>/g)) {
-      addCandidate(resolve(dirname(file), match[1].trim()));
-    }
+  const fileMap = {};
+  for (const file of walkFiles(sourceRoot)) {
+    const path = toPosix(relative(sourceRoot, file));
+    if (!isDiscoveryRelevantPath(path)) continue;
+    try { fileMap[path] = readFileSync(file, 'utf8'); } catch { /* unreadable file: skip */ }
   }
-  for (const file of allFiles.filter((path) => basename(path) === 'meson.build')) {
-    const meson = readFileSync(file, 'utf8');
-    for (const match of meson.matchAll(/'([^']+\.(?:blp|ui))'/g)) {
-      addCandidate(resolve(dirname(file), match[1]));
-    }
-  }
-
-  let discovery = 'build-metadata (gresource XML + meson.build)';
-  let selected = [...referenced];
-  if (!selected.length) {
-    discovery = 'glob fallback';
-    notes.push('no gresource/meson metadata referenced any .blp/.ui file; falling back to a recursive glob — review the file list for stale or test-only sources.');
-    selected = [...onDisk].filter((path) => /\.(blp|ui)$/.test(path));
-  } else {
-    const unreferenced = [...onDisk].filter((path) => /\.(blp|ui)$/.test(path) && !referenced.has(path));
-    if (unreferenced.length) {
-      notes.push(`${unreferenced.length} declarative file(s) on disk are not referenced by build metadata and were excluded: ${unreferenced.join(', ')}`);
-    }
-  }
-  selected.sort();
-  const files = selected.map((path) => ({ path, content: readFileSync(join(sourceRoot, path), 'utf8') }));
-  const codeFiles = [...onDisk]
-    .filter((path) => /\.(vala|c)$/.test(path))
-    .sort()
-    .map((path) => ({ path, content: readFileSync(join(sourceRoot, path), 'utf8') }));
-  return { sourceRoot, files, codeFiles, discovery, notes };
+  return { sourceRoot, ...discoverAppSources(fileMap) };
 }
 
-/** Manifest facts about a discovered bundle: entry candidates, template links, parseability. */
-export function bundleManifest(files) {
-  const declared = new Set();
-  for (const file of files) {
-    if (file.path.endsWith('.blp')) {
-      for (const match of file.content.matchAll(/template\s+\$([A-Za-z_][A-Za-z0-9_-]*)/g)) declared.add(match[1]);
-    } else {
-      for (const match of file.content.matchAll(/<template\s+[^>]*class="([^"]+)"/g)) declared.add(match[1]);
-    }
-  }
-  const entryCandidates = [];
-  const parseIssues = [];
-  const unresolvedReferences = new Set();
-  const WINDOW_TYPES = new Set(['window', 'dialog', 'preferences-dialog', 'about-dialog']);
-  for (const file of files) {
-    try {
-      const { roots } = blueprintImport(file.content);
-      if (roots.some((root) => WINDOW_TYPES.has(root.type))) entryCandidates.push(file.path);
-    } catch (error) {
-      parseIssues.push({ path: file.path, message: error instanceof Error ? error.message : String(error) });
-    }
-    if (file.path.endsWith('.blp')) {
-      for (const reference of blueprintTemplateReferences(file.content)) {
-        if (!declared.has(reference)) unresolvedReferences.add(reference);
-      }
-    }
-  }
-  return { entryCandidates, parseIssues, unresolvedReferences: [...unresolvedReferences].sort(), declaredTemplates: [...declared].sort() };
-}
+/** Manifest facts about a discovered bundle (shared with the browser importer). */
+export const bundleManifest = appBundleManifest;
 
 // ---------------------------------------------------------------------------
 // Span-preserving Blueprint CST

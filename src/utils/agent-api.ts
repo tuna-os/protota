@@ -16,6 +16,8 @@
 import type { MockupDocument, AdwNode, AdwNodeType, ScreenTemplateType } from '../types/mockup';
 import { LEGAL_CHILDREN, LEGAL_SLOTS, SCREEN_DEFAULTS } from '../types/mockup';
 import { blueprintBundleToDocument, type BlueprintSourceFile } from './blueprint';
+import { discoverAppSources, appBundleManifest, type AppFileMap } from './appDiscovery';
+import { fetchGitArchive } from './appIngest';
 
 let _nextId = 0;
 function uid(): string {
@@ -150,6 +152,46 @@ export class MockupBuilder {
     const lastScreen = this.doc.screens[this.doc.screens.length - 1];
     if (lastScreen) this._stack = [lastScreen.rootNode];
     return this;
+  }
+
+  /**
+   * Import a whole app checkout supplied as an abstract file map
+   * (`{ path → text }`) — the same front door the Import App dialog uses
+   * (#118). Discovery (gresource XML + meson.build, glob fallback) selects
+   * the declarative sources; when `entry` is omitted it is inferred from the
+   * single window-bearing candidate, and ambiguity fails loudly with the
+   * candidate list instead of guessing.
+   */
+  importApp(files: AppFileMap, entry?: string, options?: { title?: string; width?: number; height?: number }): this {
+    const discovered = discoverAppSources(files);
+    if (!discovered.files.length) {
+      throw new Error('importApp: no .blp or .ui files found in the supplied file map.');
+    }
+    const manifest = appBundleManifest(discovered.files);
+    let entryPath = entry ?? null;
+    if (entryPath && !discovered.files.some(file => file.path === entryPath)) {
+      throw new Error(`importApp: entry "${entryPath}" is not among the discovered files: ${discovered.files.map(file => file.path).join(', ')}`);
+    }
+    if (!entryPath) {
+      if (manifest.entryCandidates.length === 1) entryPath = manifest.entryCandidates[0];
+      else if (manifest.entryCandidates.length) {
+        throw new Error(`importApp: multiple entry candidates — pass entry. Candidates: ${manifest.entryCandidates.join(', ')}`);
+      } else {
+        throw new Error('importApp: no window-bearing file found — pass entry explicitly.');
+      }
+    }
+    return this.importScreens(discovered.files, entryPath, options);
+  }
+
+  /**
+   * Import an app straight from its forge URL (GitHub / GitLab incl.
+   * gitlab.gnome.org / Codeberg): the ref archive is fetched client-side,
+   * unpacked in-memory, and handed to {@link importApp}. Forges that block
+   * cross-origin downloads fail with an actionable error.
+   */
+  async importAppFromUrl(gitUrl: string, ref?: string, options?: { entry?: string; title?: string; width?: number; height?: number }): Promise<this> {
+    const { files } = await fetchGitArchive(gitUrl, ref);
+    return this.importApp(files, options?.entry, options);
   }
 
   /** Resolve a screen by id or title. */

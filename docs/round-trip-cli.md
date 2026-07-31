@@ -20,6 +20,14 @@ to a recursive glob **with an explicit note** when no metadata references any
 UI file. Declarative files on disk that metadata does not reference are
 excluded and listed.
 
+The discovery core itself is environment-free and lives in
+`src/utils/appDiscovery.ts` (an abstract `{ path → text }` file map in, the
+selected files, notes, and manifest facts out). The CLI walks the filesystem
+into that map; the browser's **File → Import App** front door (#118 — folder
+drop, zip, git-forge URL, plus `MockupBuilder.importApp` /
+`importAppFromUrl` on the agent API) feeds the same core from in-page
+ingest, so both always agree about what an app checkout contains.
+
 It prints a manifest to stderr (files found with their template
 declarations, entry candidates, unresolved `$Template` references, parse
 issues) and writes a source bundle JSON — `{ version: 1, entry, files }`,

@@ -1,6 +1,21 @@
-import { describe, it, expect, vi } from 'vitest';
-import { MockupBuilder, generateMockup } from '../utils/agent-api';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import type { MockupDocument, Screen } from '../types/mockup';
+import { MockupBuilder, generateMockup, protota } from '../utils/agent-api';
+import { useMockupStore } from '../store/mockupStore';
 import { mockupToBlueprint, blueprintToNode } from '../utils/blueprint';
+
+// The live handle drives the real store, whose mutations persist to
+// localStorage — absent under node, so stub it (module evaluation itself is
+// storage-safe; only mutations write).
+const backing = new Map<string, string>();
+globalThis.localStorage = {
+  getItem: (key: string) => backing.get(key) ?? null,
+  setItem: (key: string, value: string) => { backing.set(key, value); },
+  removeItem: (key: string) => { backing.delete(key); },
+  clear: () => { backing.clear(); },
+  key: (index: number) => [...backing.keys()][index] ?? null,
+  get length() { return backing.size; },
+} as Storage;
 
 describe('MockupBuilder flow and import tooling', () => {
   it('connects screens with flow edges by title', () => {
@@ -188,6 +203,121 @@ describe('MockupBuilder', () => {
     const parsedNode = blueprintToNode(blpCode);
     expect(parsedNode.type).toBe('window');
     expect(parsedNode.children?.length).toBeGreaterThan(0);
+  });
+});
+
+describe('protota live handle (ADR 0001 Part 3 item 4)', () => {
+  /**
+   * root(box)
+   * ├── a(box) — a1(button), a2(label)
+   * └── c(button)
+   */
+  const makeScreens = (): Screen[] => [{
+    id: 's1', title: 'Screen 1', type: 'empty', width: 800, height: 600,
+    rootNode: {
+      id: 'root', type: 'box',
+      children: [
+        { id: 'a', type: 'box', children: [
+          { id: 'a1', type: 'button', title: 'One' },
+          { id: 'a2', type: 'label', title: 'Two' },
+        ] },
+        { id: 'c', type: 'button', title: 'Three' },
+      ],
+    },
+  }];
+  const cleanups: Array<() => void> = [];
+  const onSelection = (cb: (payload: { selection: string[] }) => void) => {
+    protota.on('selectionchange', cb);
+    cleanups.push(() => protota.off('selectionchange', cb));
+  };
+  const onDocument = (cb: (payload: { doc: MockupDocument }) => void) => {
+    protota.on('documentchange', cb);
+    cleanups.push(() => protota.off('documentchange', cb));
+  };
+
+  beforeEach(() => {
+    const doc: MockupDocument = {
+      id: 'doc-test', title: 'Test', edges: [], colorScheme: 'auto', screens: makeScreens(),
+    };
+    useMockupStore.setState({
+      doc, history: [doc], historyIndex: 0, clipboard: [],
+      selectedNodeId: null, selectedNodeIds: [], selectedScreenId: 's1',
+    });
+  });
+
+  afterEach(() => {
+    // Leave no subscription behind between tests.
+    cleanups.forEach((cleanup) => cleanup());
+    cleanups.length = 0;
+  });
+
+  it('reads and writes the ordered selection through the store', () => {
+    expect(protota.selection).toEqual([]);
+    protota.selection = ['a1', 'c'];
+    expect(protota.selection).toEqual(['a1', 'c']);
+    expect(useMockupStore.getState().selectedNodeId).toBe('c'); // primary = last
+    // The getter hands out a copy — mutating it never touches the store.
+    protota.selection.push('ghost');
+    expect(useMockupStore.getState().selectedNodeIds).toEqual(['a1', 'c']);
+  });
+
+  it('fires selectionchange with the ordered ids, but not on an identical reselect', () => {
+    const seen: string[][] = [];
+    onSelection(({ selection }) => seen.push(selection));
+    protota.selection = ['a1', 'a2'];
+    protota.selection = ['a1', 'a2']; // no-op: same membership and order
+    useMockupStore.getState().toggleNodeSelection('c');
+    expect(seen).toEqual([['a1', 'a2'], ['a1', 'a2', 'c']]);
+  });
+
+  it('fires documentchange once per snapshot, never for editor-only state', () => {
+    const docs: MockupDocument[] = [];
+    onDocument(({ doc }) => docs.push(doc));
+    protota.selection = ['a1'];              // editor state: silent
+    useMockupStore.getState().setTierFilter('warning', false); // silent
+    useMockupStore.getState().updateNodeProps('a1', { title: 'X' });
+    expect(docs).toHaveLength(1);
+    expect(docs[0]).toBe(useMockupStore.getState().doc);
+    useMockupStore.getState().undo();
+    useMockupStore.getState().redo();
+    expect(docs).toHaveLength(3);
+  });
+
+  it('transaction() batches mutations into one snapshot and one documentchange', () => {
+    let events = 0;
+    onDocument(() => { events += 1; });
+    const before = useMockupStore.getState().historyIndex;
+    protota.transaction(() => {
+      useMockupStore.getState().updateNodeProps('a1', { title: 'X' });
+      useMockupStore.getState().updateNodeProps('a2', { title: 'Y' });
+      // Nested transactions are no-ops; the outer one owns the snapshot.
+      protota.transaction(() => {
+        useMockupStore.getState().updateNodeProps('c', { title: 'Z' });
+      });
+    });
+    expect(events).toBe(1);
+    expect(useMockupStore.getState().historyIndex).toBe(before + 1);
+    useMockupStore.getState().undo();
+    const root = useMockupStore.getState().doc.screens[0].rootNode;
+    expect(root.children![0].children![0].title).toBe('One');
+    expect(root.children![1].title).toBe('Three');
+  });
+
+  it('an empty transaction emits nothing', () => {
+    let events = 0;
+    onDocument(() => { events += 1; });
+    protota.transaction(() => {});
+    expect(events).toBe(0);
+  });
+
+  it('off() removes a listener', () => {
+    let calls = 0;
+    const cb = () => { calls += 1; };
+    protota.on('selectionchange', cb);
+    protota.selection = ['a1'];
+    protota.off('selectionchange', cb);
+    protota.selection = ['c'];
+    expect(calls).toBe(1);
   });
 });
 

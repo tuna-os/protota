@@ -65,7 +65,11 @@ const TAG_MAP: Record<string, string | null> = {
   'toolbar-view':        'adw-toolbar-view',
   'header-bar':          'adw-header-bar',
   'window-title':        'adw-window-title',
-  'view-stack':          'adw-view-stack',
+  // adw-view-stack keeps only adw-view-stack-page children: connectedCallback
+  // snapshots those and calls replaceChildren, destroying everything else. Our
+  // pages are stack-page nodes, and the model already selects the visible one,
+  // so render the stack ourselves (as with stack and navigation-view).
+  'view-stack':          null,
   'view-switcher':       'adw-view-switcher',
   'navigation-view':     'adw-navigation-view',
   'tab-view':            'adw-tab-view',
@@ -118,12 +122,13 @@ const TAG_MAP: Record<string, string | null> = {
 };
 
 /** Div-only types: render a semantic container with Adwaita-styled layout.
- * navigation-view is here because the adw-navigation-view element manages
- * only adw-navigation-page children and hides everything else; the model
+ * navigation-view and view-stack are here because their custom elements
+ * manage only their own page elements — adw-navigation-page and
+ * adw-view-stack-page — and hide or discard everything else; the model
  * already selects the visible page. */
 const DIV_TYPES = new Set([
   'bin', 'custom-widget', 'box', 'grid', 'center-box', 'stack', 'stack-page', 'scrolled-window', 'search-entry', 'switch-widget',
-  'check-button', 'list-box', 'label', 'inscription', 'navigation-view',
+  'check-button', 'list-box', 'label', 'inscription', 'navigation-view', 'view-stack',
   'progress-bar', 'scale', 'level-bar', 'popover', 'list-box-row',
   // adw-overlay-split-view collects [slot="content"] with an unscoped query,
   // so it hoists the content child of any nested toolbar view into its own

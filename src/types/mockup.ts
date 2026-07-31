@@ -152,6 +152,22 @@ export interface AdwNode {
   /** GTK expand semantics — the node claims its parent's spare allocation. */
   hexpand?: boolean;
   vexpand?: boolean;
+  /** GTK widget margins, in pixels, outside the widget's own allocation. */
+  marginStart?: number;
+  marginEnd?: number;
+  marginTop?: number;
+  marginBottom?: number;
+  /** GtkBox/GtkGrid homogeneous sizing — equal shares of the main axis. */
+  homogeneous?: boolean;
+  /** Adw.Clamp maximum child width. */
+  maximumSize?: number;
+  /**
+   * Which layer produced a geometry-relevant property (#55): unset means the
+   * declarative source declared it; 'code' means a static language adapter
+   * projected it from an application code assignment. Feeds the boundary's
+   * origin/confidence audit trail; never exported.
+   */
+  geometryOrigin?: Record<string, 'code'>;
   /** GTK visibility. `false` renders nothing, exactly like a hidden widget. */
   visible?: boolean;
   /**

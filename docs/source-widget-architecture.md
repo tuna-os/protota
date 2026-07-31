@@ -545,7 +545,18 @@ surfaces, as they are today.
 
 Retain `inputKind`, native and rendered geometry, unresolved coverage,
 source-resolved similarity, foreground IoU, and attainable raw ceiling. A
-boundary is never counted as a rendered implementation. Visual captures
+boundary is never counted as a rendered implementation.
+
+Each unresolved boundary in the DOM carries its geometry evidence (#55):
+`data-protota-geometry` is the JSON list of applied facts, each with the
+effect (`min-width`, `vexpand`, `allocation`…), the value, an origin naming
+the layer and source property that produced it (`source:width-request`,
+`code:vexpand`, `container:GtkBox.homogeneous`, `fallback:renderer-minimum`),
+and a confidence (`declared` > `code` > `derived` > `fallback`).
+`data-protota-geometry-confidence` is the weakest confidence among them. The
+comparison artifact copies these per-boundary facts into
+`comparison-<app>.json` under `unresolvedWidgets`, so every masked rectangle
+is auditable back to the source fact that granted it its region. Visual captures
 remain a regression oracle rather than an input to semantic import.
 
 ## Delivery plan

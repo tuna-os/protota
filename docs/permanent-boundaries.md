@@ -75,18 +75,18 @@ resolved subtree is a pass-through container, while a leaf boundary
 | calendar | core | 276 | 6 | `snapshot()`-drawn week grid; runtime month grid | partly — month grid yes, week grid permanent |
 | clocks | core | 380 | 0 | — (runtime list content is default-empty) | n/a |
 | disks | core | 69 | 2 | C custom-drawn graph/meter | no (benchmark graph permanent); allocation bar probe-verified |
-| files | core | 178 | 4 | runtime C composites; `snapshot()`-drawn path bar | partly — sidebar/entry yes, path bar permanent |
+| files | core | 184 | 2 | runtime-populated C composites (sidebar rows, path-bar buttons) | yes — static chrome now resolved; content is probe territory |
 | settings | core | 17 | 0 | panel list and panels are runtime C widgets (no nodes emitted) | yes — entirely probe territory |
 | software | core | 441 | 38 | runtime-populated pages + drawn star/review primitives | mostly yes; paintables permanent |
-| text-editor | core | 82 | 12 | C preference composites | yes |
+| text-editor | core | 93 | 1 | C wrapper (pass-through) | state only (switch/spin values) |
 | weather | core | 15 | 0 | GJS runtime tree; default screen is the empty search view | n/a (residual delta is font rasterisation/window shadow) |
 | amberol | circle | 74 | 6 | Rust composites (waveform, marquee, cover art) | probe determines; waveform likely permanent |
 | ear-tag | circle | 90 | 12 | Python/GTK composites | yes |
 | graphs | circle | 52 | 0 | — | n/a |
 
-Totals: 85 boundary nodes across the twelve presets. Of these, 4 are
+Totals: 72 boundary nodes across the twelve presets. Of these, 3 are
 documented permanently `snapshot()`-drawn, 7 are permanent-but-harmless
-(non-visual or pass-through), and the remaining 74 are #58 probe territory.
+(non-visual or pass-through), and the remaining 62 are #58 probe territory.
 Calculator's five nodes are the first settled by a committed probe dump
 (`presets-src/calculator.probe.json`, 2026-07-31): they stay as honest
 markers, now with dump-backed allocation and state instead of hedges.
@@ -95,7 +95,16 @@ previous 88: both `Adw.TabBar` renderer gaps were promoted to a registry
 widget (`tab-bar` — tabs derive from the linked `Adw.TabView`'s declared
 pages), and Text Editor's non-visual `Gtk.SourceBuffer` node is no longer
 emitted because the importer's non-visual filter learned `SourceBuffer`
-after that preset was last generated.
+after that preset was last generated. The second 2026-07-31 regeneration
+(#59 Wave 1, app composites) removed thirteen more via a generic C-adapter
+extension — no app-specific branches: a code-defined subclass of a
+renderable library widget now resolves to its base class with its
+code-constructed children (the eleven Text Editor `EditorPreferences*` rows
+→ `Adw.ActionRow` + switch/spin/chevron suffix; `NautilusLocationEntry` →
+`Gtk.Entry`; `NautilusPathBar` → `Gtk.Box` chrome — the pinned
+`nautilus-pathbar.c` at 49.1 contains no `snapshot()`, so the earlier
+"snapshot-drawn permanent" classification was stale; its per-directory
+buttons remain runtime/probe territory).
 
 ## Per-app boundary list
 
@@ -149,14 +158,23 @@ default `AdwViewStack` pages against official screenshots.
 | `GduBenchmarkGraph` | 1 | Drawn with `snapshot()` — named by the maintainer as a permanent honest boundary (#32, #81). | **permanent** |
 | `GduSpaceAllocationBar` | 1 | C custom-drawn allocation meter; no declarative template. Expected permanent for the same reason as the graph; the probe run settles it definitively. | probe verifies (likely permanent) |
 
-### Files (`nautilus` 49.1) — 4 boundary nodes
+### Files (`nautilus` 49.1) — 2 boundary nodes
 
 | Boundary | Instances | Why static import stops | Status |
 | --- | ---: | --- | --- |
-| `NautilusShortcutManager` | 1 | Non-visual near-root wrapper; its 51 imported children render. | pass-through (permanent as a node) |
-| `NautilusSidebar` | 1 | Runtime C widget (`docs/gnome-source-import.md`: "directory list/grid and sidebar are runtime C widgets"; #81: probe is the route to the Nautilus sidebar). | **probe** |
-| `NautilusPathBar` | 1 | Drawn with `snapshot()` — named by the maintainer as a permanent honest boundary (#32, #81). | **permanent** |
-| `NautilusLocationEntry` | 1 | C composite, swapped with the path bar at runtime. | probe |
+| `NautilusShortcutManager` | 1 | Non-visual near-root wrapper; its 57 imported children render. | pass-through (permanent as a node) |
+| `NautilusSidebar` | 1 | Its static chrome (scrolled window + `navigation-sidebar` list box) now resolves from C construction facts in `nautilus-sidebar.c` init; the node stays as an honest marker because the places rows are runtime bookmark/mount data (#81: probe is the route to the Nautilus sidebar). | pass-through / **probe** for rows |
+
+Two former boundaries left this table in the second 2026-07-31 regeneration
+(#59 Wave 1, app composites), both via the generic base-class projection:
+
+- `NautilusLocationEntry` is a `GtkEntry` subclass; it resolves to a plain
+  entry. Its text (the current path) is runtime state.
+- `NautilusPathBar` is a `GtkBox` subclass whose init constructs a scrolled
+  buttons box and a view-menu button; that chrome resolves. The pinned
+  `nautilus-pathbar.c` contains no `snapshot()` — the earlier "snapshot-drawn
+  permanent" note was stale for 49.1. Its per-directory path buttons are
+  created at runtime (`nautilus_path_bar_update_path`) — **probe** territory.
 
 Beyond the nodes: the directory list/grid view is runtime-populated —
 **probe-resolvable**. The former `Adw.TabBar` renderer-gap boundary was
@@ -189,12 +207,21 @@ because `gs-shell.ui` declares the template `visible=False` (presented
 programmatically) — fixed by the single finishing override in
 `presets-src/software.finishing.json`.
 
-### Text Editor (`gnome-text-editor` 49.1) — 12 boundary nodes
+### Text Editor (`gnome-text-editor` 49.1) — 1 boundary node
 
 | Boundary | Instances | Why static import stops | Status |
 | --- | ---: | --- | --- |
 | `EditorFullscreenBox` | 1 | C wrapper; its 49 imported children render. | pass-through |
-| `EditorPreferencesFont` / `EditorPreferencesSwitch` / `EditorPreferencesSpin` | 11 | C preference-row composites in the preferences dialog; no declarative templates. | probe |
+
+The eleven `EditorPreferencesFont` / `EditorPreferencesSwitch` /
+`EditorPreferencesSpin` rows left this table in the second 2026-07-31
+regeneration (#59 Wave 1, app composites). Each is a thin `AdwActionRow`
+subclass whose init adds one suffix widget in code; the generic base-class
+projection resolves them to `action-row` nodes with their declared titles
+and a `Gtk.Switch` / `Gtk.SpinButton` / go-next `Gtk.Image` suffix. What
+stays runtime is their *state* — switch positions, the spin value, and the
+font row's title all come from GSettings — which is #58 probe territory,
+recorded per screen rather than as boundary nodes.
 
 Two former boundaries left this table in the 2026-07-31 regeneration:
 `Adw.TabBar` was promoted to the `tab-bar` registry widget (#59 Wave 1 —

@@ -43,6 +43,8 @@ export interface CClassFacts {
   constructions: Record<string, string>;
   insertions: CInsertion[];
   propertyAssignments: CPropertyAssignment[];
+  /** gtk_widget_add_css_class calls with a literal class name. */
+  styleClasses: Array<{ target: string; name: string }>;
 }
 
 /** Namespaces whose `_new` really does build a widget we can render. */
@@ -253,9 +255,9 @@ function literalOf(expression: string): CLiteral | undefined {
 }
 
 /** Byte ranges of each function body, with the function's name. */
-function findFunctionBodies(code: string): Array<{ name: string; start: number; end: number }> {
-  const bodies: Array<{ name: string; start: number; end: number }> = [];
-  const pattern = /\b([A-Za-z_][A-Za-z0-9_]*)\s*\([^;{]*\)\s*\{/g;
+function findFunctionBodies(code: string): Array<{ name: string; start: number; end: number; instance?: string }> {
+  const bodies: Array<{ name: string; start: number; end: number; instance?: string }> = [];
+  const pattern = /\b([A-Za-z_][A-Za-z0-9_]*)\s*\(([^;{]*)\)\s*\{/g;
   let match: RegExpExecArray | null;
   while ((match = pattern.exec(code))) {
     const open = code.indexOf('{', match.index + match[0].length - 1);
@@ -269,7 +271,12 @@ function findFunctionBodies(code: string): Array<{ name: string; start: number; 
       }
       cursor += 1;
     }
-    bodies.push({ name: match[1], start: open, end: cursor });
+    // The first parameter of a class-owned function is the instance. Its
+    // name is the author's choice (`self`, `sidebar`, `entry`); recording it
+    // lets facts normalise it to the language-neutral `this`.
+    const firstParameter = match[2].split(',')[0]?.trim() ?? '';
+    const instance = /([A-Za-z_][A-Za-z0-9_]*)\s*$/.exec(firstParameter)?.[1];
+    bodies.push({ name: match[1], start: open, end: cursor, instance });
     pattern.lastIndex = open + 1;
   }
   return bodies;
@@ -297,6 +304,7 @@ export function extractCFacts(code: string): CClassFacts[] {
       constructions: {},
       insertions: [],
       propertyAssignments: [],
+      styleClasses: [],
     });
     prefixes.push({ prefix, className });
   }
@@ -305,11 +313,43 @@ export function extractCFacts(code: string): CClassFacts[] {
   // Longest prefix first, so quux_panel_row_init is not read as quux_panel's.
   prefixes.sort((a, b) => b.prefix.length - a.prefix.length);
   const bodies = findFunctionBodies(source);
-  const classAt = (index: number): CClassFacts | undefined => {
+  const contextAt = (index: number): { facts: CClassFacts; instance?: string } | undefined => {
     const body = bodies.find((candidate) => index > candidate.start && index < candidate.end);
     if (!body) return undefined;
     const owner = prefixes.find(({ prefix }) => body.name.startsWith(`${prefix}_`));
-    return owner ? classes.get(owner.className) : undefined;
+    const facts = owner ? classes.get(owner.className) : undefined;
+    return facts ? { facts, instance: body.instance } : undefined;
+  };
+  const classAt = (index: number): CClassFacts | undefined => contextAt(index)?.facts;
+
+  // Constructors whose literal argument is a well-known property, by GTK
+  // naming convention: gtk_image_new_from_icon_name ("x") sets icon-name.
+  const CONSTRUCTOR_ARGUMENT_PROPERTIES: Array<{ pattern: RegExp; property: string }> = [
+    { pattern: /_new_from_icon_name$/, property: 'icon-name' },
+    { pattern: /_new_with_label$/, property: 'label' },
+    { pattern: /^gtk_label_new$/, property: 'label' },
+  ];
+
+  let inlineCounter = 0;
+  /**
+   * A child argument that is itself a widget constructor call —
+   * `adw_action_row_add_suffix (row, gtk_image_new_from_icon_name ("x"))` —
+   * is as deterministic as a named variable. Synthesise one.
+   */
+  const inlineConstruction = (facts: CClassFacts, expression: string): string | undefined => {
+    const call = /^([a-z][a-z0-9_]*)\s*\((.*)\)$/s.exec(expression.trim());
+    if (!call || !/_new(_[a-z0-9_]+)?$/.test(call[1])) return undefined;
+    const constructed = classFromConstructor(call[1]);
+    if (!constructed || NON_WIDGET_PATTERN.test(constructed)) return undefined;
+    const variable = `inline_${++inlineCounter}`;
+    facts.constructions[variable] = constructed;
+    const convention = CONSTRUCTOR_ARGUMENT_PROPERTIES.find(({ pattern }) => pattern.test(call[1]));
+    const argument = splitArguments(call[2])[0];
+    const value = argument === undefined ? undefined : literalOf(argument);
+    if (convention && typeof value === 'string') {
+      facts.propertyAssignments.push({ target: variable, property: convention.property, value });
+    }
+    return variable;
   };
 
   for (const call of findCalls(source)) {
@@ -330,15 +370,33 @@ export function extractCFacts(code: string): CClassFacts[] {
       continue;
     }
 
-    const facts = classAt(call.index);
-    if (!facts) continue;
+    const context = contextAt(call.index);
+    if (!context) continue;
+    const facts = context.facts;
+    // The class's own instance parameter is `this` in fact terms, whatever
+    // the author named it (`self`, `sidebar`, `entry`). A bare `self` is the
+    // GObject convention for the same thing even when the parameter is a
+    // GObject* (constructed() casts it to a local named self).
+    const normalize = (name: string | undefined): string | undefined =>
+      name !== undefined && (name === context.instance || name === 'self') ? 'this' : name;
 
     // set_parent takes (child, parent) — the reverse of every append.
     if (call.name === 'gtk_widget_set_parent' && call.args.length >= 2) {
       const child = bareName(call.args[0]);
-      const parent = bareName(call.args[1]);
+      const parent = normalize(bareName(call.args[1]));
       if (child && parent) {
         facts.insertions.push({ parent, child, method: call.name });
+      }
+      continue;
+    }
+
+    // A literal style class is a rendered fact: Adwaita styles like
+    // navigation-sidebar or spin change what the widget looks like.
+    if (call.name === 'gtk_widget_add_css_class' && call.args.length >= 2) {
+      const target = normalize(bareName(call.args[0]));
+      const name = literalOf(call.args[1]);
+      if (target && typeof name === 'string') {
+        facts.styleClasses.push({ target, name });
       }
       continue;
     }
@@ -348,8 +406,8 @@ export function extractCFacts(code: string): CClassFacts[] {
       // g_list_append also ends in _append but is not a widget call.
       const namespace = Object.keys(WIDGET_NAMESPACES)
         .some((ns) => call.name.startsWith(`${ns}_`));
-      const parent = bareName(call.args[0]);
-      const child = bareName(call.args[1]);
+      const parent = normalize(bareName(call.args[0]));
+      const child = bareName(call.args[1]) ?? (namespace && parent ? inlineConstruction(facts, call.args[1]) : undefined);
       if (namespace && parent && child) {
         facts.insertions.push({ parent, child, method: call.name });
         continue;
@@ -379,7 +437,7 @@ export function extractCFacts(code: string): CClassFacts[] {
     if (setter && call.args.length >= 2) {
       const isWidgetCall = Object.keys(WIDGET_NAMESPACES)
         .some((ns) => call.name.startsWith(`${ns}_`));
-      const target = bareName(call.args[0]);
+      const target = normalize(bareName(call.args[0]));
       const value = literalOf(call.args[1]);
       if (isWidgetCall && target && value !== undefined) {
         facts.propertyAssignments.push({

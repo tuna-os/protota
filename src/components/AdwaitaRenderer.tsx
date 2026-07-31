@@ -435,6 +435,15 @@ export const AdwaitaRenderer: React.FC<Props> = ({
     />
   ) : null;
 
+  // A Gtk.Image imports as a bin carrying its declared icon-name; drawing
+  // that icon is source-grounded (the go-next chevron on a font row).
+  const binIcon = node.type === 'bin' && node.iconName ? (
+    <span
+      aria-hidden="true"
+      className={`adw-icon adw-icon--${node.iconName.replace(/-symbolic$/, '')}`}
+    />
+  ) : null;
+
   // Div-only types get Adwaita-styled classes for layout/structure.
   // A custom-widget with projected children is a resolved composite: render it
   // as a plain container, not a striped unresolved boundary.
@@ -504,6 +513,7 @@ export const AdwaitaRenderer: React.FC<Props> = ({
         className: elementClass || undefined,
       },
         iconPrefix,
+        binIcon,
         tabBarTabs,
         ...(children ?? []),
         windowControls,

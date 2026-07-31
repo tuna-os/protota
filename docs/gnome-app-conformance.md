@@ -23,11 +23,11 @@ to drive down is the app-defined count, not boundaries in general.
 
 | App | Screens | Nodes | Boundaries | Unresolved classes |
 | --- | ---: | ---: | ---: | --- |
-| text-editor | 2 | 82 | 12 | Editor* composites (C) |
+| text-editor | 2 | 93 | 1 | EditorFullscreenBox (C pass-through) |
 | ear-tag | 1 | 90 | 13 | Eartag* composites (Python/GTK) |
 | amberol | 1 | 74 | 10 | Amberol* composites (Rust) |
 | calendar | 2 | 276 | 8 | Gcal* composites (C) |
-| files | 4 | 178 | 4 | Nautilus* composites (C) |
+| files | 4 | 184 | 2 | NautilusShortcutManager, NautilusSidebar (C; static chrome resolved) |
 | calculator | 6 | 1939 | 5 | MathButtons instances (Vala; keypad renders) |
 | disks | 3 | 65 | 2 | GduBenchmarkGraph, GduSpaceAllocationBar (C) |
 | clocks | 5 | 380 | 0 | -- |
@@ -43,8 +43,14 @@ renders generically, and AdwTabBar was promoted to a registry widget (#59
 Wave 1, 2026-07-31) — its tab strip derives from the linked AdwTabView's
 declared pages, with runtime-populated views honestly empty until the #58
 probe. Text Editor's and Files' rows above reflect the 2026-07-31
-regeneration (Text Editor also dropped its non-visual `Gtk.SourceBuffer`
-boundary node, which the importer now filters).
+regenerations (Text Editor also dropped its non-visual `Gtk.SourceBuffer`
+boundary node, which the importer now filters). The second Wave 1 PR
+extended the C adapter generically: a code-defined subclass of a renderable
+library widget resolves to its base class with its code-constructed
+children, which resolved the eleven `EditorPreferences*` rows,
+`NautilusLocationEntry`, and `NautilusPathBar`'s chrome, and gave
+`NautilusSidebar` its scrolled `navigation-sidebar` list chrome. Row/button
+content and GSettings-driven state remain #58 probe territory.
 
 ## Required sequence
 

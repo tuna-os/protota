@@ -1,5 +1,9 @@
 import { defineConfig, devices } from '@playwright/test';
 
+// Overridable so parallel worktrees don't fight over (or silently reuse)
+// one another's dev server on the default port.
+const port = Number(process.env.PROTOTA_PORT ?? 5173);
+
 export default defineConfig({
   testDir: './tests',
   fullyParallel: true,
@@ -11,7 +15,7 @@ export default defineConfig({
   // passes; retain their native, Protota, diff, and JSON outputs for CI.
   preserveOutput: 'always',
   use: {
-    baseURL: 'http://localhost:5173',
+    baseURL: `http://localhost:${port}`,
     trace: 'on-first-retry',
   },
   projects: [
@@ -21,8 +25,8 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: 'npm run dev -- --port 5173',
-    url: 'http://localhost:5173',
+    command: `npm run dev -- --port ${port} --strictPort`,
+    url: `http://localhost:${port}`,
     reuseExistingServer: !process.env.CI,
   },
 });

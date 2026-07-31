@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { useMockupStore } from '../store/mockupStore';
 import type { Diagnostic, DiagnosticTier } from '../diagnostics/types';
 import { filterDiagnostics } from '../diagnostics/engine';
+import { useLiveBlueprint } from '../diagnostics/useLiveBlueprint';
 import {
   dialogErrorSymbolic,
   dialogWarningSymbolic,
@@ -62,14 +63,25 @@ export const DiagnosticsPanel: React.FC = () => {
     applyQuickFix,
     selectNode,
     selectedNodeId,
+    liveBlueprintEnabled,
+    liveBlueprintStatus,
+    liveBlueprintError,
+    liveBlueprintDiagnostics,
+    toggleLiveBlueprint,
   } = useMockupStore();
+
+  // Live syntax tier driver (BLP-L001): only checks while this panel exists
+  // and the user opted in — the Pyodide download never happens on app start.
+  useLiveBlueprint();
 
   const [showIgnored, setShowIgnored] = useState(false);
   const [overflowOpen, setOverflowOpen] = useState(false);
   const [expanded, setExpanded] = useState<string | null>(null);
   const [ignoreMenuFor, setIgnoreMenuFor] = useState<string | null>(null);
 
-  const all = useMemo(() => [...diagnostics, ...exportCheck], [diagnostics, exportCheck]);
+  const all = useMemo(
+    () => [...diagnostics, ...exportCheck, ...liveBlueprintDiagnostics],
+    [diagnostics, exportCheck, liveBlueprintDiagnostics]);
   const higDiagnostics = all.filter((d) => d.source === 'hig');
   const blueprintDiagnostics = all.filter((d) => d.source === 'blueprint');
 
@@ -272,15 +284,41 @@ export const DiagnosticsPanel: React.FC = () => {
         );
       })}
 
-      {/* Source group — Blueprint diagnostics, per document (design §5.1.3) */}
-      {blueprintVisible.length > 0 && (
-        <div data-testid="diagnostics-source-group">
-          <div className="protota-menu-section-header" style={{ padding: '2px 0' }}>
-            Source (Blueprint)
-          </div>
-          {blueprintVisible.map((d, i) => renderCard(d, i))}
+      {/* Source group — Blueprint diagnostics, per document (design §5.1.3),
+          plus the opt-in live syntax tier (BLP-L001, design §2.3 level 3). */}
+      <div data-testid="diagnostics-source-group">
+        <div className="protota-menu-section-header" style={{ padding: '2px 0' }}>
+          Source (Blueprint)
         </div>
-      )}
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px', flexWrap: 'wrap', padding: '2px 0 6px' }}>
+          <button
+            className={`adw-button flat${liveBlueprintEnabled ? ' active' : ''}`}
+            data-testid="live-blueprint-toggle"
+            data-active={liveBlueprintEnabled ? 'true' : undefined}
+            onClick={toggleLiveBlueprint}
+            style={{ fontSize: '11px', padding: '2px 8px' }}
+            title="Parse the exported Blueprint with blueprint-compiler running in your browser. Syntax only — full GIR validation still needs a host compile."
+          >
+            Live syntax check
+          </button>
+          <span
+            data-testid="live-blueprint-status"
+            data-status={liveBlueprintEnabled ? liveBlueprintStatus : 'off'}
+            style={{ fontSize: '10px', opacity: 0.65 }}
+          >
+            {!liveBlueprintEnabled
+              ? 'Off — parses exported .blp in-browser (one-time ~14 MB runtime download).'
+              : liveBlueprintStatus === 'loading'
+                ? 'Loading Python runtime…'
+                : liveBlueprintStatus === 'ready'
+                  ? 'Syntax check (browser) — not a compile; GIR validation runs on the host.'
+                  : liveBlueprintStatus === 'error'
+                    ? `Unavailable: ${liveBlueprintError ?? 'failed to load'} — toggle to retry.`
+                    : 'Starting…'}
+          </span>
+        </div>
+        {blueprintVisible.map((d, i) => renderCard(d, i))}
+      </div>
 
       {showIgnored && ignored.length > 0 && (
         <div data-testid="diagnostics-ignored-group">

@@ -217,6 +217,87 @@ test.describe('align and distribute', () => {
   });
 });
 
+test.describe('forest clipboard (ADR 0001 Part 3)', () => {
+  test('copy/paste of a multi-selection pastes both, in order, as ONE undo step', async ({ page }) => {
+    const [b1, b2] = await addTwoButtons(page);
+    const boxId = await nodeIdByType(page, 'box');
+
+    await canvasNode(page, b1).click();
+    await canvasNode(page, b2).click({ modifiers: ['Control'] });
+    await page.keyboard.press('Control+c');
+
+    // Paste with b1 as target: buttons cannot live inside a button, so both
+    // land beside it in the parent box, in clipboard (selection) order.
+    await canvasNode(page, b1).click();
+    const before = await historyIndex(page);
+    await page.keyboard.press('Control+v');
+
+    expect(await historyIndex(page)).toBe(before + 1);
+    const pasted = await selectedIds(page);
+    expect(pasted).toHaveLength(2);
+    const box = await nodeById(page, boxId);
+    const childIds = (box?.children ?? []).map((child) => child.id);
+    // [clamp, b1, p1, p2, b2]: the pasted forest sits after the target.
+    expect(childIds.indexOf(b1)).toBeGreaterThan(-1);
+    expect(childIds.slice(childIds.indexOf(b1) + 1, childIds.indexOf(b1) + 3)).toEqual(pasted);
+    expect(childIds[childIds.length - 1]).toBe(b2);
+
+    // A single undo removes the whole pasted forest.
+    await page.keyboard.press('Control+z');
+    const boxAfter = await nodeById(page, boxId);
+    expect((boxAfter?.children ?? []).map((child) => child.id)).not.toContain(pasted[0]);
+    expect(await nodeById(page, b1)).not.toBeNull();
+    expect(await nodeById(page, b2)).not.toBeNull();
+  });
+
+  test('Ctrl+D duplicates every member of a multi-selection in ONE undo step', async ({ page }) => {
+    const [b1, b2] = await addTwoButtons(page);
+    const boxId = await nodeIdByType(page, 'box');
+
+    await canvasNode(page, b1).click();
+    await canvasNode(page, b2).click({ modifiers: ['Control'] });
+    const before = await historyIndex(page);
+    await page.keyboard.press('Control+d');
+
+    expect(await historyIndex(page)).toBe(before + 1);
+    const created = await selectedIds(page);
+    expect(created).toHaveLength(2);
+    const box = await nodeById(page, boxId);
+    const buttonCount = (box?.children ?? []).filter((child) => child.type === 'button').length;
+    expect(buttonCount).toBe(4);
+
+    await page.keyboard.press('Control+z');
+    const boxAfter = await nodeById(page, boxId);
+    expect((boxAfter?.children ?? []).filter((child) => child.type === 'button')).toHaveLength(2);
+  });
+
+  test('Ctrl+X cuts the forest in ONE step; paste moves it into another container', async ({ page }) => {
+    const [b1, b2] = await addTwoButtons(page);
+    const boxId = await nodeIdByType(page, 'box');
+
+    await canvasNode(page, b1).click();
+    await canvasNode(page, b2).click({ modifiers: ['Control'] });
+    const before = await historyIndex(page);
+    await page.keyboard.press('Control+x');
+
+    expect(await historyIndex(page)).toBe(before + 1);
+    expect(await nodeById(page, b1)).toBeNull();
+    expect(await nodeById(page, b2)).toBeNull();
+
+    // Paste into the box the buttons came from — the classic move workflow.
+    // Select the box through the store: a center click would land on a child.
+    await page.evaluate((id) => {
+      interface StoreShape { getState: () => { selectNode: (nodeId: string) => void } }
+      (window as unknown as { __mockupStore: StoreShape }).__mockupStore.getState().selectNode(id);
+    }, boxId);
+    await page.keyboard.press('Control+v');
+    const pasted = await selectedIds(page);
+    expect(pasted).toHaveLength(2);
+    const box = await nodeById(page, boxId);
+    expect((box?.children ?? []).filter((child) => child.type === 'button')).toHaveLength(2);
+  });
+});
+
 test.describe('delete with multi-selection', () => {
   test('Delete removes all selected nodes in ONE undo snapshot', async ({ page }) => {
     const [b1, b2] = await addTwoButtons(page);

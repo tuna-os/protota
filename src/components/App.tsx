@@ -48,12 +48,13 @@ export const App: React.FC = () => {
     moveNodeUp,
     moveNodeDown,
     selectNode,
+    selectNodes,
     addChildNode,
     selectedScreenId,
-    copyNode,
-    cutNode,
-    pasteNode,
-    duplicateNode,
+    copyNodes,
+    cutNodes,
+    pasteNodes,
+    duplicateNodes,
     toggleDiagnostics,
     diagnosticsEnabled,
   } = useMockupStore();
@@ -173,21 +174,28 @@ export const App: React.FC = () => {
         redo();
         return;
       }
-      // Subtree clipboard, with the shortcuts every design tool uses.
-      if (mod && selectedNodeId && (e.key === "c" || e.key === "x" || e.key === "d")) {
+      // Forest clipboard (ADR 0001 Part 3): the shortcuts every design tool
+      // uses, operating on the whole ordered selection. `selectedNodeIds`
+      // mirrors single selection, so single-node behavior is unchanged.
+      if (mod && selectedNodeIds.length > 0 && (e.key === "c" || e.key === "x" || e.key === "d")) {
         e.preventDefault();
-        if (e.key === "c") copyNode(selectedNodeId);
-        else if (e.key === "x") cutNode(selectedNodeId);
+        if (e.key === "c") copyNodes(selectedNodeIds);
+        else if (e.key === "x") cutNodes(selectedNodeIds);
         else {
-          const created = duplicateNode(selectedNodeId);
-          if (created) selectNode(created, selectedScreenId ?? undefined);
+          const created = duplicateNodes(selectedNodeIds);
+          if (created.length) selectNodes(created, selectedScreenId ?? undefined);
         }
         return;
       }
       if (mod && e.key === "v" && selectedNodeId) {
         e.preventDefault();
-        const created = pasteNode(selectedNodeId);
-        if (created) selectNode(created, selectedScreenId ?? undefined);
+        // Paste targets the primary selection; trees that cannot legally
+        // land there report and are skipped while the rest paste.
+        const { pastedIds, skipped } = pasteNodes(selectedNodeId);
+        if (skipped.length) {
+          console.warn(`Paste skipped ${skipped.length} widget(s) not legal here: ${skipped.join(", ")}`);
+        }
+        if (pastedIds.length) selectNodes(pastedIds, selectedScreenId ?? undefined);
         return;
       }
       if (e.key === "Delete" || e.key === "Backspace") {
@@ -288,7 +296,14 @@ export const App: React.FC = () => {
     moveNodeUp,
     moveNodeDown,
     selectNode,
+    selectNodes,
     addChildNode,
+    selectedScreenId,
+    copyNodes,
+    cutNodes,
+    pasteNodes,
+    duplicateNodes,
+    setShowAddScreenModal,
     showShortcuts,
     showCommandPalette,
     toggleDiagnostics,

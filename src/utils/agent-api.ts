@@ -18,6 +18,7 @@ import { LEGAL_CHILDREN, LEGAL_SLOTS, SCREEN_DEFAULTS } from '../types/mockup';
 import { blueprintBundleToDocument, type BlueprintSourceFile } from './blueprint';
 import { discoverAppSources, appBundleManifest, type AppFileMap } from './appDiscovery';
 import { fetchGitArchive } from './appIngest';
+import { useMockupStore } from '../store/mockupStore';
 
 let _nextId = 0;
 function uid(): string {
@@ -249,6 +250,115 @@ export class MockupBuilder {
     return JSON.parse(JSON.stringify(this.doc));
   }
 }
+
+// ---------------------------------------------------------------------------
+// Live handle (ADR 0001 Part 3 item 4, docs/penpot-study.md §8)
+//
+// `MockupBuilder` stays the detached *construction* API; `protota` is the
+// tiny *live* handle onto the running editor store — the same split Penpot
+// makes between document types and the runtime `penpot` global.
+// ---------------------------------------------------------------------------
+
+/**
+ * Events the live handle emits. Payloads:
+ * - `selectionchange`: `{ selection: string[] }` — the new ordered selected
+ *   node ids (primary last). Fired only when membership or order actually
+ *   changes; re-selecting the identical set is a no-op.
+ * - `documentchange`: `{ doc: MockupDocument }` — fired exactly once per
+ *   undo snapshot: a committed mutation, a `transaction()` commit, an undo,
+ *   or a redo. Editor-only state (selection, panel toggles, diagnostics
+ *   filters) and the intermediate states inside a transaction never fire it.
+ */
+export interface PrototaEventMap {
+  selectionchange: { selection: string[] };
+  documentchange: { doc: MockupDocument };
+}
+
+type PrototaEventName = keyof PrototaEventMap;
+type PrototaListener<E extends PrototaEventName> = (payload: PrototaEventMap[E]) => void;
+
+const liveListeners: { [E in PrototaEventName]: Set<PrototaListener<E>> } = {
+  selectionchange: new Set(),
+  documentchange: new Set(),
+};
+
+let liveUnsubscribe: (() => void) | null = null;
+
+function sameIds(a: readonly string[], b: readonly string[]): boolean {
+  return a.length === b.length && a.every((id, index) => id === b[index]);
+}
+
+/**
+ * Push-based wiring: one zustand subscription exists while any listener is
+ * registered, torn down when the last one leaves. No polling anywhere.
+ */
+function ensureLiveSubscription(): void {
+  if (liveUnsubscribe) return;
+  liveUnsubscribe = useMockupStore.subscribe((state, prev) => {
+    if (!sameIds(state.selectedNodeIds, prev.selectedNodeIds)) {
+      const payload = { selection: [...state.selectedNodeIds] };
+      liveListeners.selectionchange.forEach((cb) => cb(payload));
+    }
+    // A snapshot happened iff the history advanced (mutation / transaction
+    // commit) or the cursor moved (undo / redo). Transient transaction
+    // states change `doc` alone and stay silent.
+    if (state.history !== prev.history || state.historyIndex !== prev.historyIndex) {
+      const payload = { doc: state.doc };
+      liveListeners.documentchange.forEach((cb) => cb(payload));
+    }
+  });
+}
+
+function releaseLiveSubscriptionIfIdle(): void {
+  if (!liveUnsubscribe) return;
+  if (liveListeners.selectionchange.size === 0 && liveListeners.documentchange.size === 0) {
+    liveUnsubscribe();
+    liveUnsubscribe = null;
+  }
+}
+
+/**
+ * The live handle: a small window onto the running editor, for agents (and
+ * tests) that drive the same store humans do — one selection model, one
+ * undo history, one legality engine for everybody.
+ */
+export const protota = {
+  /**
+   * Ordered selected node ids, primary last — the same array the editor's
+   * multi-select uses. Assigning replaces the selection (unknown ids are
+   * tolerated the way the store tolerates them). Never touches undo.
+   */
+  get selection(): string[] {
+    return [...useMockupStore.getState().selectedNodeIds];
+  },
+  set selection(ids: string[]) {
+    useMockupStore.getState().selectNodes(ids);
+  },
+
+  /** Subscribe to a live event. See {@link PrototaEventMap} for payloads. */
+  on<E extends PrototaEventName>(event: E, cb: PrototaListener<E>): void {
+    (liveListeners[event] as Set<PrototaListener<E>>).add(cb);
+    ensureLiveSubscription();
+  },
+
+  /** Remove a listener registered with {@link protota.on}. */
+  off<E extends PrototaEventName>(event: E, cb: PrototaListener<E>): void {
+    (liveListeners[event] as Set<PrototaListener<E>>).delete(cb);
+    releaseLiveSubscriptionIfIdle();
+  },
+
+  /**
+   * Batch several store mutations into ONE undo snapshot (the same
+   * primitive align/distribute uses via `updateNodesProps`, generalized as
+   * the store's `runInTransaction`). Emits a single `documentchange` at
+   * commit. Nested transactions are no-ops: the inner call runs its
+   * function inline and the outermost transaction owns the snapshot. An
+   * empty transaction pushes nothing and emits nothing.
+   */
+  transaction(fn: () => void): void {
+    useMockupStore.getState().runInTransaction(fn);
+  },
+};
 
 /**
  * One-shot builder: generate a mockup from a high-level description.

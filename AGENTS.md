@@ -33,6 +33,78 @@ SSH host for Broadway/container/Playwright-heavy work; it has the dedicated
 clone at `/var/home/james/work/protota`. Keep local temporary worktrees and
 generated reports cleaned up after use.
 
+## Diagnosing a rendering failure
+
+If a preset renders wrongly, **observe the DOM before theorising**. This
+checkout cannot launch Chromium; himachal has the capacity but, as of
+2026-07-31, **no node and no browser image installed** — the loop needs a
+one-time setup:
+
+```sh
+# One-time on himachal: podman pull mcr.microsoft.com/playwright:v1.50.0-noble
+# Do not mutate /var/home/james/work/protota — it carries local modifications.
+ssh himachal 'cd /var/home/james/work/protota && git fetch \
+  && git worktree add -f /var/home/james/pr<N> FETCH_HEAD'
+ssh himachal 'podman run --rm -v /var/home/james/pr<N>:/w:z -w /w \
+  mcr.microsoft.com/playwright:v1.50.0-noble \
+  sh -c "npm ci --silent && npx playwright test <spec> --reporter=line"'
+```
+
+One observation beats several rounds of source-reading. A CI round trip costs
+about five minutes; four consecutive wrong guesses about Software's blank
+render (2026-07-31) cost far more than setting this up once would have.
+
+Rendering defects chain, so fixing one only reveals the next: Software had a
+window hidden by `visible=False`, then its whole tree inside an unmapped
+`Adw.Leaflet` boundary, then `adw-view-stack` discarding non-page children.
+Expect the second failure after fixing the first; it is not a sign the fix
+was wrong.
+
+When several presets pass and one fails, diff their shapes before reading
+code — comparing root chains isolated the view-stack bug in a single query
+after source-reading had failed repeatedly.
+
+Custom elements are a recurring cause: `adw-view-stack` and
+`adw-navigation-view` keep only their own page children and discard the rest.
+Anything similar belongs in `DIV_TYPES`.
+
+## Reading CI status
+
+`gh pr checks` lists **skipped** jobs as though they were finished, so a PR
+whose real test job has not started can look complete. Key the wait on the
+run for a specific commit instead:
+
+```sh
+gh run list --branch <branch> --json headSha,status,conclusion \
+  --jq '.[] | select((.headSha|startswith("<sha>")) and .status=="completed")'
+```
+
+Do not chain a push off a grep of test output: `npx vitest run | grep ... && git push`
+runs on grep's exit status, not the suite's. Gate on the runner itself
+(`if npx vitest run >/dev/null 2>&1; then ...`).
+
+## Metrics that mislead
+
+Boundary counts are unweighted, so they read as reassuring exactly when they
+should not: Software measured "44 boundaries of 441 nodes, 10%" while
+rendering as a single empty box, because one boundary sat near the root and
+hid everything. Weight a boundary by the size of the subtree it hides.
+
+Segment before concluding. Fleet-wide counts are dominated by out-of-scope
+GNOME Circle presets, which come from a separate generator that never
+canonicalises class names; core-app numbers are much better than the totals
+suggest.
+
+Verify a claim about the codebase by parsing it, never by a range-limited
+grep. A "40 missing components" backlog reported on 2026-07-31 was an
+artefact of grepping a truncated slice of `CLASS_TO_WIDGET_MAP`; the registry
+already had all of them.
+
+Measure before building. The C adapter (#78) was built on the premise that it
+would resolve composites in four apps; one query afterwards showed zero of the
+fleet's unresolved boundaries were template-backed C classes. The same query
+would have been just as cheap beforehand.
+
 ## Pull requests and merges
 
 1. Review the current PR head, mergeability, checks, and any prior review.

@@ -199,7 +199,7 @@ build with, whether from the palette, the agent API, or a Blueprint import.
 - **Exports as:** `Gtk.ListBoxRow`
 - **Slots:** `child`
 - **Properties:** `activatable` (boolean)
-- **Accepts:** `box`, `bin`, `label`, `button`, `menu-button`, `switch-widget`, `check-button`, `avatar`, `progress-bar`, `level-bar`, `spinner`, `entry`, `inscription`, `custom-widget`
+- **Accepts:** any widget (generic container)
 
 ## `menu-button`
 
@@ -325,7 +325,7 @@ build with, whether from the palette, the agent API, or a Blueprint import.
 - **Exports as:** `Adw.StatusPage`
 - **Slots:** `child`
 - **Properties:** `title` (string), `description` (string), `iconName` (icon)
-- **Accepts:** `box`, `button`, `menu-button`, `label`, `clamp`, `list-box`, `bin`, `preferences-group`
+- **Accepts:** any widget (generic container)
 
 ## `switch-row`
 

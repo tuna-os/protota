@@ -269,6 +269,14 @@ interface MockupState {
   addScreen: (title: string, type: ScreenTemplateType) => void;
   moveNodeUp: (nodeId: string) => void;
   moveNodeDown: (nodeId: string) => void;
+  /**
+   * Reparent/reorder a node in a single undo snapshot, preserving identity.
+   * `index` is the drop position among the target's current children (before
+   * the node is removed); pass `children.length` to append. Illegal moves —
+   * a node into itself or its own descendant, a screen root, or an unknown
+   * id — are ignored.
+   */
+  moveNode: (nodeId: string, targetParentId: string, index: number, slot?: string) => void;
   deleteNode: (nodeId: string) => void;
   undo: () => void;
   redo: () => void;
@@ -436,6 +444,58 @@ export const useMockupStore = create<MockupState>((set, get) => {
             break;
           }
         }
+      });
+      set(pushSnapshot(nextDoc));
+    },
+
+    moveNode: (nodeId, targetParentId, index, slot) => {
+      if (nodeId === targetParentId) return;
+      const { doc } = get();
+      // Screen roots are anchors, not movable layers.
+      if (doc.screens.some((screen) => screen.rootNode.id === nodeId)) return;
+      let subject: AdwNode | null = null;
+      let sourceLoc: ReturnType<typeof findNodeLocation> = null;
+      for (const screen of doc.screens) {
+        sourceLoc = findNodeLocation(screen.rootNode, nodeId);
+        if (sourceLoc) { subject = sourceLoc.parentChildren[sourceLoc.index]; break; }
+      }
+      if (!subject || !sourceLoc) return;
+      // A node cannot move into itself or its own descendant.
+      if (findNodeById([subject], targetParentId)) return;
+      let target: AdwNode | null = null;
+      for (const screen of doc.screens) {
+        target = findNodeById([screen.rootNode], targetParentId);
+        if (target) break;
+      }
+      if (!target) return;
+      // Reordering to the position it already occupies is not an edit.
+      if (target.children === sourceLoc.parentChildren && slot === undefined) {
+        let finalIndex = Math.max(0, Math.min(index, target.children.length));
+        if (finalIndex > sourceLoc.index) finalIndex -= 1;
+        if (finalIndex === sourceLoc.index) return;
+      }
+
+      const nextDoc = produce(doc, (draft) => {
+        let loc: ReturnType<typeof findNodeLocation> = null;
+        for (const screen of draft.screens) {
+          loc = findNodeLocation(screen.rootNode, nodeId);
+          if (loc) break;
+        }
+        let draftTarget: AdwNode | null = null;
+        for (const screen of draft.screens) {
+          draftTarget = findNodeById([screen.rootNode], targetParentId);
+          if (draftTarget) break;
+        }
+        if (!loc || !draftTarget) return;
+        // Splice the same node object out and back in — never delete+add —
+        // so the node keeps its identity across the move.
+        const [moved] = loc.parentChildren.splice(loc.index, 1);
+        draftTarget.children = draftTarget.children ?? [];
+        let insertAt = Math.max(0, Math.min(index, draftTarget.children.length + 1));
+        if (loc.parentChildren === draftTarget.children && insertAt > loc.index) insertAt -= 1;
+        insertAt = Math.min(insertAt, draftTarget.children.length);
+        draftTarget.children.splice(insertAt, 0, moved);
+        if (slot !== undefined) moved.slot = slot || undefined;
       });
       set(pushSnapshot(nextDoc));
     },

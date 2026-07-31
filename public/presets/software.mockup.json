@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exportedAt": "2026-07-31T01:05:16.558Z",
+  "exportedAt": "2026-07-31T01:10:35.741Z",
   "generatedBy": "scripts/generate-preset.mjs",
   "document": {
     "id": "software-preset",
@@ -31,19 +31,19 @@
                       "children": [
                         {
                           "id": "details_leaflet",
-                          "type": "custom-widget",
+                          "type": "overlay-split",
                           "children": [
                             {
                               "id": "imported-3",
-                              "type": "custom-widget",
+                              "type": "stack-page",
                               "children": [
                                 {
                                   "id": "main_leaflet",
-                                  "type": "custom-widget",
+                                  "type": "overlay-split",
                                   "children": [
                                     {
                                       "id": "imported-4",
-                                      "type": "custom-widget",
+                                      "type": "stack-page",
                                       "children": [
                                         {
                                           "id": "imported-5",
@@ -1536,13 +1536,12 @@
                                           "slot": "child"
                                         }
                                       ],
-                                      "sourceClass": "Adw.LeafletPage",
-                                      "title": "AdwLeafletPage",
-                                      "name": "main"
+                                      "name": "main",
+                                      "sourceClass": "Adw.LeafletPage"
                                     },
                                     {
                                       "id": "imported-13",
-                                      "type": "custom-widget",
+                                      "type": "stack-page",
                                       "children": [
                                         {
                                           "id": "imported-14",
@@ -1960,25 +1959,22 @@
                                           "slot": "child"
                                         }
                                       ],
-                                      "sourceClass": "Adw.LeafletPage",
-                                      "title": "AdwLeafletPage",
-                                      "name": "sub"
+                                      "name": "sub",
+                                      "sourceClass": "Adw.LeafletPage"
                                     }
                                   ],
-                                  "sourceClass": "Adw.Leaflet",
-                                  "title": "AdwLeaflet",
                                   "canNavigateBack": true,
                                   "canUnfold": false,
+                                  "sourceClass": "Adw.Leaflet",
                                   "slot": "child"
                                 }
                               ],
-                              "sourceClass": "Adw.LeafletPage",
-                              "title": "AdwLeafletPage",
-                              "name": "main"
+                              "name": "main",
+                              "sourceClass": "Adw.LeafletPage"
                             },
                             {
                               "id": "imported-17",
-                              "type": "custom-widget",
+                              "type": "stack-page",
                               "children": [
                                 {
                                   "id": "imported-18",
@@ -4530,15 +4526,13 @@
                                   "slot": "child"
                                 }
                               ],
-                              "sourceClass": "Adw.LeafletPage",
-                              "title": "AdwLeafletPage",
-                              "name": "details"
+                              "name": "details",
+                              "sourceClass": "Adw.LeafletPage"
                             }
                           ],
-                          "sourceClass": "Adw.Leaflet",
-                          "title": "AdwLeaflet",
                           "canNavigateBack": true,
                           "canUnfold": false,
+                          "sourceClass": "Adw.Leaflet",
                           "slot": "child"
                         }
                       ],

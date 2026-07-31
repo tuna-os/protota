@@ -71,7 +71,7 @@ resolved subtree is a pass-through container, while a leaf boundary
 
 | App | Suite | Nodes | Boundary nodes | Dominant cause | Probe-resolvable? |
 | --- | --- | ---: | ---: | --- | --- |
-| calculator | core | 1949 | 5 | Vala composite (`MathButtons`, keypad renders) + GSettings mode state | yes (mode/state); node stays as marker |
+| calculator | core | 1949 | 5 | Vala composite (`MathButtons`, keypad renders) + GSettings mode state | **probe-confirmed** (committed dump, 2026-07-31) |
 | calendar | core | 276 | 6 | `snapshot()`-drawn week grid; runtime month grid | partly — month grid yes, week grid permanent |
 | clocks | core | 380 | 0 | — (runtime list content is default-empty) | n/a |
 | disks | core | 69 | 2 | C custom-drawn graph/meter | no (benchmark graph permanent); allocation bar probe-verified |
@@ -87,6 +87,9 @@ resolved subtree is a pass-through container, while a leaf boundary
 Totals: 85 boundary nodes across the twelve presets. Of these, 4 are
 documented permanently `snapshot()`-drawn, 7 are permanent-but-harmless
 (non-visual or pass-through), and the remaining 74 are #58 probe territory.
+Calculator's five nodes are the first settled by a committed probe dump
+(`presets-src/calculator.probe.json`, 2026-07-31): they stay as honest
+markers, now with dump-backed allocation and state instead of hedges.
 The 2026-07-31 regeneration (#59 Wave 1) removed three nodes from the
 previous 88: both `Adw.TabBar` renderer gaps were promoted to a registry
 widget (`tab-bar` — tabs derive from the linked `Adw.TabView`'s declared
@@ -106,14 +109,19 @@ guesswork about upstream code.
 
 | Boundary | Instances | Why static import stops | Status |
 | --- | ---: | --- | --- |
-| `MathButtons` (`_buttons`) | 5 (one per mode screen) | Vala-implemented composite instantiated at runtime (`docs/custom-widget-handoff.md`). Since the Vala construction-facts pass, each instance renders its keypad panel from `buttons-*.blp` (350 resolved children per instance) — the node remains as an honest marker. | pass-through / probe confirms panel choice |
+| `MathButtons` (`_buttons`) | 5 (one per mode screen) | Vala-implemented composite instantiated at runtime (`docs/custom-widget-handoff.md`). Since the Vala construction-facts pass, each instance renders its keypad panel from `buttons-*.blp` (350 resolved children per instance) — the node remains as an honest marker. | pass-through / **probe-confirmed**: the committed dump records `_buttons` mapped at `0,356 360x260` with `BasicButtonPanel` as the mapped panel |
 
 Runtime state recorded in `presets-src/calculator.finishing.json` (not nodes,
 but the same boundary class): converter visibility, active-mode button label,
-history-card allocation, and the currency spinner all depend on the GSettings
-`button-mode` and runtime data. `docs/gnome-app-conformance.md` already
-assigns this to the probe: "button-mode comes from GSettings at runtime
-(Phase 5 probe)". **Probe-resolvable.**
+history-card allocation, and the currency spinner all depended on the
+GSettings `button-mode` and runtime data. **Settled by the native probe
+(2026-07-31):** the committed dump `presets-src/calculator.probe.json`
+records `_converter`/`converter_box`, `back_button` and `spinner` unmapped
+and `BasicButtonPanel` as the mapped keypad panel in the default mode, and
+the corresponding finishing entries now carry `probeEvidence` and are
+re-validated against the dump on every generation run. Still hand-written
+because the probe records no label text or runtime list content: the mode
+MenuButton label and the history-card allocation.
 
 ### Calendar (`gnome-calendar` 49.1) — 6 boundary nodes
 
@@ -242,7 +250,15 @@ resolvable is progress to record; a boundary that disappears silently is a
 bug (`docs/source-widget-architecture.md`: renderer work may improve a
 boundary, "they may not disappear").
 
-When #58 lands, probe results move rows from "probe" to either resolved
-(delete the row, regenerate) or confirmed-permanent (mark it here); the
-"permanent" set is then closed and the pixel-accuracy goal of #32 is bounded
-rather than open-ended.
+#58 has landed, and the mechanism for settling probe-territory rows now
+exists end-to-end: run a probed capture (`docs/runtime-probe.md`), commit the
+dump as `presets-src/<app>.probe.json`, record the settled facts as
+`probeEvidence` finishing entries, and update this document's rows in the
+same change — Calculator (2026-07-31) is the worked example, its hedges
+replaced with dump-backed classifications above. Apps without a committed
+probed capture (Calendar, Disks, Files, Software, Text Editor, the Circle
+apps) keep their hedged "probe" / "probe verifies" rows until their dumps are
+captured the same way; a probe result then moves each row to either resolved
+(delete the row, regenerate) or confirmed-permanent (mark it here). Once the
+fleet is probed, the "permanent" set is closed and the pixel-accuracy goal of
+#32 is bounded rather than open-ended.

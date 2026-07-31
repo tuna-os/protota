@@ -117,3 +117,46 @@ rather than silently wrong. Matched nodes gain facts such as
 an unresolved boundary that matches also records `runtimeMatch`
 (`matchedBy`, `buildableId`, `gtype`, `bounds`) and its
 `geometryConfidence` becomes `native`.
+
+## Consuming the evidence (#55, ADR 0001 consumers)
+
+`applyRuntimeEvidence` (`src/utils/runtimeProfile.ts`) wires a join into the
+document the comparison renders, before the screenshot is taken:
+
+1. **Suppression.** A matched node the probe saw unmapped (or invisible) is
+   hidden at `native:visible` origin. This is what turns Calculator's
+   `converter_box` divergence from a hand guess into GTK's own answer — the
+   runtime-invisible converter subtree stops crowding its siblings.
+2. **Boundary allocation.** An unresolved boundary (childless
+   `custom-widget`) that matched a mapped widget takes **exactly** the
+   probe-measured bounds (`runtimeEvidence` on the node): the measurement
+   was taken on the very surface the comparison renders and already contains
+   GTK's expansion and sibling pressure, so the renderer applies it as a
+   fixed region — no flex growth past it, no squeeze below it. The DOM
+   marker and comparison artifact then carry `native:*` facts and `native`
+   confidence, with `runtimeMatch` recording GTK's own rect beside the
+   rendered one.
+
+Resolved nodes keep their statically imported geometry: the probe is
+evidence for what static import cannot settle, not a pixel overlay.
+
+## Probe-generated finishing entries
+
+A finishing override derived from a probe dump carries `probeEvidence`
+(see `scripts/generate-preset.mjs`):
+
+```jsonc
+{ "id": "_converter", "set": { "visible": false },
+  "probeEvidence": { "probeVersion": 1, "buildableId": "_converter",
+                     "expect": { "mapped": false } },
+  "why": "Native probe: _converter is unmapped in the default mode." }
+```
+
+The dump it came from is committed as `presets-src/<app>.probe.json`.
+`expect` states what that dump must still say about `buildableId`
+(checkable fields: `mapped`, `visible`, `visibleChildName`); on every
+generation run `validateProbeEvidence` re-checks it and a stale entry —
+missing dump, vanished id, or a dump that no longer says what the entry
+claims — aborts generation loudly, exactly like a manual override whose
+node id no longer matches the source. Fields the probe does not record
+(e.g. label text) are rejected as probe evidence and stay hand-written.

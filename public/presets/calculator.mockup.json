@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exportedAt": "2026-07-30T14:19:13.987Z",
+  "exportedAt": "2026-07-31T14:27:47.312Z",
   "generatedBy": "scripts/generate-preset.mjs",
   "document": {
     "id": "calculator-preset",
@@ -5055,7 +5055,8 @@
                               ],
                               "hhomogeneous": false,
                               "vhomogeneous": false,
-                              "sourceClass": "Gtk.Stack"
+                              "sourceClass": "Gtk.Stack",
+                              "visibleChildName": "bas_panel"
                             }
                           ],
                           "sourceClass": "MathButtons",
@@ -5064,7 +5065,10 @@
                           "bindings": {
                             "equation": "template.equation"
                           },
-                          "vexpand": true
+                          "vexpand": true,
+                          "geometryOrigin": {
+                            "vexpand": "code"
+                          }
                         }
                       ],
                       "vexpand": true,
@@ -10145,7 +10149,10 @@
                           "bindings": {
                             "equation": "template.equation"
                           },
-                          "vexpand": true
+                          "vexpand": true,
+                          "geometryOrigin": {
+                            "vexpand": "code"
+                          }
                         }
                       ],
                       "vexpand": true,
@@ -15225,7 +15232,10 @@
                           "bindings": {
                             "equation": "template.equation"
                           },
-                          "vexpand": true
+                          "vexpand": true,
+                          "geometryOrigin": {
+                            "vexpand": "code"
+                          }
                         }
                       ],
                       "vexpand": true,
@@ -20305,7 +20315,10 @@
                           "bindings": {
                             "equation": "template.equation"
                           },
-                          "vexpand": true
+                          "vexpand": true,
+                          "geometryOrigin": {
+                            "vexpand": "code"
+                          }
                         }
                       ],
                       "vexpand": true,
@@ -25385,7 +25398,10 @@
                           "bindings": {
                             "equation": "template.equation"
                           },
-                          "vexpand": true
+                          "vexpand": true,
+                          "geometryOrigin": {
+                            "vexpand": "code"
+                          }
                         }
                       ],
                       "vexpand": true,

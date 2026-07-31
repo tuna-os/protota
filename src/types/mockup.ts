@@ -165,10 +165,27 @@ export interface AdwNode {
   /**
    * Which layer produced a geometry-relevant property (#55): unset means the
    * declarative source declared it; 'code' means a static language adapter
-   * projected it from an application code assignment. Feeds the boundary's
-   * origin/confidence audit trail; never exported.
+   * projected it from an application code assignment; 'native' means the
+   * runtime probe (#58) measured it from the live GTK widget tree. Feeds the
+   * boundary's origin/confidence audit trail; never exported.
    */
-  geometryOrigin?: Record<string, 'code'>;
+  geometryOrigin?: Record<string, 'code' | 'native'>;
+  /**
+   * Native runtime evidence attached to an unresolved boundary (#55/#58):
+   * the probe-measured allocation GTK gave this widget, joined by buildable
+   * id or structure — never pixels. The renderer takes the boundary's
+   * allocation from these bounds; `boundaryGeometryFacts` publishes them as
+   * `native:*` facts at the top confidence tier. Never exported.
+   */
+  runtimeEvidence?: {
+    probeVersion: number;
+    matchedBy: 'buildable-id' | 'structure';
+    buildableId: string | null;
+    gtype: string;
+    mapped: boolean;
+    visible: boolean;
+    bounds: { x: number; y: number; width: number; height: number } | null;
+  };
   /** GTK visibility. `false` renders nothing, exactly like a hidden widget. */
   visible?: boolean;
   /**

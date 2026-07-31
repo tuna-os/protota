@@ -1469,11 +1469,23 @@ function expandBundleTemplates(source: string, templates: Map<string, BlueprintT
   });
 }
 
-/** Vala spellings that make the argument the receiver's sole child slot. */
-const VALA_SELF_CHILD_METHODS = new Set(['set_child', 'set_content', 'child', 'content']);
+/**
+ * Vala spellings that make the argument the receiver's sole child slot.
+ * `set_parent` is C's spelling of the same fact for a plain GtkWidget
+ * subclass: the widget parented directly onto the composite is its content.
+ */
+const VALA_SELF_CHILD_METHODS = new Set(['set_child', 'set_content', 'child', 'content', 'set_parent']);
 
 function formatBlueprintValue(value: string | number | boolean): string {
   return typeof value === 'string' ? `"${escapeBlueprintString(value)}"` : String(value);
+}
+
+/** `styles ["a", "b"]` for a fact target, or the empty string. */
+function factStyleClasses(facts: ValaClassFacts, target: string): string {
+  const names = (facts.styleClasses ?? [])
+    .filter(styleClass => styleClass.target === target)
+    .map(styleClass => `"${escapeBlueprintString(styleClass.name)}"`);
+  return names.length ? `styles [ ${names.join(', ')} ]` : '';
 }
 
 /**
@@ -1487,31 +1499,92 @@ function formatBlueprintValue(value: string | number | boolean): string {
 function valaCompositeSnippet(
   facts: ValaClassFacts,
   templates: Map<string, BlueprintTemplate>,
-): string | null {
-  const rootInsertion = facts.insertions.find(insertion => insertion.parent === 'this' && VALA_SELF_CHILD_METHODS.has(insertion.method));
-  if (!rootInsertion) return null;
+): { snippet: string; projectedBaseClass?: string } | null {
   const emitVariable = (variable: string): string | null => {
     const constructedClass = facts.constructions[variable];
     if (!constructedClass) return null;
+    // A popover parented in code is a popup surface allocated above the
+    // window, invisible until opened — the same reason the declarative
+    // parser filters `popover`-slot children out of the layout tree.
+    if (/Popover/.test(constructedClass)) return null;
     const short = constructedClass.split('.').pop() ?? constructedClass;
     if (templates.has(short)) return `$${short} ${variable} {}`;
     const properties = facts.propertyAssignments
       .filter(assignment => assignment.target === variable)
       .map(assignment => `${assignment.property.replace(/_/g, '-')}: ${formatBlueprintValue(assignment.value)};`)
       .join(' ');
+    const styles = factStyleClasses(facts, variable);
     const children = facts.insertions
       .filter(insertion => insertion.parent === variable)
       .map(insertion => emitVariable(insertion.child))
       .filter(Boolean)
       .join(' ');
     if (CLASS_TO_WIDGET_MAP[constructedClass] || CLASS_TO_WIDGET_MAP[short]) {
-      return `${constructedClass} ${variable} { ${properties} ${children} }`;
+      return `${constructedClass} ${variable} { ${properties} ${styles} ${children} }`;
     }
     // A nested code-defined class stays a boundary here; the enrichment walk
     // revisits it with its own facts.
     return `$${short} ${variable} {}`;
   };
-  return emitVariable(rootInsertion.child);
+
+  for (const insertion of facts.insertions) {
+    if (insertion.parent !== 'this' || !VALA_SELF_CHILD_METHODS.has(insertion.method)) continue;
+    const snippet = emitVariable(insertion.child);
+    if (snippet) return { snippet };
+  }
+
+  // No sole-child root, but the composite may *be* its declared base widget:
+  // `struct _EditorPreferencesSwitch { AdwActionRow row; … }` adds a switch
+  // suffix to itself in init. Projecting the base class with the code-added
+  // children is a construction fact, not a guess — gated on the base being a
+  // real renderable library class. A plain Gtk.Widget base names a
+  // custom-drawn widget and proves nothing renderable, so it is excluded.
+  const base = facts.baseClass;
+  if (!base) return null;
+  const canonicalBase = canonicalClassName(base);
+  if (canonicalBase === 'Gtk.Widget' || canonicalBase === 'Widget' || !CLASS_TO_WIDGET_MAP[canonicalBase]) return null;
+  const selfChildren = facts.insertions
+    .filter(insertion => insertion.parent === 'this')
+    .map(insertion => {
+      const body = emitVariable(insertion.child);
+      if (!body) return null;
+      // adw_action_row_add_suffix places its child in the `[suffix]` slot.
+      const slot = insertion.method.replace(/^(add|set)_/, '');
+      return ANNOTATION_SLOTS.has(slot) ? `[${slot}] ${body}` : body;
+    })
+    .filter(Boolean)
+    .join(' ');
+  // A chromeless container base with no discovered children would project as
+  // an empty box that renders nothing — a boundary silently erased, when the
+  // subclass almost certainly populates itself at runtime. A base that draws
+  // its own chrome (a row, an entry) is that widget even when empty.
+  const CHROMELESS_CONTAINER_TYPES = new Set([
+    'bin', 'box', 'grid', 'center-box', 'clamp', 'stack', 'scrolled-window',
+    'list-box', 'wrap-box', 'overlay-split', 'toolbar-view',
+  ]);
+  if (!selfChildren && CHROMELESS_CONTAINER_TYPES.has(CLASS_TO_WIDGET_MAP[canonicalBase])) return null;
+  const selfProperties = facts.propertyAssignments
+    .filter(assignment => assignment.target === 'this')
+    .map(assignment => `${assignment.property.replace(/_/g, '-')}: ${formatBlueprintValue(assignment.value)};`)
+    .join(' ');
+  return {
+    snippet: `${canonicalBase} { ${selfProperties} ${factStyleClasses(facts, 'this')} ${selfChildren} }`,
+    projectedBaseClass: canonicalBase,
+  };
+}
+
+/**
+ * C insertion calls carry their full symbol (`adw_action_row_add_suffix`);
+ * the enrichment engine reasons in Vala's short spellings (`add_suffix`).
+ */
+const C_METHOD_SUFFIXES = [
+  'set_parent', 'set_child', 'set_content', 'add_suffix', 'add_prefix',
+  'add_overlay', 'add_top_bar', 'add_bottom_bar', 'add_named', 'add_titled',
+  'add_child', 'append', 'prepend', 'attach', 'set_start_widget',
+  'set_end_widget', 'set_title_widget', 'set_extra_child',
+];
+function shortCMethod(method: string): string {
+  return C_METHOD_SUFFIXES.find(suffix => method === suffix || method.endsWith(`_${suffix}`)) ?? method;
 }
 
 /**
@@ -1527,8 +1600,9 @@ function valaShapeOfCFacts(facts: CClassFacts): ValaClassFacts {
     // C has no declared-default syntax; the template is the source of truth.
     propertyDefaults: {},
     constructions: facts.constructions,
-    insertions: facts.insertions,
+    insertions: facts.insertions.map(insertion => ({ ...insertion, method: shortCMethod(insertion.method) })),
     propertyAssignments: facts.propertyAssignments,
+    styleClasses: facts.styleClasses,
   };
 }
 
@@ -1570,21 +1644,44 @@ function enrichWithValaFacts(doc: MockupDocument, valaFiles: BlueprintSourceFile
       if (assignment.property === 'vexpand' || assignment.property === 'vexpand_set') projectFromCode('vexpand');
       if (assignment.property === 'hexpand' || assignment.property === 'hexpand_set') projectFromCode('hexpand');
     }
-    const snippet = valaCompositeSnippet(facts, templates);
-    if (!snippet) return;
+    const projection = valaCompositeSnippet(facts, templates);
+    if (!projection) return;
     const childDiagnostics: ImportDiagnostic[] = [];
-    const roots = parseBlueprintRoots(expandBundleTemplates(snippet, templates), childDiagnostics);
+    const roots = parseBlueprintRoots(expandBundleTemplates(projection.snippet, templates), childDiagnostics);
     if (!roots.length) return;
-    node.children = roots;
+    if (projection.projectedBaseClass) {
+      // The composite *is* its declared base widget. The node becomes that
+      // widget — declared source properties (title, subtitle, visibility)
+      // win over code facts — and stops being an unresolved boundary. Child
+      // ids are namespaced per instance: eleven preference rows must not
+      // share a `toggle`.
+      const projected = roots[0];
+      const namespaceIds = (child: AdwNode): void => {
+        child.id = `${node.id}-${child.id}`;
+        child.children?.forEach(namespaceIds);
+      };
+      projected.children?.forEach(namespaceIds);
+      node.type = projected.type;
+      node.children = projected.children ?? [];
+      if (node.title === node.sourceClass) delete node.title;
+      for (const [key, value] of Object.entries(projected)) {
+        if (key === 'id' || key === 'slot' || key === 'children' || key === 'type' || node[key] !== undefined) continue;
+        node[key] = value;
+      }
+    } else {
+      node.children = roots;
+    }
     diagnostics.push(...childDiagnostics, {
       code: 'static-source-expansion',
       sourceClass: node.sourceClass,
       sourceId: node.id,
-      message: `${node.sourceClass} composite discovered from Vala construction facts; contents projected from declarative templates in the source bundle.`,
+      message: projection.projectedBaseClass
+        ? `${node.sourceClass} is a code-defined subclass of ${projection.projectedBaseClass}; resolved to its base widget with its code-constructed children.`
+        : `${node.sourceClass} composite discovered from Vala construction facts; contents projected from declarative templates in the source bundle.`,
     });
     const nested = new Set(seen);
     nested.add(node.sourceClass);
-    roots.forEach(child => expandNode(child, nested));
+    (node.children ?? []).forEach(child => expandNode(child, nested));
   };
 
   // A binding to a template property with a declared literal default has a
@@ -1610,7 +1707,10 @@ function enrichWithValaFacts(doc: MockupDocument, valaFiles: BlueprintSourceFile
   const expandedKeys = new Set(
     diagnostics.filter(d => d.code === 'static-source-expansion').map(d => `${d.sourceClass}:${d.sourceId}`),
   );
-  doc.importDiagnostics = diagnostics.filter(d => !(d.code === 'template-not-in-bundle' && expandedKeys.has(`${d.sourceClass}:${d.sourceId}`)));
+  doc.importDiagnostics = diagnostics.filter(d => !(
+    (d.code === 'template-not-in-bundle' || d.code === 'renderer-does-not-support-class') &&
+    expandedKeys.has(`${d.sourceClass}:${d.sourceId}`)
+  ));
 }
 
 /**

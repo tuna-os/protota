@@ -42,6 +42,8 @@ export interface ValaClassFacts {
   insertions: ValaInsertion[];
   /** Literal property assignments in source order. */
   propertyAssignments: ValaPropertyAssignment[];
+  /** `x.add_css_class ("name")` calls with a literal class name. */
+  styleClasses?: Array<{ target: string; name: string }>;
 }
 
 /** Calls that make the argument a child of the receiver. */
@@ -211,6 +213,15 @@ export function extractValaFacts(code: string): ValaClassFacts[] {
     if (tokens[index + 1]?.value === '(') {
       const call = token.value;
       const method = shortName(call);
+      // A literal style class is a rendered fact, mirroring the C adapter's
+      // gtk_widget_add_css_class.
+      if (method === 'add_css_class' && tokens[index + 2]?.kind === 'string') {
+        const receiver = call.includes('.') ? call.slice(0, call.lastIndexOf('.')) : 'this';
+        if (!receiver.includes('.')) {
+          (facts.styleClasses ??= []).push({ target: receiver, name: tokens[index + 2].value });
+        }
+        continue;
+      }
       if (!CHILD_INSERT_METHODS.has(method)) continue;
       const receiver = call.includes('.') ? call.slice(0, call.lastIndexOf('.')) : 'this';
       if (receiver.includes('.')) continue; // chained receivers are not statically identifiable

@@ -1135,6 +1135,104 @@ html .protota-div-list-box-row + .protota-div-list-box-row {
   border-top: 1px solid var(--separator-color, rgba(0, 0, 6, 0.07));
 }
 
+/* Adw.TabBar: a headerbar-colored strip of tab chips over the view, ported
+   from libadwaita's tabbar stylesheet via @gjsify/adwaita-web's _tab_view.scss
+   (same colors and alpha fills; no drag-reorder or overflow chrome — those
+   are runtime interactions the mockup does not claim). */
+html .protota-div-tab-bar {
+  display: flex;
+  align-items: stretch;
+  flex-shrink: 0;
+  box-sizing: border-box;
+  padding: 0 1px 1px;
+  background-color: var(--headerbar-bg-color, #fff);
+  color: var(--headerbar-fg-color, rgba(0, 0, 6, 0.8));
+  box-shadow: inset 0 -1px var(--headerbar-shade-color, rgba(0, 0, 6, 0.12));
+  overflow: hidden;
+}
+html .protota-tab-box {
+  display: flex;
+  align-items: stretch;
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 4px 0;
+}
+html .protota-tab {
+  position: relative;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-xs, 6px);
+  max-width: 200px;
+  min-width: 0;
+  min-height: 26px;
+  padding: 0 var(--spacing-m, 12px);
+  border-radius: var(--button-radius, 9px);
+  font-size: var(--font-size-base, 15px);
+  line-height: 1;
+}
+/* The selected tab: libadwaita's currentColor alpha fill over the tab slot. */
+html .protota-tab-active {
+  background-color: color-mix(in srgb, currentColor 10%, transparent);
+}
+/* A lone tab draws no chip background (libadwaita keeps it flat). */
+html .protota-div-tab-bar[data-protota-single-tab] .protota-tab {
+  background: none;
+}
+/* Thin separators between tabs, hidden beside the selected one. */
+html .protota-tab + .protota-tab::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 3px;
+  bottom: 3px;
+  width: 1px;
+  background-color: currentColor;
+  opacity: 0.2;
+  pointer-events: none;
+}
+html .protota-tab-active + .protota-tab::before {
+  opacity: 0;
+}
+html .protota-tab-title {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+/* CSS-drawn close affordance ("x"), as the native tab draws per tab. */
+html .protota-tab-close {
+  box-sizing: border-box;
+  flex-shrink: 0;
+  position: relative;
+  width: 18px;
+  height: 18px;
+  border-radius: 9999px;
+  opacity: 0.7;
+}
+html .protota-tab-close::before,
+html .protota-tab-close::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 9px;
+  height: 1.5px;
+  background-color: currentColor;
+  border-radius: 1px;
+}
+html .protota-tab-close::before {
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+html .protota-tab-close::after {
+  transform: translate(-50%, -50%) rotate(-45deg);
+}
+/* Start/end action widgets (buttons in real usage) sit beside the tab box. */
+html .protota-div-tab-bar > .adw-node-wrapper > * {
+  align-self: center;
+}
+
 /* ---- Drag and drop (#79) ---- */
 
 /* Palette entries in the left panel: plain DOM rows that start HTML5 drags. */

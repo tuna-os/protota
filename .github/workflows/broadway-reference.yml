@@ -70,11 +70,11 @@ jobs:
             echo 'enabled=false' >> "$GITHUB_OUTPUT"
           fi
       - if: steps.select.outputs.enabled == 'true'
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
       - if: steps.select.outputs.enabled == 'true'
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
-          node-version: 22
+          node-version: 24
           cache: npm
       - if: steps.select.outputs.enabled == 'true'
         run: npm ci
@@ -95,7 +95,12 @@ jobs:
         run: docker build --build-arg APP_PACKAGE="$BROADWAY_APP_PACKAGE" --build-arg APP_COMMAND="$BROADWAY_APP_COMMAND" --tag protota-broadway-app containers/broadway
       - if: steps.select.outputs.enabled == 'true'
         name: Start native app
-        run: docker run --detach --rm --name protota-broadway-app -p 8085:8085 protota-broadway-app
+        # The /probe volume opts in to the read-only runtime probe (#58).
+        # A capture without a probe.json proceeds unchanged — the probe is
+        # evidence, never a gate on the capture itself.
+        run: |
+          mkdir -p "$PWD/.probe-local" && chmod 777 "$PWD/.probe-local"
+          docker run --detach --rm --name protota-broadway-app -p 8085:8085 -v "$PWD/.probe-local:/probe" protota-broadway-app
       - if: steps.select.outputs.enabled == 'true'
         name: Wait for Broadway
         run: until curl --fail --silent http://127.0.0.1:8085/; do sleep 1; done
@@ -103,10 +108,10 @@ jobs:
         name: Capture native and Protota output
         env:
           BROADWAY_MAX_DIFF_RATIO: ${{ inputs.max_diff_ratio }}
-        run: BROADWAY_URL=http://127.0.0.1:8085/ BROADWAY_PRESET_ID="$BROADWAY_PRESET_ID" BROADWAY_VIEWPORT_WIDTH="$BROADWAY_VIEWPORT_WIDTH" BROADWAY_VIEWPORT_HEIGHT="$BROADWAY_VIEWPORT_HEIGHT" BROADWAY_SOURCE_ROOT="$BROADWAY_SOURCE_ROOT" BROADWAY_SOURCE_ENTRY="$BROADWAY_SOURCE_ENTRY" npx playwright test tests/broadway-reference.spec.ts
+        run: BROADWAY_URL=http://127.0.0.1:8085/ BROADWAY_PRESET_ID="$BROADWAY_PRESET_ID" BROADWAY_VIEWPORT_WIDTH="$BROADWAY_VIEWPORT_WIDTH" BROADWAY_VIEWPORT_HEIGHT="$BROADWAY_VIEWPORT_HEIGHT" BROADWAY_SOURCE_ROOT="$BROADWAY_SOURCE_ROOT" BROADWAY_SOURCE_ENTRY="$BROADWAY_SOURCE_ENTRY" BROADWAY_PROBE_FILE="$PWD/.probe-local/probe.json" npx playwright test tests/broadway-reference.spec.ts
       - name: Upload reference captures
         if: always() && steps.select.outputs.enabled == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: ${{ matrix.app }}-broadway-reference
           path: test-results/

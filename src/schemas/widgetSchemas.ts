@@ -58,6 +58,13 @@ export const WIDGET_SCHEMAS: Record<AdwNodeType, PropSchema[]> = {
   'view-switcher': [],
   'navigation-view': [],
   'tab-view': [],
+  'tab-bar': [
+    // The id of the Adw.TabView this bar presents; tabs derive from that
+    // view's statically declared pages.
+    { key: 'view', label: 'Tab view (id)', type: 'string', defaultValue: '' },
+    // Adw.TabBar default: the bar hides when the view has fewer than two tabs.
+    { key: 'autohide', label: 'Autohide', type: 'boolean', defaultValue: true },
+  ],
   'overlay-split': [],
 
   // === Layout ===

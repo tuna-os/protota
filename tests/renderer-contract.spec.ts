@@ -83,3 +83,44 @@ test('tab bar renders its tabs from the linked tab view pages', async ({ page })
   // Each tab draws a close affordance, as the native strip does.
   await expect(bar.locator('.protota-tab-close')).toHaveCount(2);
 });
+
+// #59 Wave 1 (app composites): a code-defined preference row resolves to its
+// Adw.ActionRow base with a code-constructed suffix — the renderer must draw
+// the row chrome, the suffix widget in its slot, and a Gtk.Image bin's icon.
+const projectedRowDocument = {
+  id: 'projected-row-contract', title: 'Projected row contract', colorScheme: 'auto', edges: [],
+  screens: [{
+    id: 'screen', title: 'Preferences', type: 'standard', width: 640, height: 400,
+    rootNode: {
+      id: 'window', type: 'window', children: [{
+        id: 'group', type: 'preferences-group', children: [
+          {
+            id: 'wrap', type: 'action-row', title: 'Wrap Lines', sourceClass: 'EditorPreferencesSwitch',
+            children: [{ id: 'wrap-toggle', type: 'switch-widget', slot: 'suffix', children: [] }],
+          },
+          {
+            id: 'font', type: 'action-row', title: 'Custom Font', sourceClass: 'EditorPreferencesFont',
+            children: [{ id: 'font-chevron', type: 'bin', iconName: 'go-next-symbolic', slot: 'suffix', children: [] }],
+          },
+        ],
+      }],
+    },
+  }],
+};
+
+test('a projected preference row renders row chrome, suffix switch, and image icon', async ({ page }) => {
+  await page.goto('/');
+  await page.evaluate((document) => localStorage.setItem('protota_doc_v1', JSON.stringify(document)), projectedRowDocument);
+  await page.reload();
+
+  const wrap = page.locator('[data-protota-type="action-row"][data-node-id="wrap"]');
+  await expect(wrap).toBeVisible();
+  await expect(wrap).toHaveAttribute('title', 'Wrap Lines');
+  // The code-constructed switch sits in the suffix slot, not as a boundary.
+  const toggle = page.locator('[data-protota-type="switch-widget"][data-node-id="wrap-toggle"]');
+  await expect(toggle).toHaveAttribute('data-protota-type', 'switch-widget');
+  await expect(toggle.locator('..')).toHaveAttribute('slot', 'suffix');
+  // A Gtk.Image imported as a bin draws its declared icon.
+  const chevron = page.locator('[data-protota-type="bin"][data-node-id="font-chevron"] .adw-icon');
+  await expect(chevron).toHaveClass(/adw-icon--go-next/);
+});

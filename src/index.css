@@ -471,6 +471,7 @@ adw-window > .adw-node-wrapper,
 .adw-osv-sidebar > .adw-node-wrapper,
 .protota-div-bin > .adw-node-wrapper,
 .protota-div-stack > .adw-node-wrapper,
+.protota-div-view-stack > .adw-node-wrapper,
 .protota-div-stack-page > .adw-node-wrapper {
   flex: 1 1 auto;
   min-height: 0;
@@ -484,12 +485,14 @@ adw-window > .adw-node-wrapper > *,
 .adw-osv-sidebar > .adw-node-wrapper > *,
 .protota-div-bin > .adw-node-wrapper > *,
 .protota-div-stack > .adw-node-wrapper > *,
+.protota-div-view-stack > .adw-node-wrapper > *,
 .protota-div-stack-page > .adw-node-wrapper > * {
   flex: 1 1 auto;
   min-height: 0;
 }
 .protota-div-bin,
 .protota-div-stack,
+.protota-div-view-stack,
 .protota-div-stack-page,
 .protota-div-navigation-view {
   display: flex;

@@ -136,7 +136,7 @@ npx tsx scripts/export-blueprint.mjs      # writes artifacts/blp/<app>-<screen>.
 for f in *.blp; do blueprint-compiler compile "$f" >/dev/null || echo "FAIL $f"; done
 ```
 
-State as of 2026-07-30: **15 of 27** exported screens compile, up from 1. The
+State as of 2026-07-30: **19 of 27** exported screens compile, up from 1. The
 emitter had been producing camelCase property names, `top { }` blocks instead
 of `[top]` annotations, quoted enums and object references, editor-only style
 flags (`suggested: true`), and signal handlers as properties.
@@ -167,52 +167,17 @@ required when patching back into the app's own source where `template.` still
 resolves. `mockupToBlueprint(doc, { standalone: true })` drops them, because a
 file on its own has no template context. Validation uses standalone mode.
 
-Remaining failures are a long tail: menus and adjustments the export does not
-carry, string values for object-typed properties, and widgets whose child is a
-string in source. Tracked in issue #77.
+Remaining failures are four distinct causes, each verified against the
+compiler and tracked in issue #77:
 
-## Building UIs programmatically (agents)
+| File | Compiler error | Cause |
+| --- | --- | --- |
+| calculator-preferences | Cannot convert string to number | numeric property emitted as a string |
+| ear-tag-main | Gtk.ActionBar has no property `orientation` | `Gtk.ActionBar` is missing from the generated GIR table, so nothing filters it |
+| files-properties | Cannot convert string to Pango.WrapMode | enum-typed properties need coercion; the table stores names, not types |
+| text-editor-preferences | Unexpected tokens | not yet minimised |
 
-The same building blocks are a typed API — `src/utils/agent-api.ts`:
-
-```ts
-import { MockupBuilder } from './src/utils/agent-api';
-
-const doc = new MockupBuilder('My App')
-  .addScreen('standard', 'Main')
-  .addWidget('toolbar-view').addWidget('header-bar', { title: 'My App' }).up()
-  .addScreen('preferences', 'Preferences')
-  .connectScreens('Main', 'Preferences')          // flow edge, drawn on canvas
-  .build();
-
-// Or start from real source / an existing preset:
-const imported = new MockupBuilder('From Source')
-  .importScreens(files, 'window.blp')             // full importer: templates, Vala facts, boundaries
-  .overrideNode('sidebar', { visible: false })    // finishing-style override
-  .build();
-```
-
-`MockupBuilder.fromDocument(doc)` continues from any existing document.
-`validate()` checks child legality before you ship.
-
-GNOME layout is slot-driven, so placement is part of adding a widget:
-
-```ts
-MockupBuilder.slotsFor(header-bar);   // [start, title, end]
-MockupBuilder.childrenFor(list-box);  // widgets a boxed list accepts
-
-builder.addWidget(button, { title: Open, slot: start });
-```
-
-A slot the container does not offer is rejected rather than silently placed
-somewhere else. In the editor the same control is the Slot selector at the
-top of the Inspector.
-
-## In the editor (users)
-
-- **Flows**: select anything in a screen — the Inspector shows the screen's
-  flows with add/remove. The toolbar **Flows** button toggles the arrows.
-- **Save JSON / Code Export / PNG**: toolbar buttons export the document, the
-  generated Blueprint, or a screen image.
-- Importing a `.blp`/`.ui` file via File → Import runs the same importer as
-  the preset pipeline.
+The first three share a root: the property table records which properties exist
+but not their *types*, so the emitter cannot tell a number or an enum from a
+string. Extending `scripts/extract-gtk-properties.mjs` to carry types would
+close them together.

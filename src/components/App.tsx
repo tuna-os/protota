@@ -79,6 +79,30 @@ export const App: React.FC = () => {
   };
 
   // Listen for MenuBar custom events
+  // Rendering settles asynchronously: webfonts load, the runtime icon
+  // registry injects CSS, and the adw-* custom elements upgrade. Publish a
+  // readiness flag once all of that has painted so automation — screenshot
+  // tests, the capture tooling, anything driving the editor — can wait for a
+  // settled frame instead of guessing with a timeout.
+  useEffect(() => {
+    let cancelled = false;
+    const root = document.documentElement;
+    delete root.dataset.prototaReady;
+    const settle = async () => {
+      try {
+        await document.fonts.ready;
+      } catch {
+        // A browser without the font API still gets the frame wait below.
+      }
+      await new Promise<void>((resolve) =>
+        requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
+      );
+      if (!cancelled) root.dataset.prototaReady = "true";
+    };
+    void settle();
+    return () => { cancelled = true; };
+  }, [doc]);
+
   useEffect(() => {
     const onToggleLayers = () => setLeftOpen((v) => !v);
     const onToggleProperties = () => setRightOpen((v) => !v);

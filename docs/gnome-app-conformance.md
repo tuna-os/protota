@@ -23,11 +23,11 @@ to drive down is the app-defined count, not boundaries in general.
 
 | App | Screens | Nodes | Boundaries | Unresolved classes |
 | --- | ---: | ---: | ---: | --- |
-| text-editor | 2 | 83 | 14 | AdwTabBar, Editor* composites (C) |
+| text-editor | 2 | 82 | 12 | Editor* composites (C) |
 | ear-tag | 1 | 90 | 13 | Eartag* composites (Python/GTK) |
 | amberol | 1 | 74 | 10 | Amberol* composites (Rust) |
 | calendar | 2 | 276 | 8 | Gcal* composites (C) |
-| files | 4 | 178 | 6 | Nautilus* composites (C), AdwTabBar, GtkLevelBar |
+| files | 4 | 178 | 4 | Nautilus* composites (C) |
 | calculator | 6 | 1939 | 5 | MathButtons instances (Vala; keypad renders) |
 | disks | 3 | 65 | 2 | GduBenchmarkGraph, GduSpaceAllocationBar (C) |
 | clocks | 5 | 380 | 0 | -- |
@@ -37,9 +37,14 @@ to drive down is the app-defined count, not boundaries in general.
 
 Four apps import with no unresolved widgets at all. The largest remaining
 category is C-defined composites: one C language adapter would cover
-Nautilus, Calendar, Text Editor, and Disks together. The rest is two
-GTK/libadwaita widgets the renderer does not draw yet (AdwTabBar's tab
-strip, GtkLevelBar's meter).
+Nautilus, Calendar, Text Editor, and Disks together. The two stock-widget
+renderer gaps this table originally recorded are closed: GtkLevelBar's meter
+renders generically, and AdwTabBar was promoted to a registry widget (#59
+Wave 1, 2026-07-31) — its tab strip derives from the linked AdwTabView's
+declared pages, with runtime-populated views honestly empty until the #58
+probe. Text Editor's and Files' rows above reflect the 2026-07-31
+regeneration (Text Editor also dropped its non-visual `Gtk.SourceBuffer`
+boundary node, which the importer now filters).
 
 ## Required sequence
 

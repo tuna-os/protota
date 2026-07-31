@@ -51,6 +51,7 @@ export const ALL_WIDGETS: { type: AdwNodeType; label: string; desc: string }[] =
   { type: "toggle-group", label: "Toggle Group", desc: "Group of toggles" },
   { type: "view-stack", label: "View Stack", desc: "Switched pages" },
   { type: "tab-view", label: "Tab View", desc: "Multi-document tabs" },
+  { type: "tab-bar", label: "Tab Bar", desc: "Tab strip bound to a tab view" },
   { type: "overlay-split", label: "Overlay Split", desc: "Sidebar + content" },
   { type: "view-switcher", label: "View Switcher", desc: "Flat tab bar" },
   { type: "navigation-view", label: "Navigation View", desc: "Push/pop nav" },

@@ -21,7 +21,8 @@ export type AdwNodeType =
   | 'view-stack'       // AdwViewStack — stack of pages with ViewSwitcher
   | 'view-switcher'    // AdwViewSwitcher — flat tab switcher (3-5 tabs)
   | 'navigation-view'  // AdwNavigationView — push/pop navigation
-  | 'tab-view'         // AdwTabView + TabBar — multi-document tabs
+  | 'tab-view'         // AdwTabView — multi-document tab pages
+  | 'tab-bar'          // AdwTabBar — tab strip bound to a TabView
   | 'overlay-split'    // AdwOverlaySplitView — sidebar + content
 
   // Layout
@@ -235,6 +236,7 @@ export const LEGAL_SLOTS: Partial<Record<AdwNodeType, string[]>> = {
   'toolbar-view': ['top', 'content', 'bottom'],
   'overlay-split': ['sidebar', 'content'],
   'navigation-view': ['content'],
+  'tab-bar': ['start-action-widget', 'end-action-widget'],
   'status-page': ['child'],
   'action-row': ['prefix', 'suffix'],
   'switch-row': ['prefix', 'suffix'],
@@ -263,7 +265,7 @@ export const LEGAL_SLOTS: Partial<Record<AdwNodeType, string[]>> = {
  */
 const CONTAINER_CHILDREN: AdwNodeType[] = [
   'toolbar-view', 'header-bar', 'window-title',
-  'view-stack', 'view-switcher', 'navigation-view', 'tab-view', 'overlay-split',
+  'view-stack', 'view-switcher', 'navigation-view', 'tab-view', 'tab-bar', 'overlay-split',
   'clamp', 'bin', 'custom-widget', 'box', 'grid', 'center-box', 'stack', 'stack-page',
   'scrolled-window', 'wrap-box', 'popover',
   'action-row', 'switch-row', 'combo-row', 'spin-row', 'button-row', 'expander-row',
@@ -304,6 +306,10 @@ export const LEGAL_CHILDREN: Record<AdwNodeType, AdwNodeType[]> = {
   'view-switcher': [],
   'navigation-view': CONTAINER_CHILDREN,
   'tab-view': CONTAINER_CHILDREN,
+  // Adw.TabBar draws its tabs from the linked TabView's pages; its only real
+  // child positions are the start/end action-widget slots (single widget each,
+  // buttons in every audited app that uses them).
+  'tab-bar': ['button', 'menu-button', 'split-button', 'box'],
   'overlay-split': CONTAINER_CHILDREN,
   // === Layout ===
   clamp: CONTAINER_CHILDREN,

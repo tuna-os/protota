@@ -10,7 +10,7 @@ build with, whether from the palette, the agent API, or a Blueprint import.
 - **Properties** — what the inspector and the builder can set.
 - **Accepts** — legal children; generic containers accept any widget.
 
-57 components.
+58 components.
 
 ## `about-dialog`
 
@@ -340,6 +340,13 @@ build with, whether from the palette, the agent API, or a Blueprint import.
 - **Slots:** —
 - **Properties:** `active` (boolean)
 - **Accepts:** nothing (leaf)
+
+## `tab-bar`
+
+- **Exports as:** `Adw.TabBar`
+- **Slots:** `start-action-widget`, `end-action-widget`
+- **Properties:** `view` (string), `autohide` (boolean)
+- **Accepts:** `button`, `menu-button`, `split-button`, `box`
 
 ## `tab-view`
 

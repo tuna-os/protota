@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exportedAt": "2026-07-30T14:19:48.502Z",
+  "exportedAt": "2026-07-31T13:11:02.882Z",
   "generatedBy": "scripts/generate-preset.mjs",
   "document": {
     "id": "text-editor-preset",
@@ -163,11 +163,10 @@
                     },
                     {
                       "id": "tab_bar",
-                      "type": "custom-widget",
+                      "type": "tab-bar",
                       "children": [],
-                      "sourceClass": "Adw.TabBar",
-                      "title": "AdwTabBar",
                       "view": "tab_view",
+                      "sourceClass": "Adw.TabBar",
                       "slot": "top",
                       "heightRequest": 34
                     },
@@ -579,16 +578,7 @@
                     {
                       "id": "source_view",
                       "type": "entry",
-                      "children": [
-                        {
-                          "id": "buffer",
-                          "type": "custom-widget",
-                          "children": [],
-                          "sourceClass": "Gtk.SourceBuffer",
-                          "title": "GtkSourceBuffer",
-                          "slot": "buffer"
-                        }
-                      ],
+                      "children": [],
                       "editable": false,
                       "cursorVisible": false,
                       "topMargin": 8,
@@ -599,7 +589,7 @@
                       "monospace": true,
                       "showLineNumbers": true,
                       "marginBottom": 24,
-                      "sourceClass": "Gtk.SourceView"
+                      "sourceClass": "GtkSource.View"
                     },
                     {
                       "id": "scheme_group",

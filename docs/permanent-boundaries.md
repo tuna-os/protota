@@ -60,7 +60,9 @@ resolved subtree is a pass-through container, while a leaf boundary
   runtime-populated composites").
 - **renderer gap** — a stock GTK/libadwaita widget the renderer does not draw
   yet. Statically fixable; listed so it is not mistaken for a permanent
-  boundary (`docs/gnome-app-conformance.md`: "AdwTabBar's tab strip").
+  boundary. As of the #59 Wave 1 `Adw.TabBar` promotion (2026-07-31) this
+  category is empty: no boundary node in the shipped presets is a stock
+  widget.
 - **pass-through** — a boundary node whose imported children resolved and
   render; the wrapper itself contributes no pixels by default. Permanent as a
   node, visually harmless.
@@ -73,19 +75,24 @@ resolved subtree is a pass-through container, while a leaf boundary
 | calendar | core | 276 | 6 | `snapshot()`-drawn week grid; runtime month grid | partly — month grid yes, week grid permanent |
 | clocks | core | 380 | 0 | — (runtime list content is default-empty) | n/a |
 | disks | core | 69 | 2 | C custom-drawn graph/meter | no (benchmark graph permanent); allocation bar probe-verified |
-| files | core | 178 | 5 | runtime C composites; `snapshot()`-drawn path bar | partly — sidebar/entry yes, path bar permanent |
+| files | core | 178 | 4 | runtime C composites; `snapshot()`-drawn path bar | partly — sidebar/entry yes, path bar permanent |
 | settings | core | 17 | 0 | panel list and panels are runtime C widgets (no nodes emitted) | yes — entirely probe territory |
 | software | core | 441 | 38 | runtime-populated pages + drawn star/review primitives | mostly yes; paintables permanent |
-| text-editor | core | 83 | 14 | C preference composites; non-visual `Gtk.SourceBuffer` | yes except buffer (non-visual, permanent) |
+| text-editor | core | 82 | 12 | C preference composites | yes |
 | weather | core | 15 | 0 | GJS runtime tree; default screen is the empty search view | n/a (residual delta is font rasterisation/window shadow) |
 | amberol | circle | 74 | 6 | Rust composites (waveform, marquee, cover art) | probe determines; waveform likely permanent |
 | ear-tag | circle | 90 | 12 | Python/GTK composites | yes |
 | graphs | circle | 52 | 0 | — | n/a |
 
-Totals: 88 boundary nodes across the twelve presets. Of these, 4 are
-documented permanently `snapshot()`-drawn, 8 are permanent-but-harmless
-(non-visual or pass-through), 2 are statically fixable renderer gaps
-(`Adw.TabBar`), and the remaining 74 are #58 probe territory.
+Totals: 85 boundary nodes across the twelve presets. Of these, 4 are
+documented permanently `snapshot()`-drawn, 7 are permanent-but-harmless
+(non-visual or pass-through), and the remaining 74 are #58 probe territory.
+The 2026-07-31 regeneration (#59 Wave 1) removed three nodes from the
+previous 88: both `Adw.TabBar` renderer gaps were promoted to a registry
+widget (`tab-bar` — tabs derive from the linked `Adw.TabView`'s declared
+pages), and Text Editor's non-visual `Gtk.SourceBuffer` node is no longer
+emitted because the importer's non-visual filter learned `SourceBuffer`
+after that preset was last generated.
 
 ## Per-app boundary list
 
@@ -134,7 +141,7 @@ default `AdwViewStack` pages against official screenshots.
 | `GduBenchmarkGraph` | 1 | Drawn with `snapshot()` — named by the maintainer as a permanent honest boundary (#32, #81). | **permanent** |
 | `GduSpaceAllocationBar` | 1 | C custom-drawn allocation meter; no declarative template. Expected permanent for the same reason as the graph; the probe run settles it definitively. | probe verifies (likely permanent) |
 
-### Files (`nautilus` 49.1) — 5 boundary nodes
+### Files (`nautilus` 49.1) — 4 boundary nodes
 
 | Boundary | Instances | Why static import stops | Status |
 | --- | ---: | --- | --- |
@@ -142,10 +149,12 @@ default `AdwViewStack` pages against official screenshots.
 | `NautilusSidebar` | 1 | Runtime C widget (`docs/gnome-source-import.md`: "directory list/grid and sidebar are runtime C widgets"; #81: probe is the route to the Nautilus sidebar). | **probe** |
 | `NautilusPathBar` | 1 | Drawn with `snapshot()` — named by the maintainer as a permanent honest boundary (#32, #81). | **permanent** |
 | `NautilusLocationEntry` | 1 | C composite, swapped with the path bar at runtime. | probe |
-| `Adw.TabBar` | 1 | Stock widget the renderer does not draw yet (`docs/gnome-app-conformance.md`). | renderer gap (statically fixable) |
 
 Beyond the nodes: the directory list/grid view is runtime-populated —
-**probe-resolvable**.
+**probe-resolvable**. The former `Adw.TabBar` renderer-gap boundary was
+promoted to the `tab-bar` registry widget (#59 Wave 1): with zero statically
+declared pages and `autohide` at its default, the promoted strip renders
+nothing — matching the native app, whose single-tab bar autohides.
 
 ### Settings (`gnome-control-center` 49.1) — 0 boundary nodes
 
@@ -172,14 +181,21 @@ because `gs-shell.ui` declares the template `visible=False` (presented
 programmatically) — fixed by the single finishing override in
 `presets-src/software.finishing.json`.
 
-### Text Editor (`gnome-text-editor` 49.1) — 14 boundary nodes
+### Text Editor (`gnome-text-editor` 49.1) — 12 boundary nodes
 
 | Boundary | Instances | Why static import stops | Status |
 | --- | ---: | --- | --- |
 | `EditorFullscreenBox` | 1 | C wrapper; its 49 imported children render. | pass-through |
-| `Adw.TabBar` | 1 | Renderer does not draw the tab strip yet; finishing pins its 34px runtime allocation. | renderer gap |
-| `Gtk.SourceBuffer` | 1 | Non-visual buffer object, not a widget (filtered from export for the same reason, PR #104). Document text is runtime/user content. | **permanent** (non-visual) |
 | `EditorPreferencesFont` / `EditorPreferencesSwitch` / `EditorPreferencesSpin` | 11 | C preference-row composites in the preferences dialog; no declarative templates. | probe |
+
+Two former boundaries left this table in the 2026-07-31 regeneration:
+`Adw.TabBar` was promoted to the `tab-bar` registry widget (#59 Wave 1 —
+the finishing file still pins its 34px runtime allocation, so the strip's
+chrome renders at the allocated height; the single runtime tab's label is
+#58 probe territory), and the non-visual `Gtk.SourceBuffer` node is no
+longer emitted at all — the importer's non-visual filter learned
+`SourceBuffer` (the same reason it is filtered from export, PR #104) after
+this preset was last generated. Document text remains runtime/user content.
 
 ### Weather (`gnome-weather` 49.0) — 0 boundary nodes
 

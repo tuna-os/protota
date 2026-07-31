@@ -36,11 +36,18 @@ generated reports cleaned up after use.
 ## Diagnosing a rendering failure
 
 If a preset renders wrongly, **observe the DOM before theorising**. This
-checkout cannot launch Chromium, but himachal can:
+checkout cannot launch Chromium; himachal has the capacity but, as of
+2026-07-31, **no node and no browser image installed** — the loop needs a
+one-time setup:
 
 ```sh
-ssh himachal 'cd /var/home/james/work/protota && git fetch && git checkout <sha> \
-  && npx playwright test tests/presets.spec.ts --reporter=line'
+# One-time on himachal: podman pull mcr.microsoft.com/playwright:v1.50.0-noble
+# Do not mutate /var/home/james/work/protota — it carries local modifications.
+ssh himachal 'cd /var/home/james/work/protota && git fetch \
+  && git worktree add -f /var/home/james/pr<N> FETCH_HEAD'
+ssh himachal 'podman run --rm -v /var/home/james/pr<N>:/w:z -w /w \
+  mcr.microsoft.com/playwright:v1.50.0-noble \
+  sh -c "npm ci --silent && npx playwright test <spec> --reporter=line"'
 ```
 
 One observation beats several rounds of source-reading. A CI round trip costs

@@ -80,7 +80,7 @@ function sourceBundleDocument() {
   // Recursive: declarative UI files plus language sources for static
   // enrichment (Phase 4), wherever the app keeps them under the source root.
   const files = readdirSync(sourceRoot, { recursive: true, withFileTypes: true })
-    .filter(entry => entry.isFile() && /\.(blp|ui|vala)$/i.test(entry.name))
+    .filter(entry => entry.isFile() && /\.(blp|ui|vala|c)$/i.test(entry.name))
     .map(entry => {
       const absolute = join(entry.parentPath, entry.name);
       return { path: relative(sourceRoot, absolute), content: readFileSync(absolute, 'utf8') };
@@ -127,7 +127,7 @@ test.describe('Broadway reference captures', () => {
     // first, structural gtype ordinal second, never pixels. The join needs
     // source-graph node ids, so it only runs in source-bundle mode.
     let runtimeProfile: RuntimeProfileReport | null = null;
-    let appliedEvidence: { suppressed: string[]; allocated: string[] } | null = null;
+    let appliedEvidence: { suppressed: string[]; revealed: string[]; allocated: string[] } | null = null;
     if (probeFile && existsSync(probeFile) && sourceDocument) {
       try {
         const probe = JSON.parse(readFileSync(probeFile, 'utf8')) as ProbeDocument;

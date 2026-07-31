@@ -416,7 +416,10 @@ export function extractCFacts(code: string): CClassFacts[] {
     }
 
     // Construction: `Type *var = gtk_label_new (...)` or a bare assignment.
-    const assignment = /([A-Za-z_][A-Za-z0-9_]*)\s*(?:->\s*([A-Za-z_][A-Za-z0-9_]*)\s*)?=\s*$/
+    // `g_object_ref_sink (…)` / `g_object_ref (…)` are transparent ownership
+    // wrappers — the GObject idiom for keeping a floating widget alive — so an
+    // assignment through one is still the same construction fact.
+    const assignment = /([A-Za-z_][A-Za-z0-9_]*)\s*(?:->\s*([A-Za-z_][A-Za-z0-9_]*)\s*)?=\s*(?:g_object_ref_sink\s*\(\s*|g_object_ref\s*\(\s*)?$/
       .exec(call.prefix);
     if (assignment) {
       const variable = assignment[2] ?? assignment[1];

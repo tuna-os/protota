@@ -12,6 +12,62 @@
         "visible": true
       },
       "why": "src/gs-shell.ui declares <property name=\"visible\">False</property> on the GsShell template, because the shell is presented programmatically once the application has finished loading rather than shown by the builder. Imported faithfully the window renders nothing at all, so a designer screen must show it."
+    },
+    {
+      "id": "stack_loading",
+      "set": {
+        "visibleChildName": "main"
+      },
+      "probeEvidence": {
+        "probeVersion": 1,
+        "buildableId": "stack_loading",
+        "expect": {
+          "visibleChildName": "main"
+        }
+      },
+      "why": "Native probe (presets-src/software.probe.json): once the first frame settles the shell's outer stack shows the main surface, not the initial loading page — the loading page is a startup transient."
+    },
+    {
+      "id": "details_leaflet",
+      "set": {
+        "visibleChildName": "main"
+      },
+      "probeEvidence": {
+        "probeVersion": 1,
+        "buildableId": "details_leaflet",
+        "expect": {
+          "visibleChildName": "main"
+        }
+      },
+      "why": "Native probe: the can-unfold=false navigation leaflet shows its main page; the details surface is unmapped until an app is opened."
+    },
+    {
+      "id": "main_leaflet",
+      "set": {
+        "visibleChildName": "main"
+      },
+      "probeEvidence": {
+        "probeVersion": 1,
+        "buildableId": "main_leaflet",
+        "expect": {
+          "visibleChildName": "main"
+        }
+      },
+      "why": "Native probe: the inner navigation leaflet shows its main page; the category/extras sub-surface is unmapped at startup."
+    },
+    {
+      "id": "stack_main",
+      "set": {
+        "visibleChildName": "overview"
+      },
+      "probeEvidence": {
+        "probeVersion": 1,
+        "buildableId": "stack_main",
+        "expect": {
+          "visibleChildName": "overview"
+        }
+      },
+      "why": "Native probe: the overview page is the mapped main page in --mode=overview; installed/search/updates pages are unmapped siblings in the same stack."
     }
   ]
 }

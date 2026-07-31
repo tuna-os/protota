@@ -126,6 +126,41 @@ describe('runtime profile matching (#58)', () => {
     expect(boundaryGeometryConfidence(facts)).toBe('native');
   });
 
+  it('aligns named pages by the parent visible-child-name, not sibling order', () => {
+    // AdwLeaflet keeps its runtime children in reverse page order (and
+    // interposes AdwGizmo internals). Ordinal alignment alone would join the
+    // source's first page to the runtime's unmapped second page. The parent's
+    // own visible-child-name record disambiguates: the visible page's child
+    // is the mapped widget of the class, every other page's child an
+    // unmapped one.
+    const navRoot = blueprintToNode(`
+      Adw.ApplicationWindow window {
+        Adw.ViewStack nav {
+          Adw.ViewStackPage {
+            name: "main";
+            child: Gtk.Box main_box {};
+          }
+          Adw.ViewStackPage {
+            name: "details";
+            child: Gtk.Box details_box {};
+          }
+        }
+      }
+    `);
+    const report = matchRuntimeProfile(probe([
+      widget({ gtype: 'AdwApplicationWindow', indexPath: [0], buildableId: 'window' }),
+      widget({ gtype: 'AdwLeaflet', indexPath: [0, 0], buildableId: 'nav', visibleChildName: 'main' }),
+      widget({ gtype: 'AdwGizmo', indexPath: [0, 0, 0], mapped: false }),
+      // Reverse page order: details first, main second.
+      widget({ gtype: 'GtkBox', indexPath: [0, 0, 1], mapped: false, bounds: { x: 0, y: 0, width: 0, height: 0 } }),
+      widget({ gtype: 'GtkBox', indexPath: [0, 0, 2], mapped: true, bounds: { x: 0, y: 0, width: 360, height: 600 } }),
+    ]), navRoot);
+    const main = report.matches.find((match) => match.nodeId === 'main_box');
+    const details = report.matches.find((match) => match.nodeId === 'details_box');
+    expect(main?.mapped).toBe(true);
+    expect(details?.mapped).toBe(false);
+  });
+
   it('records runtime visibility divergence (converter_box mapped:false)', () => {
     const facts = nativeFactsFor(widget({
       gtype: 'GtkBox', indexPath: [0, 1, 1], buildableId: 'converter_box',

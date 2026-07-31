@@ -280,7 +280,9 @@ export const LEGAL_CHILDREN: Record<AdwNodeType, AdwNodeType[]> = {
   avatar: [],
   'wrap-box': CONTAINER_CHILDREN,
   popover: CONTAINER_CHILDREN,
-  'list-box-row': ['box', 'bin', 'label', 'button', 'menu-button', 'switch-widget', 'check-button', 'avatar', 'progress-bar', 'level-bar', 'spinner', 'entry', 'inscription', 'custom-widget'],
+  // A GtkListBoxRow is a bin: it takes any single widget, and real apps put
+  // clamps and layout boxes in one. HIG guidance belongs in the linter.
+  'list-box-row': CONTAINER_CHILDREN,
   // === Navigation ===
   'view-stack': CONTAINER_CHILDREN,
   'view-switcher': [],
@@ -321,7 +323,9 @@ export const LEGAL_CHILDREN: Record<AdwNodeType, AdwNodeType[]> = {
   'check-button': [],
 
   // === Feedback ===
-  'status-page': ['box', 'button', 'menu-button', 'label', 'clamp', 'list-box', 'bin', 'preferences-group'],
+  // AdwStatusPage's child property accepts any widget, including an
+  // unresolved boundary.
+  'status-page': CONTAINER_CHILDREN,
   'toast-overlay': CONTAINER_CHILDREN,
   banner: [],
   spinner: [],

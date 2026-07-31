@@ -215,7 +215,9 @@
     "sourceImport": {
       "repository": "https://gitlab.gnome.org/GNOME/gnome-software.git",
       "uiPath": "src",
-      "entry": "gs-shell.ui"
+      "entry": "gs-shell.ui",
+      "tag": "49.4",
+      "importRoot": "src"
     },
     "suite": "core",
     "status": "preset",
@@ -677,7 +679,7 @@
     "visualStatus": "not-validated"
   },
   "deja-dup-backups": {
-    "name": "Déjà Dup Backups",
+    "name": "D\u00e9j\u00e0 Dup Backups",
     "aptPackage": "deja-dup-backups",
     "command": "deja-dup-backups",
     "presetId": "deja-dup-backups",
@@ -685,9 +687,9 @@
       "width": 900,
       "height": 650
     },
-    "source": "https://gitlab.gnome.org/World/DéjàDupBackups",
+    "source": "https://gitlab.gnome.org/World/D\u00e9j\u00e0DupBackups",
     "sourceImport": {
-      "repository": "https://gitlab.gnome.org/World/DéjàDupBackups.git",
+      "repository": "https://gitlab.gnome.org/World/D\u00e9j\u00e0DupBackups.git",
       "uiPath": "data/ui",
       "entry": "window.ui"
     },

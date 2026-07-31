@@ -40,7 +40,9 @@ export const App: React.FC = () => {
     setShowAddScreenModal,
     showAddScreenModal,
     selectedNodeId,
+    selectedNodeIds,
     deleteNode,
+    deleteSelectedNodes,
     moveNodeUp,
     moveNodeDown,
     selectNode,
@@ -179,6 +181,12 @@ export const App: React.FC = () => {
         return;
       }
       if (e.key === "Delete" || e.key === "Backspace") {
+        // Multi-selection deletes as one batch — one undo snapshot (#79).
+        if (selectedNodeIds.length > 1) {
+          e.preventDefault();
+          deleteSelectedNodes();
+          return;
+        }
         if (selectedNodeId) {
           e.preventDefault();
           deleteNode(selectedNodeId);
@@ -264,7 +272,9 @@ export const App: React.FC = () => {
     undo,
     redo,
     selectedNodeId,
+    selectedNodeIds,
     deleteNode,
+    deleteSelectedNodes,
     moveNodeUp,
     moveNodeDown,
     selectNode,

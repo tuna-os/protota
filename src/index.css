@@ -208,6 +208,25 @@ body,
   border-radius: 4px;
 }
 
+/* Non-primary members of a multi-selection (#79): dashed, no badge —
+   visually distinct from the solid primary outline. */
+.adw-node-wrapper.multi-selected-outline {
+  display: block;
+  position: relative;
+  outline: 2px dashed var(--accent-bg-color, #3584e4);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Rubber-band marquee overlay (#79): fixed-positioned editor chrome. */
+.protota-marquee {
+  position: fixed;
+  border: 1px solid var(--accent-bg-color, #3584e4);
+  background: color-mix(in srgb, var(--accent-bg-color, #3584e4) 12%, transparent);
+  pointer-events: none;
+  z-index: 60;
+}
+
 /* ---- Layers tree ---- */
 .protota-tree-item {
   padding: var(--spacing-xs, 6px) var(--spacing-m, 12px);
@@ -230,6 +249,12 @@ body,
 .protota-tree-item--selected {
   background: var(--button-active-color, rgba(0, 0, 6, 0.19)) !important;
   color: var(--window-fg-color, rgba(0, 0, 6, 0.8)) !important;
+}
+
+/* Primary row of a multi-selection: accent bar distinguishes it from the
+   other selected members (#79). */
+.protota-tree-item--primary {
+  box-shadow: inset 2px 0 0 var(--accent-bg-color, #3584e4);
 }
 
 /* ---- Type badge (debug label) ---- */
@@ -325,7 +350,8 @@ body,
   display: none !important;
 }
 
-:root[data-protota-capture="true"] .adw-node-wrapper.selected-outline {
+:root[data-protota-capture="true"] .adw-node-wrapper.selected-outline,
+:root[data-protota-capture="true"] .adw-node-wrapper.multi-selected-outline {
   outline: none;
 }
 

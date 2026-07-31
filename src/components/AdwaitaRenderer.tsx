@@ -278,10 +278,13 @@ export const AdwaitaRenderer: React.FC<Props> = ({
   // The screen root resolves which header bar owns the window controls.
   const primaryHeaderBar = primaryHeaderBarId ?? (screenWidth ? findPrimaryHeaderBarId(node) : undefined);
   const {
-    selectedNodeId, selectNode, addChildNode, doc,
+    selectedNodeId, selectedNodeIds, selectNode, toggleNodeSelection, addChildNode, doc,
     diagnosticsEnabled, diagnostics, tierFilters, ignoredRules, ignoredInstances,
   } = useMockupStore();
   const isSelected = selectedNodeId === node.id;
+  // Multi-selection member that is not the primary: distinct dashed outline,
+  // no badge/add-buttons — those belong to the primary only (#79).
+  const isMultiSelected = !isSelected && selectedNodeIds.includes(node.id);
 
   // Diagnostics outlines (#95, design §5.4): visible (filtered, non-ignored)
   // diagnostics tint this node by their worst tier. Editor chrome only —
@@ -323,11 +326,13 @@ export const AdwaitaRenderer: React.FC<Props> = ({
     if (!wrapper) return;
     const handleNativeClick = (event: MouseEvent) => {
       event.stopPropagation();
-      selectNode(node.id, screenId);
+      // Ctrl/Cmd-click toggles multi-selection membership (#79, study §3).
+      if (event.ctrlKey || event.metaKey) toggleNodeSelection(node.id, screenId);
+      else selectNode(node.id, screenId);
     };
     wrapper.addEventListener('click', handleNativeClick);
     return () => wrapper.removeEventListener('click', handleNativeClick);
-  }, [node.id, screenId, selectNode]);
+  }, [node.id, screenId, selectNode, toggleNodeSelection]);
 
   // GTK visibility: a hidden widget takes no space and draws nothing. This
   // must come after every hook so React's hook order stays stable.
@@ -414,9 +419,9 @@ export const AdwaitaRenderer: React.FC<Props> = ({
     <div
       ref={wrapperRef}
       slot={node.slot ?? inheritedSlot}
-      className={`adw-node-wrapper${isSelected ? ' selected-outline' : ''}`}
+      className={`adw-node-wrapper${isSelected ? ' selected-outline' : ''}${isMultiSelected ? ' multi-selected-outline' : ''}`}
       style={{
-        ...(isSelected ? { position: 'relative' } : {}),
+        ...(isSelected || isMultiSelected ? { position: 'relative' } : {}),
         ...placementLayout(node, parentFlow),
       }}
     >

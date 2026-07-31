@@ -4,6 +4,7 @@ import type { AdwNode, AdwNodeType } from '../types/mockup';
 import { LEGAL_CHILDREN } from '../types/mockup';
 import { findNodeById, findNodeLocation } from '../utils/treeHelpers';
 import { useDndStore } from '../dnd/dndStore';
+import { rangeSelection } from '../utils/selection';
 
 /** Where a row drop lands relative to the row (#79). */
 type DropPosition = 'before' | 'inside' | 'after';
@@ -38,7 +39,8 @@ function findParentIdOf(root: AdwNode, nodeId: string): string | null {
 
 export const LayersPanel: React.FC = () => {
   const {
-    doc, selectedNodeId, selectNode, updateNodeProps, moveNodeUp, moveNodeDown,
+    doc, selectedNodeId, selectedNodeIds, selectNode, toggleNodeSelection,
+    selectNodes, updateNodeProps, moveNodeUp, moveNodeDown,
     moveNode, addChildNode,
   } = useMockupStore();
 
@@ -264,9 +266,26 @@ export const LayersPanel: React.FC = () => {
     useDndStore.getState().endDrag();
   };
 
+  // Row click with modifiers (#79, study §3): Ctrl/Cmd toggles membership;
+  // Shift selects the visible-order range from the primary to the clicked
+  // row; a plain click replaces the selection.
+  const handleRowClick = (row: LayerRow, e: React.MouseEvent) => {
+    if (e.ctrlKey || e.metaKey) {
+      toggleNodeSelection(row.node.id, row.screenId);
+      return;
+    }
+    if (e.shiftKey && selectedNodeId) {
+      const order = rows.map((r) => r.node.id);
+      selectNodes(rangeSelection(order, selectedNodeId, row.node.id), row.screenId);
+      return;
+    }
+    selectNode(row.node.id, row.screenId);
+  };
+
   const renderRow = (row: LayerRow) => {
     const { node, depth, hasChildren, expanded } = row;
-    const isSelected = selectedNodeId === node.id;
+    const isSelected = selectedNodeIds.includes(node.id);
+    const isPrimary = selectedNodeId === node.id;
     const isRenaming = renamingId === node.id;
     const hint = dropHint?.rowId === node.id ? dropHint.position : null;
 
@@ -287,8 +306,8 @@ export const LayersPanel: React.FC = () => {
         {...(hint ? { 'data-drop-position': hint } : {})}
         draggable={!isRenaming}
         style={{ marginLeft: `${depth * 14}px` }}
-        className={`protota-tree-item${isSelected ? ' protota-tree-item--selected' : ''}${hint ? ` protota-tree-item--drop-${hint}` : ''}`}
-        onClick={() => selectNode(node.id, row.screenId)}
+        className={`protota-tree-item${isSelected ? ' protota-tree-item--selected' : ''}${isPrimary ? ' protota-tree-item--primary' : ''}${hint ? ` protota-tree-item--drop-${hint}` : ''}`}
+        onClick={(e) => handleRowClick(row, e)}
         onDoubleClick={() => beginRename(row)}
         onDragStart={(e) => handleRowDragStart(row, e)}
         onDragOver={(e) => handleRowDragOver(row, e)}

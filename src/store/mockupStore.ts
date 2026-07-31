@@ -8,6 +8,7 @@ import { instanceKey } from '../diagnostics/types';
 import { runDiagnostics } from '../diagnostics/engine';
 import { runRoundTripCheck } from '../diagnostics/blueprintSource';
 import { findNodeLocation, findNodeById } from '../utils/treeHelpers';
+import { toggleSelection, unionSelection } from '../utils/selection';
 import { blueprintToDocument, mockupToBlueprint } from '../utils/blueprint';
 
 const BLUEPRINT_STORAGE_KEY = 'protota_blueprint_v1';
@@ -280,7 +281,14 @@ function createRootNode(type: ScreenTemplateType, title: string): AdwNode {
 
 interface MockupState {
   doc: MockupDocument;
+  /** Primary (last-selected) node — what the inspector and single-node ops use. */
   selectedNodeId: string | null;
+  /**
+   * Ordered multi-selection (#79, penpot-study.md §3). The primary is always
+   * the last element; `selectedNodeId` mirrors it. Editor state, never
+   * document state — selection does not go through pushSnapshot/undo.
+   */
+  selectedNodeIds: string[];
   selectedScreenId: string | null;
   history: MockupDocument[];
   historyIndex: number;
@@ -300,7 +308,16 @@ interface MockupState {
   showFlows: boolean;
 
   selectNode: (nodeId: string | null, screenId?: string) => void;
+  /** Ctrl/Cmd-click: toggle membership; primary becomes the last element. */
+  toggleNodeSelection: (nodeId: string, screenId?: string) => void;
+  /** Replace (or with `additive`, union into) the selection with `ids`. */
+  selectNodes: (ids: string[], screenId?: string, additive?: boolean) => void;
   updateNodeProps: (nodeId: string, props: Partial<AdwNode>) => void;
+  /**
+   * Batched multi-node property edit in ONE undo snapshot — the store
+   * addition penpot-study.md §6/§8 calls for, used by align/distribute.
+   */
+  updateNodesProps: (edits: Array<{ nodeId: string; props: Partial<AdwNode> }>) => void;
   /** Screen geometry lives beside rootNode; needed by HIG-E001's quick-fix. */
   updateScreenProps: (screenId: string, props: Partial<Pick<Screen, 'width' | 'height' | 'title'>>) => void;
   /**
@@ -321,6 +338,8 @@ interface MockupState {
    */
   moveNode: (nodeId: string, targetParentId: string, index: number, slot?: string) => void;
   deleteNode: (nodeId: string) => void;
+  /** Delete every selected node (screen roots skipped) in ONE undo snapshot. */
+  deleteSelectedNodes: () => void;
   undo: () => void;
   redo: () => void;
   toggleColorScheme: () => void;
@@ -409,6 +428,7 @@ export const useMockupStore = create<MockupState>((set, get) => {
   return {
     doc: startDoc,
     selectedNodeId: null,
+    selectedNodeIds: [],
     selectedScreenId: startDoc.screens[0]?.id || null,
     history: [startDoc],
     historyIndex: 0,
@@ -421,7 +441,29 @@ export const useMockupStore = create<MockupState>((set, get) => {
     showFlows: false,
 
     selectNode: (nodeId, screenId) =>
-      set({ selectedNodeId: nodeId, selectedScreenId: screenId ?? get().selectedScreenId }),
+      set({
+        selectedNodeId: nodeId,
+        selectedNodeIds: nodeId ? [nodeId] : [],
+        selectedScreenId: screenId ?? get().selectedScreenId,
+      }),
+
+    toggleNodeSelection: (nodeId, screenId) => {
+      const selectedNodeIds = toggleSelection(get().selectedNodeIds, nodeId);
+      set({
+        selectedNodeIds,
+        selectedNodeId: selectedNodeIds[selectedNodeIds.length - 1] ?? null,
+        selectedScreenId: screenId ?? get().selectedScreenId,
+      });
+    },
+
+    selectNodes: (ids, screenId, additive) => {
+      const selectedNodeIds = additive ? unionSelection(get().selectedNodeIds, ids) : [...ids];
+      set({
+        selectedNodeIds,
+        selectedNodeId: selectedNodeIds[selectedNodeIds.length - 1] ?? null,
+        selectedScreenId: screenId ?? get().selectedScreenId,
+      });
+    },
 
     updateNodeProps: (nodeId, props) => {
       const nextDoc = produce(get().doc, (draft) => {
@@ -430,6 +472,20 @@ export const useMockupStore = create<MockupState>((set, get) => {
           return node.children?.some(update) ?? false;
         };
         draft.screens.forEach((s) => update(s.rootNode));
+      });
+      set(pushSnapshot(nextDoc));
+    },
+
+    updateNodesProps: (edits) => {
+      if (edits.length === 0) return;
+      const nextDoc = produce(get().doc, (draft) => {
+        for (const edit of edits) {
+          const update = (node: AdwNode): boolean => {
+            if (node.id === edit.nodeId) { Object.assign(node, edit.props); return true; }
+            return node.children?.some(update) ?? false;
+          };
+          draft.screens.some((s) => update(s.rootNode));
+        }
       });
       set(pushSnapshot(nextDoc));
     },
@@ -584,7 +640,29 @@ export const useMockupStore = create<MockupState>((set, get) => {
       if (get().selectedNodeId === nodeId) {
         (nextState as MockupState).selectedNodeId = null;
       }
+      if (get().selectedNodeIds.includes(nodeId)) {
+        nextState.selectedNodeIds = get().selectedNodeIds.filter((id) => id !== nodeId);
+      }
       set(nextState);
+    },
+
+    deleteSelectedNodes: () => {
+      const ids = get().selectedNodeIds;
+      if (ids.length === 0) return;
+      let removed = 0;
+      const nextDoc = produce(get().doc, (draft) => {
+        for (const nodeId of ids) {
+          for (const screen of draft.screens) {
+            if (screen.rootNode.id === nodeId) continue; // roots are anchors
+            const loc = findNodeLocation(screen.rootNode, nodeId);
+            // A node already gone (deleted with a selected ancestor) is fine.
+            if (loc) { loc.parentChildren.splice(loc.index, 1); removed += 1; break; }
+          }
+        }
+      });
+      if (removed === 0) return;
+      // One snapshot for the whole batch; selection collapses to none.
+      set({ ...pushSnapshot(nextDoc), selectedNodeId: null, selectedNodeIds: [] });
     },
 
     undo: () => {

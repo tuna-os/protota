@@ -6,7 +6,8 @@ import { useDndStore } from "../dnd/dndStore";
 import { resolveDropTarget } from "../dnd/dropResolution";
 import { DropIndicator } from "../dnd/DropIndicator";
 import { findNodeById } from "../utils/treeHelpers";
-import type { AdwNodeType } from "../types/mockup";
+import { filterShallowest, screenOf, unionSelection } from "../utils/selection";
+import type { AdwNode, AdwNodeType } from "../types/mockup";
 import { windowCloseSymbolic } from "@gjsify/adwaita-icons/ui";
 import { toDataUri } from "@gjsify/adwaita-icons/utils";
 
@@ -289,6 +290,101 @@ export const ViewportCanvas: React.FC = () => {
     el.addEventListener("pointerdown", handleNodePointerDown);
     return () => el.removeEventListener("pointerdown", handleNodePointerDown);
   }, [handleNodePointerDown]);
+
+  // --- Rubber-band marquee (#79, penpot-study.md §3) ---
+  //
+  // Starts only on empty canvas space, so it can never conflict with the
+  // pointer-reparent drag above (which requires the pointer to go down on a
+  // selected node). Selection matches by DOM-rect intersection — no worker,
+  // no geometric index; a mockup has tens of nodes — with two adaptations:
+  // a container (node with children) counts only when the marquee fully
+  // contains it (pure intersection would always select every ancestor of any
+  // matched leaf), and shallowest-ancestor filtering drops descendants of
+  // other matches. Shift adds to the pre-gesture selection.
+  const [marquee, setMarquee] = useState<{ left: number; top: number; width: number; height: number } | null>(null);
+
+  const handleMarqueePointerDown = useCallback((e: PointerEvent) => {
+    if (e.button !== 0 || spaceDown.current || isPanningRef.current) return;
+    const target = e.target as Element;
+    if (target.closest?.("[data-node-id], .protota-zoom-bar, button, select, input, .protota-screen-label")) return;
+
+    const gesture = {
+      startX: e.clientX, startY: e.clientY, active: false,
+      additive: e.shiftKey,
+      baseline: useMockupStore.getState().selectedNodeIds,
+    };
+
+    const applySelection = (rect: { left: number; top: number; width: number; height: number }) => {
+      const el = canvasRef.current;
+      if (!el) return;
+      const doc = docRef.current;
+      const right = rect.left + rect.width;
+      const bottom = rect.top + rect.height;
+      const rootIds = new Set(doc.screens.map((s) => s.rootNode.id));
+      const hits: string[] = [];
+      el.querySelectorAll<HTMLElement>("[data-node-id]").forEach((nodeEl) => {
+        const id = nodeEl.dataset.nodeId!;
+        if (rootIds.has(id)) return; // screen roots are anchors, never marquee-picked
+        const b = nodeEl.getBoundingClientRect();
+        if (b.width === 0 && b.height === 0) return;
+        const intersects = b.left < right && b.right > rect.left && b.top < bottom && b.bottom > rect.top;
+        if (!intersects) return;
+        let node: AdwNode | null = null;
+        for (const screen of doc.screens) {
+          node = findNodeById([screen.rootNode], id);
+          if (node) break;
+        }
+        if (!node) return;
+        const isContainer = (node.children?.length ?? 0) > 0;
+        const contained = b.left >= rect.left && b.right <= right && b.top >= rect.top && b.bottom <= bottom;
+        if (isContainer && !contained) return;
+        hits.push(id);
+      });
+      const ids = filterShallowest(hits, doc.screens);
+      const merged = gesture.additive ? unionSelection(gesture.baseline, ids) : ids;
+      const screen = merged.length ? screenOf(doc.screens, merged[merged.length - 1]) : null;
+      useMockupStore.getState().selectNodes(merged, screen?.id);
+    };
+
+    const onMove = (ev: PointerEvent) => {
+      if (!gesture.active) {
+        if (Math.hypot(ev.clientX - gesture.startX, ev.clientY - gesture.startY) < 5) return;
+        gesture.active = true;
+        document.body.style.userSelect = "none";
+      }
+      const rect = {
+        left: Math.min(gesture.startX, ev.clientX),
+        top: Math.min(gesture.startY, ev.clientY),
+        width: Math.abs(ev.clientX - gesture.startX),
+        height: Math.abs(ev.clientY - gesture.startY),
+      };
+      setMarquee(rect);
+      applySelection(rect);
+    };
+
+    const onUp = () => {
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerup", onUp);
+      document.body.style.userSelect = "";
+      setMarquee(null);
+      if (gesture.active) {
+        // The click that ends the gesture must not run the canvas deselect.
+        const swallowClick = (ce: MouseEvent) => { ce.stopPropagation(); ce.preventDefault(); };
+        window.addEventListener("click", swallowClick, { capture: true, once: true });
+        setTimeout(() => window.removeEventListener("click", swallowClick, true), 150);
+      }
+    };
+
+    window.addEventListener("pointermove", onMove);
+    window.addEventListener("pointerup", onUp);
+  }, []);
+
+  useEffect(() => {
+    const el = canvasRef.current;
+    if (!el) return;
+    el.addEventListener("pointerdown", handleMarqueePointerDown);
+    return () => el.removeEventListener("pointerdown", handleMarqueePointerDown);
+  }, [handleMarqueePointerDown]);
 
   // --- Keyboard: Escape + Space (pan mode) ---
 
@@ -705,6 +801,15 @@ export const ViewportCanvas: React.FC = () => {
       {/* Drop preview (#79): candidate-container highlight + insertion caret.
           Fixed-positioned, so it lives outside the transformed surface. */}
       <DropIndicator />
+
+      {/* Rubber-band marquee (#79): fixed-positioned editor chrome. */}
+      {marquee && (
+        <div
+          className="protota-marquee"
+          data-testid="marquee"
+          style={{ left: marquee.left, top: marquee.top, width: marquee.width, height: marquee.height }}
+        />
+      )}
 
       {/* Transformable Canvas Surface */}
       <div

@@ -6,9 +6,10 @@ import type { AdwNode } from "../types/mockup";
 import { findNodeById } from "../utils/treeHelpers";
 import { NodeActions } from "./NodeActions";
 import { IconPicker } from "./IconPicker";
+import { MultiSelectPanel } from "./MultiSelectPanel";
 
 export const InspectorPanel: React.FC = () => {
-  const { doc, selectedNodeId, selectedScreenId, updateNodeProps, addEdge, removeEdge } = useMockupStore();
+  const { doc, selectedNodeId, selectedNodeIds, selectedScreenId, updateNodeProps, addEdge, removeEdge } = useMockupStore();
 
   const selectedScreen = doc.screens.find((s) => s.id === selectedScreenId);
   const selectedNode: AdwNode | null = (() => {
@@ -42,6 +43,12 @@ export const InspectorPanel: React.FC = () => {
         screen.id !== selectedScreen.id &&
         !outgoingEdges.some((edge) => edge.targetId === screen.id))
     : [];
+
+  // Multi-selection replaces the single-node inspector with the
+  // align/distribute toolbar (#79).
+  if (selectedNodeIds.length >= 2) {
+    return <MultiSelectPanel />;
+  }
 
   if (!selectedNode) {
     return (

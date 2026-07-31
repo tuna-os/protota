@@ -42,7 +42,7 @@ const sourceEntries = readdirSync(sourceRoot, { recursive: true, withFileTypes: 
   .filter((dirent) => dirent.isFile());
 
 const files = sourceEntries
-  .filter((dirent) => /\.(blp|ui|vala)$/i.test(dirent.name))
+  .filter((dirent) => /\.(blp|ui|vala|c)$/i.test(dirent.name))
   .map((dirent) => {
     const absolute = join(dirent.parentPath, dirent.name);
     return { path: relative(sourceRoot, absolute), content: readFileSync(absolute, 'utf8') };

@@ -2,5 +2,12 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
     "config:recommended"
+  ],
+  "packageRules": [
+    {
+      "description": "The Broadway reference runners are the visual oracle: their base image pins the GNOME app versions the presets were imported against. Bumping them changes the oracle, so they are updated manually, version-aligned with the source tags in tests/fixtures/gnome-app-catalog.json.",
+      "matchFileNames": ["containers/broadway/**"],
+      "enabled": false
+    }
   ]
 }

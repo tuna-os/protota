@@ -106,7 +106,7 @@ jobs:
         run: BROADWAY_URL=http://127.0.0.1:8085/ BROADWAY_PRESET_ID="$BROADWAY_PRESET_ID" BROADWAY_VIEWPORT_WIDTH="$BROADWAY_VIEWPORT_WIDTH" BROADWAY_VIEWPORT_HEIGHT="$BROADWAY_VIEWPORT_HEIGHT" BROADWAY_SOURCE_ROOT="$BROADWAY_SOURCE_ROOT" BROADWAY_SOURCE_ENTRY="$BROADWAY_SOURCE_ENTRY" npx playwright test tests/broadway-reference.spec.ts
       - name: Upload reference captures
         if: always() && steps.select.outputs.enabled == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: ${{ matrix.app }}-broadway-reference
           path: test-results/

@@ -225,11 +225,13 @@ const CLASS_TO_WIDGET_MAP: Record<string, AdwNodeType> = {
 
 /**
  * Source objects that occupy no layout allocation: gestures, controllers,
- * shortcuts, models, and popup surfaces. They belong to the source, but they
- * must not receive renderer boxes or count as unresolved visual coverage.
+ * shortcuts, models, paintables (`Adw.SpinnerPaintable` is an image source
+ * assigned to a widget's `paintable` property, not a widget), and popup
+ * surfaces. They belong to the source, but they must not receive renderer
+ * boxes or count as unresolved visual coverage.
  */
 const NON_VISUAL_CLASS_PATTERN =
-  /^(Gtk\.|Gio\.|Adw\.|GtkSource\.)?(EventController[A-Za-z]*|Gesture[A-Za-z]*|ShortcutController|Shortcut|DropTarget|DragSource|Adjustment|TextBuffer|SourceBuffer|Buffer|EntryBuffer|Tooltip|StringList|ListStore|SizeGroup|FileFilter|SortListModel|FilterListModel|SingleSelection|MultiSelection|NoSelection|SignalListItemFactory|BuilderListItemFactory|Breakpoint)$/;
+  /^(Gtk\.|Gio\.|Adw\.|GtkSource\.)?(EventController[A-Za-z]*|Gesture[A-Za-z]*|ShortcutController|Shortcut|DropTarget|DragSource|Adjustment|TextBuffer|SourceBuffer|Buffer|EntryBuffer|Tooltip|StringList|ListStore|SizeGroup|FileFilter|SortListModel|FilterListModel|SingleSelection|MultiSelection|NoSelection|SignalListItemFactory|BuilderListItemFactory|Breakpoint|[A-Za-z]*Paintable)$/;
 
 const WIDGET_CLASS_MAP: Record<string, string> = {
   window: 'Adw.ApplicationWindow',
@@ -792,7 +794,15 @@ function makeNode(
   // includes real library widgets (GtkSourceView, WebKit views) as well as
   // app-defined ones. A `$Name` whose class the registry knows is that
   // widget, not an unresolved boundary.
-  const type = CLASS_TO_WIDGET_MAP[sourceClass] ?? CLASS_TO_WIDGET_MAP[canonicalClassName(sourceClass)];
+  let type = CLASS_TO_WIDGET_MAP[sourceClass] ?? CLASS_TO_WIDGET_MAP[canonicalClassName(sourceClass)];
+  // An Adw.Leaflet declaring `can-unfold: false` never shows its pages side
+  // by side — it is a navigation stack (the pattern GNOME Software's shell
+  // uses). Rendering it as a split view would paint pages GTK never shows
+  // together. Property-driven refinement, not an app-specific branch.
+  if (type === 'overlay-split' && canonicalClassName(sourceClass) === 'Adw.Leaflet'
+      && properties['can-unfold'] === false) {
+    type = 'view-stack';
+  }
   const node: AdwNode = { id, type: type ?? 'custom-widget', children };
   // A silent fallback or a dropped sibling makes an imported GNOME UI look
   // plausible while being structurally wrong. An unmapped class survives as

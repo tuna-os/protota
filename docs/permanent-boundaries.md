@@ -77,19 +77,33 @@ resolved subtree is a pass-through container, while a leaf boundary
 | disks | core | 69 | 2 | C custom-drawn graph/meter | no (benchmark graph permanent); allocation bar probe-verified |
 | files | core | 184 | 2 | runtime-populated C composites (sidebar rows, path-bar buttons) | yes — static chrome now resolved; content is probe territory |
 | settings | core | 17 | 0 | panel list and panels are runtime C widgets (no nodes emitted) | yes — entirely probe territory |
-| software | core | 441 | 38 | runtime-populated pages + drawn star/review primitives | mostly yes; paintables permanent |
+| software | core | 462 | 36 | runtime-populated pages + drawn star/review primitives | **probe-confirmed** (committed dump, 2026-07-31); star/review drawing permanent |
 | text-editor | core | 93 | 1 | C wrapper (pass-through) | state only (switch/spin values) |
 | weather | core | 15 | 0 | GJS runtime tree; default screen is the empty search view | n/a (residual delta is font rasterisation/window shadow) |
 | amberol | circle | 74 | 6 | Rust composites (waveform, marquee, cover art) | probe determines; waveform likely permanent |
 | ear-tag | circle | 90 | 12 | Python/GTK composites | yes |
 | graphs | circle | 52 | 0 | — | n/a |
 
-Totals: 72 boundary nodes across the twelve presets. Of these, 3 are
-documented permanently `snapshot()`-drawn, 7 are permanent-but-harmless
-(non-visual or pass-through), and the remaining 62 are #58 probe territory.
-Calculator's five nodes are the first settled by a committed probe dump
-(`presets-src/calculator.probe.json`, 2026-07-31): they stay as honest
-markers, now with dump-backed allocation and state instead of hedges.
+Totals: 70 boundary nodes across the twelve presets. Of these, 28 are
+documented permanently `snapshot()`-drawn (the Calendar week grid, the Disks
+benchmark graph, and — confirmed against pinned source in the Wave 2 pass —
+Software's 20 `GsStarImage` and 5 `GsReviewBar` drawing primitives), 5 are
+permanent-but-harmless (non-visual or pass-through), and the remaining 37 are
+#58 probe territory. Calculator's five nodes were the first settled by a
+committed probe dump (`presets-src/calculator.probe.json`, 2026-07-31);
+Software's 36 are the second (`presets-src/software.probe.json`, same day):
+both stay as honest markers, now with dump-backed allocation and state
+instead of hedges.
+The third 2026-07-31 regeneration (#59 Wave 2, Software) removed two nodes
+from the previous 72: the importer's non-visual filter learned paintables
+(`Adw.SpinnerPaintable` is an image source assigned to a `paintable`
+property, not a widget — the same mechanism that filtered `SourceBuffer`),
+and two generic adapter fixes resolved more chrome without touching the
+boundary count: constructions assigned through `g_object_ref_sink` are now
+read (GsUpdatesPausedBanner resolves its code-constructed `Adw.Banner`,
+which renders nothing while unrevealed — exactly what the probe records),
+and an `Adw.Leaflet` declaring `can-unfold: false` imports as a navigation
+stack rather than a side-by-side split view.
 The 2026-07-31 regeneration (#59 Wave 1) removed three nodes from the
 previous 88: both `Adw.TabBar` renderer gaps were promoted to a registry
 widget (`tab-bar` — tabs derive from the linked `Adw.TabView`'s declared
@@ -190,22 +204,38 @@ importable declarative tree at all, so no boundary nodes are emitted. The
 entire panel surface is **probe-resolvable**; until #58 lands, this preset is
 honestly a shell.
 
-### Software (`gnome-software` 49.4) — 38 boundary nodes
+### Software (`gnome-software` 49.4) — 36 boundary nodes
+
+Probed 2026-07-31 (#59 Wave 2): the committed dump
+`presets-src/software.probe.json` (1853 widgets, 92% source match rate, 259
+joins by buildable id) settles every hedge below.
 
 | Boundary | Instances | Why static import stops | Status |
 | --- | ---: | --- | --- |
-| `GsOverviewPage`, `GsInstalledPage`, `GsSearchPage`, `GsUpdatesPage`, `GsCategoryPage`, `GsExtrasPage`, `GsDetailsPage`, `GsLoadingPage` | 8 | Runtime-populated pages ("overview tiles/carousel are runtime package data/widgets", `docs/gnome-source-import.md`; #81: "Software's lists"). Their declarative shells resolve — `details_page` alone carries 234 resolved children. | **probe** (pages are pass-through today) |
-| `GsUpdatesPausedBanner` | 1 | Runtime banner, shown on network state. | probe |
-| `GsDescriptionBox` | 2 | C composite for expandable description text. | probe |
-| `GsStarImage` | 20 | C-drawn star primitive (rating display). | probe verifies (likely permanent drawing) |
-| `GsReviewBar` | 5 | C-drawn review histogram bar. | probe verifies (likely permanent drawing) |
-| `Adw.SpinnerPaintable` | 2 | A paintable, not a widget — there is no child tree to introspect at runtime either. | **permanent** (non-visual node) |
+| `GsOverviewPage`, `GsInstalledPage`, `GsSearchPage`, `GsUpdatesPage`, `GsCategoryPage`, `GsExtrasPage`, `GsDetailsPage`, `GsLoadingPage` | 8 | Runtime-populated pages ("overview tiles/carousel are runtime package data/widgets", `docs/gnome-source-import.md`; #81: "Software's lists"). Their declarative shells resolve — `details_page` alone carries 255 resolved children. | pass-through / **probe-confirmed**: `overview_page` is the one mapped page (`0,46 1024x554`); the other seven are unmapped in `--mode=overview` |
+| `GsUpdatesPausedBanner` | 1 | Runtime banner, shown on network state. Its code-constructed `Adw.Banner` chrome now resolves (construction read through `g_object_ref_sink`); unrevealed, it renders nothing. | pass-through / **probe-confirmed**: mapped at `1024x0` — zero height, unrevealed |
+| `GsDescriptionBox` | 2 | C composite for expandable description text; `GtkWidget` base, never base-projected. | **probe-confirmed** unmapped (lives in the details surface) |
+| `GsStarImage` | 20 | `gs-star-image.c` overrides `snapshot()` to clip two child `GtkImage`s by rating fraction. The starred-image chrome resolves from construction facts; the fractional painting is code. | **permanent** drawing (source-confirmed); probe: all 20 unmapped at startup |
+| `GsReviewBar` | 5 | `gs-review-bar.c` overrides `snapshot()` to paint the histogram bar. | **permanent** drawing (source-confirmed); probe: unmapped |
+
+Two former `Adw.SpinnerPaintable` rows left this table in the Wave 2
+regeneration: a paintable is an image source assigned to a widget's
+`paintable` property, not a widget, and the importer's non-visual filter now
+covers paintables (the same mechanism that filtered `SourceBuffer`). The
+shell's runtime page state is carried by four probe-evidenced finishing
+entries (`stack_loading`/`stack_main`/`details_leaflet`/`main_leaflet`),
+re-validated against the dump on every generation run. The shell's
+`can-unfold=False` leaflets import as navigation stacks (property-driven,
+generic) — previously they rendered pages side by side that GTK never shows
+together.
 
 Software is also the recorded caution against trusting raw counts: it once
 measured "44 boundaries of 441 nodes, 10%" while rendering as an empty box,
 because `gs-shell.ui` declares the template `visible=False` (presented
 programmatically) — fixed by the single finishing override in
-`presets-src/software.finishing.json`.
+`presets-src/software.finishing.json`, and now also mirrored generically in
+the capture path: a probe-matched node the source declares invisible but GTK
+maps is revealed at `native:visible` origin.
 
 ### Text Editor (`gnome-text-editor` 49.1) — 1 boundary node
 
@@ -281,11 +311,11 @@ boundary, "they may not disappear").
 exists end-to-end: run a probed capture (`docs/runtime-probe.md`), commit the
 dump as `presets-src/<app>.probe.json`, record the settled facts as
 `probeEvidence` finishing entries, and update this document's rows in the
-same change — Calculator (2026-07-31) is the worked example, its hedges
-replaced with dump-backed classifications above. Apps without a committed
-probed capture (Calendar, Disks, Files, Software, Text Editor, the Circle
-apps) keep their hedged "probe" / "probe verifies" rows until their dumps are
-captured the same way; a probe result then moves each row to either resolved
-(delete the row, regenerate) or confirmed-permanent (mark it here). Once the
-fleet is probed, the "permanent" set is closed and the pixel-accuracy goal of
-#32 is bounded rather than open-ended.
+same change — Calculator and Software (both 2026-07-31) are the worked
+examples, their hedges replaced with dump-backed classifications above. Apps
+without a committed probed capture (Calendar, Disks, Files, Text Editor, the
+Circle apps) keep their hedged "probe" / "probe verifies" rows until their
+dumps are captured the same way; a probe result then moves each row to either
+resolved (delete the row, regenerate) or confirmed-permanent (mark it here).
+Once the fleet is probed, the "permanent" set is closed and the
+pixel-accuracy goal of #32 is bounded rather than open-ended.

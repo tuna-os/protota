@@ -101,12 +101,21 @@ function expectedClass(node: AdwNode): string | null {
 }
 
 /**
- * Children as GTK sees them: GtkStackPage/AdwViewStackPage are not widgets,
- * so a page's child sits directly under the stack in the runtime tree.
+ * Children as GTK sees them — GtkStackPage/AdwViewStackPage are not widgets,
+ * so a page's child sits directly under the stack in the runtime tree — with
+ * each flattened child keeping the name of the stack page it came through.
+ * Page names let the aligner use the parent's own `visible-child-name` record
+ * instead of trusting sibling order — AdwLeaflet, for one, keeps its runtime
+ * children in reverse page order.
  */
-function runtimeVisibleChildren(node: AdwNode): AdwNode[] {
+function runtimeChildrenWithPageNames(node: AdwNode): Array<{ child: AdwNode; pageName: string | null }> {
   const raw = [...(node.children ?? []), ...(node.pages ?? [])];
-  return raw.flatMap((child) => (child.type === 'stack-page' ? runtimeVisibleChildren(child) : [child]));
+  return raw.flatMap((child) => {
+    if (child.type !== 'stack-page') return [{ child, pageName: null }];
+    const rawName = (child as { name?: unknown }).name;
+    const name = typeof rawName === 'string' ? rawName : null;
+    return runtimeChildrenWithPageNames(child).map((inner) => ({ child: inner.child, pageName: inner.pageName ?? name }));
+  });
 }
 
 function walkSource(node: AdwNode, into: AdwNode[]): void {
@@ -204,9 +213,15 @@ export function matchRuntimeProfile(probe: ProbeDocument, root: AdwNode): Runtim
   }
 
   const alignChildren = (sourceNode: AdwNode, parentWidget: ProbeWidget): void => {
-    const sourceChildren = runtimeVisibleChildren(sourceNode);
+    const sourceChildren = runtimeChildrenWithPageNames(sourceNode);
     const probeChildren = tree.childrenOf(parentWidget);
-    for (const child of sourceChildren) {
+    // The parent's own visible-child-name record is GTK's answer to which
+    // page is showing. When source pages are named, it replaces ordinal trust:
+    // the visible page's child must be a mapped widget, every other page's
+    // child an unmapped one. AdwLeaflet keeps runtime children in reverse
+    // page order, so ordinal alignment alone would cross-join the pages.
+    const visibleChildName = typeof parentWidget.visibleChildName === 'string' ? parentWidget.visibleChildName : null;
+    for (const { child, pageName } of sourceChildren) {
       const existing = matchedWidgetByNode.get(child);
       if (existing) {
         // An id-matched child anchors recursion at ITS runtime widget even if
@@ -219,8 +234,12 @@ export function matchRuntimeProfile(probe: ProbeDocument, root: AdwNode): Runtim
       // Source children are visited in order and each claim is permanent, so
       // "first unclaimed widget of the class" aligns the k-th source child of
       // a class with the k-th runtime child of it.
+      const requireMapped = visibleChildName !== null && pageName !== null
+        ? pageName === visibleChildName
+        : null;
       const firstUnclaimed = (pool: ProbeWidget[]): ProbeWidget | undefined =>
-        pool.find((candidate) => canonicalGType(candidate.gtype) === cls && !claimedWidgets.has(candidate));
+        pool.find((candidate) => canonicalGType(candidate.gtype) === cls && !claimedWidgets.has(candidate)
+          && (requireMapped === null || candidate.mapped === requireMapped));
       // GTK interposes internal containers (viewports, window handles); look
       // exactly one level deeper before giving up. Never deeper: an unbounded
       // descent would fabricate joins.
@@ -281,6 +300,8 @@ export function matchRuntimeProfile(probe: ProbeDocument, root: AdwNode): Runtim
 export interface AppliedRuntimeEvidence {
   /** Node ids hidden because the probe saw them unmapped/invisible. */
   suppressed: string[];
+  /** Node ids un-hidden: declared invisible in source, but mapped at runtime. */
+  revealed: string[];
   /** Unresolved-boundary node ids that took allocation from native bounds. */
   allocated: string[];
 }
@@ -305,7 +326,7 @@ export function applyRuntimeEvidence(root: AdwNode, report: RuntimeProfileReport
   const nodes: AdwNode[] = [];
   walkSource(root, nodes);
   const nodeById = new Map(nodes.map((node) => [node.id, node]));
-  const applied: AppliedRuntimeEvidence = { suppressed: [], allocated: [] };
+  const applied: AppliedRuntimeEvidence = { suppressed: [], revealed: [], allocated: [] };
   for (const match of report.matches) {
     const node = nodeById.get(match.nodeId);
     if (!node) continue;
@@ -314,6 +335,15 @@ export function applyRuntimeEvidence(root: AdwNode, report: RuntimeProfileReport
       node.geometryOrigin = { ...node.geometryOrigin, visible: 'native' };
       applied.suppressed.push(node.id);
       continue;
+    }
+    // The mirror of suppression: a node the source declares invisible but the
+    // probe saw mapped is shown at native origin. GsShell's template declares
+    // visible=False because the app presents the window programmatically;
+    // GTK's own answer is that it is mapped.
+    if (node.visible === false) {
+      node.visible = true;
+      node.geometryOrigin = { ...node.geometryOrigin, visible: 'native' };
+      applied.revealed.push(node.id);
     }
     const isUnresolvedBoundary = node.type === 'custom-widget'
       && (node.children?.length ?? 0) === 0 && (node.pages?.length ?? 0) === 0;

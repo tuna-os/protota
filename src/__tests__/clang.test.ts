@@ -71,6 +71,23 @@ describe('extractCFacts', () => {
     expect(Object.keys(facts[0].constructions)).toEqual(['real']);
   });
 
+  it('sees a construction through the g_object_ref_sink ownership wrapper', () => {
+    // `self->banner = g_object_ref_sink (adw_banner_new (""))` is the GObject
+    // idiom for keeping a floating widget; the wrapper is transparent and the
+    // assignment is still a construction fact.
+    const facts = extractCFacts(`
+      G_DEFINE_TYPE (QuuxNotice, quux_notice, ADW_TYPE_BIN);
+      static void quux_notice_init (QuuxNotice *self) {
+        self->banner = g_object_ref_sink (adw_banner_new (""));
+        adw_bin_set_child (ADW_BIN (self), self->banner);
+      }
+    `);
+    expect(facts[0].constructions.banner).toBe('Adw.Banner');
+    expect(facts[0].insertions).toEqual([
+      { parent: 'this', child: 'banner', method: 'adw_bin_set_child' },
+    ]);
+  });
+
   it('resolves g_object_new through its type macro', () => {
     const facts = extractCFacts(`
       G_DEFINE_TYPE (QuuxPanel, quux_panel, GTK_TYPE_WIDGET);

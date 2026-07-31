@@ -46,6 +46,10 @@ const CLASS_TO_WIDGET_MAP: Record<string, AdwNodeType> = {
   'Adw.ViewSwitcherTitle': 'view-switcher',
   'Adw.ViewSwitcherBar': 'view-switcher',
   'Adw.TabView': 'tab-view',
+  'Adw.TabBar': 'tab-bar',
+  // Adw.TabPage is a page record like ViewStackPage: title + child widget.
+  'Adw.TabPage': 'stack-page',
+  AdwTabPage: 'stack-page',
   'Adw.OverlaySplitView': 'overlay-split',
   'Adw.Clamp': 'clamp',
   'Adw.Bin': 'bin',
@@ -112,6 +116,7 @@ const CLASS_TO_WIDGET_MAP: Record<string, AdwNodeType> = {
   AdwViewStack: 'view-stack',
   AdwViewSwitcher: 'view-switcher',
   AdwTabView: 'tab-view',
+  AdwTabBar: 'tab-bar',
   AdwOverlaySplitView: 'overlay-split',
   AdwPreferencesPage: 'preferences-page',
   AdwPreferencesGroup: 'preferences-group',
@@ -141,8 +146,8 @@ const CLASS_TO_WIDGET_MAP: Record<string, AdwNodeType> = {
   GtkImage: 'bin',
   'Gtk.Image': 'bin',
   // Library widgets the generic renderer genuinely covers. Widgets it does
-  // not (AdwTabBar's tab strip, GtkLevelBar's meter) stay explicit
-  // boundaries rather than rendering as an empty box that claims support.
+  // not draw yet stay explicit boundaries rather than rendering as an empty
+  // box that claims support.
   ProgressBar: 'progress-bar',
   GtkProgressBar: 'progress-bar',
   'Gtk.ProgressBar': 'progress-bar',
@@ -239,6 +244,7 @@ const WIDGET_CLASS_MAP: Record<string, string> = {
   'view-switcher': 'Adw.ViewSwitcher',
   'navigation-view': 'Adw.NavigationView',
   'tab-view': 'Adw.TabView',
+  'tab-bar': 'Adw.TabBar',
   'overlay-split': 'Adw.OverlaySplitView',
   clamp: 'Adw.Clamp',
   bin: 'Adw.Bin',
@@ -336,7 +342,17 @@ const OBJECT_REFERENCE_PROPERTIES = new Set([
   // Gtk.SearchBar names the widget whose key events it captures; emitting the
   // class name as a string is rejected ("Cannot convert string to Gtk.Widget").
   'key-capture-widget',
+  // Adw.TabBar (and TabButton/TabOverview) name the Adw.TabView they present.
+  'view',
 ]);
+
+/**
+ * Properties whose `false` is a meaningful deviation from a `true` GTK
+ * default, so export must emit it rather than treat false as "unset".
+ * Adw.TabBar autohide defaults to true; `autohide: false` is what keeps a
+ * single-tab bar visible.
+ */
+const EXPORTED_FALSE_PROPERTIES = new Set(['autohide']);
 
 /**
  * Properties that genuinely hold text. Everything else whose value looks like
@@ -519,7 +535,8 @@ function nodeToBlueprint(node: AdwNode, depth: number = 0, context?: ExportConte
     : [];
 
   for (const [key, value] of Object.entries(node)) {
-    if (INTERNAL_PROPERTIES.has(key) || value === undefined || value === false || value === '') continue;
+    if (INTERNAL_PROPERTIES.has(key) || value === undefined ||
+        (value === false && !EXPORTED_FALSE_PROPERTIES.has(key)) || value === '') continue;
     // Signal handlers imported as properties (`notify::x`) are not properties.
     if (key.includes('::') || key.startsWith('notify')) continue;
     if (STYLE_CLASS_PROPERTIES[key]) {
@@ -655,8 +672,11 @@ export function mockupToBlueprint(doc: MockupDocument, options?: BlueprintExport
   const context: ExportContext = {
     knownIds, usedIds, idMap, renames, standalone: options?.standalone ?? false,
   };
-  return 'using Gtk 4.0;\nusing Adw 1;\n\n' +
-    doc.screens.map(screen => nodeToBlueprint(screen.rootNode, 0, context)).join('\n');
+  const body = doc.screens.map(screen => nodeToBlueprint(screen.rootNode, 0, context)).join('\n');
+  // A re-emitted GtkSource class (the importer canonicalizes `GtkSourceView`
+  // to `GtkSource.View`) compiles only with its namespace imported.
+  const gtkSourceImport = /\bGtkSource\.[A-Z]/.test(body) ? 'using GtkSource 5;\n' : '';
+  return `using Gtk 4.0;\nusing Adw 1;\n${gtkSourceImport}\n${body}`;
 }
 
 /**

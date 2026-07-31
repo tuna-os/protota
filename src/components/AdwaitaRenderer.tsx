@@ -8,6 +8,7 @@ import {
   boundaryGeometryConfidence, boundaryGeometryFacts, containerLayout,
   parentFlowOf, placementLayout, type ParentFlow,
 } from '../utils/nodeGeometry';
+import { tabBarModel } from '../utils/tabBar';
 
 interface Props {
   node: AdwNode;
@@ -80,6 +81,9 @@ const TAG_MAP: Record<string, string | null> = {
   'view-switcher':       'adw-view-switcher',
   'navigation-view':     'adw-navigation-view',
   'tab-view':            'adw-tab-view',
+  // No adw-tab-bar custom element exists; the strip is drawn as a styled div
+  // whose tabs derive from the linked tab-view's pages (see utils/tabBar.ts).
+  'tab-bar':             null,
   'overlay-split':       'adw-overlay-split-view',
   clamp:                 'adw-clamp',
   bin:                   null,
@@ -136,7 +140,7 @@ const TAG_MAP: Record<string, string | null> = {
 const DIV_TYPES = new Set([
   'bin', 'custom-widget', 'box', 'grid', 'center-box', 'stack', 'stack-page', 'scrolled-window', 'search-entry', 'switch-widget',
   'check-button', 'list-box', 'label', 'inscription', 'navigation-view', 'view-stack',
-  'progress-bar', 'scale', 'level-bar', 'popover', 'list-box-row',
+  'progress-bar', 'scale', 'level-bar', 'popover', 'list-box-row', 'tab-bar',
   // adw-overlay-split-view collects [slot="content"] with an unscoped query,
   // so it hoists the content child of any nested toolbar view into its own
   // pane. Render the panes ourselves, as with navigation-view.
@@ -299,6 +303,12 @@ export const AdwaitaRenderer: React.FC<Props> = ({
   const legalAdds = LEGAL_CHILDREN[node.type] || [];
   const elRef = useRef<HTMLElement>(null);
 
+  // Adw.TabBar derives its tabs from the linked tab-view's declared pages;
+  // its autohide semantics can hide the whole strip (checked after hooks).
+  const tabBar = node.type === 'tab-bar'
+    ? tabBarModel(node, doc.screens.find((screen) => screen.id === screenId)?.rootNode)
+    : null;
+
   // A dialog used as a canvas screen renders as a window-like surface; the
   // real dialog elements are modals, hidden until runtime opens them.
   const isDialogRoot = Boolean(screenWidth) &&
@@ -314,6 +324,11 @@ export const AdwaitaRenderer: React.FC<Props> = ({
   useEffect(() => {
     ensureAdwIcon(node.iconName);
   }, [node.iconName]);
+
+  const tabIconNames = tabBar?.tabs.map((tab) => tab.iconName).filter(Boolean).join(' ') ?? '';
+  useEffect(() => {
+    for (const iconName of tabIconNames.split(' ')) if (iconName) ensureAdwIcon(iconName);
+  }, [tabIconNames]);
 
   // Selection must use a native listener: the adw-* custom elements build
   // and reparent internal DOM, and clicks originating there never reach
@@ -337,6 +352,10 @@ export const AdwaitaRenderer: React.FC<Props> = ({
   // GTK visibility: a hidden widget takes no space and draws nothing. This
   // must come after every hook so React's hook order stays stable.
   if (node.visible === false) return null;
+  // Adw.TabBar autohide: with fewer than two tabs the bar takes no space,
+  // exactly like a hidden widget (unless a finishing file pinned a runtime
+  // allocation via heightRequest — see utils/tabBar.ts).
+  if (tabBar?.hidden) return null;
 
   // adw-menu-button is icon-only; a labelled MenuButton renders as a button.
   const tag = isDialogRoot
@@ -386,6 +405,27 @@ export const AdwaitaRenderer: React.FC<Props> = ({
       <span className="protota-window-control close" />
     </div>
   ) : null;
+
+  // The tab strip's tabs are renderer-derived chrome (like window controls):
+  // one chip per statically declared page of the linked view, first selected
+  // (GTK's default). A close affordance is drawn per tab, as native does; a
+  // lone tab draws no chip background (libadwaita keeps it flat).
+  const tabBarTabs = tabBar && tabBar.tabs.length ? (
+    <div key="tab-box" className="protota-tab-box" aria-hidden="true">
+      {tabBar.tabs.map((tab, index) => (
+        <div key={tab.id} className={`protota-tab${index === 0 ? ' protota-tab-active' : ''}`}>
+          {tab.iconName ? (
+            <span className={`adw-icon adw-icon--${tab.iconName.replace(/-symbolic$/, '')}`} />
+          ) : null}
+          <span className="protota-tab-title">{plainText(tab.title)}</span>
+          <span className="protota-tab-close" />
+        </div>
+      ))}
+    </div>
+  ) : null;
+  if (tabBar && tabBar.tabs.length === 1 && tabBar.viewResolved) {
+    attrs['data-protota-single-tab'] = 'true';
+  }
 
   const iconPrefix = node.type === 'action-row' && node.iconName ? (
     <span
@@ -464,6 +504,7 @@ export const AdwaitaRenderer: React.FC<Props> = ({
         className: elementClass || undefined,
       },
         iconPrefix,
+        tabBarTabs,
         ...(children ?? []),
         windowControls,
         // For label/inscription — render text content

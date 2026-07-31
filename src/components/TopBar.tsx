@@ -4,6 +4,19 @@ import { exportDocumentFile, importDocumentFile } from "../utils/exportImport";
 import { mockupToBlueprint } from "../utils/blueprint";
 import { downloadPng, renderScreenToPng } from "../utils/pngExport";
 import { ExportModal } from "./ExportModal";
+import { openMenuSymbolic } from "@gjsify/adwaita-icons/actions";
+import { toDataUri } from "@gjsify/adwaita-icons/utils";
+
+const hamburgerIconStyle: React.CSSProperties = {
+  display: "inline-block",
+  width: "16px",
+  height: "16px",
+  maskImage: toDataUri(openMenuSymbolic),
+  WebkitMaskImage: toDataUri(openMenuSymbolic),
+  maskSize: "contain",
+  WebkitMaskSize: "contain",
+  backgroundColor: "currentColor",
+};
 
 interface MenuItem {
   label: string;
@@ -32,6 +45,7 @@ export const TopBar: React.FC = () => {
     toggleShowFlows,
     violations,
     clearCanvas,
+    setShowAddScreenModal,
   } = useMockupStore();
   const [openMenu, setOpenMenu] = useState<string | null>(null);
   const [showExportModal, setShowExportModal] = useState(false);
@@ -182,10 +196,79 @@ export const TopBar: React.FC = () => {
     setOpenMenu(null);
   };
 
+  // On narrow (mobile) viewports the menu bar and direct-access buttons do
+  // not fit, so everything collapses into a single hamburger overflow menu
+  // (issue #99). The extra "Actions" group surfaces the direct-access
+  // toolbar buttons plus the header-bar actions that are hidden on mobile.
+  const mobileMenus: MenuGroup[] = [
+    {
+      label: "Actions",
+      items: [
+        { label: "New Screen", action: () => setShowAddScreenModal(true), shortcut: "Ctrl+N" },
+        {
+          label: "Load Preset",
+          action: () => window.dispatchEvent(new CustomEvent("protota:show-presets")),
+        },
+        { label: "divider", divider: true },
+        { label: "Save JSON", action: () => exportDocumentFile(doc) },
+        { label: "Code Export", action: () => setShowExportModal(true) },
+      ],
+    },
+    ...menus,
+  ];
+
   return (
     <div ref={menuBarRef} style={{ display: "flex", gap: "2px" }}>
+      {/* Mobile: compact hamburger with every action in one overflow menu */}
+      <div className="protota-mobile-only" style={{ position: "relative" }}>
+        <button
+          className={`adw-button flat${openMenu === "mobile" ? " active" : ""}`}
+          onClick={() => handleMenuClick("mobile")}
+          title="Menu"
+          aria-label="Main Menu"
+          aria-expanded={openMenu === "mobile"}
+          data-testid="mobile-menu-button"
+          style={
+            openMenu === "mobile"
+              ? { backgroundColor: "var(--button-active-color)" }
+              : undefined
+          }
+        >
+          <span style={hamburgerIconStyle} />
+        </button>
+        {openMenu === "mobile" && (
+          <div
+            className="protota-menu-dropdown protota-mobile-menu"
+            data-testid="mobile-menu"
+          >
+            {mobileMenus.map((menu, groupIdx) => (
+              <React.Fragment key={menu.label}>
+                {groupIdx > 0 && <div className="protota-menu-divider" />}
+                <div className="protota-menu-section-header">{menu.label}</div>
+                {menu.items.map((item, idx) =>
+                  item.divider ? (
+                    <div key={idx} className="protota-menu-divider" />
+                  ) : (
+                    <button
+                      key={idx}
+                      className="protota-menu-item"
+                      onClick={() => handleItemClick(item)}
+                    >
+                      <span className="protota-menu-item-label">{item.label}</span>
+                      {item.shortcut && (
+                        <span className="protota-menu-item-shortcut">{item.shortcut}</span>
+                      )}
+                    </button>
+                  ),
+                )}
+              </React.Fragment>
+            ))}
+          </div>
+        )}
+      </div>
+      {/* Desktop: full menu bar */}
       {menus.map((menu) => (
-        <div key={menu.label} style={{ position: "relative" }}>
+        <div key={menu.label} className="protota-desktop-only" style={{ position: "relative" }}>
           <button
             className={`adw-button flat${openMenu === menu.label ? " active" : ""}`}
             onClick={() => handleMenuClick(menu.label)}
@@ -224,7 +307,7 @@ export const TopBar: React.FC = () => {
           issues #5/#8/#11/#12/#17/#24/#25 — visible buttons, not only menu
           entries. */}
       <button
-        className={`adw-button flat${showFlows ? " active" : ""}`}
+        className={`adw-button flat protota-desktop-only${showFlows ? " active" : ""}`}
         data-active={showFlows ? "true" : undefined}
         onClick={toggleShowFlows}
         title="Show navigation flow connectors between screens"
@@ -232,26 +315,26 @@ export const TopBar: React.FC = () => {
         Flows
       </button>
       <button
-        className={`adw-button flat${lintEnabled ? " active" : ""}`}
+        className={`adw-button flat protota-desktop-only${lintEnabled ? " active" : ""}`}
         data-active={lintEnabled ? "true" : undefined}
         onClick={toggleLint}
         title={`HIG lint${violations.length ? ` — ${violations.length} issue(s)` : ""}`}
       >
         HIG Lint
       </button>
-      <button className="adw-button flat" onClick={toggleColorScheme} title={`Switch theme (${themeLabel})`}>
+      <button className="adw-button flat protota-desktop-only" onClick={toggleColorScheme} title={`Switch theme (${themeLabel})`}>
         Theme
       </button>
-      <button className="adw-button flat" onClick={handleShare} title="Copy a shareable link">
+      <button className="adw-button flat protota-desktop-only" onClick={handleShare} title="Copy a shareable link">
         Share
       </button>
-      <button className="adw-button flat" onClick={() => exportDocumentFile(doc)} title="Download the document as .mockup.json">
+      <button className="adw-button flat protota-desktop-only" onClick={() => exportDocumentFile(doc)} title="Download the document as .mockup.json">
         Save JSON
       </button>
-      <button className="adw-button flat" onClick={() => setShowExportModal(true)} title="View generated Blueprint code">
+      <button className="adw-button flat protota-desktop-only" onClick={() => setShowExportModal(true)} title="View generated Blueprint code">
         Code Export
       </button>
-      <button className="adw-button flat" onClick={handleExportPNG} title="Export the focused screen as PNG">
+      <button className="adw-button flat protota-desktop-only" onClick={handleExportPNG} title="Export the focused screen as PNG">
         PNG
       </button>
       <ExportModal isOpen={showExportModal} onClose={() => setShowExportModal(false)} />

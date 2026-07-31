@@ -674,7 +674,45 @@ html adw-status-page .adw-status-page-child {
 }
 
 /* ---- Responsive Mobile Styles ---- */
+
+/* Elements that only exist on narrow (mobile) viewports — e.g. the top-bar
+   hamburger overflow menu (issue #99). Hidden by default; shown below. */
+.protota-mobile-only {
+  display: none !important;
+}
+
+.protota-menu-section-header {
+  padding: var(--spacing-xs, 6px) var(--spacing-m, 12px) 2px;
+  font-size: var(--font-size-small, 9pt);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  opacity: var(--dim-opacity, 0.55);
+}
+
 @media (max-width: 768px) {
+  /* Collapse the top bar (issue #99): hide the desktop menu bar and
+     direct-access buttons; the hamburger overflow menu replaces them. */
+  .protota-desktop-only {
+    display: none !important;
+  }
+
+  .protota-mobile-only {
+    display: flex !important;
+  }
+
+  /* The overflow dropdown anchors to the viewport so it never spills past
+     the screen edge under the compact header bar. */
+  .protota-mobile-menu {
+    position: fixed;
+    top: 48px;
+    left: 8px;
+    right: 8px;
+    min-width: 0;
+    max-height: calc(100vh - 64px);
+    overflow-y: auto;
+  }
+
   .protota-mobile-scrim {
     position: absolute;
     inset: 0;

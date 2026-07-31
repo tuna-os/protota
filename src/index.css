@@ -180,6 +180,12 @@ body,
 /* ---- Canvas ---- */
 .protota-canvas {
   background-color: var(--view-bg-color, #ffffff);
+  /* The surface is an inline-flex box translated by the pan offset from a
+     `0 0` origin, so centring it here is what makes pan.x = 0 mean "centred"
+     rather than "flush against the left edge, underneath the sidebar". The
+     zoom anchor maths measures from canvasW / 2 for the same reason. */
+  display: flex;
+  justify-content: center;
 }
 
 /* ---- Screen cards ---- */

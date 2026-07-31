@@ -1135,6 +1135,33 @@ html .protota-div-list-box-row + .protota-div-list-box-row {
   border-top: 1px solid var(--separator-color, rgba(0, 0, 6, 0.07));
 }
 
+/* Adw.PreferencesPage: adwaita-web's element is a bare marker — it only gets
+   geometry from adw-preferences-dialog's own clamp. A standalone page (Files'
+   compress dialog: Adw.Dialog → ToolbarView → PreferencesPage) must carry
+   libadwaita's page geometry itself: 24px/12px margins, 24px group spacing,
+   groups clamped to 600px (adw-preferences-page.ui). Node wrappers are
+   display: contents, so the groups are the page's real flex children. */
+html adw-preferences-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-sizing: border-box;
+  width: 100%;
+  padding: 24px 12px;
+  gap: 24px;
+  overflow-y: auto;
+}
+html adw-preferences-page adw-preferences-group {
+  width: 100%;
+  max-width: 600px;
+}
+/* Inside adw-preferences-dialog the dialog's own pages container already
+   carries the 24px/12px padding and 600px clamp — zero the page's copy so
+   dialog pages are not padded twice. */
+html adw-preferences-dialog adw-preferences-page {
+  padding: 0;
+}
+
 /* Adw.TabBar: a headerbar-colored strip of tab chips over the view, ported
    from libadwaita's tabbar stylesheet via @gjsify/adwaita-web's _tab_view.scss
    (same colors and alpha fills; no drag-reorder or overflow chrome — those

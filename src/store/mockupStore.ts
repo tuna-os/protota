@@ -1,17 +1,44 @@
 import { create } from 'zustand';
 import { produce } from 'immer';
-import type { MockupDocument, AdwNode, AdwNodeType } from '../types/mockup';
+import type { MockupDocument, AdwNode, AdwNodeType, Screen } from '../types/mockup';
 import type { ScreenTemplateType } from '../types/mockup';
 import { SCREEN_DEFAULTS, LEGAL_CHILDREN } from '../types/mockup';
-import type { LintViolation } from '../utils/higLinter';
-import { lintDocument } from '../utils/higLinter';
+import type { Diagnostic, DiagnosticTier, QuickFix } from '../diagnostics/types';
+import { instanceKey } from '../diagnostics/types';
+import { runDiagnostics } from '../diagnostics/engine';
+import { runRoundTripCheck } from '../diagnostics/blueprintSource';
 import { findNodeLocation, findNodeById } from '../utils/treeHelpers';
 import { blueprintToDocument, mockupToBlueprint } from '../utils/blueprint';
 
 const BLUEPRINT_STORAGE_KEY = 'protota_blueprint_v1';
 const METADATA_STORAGE_KEY = 'protota_editor_metadata_v1';
 const LEGACY_STORAGE_KEY = 'protota_doc_v1';
+/** Diagnostic ignores are editor state, not document content (design §2.4). */
+const IGNORES_STORAGE_KEY = 'protota_diagnostics_ignores_v1';
 const MAX_HISTORY = 50;
+
+interface PersistedIgnores {
+  rules: string[];
+  instances: string[];
+}
+
+function loadIgnores(): PersistedIgnores {
+  try {
+    const raw = localStorage.getItem(IGNORES_STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw) as Partial<PersistedIgnores>;
+      return {
+        rules: Array.isArray(parsed.rules) ? parsed.rules : [],
+        instances: Array.isArray(parsed.instances) ? parsed.instances : [],
+      };
+    }
+  } catch { /* corrupt cache means no ignores */ }
+  return { rules: [], instances: [] };
+}
+
+function saveIgnores(ignores: PersistedIgnores) {
+  localStorage.setItem(IGNORES_STORAGE_KEY, JSON.stringify(ignores));
+}
 
 interface EditorMetadata {
   title?: string;
@@ -258,13 +285,24 @@ interface MockupState {
   history: MockupDocument[];
   historyIndex: number;
   showAddScreenModal: boolean;
-  lintEnabled: boolean;
+  /** Diagnostics (#95) — renames lintEnabled/violations/toggleLint. */
+  diagnosticsEnabled: boolean;
+  diagnostics: Diagnostic[];
+  /** BLP-E001 round-trip results, refreshed at export and cleared on edit. */
+  exportCheck: Diagnostic[];
+  /** Panel tier chips; filtering happens at selection time, not in the engine. */
+  tierFilters: Record<DiagnosticTier, boolean>;
+  /** Rule ids disabled globally (persisted). */
+  ignoredRules: string[];
+  /** `${ruleId}:${nodeId}` dismissals (persisted). */
+  ignoredInstances: string[];
   /** Flow-edge connectors between screens (#11) drawn on the canvas. */
   showFlows: boolean;
-  violations: LintViolation[];
 
   selectNode: (nodeId: string | null, screenId?: string) => void;
   updateNodeProps: (nodeId: string, props: Partial<AdwNode>) => void;
+  /** Screen geometry lives beside rootNode; needed by HIG-E001's quick-fix. */
+  updateScreenProps: (screenId: string, props: Partial<Pick<Screen, 'width' | 'height' | 'title'>>) => void;
   addChildNode: (parentId: string, type: AdwNodeType, slot?: string) => void;
   addScreen: (title: string, type: ScreenTemplateType) => void;
   moveNodeUp: (nodeId: string) => void;
@@ -281,7 +319,16 @@ interface MockupState {
   undo: () => void;
   redo: () => void;
   toggleColorScheme: () => void;
-  toggleLint: () => void;
+  toggleDiagnostics: () => void;
+  setTierFilter: (tier: DiagnosticTier, on: boolean) => void;
+  ignoreRule: (ruleId: string) => void;
+  ignoreInstance: (ruleId: string, nodeId: string) => void;
+  /** Re-enable all rules and un-dismiss all instances. */
+  clearIgnores: () => void;
+  /** Apply a machine fix expressed as data over existing mutations (§6). */
+  applyQuickFix: (d: Diagnostic) => void;
+  /** Export round-trip check (BLP-E001); returns the diagnostics it stored. */
+  runExportCheck: () => Diagnostic[];
   toggleShowFlows: () => void;
   /** Connect two screens with a navigation flow edge (#11). */
   addEdge: (sourceScreenId: string, targetScreenId: string) => void;
@@ -346,9 +393,11 @@ export const useMockupStore = create<MockupState>((set, get) => {
     if (newHistory.length >= MAX_HISTORY) newHistory.shift();
     newHistory.push(newDoc);
     const result: Partial<MockupState> = { doc: newDoc, history: newHistory, historyIndex: newHistory.length - 1 };
-    if (get().lintEnabled) {
-      result.violations = lintDocument(newDoc);
+    if (get().diagnosticsEnabled) {
+      result.diagnostics = runDiagnostics(newDoc);
     }
+    // Round-trip results describe the document as it was at export time.
+    if (get().exportCheck.length) result.exportCheck = [];
     return result;
   };
 
@@ -359,9 +408,12 @@ export const useMockupStore = create<MockupState>((set, get) => {
     history: [startDoc],
     historyIndex: 0,
     showAddScreenModal: false,
-    lintEnabled: false,
+    diagnosticsEnabled: false,
+    diagnostics: [],
+    exportCheck: [],
+    tierFilters: { error: true, warning: true, suggestion: true },
+    ...(() => { const ignores = loadIgnores(); return { ignoredRules: ignores.rules, ignoredInstances: ignores.instances }; })(),
     showFlows: false,
-    violations: [],
 
     selectNode: (nodeId, screenId) =>
       set({ selectedNodeId: nodeId, selectedScreenId: screenId ?? get().selectedScreenId }),
@@ -373,6 +425,14 @@ export const useMockupStore = create<MockupState>((set, get) => {
           return node.children?.some(update) ?? false;
         };
         draft.screens.forEach((s) => update(s.rootNode));
+      });
+      set(pushSnapshot(nextDoc));
+    },
+
+    updateScreenProps: (screenId, props) => {
+      const nextDoc = produce(get().doc, (draft) => {
+        const screen = draft.screens.find((s) => s.id === screenId);
+        if (screen) Object.assign(screen, props);
       });
       set(pushSnapshot(nextDoc));
     },
@@ -521,7 +581,11 @@ export const useMockupStore = create<MockupState>((set, get) => {
         const newIndex = historyIndex - 1;
         const prevDoc = history[newIndex];
         persistDocumentSource(prevDoc);
-        set({ doc: prevDoc, historyIndex: newIndex });
+        set({
+          doc: prevDoc, historyIndex: newIndex,
+          // The report must describe the document now on screen.
+          ...(get().diagnosticsEnabled ? { diagnostics: runDiagnostics(prevDoc) } : {}),
+        });
       }
     },
 
@@ -531,7 +595,10 @@ export const useMockupStore = create<MockupState>((set, get) => {
         const newIndex = historyIndex + 1;
         const nextDoc = history[newIndex];
         persistDocumentSource(nextDoc);
-        set({ doc: nextDoc, historyIndex: newIndex });
+        set({
+          doc: nextDoc, historyIndex: newIndex,
+          ...(get().diagnosticsEnabled ? { diagnostics: runDiagnostics(nextDoc) } : {}),
+        });
       }
     },
 
@@ -547,10 +614,60 @@ export const useMockupStore = create<MockupState>((set, get) => {
       set(pushSnapshot(next));
     },
 
-    toggleLint: () => {
-      const nextEnabled = !get().lintEnabled;
-      const nextViolations = nextEnabled ? lintDocument(get().doc) : [];
-      set({ lintEnabled: nextEnabled, violations: nextViolations });
+    toggleDiagnostics: () => {
+      const nextEnabled = !get().diagnosticsEnabled;
+      set({
+        diagnosticsEnabled: nextEnabled,
+        diagnostics: nextEnabled ? runDiagnostics(get().doc) : [],
+        ...(nextEnabled ? {} : { exportCheck: [] }),
+      });
+    },
+
+    setTierFilter: (tier, on) =>
+      set({ tierFilters: { ...get().tierFilters, [tier]: on } }),
+
+    ignoreRule: (ruleId) => {
+      const ignoredRules = [...new Set([...get().ignoredRules, ruleId])];
+      saveIgnores({ rules: ignoredRules, instances: get().ignoredInstances });
+      set({ ignoredRules });
+    },
+
+    ignoreInstance: (ruleId, nodeId) => {
+      const ignoredInstances = [...new Set([...get().ignoredInstances, instanceKey(ruleId, nodeId)])];
+      saveIgnores({ rules: get().ignoredRules, instances: ignoredInstances });
+      set({ ignoredInstances });
+    },
+
+    clearIgnores: () => {
+      saveIgnores({ rules: [], instances: [] });
+      set({ ignoredRules: [], ignoredInstances: [] });
+    },
+
+    applyQuickFix: (d) => {
+      const fix: QuickFix | undefined = d.quickFix;
+      if (!fix) return;
+      switch (fix.kind) {
+        case 'set-props':
+          get().updateNodeProps(fix.nodeId, fix.props);
+          break;
+        case 'add-child':
+          get().addChildNode(fix.parentId, fix.childType, fix.slot);
+          break;
+        case 'delete-node':
+          get().deleteNode(fix.nodeId);
+          break;
+        case 'set-screen-props':
+          get().updateScreenProps(d.screenId, fix.props);
+          break;
+      }
+      // Reselect the anchor so the red-to-green loop stays visible (§6).
+      if (d.nodeId) get().selectNode(d.nodeId, d.screenId);
+    },
+
+    runExportCheck: () => {
+      const exportCheck = runRoundTripCheck(get().doc);
+      set({ exportCheck });
+      return exportCheck;
     },
 
     toggleShowFlows: () => set({ showFlows: !get().showFlows }),

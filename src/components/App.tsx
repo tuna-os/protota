@@ -3,7 +3,7 @@ import { persistDocumentSource, useMockupStore } from "../store/mockupStore";
 import { LayersPanel } from "./LayersPanel";
 import { ViewportCanvas } from "./ViewportCanvas";
 import { InspectorPanel } from "./InspectorPanel";
-import { AuditPanel } from "./AuditPanel";
+import { DiagnosticsPanel } from "./DiagnosticsPanel";
 import { ContextMenu } from "./ContextMenu";
 import { PresetGallery } from "./PresetGallery";
 import { CommandPalette } from "./CommandPalette";
@@ -48,10 +48,14 @@ export const App: React.FC = () => {
     cutNode,
     pasteNode,
     duplicateNode,
+    toggleDiagnostics,
+    diagnosticsEnabled,
   } = useMockupStore();
 
   const [leftOpen, setLeftOpen] = useState(() => typeof window !== 'undefined' ? window.innerWidth >= 768 : true);
   const [rightOpen, setRightOpen] = useState(() => typeof window !== 'undefined' ? window.innerWidth >= 768 : true);
+  /** Two-tab right drawer: Properties (inspector) | Diagnostics (design §5.1). */
+  const [rightTab, setRightTab] = useState<"properties" | "diagnostics">("properties");
   const [showShortcuts, setShowShortcuts] = useState(false);
   const [showPresets, setShowPresets] = useState(false);
   const [showCommandPalette, setShowCommandPalette] = useState(false);
@@ -108,15 +112,22 @@ export const App: React.FC = () => {
     const onToggleProperties = () => setRightOpen((v) => !v);
     const onShowShortcuts = () => setShowShortcuts((v) => !v);
     const onShowPresets = () => setShowPresets(true);
+    // Enabling diagnostics with the drawer closed opens it on that tab (§5.3).
+    const onShowDiagnostics = () => {
+      setRightOpen(true);
+      setRightTab("diagnostics");
+    };
     window.addEventListener("protota:toggle-layers", onToggleLayers);
     window.addEventListener("protota:toggle-properties", onToggleProperties);
     window.addEventListener("protota:show-shortcuts", onShowShortcuts);
     window.addEventListener("protota:show-presets", onShowPresets);
+    window.addEventListener("protota:show-diagnostics", onShowDiagnostics);
     return () => {
       window.removeEventListener("protota:toggle-layers", onToggleLayers);
       window.removeEventListener("protota:toggle-properties", onToggleProperties);
       window.removeEventListener("protota:show-shortcuts", onShowShortcuts);
       window.removeEventListener("protota:show-presets", onShowPresets);
+      window.removeEventListener("protota:show-diagnostics", onShowDiagnostics);
     };
   }, []);
 
@@ -218,6 +229,15 @@ export const App: React.FC = () => {
         setRightOpen((v) => !v);
         return;
       }
+      // Diagnostics (HIG lint) toggle
+      if (e.key === "." && mod) {
+        e.preventDefault();
+        if (!diagnosticsEnabled) {
+          window.dispatchEvent(new CustomEvent("protota:show-diagnostics"));
+        }
+        toggleDiagnostics();
+        return;
+      }
       // New screen
       if (e.key === "k" && mod) {
         e.preventDefault();
@@ -243,6 +263,8 @@ export const App: React.FC = () => {
     addChildNode,
     showShortcuts,
     showCommandPalette,
+    toggleDiagnostics,
+    diagnosticsEnabled,
   ]);
 
   return (
@@ -348,13 +370,31 @@ export const App: React.FC = () => {
                 flexDirection: "column",
               }}
             >
-              <InspectorPanel />
+              {/* Two-tab segment: Properties | Diagnostics (design §5.1) */}
+              <div
+                role="tablist"
+                aria-label="Right panel tabs"
+                style={{ display: "flex", gap: "4px", padding: "8px 8px 0 8px", flexShrink: 0 }}
+              >
+                {(["properties", "diagnostics"] as const).map((tab) => (
+                  <button
+                    key={tab}
+                    role="tab"
+                    aria-selected={rightTab === tab}
+                    data-testid={`right-tab-${tab}`}
+                    className={`adw-button flat${rightTab === tab ? " active" : ""}`}
+                    onClick={() => setRightTab(tab)}
+                    style={{ flex: 1, fontSize: "12px" }}
+                  >
+                    {tab === "properties" ? "Properties" : "Diagnostics"}
+                  </button>
+                ))}
+              </div>
+              {rightTab === "properties" ? <InspectorPanel /> : <DiagnosticsPanel />}
             </aside>
           )}
         </div>
       </adw-toolbar-view>
-
-      <AuditPanel />
 
       <AddScreenModal isOpen={showAddScreenModal} onClose={() => setShowAddScreenModal(false)} />
 
@@ -484,7 +524,7 @@ const SHORTCUT_GROUPS = [
     items: [
       { keys: "Ctrl+\\", label: "Toggle Layers panel" },
       { keys: "Ctrl+]", label: "Toggle Properties panel" },
-      { keys: "Ctrl+.", label: "Toggle HIG lint" },
+      { keys: "Ctrl+.", label: "Toggle Diagnostics (HIG lint)" },
       { keys: "Ctrl+/", label: "Toggle Preview mode" },
       { keys: "?", label: "Show this help" },
     ],

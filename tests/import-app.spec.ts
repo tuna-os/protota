@@ -1,5 +1,5 @@
 /**
- * Import App front door (#118): File menu → dialog → folder/zip ingest →
+ * Import App front door (#118): Open menu → dialog → folder/zip ingest →
  * discovery manifest → entry selection → import replaces the document.
  * Git-URL fetching is unit-tested with fetch mocked (src/__tests__/
  * app-ingest.test.ts); no live network is touched here.
@@ -14,8 +14,8 @@ const checkoutDir = join(here, 'fixtures', 'import-app-checkout');
 const openImportAppDialog = async (page: Page) => {
   await page.goto('/');
   await page.waitForSelector('adw-window', { timeout: 10000 });
-  await page.getByRole('button', { name: 'File', exact: true }).click();
-  await page.getByRole('button', { name: /Import App/ }).click();
+  await page.getByTestId('app-header-bar').getByRole('button', { name: 'Open', exact: true }).click();
+  await page.getByRole('menuitem', { name: /Import App/ }).click();
   await expect(page.getByTestId('import-app-dialog')).toBeVisible();
 };
 

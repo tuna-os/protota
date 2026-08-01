@@ -2,7 +2,8 @@ import { test, expect } from '@playwright/test';
 
 // The Icon Library (GNOME "Icon Library" style): a browsable, searchable
 // catalog of every symbolic icon in the installed @gjsify/adwaita-icons
-// package, opened from the View menu (desktop) or the mobile overflow menu.
+// package, opened from the app-menu button (hamburger) on every viewport.
+// (It left the menu bar with the Edit/View groups.)
 test.describe('Icon library', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
@@ -10,8 +11,8 @@ test.describe('Icon library', () => {
   });
 
   const openLibrary = async (page: import('@playwright/test').Page) => {
-    await page.getByRole('button', { name: 'View', exact: true }).click();
-    await page.getByRole('button', { name: 'Icon Library' }).click();
+    await page.getByTestId('mobile-menu-button').click();
+    await page.getByRole('menuitem', { name: /icon library/i }).click();
     await expect(page.getByTestId('icon-library')).toBeVisible({ timeout: 5000 });
   };
 

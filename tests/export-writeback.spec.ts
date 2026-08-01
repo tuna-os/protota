@@ -26,8 +26,8 @@ const fixtureFiles: Record<string, string> = {
 };
 
 const openWritebackDialog = async (page: Page) => {
-  await page.getByRole('button', { name: 'File', exact: true }).click();
-  await page.getByRole('button', { name: /Patch into Checkout/ }).click();
+  await page.getByTestId('app-header-bar').getByRole('button', { name: 'Export', exact: true }).click();
+  await page.getByRole('menuitem', { name: /Patch into Checkout/ }).click();
   await expect(page.getByTestId('writeback-dialog')).toBeVisible();
 };
 
@@ -147,8 +147,8 @@ test.describe('Export → Patch into Checkout (write-back UX bridge)', () => {
     await page.waitForSelector('adw-window', { timeout: 10000 });
 
     // Bring the fixture checkout into the editor through the import front door.
-    await page.getByRole('button', { name: 'File', exact: true }).click();
-    await page.getByRole('button', { name: /Import App/ }).click();
+    await page.getByTestId('app-header-bar').getByRole('button', { name: 'Open', exact: true }).click();
+    await page.getByRole('menuitem', { name: /Import App/ }).click();
     await page.getByTestId('import-app-folder-input').setInputFiles(checkoutDir);
     await expect(page.getByTestId('import-app-entry')).toHaveValue('src/window.blp');
     await page.getByTestId('import-app-confirm').click();
@@ -199,8 +199,8 @@ test.describe('Export → Patch into Checkout (write-back UX bridge)', () => {
     await mockDirectoryPicker(page, fixtureFiles);
     await page.goto('/');
     await page.waitForSelector('adw-window', { timeout: 10000 });
-    await page.getByRole('button', { name: 'File', exact: true }).click();
-    await page.getByRole('button', { name: /Import App/ }).click();
+    await page.getByTestId('app-header-bar').getByRole('button', { name: 'Open', exact: true }).click();
+    await page.getByRole('menuitem', { name: /Import App/ }).click();
     await page.getByTestId('import-app-folder-input').setInputFiles(checkoutDir);
     await page.getByTestId('import-app-confirm').click();
     await page.waitForSelector('adw-window', { timeout: 10000 });
@@ -214,7 +214,8 @@ test.describe('Export → Patch into Checkout (write-back UX bridge)', () => {
   test('ExportModal links to the write-back dialog', async ({ page }) => {
     await page.goto('/');
     await page.waitForSelector('adw-window', { timeout: 10000 });
-    await page.getByRole('button', { name: 'Code Export' }).click();
+    await page.getByTestId('app-header-bar').getByRole('button', { name: 'Export', exact: true }).click();
+    await page.getByRole('menuitem', { name: /code export/i }).click();
     await page.getByTestId('export-writeback-open').click();
     await expect(page.getByTestId('writeback-dialog')).toBeVisible();
   });

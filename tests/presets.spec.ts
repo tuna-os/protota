@@ -1,10 +1,10 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('GNOME Core app presets (#6)', () => {
-// Load Preset moved into the File menu (#106 layout reorder).
+// Load Preset moved into the Open menu (#106 layout reorder).
 const openPresetGallery = async (page: import('@playwright/test').Page) => {
-  await page.getByRole('button', { name: 'File', exact: true }).click();
-  await page.getByRole('button', { name: /load preset/i }).click();
+  await page.getByTestId('app-header-bar').getByRole('button', { name: 'Open', exact: true }).click();
+  await page.getByRole('menuitem', { name: /load preset/i }).click();
 };
 
   test.beforeEach(async ({ page }) => {
@@ -12,9 +12,9 @@ const openPresetGallery = async (page: import('@playwright/test').Page) => {
     await page.waitForSelector('adw-window', { timeout: 10000 });
   });
 
-  test('preset gallery entry exists in the File menu', async ({ page }) => {
-    await page.getByRole('button', { name: 'File', exact: true }).click();
-    await expect(page.getByRole('button', { name: /load preset/i })).toBeVisible();
+  test('preset gallery entry exists in the Open menu', async ({ page }) => {
+    await page.getByTestId('app-header-bar').getByRole('button', { name: 'Open', exact: true }).click();
+    await expect(page.getByRole('menuitem', { name: /load preset/i })).toBeVisible();
   });
 
   test('clicking preset button opens gallery', async ({ page }) => {

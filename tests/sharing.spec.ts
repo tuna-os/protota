@@ -6,17 +6,19 @@ test.describe('Shareable links (#25)', () => {
     await page.waitForSelector('adw-window', { timeout: 10000 });
   });
 
-  test('Share button exists in toolbar', async ({ page }) => {
-    const shareBtn = page.getByRole('button', { name: /share/i });
-    await expect(shareBtn).toBeVisible();
+  test('Share action exists in the Export menu', async ({ page }) => {
+    // The share/export header buttons consolidated into the Export menu
+    // (#108 header reorg); Share URL is its last item.
+    await page.getByTestId('app-header-bar').getByRole('button', { name: 'Export', exact: true }).click();
+    await expect(page.getByRole('menuitem', { name: /share url/i })).toBeVisible();
   });
 
-  test('clicking Share copies a URL to clipboard', async ({ page }) => {
+  test('sharing copies a URL to clipboard', async ({ page }) => {
     // Grant clipboard permission
     await page.context().grantPermissions(['clipboard-read', 'clipboard-write']);
 
-    const shareBtn = page.getByRole('button', { name: /share/i });
-    await shareBtn.click();
+    await page.getByTestId('app-header-bar').getByRole('button', { name: 'Export', exact: true }).click();
+    await page.getByRole('menuitem', { name: /share url/i }).click();
 
     // The share action copies a URL — verify the clipboard has a URL
     const clipboard = await page.evaluate(() => navigator.clipboard.readText());

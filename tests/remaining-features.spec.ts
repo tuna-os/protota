@@ -6,9 +6,9 @@ test.describe('Remaining features (#9, #16, #18-#24)', () => {
     await page.waitForSelector('adw-window', { timeout: 10000 });
   });
 
-  test('#9 Blueprint export command exists in the Export menu', async ({ page }) => {
+  test('#9 Code export command exists in the Export menu', async ({ page }) => {
     await page.getByTestId('app-header-bar').getByRole('button', { name: 'Export', exact: true }).click();
-    await expect(page.getByRole('menuitem', { name: /code export/i })).toBeVisible();
+    await expect(page.getByRole('menuitem', { name: /export code/i })).toBeVisible();
   });
 
   test('#16 Screen width defaults exist in store', async ({ page }) => {

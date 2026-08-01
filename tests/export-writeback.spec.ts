@@ -215,7 +215,7 @@ test.describe('Export → Patch into Checkout (write-back UX bridge)', () => {
     await page.goto('/');
     await page.waitForSelector('adw-window', { timeout: 10000 });
     await page.getByTestId('app-header-bar').getByRole('button', { name: 'Export', exact: true }).click();
-    await page.getByRole('menuitem', { name: /code export/i }).click();
+    await page.getByRole('menuitem', { name: /export code/i }).click();
     await page.getByTestId('export-writeback-open').click();
     await expect(page.getByTestId('writeback-dialog')).toBeVisible();
   });

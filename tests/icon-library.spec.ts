@@ -93,7 +93,7 @@ test.describe('Icon library', () => {
   test('appears in the mobile overflow menu', async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.getByTestId('mobile-menu-button').click();
-    await page.getByTestId('mobile-menu').getByRole('button', { name: 'Icon Library' }).click();
+    await page.getByTestId('mobile-menu').getByRole('menuitem', { name: /icon library/i }).click();
     await expect(page.getByTestId('icon-library')).toBeVisible({ timeout: 5000 });
   });
 });

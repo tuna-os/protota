@@ -5,8 +5,10 @@ test.describe('Agent API (#7)', () => {
     await page.goto('/');
     await page.waitForSelector('adw-window', { timeout: 10000 });
 
-    // Export the document and verify it matches the schema structure
-    const exportBtn = page.getByRole('button', { name: /save json/i });
+    // Export the document and verify it matches the schema structure.
+    // The header's Export menu carries the JSON export (#108 header reorg).
+    await page.getByTestId('app-header-bar').getByRole('button', { name: 'Export', exact: true }).click();
+    const exportBtn = page.getByRole('menuitem', { name: /export to json/i });
     const [download] = await Promise.all([
       page.waitForEvent('download', { timeout: 5000 }),
       exportBtn.click(),

@@ -42,7 +42,11 @@ function zoomAtPoint(
 }
 
 export const ViewportCanvas: React.FC = () => {
-  const { doc, selectNode, showFlows } = useMockupStore();
+  const {
+    doc, selectNode, showFlows,
+    selectScreen, selectedScreenId, screenSelected,
+    screenDeleteNotice, clearScreenDeleteNotice,
+  } = useMockupStore();
 
   // Ref mirror of doc — lets stable callbacks read latest screens without re-creating
   const docRef = useRef(doc);
@@ -185,8 +189,39 @@ export const ViewportCanvas: React.FC = () => {
 
   const handleCanvasClick = useCallback(() => {
     canvasRef.current?.focus();
+    // Clears BOTH node and screen selection: selectNode(null) resets the
+    // node ids and drops the screenSelected flag (see mockupStore).
     selectNode(null);
   }, [selectNode]);
+
+  // --- Screen selection (#138) ---
+  //
+  // Clicking the screen title selects the whole screen. Delete/Backspace is
+  // handled canvas-locally (the canvas owns focus after the title click):
+  // screen selection cleared the node selection, so the global App.tsx
+  // Delete shortcut no-ops — no double handling. Unifying this into the
+  // global shortcut can follow after the App/TopBar refactor.
+  const handleScreenTitleClick = useCallback((e: React.MouseEvent, screenId: string) => {
+    e.stopPropagation();
+    canvasRef.current?.focus();
+    selectScreen(screenId);
+  }, [selectScreen]);
+
+  const handleCanvasKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if (e.key !== 'Delete' && e.key !== 'Backspace') return;
+    const store = useMockupStore.getState();
+    if (!store.screenSelected || !store.selectedScreenId) return;
+    e.preventDefault();
+    e.stopPropagation();
+    store.deleteScreen(store.selectedScreenId);
+  }, []);
+
+  // The last-screen refusal notice is transient chrome: show, then clear.
+  useEffect(() => {
+    if (!screenDeleteNotice) return;
+    const timer = window.setTimeout(clearScreenDeleteNotice, 3000);
+    return () => window.clearTimeout(timer);
+  }, [screenDeleteNotice, clearScreenDeleteNotice]);
 
   // --- Drag and drop (#79) ---
   //
@@ -870,6 +905,7 @@ export const ViewportCanvas: React.FC = () => {
       onMouseUp={handleMouseUp}
       onMouseLeave={handleMouseUp}
       onClick={handleCanvasClick}
+      onKeyDown={handleCanvasKeyDown}
       style={{
         flex: 1,
         overflow: "hidden",
@@ -1018,6 +1054,13 @@ export const ViewportCanvas: React.FC = () => {
       {/* Post-drop spacing quantise offer (#79): transient, one undo step. */}
       <QuantiseHintChip />
 
+      {/* Last-screen deletion refusal (#138): transient visible reason. */}
+      {screenDeleteNotice && (
+        <div className="protota-screen-delete-notice" data-testid="screen-delete-notice" role="status">
+          {screenDeleteNotice}
+        </div>
+      )}
+
       {/* Rubber-band marquee (#79): fixed-positioned editor chrome. */}
       {marquee && (
         <div
@@ -1080,13 +1123,20 @@ export const ViewportCanvas: React.FC = () => {
           const liveWidth = preview?.width ?? screen.width;
           const liveHeight = preview?.height ?? screen.height;
           const active = breakpointState[screen.id]?.active ?? [];
+          const isScreenSelected = screenSelected && selectedScreenId === screen.id;
           return (
           <div
             key={screen.id}
             data-protota-flow-screen={screen.id}
             style={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}
           >
-            <div className="protota-screen-label" style={{ marginBottom: "8px", display: "flex", gap: "8px", alignItems: "center" }}>
+            <div
+              className={`protota-screen-label${isScreenSelected ? " protota-screen-label--selected" : ""}`}
+              data-testid={`screen-title-${screen.id}`}
+              onClick={(e) => handleScreenTitleClick(e, screen.id)}
+              title="Click to select the whole screen"
+              style={{ marginBottom: "8px", display: "flex", gap: "8px", alignItems: "center", cursor: "pointer" }}
+            >
               {screen.title}
               {active.length > 0 && (
                 <span
@@ -1098,7 +1148,11 @@ export const ViewportCanvas: React.FC = () => {
                 </span>
               )}
             </div>
-            <div style={{ position: "relative" }} data-testid={`screen-frame-${screen.id}`}>
+            <div
+              style={{ position: "relative" }}
+              data-testid={`screen-frame-${screen.id}`}
+              className={isScreenSelected ? "protota-screen-frame--selected" : undefined}
+            >
               <AdwaitaRenderer
                 node={screen.rootNode}
                 screenId={screen.id}

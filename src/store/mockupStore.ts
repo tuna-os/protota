@@ -290,6 +290,22 @@ interface MockupState {
    */
   selectedNodeIds: string[];
   selectedScreenId: string | null;
+  /**
+   * Whole-screen selection (#138). `selectedScreenId` alone is the *active
+   * screen context* (it always points somewhere so the inspector, command
+   * palette, and render targeting have a screen to talk about); this flag
+   * marks it as an explicit selection of the screen itself. Screen and node
+   * selection are mutually exclusive: `selectScreen` clears the node
+   * selection, and every node-selection action clears this flag — so the
+   * global Delete shortcut (which keys off `selectedNodeId(s)`) can never
+   * double-handle a screen deletion. Editor state, never undoable.
+   */
+  screenSelected: boolean;
+  /**
+   * Visible reason the last deleteScreen refused (the last-screen rule).
+   * Transient editor chrome; surfaces show it briefly and clear it.
+   */
+  screenDeleteNotice: string | null;
   history: MockupDocument[];
   historyIndex: number;
   showAddScreenModal: boolean;
@@ -322,6 +338,24 @@ interface MockupState {
   toggleNodeSelection: (nodeId: string, screenId?: string) => void;
   /** Replace (or with `additive`, union into) the selection with `ids`. */
   selectNodes: (ids: string[], screenId?: string, additive?: boolean) => void;
+  /**
+   * Select a whole screen (#138): title click on canvas, screen row in the
+   * Layers panel. Clears the node selection (see `screenSelected`). Passing
+   * null clears the screen selection but keeps the active-screen context.
+   */
+  selectScreen: (screenId: string | null) => void;
+  /**
+   * Delete a whole screen — nodes, its flow edges, everything — in ONE undo
+   * snapshot. Screens have no stored x/y: the canvas lays them out as a
+   * flex row, so the remaining screens auto-adjust to fill the space simply
+   * by the array entry disappearing. Returns false (and sets
+   * `screenDeleteNotice`) for the last screen: the editor's invariant since
+   * initialDocument is that a document always has a screen for the
+   * active-screen context to point at — emptying the canvas is a deliberate
+   * act with its own affordance (clearCanvas / presets), not a Delete press.
+   */
+  deleteScreen: (screenId: string) => boolean;
+  clearScreenDeleteNotice: () => void;
   updateNodeProps: (nodeId: string, props: Partial<AdwNode>) => void;
   /**
    * Batched multi-node property edit in ONE undo snapshot — the store
@@ -524,6 +558,8 @@ export const useMockupStore = create<MockupState>((set, get) => {
     selectedNodeId: null,
     selectedNodeIds: [],
     selectedScreenId: startDoc.screens[0]?.id || null,
+    screenSelected: false,
+    screenDeleteNotice: null,
     history: [startDoc],
     historyIndex: 0,
     showAddScreenModal: false,
@@ -543,6 +579,7 @@ export const useMockupStore = create<MockupState>((set, get) => {
         selectedNodeId: nodeId,
         selectedNodeIds: nodeId ? [nodeId] : [],
         selectedScreenId: screenId ?? get().selectedScreenId,
+        screenSelected: false,
       }),
 
     toggleNodeSelection: (nodeId, screenId) => {
@@ -551,6 +588,7 @@ export const useMockupStore = create<MockupState>((set, get) => {
         selectedNodeIds,
         selectedNodeId: selectedNodeIds[selectedNodeIds.length - 1] ?? null,
         selectedScreenId: screenId ?? get().selectedScreenId,
+        screenSelected: false,
       });
     },
 
@@ -560,7 +598,64 @@ export const useMockupStore = create<MockupState>((set, get) => {
         selectedNodeIds,
         selectedNodeId: selectedNodeIds[selectedNodeIds.length - 1] ?? null,
         selectedScreenId: screenId ?? get().selectedScreenId,
+        screenSelected: false,
       });
+    },
+
+    selectScreen: (screenId) => {
+      if (screenId === null) {
+        set({ screenSelected: false });
+        return;
+      }
+      if (!get().doc.screens.some((screen) => screen.id === screenId)) return;
+      // Screen selection replaces node selection (mutual exclusion, #138):
+      // with no selected node ids, the global Delete shortcut no-ops and the
+      // canvas/panel handlers own the whole-screen deletion.
+      set({
+        selectedScreenId: screenId,
+        screenSelected: true,
+        selectedNodeId: null,
+        selectedNodeIds: [],
+      });
+    },
+
+    deleteScreen: (screenId) => {
+      const { doc } = get();
+      const index = doc.screens.findIndex((screen) => screen.id === screenId);
+      if (index < 0) return false;
+      if (doc.screens.length === 1) {
+        set({ screenDeleteNotice: 'Can’t delete the last screen — a document always keeps one.' });
+        return false;
+      }
+      const nextDoc = produce(doc, (draft) => {
+        draft.screens.splice(index, 1);
+        // Flow edges pointing at the deleted screen die with it, in the SAME
+        // snapshot, so undo restores screen + edges together.
+        draft.edges = draft.edges.filter(
+          (edge) => edge.sourceId !== screenId && edge.targetId !== screenId,
+        );
+      });
+      // Any selected nodes living on the deleted screen leave the selection.
+      const surviving = get().selectedNodeIds.filter((id) =>
+        nextDoc.screens.some((screen) => findNodeById([screen.rootNode], id)),
+      );
+      // Keep the active-screen context valid; when the deleted screen was the
+      // explicit selection, the neighbour inherits it so repeated Delete
+      // walks through the screens (the exact flow in issue #138).
+      const wasContext = get().selectedScreenId === screenId;
+      const neighbour = nextDoc.screens[Math.min(index, nextDoc.screens.length - 1)];
+      set({
+        ...pushSnapshot(nextDoc),
+        selectedNodeIds: surviving,
+        selectedNodeId: surviving[surviving.length - 1] ?? null,
+        ...(wasContext ? { selectedScreenId: neighbour.id } : {}),
+        screenDeleteNotice: null,
+      });
+      return true;
+    },
+
+    clearScreenDeleteNotice: () => {
+      if (get().screenDeleteNotice !== null) set({ screenDeleteNotice: null });
     },
 
     updateNodeProps: (nodeId, props) => {

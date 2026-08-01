@@ -4,12 +4,16 @@ import { useMockupStore } from '../store/mockupStore';
 interface Props { x: number; y: number; onClose: () => void }
 
 export const ContextMenu: React.FC<Props> = ({ x, y, onClose }) => {
-  const { deleteNode, selectedNodeId, undo, redo } = useMockupStore();
+  const { deleteNode, selectedNodeId, undo, redo, screenSelected, selectedScreenId, deleteScreen } = useMockupStore();
 
   const items = [
     { label: 'Undo', action: () => { undo(); onClose(); } },
     { label: 'Redo', action: () => { redo(); onClose(); } },
-    { label: 'Delete', action: () => { if (selectedNodeId) { deleteNode(selectedNodeId); onClose(); } }, danger: true },
+    // Delete acts on the current selection: the whole screen when one is
+    // selected (#138), else the selected node.
+    screenSelected && selectedScreenId
+      ? { label: 'Delete Screen', action: () => { deleteScreen(selectedScreenId); onClose(); }, danger: true }
+      : { label: 'Delete', action: () => { if (selectedNodeId) { deleteNode(selectedNodeId); onClose(); } }, danger: true },
   ];
 
   return (

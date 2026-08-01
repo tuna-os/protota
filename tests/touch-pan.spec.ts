@@ -10,13 +10,50 @@ interface Point {
   y: number;
 }
 
+interface Matrix {
+  scale: number;
+  x: number;
+  y: number;
+}
+
 /** Current surface transform: matrix(a,·,·,·,e,f) → scale + translation. */
-const surfaceMatrix = (page: Page) =>
+const surfaceMatrix = (page: Page): Promise<Matrix> =>
   page.locator('.protota-canvas-surface').evaluate((el) => {
     const t = getComputedStyle(el).transform;
     const m = new DOMMatrixReadOnly(t === 'none' ? undefined : t);
     return { scale: m.a, x: m.e, y: m.f };
   });
+
+/**
+ * The surface animates (`transform 0.2s ease`), so a single read can catch an
+ * interpolated value. Poll until two consecutive reads agree and return that
+ * settled matrix.
+ */
+async function settledMatrix(page: Page): Promise<Matrix> {
+  let previous = await surfaceMatrix(page);
+  await expect
+    .poll(async () => {
+      const current = await surfaceMatrix(page);
+      const same =
+        Math.abs(current.scale - previous.scale) < 1e-4 &&
+        Math.abs(current.x - previous.x) < 0.5 &&
+        Math.abs(current.y - previous.y) < 0.5;
+      previous = current;
+      return same;
+    })
+    .toBe(true);
+  return previous;
+}
+
+/** Wait for the initial fit to have run and finished animating. */
+async function fittedMatrix(page: Page): Promise<Matrix> {
+  const frame = page.locator('[data-protota-flow-screen]').first();
+  await expect(frame).toBeVisible();
+  // The fit shrinks the 800px-wide screen into this 390px viewport, so an
+  // identity transform means the fit effect has not applied yet.
+  await expect.poll(async () => (await surfaceMatrix(page)).scale).toBeLessThan(1);
+  return settledMatrix(page);
+}
 
 /** Drive a two-finger gesture from `from` to `to` in interpolated steps. */
 async function twoFingerGesture(
@@ -71,7 +108,7 @@ test.describe('Touch pan/zoom and small-viewport fit', () => {
   });
 
   test('two-finger drag pans the canvas without changing zoom', async ({ page }) => {
-    const before = await surfaceMatrix(page);
+    const before = await fittedMatrix(page);
     await twoFingerGesture(
       page,
       [{ x: 140, y: 350 }, { x: 240, y: 350 }],
@@ -87,7 +124,7 @@ test.describe('Touch pan/zoom and small-viewport fit', () => {
   });
 
   test('pinch spread zooms in, and the bottom bar shows the same zoom', async ({ page }) => {
-    const before = await surfaceMatrix(page);
+    const before = await fittedMatrix(page);
     await twoFingerGesture(
       page,
       [{ x: 145, y: 400 }, { x: 245, y: 400 }],
@@ -96,7 +133,7 @@ test.describe('Touch pan/zoom and small-viewport fit', () => {
     await expect
       .poll(async () => (await surfaceMatrix(page)).scale)
       .toBeGreaterThan(before.scale * 1.5);
-    const after = await surfaceMatrix(page);
+    const after = await settledMatrix(page);
     expect(after.scale).toBeLessThanOrEqual(2.5); // existing zoom ceiling
     // Pinch updates the same zoom state the bottom-bar controls display.
     await expect(page.locator('.protota-zoom-bar')).toContainText(
@@ -105,7 +142,7 @@ test.describe('Touch pan/zoom and small-viewport fit', () => {
   });
 
   test('pinch close zooms out, clamped to the existing floor', async ({ page }) => {
-    const before = await surfaceMatrix(page);
+    const before = await fittedMatrix(page);
     await twoFingerGesture(
       page,
       [{ x: 70, y: 400 }, { x: 320, y: 400 }],
@@ -114,13 +151,14 @@ test.describe('Touch pan/zoom and small-viewport fit', () => {
     await expect
       .poll(async () => (await surfaceMatrix(page)).scale)
       .toBeLessThan(before.scale);
-    const after = await surfaceMatrix(page);
+    const after = await settledMatrix(page);
     expect(after.scale).toBeGreaterThanOrEqual(0.3 - 1e-6);
   });
 
   test('single-finger tap still selects a node', async ({ page }) => {
     // Tap the mockup's header bar area (centre of the fitted screen's top).
     const frame = page.locator('[data-protota-flow-screen]').first();
+    await fittedMatrix(page);
     const box = (await frame.boundingBox())!;
     await page.touchscreen.tap(box.x + box.width / 2, box.y + 40);
     await expect(page.locator('.adw-node-wrapper.selected-outline')).toHaveCount(1);

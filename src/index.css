@@ -190,6 +190,39 @@ body,
   opacity: 0.7;
 }
 
+/* Whole-screen selection (#138): visibly distinct from node selection —
+   nodes get a tight 2px solid accent outline; a selected screen frames the
+   entire render with an offset accent border plus a soft halo, and its
+   title label switches to the accent colour. */
+.protota-screen-label--selected {
+  color: var(--accent-bg-color, #3584e4);
+  opacity: 1;
+}
+
+.protota-screen-frame--selected {
+  outline: 2px solid var(--accent-bg-color, #3584e4);
+  outline-offset: 6px;
+  border-radius: 8px;
+  box-shadow: 0 0 0 10px color-mix(in srgb, var(--accent-bg-color, #3584e4) 12%, transparent);
+}
+
+/* Last-screen deletion refusal (#138): transient fixed chip. */
+.protota-screen-delete-notice {
+  position: absolute;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 80;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: var(--font-size-small, 9pt);
+  background: var(--popover-bg-color, #fff);
+  color: var(--window-fg-color, rgba(0, 0, 6, 0.8));
+  border: 1px solid var(--separator-color, rgba(0, 0, 6, 0.12));
+  box-shadow: 0 4px 16px rgba(0, 0, 6, 0.18);
+  pointer-events: none;
+}
+
 /* Renderer wrappers are layout-transparent: the rendered widget element is
    the flex/grid item its parent lays out, so GTK expand, homogeneity, and
    attach semantics propagate through the tree instead of stopping at each
@@ -418,6 +451,15 @@ body,
 :root[data-protota-capture="true"] .adw-node-wrapper.selected-outline,
 :root[data-protota-capture="true"] .adw-node-wrapper.multi-selected-outline {
   outline: none;
+}
+
+:root[data-protota-capture="true"] .protota-screen-frame--selected {
+  outline: none;
+  box-shadow: none;
+}
+
+:root[data-protota-capture="true"] .protota-screen-delete-notice {
+  display: none !important;
 }
 
 /* ---- Diagnostics canvas highlighting (#95, design §5.4) ----
@@ -1450,6 +1492,11 @@ html .protota-div-tab-bar > .adw-node-wrapper > * {
 [data-protota-capture-scope="true"] .adw-node-wrapper.selected-outline,
 [data-protota-capture-scope="true"] .adw-node-wrapper.multi-selected-outline {
   outline: none !important;
+}
+
+[data-protota-capture-scope="true"] .protota-screen-frame--selected {
+  outline: none !important;
+  box-shadow: none !important;
 }
 
 [data-protota-capture-scope="true"] .protota-type-badge,

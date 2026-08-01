@@ -1,6 +1,7 @@
 import React, { useState, useRef, useCallback, useEffect, useMemo } from "react";
 import { useMockupStore } from "../store/mockupStore";
 import { AdwaitaRenderer } from "./AdwaitaRenderer";
+import { CanvasErrorBoundary } from "./CanvasErrorBoundary";
 import { BottomBar } from "./BottomBar";
 import { useDndStore } from "../dnd/dndStore";
 import { resolveDropTarget } from "../dnd/dropResolution";
@@ -969,11 +970,13 @@ export const ViewportCanvas: React.FC = () => {
           </div>
 
           <div className="protota-gnome-window-frame">
-            <AdwaitaRenderer
-              node={activeDesktopScreen.rootNode}
-              screenId={activeDesktopScreen.id}
-              overrides={breakpointState[activeDesktopScreen.id]?.overrides}
-            />
+            <CanvasErrorBoundary resetKey={doc}>
+              <AdwaitaRenderer
+                node={activeDesktopScreen.rootNode}
+                screenId={activeDesktopScreen.id}
+                overrides={breakpointState[activeDesktopScreen.id]?.overrides}
+              />
+            </CanvasErrorBoundary>
           </div>
         </div>
       )}
@@ -1016,11 +1019,13 @@ export const ViewportCanvas: React.FC = () => {
           </div>
 
           <div className="protota-phosh-phone-frame">
-            <AdwaitaRenderer
-              node={activePhoshScreen.rootNode}
-              screenId={activePhoshScreen.id}
-              overrides={breakpointState[activePhoshScreen.id]?.overrides}
-            />
+            <CanvasErrorBoundary resetKey={doc}>
+              <AdwaitaRenderer
+                node={activePhoshScreen.rootNode}
+                screenId={activePhoshScreen.id}
+                overrides={breakpointState[activePhoshScreen.id]?.overrides}
+              />
+            </CanvasErrorBoundary>
           </div>
         </div>
       )}
@@ -1153,13 +1158,15 @@ export const ViewportCanvas: React.FC = () => {
               data-testid={`screen-frame-${screen.id}`}
               className={isScreenSelected ? "protota-screen-frame--selected" : undefined}
             >
-              <AdwaitaRenderer
-                node={screen.rootNode}
-                screenId={screen.id}
-                screenWidth={liveWidth}
-                screenHeight={liveHeight}
-                overrides={breakpointState[screen.id]?.overrides}
-              />
+              <CanvasErrorBoundary resetKey={doc}>
+                <AdwaitaRenderer
+                  node={screen.rootNode}
+                  screenId={screen.id}
+                  screenWidth={liveWidth}
+                  screenHeight={liveHeight}
+                  overrides={breakpointState[screen.id]?.overrides}
+                />
+              </CanvasErrorBoundary>
               <div
                 data-resize-handle="right"
                 data-testid={`resize-right-${screen.id}`}

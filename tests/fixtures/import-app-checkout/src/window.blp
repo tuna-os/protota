@@ -1,0 +1,20 @@
+using Gtk 4.0;
+using Adw 1;
+
+template $DemoWindow : Adw.ApplicationWindow {
+  title: _("Import Demo");
+  content: Adw.ToolbarView toolbar {
+    [top]
+    Adw.HeaderBar header_bar {
+      title-widget: Adw.WindowTitle { title: "Import Demo"; };
+    }
+    content: Gtk.Box main_box {
+      orientation: vertical;
+      spacing: 12;
+      $DemoPanel panel {}
+      $ThirdPartyWidget preview {
+        hexpand: true;
+      }
+    };
+  };
+}

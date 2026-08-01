@@ -1,13 +1,18 @@
 import React, { useState, useRef, useEffect } from "react";
 import { persistDocumentSource, useMockupStore } from "../store/mockupStore";
 import { LayersPanel } from "./LayersPanel";
+import { WidgetPalette } from "./WidgetPalette";
 import { ViewportCanvas } from "./ViewportCanvas";
 import { InspectorPanel } from "./InspectorPanel";
-import { AuditPanel } from "./AuditPanel";
+import { DiagnosticsPanel } from "./DiagnosticsPanel";
 import { ContextMenu } from "./ContextMenu";
 import { PresetGallery } from "./PresetGallery";
+import { IconLibrary } from "./IconLibrary";
+import { ImportAppDialog } from "./ImportAppDialog";
+import { ExportWritebackDialog } from "./ExportWritebackDialog";
 import { CommandPalette } from "./CommandPalette";
 import { AddScreenModal } from "./AddScreenModal";
+import { ExportModal } from "./ExportModal";
 import { TopBar } from "./TopBar";
 import {
   sidebarShowSymbolic,
@@ -15,11 +20,11 @@ import {
   editRedoSymbolic,
   sidebarShowRightSymbolic,
 } from "@gjsify/adwaita-icons/actions";
+import { toDataUri } from "@gjsify/adwaita-icons/utils";
 import { exportDocumentFile } from "../utils/exportImport";
 import { downloadPng, renderScreenToPng } from "../utils/pngExport";
 import { mockupToBlueprint } from "../utils/blueprint";
-import { ExportModal } from "./ExportModal";
-import { toDataUri } from "@gjsify/adwaita-icons/utils";
+import { settleRender } from "../utils/settle";
 
 const iconStyle = (svg: string): React.CSSProperties => ({
   display: "inline-block",
@@ -32,6 +37,44 @@ const iconStyle = (svg: string): React.CSSProperties => ({
   backgroundColor: "currentColor",
 });
 
+/** Single share implementation (tests/sharing.spec.ts): base64 of the UTF-8
+ * document JSON in the URL hash. TextEncoder replaces the deprecated
+ * `unescape` spelling while producing byte-identical URLs. */
+const shareDocument = async () => {
+  const { doc } = useMockupStore.getState();
+  const json = JSON.stringify(doc);
+  const bytes = new TextEncoder().encode(json);
+  let binary = "";
+  for (const byte of bytes) binary += String.fromCharCode(byte);
+  const encoded = btoa(binary);
+  const url = `${window.location.origin}${window.location.pathname}#doc=${encoded}`;
+  try {
+    await navigator.clipboard.writeText(url);
+  } catch {
+    prompt("Share this URL:", url);
+  }
+};
+
+const exportPng = async () => {
+  downloadPng(await renderScreenToPng());
+};
+
+const exportBlueprint = () => {
+  const { doc, runExportCheck } = useMockupStore.getState();
+  // Round-trip fidelity check (BLP-E001, design flow D): export proceeds,
+  // but anything the importer cannot faithfully read back gets a card.
+  runExportCheck();
+  const xml = mockupToBlueprint(doc);
+  // Blueprint is plain text, not XML.
+  const blob = new Blob([xml], { type: "text/plain" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `${doc.title.toLowerCase().replace(/\s+/g, "-")}.blp`;
+  a.click();
+  URL.revokeObjectURL(url);
+};
+
 export const App: React.FC = () => {
   const {
     doc,
@@ -40,16 +83,21 @@ export const App: React.FC = () => {
     setShowAddScreenModal,
     showAddScreenModal,
     selectedNodeId,
+    selectedNodeIds,
     deleteNode,
+    deleteSelectedNodes,
     moveNodeUp,
     moveNodeDown,
     selectNode,
+    selectNodes,
     addChildNode,
     selectedScreenId,
-    copyNode,
-    cutNode,
-    pasteNode,
-    duplicateNode,
+    copyNodes,
+    cutNodes,
+    pasteNodes,
+    duplicateNodes,
+    toggleDiagnostics,
+    diagnosticsEnabled,
   } = useMockupStore();
 
   const [leftOpen, setLeftOpen] = useState(() =>
@@ -58,27 +106,18 @@ export const App: React.FC = () => {
   const [rightOpen, setRightOpen] = useState(() =>
     typeof window !== "undefined" ? window.innerWidth >= 768 : true,
   );
+  /** Two-tab right drawer: Properties (inspector) | Diagnostics (design §5.1). */
+  const [rightTab, setRightTab] = useState<"properties" | "diagnostics">("properties");
+  /** Two-tab left drawer: Layers (tree) | Widgets (draggable palette, #79). */
+  const [leftTab, setLeftTab] = useState<"layers" | "widgets">("layers");
   const [showShortcuts, setShowShortcuts] = useState(false);
   const [showPresets, setShowPresets] = useState(false);
-  const [showCommandPalette, setShowCommandPalette] = useState(false);
+  const [showIconLibrary, setShowIconLibrary] = useState(false);
+  const [showImportApp, setShowImportApp] = useState(false);
+  const [showWriteback, setShowWriteback] = useState(false);
   const [showExportModal, setShowExportModal] = useState(false);
+  const [showCommandPalette, setShowCommandPalette] = useState(false);
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null);
-
-  const handleShare = async () => {
-    const json = JSON.stringify(doc);
-    const encoded = btoa(unescape(encodeURIComponent(json)));
-    const url = `${window.location.origin}${window.location.pathname}#doc=${encoded}`;
-    try {
-      await navigator.clipboard.writeText(url);
-    } catch {
-      prompt("Share this URL:", url);
-    }
-  };
-
-  const handleExportPNG = async () => {
-    downloadPng(await renderScreenToPng());
-  };
-
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleContextMenu = (e: React.MouseEvent) => {
@@ -101,28 +140,16 @@ export const App: React.FC = () => {
     e.target.value = "";
   };
 
-  // Listen for MenuBar custom events
-  // Rendering settles asynchronously: webfonts load, the runtime icon
-  // registry injects CSS, and the adw-* custom elements upgrade. Publish a
-  // readiness flag once all of that has painted so automation — screenshot
-  // tests, the capture tooling, anything driving the editor — can wait for a
-  // settled frame instead of guessing with a timeout.
+  // Publish a readiness flag once rendering has settled (utils/settle.ts) so
+  // automation — screenshot tests, the capture tooling, anything driving the
+  // editor — can wait for a settled frame instead of guessing with a timeout.
   useEffect(() => {
     let cancelled = false;
     const root = document.documentElement;
     delete root.dataset.prototaReady;
-    const settle = async () => {
-      try {
-        await document.fonts.ready;
-      } catch {
-        // A browser without the font API still gets the frame wait below.
-      }
-      await new Promise<void>((resolve) =>
-        requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
-      );
+    void settleRender().then(() => {
       if (!cancelled) root.dataset.prototaReady = "true";
-    };
-    void settle();
+    });
     return () => {
       cancelled = true;
     };
@@ -132,47 +159,45 @@ export const App: React.FC = () => {
     const onToggleLayers = () => setLeftOpen((v) => !v);
     const onToggleProperties = () => setRightOpen((v) => !v);
     const onShowShortcuts = () => setShowShortcuts((v) => !v);
-    const onNewScreen = () => setShowAddScreenModal(true);
     const onShowPresets = () => setShowPresets(true);
-    const onExportPNG = () => handleExportPNG();
-    const onExportBlueprint = () => {
-      const { doc } = useMockupStore.getState();
-      const xml = mockupToBlueprint(doc);
-      const blob = new Blob([xml], { type: "application/xml" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `${doc.title.toLowerCase().replace(/\s+/g, "-")}.blp`;
-      a.click();
-      URL.revokeObjectURL(url);
+    // Enabling diagnostics with the drawer closed opens it on that tab (§5.3).
+    const onShowDiagnostics = () => {
+      setRightOpen(true);
+      setRightTab("diagnostics");
     };
-
-    const onShare = async () => {
-      const { doc } = useMockupStore.getState();
-      const json = JSON.stringify(doc);
-      const encoded = btoa(unescape(encodeURIComponent(json)));
-      const url = `${window.location.origin}${window.location.pathname}#doc=${encoded}`;
-      try {
-        await navigator.clipboard.writeText(url);
-      } catch {
-        prompt("Share this URL:", url);
-      }
-    };
+    const onShowIconLibrary = () => setShowIconLibrary(true);
+    const onShowImportApp = () => setShowImportApp(true);
+    const onShowWriteback = () => setShowWriteback(true);
+    const onNewScreen = () => useMockupStore.getState().setShowAddScreenModal(true);
+    const onCodeExport = () => setShowExportModal(true);
+    const onExportPng = () => void exportPng();
+    const onExportBlueprint = () => exportBlueprint();
+    const onShare = () => void shareDocument();
+    window.addEventListener("protota:show-import-app", onShowImportApp);
+    window.addEventListener("protota:show-writeback", onShowWriteback);
     window.addEventListener("protota:toggle-layers", onToggleLayers);
     window.addEventListener("protota:toggle-properties", onToggleProperties);
     window.addEventListener("protota:show-shortcuts", onShowShortcuts);
-    window.addEventListener("protota:new-screen", onNewScreen);
     window.addEventListener("protota:show-presets", onShowPresets);
-    window.addEventListener("protota:export-png", onExportPNG);
+    window.addEventListener("protota:show-diagnostics", onShowDiagnostics);
+    window.addEventListener("protota:show-icon-library", onShowIconLibrary);
+    window.addEventListener("protota:new-screen", onNewScreen);
+    window.addEventListener("protota:code-export", onCodeExport);
+    window.addEventListener("protota:export-png", onExportPng);
     window.addEventListener("protota:export-blueprint", onExportBlueprint);
     window.addEventListener("protota:share", onShare);
     return () => {
       window.removeEventListener("protota:toggle-layers", onToggleLayers);
       window.removeEventListener("protota:toggle-properties", onToggleProperties);
       window.removeEventListener("protota:show-shortcuts", onShowShortcuts);
-      window.removeEventListener("protota:new-screen", onNewScreen);
       window.removeEventListener("protota:show-presets", onShowPresets);
-      window.removeEventListener("protota:export-png", onExportPNG);
+      window.removeEventListener("protota:show-diagnostics", onShowDiagnostics);
+      window.removeEventListener("protota:show-icon-library", onShowIconLibrary);
+      window.removeEventListener("protota:show-import-app", onShowImportApp);
+      window.removeEventListener("protota:show-writeback", onShowWriteback);
+      window.removeEventListener("protota:new-screen", onNewScreen);
+      window.removeEventListener("protota:code-export", onCodeExport);
+      window.removeEventListener("protota:export-png", onExportPng);
       window.removeEventListener("protota:export-blueprint", onExportBlueprint);
       window.removeEventListener("protota:share", onShare);
     };
@@ -200,24 +225,37 @@ export const App: React.FC = () => {
         redo();
         return;
       }
-      // Subtree clipboard, with the shortcuts every design tool uses.
-      if (mod && selectedNodeId && (e.key === "c" || e.key === "x" || e.key === "d")) {
+      // Forest clipboard (ADR 0001 Part 3): the shortcuts every design tool
+      // uses, operating on the whole ordered selection. `selectedNodeIds`
+      // mirrors single selection, so single-node behavior is unchanged.
+      if (mod && selectedNodeIds.length > 0 && (e.key === "c" || e.key === "x" || e.key === "d")) {
         e.preventDefault();
-        if (e.key === "c") copyNode(selectedNodeId);
-        else if (e.key === "x") cutNode(selectedNodeId);
+        if (e.key === "c") copyNodes(selectedNodeIds);
+        else if (e.key === "x") cutNodes(selectedNodeIds);
         else {
-          const created = duplicateNode(selectedNodeId);
-          if (created) selectNode(created, selectedScreenId ?? undefined);
+          const created = duplicateNodes(selectedNodeIds);
+          if (created.length) selectNodes(created, selectedScreenId ?? undefined);
         }
         return;
       }
       if (mod && e.key === "v" && selectedNodeId) {
         e.preventDefault();
-        const created = pasteNode(selectedNodeId);
-        if (created) selectNode(created, selectedScreenId ?? undefined);
+        // Paste targets the primary selection; trees that cannot legally
+        // land there report and are skipped while the rest paste.
+        const { pastedIds, skipped } = pasteNodes(selectedNodeId);
+        if (skipped.length) {
+          console.warn(`Paste skipped ${skipped.length} widget(s) not legal here: ${skipped.join(", ")}`);
+        }
+        if (pastedIds.length) selectNodes(pastedIds, selectedScreenId ?? undefined);
         return;
       }
       if (e.key === "Delete" || e.key === "Backspace") {
+        // Multi-selection deletes as one batch — one undo snapshot (#79).
+        if (selectedNodeIds.length > 1) {
+          e.preventDefault();
+          deleteSelectedNodes();
+          return;
+        }
         if (selectedNodeId) {
           e.preventDefault();
           deleteNode(selectedNodeId);
@@ -276,6 +314,15 @@ export const App: React.FC = () => {
         setRightOpen((v) => !v);
         return;
       }
+      // Diagnostics (HIG lint) toggle
+      if (e.key === "." && mod) {
+        e.preventDefault();
+        if (!diagnosticsEnabled) {
+          window.dispatchEvent(new CustomEvent("protota:show-diagnostics"));
+        }
+        toggleDiagnostics();
+        return;
+      }
       // New screen
       if (e.key === "k" && mod) {
         e.preventDefault();
@@ -294,13 +341,24 @@ export const App: React.FC = () => {
     undo,
     redo,
     selectedNodeId,
+    selectedNodeIds,
     deleteNode,
+    deleteSelectedNodes,
     moveNodeUp,
     moveNodeDown,
     selectNode,
+    selectNodes,
     addChildNode,
+    selectedScreenId,
+    copyNodes,
+    cutNodes,
+    pasteNodes,
+    duplicateNodes,
+    setShowAddScreenModal,
     showShortcuts,
     showCommandPalette,
+    toggleDiagnostics,
+    diagnosticsEnabled,
   ]);
 
   return (
@@ -332,26 +390,30 @@ export const App: React.FC = () => {
           </div>
           {/* End slot: Export actions + Properties toggle */}
           <div slot="end" style={{ display: "flex", gap: "2px", alignItems: "center" }}>
-            <button className="adw-button flat" onClick={handleShare} title="Copy a shareable link">
+            <button
+              className="adw-button flat protota-desktop-only"
+              onClick={() => window.dispatchEvent(new CustomEvent("protota:share"))}
+              title="Copy a shareable link"
+            >
               Share
             </button>
             <button
-              className="adw-button flat"
+              className="adw-button flat protota-desktop-only"
               onClick={() => exportDocumentFile(doc)}
               title="Download the document as .mockup.json"
             >
               Save JSON
             </button>
             <button
-              className="adw-button flat"
+              className="adw-button flat protota-desktop-only"
               onClick={() => setShowExportModal(true)}
               title="View generated Blueprint code"
             >
               Code Export
             </button>
             <button
-              className="adw-button flat"
-              onClick={handleExportPNG}
+              className="adw-button flat protota-desktop-only"
+              onClick={() => window.dispatchEvent(new CustomEvent("protota:export-png"))}
               title="Export the focused screen as PNG"
             >
               PNG
@@ -386,7 +448,27 @@ export const App: React.FC = () => {
                 flexDirection: "column",
               }}
             >
-              <LayersPanel />
+              {/* Two-tab segment: Layers | Widgets (#79) */}
+              <div
+                role="tablist"
+                aria-label="Left panel tabs"
+                style={{ display: "flex", gap: "4px", padding: "8px 8px 0 8px", flexShrink: 0 }}
+              >
+                {(["layers", "widgets"] as const).map((tab) => (
+                  <button
+                    key={tab}
+                    role="tab"
+                    aria-selected={leftTab === tab}
+                    data-testid={`left-tab-${tab}`}
+                    className={`adw-button flat${leftTab === tab ? " active" : ""}`}
+                    onClick={() => setLeftTab(tab)}
+                    style={{ flex: 1, fontSize: "12px" }}
+                  >
+                    {tab === "layers" ? "Layers" : "Widgets"}
+                  </button>
+                ))}
+              </div>
+              {leftTab === "layers" ? <LayersPanel /> : <WidgetPalette />}
             </aside>
           )}
 
@@ -394,9 +476,7 @@ export const App: React.FC = () => {
           <ViewportCanvas />
 
           {/* Right Drawer (Inspector) Backdrop on Mobile */}
-          {rightOpen && (
-            <div className="protota-mobile-scrim" onClick={() => setRightOpen(false)} />
-          )}
+          {rightOpen && <div className="protota-mobile-scrim" onClick={() => setRightOpen(false)} />}
 
           {/* Right Drawer (Inspector) — Adwaita sidebar styling */}
           {rightOpen && (
@@ -409,13 +489,32 @@ export const App: React.FC = () => {
                 flexDirection: "column",
               }}
             >
-              <InspectorPanel />
+              {/* Two-tab segment: Properties | Diagnostics (design §5.1) */}
+              <div
+                role="tablist"
+                aria-label="Right panel tabs"
+                style={{ display: "flex", gap: "4px", padding: "8px 8px 0 8px", flexShrink: 0 }}
+              >
+                {(["properties", "diagnostics"] as const).map((tab) => (
+                  <button
+                    key={tab}
+                    role="tab"
+                    aria-selected={rightTab === tab}
+                    data-testid={`right-tab-${tab}`}
+                    className={`adw-button flat${rightTab === tab ? " active" : ""}`}
+                    onClick={() => setRightTab(tab)}
+                    style={{ flex: 1, fontSize: "12px" }}
+                  >
+                    {tab === "properties" ? "Properties" : "Diagnostics"}
+                  </button>
+                ))}
+              </div>
+              {rightTab === "properties" ? <InspectorPanel /> : <DiagnosticsPanel />}
             </aside>
           )}
         </div>
       </adw-toolbar-view>
 
-      <AuditPanel />
       <ExportModal isOpen={showExportModal} onClose={() => setShowExportModal(false)} />
 
       <AddScreenModal isOpen={showAddScreenModal} onClose={() => setShowAddScreenModal(false)} />
@@ -425,6 +524,10 @@ export const App: React.FC = () => {
       )}
 
       <PresetGallery isOpen={showPresets} onClose={() => setShowPresets(false)} />
+
+      <IconLibrary isOpen={showIconLibrary} onClose={() => setShowIconLibrary(false)} />
+      <ImportAppDialog isOpen={showImportApp} onClose={() => setShowImportApp(false)} />
+      <ExportWritebackDialog isOpen={showWriteback} onClose={() => setShowWriteback(false)} />
 
       <CommandPalette isOpen={showCommandPalette} onClose={() => setShowCommandPalette(false)} />
 
@@ -546,7 +649,7 @@ const SHORTCUT_GROUPS = [
     items: [
       { keys: "Ctrl+\\", label: "Toggle Layers panel" },
       { keys: "Ctrl+]", label: "Toggle Properties panel" },
-      { keys: "Ctrl+.", label: "Toggle HIG lint" },
+      { keys: "Ctrl+.", label: "Toggle Diagnostics (HIG lint)" },
       { keys: "Ctrl+/", label: "Toggle Preview mode" },
       { keys: "?", label: "Show this help" },
     ],

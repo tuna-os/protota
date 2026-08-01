@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exportedAt": "2026-07-31T01:10:35.741Z",
+  "exportedAt": "2026-07-31T16:46:58.729Z",
   "generatedBy": "scripts/generate-preset.mjs",
   "document": {
     "id": "software-preset",
@@ -31,7 +31,7 @@
                       "children": [
                         {
                           "id": "details_leaflet",
-                          "type": "overlay-split",
+                          "type": "view-stack",
                           "children": [
                             {
                               "id": "imported-3",
@@ -39,7 +39,7 @@
                               "children": [
                                 {
                                   "id": "main_leaflet",
-                                  "type": "overlay-split",
+                                  "type": "view-stack",
                                   "children": [
                                     {
                                       "id": "imported-4",
@@ -130,7 +130,15 @@
                                                 {
                                                   "id": "updates_paused_banner",
                                                   "type": "custom-widget",
-                                                  "children": [],
+                                                  "children": [
+                                                    {
+                                                      "id": "banner",
+                                                      "type": "banner",
+                                                      "children": [],
+                                                      "revealed": false,
+                                                      "sourceClass": "Adw.Banner"
+                                                    }
+                                                  ],
                                                   "sourceClass": "GsUpdatesPausedBanner",
                                                   "title": "GsUpdatesPausedBanner"
                                                 },
@@ -151,11 +159,11 @@
                                                               "type": "stack",
                                                               "children": [
                                                                 {
-                                                                  "id": "template-imported-176",
+                                                                  "id": "template-imported-175",
                                                                   "type": "stack-page",
                                                                   "children": [
                                                                     {
-                                                                      "id": "template-imported-177",
+                                                                      "id": "template-imported-176",
                                                                       "type": "box",
                                                                       "children": [
                                                                         {
@@ -167,11 +175,11 @@
                                                                               "type": "bin",
                                                                               "children": [
                                                                                 {
-                                                                                  "id": "template-imported-178",
+                                                                                  "id": "template-imported-177",
                                                                                   "type": "clamp",
                                                                                   "children": [
                                                                                     {
-                                                                                      "id": "template-imported-179",
+                                                                                      "id": "template-imported-178",
                                                                                       "type": "box",
                                                                                       "children": [
                                                                                         {
@@ -409,7 +417,7 @@
                                                                   "sourceClass": "Gtk.StackPage"
                                                                 },
                                                                 {
-                                                                  "id": "template-imported-180",
+                                                                  "id": "template-imported-179",
                                                                   "type": "stack-page",
                                                                   "children": [
                                                                     {
@@ -453,7 +461,7 @@
                                                               "type": "stack",
                                                               "children": [
                                                                 {
-                                                                  "id": "template-imported-158",
+                                                                  "id": "template-imported-157",
                                                                   "type": "stack-page",
                                                                   "children": [
                                                                     {
@@ -468,7 +476,7 @@
                                                                   "sourceClass": "Gtk.StackPage"
                                                                 },
                                                                 {
-                                                                  "id": "template-imported-159",
+                                                                  "id": "template-imported-158",
                                                                   "type": "stack-page",
                                                                   "children": [
                                                                     {
@@ -480,11 +488,11 @@
                                                                           "type": "scrolled-window",
                                                                           "children": [
                                                                             {
-                                                                              "id": "template-imported-160",
+                                                                              "id": "template-imported-159",
                                                                               "type": "clamp",
                                                                               "children": [
                                                                                 {
-                                                                                  "id": "template-imported-161",
+                                                                                  "id": "template-imported-160",
                                                                                   "type": "box",
                                                                                   "children": [
                                                                                     {
@@ -633,11 +641,11 @@
                                                               "type": "stack",
                                                               "children": [
                                                                 {
-                                                                  "id": "template-imported-241",
+                                                                  "id": "template-imported-240",
                                                                   "type": "stack-page",
                                                                   "children": [
                                                                     {
-                                                                      "id": "template-imported-242",
+                                                                      "id": "template-imported-241",
                                                                       "type": "status-page",
                                                                       "children": [],
                                                                       "iconName": "org.gnome.Software-symbolic",
@@ -650,7 +658,7 @@
                                                                   "sourceClass": "Gtk.StackPage"
                                                                 },
                                                                 {
-                                                                  "id": "template-imported-243",
+                                                                  "id": "template-imported-242",
                                                                   "type": "stack-page",
                                                                   "children": [
                                                                     {
@@ -665,7 +673,7 @@
                                                                   "sourceClass": "Gtk.StackPage"
                                                                 },
                                                                 {
-                                                                  "id": "template-imported-244",
+                                                                  "id": "template-imported-243",
                                                                   "type": "stack-page",
                                                                   "children": [
                                                                     {
@@ -682,7 +690,7 @@
                                                                   "sourceClass": "Gtk.StackPage"
                                                                 },
                                                                 {
-                                                                  "id": "template-imported-245",
+                                                                  "id": "template-imported-244",
                                                                   "type": "stack-page",
                                                                   "children": [
                                                                     {
@@ -690,7 +698,7 @@
                                                                       "type": "scrolled-window",
                                                                       "children": [
                                                                         {
-                                                                          "id": "template-imported-246",
+                                                                          "id": "template-imported-245",
                                                                           "type": "clamp",
                                                                           "children": [
                                                                             {
@@ -741,7 +749,7 @@
                                                           "type": "custom-widget",
                                                           "children": [
                                                             {
-                                                              "id": "template-imported-270",
+                                                              "id": "template-imported-269",
                                                               "type": "box",
                                                               "children": [
                                                                 {
@@ -755,23 +763,13 @@
                                                                   "type": "stack",
                                                                   "children": [
                                                                     {
-                                                                      "id": "template-imported-271",
+                                                                      "id": "template-imported-270",
                                                                       "type": "stack-page",
                                                                       "children": [
                                                                         {
-                                                                          "id": "template-imported-272",
+                                                                          "id": "template-imported-271",
                                                                           "type": "status-page",
-                                                                          "children": [
-                                                                            {
-                                                                              "id": "template-imported-273",
-                                                                              "type": "custom-widget",
-                                                                              "children": [],
-                                                                              "sourceClass": "Adw.SpinnerPaintable",
-                                                                              "title": "AdwSpinnerPaintable",
-                                                                              "widget": "GsUpdatesPage",
-                                                                              "slot": "paintable"
-                                                                            }
-                                                                          ],
+                                                                          "children": [],
                                                                           "title": "Loading Updates",
                                                                           "description": "This could take a while",
                                                                           "sourceClass": "Adw.StatusPage",
@@ -782,7 +780,7 @@
                                                                       "sourceClass": "Gtk.StackPage"
                                                                     },
                                                                     {
-                                                                      "id": "template-imported-274",
+                                                                      "id": "template-imported-272",
                                                                       "type": "stack-page",
                                                                       "children": [
                                                                         {
@@ -790,7 +788,7 @@
                                                                           "type": "scrolled-window",
                                                                           "children": [
                                                                             {
-                                                                              "id": "template-imported-275",
+                                                                              "id": "template-imported-273",
                                                                               "type": "clamp",
                                                                               "children": [
                                                                                 {
@@ -842,7 +840,7 @@
                                                                                               "sourceClass": "Gtk.Box"
                                                                                             },
                                                                                             {
-                                                                                              "id": "template-imported-295",
+                                                                                              "id": "template-imported-293",
                                                                                               "type": "box",
                                                                                               "children": [
                                                                                                 {
@@ -1073,11 +1071,11 @@
                                                                       "sourceClass": "Gtk.StackPage"
                                                                     },
                                                                     {
-                                                                      "id": "template-imported-276",
+                                                                      "id": "template-imported-274",
                                                                       "type": "stack-page",
                                                                       "children": [
                                                                         {
-                                                                          "id": "template-imported-277",
+                                                                          "id": "template-imported-275",
                                                                           "type": "box",
                                                                           "children": [
                                                                             {
@@ -1125,7 +1123,7 @@
                                                                                       "sourceClass": "Gtk.Box"
                                                                                     },
                                                                                     {
-                                                                                      "id": "template-imported-295",
+                                                                                      "id": "template-imported-293",
                                                                                       "type": "box",
                                                                                       "children": [
                                                                                         {
@@ -1316,19 +1314,19 @@
                                                                               "vexpand": true
                                                                             },
                                                                             {
-                                                                              "id": "template-imported-278",
+                                                                              "id": "template-imported-276",
                                                                               "type": "scrolled-window",
                                                                               "children": [
                                                                                 {
-                                                                                  "id": "template-imported-279",
+                                                                                  "id": "template-imported-277",
                                                                                   "type": "box",
                                                                                   "children": [
                                                                                     {
-                                                                                      "id": "template-imported-280",
+                                                                                      "id": "template-imported-278",
                                                                                       "type": "clamp",
                                                                                       "children": [
                                                                                         {
-                                                                                          "id": "template-imported-281",
+                                                                                          "id": "template-imported-279",
                                                                                           "type": "box",
                                                                                           "children": [
                                                                                             {
@@ -1340,7 +1338,7 @@
                                                                                               "sourceClass": "Gtk.Image"
                                                                                             },
                                                                                             {
-                                                                                              "id": "template-imported-282",
+                                                                                              "id": "template-imported-280",
                                                                                               "type": "label",
                                                                                               "children": [],
                                                                                               "wrap": true,
@@ -1393,11 +1391,11 @@
                                                                       "sourceClass": "Gtk.StackPage"
                                                                     },
                                                                     {
-                                                                      "id": "template-imported-283",
+                                                                      "id": "template-imported-281",
                                                                       "type": "stack-page",
                                                                       "children": [
                                                                         {
-                                                                          "id": "template-imported-284",
+                                                                          "id": "template-imported-282",
                                                                           "type": "status-page",
                                                                           "children": [
                                                                             {
@@ -1421,11 +1419,11 @@
                                                                       "sourceClass": "Gtk.StackPage"
                                                                     },
                                                                     {
-                                                                      "id": "template-imported-285",
+                                                                      "id": "template-imported-283",
                                                                       "type": "stack-page",
                                                                       "children": [
                                                                         {
-                                                                          "id": "template-imported-286",
+                                                                          "id": "template-imported-284",
                                                                           "type": "status-page",
                                                                           "children": [
                                                                             {
@@ -1450,7 +1448,7 @@
                                                                       "sourceClass": "Gtk.StackPage"
                                                                     },
                                                                     {
-                                                                      "id": "template-imported-287",
+                                                                      "id": "template-imported-285",
                                                                       "type": "stack-page",
                                                                       "children": [
                                                                         {
@@ -1468,11 +1466,11 @@
                                                                       "sourceClass": "Gtk.StackPage"
                                                                     },
                                                                     {
-                                                                      "id": "template-imported-288",
+                                                                      "id": "template-imported-286",
                                                                       "type": "stack-page",
                                                                       "children": [
                                                                         {
-                                                                          "id": "template-imported-289",
+                                                                          "id": "template-imported-287",
                                                                           "type": "status-page",
                                                                           "children": [],
                                                                           "iconName": "action-unavailable-symbolic",
@@ -1516,7 +1514,8 @@
                                                   "vexpand": true,
                                                   "hhomogeneous": false,
                                                   "vhomogeneous": false,
-                                                  "sourceClass": "Adw.ViewStack"
+                                                  "sourceClass": "Adw.ViewStack",
+                                                  "visibleChildName": "overview"
                                                 }
                                               ],
                                               "orientation": "vertical",
@@ -1826,7 +1825,7 @@
                                                           "type": "stack",
                                                           "children": [
                                                             {
-                                                              "id": "template-imported-137",
+                                                              "id": "template-imported-136",
                                                               "type": "stack-page",
                                                               "children": [
                                                                 {
@@ -1856,7 +1855,7 @@
                                                               "sourceClass": "Gtk.StackPage"
                                                             },
                                                             {
-                                                              "id": "template-imported-138",
+                                                              "id": "template-imported-137",
                                                               "type": "stack-page",
                                                               "children": [
                                                                 {
@@ -1864,7 +1863,7 @@
                                                                   "type": "scrolled-window",
                                                                   "children": [
                                                                     {
-                                                                      "id": "template-imported-139",
+                                                                      "id": "template-imported-138",
                                                                       "type": "clamp",
                                                                       "children": [
                                                                         {
@@ -1901,7 +1900,7 @@
                                                               "sourceClass": "Gtk.StackPage"
                                                             },
                                                             {
-                                                              "id": "template-imported-140",
+                                                              "id": "template-imported-139",
                                                               "type": "stack-page",
                                                               "children": [
                                                                 {
@@ -1918,7 +1917,7 @@
                                                               "sourceClass": "Gtk.StackPage"
                                                             },
                                                             {
-                                                              "id": "template-imported-141",
+                                                              "id": "template-imported-140",
                                                               "type": "stack-page",
                                                               "children": [
                                                                 {
@@ -1966,7 +1965,8 @@
                                   "canNavigateBack": true,
                                   "canUnfold": false,
                                   "sourceClass": "Adw.Leaflet",
-                                  "slot": "child"
+                                  "slot": "child",
+                                  "visibleChildName": "main"
                                 }
                               ],
                               "name": "main",
@@ -2024,17 +2024,7 @@
                                                 {
                                                   "id": "template-imported-61",
                                                   "type": "status-page",
-                                                  "children": [
-                                                    {
-                                                      "id": "template-imported-62",
-                                                      "type": "custom-widget",
-                                                      "children": [],
-                                                      "sourceClass": "Adw.SpinnerPaintable",
-                                                      "title": "AdwSpinnerPaintable",
-                                                      "widget": "GsDetailsPage",
-                                                      "slot": "paintable"
-                                                    }
-                                                  ],
+                                                  "children": [],
                                                   "title": "Loading App Details",
                                                   "sourceClass": "Adw.StatusPage",
                                                   "slot": "child"
@@ -2044,11 +2034,11 @@
                                               "sourceClass": "Gtk.StackPage"
                                             },
                                             {
-                                              "id": "template-imported-63",
+                                              "id": "template-imported-62",
                                               "type": "stack-page",
                                               "children": [
                                                 {
-                                                  "id": "template-imported-64",
+                                                  "id": "template-imported-63",
                                                   "type": "box",
                                                   "children": [
                                                     {
@@ -2071,7 +2061,7 @@
                                                               "type": "box",
                                                               "children": [
                                                                 {
-                                                                  "id": "template-imported-65",
+                                                                  "id": "template-imported-64",
                                                                   "type": "clamp",
                                                                   "children": [
                                                                     {
@@ -2108,7 +2098,7 @@
                                                                                   "sourceClass": "Gtk.Label"
                                                                                 },
                                                                                 {
-                                                                                  "id": "template-imported-66",
+                                                                                  "id": "template-imported-65",
                                                                                   "type": "box",
                                                                                   "children": [
                                                                                     {
@@ -2135,7 +2125,7 @@
                                                                                   }
                                                                                 },
                                                                                 {
-                                                                                  "id": "template-imported-67",
+                                                                                  "id": "template-imported-66",
                                                                                   "type": "box",
                                                                                   "children": [
                                                                                     {
@@ -2271,7 +2261,7 @@
                                                                                       "type": "button",
                                                                                       "children": [
                                                                                         {
-                                                                                          "id": "template-imported-68",
+                                                                                          "id": "template-imported-67",
                                                                                           "type": "bin",
                                                                                           "children": [],
                                                                                           "iconName": "user-trash-symbolic",
@@ -2289,7 +2279,7 @@
                                                                                       "sourceClass": "Gtk.Button"
                                                                                     },
                                                                                     {
-                                                                                      "id": "template-imported-69",
+                                                                                      "id": "template-imported-68",
                                                                                       "type": "center-box",
                                                                                       "children": [
                                                                                         {
@@ -2301,7 +2291,7 @@
                                                                                               "type": "stack",
                                                                                               "children": [
                                                                                                 {
-                                                                                                  "id": "template-imported-188",
+                                                                                                  "id": "template-imported-187",
                                                                                                   "type": "stack-page",
                                                                                                   "children": [
                                                                                                     {
@@ -2319,7 +2309,7 @@
                                                                                                   "sourceClass": "Gtk.StackPage"
                                                                                                 },
                                                                                                 {
-                                                                                                  "id": "template-imported-189",
+                                                                                                  "id": "template-imported-188",
                                                                                                   "type": "stack-page",
                                                                                                   "children": [
                                                                                                     {
@@ -2354,7 +2344,7 @@
                                                                                           "slot": "center"
                                                                                         },
                                                                                         {
-                                                                                          "id": "template-imported-70",
+                                                                                          "id": "template-imported-69",
                                                                                           "type": "box",
                                                                                           "children": [
                                                                                             {
@@ -2492,15 +2482,15 @@
                                                                       "type": "stack",
                                                                       "children": [
                                                                         {
-                                                                          "id": "template-imported-228",
+                                                                          "id": "template-imported-227",
                                                                           "type": "stack-page",
                                                                           "children": [
                                                                             {
-                                                                              "id": "template-imported-229",
+                                                                              "id": "template-imported-228",
                                                                               "type": "box",
                                                                               "children": [
                                                                                 {
-                                                                                  "id": "template-imported-230",
+                                                                                  "id": "template-imported-229",
                                                                                   "type": "bin",
                                                                                   "children": [
                                                                                     {
@@ -2581,15 +2571,15 @@
                                                                           "sourceClass": "Gtk.StackPage"
                                                                         },
                                                                         {
-                                                                          "id": "template-imported-231",
+                                                                          "id": "template-imported-230",
                                                                           "type": "stack-page",
                                                                           "children": [
                                                                             {
-                                                                              "id": "template-imported-232",
+                                                                              "id": "template-imported-231",
                                                                               "type": "box",
                                                                               "children": [
                                                                                 {
-                                                                                  "id": "template-imported-233",
+                                                                                  "id": "template-imported-232",
                                                                                   "type": "bin",
                                                                                   "children": [],
                                                                                   "pixelSize": 96,
@@ -2599,7 +2589,7 @@
                                                                                   "sourceClass": "Gtk.Image"
                                                                                 },
                                                                                 {
-                                                                                  "id": "template-imported-234",
+                                                                                  "id": "template-imported-233",
                                                                                   "type": "label",
                                                                                   "children": [],
                                                                                   "halign": "center",
@@ -2629,7 +2619,7 @@
                                                                   "visible": false
                                                                 },
                                                                 {
-                                                                  "id": "template-imported-71",
+                                                                  "id": "template-imported-70",
                                                                   "type": "clamp",
                                                                   "children": [
                                                                     {
@@ -2652,7 +2642,15 @@
                                                                         {
                                                                           "id": "box_details_description",
                                                                           "type": "custom-widget",
-                                                                          "children": [],
+                                                                          "children": [
+                                                                            {
+                                                                              "id": "box",
+                                                                              "type": "box",
+                                                                              "children": [],
+                                                                              "orientation": "horizontal",
+                                                                              "sourceClass": "Gtk.Box"
+                                                                            }
+                                                                          ],
                                                                           "sourceClass": "GsDescriptionBox",
                                                                           "title": "GsDescriptionBox",
                                                                           "halign": "fill",
@@ -2674,7 +2672,7 @@
                                                                   "sourceClass": "Adw.Clamp"
                                                                 },
                                                                 {
-                                                                  "id": "template-imported-72",
+                                                                  "id": "template-imported-71",
                                                                   "type": "clamp",
                                                                   "children": [
                                                                     {
@@ -2722,7 +2720,7 @@
                                                                   "sourceClass": "Adw.Clamp"
                                                                 },
                                                                 {
-                                                                  "id": "template-imported-73",
+                                                                  "id": "template-imported-72",
                                                                   "type": "clamp",
                                                                   "children": [
                                                                     {
@@ -3056,7 +3054,7 @@
                                                                   "sourceClass": "Adw.Clamp"
                                                                 },
                                                                 {
-                                                                  "id": "template-imported-74",
+                                                                  "id": "template-imported-73",
                                                                   "type": "clamp",
                                                                   "children": [
                                                                     {
@@ -3114,7 +3112,15 @@
                                                                                 {
                                                                                   "id": "version_description_box",
                                                                                   "type": "custom-widget",
-                                                                                  "children": [],
+                                                                                  "children": [
+                                                                                    {
+                                                                                      "id": "box",
+                                                                                      "type": "box",
+                                                                                      "children": [],
+                                                                                      "orientation": "horizontal",
+                                                                                      "sourceClass": "Gtk.Box"
+                                                                                    }
+                                                                                  ],
                                                                                   "sourceClass": "GsDescriptionBox",
                                                                                   "title": "GsDescriptionBox",
                                                                                   "marginTop": 6,
@@ -3158,7 +3164,7 @@
                                                                   "sourceClass": "Adw.Clamp"
                                                                 },
                                                                 {
-                                                                  "id": "template-imported-75",
+                                                                  "id": "template-imported-74",
                                                                   "type": "clamp",
                                                                   "children": [
                                                                     {
@@ -3166,7 +3172,7 @@
                                                                       "type": "box",
                                                                       "children": [
                                                                         {
-                                                                          "id": "template-imported-76",
+                                                                          "id": "template-imported-75",
                                                                           "type": "label",
                                                                           "children": [],
                                                                           "justify": "center",
@@ -3198,7 +3204,7 @@
                                                                   }
                                                                 },
                                                                 {
-                                                                  "id": "template-imported-77",
+                                                                  "id": "template-imported-76",
                                                                   "type": "clamp",
                                                                   "children": [
                                                                     {
@@ -3229,7 +3235,7 @@
                                                                   }
                                                                 },
                                                                 {
-                                                                  "id": "template-imported-78",
+                                                                  "id": "template-imported-77",
                                                                   "type": "clamp",
                                                                   "children": [
                                                                     {
@@ -3256,7 +3262,7 @@
                                                                   }
                                                                 },
                                                                 {
-                                                                  "id": "template-imported-79",
+                                                                  "id": "template-imported-78",
                                                                   "type": "clamp",
                                                                   "children": [
                                                                     {
@@ -3264,7 +3270,7 @@
                                                                       "type": "box",
                                                                       "children": [
                                                                         {
-                                                                          "id": "template-imported-80",
+                                                                          "id": "template-imported-79",
                                                                           "type": "label",
                                                                           "children": [],
                                                                           "justify": "center",
@@ -3273,7 +3279,7 @@
                                                                           "sourceClass": "Gtk.Label"
                                                                         },
                                                                         {
-                                                                          "id": "template-imported-81",
+                                                                          "id": "template-imported-80",
                                                                           "type": "label",
                                                                           "children": [],
                                                                           "justify": "center",
@@ -3296,7 +3302,7 @@
                                                                   }
                                                                 },
                                                                 {
-                                                                  "id": "template-imported-82",
+                                                                  "id": "template-imported-81",
                                                                   "type": "clamp",
                                                                   "children": [
                                                                     {
@@ -3304,7 +3310,7 @@
                                                                       "type": "box",
                                                                       "children": [
                                                                         {
-                                                                          "id": "template-imported-83",
+                                                                          "id": "template-imported-82",
                                                                           "type": "label",
                                                                           "children": [],
                                                                           "justify": "center",
@@ -3313,7 +3319,7 @@
                                                                           "sourceClass": "Gtk.Label"
                                                                         },
                                                                         {
-                                                                          "id": "template-imported-84",
+                                                                          "id": "template-imported-83",
                                                                           "type": "label",
                                                                           "children": [],
                                                                           "justify": "center",
@@ -3336,7 +3342,7 @@
                                                                   }
                                                                 },
                                                                 {
-                                                                  "id": "template-imported-85",
+                                                                  "id": "template-imported-84",
                                                                   "type": "clamp",
                                                                   "children": [
                                                                     {
@@ -3367,7 +3373,7 @@
                                                                   }
                                                                 },
                                                                 {
-                                                                  "id": "template-imported-86",
+                                                                  "id": "template-imported-85",
                                                                   "type": "clamp",
                                                                   "children": [
                                                                     {
@@ -3375,7 +3381,7 @@
                                                                       "type": "box",
                                                                       "children": [
                                                                         {
-                                                                          "id": "template-imported-87",
+                                                                          "id": "template-imported-86",
                                                                           "type": "label",
                                                                           "children": [],
                                                                           "justify": "center",
@@ -3384,7 +3390,7 @@
                                                                           "sourceClass": "Gtk.Label"
                                                                         },
                                                                         {
-                                                                          "id": "template-imported-88",
+                                                                          "id": "template-imported-87",
                                                                           "type": "label",
                                                                           "children": [],
                                                                           "justify": "center",
@@ -3393,7 +3399,7 @@
                                                                           "sourceClass": "Gtk.Label"
                                                                         },
                                                                         {
-                                                                          "id": "template-imported-89",
+                                                                          "id": "template-imported-88",
                                                                           "type": "label",
                                                                           "children": [],
                                                                           "justify": "center",
@@ -3416,7 +3422,7 @@
                                                                   }
                                                                 },
                                                                 {
-                                                                  "id": "template-imported-90",
+                                                                  "id": "template-imported-89",
                                                                   "type": "clamp",
                                                                   "children": [
                                                                     {
@@ -3438,18 +3444,18 @@
                                                                           "type": "button",
                                                                           "children": [
                                                                             {
-                                                                              "id": "template-imported-91",
+                                                                              "id": "template-imported-90",
                                                                               "type": "box",
                                                                               "children": [
                                                                                 {
-                                                                                  "id": "template-imported-92",
+                                                                                  "id": "template-imported-91",
                                                                                   "type": "bin",
                                                                                   "children": [],
                                                                                   "iconName": "user-trash-symbolic",
                                                                                   "sourceClass": "Gtk.Image"
                                                                                 },
                                                                                 {
-                                                                                  "id": "template-imported-93",
+                                                                                  "id": "template-imported-92",
                                                                                   "type": "label",
                                                                                   "children": [],
                                                                                   "halign": "start",
@@ -3489,7 +3495,7 @@
                                                                   }
                                                                 },
                                                                 {
-                                                                  "id": "template-imported-94",
+                                                                  "id": "template-imported-93",
                                                                   "type": "clamp",
                                                                   "children": [
                                                                     {
@@ -3501,19 +3507,19 @@
                                                                           "type": "bin",
                                                                           "children": [
                                                                             {
-                                                                              "id": "template-imported-163",
+                                                                              "id": "template-imported-162",
                                                                               "type": "list-box",
                                                                               "children": [
                                                                                 {
-                                                                                  "id": "template-imported-164",
+                                                                                  "id": "template-imported-163",
                                                                                   "type": "list-box-row",
                                                                                   "children": [
                                                                                     {
-                                                                                      "id": "template-imported-165",
+                                                                                      "id": "template-imported-164",
                                                                                       "type": "box",
                                                                                       "children": [
                                                                                         {
-                                                                                          "id": "template-imported-166",
+                                                                                          "id": "template-imported-165",
                                                                                           "type": "box",
                                                                                           "children": [
                                                                                             {
@@ -3681,19 +3687,19 @@
                                                                           "type": "stack",
                                                                           "children": [
                                                                             {
-                                                                              "id": "template-imported-95",
+                                                                              "id": "template-imported-94",
                                                                               "type": "stack-page",
                                                                               "children": [
                                                                                 {
-                                                                                  "id": "template-imported-96",
+                                                                                  "id": "template-imported-95",
                                                                                   "type": "box",
                                                                                   "children": [
                                                                                     {
-                                                                                      "id": "template-imported-97",
+                                                                                      "id": "template-imported-96",
                                                                                       "type": "box",
                                                                                       "children": [
                                                                                         {
-                                                                                          "id": "template-imported-98",
+                                                                                          "id": "template-imported-97",
                                                                                           "type": "bin",
                                                                                           "children": [],
                                                                                           "iconName": "dialog-question-symbolic",
@@ -3702,7 +3708,7 @@
                                                                                           "sourceClass": "Gtk.Image"
                                                                                         },
                                                                                         {
-                                                                                          "id": "template-imported-99",
+                                                                                          "id": "template-imported-98",
                                                                                           "type": "label",
                                                                                           "children": [],
                                                                                           "title": "No Metadata",
@@ -3740,11 +3746,11 @@
                                                                               "sourceClass": "Gtk.StackPage"
                                                                             },
                                                                             {
-                                                                              "id": "template-imported-100",
+                                                                              "id": "template-imported-99",
                                                                               "type": "stack-page",
                                                                               "children": [
                                                                                 {
-                                                                                  "id": "template-imported-101",
+                                                                                  "id": "template-imported-100",
                                                                                   "type": "list-box",
                                                                                   "children": [
                                                                                     {
@@ -3752,7 +3758,7 @@
                                                                                       "type": "action-row",
                                                                                       "children": [
                                                                                         {
-                                                                                          "id": "template-imported-102",
+                                                                                          "id": "template-imported-101",
                                                                                           "type": "bin",
                                                                                           "children": [],
                                                                                           "iconName": "external-link-symbolic",
@@ -3771,7 +3777,7 @@
                                                                                       "type": "action-row",
                                                                                       "children": [
                                                                                         {
-                                                                                          "id": "template-imported-103",
+                                                                                          "id": "template-imported-102",
                                                                                           "type": "bin",
                                                                                           "children": [],
                                                                                           "iconName": "external-link-symbolic",
@@ -3790,7 +3796,7 @@
                                                                                       "type": "action-row",
                                                                                       "children": [
                                                                                         {
-                                                                                          "id": "template-imported-104",
+                                                                                          "id": "template-imported-103",
                                                                                           "type": "bin",
                                                                                           "children": [],
                                                                                           "iconName": "external-link-symbolic",
@@ -3809,7 +3815,7 @@
                                                                                       "type": "action-row",
                                                                                       "children": [
                                                                                         {
-                                                                                          "id": "template-imported-105",
+                                                                                          "id": "template-imported-104",
                                                                                           "type": "bin",
                                                                                           "children": [],
                                                                                           "iconName": "external-link-symbolic",
@@ -3828,7 +3834,7 @@
                                                                                       "type": "action-row",
                                                                                       "children": [
                                                                                         {
-                                                                                          "id": "template-imported-106",
+                                                                                          "id": "template-imported-105",
                                                                                           "type": "bin",
                                                                                           "children": [],
                                                                                           "iconName": "external-link-symbolic",
@@ -3847,7 +3853,7 @@
                                                                                       "type": "action-row",
                                                                                       "children": [
                                                                                         {
-                                                                                          "id": "template-imported-107",
+                                                                                          "id": "template-imported-106",
                                                                                           "type": "bin",
                                                                                           "children": [],
                                                                                           "iconName": "external-link-symbolic",
@@ -3893,7 +3899,7 @@
                                                                   "sourceClass": "Adw.Clamp"
                                                                 },
                                                                 {
-                                                                  "id": "template-imported-108",
+                                                                  "id": "template-imported-107",
                                                                   "type": "clamp",
                                                                   "children": [
                                                                     {
@@ -3901,7 +3907,7 @@
                                                                       "type": "box",
                                                                       "children": [
                                                                         {
-                                                                          "id": "template-imported-109",
+                                                                          "id": "template-imported-108",
                                                                           "type": "label",
                                                                           "children": [],
                                                                           "halign": "start",
@@ -3924,7 +3930,7 @@
                                                                                   "type": "list-box-row",
                                                                                   "children": [
                                                                                     {
-                                                                                      "id": "template-imported-110",
+                                                                                      "id": "template-imported-109",
                                                                                       "type": "clamp",
                                                                                       "children": [
                                                                                         {
@@ -3959,7 +3965,16 @@
                                                                                                         {
                                                                                                           "id": "star_value_1",
                                                                                                           "type": "custom-widget",
-                                                                                                          "children": [],
+                                                                                                          "children": [
+                                                                                                            {
+                                                                                                              "id": "starred",
+                                                                                                              "type": "bin",
+                                                                                                              "children": [],
+                                                                                                              "childVisible": true,
+                                                                                                              "styleClasses": "starred",
+                                                                                                              "sourceClass": "Gtk.Image"
+                                                                                                            }
+                                                                                                          ],
                                                                                                           "sourceClass": "GsStarImage",
                                                                                                           "title": "GsStarImage",
                                                                                                           "sensitive": false,
@@ -3968,7 +3983,16 @@
                                                                                                         {
                                                                                                           "id": "star_value_2",
                                                                                                           "type": "custom-widget",
-                                                                                                          "children": [],
+                                                                                                          "children": [
+                                                                                                            {
+                                                                                                              "id": "starred",
+                                                                                                              "type": "bin",
+                                                                                                              "children": [],
+                                                                                                              "childVisible": true,
+                                                                                                              "styleClasses": "starred",
+                                                                                                              "sourceClass": "Gtk.Image"
+                                                                                                            }
+                                                                                                          ],
                                                                                                           "sourceClass": "GsStarImage",
                                                                                                           "title": "GsStarImage",
                                                                                                           "sensitive": false,
@@ -3977,7 +4001,16 @@
                                                                                                         {
                                                                                                           "id": "star_value_3",
                                                                                                           "type": "custom-widget",
-                                                                                                          "children": [],
+                                                                                                          "children": [
+                                                                                                            {
+                                                                                                              "id": "starred",
+                                                                                                              "type": "bin",
+                                                                                                              "children": [],
+                                                                                                              "childVisible": true,
+                                                                                                              "styleClasses": "starred",
+                                                                                                              "sourceClass": "Gtk.Image"
+                                                                                                            }
+                                                                                                          ],
                                                                                                           "sourceClass": "GsStarImage",
                                                                                                           "title": "GsStarImage",
                                                                                                           "sensitive": false,
@@ -3986,7 +4019,16 @@
                                                                                                         {
                                                                                                           "id": "star_value_4",
                                                                                                           "type": "custom-widget",
-                                                                                                          "children": [],
+                                                                                                          "children": [
+                                                                                                            {
+                                                                                                              "id": "starred",
+                                                                                                              "type": "bin",
+                                                                                                              "children": [],
+                                                                                                              "childVisible": true,
+                                                                                                              "styleClasses": "starred",
+                                                                                                              "sourceClass": "Gtk.Image"
+                                                                                                            }
+                                                                                                          ],
                                                                                                           "sourceClass": "GsStarImage",
                                                                                                           "title": "GsStarImage",
                                                                                                           "sensitive": false,
@@ -3995,7 +4037,16 @@
                                                                                                         {
                                                                                                           "id": "star_value_5",
                                                                                                           "type": "custom-widget",
-                                                                                                          "children": [],
+                                                                                                          "children": [
+                                                                                                            {
+                                                                                                              "id": "starred",
+                                                                                                              "type": "bin",
+                                                                                                              "children": [],
+                                                                                                              "childVisible": true,
+                                                                                                              "styleClasses": "starred",
+                                                                                                              "sourceClass": "Gtk.Image"
+                                                                                                            }
+                                                                                                          ],
                                                                                                           "sourceClass": "GsStarImage",
                                                                                                           "title": "GsStarImage",
                                                                                                           "sensitive": false,
@@ -4057,7 +4108,16 @@
                                                                                                     {
                                                                                                       "id": "star5_1",
                                                                                                       "type": "custom-widget",
-                                                                                                      "children": [],
+                                                                                                      "children": [
+                                                                                                        {
+                                                                                                          "id": "starred",
+                                                                                                          "type": "bin",
+                                                                                                          "children": [],
+                                                                                                          "childVisible": true,
+                                                                                                          "styleClasses": "starred",
+                                                                                                          "sourceClass": "Gtk.Image"
+                                                                                                        }
+                                                                                                      ],
                                                                                                       "sourceClass": "GsStarImage",
                                                                                                       "title": "GsStarImage",
                                                                                                       "sensitive": false,
@@ -4070,7 +4130,16 @@
                                                                                                     {
                                                                                                       "id": "star5_2",
                                                                                                       "type": "custom-widget",
-                                                                                                      "children": [],
+                                                                                                      "children": [
+                                                                                                        {
+                                                                                                          "id": "starred",
+                                                                                                          "type": "bin",
+                                                                                                          "children": [],
+                                                                                                          "childVisible": true,
+                                                                                                          "styleClasses": "starred",
+                                                                                                          "sourceClass": "Gtk.Image"
+                                                                                                        }
+                                                                                                      ],
                                                                                                       "sourceClass": "GsStarImage",
                                                                                                       "title": "GsStarImage",
                                                                                                       "sensitive": false,
@@ -4083,7 +4152,16 @@
                                                                                                     {
                                                                                                       "id": "star5_3",
                                                                                                       "type": "custom-widget",
-                                                                                                      "children": [],
+                                                                                                      "children": [
+                                                                                                        {
+                                                                                                          "id": "starred",
+                                                                                                          "type": "bin",
+                                                                                                          "children": [],
+                                                                                                          "childVisible": true,
+                                                                                                          "styleClasses": "starred",
+                                                                                                          "sourceClass": "Gtk.Image"
+                                                                                                        }
+                                                                                                      ],
                                                                                                       "sourceClass": "GsStarImage",
                                                                                                       "title": "GsStarImage",
                                                                                                       "sensitive": false,
@@ -4096,7 +4174,16 @@
                                                                                                     {
                                                                                                       "id": "star5_4",
                                                                                                       "type": "custom-widget",
-                                                                                                      "children": [],
+                                                                                                      "children": [
+                                                                                                        {
+                                                                                                          "id": "starred",
+                                                                                                          "type": "bin",
+                                                                                                          "children": [],
+                                                                                                          "childVisible": true,
+                                                                                                          "styleClasses": "starred",
+                                                                                                          "sourceClass": "Gtk.Image"
+                                                                                                        }
+                                                                                                      ],
                                                                                                       "sourceClass": "GsStarImage",
                                                                                                       "title": "GsStarImage",
                                                                                                       "sensitive": false,
@@ -4109,7 +4196,16 @@
                                                                                                     {
                                                                                                       "id": "star5_5",
                                                                                                       "type": "custom-widget",
-                                                                                                      "children": [],
+                                                                                                      "children": [
+                                                                                                        {
+                                                                                                          "id": "starred",
+                                                                                                          "type": "bin",
+                                                                                                          "children": [],
+                                                                                                          "childVisible": true,
+                                                                                                          "styleClasses": "starred",
+                                                                                                          "sourceClass": "Gtk.Image"
+                                                                                                        }
+                                                                                                      ],
                                                                                                       "sourceClass": "GsStarImage",
                                                                                                       "title": "GsStarImage",
                                                                                                       "sensitive": false,
@@ -4138,7 +4234,16 @@
                                                                                                     {
                                                                                                       "id": "star4_1",
                                                                                                       "type": "custom-widget",
-                                                                                                      "children": [],
+                                                                                                      "children": [
+                                                                                                        {
+                                                                                                          "id": "starred",
+                                                                                                          "type": "bin",
+                                                                                                          "children": [],
+                                                                                                          "childVisible": true,
+                                                                                                          "styleClasses": "starred",
+                                                                                                          "sourceClass": "Gtk.Image"
+                                                                                                        }
+                                                                                                      ],
                                                                                                       "sourceClass": "GsStarImage",
                                                                                                       "title": "GsStarImage",
                                                                                                       "sensitive": false,
@@ -4151,7 +4256,16 @@
                                                                                                     {
                                                                                                       "id": "star4_2",
                                                                                                       "type": "custom-widget",
-                                                                                                      "children": [],
+                                                                                                      "children": [
+                                                                                                        {
+                                                                                                          "id": "starred",
+                                                                                                          "type": "bin",
+                                                                                                          "children": [],
+                                                                                                          "childVisible": true,
+                                                                                                          "styleClasses": "starred",
+                                                                                                          "sourceClass": "Gtk.Image"
+                                                                                                        }
+                                                                                                      ],
                                                                                                       "sourceClass": "GsStarImage",
                                                                                                       "title": "GsStarImage",
                                                                                                       "sensitive": false,
@@ -4164,7 +4278,16 @@
                                                                                                     {
                                                                                                       "id": "star4_3",
                                                                                                       "type": "custom-widget",
-                                                                                                      "children": [],
+                                                                                                      "children": [
+                                                                                                        {
+                                                                                                          "id": "starred",
+                                                                                                          "type": "bin",
+                                                                                                          "children": [],
+                                                                                                          "childVisible": true,
+                                                                                                          "styleClasses": "starred",
+                                                                                                          "sourceClass": "Gtk.Image"
+                                                                                                        }
+                                                                                                      ],
                                                                                                       "sourceClass": "GsStarImage",
                                                                                                       "title": "GsStarImage",
                                                                                                       "sensitive": false,
@@ -4177,7 +4300,16 @@
                                                                                                     {
                                                                                                       "id": "star4_4",
                                                                                                       "type": "custom-widget",
-                                                                                                      "children": [],
+                                                                                                      "children": [
+                                                                                                        {
+                                                                                                          "id": "starred",
+                                                                                                          "type": "bin",
+                                                                                                          "children": [],
+                                                                                                          "childVisible": true,
+                                                                                                          "styleClasses": "starred",
+                                                                                                          "sourceClass": "Gtk.Image"
+                                                                                                        }
+                                                                                                      ],
                                                                                                       "sourceClass": "GsStarImage",
                                                                                                       "title": "GsStarImage",
                                                                                                       "sensitive": false,
@@ -4206,7 +4338,16 @@
                                                                                                     {
                                                                                                       "id": "star3_1",
                                                                                                       "type": "custom-widget",
-                                                                                                      "children": [],
+                                                                                                      "children": [
+                                                                                                        {
+                                                                                                          "id": "starred",
+                                                                                                          "type": "bin",
+                                                                                                          "children": [],
+                                                                                                          "childVisible": true,
+                                                                                                          "styleClasses": "starred",
+                                                                                                          "sourceClass": "Gtk.Image"
+                                                                                                        }
+                                                                                                      ],
                                                                                                       "sourceClass": "GsStarImage",
                                                                                                       "title": "GsStarImage",
                                                                                                       "sensitive": false,
@@ -4219,7 +4360,16 @@
                                                                                                     {
                                                                                                       "id": "star3_2",
                                                                                                       "type": "custom-widget",
-                                                                                                      "children": [],
+                                                                                                      "children": [
+                                                                                                        {
+                                                                                                          "id": "starred",
+                                                                                                          "type": "bin",
+                                                                                                          "children": [],
+                                                                                                          "childVisible": true,
+                                                                                                          "styleClasses": "starred",
+                                                                                                          "sourceClass": "Gtk.Image"
+                                                                                                        }
+                                                                                                      ],
                                                                                                       "sourceClass": "GsStarImage",
                                                                                                       "title": "GsStarImage",
                                                                                                       "sensitive": false,
@@ -4232,7 +4382,16 @@
                                                                                                     {
                                                                                                       "id": "star3_3",
                                                                                                       "type": "custom-widget",
-                                                                                                      "children": [],
+                                                                                                      "children": [
+                                                                                                        {
+                                                                                                          "id": "starred",
+                                                                                                          "type": "bin",
+                                                                                                          "children": [],
+                                                                                                          "childVisible": true,
+                                                                                                          "styleClasses": "starred",
+                                                                                                          "sourceClass": "Gtk.Image"
+                                                                                                        }
+                                                                                                      ],
                                                                                                       "sourceClass": "GsStarImage",
                                                                                                       "title": "GsStarImage",
                                                                                                       "sensitive": false,
@@ -4261,7 +4420,16 @@
                                                                                                     {
                                                                                                       "id": "star2_1",
                                                                                                       "type": "custom-widget",
-                                                                                                      "children": [],
+                                                                                                      "children": [
+                                                                                                        {
+                                                                                                          "id": "starred",
+                                                                                                          "type": "bin",
+                                                                                                          "children": [],
+                                                                                                          "childVisible": true,
+                                                                                                          "styleClasses": "starred",
+                                                                                                          "sourceClass": "Gtk.Image"
+                                                                                                        }
+                                                                                                      ],
                                                                                                       "sourceClass": "GsStarImage",
                                                                                                       "title": "GsStarImage",
                                                                                                       "sensitive": false,
@@ -4274,7 +4442,16 @@
                                                                                                     {
                                                                                                       "id": "star2_2",
                                                                                                       "type": "custom-widget",
-                                                                                                      "children": [],
+                                                                                                      "children": [
+                                                                                                        {
+                                                                                                          "id": "starred",
+                                                                                                          "type": "bin",
+                                                                                                          "children": [],
+                                                                                                          "childVisible": true,
+                                                                                                          "styleClasses": "starred",
+                                                                                                          "sourceClass": "Gtk.Image"
+                                                                                                        }
+                                                                                                      ],
                                                                                                       "sourceClass": "GsStarImage",
                                                                                                       "title": "GsStarImage",
                                                                                                       "sensitive": false,
@@ -4303,7 +4480,16 @@
                                                                                                     {
                                                                                                       "id": "star1_1",
                                                                                                       "type": "custom-widget",
-                                                                                                      "children": [],
+                                                                                                      "children": [
+                                                                                                        {
+                                                                                                          "id": "starred",
+                                                                                                          "type": "bin",
+                                                                                                          "children": [],
+                                                                                                          "childVisible": true,
+                                                                                                          "styleClasses": "starred",
+                                                                                                          "sourceClass": "Gtk.Image"
+                                                                                                        }
+                                                                                                      ],
                                                                                                       "sourceClass": "GsStarImage",
                                                                                                       "title": "GsStarImage",
                                                                                                       "sensitive": false,
@@ -4420,11 +4606,11 @@
                                                                   }
                                                                 },
                                                                 {
-                                                                  "id": "template-imported-111",
+                                                                  "id": "template-imported-110",
                                                                   "type": "clamp",
                                                                   "children": [
                                                                     {
-                                                                      "id": "template-imported-112",
+                                                                      "id": "template-imported-111",
                                                                       "type": "box",
                                                                       "children": [
                                                                         {
@@ -4494,7 +4680,7 @@
                                               "sourceClass": "Gtk.StackPage"
                                             },
                                             {
-                                              "id": "template-imported-113",
+                                              "id": "template-imported-112",
                                               "type": "stack-page",
                                               "children": [
                                                 {
@@ -4533,7 +4719,8 @@
                           "canNavigateBack": true,
                           "canUnfold": false,
                           "sourceClass": "Adw.Leaflet",
-                          "slot": "child"
+                          "slot": "child",
+                          "visibleChildName": "main"
                         }
                       ],
                       "sourceClass": "Adw.ToastOverlay",
@@ -4571,7 +4758,7 @@
                                   "type": "status-page",
                                   "children": [
                                     {
-                                      "id": "template-imported-168",
+                                      "id": "template-imported-167",
                                       "type": "clamp",
                                       "children": [
                                         {
@@ -4609,7 +4796,8 @@
                 }
               ],
               "widthRequest": 318,
-              "sourceClass": "Adw.ViewStack"
+              "sourceClass": "Adw.ViewStack",
+              "visibleChildName": "main"
             }
           ],
           "visible": true,

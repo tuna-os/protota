@@ -1,0 +1,41 @@
+FROM registry.fedoraproject.org/fedora:43
+
+# Version-matched Ear Tag reference runner (#59 Wave 3). Neither pinned
+# runner distribution packages Ear Tag at the catalog's pinned 1.0.2
+# (Fedora 43: not packaged; Ubuntu 24.04: 0.6.0), and a version-mismatched
+# app is not a valid visual oracle — so the pinned source tag is
+# meson-installed into the pinned fedora:43 GTK stack instead. The GTK/
+# libadwaita render substrate stays the same pinned image the packaged
+# runners use (PR #132: do not bump the base).
+
+ARG EARTAG_TAG=1.0.2
+
+RUN dnf install -y --setopt=install_weak_deps=False \
+    dbus-daemon dbus-tools gcc git gtk4-devel gtk4-devel-tools \
+    libadwaita-devel meson gettext desktop-file-utils appstream \
+    blueprint-compiler glib2-devel itstool \
+    python3-gobject python3-mutagen python3-pillow python3-aiohttp \
+    python3-xxhash python3-filetype python3-aiofiles \
+  && dnf clean all
+
+RUN git clone --depth 1 --branch ${EARTAG_TAG} \
+      https://gitlab.gnome.org/World/EarTag.git /eartag-src \
+  && cd /eartag-src \
+  && meson setup build --prefix=/usr \
+  && meson install -C build
+
+# Read-only runtime probe shim (#58): LD_PRELOADed into the app by
+# entrypoint.sh only when a /probe volume is mounted. Built here so the shim
+# always matches the image's GTK; the web app never ships it.
+COPY probe.c /probe.c
+RUN gcc -shared -fPIC -O2 -Wall -o /opt/probe.so /probe.c \
+      $(pkg-config --cflags --libs gtk4) -pthread \
+  && rm /probe.c
+
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+ENV APP_COMMAND=eartag
+
+EXPOSE 8085
+ENTRYPOINT ["/entrypoint.sh"]

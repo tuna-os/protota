@@ -3,6 +3,13 @@ import type { AdwNode } from '../types/mockup';
 import { LEGAL_CHILDREN } from '../types/mockup';
 import { useMockupStore } from '../store/mockupStore';
 import { ensureAdwIcon } from '../utils/adwIcons';
+import { filterDiagnostics, getDiagnosticsForNode, worstTier } from '../diagnostics/engine';
+import {
+  boundaryGeometryConfidence, boundaryGeometryFacts, containerLayout,
+  parentFlowOf, placementLayout, type ParentFlow,
+} from '../utils/nodeGeometry';
+import { headerBarControls, headerBarFallbackTitle } from '../utils/headerBarChrome';
+import { tabBarModel } from '../utils/tabBar';
 
 interface Props {
   node: AdwNode;
@@ -12,13 +19,40 @@ interface Props {
   inheritedSlot?: string;
   /** How this node's parent arranges its children, so alignment can apply. */
   parentFlow?: ParentFlow;
+  /** The parent node, so container-driven boundary geometry can be audited. */
+  parentNode?: AdwNode;
   /**
    * Id of the header bar that carries the window controls. GTK draws them
    * once per window, on the content-side header — not on every header bar a
    * split view happens to contain. Computed per screen at the root.
    */
   primaryHeaderBarId?: string;
+  /**
+   * True when any ancestor node is an Adw dialog. A header bar inside a
+   * dialog never shows minimize/maximize — at most a close button.
+   */
+  dialogAncestor?: boolean;
+  /** Nearest ancestor window/dialog title, for AdwHeaderBar's title fallback. */
+  surfaceTitle?: string;
+  /**
+   * Render-time property overrides from the active Adw.Breakpoints
+   * (utils/breakpoints.ts), keyed by node id. Derived state — the document
+   * is never mutated; resizing the screen recomputes them.
+   */
+  overrides?: Record<string, Partial<AdwNode>>;
+  /**
+   * Render-time color-scheme override (URL render mode's `theme` param and
+   * `protota.renderScreenshot({ theme })`): wins over the document's
+   * colorScheme without touching it. See the .theme-light/.theme-dark
+   * variable scopes in index.css.
+   */
+  forcedColorScheme?: 'light' | 'dark';
 }
+
+/** Adw.Dialog and its subclasses — their header bars carry dialog chrome. */
+const DIALOG_TYPES = new Set<string>([
+  'dialog', 'preferences-dialog', 'alert-dialog', 'about-dialog',
+]);
 
 /**
  * The header bar that carries the window controls: the first visible one
@@ -73,6 +107,9 @@ const TAG_MAP: Record<string, string | null> = {
   'view-switcher':       'adw-view-switcher',
   'navigation-view':     'adw-navigation-view',
   'tab-view':            'adw-tab-view',
+  // No adw-tab-bar custom element exists; the strip is drawn as a styled div
+  // whose tabs derive from the linked tab-view's pages (see utils/tabBar.ts).
+  'tab-bar':             null,
   'overlay-split':       'adw-overlay-split-view',
   clamp:                 'adw-clamp',
   bin:                   null,
@@ -129,7 +166,7 @@ const TAG_MAP: Record<string, string | null> = {
 const DIV_TYPES = new Set([
   'bin', 'custom-widget', 'box', 'grid', 'center-box', 'stack', 'stack-page', 'scrolled-window', 'search-entry', 'switch-widget',
   'check-button', 'list-box', 'label', 'inscription', 'navigation-view', 'view-stack',
-  'progress-bar', 'scale', 'level-bar', 'popover', 'list-box-row',
+  'progress-bar', 'scale', 'level-bar', 'popover', 'list-box-row', 'tab-bar',
   // adw-overlay-split-view collects [slot="content"] with an unscoped query,
   // so it hoists the content child of any nested toolbar view into its own
   // pane. Render the panes ourselves, as with navigation-view.
@@ -145,6 +182,9 @@ function nodeProps(node: AdwNode, inheritedSlot?: string): Record<string, string
   // hints.  In particular, GtkBox orientation must survive the model → DOM
   // boundary for every imported Blueprint and preset.
   if (t === 'box' && node.orientation) p.orientation = node.orientation;
+  // GtkBox homogeneous gives every child an equal share of the main axis;
+  // the stylesheet applies the equal split to the box's children.
+  if (t === 'box' && node.homogeneous) p.homogeneous = '';
   if (t === 'overlay-split') p['show-sidebar'] = '';
   const icon = node.iconName?.replace(/-symbolic$/, '');
 
@@ -256,114 +296,6 @@ function childSlot(parent: AdwNode, child: AdwNode, index: number): string | und
   return undefined;
 }
 
-/** How a parent arranges children, which decides what alignment means. */
-type ParentFlow = 'row' | 'column' | 'grid';
-
-function parentFlowOf(node: AdwNode): ParentFlow {
-  if (node.type === 'grid') return 'grid';
-  if (node.type === 'box' || node.type === 'center-box' || node.type === 'wrap-box') {
-    return node.orientation === 'horizontal' ? 'row' : 'column';
-  }
-  if (node.type === 'header-bar' || node.type === 'overlay-split' || node.type === 'list-box-row') return 'row';
-  return 'column';
-}
-
-/**
- * GTK halign/valign in CSS. On the cross axis alignment is `align-self`; on
- * the main axis of a flex container it is auto margins, which is the only
- * thing that positions a single child there. Grids use `justify-self` and
- * `align-self` directly.
- */
-function alignmentStyle(node: AdwNode, flow: ParentFlow): React.CSSProperties {
-  const style: React.CSSProperties = {};
-  const toSelf = (value: string) =>
-    value === 'fill' ? 'stretch' : value === 'center' ? 'center' : value === 'end' ? 'flex-end' : 'flex-start';
-  const mainAxisMargins = (value: string, axis: 'inline' | 'block') => {
-    const startKey = axis === 'inline' ? 'marginInlineStart' : 'marginBlockStart';
-    const endKey = axis === 'inline' ? 'marginInlineEnd' : 'marginBlockEnd';
-    if (value === 'center') { style[startKey] = 'auto'; style[endKey] = 'auto'; }
-    else if (value === 'end') style[startKey] = 'auto';
-    else if (value === 'start') style[endKey] = 'auto';
-  };
-
-  const halign = typeof node.halign === 'string' ? node.halign : undefined;
-  const valign = typeof node.valign === 'string' ? node.valign : undefined;
-
-  if (flow === 'grid') {
-    if (halign) style.justifySelf = halign === 'fill' ? 'stretch' : halign === 'end' ? 'end' : halign;
-    if (valign) style.alignSelf = toSelf(valign);
-    return style;
-  }
-  if (flow === 'row') {
-    if (valign) style.alignSelf = toSelf(valign);
-    if (halign && halign !== 'fill') mainAxisMargins(halign, 'inline');
-    if (halign === 'fill') style.flexGrow = 1;
-  } else {
-    if (halign) style.alignSelf = toSelf(halign);
-    if (valign && valign !== 'fill') mainAxisMargins(valign, 'block');
-    if (valign === 'fill') style.flexGrow = 1;
-  }
-  return style;
-}
-
-/**
- * Placement layout: how this node sits inside ITS PARENT's flex/grid context.
- * Applied to the wrapper div, which is the parent's direct child.
- */
-function placementLayout(node: AdwNode, flow: ParentFlow = 'column'): React.CSSProperties | undefined {
-  const placement: React.CSSProperties = { ...alignmentStyle(node, flow) };
-  // GTK expand semantics: an expanding child (including an unresolved
-  // custom-widget boundary such as Calculator's MathButtons) consumes the
-  // parent's spare allocation instead of collapsing to a fallback minimum.
-  if (node.vexpand || node.hexpand) {
-    placement.flexGrow = 1;
-    placement.alignSelf = 'stretch';
-    placement.minHeight = 0;
-  }
-  // GTK size requests are MINIMUMS, not fixed sizes: a widget grows past its
-  // request to fit content (a button's label must not wrap because the
-  // source asked for a 146px minimum).
-  if (node.minWidth !== undefined) placement.minWidth = node.minWidth;
-  if (node.minHeight !== undefined) placement.minHeight = node.minHeight;
-  if (node.widthRequest !== undefined) {
-    placement.minWidth = Math.max(node.widthRequest, Number(placement.minWidth ?? 0));
-  }
-  if (node.heightRequest !== undefined) {
-    placement.minHeight = Math.max(node.heightRequest, Number(placement.minHeight ?? 0));
-  }
-  if (node.column !== undefined) placement.gridColumn = `${node.column + 1} / span ${node.columnSpan ?? 1}`;
-  if (node.row !== undefined) placement.gridRow = `${node.row + 1} / span ${node.rowSpan ?? 1}`;
-  return Object.keys(placement).length ? placement : undefined;
-}
-
-/**
- * Container layout: how this node arranges ITS OWN children. Applied to the
- * rendered element only — putting it on the wrapper as well would nest two
- * copies of the same layout and squeeze the element into its own grid cell.
- */
-function containerLayout(node: AdwNode): React.CSSProperties | undefined {
-  if (node.type === 'box') {
-    return { gap: node.spacing ?? 12 };
-  }
-  if (node.type === 'grid') {
-    // GtkGrid has no declared column count; derive it from the children's
-    // explicit attach positions and spans, as GTK does.
-    const derivedColumns = Math.max(1, ...(node.children ?? []).map((child) =>
-      (typeof child.column === 'number' ? child.column : 0) + (typeof child.columnSpan === 'number' ? child.columnSpan : 1)));
-    return {
-      gridTemplateColumns: `repeat(${node.columns ?? derivedColumns}, minmax(0, 1fr))`,
-      rowGap: node.rowSpacing ?? node.spacing ?? 6,
-      columnGap: node.columnSpacing ?? node.spacing ?? 6,
-      // GtkGrid row-homogeneous divides the grid's allocation into equal
-      // rows; without it a keypad collapses to its buttons' minimum height
-      // instead of filling the region GTK gives it.
-      ...(node.rowHomogeneous ? { gridAutoRows: 'minmax(0, 1fr)', height: '100%' } : {}),
-    };
-  }
-  if (node.type === 'scrolled-window') return { overflow: 'auto' };
-  return undefined;
-}
-
 /** GTK label markup (Pango) is not renderable text; show the plain string. */
 function plainText(text: string): string {
   return text.replace(/<[^>]+>/g, '');
@@ -371,15 +303,44 @@ function plainText(text: string): string {
 
 export const AdwaitaRenderer: React.FC<Props> = ({
   node, screenId, screenWidth, screenHeight,
-  inheritedSlot, primaryHeaderBarId, parentFlow = 'column',
+  inheritedSlot, primaryHeaderBarId, parentFlow = 'column', parentNode,
+  dialogAncestor = false, surfaceTitle, overrides, forcedColorScheme,
 }) => {
+  // Active-breakpoint setters apply as a derived patch over the document
+  // node — the same non-mutating family as the runtime-evidence geometry
+  // overrides. A node is (or is not) a breakpoint independently of the
+  // patch, so hook order below stays stable.
+  const patch = overrides?.[node.id];
+  if (patch) node = { ...node, ...patch };
   // The screen root resolves which header bar owns the window controls.
   const primaryHeaderBar = primaryHeaderBarId ?? (screenWidth ? findPrimaryHeaderBarId(node) : undefined);
-  const { selectedNodeId, selectNode, addChildNode, doc } = useMockupStore();
+  const {
+    selectedNodeId, selectedNodeIds, selectNode, toggleNodeSelection, addChildNode, doc,
+    diagnosticsEnabled, diagnostics, tierFilters, ignoredRules, ignoredInstances,
+  } = useMockupStore();
   const isSelected = selectedNodeId === node.id;
+  // Multi-selection member that is not the primary: distinct dashed outline,
+  // no badge/add-buttons — those belong to the primary only (#79).
+  const isMultiSelected = !isSelected && selectedNodeIds.includes(node.id);
+
+  // Diagnostics outlines (#95, design §5.4): visible (filtered, non-ignored)
+  // diagnostics tint this node by their worst tier. Editor chrome only —
+  // excluded from PNG capture alongside the selection outline.
+  const nodeDiagnostics = diagnosticsEnabled
+    ? getDiagnosticsForNode(
+        filterDiagnostics(diagnostics, tierFilters, ignoredRules, ignoredInstances),
+        screenId, node.id)
+    : [];
+  const diagnosticTier = worstTier(nodeDiagnostics);
 
   const legalAdds = LEGAL_CHILDREN[node.type] || [];
   const elRef = useRef<HTMLElement>(null);
+
+  // Adw.TabBar derives its tabs from the linked tab-view's declared pages;
+  // its autohide semantics can hide the whole strip (checked after hooks).
+  const tabBar = node.type === 'tab-bar'
+    ? tabBarModel(node, doc.screens.find((screen) => screen.id === screenId)?.rootNode)
+    : null;
 
   // A dialog used as a canvas screen renders as a window-like surface; the
   // real dialog elements are modals, hidden until runtime opens them.
@@ -397,6 +358,11 @@ export const AdwaitaRenderer: React.FC<Props> = ({
     ensureAdwIcon(node.iconName);
   }, [node.iconName]);
 
+  const tabIconNames = tabBar?.tabs.map((tab) => tab.iconName).filter(Boolean).join(' ') ?? '';
+  useEffect(() => {
+    for (const iconName of tabIconNames.split(' ')) if (iconName) ensureAdwIcon(iconName);
+  }, [tabIconNames]);
+
   // Selection must use a native listener: the adw-* custom elements build
   // and reparent internal DOM, and clicks originating there never reach
   // React's delegated events. Plain DOM bubbling always does. stopPropagation
@@ -408,15 +374,24 @@ export const AdwaitaRenderer: React.FC<Props> = ({
     if (!wrapper) return;
     const handleNativeClick = (event: MouseEvent) => {
       event.stopPropagation();
-      selectNode(node.id, screenId);
+      // Ctrl/Cmd-click toggles multi-selection membership (#79, study §3).
+      if (event.ctrlKey || event.metaKey) toggleNodeSelection(node.id, screenId);
+      else selectNode(node.id, screenId);
     };
     wrapper.addEventListener('click', handleNativeClick);
     return () => wrapper.removeEventListener('click', handleNativeClick);
-  }, [node.id, screenId, selectNode]);
+  }, [node.id, screenId, selectNode, toggleNodeSelection]);
 
   // GTK visibility: a hidden widget takes no space and draws nothing. This
   // must come after every hook so React's hook order stays stable.
   if (node.visible === false) return null;
+  // An Adw.Breakpoint is structure, not a widget: GTK never draws it. Its
+  // condition/setters are evaluated by utils/breakpoints.ts instead.
+  if (node.breakpointCondition !== undefined || node.sourceClass === 'Adw.Breakpoint') return null;
+  // Adw.TabBar autohide: with fewer than two tabs the bar takes no space,
+  // exactly like a hidden widget (unless a finishing file pinned a runtime
+  // allocation via heightRequest — see utils/tabBar.ts).
+  if (tabBar?.hidden) return null;
 
   // adw-menu-button is icon-only; a labelled MenuButton renders as a button.
   const tag = isDialogRoot
@@ -427,12 +402,21 @@ export const AdwaitaRenderer: React.FC<Props> = ({
         ? 'adw-button'
         : TAG_MAP[node.type] || 'div';
   const attrs = nodeProps(node, inheritedSlot);
+  // AdwHeaderBar with no title-widget shows the enclosing window's/dialog's
+  // title centered (the compress dialog's heading comes from this fallback).
+  // adw-header-bar only draws the title attribute when its center slot is
+  // empty, so a window-title/view-switcher child still wins.
+  const fallbackTitle = headerBarFallbackTitle(node, surfaceTitle);
+  if (fallbackTitle) attrs.title = fallbackTitle;
 
-  // Apply theme class to window/dialog roots based on doc colorScheme
+  // Apply theme class to window/dialog roots based on doc colorScheme; a
+  // render-time forcedColorScheme (render mode / renderScreenshot) wins
+  // without mutating the document.
   const isRoot = node.type === 'window' || node.type === 'dialog' ||
     node.type === 'preferences-dialog';
-  const themeClass = isRoot && doc.colorScheme !== 'auto'
-    ? `theme-${doc.colorScheme}` : '';
+  const effectiveScheme = forcedColorScheme ?? doc.colorScheme;
+  const themeClass = isRoot && effectiveScheme !== 'auto'
+    ? `theme-${effectiveScheme}` : '';
   if (themeClass) attrs['class'] = themeClass;
 
   // GtkStack, AdwViewStack, and AdwNavigationView show exactly one child.
@@ -445,31 +429,89 @@ export const AdwaitaRenderer: React.FC<Props> = ({
         (child.id === node.visibleChildName || child.title === node.visibleChildName || (child as { name?: unknown }).name === node.visibleChildName)) ?? node.children[0]]
     : node.children;
 
-  const children = visibleChildren?.map((child, index) => (
+  const childDialogAncestor = dialogAncestor || DIALOG_TYPES.has(node.type);
+  const childSurfaceTitle =
+    (node.type === 'window' || DIALOG_TYPES.has(node.type)) && node.title
+      ? node.title
+      : surfaceTitle;
+  // Slots resolve against the ORIGINAL child order (childSlot is index-based
+  // for slotless children), then a collapsed split view drops its sidebar:
+  // Adw.OverlaySplitView with collapsed=true moves the sidebar into an
+  // overlay that stays hidden until runtime shows it, so statically the
+  // content pane takes the whole allocation. Breakpoint setters flipping
+  // `collapsed` are how the imported corpus adapts to narrow widths.
+  const slottedChildren = (visibleChildren ?? []).map((child, index) => ({
+    child, slot: childSlot(node, child, index),
+  }));
+  const collapsedSplit = node.type === 'overlay-split' && node.collapsed === true;
+  const children = slottedChildren
+    .filter(({ slot }) => !(collapsedSplit && slot === 'sidebar'))
+    .map(({ child, slot }) => (
     <AdwaitaRenderer
       key={child.id}
       node={child}
       screenId={screenId}
-      inheritedSlot={childSlot(node, child, index)}
+      inheritedSlot={slot}
       primaryHeaderBarId={primaryHeaderBar}
       parentFlow={parentFlowOf(node)}
+      parentNode={node}
+      dialogAncestor={childDialogAncestor}
+      surfaceTitle={childSurfaceTitle}
+      overrides={overrides}
+      forcedColorScheme={forcedColorScheme}
     />
   ));
-  // GTK draws window controls in the header bar unless show-title-buttons is
-  // false (Adw.HeaderBar defaults to true). Real app windows always show
-  // them, so a mockup without them never matches a native screenshot.
-  const windowControls = node.type === 'header-bar' && node.showTitleButtons !== false && node.id === primaryHeaderBar ? (
+  // GTK draws window controls in the header bar unless the title-button
+  // properties disable them (Adw.HeaderBar defaults to true). Inside a
+  // dialog, libadwaita draws at most a close button — never minimize or
+  // maximize — and none at all when end title buttons are disabled, exactly
+  // like the Files compress dialog. See utils/headerBarChrome.ts.
+  const controlsKind = headerBarControls(node, {
+    inDialog: dialogAncestor,
+    isPrimary: node.id === primaryHeaderBar,
+  });
+  const windowControls = controlsKind !== 'none' ? (
     <div key="window-controls" slot="end" className="protota-window-controls" aria-hidden="true">
-      <span className="protota-window-control minimize" />
-      <span className="protota-window-control maximize" />
+      {controlsKind === 'window' && <span className="protota-window-control minimize" />}
+      {controlsKind === 'window' && <span className="protota-window-control maximize" />}
       <span className="protota-window-control close" />
     </div>
   ) : null;
+
+  // The tab strip's tabs are renderer-derived chrome (like window controls):
+  // one chip per statically declared page of the linked view, first selected
+  // (GTK's default). A close affordance is drawn per tab, as native does; a
+  // lone tab draws no chip background (libadwaita keeps it flat).
+  const tabBarTabs = tabBar && tabBar.tabs.length ? (
+    <div key="tab-box" className="protota-tab-box" aria-hidden="true">
+      {tabBar.tabs.map((tab, index) => (
+        <div key={tab.id} className={`protota-tab${index === 0 ? ' protota-tab-active' : ''}`}>
+          {tab.iconName ? (
+            <span className={`adw-icon adw-icon--${tab.iconName.replace(/-symbolic$/, '')}`} />
+          ) : null}
+          <span className="protota-tab-title">{plainText(tab.title)}</span>
+          <span className="protota-tab-close" />
+        </div>
+      ))}
+    </div>
+  ) : null;
+  if (tabBar && tabBar.tabs.length === 1 && tabBar.viewResolved) {
+    attrs['data-protota-single-tab'] = 'true';
+  }
 
   const iconPrefix = node.type === 'action-row' && node.iconName ? (
     <span
       aria-hidden="true"
       slot="prefix"
+      className={`adw-icon adw-icon--${node.iconName.replace(/-symbolic$/, '')}`}
+    />
+  ) : null;
+
+  // A Gtk.Image imports as a bin carrying its declared icon-name; drawing
+  // that icon is source-grounded (the go-next chevron on a font row).
+  const binIcon = node.type === 'bin' && node.iconName ? (
+    <span
+      aria-hidden="true"
       className={`adw-icon adw-icon--${node.iconName.replace(/-symbolic$/, '')}`}
     />
   ) : null;
@@ -488,15 +530,19 @@ export const AdwaitaRenderer: React.FC<Props> = ({
   const styleClasses = typeof node.styleClasses === 'string'
     ? node.styleClasses.split(/\s+/).filter(Boolean).map((name) => `protota-style-${name}`).join(' ')
     : '';
-  const elementClass = [divClass, styleClasses].filter(Boolean).join(' ');
+  // Selection outline wins visually over the diagnostic tint (design §5.4).
+  const diagnosticClass = diagnosticTier && !isSelected
+    ? `protota-diag-outline-${diagnosticTier}`
+    : '';
+  const elementClass = [divClass, styleClasses, diagnosticClass].filter(Boolean).join(' ');
 
   return (
     <div
       ref={wrapperRef}
       slot={node.slot ?? inheritedSlot}
-      className={`adw-node-wrapper${isSelected ? ' selected-outline' : ''}`}
+      className={`adw-node-wrapper${isSelected ? ' selected-outline' : ''}${isMultiSelected ? ' multi-selected-outline' : ''}`}
       style={{
-        ...(isSelected ? { position: 'relative' } : {}),
+        ...(isSelected || isMultiSelected ? { position: 'relative' } : {}),
         ...placementLayout(node, parentFlow),
       }}
     >
@@ -508,7 +554,28 @@ export const AdwaitaRenderer: React.FC<Props> = ({
         ref: elRef,
         ...attrs,
         'data-protota-type': node.type,
+        // Hit-testing anchor for drag-and-drop (#79): the rendered element is
+        // the node's real box (the wrapper is display: contents), so drop
+        // resolution and the insertion indicator both key off this attribute.
+        'data-node-id': node.id,
+        ...(nodeDiagnostics.length > 1 && !isSelected
+          ? { 'data-protota-diag-count': String(nodeDiagnostics.length) }
+          : {}),
         ...(isExpandedBoundary ? { 'data-protota-expanded': 'true' } : {}),
+        // An unresolved boundary publishes the evidence behind its geometry
+        // (#55): each fact's origin and confidence, so the Broadway
+        // comparison artifact can audit where the allocated region came from
+        // instead of trusting an arbitrary placeholder minimum.
+        ...(node.type === 'custom-widget' && !isExpandedBoundary
+          ? (() => {
+              const facts = boundaryGeometryFacts(node, parentNode);
+              return {
+                'data-protota-geometry': JSON.stringify(facts),
+                'data-protota-geometry-confidence': boundaryGeometryConfidence(facts),
+                ...(node.sourceClass ? { 'data-protota-source-class': node.sourceClass } : {}),
+              };
+            })()
+          : {}),
         ...((node.type === 'window' || isDialogRoot) && screenWidth ? { 'data-protota-render-surface': 'true' } : {}),
         // Placement lives on the rendered element because the wrapper is
         // layout-transparent (display: contents): the element itself is the
@@ -518,6 +585,8 @@ export const AdwaitaRenderer: React.FC<Props> = ({
         className: elementClass || undefined,
       },
         iconPrefix,
+        binIcon,
+        tabBarTabs,
         ...(children ?? []),
         windowControls,
         // For label/inscription — render text content

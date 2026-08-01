@@ -545,7 +545,18 @@ surfaces, as they are today.
 
 Retain `inputKind`, native and rendered geometry, unresolved coverage,
 source-resolved similarity, foreground IoU, and attainable raw ceiling. A
-boundary is never counted as a rendered implementation. Visual captures
+boundary is never counted as a rendered implementation.
+
+Each unresolved boundary in the DOM carries its geometry evidence (#55):
+`data-protota-geometry` is the JSON list of applied facts, each with the
+effect (`min-width`, `vexpand`, `allocation`…), the value, an origin naming
+the layer and source property that produced it (`source:width-request`,
+`code:vexpand`, `container:GtkBox.homogeneous`, `fallback:renderer-minimum`),
+and a confidence (`declared` > `code` > `derived` > `fallback`).
+`data-protota-geometry-confidence` is the weakest confidence among them. The
+comparison artifact copies these per-boundary facts into
+`comparison-<app>.json` under `unresolvedWidgets`, so every masked rectangle
+is auditable back to the source fact that granted it its region. Visual captures
 remain a regression oracle rather than an input to semantic import.
 
 ## Delivery plan
@@ -594,6 +605,14 @@ no Calculator-specific branch.
 
 - Add the isolated GTK probe and stable source/runtime matching.
 - Use it for geometry and active-state enrichment in Broadway artifacts.
+
+Delivered (#58): `containers/broadway/probe.c` is a read-only LD_PRELOAD shim
+armed only by a mounted `/probe` volume; `src/utils/runtimeProfile.ts` joins
+its dump to the source graph by buildable ID first, structural gtype ordinal
+second, never pixels; the Broadway comparison artifact carries the join as a
+`runtimeProfile` block and per-boundary `native:*` facts at the new top
+`native` confidence tier. Usage, schema, and matching rules:
+`docs/runtime-probe.md`.
 
 Exit condition: exact-ID custom boundaries such as `_buttons` carry auditable
 native allocation evidence.

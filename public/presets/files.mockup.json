@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exportedAt": "2026-07-30T14:19:34.065Z",
+  "exportedAt": "2026-07-31T14:43:43.035Z",
   "generatedBy": "scripts/generate-preset.mjs",
   "document": {
     "id": "files-preset",
@@ -110,7 +110,23 @@
                             {
                               "id": "places_sidebar",
                               "type": "custom-widget",
-                              "children": [],
+                              "children": [
+                                {
+                                  "id": "swin",
+                                  "type": "scrolled-window",
+                                  "children": [
+                                    {
+                                      "id": "list_box",
+                                      "type": "list-box",
+                                      "children": [],
+                                      "activateOnSingleClick": true,
+                                      "styleClasses": "navigation-sidebar",
+                                      "sourceClass": "Gtk.ListBox"
+                                    }
+                                  ],
+                                  "sourceClass": "Gtk.ScrolledWindow"
+                                }
+                              ],
                               "sourceClass": "NautilusSidebar",
                               "title": "NautilusSidebar",
                               "vexpand": true,
@@ -152,15 +168,49 @@
                                               "children": [
                                                 {
                                                   "id": "path_bar",
-                                                  "type": "custom-widget",
-                                                  "children": [],
+                                                  "type": "box",
+                                                  "children": [
+                                                    {
+                                                      "id": "path_bar-scrolled",
+                                                      "type": "scrolled-window",
+                                                      "children": [
+                                                        {
+                                                          "id": "path_bar-buttons_box",
+                                                          "type": "box",
+                                                          "children": [],
+                                                          "orientation": "horizontal",
+                                                          "sourceClass": "Gtk.Box"
+                                                        }
+                                                      ],
+                                                      "hexpand": true,
+                                                      "sourceClass": "Gtk.ScrolledWindow"
+                                                    },
+                                                    {
+                                                      "id": "path_bar-current_view_menu_button",
+                                                      "type": "menu-button",
+                                                      "children": [
+                                                        {
+                                                          "id": "path_bar-inline_1",
+                                                          "type": "bin",
+                                                          "children": [],
+                                                          "iconName": "view-more-symbolic",
+                                                          "sourceClass": "Gtk.Image"
+                                                        }
+                                                      ],
+                                                      "flat": true,
+                                                      "styleClasses": "flat",
+                                                      "sourceClass": "Gtk.MenuButton"
+                                                    }
+                                                  ],
                                                   "sourceClass": "NautilusPathBar",
-                                                  "title": "NautilusPathBar",
                                                   "valign": "center",
                                                   "bindings": {
                                                     "window-slot": "NautilusToolbar.window-slot"
                                                   },
-                                                  "slot": "child"
+                                                  "slot": "child",
+                                                  "name": "NautilusPathBar",
+                                                  "styleClasses": "linked",
+                                                  "orientation": "horizontal"
                                                 }
                                               ],
                                               "name": "pathbar",
@@ -176,10 +226,9 @@
                                                   "children": [
                                                     {
                                                       "id": "location_entry",
-                                                      "type": "custom-widget",
+                                                      "type": "entry",
                                                       "children": [],
-                                                      "sourceClass": "NautilusLocationEntry",
-                                                      "title": "NautilusLocationEntry"
+                                                      "sourceClass": "NautilusLocationEntry"
                                                     },
                                                     {
                                                       "id": "template-imported-176",
@@ -383,11 +432,10 @@
                             },
                             {
                               "id": "tab_bar",
-                              "type": "custom-widget",
+                              "type": "tab-bar",
                               "children": [],
-                              "sourceClass": "Adw.TabBar",
-                              "title": "AdwTabBar",
                               "view": "tab_view",
+                              "sourceClass": "Adw.TabBar",
                               "slot": "top"
                             },
                             {

@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exportedAt": "2026-07-30T14:19:48.502Z",
+  "exportedAt": "2026-07-31T14:43:40.427Z",
   "generatedBy": "scripts/generate-preset.mjs",
   "document": {
     "id": "text-editor-preset",
@@ -163,11 +163,10 @@
                     },
                     {
                       "id": "tab_bar",
-                      "type": "custom-widget",
+                      "type": "tab-bar",
                       "children": [],
-                      "sourceClass": "Adw.TabBar",
-                      "title": "AdwTabBar",
                       "view": "tab_view",
+                      "sourceClass": "Adw.TabBar",
                       "slot": "top",
                       "heightRequest": 34
                     },
@@ -579,16 +578,7 @@
                     {
                       "id": "source_view",
                       "type": "entry",
-                      "children": [
-                        {
-                          "id": "buffer",
-                          "type": "custom-widget",
-                          "children": [],
-                          "sourceClass": "Gtk.SourceBuffer",
-                          "title": "GtkSourceBuffer",
-                          "slot": "buffer"
-                        }
-                      ],
+                      "children": [],
                       "editable": false,
                       "cursorVisible": false,
                       "topMargin": 8,
@@ -599,7 +589,7 @@
                       "monospace": true,
                       "showLineNumbers": true,
                       "marginBottom": 24,
-                      "sourceClass": "Gtk.SourceView"
+                      "sourceClass": "GtkSource.View"
                     },
                     {
                       "id": "scheme_group",
@@ -635,14 +625,23 @@
                         },
                         {
                           "id": "custom_font",
-                          "type": "custom-widget",
-                          "children": [],
+                          "type": "action-row",
+                          "children": [
+                            {
+                              "id": "custom_font-inline_1",
+                              "type": "bin",
+                              "children": [],
+                              "iconName": "go-next-symbolic",
+                              "sourceClass": "Gtk.Image",
+                              "slot": "suffix"
+                            }
+                          ],
                           "sourceClass": "EditorPreferencesFont",
-                          "title": "EditorPreferencesFont",
                           "schemaKey": "custom-font",
                           "bindings": {
                             "sensitive": "use_custom_font.active"
-                          }
+                          },
+                          "activatable": true
                         }
                       ],
                       "title": "Custom Font",
@@ -661,8 +660,16 @@
                   "children": [
                     {
                       "id": "show_grid",
-                      "type": "custom-widget",
-                      "children": [],
+                      "type": "action-row",
+                      "children": [
+                        {
+                          "id": "show_grid-toggle",
+                          "type": "switch-widget",
+                          "children": [],
+                          "sourceClass": "Gtk.Switch",
+                          "slot": "suffix"
+                        }
+                      ],
                       "sourceClass": "EditorPreferencesSwitch",
                       "title": "Show Grid Pattern",
                       "schemaKey": "show-grid",
@@ -670,8 +677,16 @@
                     },
                     {
                       "id": "display_line_numbers",
-                      "type": "custom-widget",
-                      "children": [],
+                      "type": "action-row",
+                      "children": [
+                        {
+                          "id": "display_line_numbers-toggle",
+                          "type": "switch-widget",
+                          "children": [],
+                          "sourceClass": "Gtk.Switch",
+                          "slot": "suffix"
+                        }
+                      ],
                       "sourceClass": "EditorPreferencesSwitch",
                       "title": "Display Line Numbers",
                       "useUnderline": true,
@@ -679,8 +694,16 @@
                     },
                     {
                       "id": "highlight_current_line",
-                      "type": "custom-widget",
-                      "children": [],
+                      "type": "action-row",
+                      "children": [
+                        {
+                          "id": "highlight_current_line-toggle",
+                          "type": "switch-widget",
+                          "children": [],
+                          "sourceClass": "Gtk.Switch",
+                          "slot": "suffix"
+                        }
+                      ],
                       "sourceClass": "EditorPreferencesSwitch",
                       "title": "Highlight Current Line",
                       "useUnderline": true,
@@ -688,8 +711,16 @@
                     },
                     {
                       "id": "map",
-                      "type": "custom-widget",
-                      "children": [],
+                      "type": "action-row",
+                      "children": [
+                        {
+                          "id": "map-toggle",
+                          "type": "switch-widget",
+                          "children": [],
+                          "sourceClass": "Gtk.Switch",
+                          "slot": "suffix"
+                        }
+                      ],
                       "sourceClass": "EditorPreferencesSwitch",
                       "title": "Display Overview Map",
                       "useUnderline": true,
@@ -704,8 +735,16 @@
                   "children": [
                     {
                       "id": "imported-8",
-                      "type": "custom-widget",
-                      "children": [],
+                      "type": "action-row",
+                      "children": [
+                        {
+                          "id": "imported-8-toggle",
+                          "type": "switch-widget",
+                          "children": [],
+                          "sourceClass": "Gtk.Switch",
+                          "slot": "suffix"
+                        }
+                      ],
                       "sourceClass": "EditorPreferencesSwitch",
                       "title": "Check Spelling",
                       "useUnderline": true,
@@ -720,8 +759,16 @@
                   "children": [
                     {
                       "id": "imported-10",
-                      "type": "custom-widget",
-                      "children": [],
+                      "type": "action-row",
+                      "children": [
+                        {
+                          "id": "imported-10-toggle",
+                          "type": "switch-widget",
+                          "children": [],
+                          "sourceClass": "Gtk.Switch",
+                          "slot": "suffix"
+                        }
+                      ],
                       "sourceClass": "EditorPreferencesSwitch",
                       "title": "Show Right Margin",
                       "useUnderline": true,
@@ -729,17 +776,35 @@
                     },
                     {
                       "id": "right_margin",
-                      "type": "custom-widget",
-                      "children": [],
+                      "type": "action-row",
+                      "children": [
+                        {
+                          "id": "right_margin-spin",
+                          "type": "entry",
+                          "children": [],
+                          "sourceClass": "Gtk.SpinButton",
+                          "slot": "suffix"
+                        }
+                      ],
                       "sourceClass": "EditorPreferencesSpin",
                       "title": "Margin Position",
                       "useUnderline": true,
-                      "schemaKey": "right-margin-position"
+                      "schemaKey": "right-margin-position",
+                      "activatable": true,
+                      "styleClasses": "spin"
                     },
                     {
                       "id": "imported-11",
-                      "type": "custom-widget",
-                      "children": [],
+                      "type": "action-row",
+                      "children": [
+                        {
+                          "id": "imported-11-toggle",
+                          "type": "switch-widget",
+                          "children": [],
+                          "sourceClass": "Gtk.Switch",
+                          "slot": "suffix"
+                        }
+                      ],
                       "sourceClass": "EditorPreferencesSwitch",
                       "title": "Wrap Lines Automatically (Alt+W)",
                       "useUnderline": true,
@@ -755,8 +820,16 @@
                   "children": [
                     {
                       "id": "imported-13",
-                      "type": "custom-widget",
-                      "children": [],
+                      "type": "action-row",
+                      "children": [
+                        {
+                          "id": "imported-13-toggle",
+                          "type": "switch-widget",
+                          "children": [],
+                          "sourceClass": "Gtk.Switch",
+                          "slot": "suffix"
+                        }
+                      ],
                       "sourceClass": "EditorPreferencesSwitch",
                       "title": "Auto Indentation",
                       "useUnderline": true,
@@ -804,8 +877,16 @@
                   "children": [
                     {
                       "id": "discover",
-                      "type": "custom-widget",
-                      "children": [],
+                      "type": "action-row",
+                      "children": [
+                        {
+                          "id": "discover-toggle",
+                          "type": "switch-widget",
+                          "children": [],
+                          "sourceClass": "Gtk.Switch",
+                          "slot": "suffix"
+                        }
+                      ],
                       "sourceClass": "EditorPreferencesSwitch",
                       "title": "Discover Document Settings",
                       "useUnderline": true,

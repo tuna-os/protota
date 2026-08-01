@@ -6,9 +6,74 @@ import type { AdwNode } from "../types/mockup";
 import { findNodeById } from "../utils/treeHelpers";
 import { NodeActions } from "./NodeActions";
 import { IconPicker } from "./IconPicker";
+import { MultiSelectPanel } from "./MultiSelectPanel";
+import { SPACING_SCALE, isOnSpacingScale, nearestSpacingValue, stepSpacingValue } from "../utils/spacingScale";
+
+/**
+ * Number field for spacing-scale properties (#79, penpot-study.md §5):
+ * the steppers and arrow keys walk the Adwaita 6/12/18/24 scale the linter
+ * enforces (HIG-W001) — property-time quantisation instead of drag-time
+ * geometry. Typing stays free; off-scale values get the linter's warning
+ * tint plus a one-click snap to the nearest scale value.
+ */
+const SpacingScaleField: React.FC<{
+  fieldKey: string;
+  value: number;
+  onChange: (next: number) => void;
+}> = ({ fieldKey, value, onChange }) => {
+  const offScale = Number.isFinite(value) && !isOnSpacingScale(value);
+  const nearest = nearestSpacingValue(value);
+  return (
+    <div data-testid={`spacing-snap-${fieldKey}`} style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+      <div style={{ display: "flex", gap: "4px" }}>
+        <button
+          className="adw-button flat"
+          data-testid={`spacing-step-down-${fieldKey}`}
+          aria-label="Previous spacing scale value"
+          onClick={() => onChange(stepSpacingValue(value, -1))}
+        >
+          −
+        </button>
+        <input
+          type="number"
+          className="protota-input"
+          style={{ flex: 1, minWidth: 0 }}
+          title={`Adwaita spacing scale: ${SPACING_SCALE.join(" ")}`}
+          value={value}
+          onChange={(e) => onChange(Number(e.target.value))}
+          onKeyDown={(e) => {
+            if (e.key === "ArrowUp" || e.key === "ArrowDown") {
+              e.preventDefault();
+              onChange(stepSpacingValue(value, e.key === "ArrowUp" ? 1 : -1));
+            }
+          }}
+        />
+        <button
+          className="adw-button flat"
+          data-testid={`spacing-step-up-${fieldKey}`}
+          aria-label="Next spacing scale value"
+          onClick={() => onChange(stepSpacingValue(value, 1))}
+        >
+          +
+        </button>
+      </div>
+      {offScale && (
+        <button
+          className="adw-button flat"
+          data-testid={`spacing-off-scale-${fieldKey}`}
+          onClick={() => onChange(nearest)}
+          title="Spacing scale extracted from GNOME Core apps — 6/12/18/24 primary"
+          style={{ alignSelf: "flex-start", fontSize: "11px", color: "#e5a50a", padding: "2px 6px" }}
+        >
+          Off HIG scale — snap to {nearest}px
+        </button>
+      )}
+    </div>
+  );
+};
 
 export const InspectorPanel: React.FC = () => {
-  const { doc, selectedNodeId, selectedScreenId, updateNodeProps, addEdge, removeEdge } = useMockupStore();
+  const { doc, selectedNodeId, selectedNodeIds, selectedScreenId, updateNodeProps, updateScreenProps, addEdge, removeEdge } = useMockupStore();
 
   const selectedScreen = doc.screens.find((s) => s.id === selectedScreenId);
   const selectedNode: AdwNode | null = (() => {
@@ -43,6 +108,12 @@ export const InspectorPanel: React.FC = () => {
         !outgoingEdges.some((edge) => edge.targetId === screen.id))
     : [];
 
+  // Multi-selection replaces the single-node inspector with the
+  // align/distribute toolbar (#79).
+  if (selectedNodeIds.length >= 2) {
+    return <MultiSelectPanel />;
+  }
+
   if (!selectedNode) {
     return (
       <div style={{ padding: "16px", opacity: 0.5, fontStyle: "italic" }}>
@@ -65,6 +136,48 @@ export const InspectorPanel: React.FC = () => {
           {selectedNode.type}
         </div>
       </div>
+
+      {/* The screen root carries the screen's own geometry: live-resizable
+          here (and by the canvas drag handles / bottom-bar device presets). */}
+      {(() => {
+        const rootScreen = doc.screens.find((screen) => screen.rootNode.id === selectedNode.id);
+        if (!rootScreen) return null;
+        const commitDimension = (key: "width" | "height", raw: string) => {
+          const value = Number(raw);
+          if (!Number.isFinite(value)) return;
+          updateScreenProps(rootScreen.id, { [key]: Math.max(200, Math.round(value)) });
+        };
+        return (
+          <div data-testid="screen-size-controls">
+            <span className="protota-field-label" style={{ fontSize: "10px" }}>
+              Screen Size
+            </span>
+            <div style={{ display: "flex", gap: "6px", alignItems: "center", marginTop: "4px" }}>
+              <input
+                type="number"
+                min={200}
+                className="protota-input"
+                data-testid="screen-width-input"
+                aria-label="Screen width"
+                style={{ flex: 1, minWidth: 0 }}
+                value={rootScreen.width}
+                onChange={(e) => commitDimension("width", e.target.value)}
+              />
+              <span style={{ opacity: 0.6 }}>×</span>
+              <input
+                type="number"
+                min={200}
+                className="protota-input"
+                data-testid="screen-height-input"
+                aria-label="Screen height"
+                style={{ flex: 1, minWidth: 0 }}
+                value={rootScreen.height}
+                onChange={(e) => commitDimension("height", e.target.value)}
+              />
+            </div>
+          </div>
+        );
+      })()}
 
       {showFlowEditor && (
         <div data-testid="flow-editor">
@@ -193,7 +306,7 @@ export const InspectorPanel: React.FC = () => {
                 <span style={{ fontSize: "13px" }}>Enabled</span>
               </label>
             )}
-            {field.type === "number" && (
+            {field.type === "number" && field.snap !== "spacing" && (
               <input
                 type="number"
                 className="protota-input"
@@ -201,6 +314,13 @@ export const InspectorPanel: React.FC = () => {
                 onChange={(e) =>
                   updateNodeProps(selectedNode.id, { [field.key]: Number(e.target.value) })
                 }
+              />
+            )}
+            {field.type === "number" && field.snap === "spacing" && (
+              <SpacingScaleField
+                fieldKey={field.key}
+                value={Number(value)}
+                onChange={(next) => updateNodeProps(selectedNode.id, { [field.key]: next })}
               />
             )}
             {field.type === "icon" && (

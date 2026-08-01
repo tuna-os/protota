@@ -1,11 +1,22 @@
 import { expect, test } from '@playwright/test';
-import { readdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import pixelmatch from 'pixelmatch';
 import { PNG } from 'pngjs';
 import { blueprintBundleToDocument } from '../src/utils/blueprint';
+import { applyRuntimeEvidence, matchRuntimeProfile, type ProbeDocument, type RuntimeProfileReport } from '../src/utils/runtimeProfile';
 
 const broadwayUrl = process.env.BROADWAY_URL;
+// Per-app CI gates (#59, ADR 0001 Part 2 step 4): calibrated from measured
+// capture artifacts, enforced on every capture of that app. A regression in a
+// passed app fails CI rather than surfacing in a quarterly audit.
+const appCatalog = JSON.parse(
+  readFileSync(new URL('./fixtures/gnome-app-catalog.json', import.meta.url), 'utf8'),
+) as Record<string, { maxUnresolvedCoverage?: number; minSimilarity?: number }>;
+// Native runtime probe dump (#58), written by the containerized app when the
+// runner is started with a /probe volume. Optional: a missing or unreadable
+// probe file is "no evidence", never a failure (ADR 0001 containment rule).
+const probeFile = process.env.BROADWAY_PROBE_FILE;
 const presetId = process.env.BROADWAY_PRESET_ID || 'calculator';
 const appId = process.env.BROADWAY_APP_ID || presetId;
 const sourceRoot = process.env.BROADWAY_SOURCE_ROOT;
@@ -70,12 +81,29 @@ function unresolvedWidgetMask(width: number, height: number, rectangles: Array<{
   return mask;
 }
 
+/**
+ * Trim a screenshot that exceeded the target size by a single half-pixel
+ * rounding column/row. Any larger mismatch is a real contract violation and
+ * is returned unchanged for the size assertion to fail loudly.
+ */
+function trimToSize(png: Buffer, width: number, height: number): Buffer {
+  const image = PNG.sync.read(png);
+  if ((image.width === width && image.height === height)
+    || image.width < width || image.height < height
+    || image.width - width > 1 || image.height - height > 1) return png;
+  const trimmed = new PNG({ width, height });
+  for (let y = 0; y < height; y++) {
+    image.data.copy(trimmed.data, y * width * 4, y * image.width * 4, y * image.width * 4 + width * 4);
+  }
+  return PNG.sync.write(trimmed);
+}
+
 function sourceBundleDocument() {
   if (!sourceRoot || !sourceEntry) return null;
   // Recursive: declarative UI files plus language sources for static
   // enrichment (Phase 4), wherever the app keeps them under the source root.
   const files = readdirSync(sourceRoot, { recursive: true, withFileTypes: true })
-    .filter(entry => entry.isFile() && /\.(blp|ui|vala)$/i.test(entry.name))
+    .filter(entry => entry.isFile() && /\.(blp|ui|vala|c|py)$/i.test(entry.name))
     .map(entry => {
       const absolute = join(entry.parentPath, entry.name);
       return { path: relative(sourceRoot, absolute), content: readFileSync(absolute, 'utf8') };
@@ -118,6 +146,26 @@ test.describe('Broadway reference captures', () => {
 
     const reference = PNG.sync.read(broadwayPng);
     const sourceDocument = sourceBundleDocument();
+    // Join the probe's live widget records to the source graph — buildable ID
+    // first, structural gtype ordinal second, never pixels. The join needs
+    // source-graph node ids, so it only runs in source-bundle mode.
+    let runtimeProfile: RuntimeProfileReport | null = null;
+    let appliedEvidence: { suppressed: string[]; revealed: string[]; allocated: string[] } | null = null;
+    if (probeFile && existsSync(probeFile) && sourceDocument) {
+      try {
+        const probe = JSON.parse(readFileSync(probeFile, 'utf8')) as ProbeDocument;
+        const chosen = sourceDocument.screens.find((screen) => screen.id === screenId) ?? sourceDocument.screens[0];
+        runtimeProfile = matchRuntimeProfile(probe, chosen.rootNode);
+        // Consume the evidence in the render itself (#55 exit): suppress
+        // widgets the probe saw unmapped (runtime-invisible siblings stop
+        // squeezing their neighbours) and let unresolved boundaries take
+        // their allocation from GTK's own measured bounds.
+        appliedEvidence = applyRuntimeEvidence(chosen.rootNode, runtimeProfile);
+      } catch {
+        runtimeProfile = null; // malformed probe output stays "no evidence"
+        appliedEvidence = null;
+      }
+    }
     await page.goto('/');
     await page.evaluate(async ({ id, width, height, document, screenId }) => {
       const preset = document ? { document } : await fetch(`./presets/${id}.mockup.json`).then(response => response.json());
@@ -173,10 +221,43 @@ test.describe('Broadway reference captures', () => {
       // childless boundaries remain unresolved coverage.
       return Array.from(surface.querySelectorAll<HTMLElement>('[data-protota-type="custom-widget"]:not([data-protota-expanded])')).map((element) => {
         const rect = element.getBoundingClientRect();
-        return { x: rect.x - surfaceRect.x, y: rect.y - surfaceRect.y, width: rect.width, height: rect.height };
+        // The boundary's geometry audit trail (#55): which source facts, at
+        // what confidence, produced the allocated rectangle being masked.
+        let geometryFacts: unknown = null;
+        try { geometryFacts = JSON.parse(element.dataset.prototaGeometry ?? 'null'); } catch { /* malformed marker stays null */ }
+        return {
+          x: rect.x - surfaceRect.x, y: rect.y - surfaceRect.y, width: rect.width, height: rect.height,
+          nodeId: element.dataset.nodeId ?? null,
+          sourceClass: element.dataset.prototaSourceClass ?? null,
+          geometryConfidence: element.dataset.prototaGeometryConfidence ?? null,
+          geometryFacts,
+        };
       });
     });
-    const prototaPng = await prototaSurface.screenshot();
+    // Merge native runtime evidence (#58) into each boundary's audit trail:
+    // a matched boundary carries GTK's own allocation as `native:*` facts at
+    // the top `native` confidence tier, alongside the static facts. Facts a
+    // consumed boundary already published through its DOM marker
+    // (applyRuntimeEvidence → boundaryGeometryFacts) are not duplicated.
+    if (runtimeProfile) {
+      const matchByNodeId = new Map(runtimeProfile.matches.map((match) => [match.nodeId, match]));
+      for (const widget of unresolvedWidgets) {
+        const match = widget.nodeId ? matchByNodeId.get(widget.nodeId) : undefined;
+        if (!match) continue;
+        const staticFacts = Array.isArray(widget.geometryFacts) ? widget.geometryFacts as Array<{ property?: unknown; origin?: unknown }> : [];
+        const present = new Set(staticFacts.map((fact) => `${fact.origin}|${fact.property}`));
+        widget.geometryFacts = [...staticFacts, ...match.facts.filter((fact) => !present.has(`${fact.origin}|${fact.property}`))];
+        widget.geometryConfidence = 'native';
+        (widget as Record<string, unknown>).runtimeMatch = {
+          matchedBy: match.matchedBy, buildableId: match.buildableId, gtype: match.gtype, bounds: match.bounds,
+        };
+      }
+    }
+    // An odd-width window centered in the canvas sits on a half-pixel
+    // boundary, and the element screenshot rounds up to one extra column/row;
+    // trim it so both images are exactly the native window's integer size.
+    const rawPrototaPng = await prototaSurface.screenshot();
+    const prototaPng = trimToSize(rawPrototaPng, reference.width, reference.height);
     await attachArtifact(`protota-${appId}.png`, prototaPng, 'image/png');
 
     const actual = PNG.sync.read(prototaPng);
@@ -221,6 +302,11 @@ test.describe('Broadway reference captures', () => {
     const rawSimilarityCeiling = 1 - unresolvedWidgetCoverage;
     const sourceResolvedSimilarity = resolvedPixels === 0 ? 0 : 1 - resolvedDifferentPixels / resolvedPixels;
     await attachArtifact(`diff-${appId}.png`, PNG.sync.write(diff), 'image/png');
+    if (probeFile && existsSync(probeFile)) {
+      // The raw probe dump travels next to the comparison artifact so every
+      // native:* fact in it can be audited against GTK's own records.
+      await attachArtifact(`probe-${appId}.json`, readFileSync(probeFile), 'application/json');
+    }
     await attachArtifact(
       `comparison-${appId}.json`,
       Buffer.from(JSON.stringify({
@@ -228,6 +314,13 @@ test.describe('Broadway reference captures', () => {
         differentPixels, totalPixels, differenceRatio, ...foreground,
         unresolvedWidgetPixels, unresolvedWidgetCoverage, rawSimilarityCeiling,
         resolvedDifferentPixels, resolvedPixels, sourceResolvedSimilarity,
+        unresolvedWidgets,
+        // Native runtime probe join (#58): per-source-node evidence and the
+        // per-app match rate, so a weak join is visible in the artifact.
+        runtimeProfile,
+        // Which nodes the render actually consumed evidence for (#55):
+        // probe-suppressed widgets and boundaries allocated from native bounds.
+        appliedRuntimeEvidence: appliedEvidence,
       }, null, 2)),
       'application/json',
     );
@@ -245,6 +338,17 @@ test.describe('Broadway reference captures', () => {
     const maximumUnresolvedWidgetCoverage = process.env.BROADWAY_MAX_UNRESOLVED_WIDGET_COVERAGE;
     if (maximumUnresolvedWidgetCoverage) {
       expect(unresolvedWidgetCoverage, `Unresolved custom-widget coverage for ${appId}`).toBeLessThanOrEqual(Number(maximumUnresolvedWidgetCoverage));
+    }
+
+    // Catalog-carried per-app gates (#59): each value traces to a committed
+    // measured artifact for this app (see docs/gnome-app-conformance.md).
+    // Environment thresholds above remain available for tighter ad-hoc runs.
+    const gates = appCatalog[appId];
+    if (gates?.maxUnresolvedCoverage !== undefined) {
+      expect(unresolvedWidgetCoverage, `Catalog unresolved-coverage gate for ${appId}`).toBeLessThanOrEqual(gates.maxUnresolvedCoverage);
+    }
+    if (gates?.minSimilarity !== undefined) {
+      expect(sourceResolvedSimilarity, `Catalog source-resolved-similarity gate for ${appId}`).toBeGreaterThanOrEqual(gates.minSimilarity);
     }
   });
 });

@@ -21,7 +21,8 @@ export type AdwNodeType =
   | 'view-stack'       // AdwViewStack — stack of pages with ViewSwitcher
   | 'view-switcher'    // AdwViewSwitcher — flat tab switcher (3-5 tabs)
   | 'navigation-view'  // AdwNavigationView — push/pop navigation
-  | 'tab-view'         // AdwTabView + TabBar — multi-document tabs
+  | 'tab-view'         // AdwTabView — multi-document tab pages
+  | 'tab-bar'          // AdwTabBar — tab strip bound to a TabView
   | 'overlay-split'    // AdwOverlaySplitView — sidebar + content
 
   // Layout
@@ -90,13 +91,21 @@ export type AdwNodeType =
 export type ImportDiagnosticCode =
   | 'template-not-in-bundle'           // $Class reference with no template definition in the imported source
   | 'renderer-does-not-support-class'  // known-syntax GTK/Adw class outside the generic widget registry
-  | 'static-source-expansion';         // code-defined composite projected from language construction facts
+  | 'static-source-expansion'          // code-defined composite projected from language construction facts
+  | 'breakpoint-setter-target-missing'; // Adw.Breakpoint setter names an id the import did not keep
 
 export interface ImportDiagnostic {
   code: ImportDiagnosticCode;
   sourceClass: string;
   sourceId?: string;
   message: string;
+}
+
+/** One `setters` entry of an Adw.Breakpoint, in source property spelling. */
+export interface BreakpointSetter {
+  target: string;
+  property: string;
+  value: string | number | boolean | null;
 }
 
 export interface AdwNode {
@@ -134,6 +143,9 @@ export interface AdwNode {
   selectedIndex?: number;
   // Header bar
   showTitleButtons?: boolean;
+  /** Adw.HeaderBar show-start-title-buttons / show-end-title-buttons. */
+  showStartTitleButtons?: boolean;
+  showEndTitleButtons?: boolean;
   // Layout
   orientation?: 'horizontal' | 'vertical';
   spacing?: number;
@@ -152,6 +164,39 @@ export interface AdwNode {
   /** GTK expand semantics — the node claims its parent's spare allocation. */
   hexpand?: boolean;
   vexpand?: boolean;
+  /** GTK widget margins, in pixels, outside the widget's own allocation. */
+  marginStart?: number;
+  marginEnd?: number;
+  marginTop?: number;
+  marginBottom?: number;
+  /** GtkBox/GtkGrid homogeneous sizing — equal shares of the main axis. */
+  homogeneous?: boolean;
+  /** Adw.Clamp maximum child width. */
+  maximumSize?: number;
+  /**
+   * Which layer produced a geometry-relevant property (#55): unset means the
+   * declarative source declared it; 'code' means a static language adapter
+   * projected it from an application code assignment; 'native' means the
+   * runtime probe (#58) measured it from the live GTK widget tree. Feeds the
+   * boundary's origin/confidence audit trail; never exported.
+   */
+  geometryOrigin?: Record<string, 'code' | 'native'>;
+  /**
+   * Native runtime evidence attached to an unresolved boundary (#55/#58):
+   * the probe-measured allocation GTK gave this widget, joined by buildable
+   * id or structure — never pixels. The renderer takes the boundary's
+   * allocation from these bounds; `boundaryGeometryFacts` publishes them as
+   * `native:*` facts at the top confidence tier. Never exported.
+   */
+  runtimeEvidence?: {
+    probeVersion: number;
+    matchedBy: 'buildable-id' | 'structure';
+    buildableId: string | null;
+    gtype: string;
+    mapped: boolean;
+    visible: boolean;
+    bounds: { x: number; y: number; width: number; height: number } | null;
+  };
   /** GTK visibility. `false` renders nothing, exactly like a hidden widget. */
   visible?: boolean;
   /**
@@ -162,8 +207,15 @@ export interface AdwNode {
   sourceClass?: string;
   /** Blueprint `property: bind …` values preserved as opaque source text. */
   bindings?: Record<string, string>;
-  // Breakpoint
+  // Adw.Breakpoint (import-preserved, evaluated at render time — never exported
+  // as plain properties; the exporter re-emits real Blueprint breakpoint syntax)
   breakpointCondition?: string;
+  /**
+   * The breakpoint's `setters` block: target object id → GTK property (source
+   * spelling, e.g. `visible-child-name`) → value. `null` means the setter
+   * unsets the property (GtkBuilder's empty <setter/>).
+   */
+  breakpointSetters?: BreakpointSetter[];
   // View stack pages
   pages?: AdwNode[];
   // Generic slot for extra data
@@ -219,6 +271,7 @@ export const LEGAL_SLOTS: Partial<Record<AdwNodeType, string[]>> = {
   'toolbar-view': ['top', 'content', 'bottom'],
   'overlay-split': ['sidebar', 'content'],
   'navigation-view': ['content'],
+  'tab-bar': ['start-action-widget', 'end-action-widget'],
   'status-page': ['child'],
   'action-row': ['prefix', 'suffix'],
   'switch-row': ['prefix', 'suffix'],
@@ -247,7 +300,7 @@ export const LEGAL_SLOTS: Partial<Record<AdwNodeType, string[]>> = {
  */
 const CONTAINER_CHILDREN: AdwNodeType[] = [
   'toolbar-view', 'header-bar', 'window-title',
-  'view-stack', 'view-switcher', 'navigation-view', 'tab-view', 'overlay-split',
+  'view-stack', 'view-switcher', 'navigation-view', 'tab-view', 'tab-bar', 'overlay-split',
   'clamp', 'bin', 'custom-widget', 'box', 'grid', 'center-box', 'stack', 'stack-page',
   'scrolled-window', 'wrap-box', 'popover',
   'action-row', 'switch-row', 'combo-row', 'spin-row', 'button-row', 'expander-row',
@@ -288,6 +341,10 @@ export const LEGAL_CHILDREN: Record<AdwNodeType, AdwNodeType[]> = {
   'view-switcher': [],
   'navigation-view': CONTAINER_CHILDREN,
   'tab-view': CONTAINER_CHILDREN,
+  // Adw.TabBar draws its tabs from the linked TabView's pages; its only real
+  // child positions are the start/end action-widget slots (single widget each,
+  // buttons in every audited app that uses them).
+  'tab-bar': ['button', 'menu-button', 'split-button', 'box'],
   'overlay-split': CONTAINER_CHILDREN,
   // === Layout ===
   clamp: CONTAINER_CHILDREN,

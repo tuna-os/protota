@@ -25,12 +25,22 @@
  * Without a `screens` array, the CLI entry produces a single screen and the
  * legacy top-level `screen`/`overrides` keys apply to it.
  *
+ * Probe-generated entries (#58, ADR 0001 consumer 2): an override derived
+ * from a native runtime probe dump carries a `probeEvidence` field —
+ * `{ "probeVersion": 1, "buildableId": "_converter", "expect": { "mapped": false } }`
+ * — recording the dump record it came from and what that record must still
+ * say. The dump itself is committed as `presets-src/<app>.probe.json` so the
+ * evidence is auditable. When the entry goes stale (dump missing, widget id
+ * gone, or the dump no longer says what `expect` claims), generation fails
+ * loudly, exactly like a manual override whose node id no longer matches.
+ *
  * Usage:
  *   npx tsx scripts/generate-preset.mjs <appId> <sourceRoot> <entry>
  */
 import { readdirSync, readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { blueprintBundleToDocument } from '../src/utils/blueprint.ts';
+import { validateProbeEvidence } from '../src/utils/runtimeProfile.ts';
 
 const [appId, sourceRoot, defaultEntry] = process.argv.slice(2);
 if (!appId || !sourceRoot || !defaultEntry) {
@@ -42,7 +52,7 @@ const sourceEntries = readdirSync(sourceRoot, { recursive: true, withFileTypes: 
   .filter((dirent) => dirent.isFile());
 
 const files = sourceEntries
-  .filter((dirent) => /\.(blp|ui|vala|c)$/i.test(dirent.name))
+  .filter((dirent) => /\.(blp|ui|vala|c|py)$/i.test(dirent.name))
   .map((dirent) => {
     const absolute = join(dirent.parentPath, dirent.name);
     return { path: relative(sourceRoot, absolute), content: readFileSync(absolute, 'utf8') };
@@ -72,6 +82,30 @@ for (const dirent of sourceEntries) {
 const finishingPath = new URL(`../presets-src/${appId}.finishing.json`, import.meta.url);
 const finishing = existsSync(finishingPath) ? JSON.parse(readFileSync(finishingPath, 'utf8')) : null;
 
+// Native probe dump for this app (#58): the committed runtime evidence that
+// probe-generated finishing entries are validated against on every run.
+const probePath = new URL(`../presets-src/${appId}.probe.json`, import.meta.url);
+const probeDump = existsSync(probePath) ? JSON.parse(readFileSync(probePath, 'utf8')) : null;
+
+function validateProbeEvidenceEntries(overrides, label) {
+  const errors = [];
+  let evidenced = 0;
+  for (const override of overrides ?? []) {
+    if (!override.probeEvidence) continue;
+    evidenced++;
+    for (const error of validateProbeEvidence(override.probeEvidence, probeDump)) {
+      errors.push(`${label} / ${override.id}: ${error}`);
+    }
+  }
+  if (errors.length) {
+    // A probe-derived entry the dump no longer supports is stale — fail
+    // loudly instead of silently shipping a drifted preset.
+    errors.forEach((error) => console.error(error));
+    process.exit(1);
+  }
+  return evidenced;
+}
+
 function applyOverrides(screen, overrides, label) {
   const overridesById = new Map((overrides ?? []).map((override) => [override.id, override.set]));
   const applied = new Set();
@@ -100,6 +134,7 @@ const screenSpecs = finishing?.screens?.length
 
 const screens = [];
 let appliedTotal = 0;
+let evidencedTotal = 0;
 let diagnosticsTotal = 0;
 for (const spec of screenSpecs) {
   const entry = spec.entry ?? defaultEntry;
@@ -109,6 +144,7 @@ for (const spec of screenSpecs) {
   if (spec.title) screen.title = spec.title;
   if (spec.width) screen.width = spec.width;
   if (spec.height) screen.height = spec.height;
+  evidencedTotal += validateProbeEvidenceEntries(spec.overrides, screen.id);
   appliedTotal += applyOverrides(screen, spec.overrides, screen.id);
   diagnosticsTotal += generated.importDiagnostics?.length ?? 0;
   screens.push(screen);
@@ -153,4 +189,4 @@ writeFileSync(outputPath, JSON.stringify({
   // Source-grounded: never a similar-looking substitute for missing art.
   sourceIcons: sourceIconAssets,
 }, null, 2) + '\n');
-console.error(`Wrote public/presets/${appId}.mockup.json — ${screens.length} screen(s), ${document.edges.length} edge(s), ${appliedTotal} finishing overrides, ${diagnosticsTotal} import diagnostics`);
+console.error(`Wrote public/presets/${appId}.mockup.json — ${screens.length} screen(s), ${document.edges.length} edge(s), ${appliedTotal} finishing overrides (${evidencedTotal} probe-evidenced), ${diagnosticsTotal} import diagnostics`);

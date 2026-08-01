@@ -1,6 +1,9 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { App } from './components/App';
+import { RenderView } from './components/RenderView';
+import { parseRenderParams } from './utils/renderRequest';
+import { protota } from './utils/agent-api';
 
 // Adwaita web components first — their stylesheet self-applies on import —
 // then ours. Our sheet is the override layer, so equal-specificity rules
@@ -24,8 +27,24 @@ document.documentElement.style.padding = '0';
 document.body.style.margin = '0';
 document.body.style.padding = '0';
 
+// The live agent handle (docs/render-api.md): selection, transactions,
+// events, renderScreenshot. Exposed unconditionally — the deployed app IS
+// the agent surface on static hosting.
+(window as unknown as Record<string, unknown>).protota = protota;
+
+// `?render=1&…` swaps the editor for the chromeless render view: the
+// interactive chrome (top bar, panels, canvas, bottom bar) never mounts.
+const mode = parseRenderParams(window.location.search);
+
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <App />
+    {mode.mode === 'editor' ? (
+      <App />
+    ) : (
+      <RenderView
+        request={mode.mode === 'render' ? mode.request : undefined}
+        error={mode.mode === 'render-error' ? mode.error : undefined}
+      />
+    )}
   </React.StrictMode>,
 );

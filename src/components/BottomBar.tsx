@@ -10,6 +10,7 @@ import {
   documentNewSymbolic,
 } from "@gjsify/adwaita-icons/actions";
 import { toDataUri } from "@gjsify/adwaita-icons/utils";
+import { BreakpointBar } from "./BreakpointBar";
 
 interface ScreenOption {
   id: string;
@@ -33,6 +34,10 @@ interface BottomBarProps {
   onFocusPrev: () => void;
   onFocusNext: () => void;
   onSelectScreen: (idx: number) => void;
+  /** Focused screen's live size, so a matching device preset can highlight. */
+  screenSize: { width: number; height: number } | null;
+  /** Resize the focused screen to a device preset (one undo entry). */
+  onApplySizePreset: (size: { width: number; height: number }) => void;
 }
 
 /** Cached data URIs for SVG icons — avoids re-encoding on every render. */
@@ -111,6 +116,8 @@ export const BottomBar: React.FC<BottomBarProps> = React.memo(
     onFocusPrev,
     onFocusNext,
     onSelectScreen,
+    screenSize,
+    onApplySizePreset,
   }) => {
     const dropDownRef = useRef<
       HTMLElement & {
@@ -207,6 +214,16 @@ export const BottomBar: React.FC<BottomBarProps> = React.memo(
           title="Toggle Phone Preview"
           active={!!phoshScreenId}
         />
+        {screenSize && (
+          <>
+            <Separator />
+            <BreakpointBar
+              width={screenSize.width}
+              height={screenSize.height}
+              onChange={onApplySizePreset}
+            />
+          </>
+        )}
       </div>
     );
   },

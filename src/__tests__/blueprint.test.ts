@@ -192,6 +192,63 @@ describe('Blueprint import', () => {
     expect(diagnostics).toEqual([]);
   });
 
+  it('maps a can-unfold=false leaflet to a stack, not a split view', () => {
+    // GNOME Software's shell uses AdwLeaflet with can-unfold=False as pure
+    // navigation: exactly one page is ever mapped. Rendering it as a split
+    // view would paint pages GTK never shows together.
+    const doc = blueprintBundleToDocument([
+      { path: 'shell.ui', content: `<interface>
+        <object class="AdwLeaflet" id="nav">
+          <property name="can-unfold">False</property>
+          <child><object class="AdwLeafletPage">
+            <property name="name">main</property>
+            <property name="child"><object class="GtkLabel" id="main_page"/></property>
+          </object></child>
+          <child><object class="AdwLeafletPage">
+            <property name="name">details</property>
+            <property name="child"><object class="GtkLabel" id="details_page"/></property>
+          </object></child>
+        </object></interface>` },
+    ], 'shell.ui');
+    const nav = doc.screens[0].rootNode;
+    expect(nav).toMatchObject({ id: 'nav', type: 'view-stack', sourceClass: 'Adw.Leaflet' });
+    expect(nav.children?.map(child => child.type)).toEqual(['stack-page', 'stack-page']);
+  });
+
+  it('keeps an unfoldable leaflet as a split view', () => {
+    const doc = blueprintBundleToDocument([
+      { path: 'shell.ui', content: `<interface>
+        <object class="AdwLeaflet" id="split">
+          <child><object class="AdwLeafletPage">
+            <property name="name">sidebar</property>
+            <property name="child"><object class="GtkLabel" id="side"/></property>
+          </object></child>
+        </object></interface>` },
+    ], 'shell.ui');
+    expect(doc.screens[0].rootNode).toMatchObject({ id: 'split', type: 'overlay-split' });
+  });
+
+  it('drops paintable property objects instead of boxing them as boundaries', () => {
+    // `Adw.SpinnerPaintable` is a GdkPaintable assigned to a widget's
+    // `paintable` property — an image source, not a widget. Emitting it as a
+    // custom-widget node invents an allocation GTK never gives it.
+    const doc = blueprintBundleToDocument([
+      { path: 'page.ui', content: `<interface>
+        <object class="GtkBox" id="shell">
+          <child><object class="AdwStatusPage" id="status">
+            <property name="paintable">
+              <object class="AdwSpinnerPaintable"><property name="widget">shell</property></object>
+            </property>
+            <property name="title">Loading</property>
+          </object></child>
+        </object></interface>` },
+    ], 'page.ui');
+    const status = doc.screens[0].rootNode.children?.[0];
+    expect(status).toMatchObject({ id: 'status', title: 'Loading' });
+    expect(status?.children).toEqual([]);
+    expect(doc.importDiagnostics?.filter(d => d.code === 'renderer-does-not-support-class')).toEqual([]);
+  });
+
   it('retains a code-defined template reference with its bindings, siblings, and expand semantics', () => {
     const imported = blueprintBundleToDocument([
       { path: 'window.blp', content: `

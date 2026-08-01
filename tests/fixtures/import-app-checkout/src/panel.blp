@@ -1,0 +1,17 @@
+using Gtk 4.0;
+using Adw 1;
+
+// The action strip shown under the content.
+template $DemoPanel : Gtk.Box {
+  orientation: horizontal;
+  spacing: 6;
+
+  Gtk.Button open_button {
+    label: _("Open");
+    styles [ "suggested-action" ]
+  }
+
+  Gtk.Button close_button {
+    label: "Close";
+  }
+}

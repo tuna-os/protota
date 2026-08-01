@@ -1,0 +1,12 @@
+{
+  "title": "Ear Tag",
+  "screens": [
+    { "id": "ear-tag-main", "entry": "window.blp", "title": "Ear Tag", "width": 900, "height": 650,
+      "overrides": [
+        { "id": "split_view", "set": { "visible": false },
+          "probeEvidence": { "probeVersion": 1, "buildableId": "split_view",
+                             "expect": { "mapped": false } },
+          "why": "Native probe (2026-07-31, version-matched from-source runner): with no file opened, container_stack shows the no-file status page and the whole split view — sidebar file list and EartagFileView — is unmapped." }
+      ] }
+  ]
+}

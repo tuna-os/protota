@@ -8,6 +8,13 @@ export interface PropSchema {
   type: PropType;
   options?: string[];
   defaultValue?: unknown;
+  /**
+   * 'spacing' marks a number as living on the Adwaita spacing scale (#79):
+   * the inspector steppers/arrows then walk the HIG-W001 scale instead of
+   * incrementing by one. Typed input stays free — the linter, not the
+   * field, owns enforcement.
+   */
+  snap?: 'spacing';
 }
 
 /**
@@ -51,6 +58,13 @@ export const WIDGET_SCHEMAS: Record<AdwNodeType, PropSchema[]> = {
   'view-switcher': [],
   'navigation-view': [],
   'tab-view': [],
+  'tab-bar': [
+    // The id of the Adw.TabView this bar presents; tabs derive from that
+    // view's statically declared pages.
+    { key: 'view', label: 'Tab view (id)', type: 'string', defaultValue: '' },
+    // Adw.TabBar default: the bar hides when the view has fewer than two tabs.
+    { key: 'autohide', label: 'Autohide', type: 'boolean', defaultValue: true },
+  ],
   'overlay-split': [],
 
   // === Layout ===
@@ -71,12 +85,12 @@ export const WIDGET_SCHEMAS: Record<AdwNodeType, PropSchema[]> = {
       options: ['vertical', 'horizontal'],
       defaultValue: 'vertical',
     },
-    { key: 'spacing', label: 'Spacing', type: 'number', defaultValue: 12 },
+    { key: 'spacing', label: 'Spacing', type: 'number', defaultValue: 12, snap: 'spacing' },
   ],
   grid: [
     { key: 'columns', label: 'Columns', type: 'number', defaultValue: 2 },
-    { key: 'rowSpacing', label: 'Row spacing', type: 'number', defaultValue: 6 },
-    { key: 'columnSpacing', label: 'Column spacing', type: 'number', defaultValue: 6 },
+    { key: 'rowSpacing', label: 'Row spacing', type: 'number', defaultValue: 6, snap: 'spacing' },
+    { key: 'columnSpacing', label: 'Column spacing', type: 'number', defaultValue: 6, snap: 'spacing' },
   ],
   'center-box': [],
   stack: [],
@@ -212,7 +226,7 @@ export const WIDGET_SCHEMAS: Record<AdwNodeType, PropSchema[]> = {
     { key: 'value', label: 'Size', type: 'number', defaultValue: 48 },
   ],
   'wrap-box': [
-    { key: 'spacing', label: 'Spacing', type: 'number', defaultValue: 6 },
+    { key: 'spacing', label: 'Spacing', type: 'number', defaultValue: 6, snap: 'spacing' },
   ],
   popover: [
     { key: 'title', label: 'Title', type: 'string', defaultValue: '' },

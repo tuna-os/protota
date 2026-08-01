@@ -16,6 +16,10 @@
 import type { MockupDocument, AdwNode, AdwNodeType, ScreenTemplateType } from '../types/mockup';
 import { LEGAL_CHILDREN, LEGAL_SLOTS, SCREEN_DEFAULTS } from '../types/mockup';
 import { blueprintBundleToDocument, type BlueprintSourceFile } from './blueprint';
+import { discoverAppSources, appBundleManifest, type AppFileMap } from './appDiscovery';
+import { fetchGitArchive } from './appIngest';
+import { useMockupStore } from '../store/mockupStore';
+import { resolveScreenshotTarget, type ScreenshotOptions } from './renderRequest';
 
 let _nextId = 0;
 function uid(): string {
@@ -152,6 +156,46 @@ export class MockupBuilder {
     return this;
   }
 
+  /**
+   * Import a whole app checkout supplied as an abstract file map
+   * (`{ path → text }`) — the same front door the Import App dialog uses
+   * (#118). Discovery (gresource XML + meson.build, glob fallback) selects
+   * the declarative sources; when `entry` is omitted it is inferred from the
+   * single window-bearing candidate, and ambiguity fails loudly with the
+   * candidate list instead of guessing.
+   */
+  importApp(files: AppFileMap, entry?: string, options?: { title?: string; width?: number; height?: number }): this {
+    const discovered = discoverAppSources(files);
+    if (!discovered.files.length) {
+      throw new Error('importApp: no .blp or .ui files found in the supplied file map.');
+    }
+    const manifest = appBundleManifest(discovered.files);
+    let entryPath = entry ?? null;
+    if (entryPath && !discovered.files.some(file => file.path === entryPath)) {
+      throw new Error(`importApp: entry "${entryPath}" is not among the discovered files: ${discovered.files.map(file => file.path).join(', ')}`);
+    }
+    if (!entryPath) {
+      if (manifest.entryCandidates.length === 1) entryPath = manifest.entryCandidates[0];
+      else if (manifest.entryCandidates.length) {
+        throw new Error(`importApp: multiple entry candidates — pass entry. Candidates: ${manifest.entryCandidates.join(', ')}`);
+      } else {
+        throw new Error('importApp: no window-bearing file found — pass entry explicitly.');
+      }
+    }
+    return this.importScreens(discovered.files, entryPath, options);
+  }
+
+  /**
+   * Import an app straight from its forge URL (GitHub / GitLab incl.
+   * gitlab.gnome.org / Codeberg): the ref archive is fetched client-side,
+   * unpacked in-memory, and handed to {@link importApp}. Forges that block
+   * cross-origin downloads fail with an actionable error.
+   */
+  async importAppFromUrl(gitUrl: string, ref?: string, options?: { entry?: string; title?: string; width?: number; height?: number }): Promise<this> {
+    const { files } = await fetchGitArchive(gitUrl, ref);
+    return this.importApp(files, options?.entry, options);
+  }
+
   /** Resolve a screen by id or title. */
   private findScreen(idOrTitle: string) {
     return this.doc.screens.find(screen => screen.id === idOrTitle || screen.title === idOrTitle);
@@ -207,6 +251,188 @@ export class MockupBuilder {
     return JSON.parse(JSON.stringify(this.doc));
   }
 }
+
+// ---------------------------------------------------------------------------
+// Live handle (ADR 0001 Part 3 item 4, docs/penpot-study.md §8)
+//
+// `MockupBuilder` stays the detached *construction* API; `protota` is the
+// tiny *live* handle onto the running editor store — the same split Penpot
+// makes between document types and the runtime `penpot` global.
+// ---------------------------------------------------------------------------
+
+/**
+ * Events the live handle emits. Payloads:
+ * - `selectionchange`: `{ selection: string[] }` — the new ordered selected
+ *   node ids (primary last). Fired only when membership or order actually
+ *   changes; re-selecting the identical set is a no-op.
+ * - `documentchange`: `{ doc: MockupDocument }` — fired exactly once per
+ *   undo snapshot: a committed mutation, a `transaction()` commit, an undo,
+ *   or a redo. Editor-only state (selection, panel toggles, diagnostics
+ *   filters) and the intermediate states inside a transaction never fire it.
+ */
+export interface PrototaEventMap {
+  selectionchange: { selection: string[] };
+  documentchange: { doc: MockupDocument };
+}
+
+type PrototaEventName = keyof PrototaEventMap;
+type PrototaListener<E extends PrototaEventName> = (payload: PrototaEventMap[E]) => void;
+
+const liveListeners: { [E in PrototaEventName]: Set<PrototaListener<E>> } = {
+  selectionchange: new Set(),
+  documentchange: new Set(),
+};
+
+let liveUnsubscribe: (() => void) | null = null;
+
+function sameIds(a: readonly string[], b: readonly string[]): boolean {
+  return a.length === b.length && a.every((id, index) => id === b[index]);
+}
+
+/**
+ * Push-based wiring: one zustand subscription exists while any listener is
+ * registered, torn down when the last one leaves. No polling anywhere.
+ */
+function ensureLiveSubscription(): void {
+  if (liveUnsubscribe) return;
+  liveUnsubscribe = useMockupStore.subscribe((state, prev) => {
+    if (!sameIds(state.selectedNodeIds, prev.selectedNodeIds)) {
+      const payload = { selection: [...state.selectedNodeIds] };
+      liveListeners.selectionchange.forEach((cb) => cb(payload));
+    }
+    // A snapshot happened iff the history advanced (mutation / transaction
+    // commit) or the cursor moved (undo / redo). Transient transaction
+    // states change `doc` alone and stay silent.
+    if (state.history !== prev.history || state.historyIndex !== prev.historyIndex) {
+      const payload = { doc: state.doc };
+      liveListeners.documentchange.forEach((cb) => cb(payload));
+    }
+  });
+}
+
+function releaseLiveSubscriptionIfIdle(): void {
+  if (!liveUnsubscribe) return;
+  if (liveListeners.selectionchange.size === 0 && liveListeners.documentchange.size === 0) {
+    liveUnsubscribe();
+    liveUnsubscribe = null;
+  }
+}
+
+/**
+ * The live handle: a small window onto the running editor, for agents (and
+ * tests) that drive the same store humans do — one selection model, one
+ * undo history, one legality engine for everybody.
+ */
+export const protota = {
+  /**
+   * Ordered selected node ids, primary last — the same array the editor's
+   * multi-select uses. Assigning replaces the selection (unknown ids are
+   * tolerated the way the store tolerates them). Never touches undo.
+   */
+  get selection(): string[] {
+    return [...useMockupStore.getState().selectedNodeIds];
+  },
+  set selection(ids: string[]) {
+    useMockupStore.getState().selectNodes(ids);
+  },
+
+  /** Subscribe to a live event. See {@link PrototaEventMap} for payloads. */
+  on<E extends PrototaEventName>(event: E, cb: PrototaListener<E>): void {
+    (liveListeners[event] as Set<PrototaListener<E>>).add(cb);
+    ensureLiveSubscription();
+  },
+
+  /** Remove a listener registered with {@link protota.on}. */
+  off<E extends PrototaEventName>(event: E, cb: PrototaListener<E>): void {
+    (liveListeners[event] as Set<PrototaListener<E>>).delete(cb);
+    releaseLiveSubscriptionIfIdle();
+  },
+
+  /**
+   * Batch several store mutations into ONE undo snapshot (the same
+   * primitive align/distribute uses via `updateNodesProps`, generalized as
+   * the store's `runInTransaction`). Emits a single `documentchange` at
+   * commit. Nested transactions are no-ops: the inner call runs its
+   * function inline and the outermost transaction owns the snapshot. An
+   * empty transaction pushes nothing and emits nothing.
+   */
+  transaction(fn: () => void): void {
+    useMockupStore.getState().runInTransaction(fn);
+  },
+
+  /**
+   * Capture ONE screen of the live document as a PNG blob, at the requested
+   * dimensions and color scheme, WITHOUT disturbing the editor: the screen
+   * renders into a hidden offscreen container (the same AdwaitaRenderer +
+   * Adw.Breakpoint override path the canvas uses — `width`/`height`
+   * re-evaluate the breakpoints), html2canvas rasterises the render surface,
+   * and the container is torn down. Zoom, pan, selection, undo history, and
+   * the persisted document are all untouched.
+   *
+   * Defaults: the selected screen (else the first), its own dimensions, the
+   * document's color scheme, scale 1 (PNG pixels == CSS pixels, so the blob
+   * decodes to exactly `width` x `height`).
+   *
+   * Fidelity caveat (html2canvas): CSS `mask-image` is unsupported, so
+   * symbolic icons drawn via masks can come out as solid boxes or be
+   * missing; shadows and some blend modes are approximate. Pixel-faithful
+   * captures should drive the URL render mode with a real browser
+   * screenshot instead (docs/render-api.md).
+   */
+  async renderScreenshot(options: ScreenshotOptions = {}): Promise<Blob> {
+    const state = useMockupStore.getState();
+    const target = resolveScreenshotTarget(state.doc, options, state.selectedScreenId);
+
+    // Dynamic imports keep this DOM-heavy path out of the module graph that
+    // node-side consumers (unit tests, the round-trip CLI) load.
+    const [{ createRoot }, React, { AdwaitaRenderer }, { breakpointOverrides }, { settleRender }, html2canvas] =
+      await Promise.all([
+        import('react-dom/client'),
+        import('react'),
+        import('../components/AdwaitaRenderer'),
+        import('./breakpoints'),
+        import('./settle'),
+        import('html2canvas').then((module) => module.default),
+      ]);
+
+    const container = document.createElement('div');
+    // Scoped capture hygiene (index.css): selection outlines, badges, and
+    // diagnostics chrome never reach the capture, even though the offscreen
+    // render shares the live store (and therefore the live selection).
+    container.setAttribute('data-protota-capture-scope', 'true');
+    container.setAttribute('aria-hidden', 'true');
+    // In-viewport but behind everything: html2canvas is unreliable for
+    // far-offscreen subtrees, and the editor's opaque chrome covers this.
+    container.style.cssText = 'position:fixed;top:0;left:0;z-index:-2147483647;pointer-events:none;';
+    document.body.appendChild(container);
+    const root = createRoot(container);
+    try {
+      root.render(
+        React.createElement(AdwaitaRenderer, {
+          node: target.screen.rootNode,
+          screenId: target.screen.id,
+          screenWidth: target.width,
+          screenHeight: target.height,
+          overrides: breakpointOverrides(target.screen.rootNode, target.width, target.height),
+          forcedColorScheme: target.theme,
+        }),
+      );
+      await settleRender();
+      const surface = container.querySelector<HTMLElement>('[data-protota-render-surface="true"]');
+      if (!surface) throw new Error('renderScreenshot: the screen produced no render surface.');
+      const canvas = await html2canvas(surface, { scale: target.scale, backgroundColor: null });
+      return await new Promise<Blob>((resolve, reject) => {
+        canvas.toBlob((blob) => {
+          if (blob) resolve(blob);
+          else reject(new Error('renderScreenshot: unable to encode the capture as PNG.'));
+        }, 'image/png');
+      });
+    } finally {
+      root.unmount();
+      container.remove();
+    }
+  },
+};
 
 /**
  * One-shot builder: generate a mockup from a high-level description.

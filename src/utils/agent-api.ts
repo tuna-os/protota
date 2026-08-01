@@ -19,6 +19,7 @@ import { blueprintBundleToDocument, type BlueprintSourceFile } from './blueprint
 import { discoverAppSources, appBundleManifest, type AppFileMap } from './appDiscovery';
 import { fetchGitArchive } from './appIngest';
 import { useMockupStore } from '../store/mockupStore';
+import { resolveScreenshotTarget, type ScreenshotOptions } from './renderRequest';
 
 let _nextId = 0;
 function uid(): string {
@@ -357,6 +358,79 @@ export const protota = {
    */
   transaction(fn: () => void): void {
     useMockupStore.getState().runInTransaction(fn);
+  },
+
+  /**
+   * Capture ONE screen of the live document as a PNG blob, at the requested
+   * dimensions and color scheme, WITHOUT disturbing the editor: the screen
+   * renders into a hidden offscreen container (the same AdwaitaRenderer +
+   * Adw.Breakpoint override path the canvas uses — `width`/`height`
+   * re-evaluate the breakpoints), html2canvas rasterises the render surface,
+   * and the container is torn down. Zoom, pan, selection, undo history, and
+   * the persisted document are all untouched.
+   *
+   * Defaults: the selected screen (else the first), its own dimensions, the
+   * document's color scheme, scale 1 (PNG pixels == CSS pixels, so the blob
+   * decodes to exactly `width` x `height`).
+   *
+   * Fidelity caveat (html2canvas): CSS `mask-image` is unsupported, so
+   * symbolic icons drawn via masks can come out as solid boxes or be
+   * missing; shadows and some blend modes are approximate. Pixel-faithful
+   * captures should drive the URL render mode with a real browser
+   * screenshot instead (docs/render-api.md).
+   */
+  async renderScreenshot(options: ScreenshotOptions = {}): Promise<Blob> {
+    const state = useMockupStore.getState();
+    const target = resolveScreenshotTarget(state.doc, options, state.selectedScreenId);
+
+    // Dynamic imports keep this DOM-heavy path out of the module graph that
+    // node-side consumers (unit tests, the round-trip CLI) load.
+    const [{ createRoot }, React, { AdwaitaRenderer }, { breakpointOverrides }, { settleRender }, html2canvas] =
+      await Promise.all([
+        import('react-dom/client'),
+        import('react'),
+        import('../components/AdwaitaRenderer'),
+        import('./breakpoints'),
+        import('./settle'),
+        import('html2canvas').then((module) => module.default),
+      ]);
+
+    const container = document.createElement('div');
+    // Scoped capture hygiene (index.css): selection outlines, badges, and
+    // diagnostics chrome never reach the capture, even though the offscreen
+    // render shares the live store (and therefore the live selection).
+    container.setAttribute('data-protota-capture-scope', 'true');
+    container.setAttribute('aria-hidden', 'true');
+    // In-viewport but behind everything: html2canvas is unreliable for
+    // far-offscreen subtrees, and the editor's opaque chrome covers this.
+    container.style.cssText = 'position:fixed;top:0;left:0;z-index:-2147483647;pointer-events:none;';
+    document.body.appendChild(container);
+    const root = createRoot(container);
+    try {
+      root.render(
+        React.createElement(AdwaitaRenderer, {
+          node: target.screen.rootNode,
+          screenId: target.screen.id,
+          screenWidth: target.width,
+          screenHeight: target.height,
+          overrides: breakpointOverrides(target.screen.rootNode, target.width, target.height),
+          forcedColorScheme: target.theme,
+        }),
+      );
+      await settleRender();
+      const surface = container.querySelector<HTMLElement>('[data-protota-render-surface="true"]');
+      if (!surface) throw new Error('renderScreenshot: the screen produced no render surface.');
+      const canvas = await html2canvas(surface, { scale: target.scale, backgroundColor: null });
+      return await new Promise<Blob>((resolve, reject) => {
+        canvas.toBlob((blob) => {
+          if (blob) resolve(blob);
+          else reject(new Error('renderScreenshot: unable to encode the capture as PNG.'));
+        }, 'image/png');
+      });
+    } finally {
+      root.unmount();
+      container.remove();
+    }
   },
 };
 

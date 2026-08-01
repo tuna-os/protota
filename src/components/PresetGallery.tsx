@@ -1,34 +1,7 @@
 import React, { useState } from 'react';
-import type { MockupDocument } from '../types/mockup';
 import { persistDocumentSource } from '../store/mockupStore';
-import { blueprintBundleToDocument, type BlueprintSourceFile } from '../utils/blueprint';
 import { registerSourceIcons, SOURCE_ICONS_STORAGE_KEY } from '../utils/adwIcons';
-
-interface PresetMeta {
-  id: string;
-  name: string;
-  description: string;
-  screens: number;
-  sourceImportPending?: boolean;
-  sourcePackage?: string;
-}
-
-const PRESETS: PresetMeta[] = [
-  { id: 'amberol', name: 'Amberol', description: 'GNOME Circle music player, imported from its official Blueprint source bundle.', screens: 1, sourcePackage: 'source-imports/amberol.source.json' },
-  { id: 'apostrophe', name: 'Apostrophe', description: 'GNOME Circle Markdown editor, imported from its official GtkBuilder source bundle.', screens: 1, sourcePackage: 'source-imports/apostrophe.source.json' },
-  { id: 'authenticator', name: 'Authenticator', description: 'GNOME Circle 2FA code manager, imported from its official GtkBuilder source bundle.', screens: 1, sourcePackage: 'source-imports/authenticator.source.json' },
-  { id: 'decoder', name: 'Decoder', description: 'GNOME Circle QR scanner and generator, imported from its official GtkBuilder source bundle.', screens: 1, sourcePackage: 'source-imports/decoder.source.json' },
-  { id: 'text-editor', name: 'GNOME Text Editor', description: 'Document editor with header bar, save/open buttons, and content area.', screens: 1 },
-  { id: 'settings', name: 'GNOME Settings', description: 'Navigation split view with panel sidebar, imported from its official GtkBuilder source bundle — collapses below its 550sp Adw.Breakpoint.', screens: 1, sourcePackage: 'source-imports/settings.source.json' },
-  { id: 'calculator', name: 'GNOME Calculator', description: 'Button grid calculator with display and arithmetic operations.', screens: 1 },
-  { id: 'files', name: 'GNOME Files (Nautilus)', description: 'Sidebar + content layout with bookmarks, search, and file grid.', screens: 1 },
-  { id: 'calendar', name: 'GNOME Calendar', description: 'Event list with header bar, today/prev/next navigation, and new event button.', screens: 1 },
-  { id: 'weather', name: 'GNOME Weather', description: 'City forecast view with status header and 7-day temperature trends.', screens: 1 },
-  { id: 'clocks', name: 'GNOME Clocks', description: 'World clocks, alarms, stopwatch, and timers with ViewSwitcher tabs.', screens: 1 },
-  { id: 'disks', name: 'GNOME Disks', description: 'Disk partition utility with drive list sidebar and volume allocation.', screens: 1 },
-  { id: 'web', name: 'GNOME Web (Epiphany)', description: 'Browser window with tab bar, location entry, and status landing page.', screens: 1 },
-  { id: 'software', name: 'GNOME Software', description: 'App store catalog with ViewSwitcher tabs (Explore, Installed, Updates).', screens: 1 },
-];
+import { loadPresetDocument, PRESET_CATALOG as PRESETS } from '../utils/presetCatalog';
 
 interface Props {
   isOpen: boolean;
@@ -43,22 +16,13 @@ export const PresetGallery: React.FC<Props> = ({ isOpen, onClose }) => {
   const handleLoad = async (id: string) => {
     setLoading(true);
     try {
-      const preset = PRESETS.find((candidate) => candidate.id === id);
-      let doc: MockupDocument;
-      if (preset?.sourcePackage) {
-        const source = await fetch(`${import.meta.env.BASE_URL}${preset.sourcePackage}`).then(response => response.json()) as {
-          entry: string;
-          files: BlueprintSourceFile[];
-        };
-        doc = blueprintBundleToDocument(source.files, source.entry, preset.name);
-      } else {
-        const payload = await fetch(`${import.meta.env.BASE_URL}presets/${id}.mockup.json`).then(response => response.json());
-        doc = payload.document;
+      const loaded = await loadPresetDocument(id);
+      const doc = loaded.doc;
+      if (loaded.kind === 'mockup') {
         // Artwork the app ships in its own source, embedded by the generator.
-        registerSourceIcons(payload.sourceIcons);
-        localStorage.setItem(SOURCE_ICONS_STORAGE_KEY, JSON.stringify(payload.sourceIcons ?? {}));
+        registerSourceIcons(loaded.sourceIcons);
+        localStorage.setItem(SOURCE_ICONS_STORAGE_KEY, JSON.stringify(loaded.sourceIcons ?? {}));
       }
-      doc.colorScheme = doc.colorScheme || 'auto';
 
       // Save to localStorage and reload
       persistDocumentSource(doc);

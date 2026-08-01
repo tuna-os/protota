@@ -40,6 +40,13 @@ interface Props {
    * is never mutated; resizing the screen recomputes them.
    */
   overrides?: Record<string, Partial<AdwNode>>;
+  /**
+   * Render-time color-scheme override (URL render mode's `theme` param and
+   * `protota.renderScreenshot({ theme })`): wins over the document's
+   * colorScheme without touching it. See the .theme-light/.theme-dark
+   * variable scopes in index.css.
+   */
+  forcedColorScheme?: 'light' | 'dark';
 }
 
 /** Adw.Dialog and its subclasses — their header bars carry dialog chrome. */
@@ -297,7 +304,7 @@ function plainText(text: string): string {
 export const AdwaitaRenderer: React.FC<Props> = ({
   node, screenId, screenWidth, screenHeight,
   inheritedSlot, primaryHeaderBarId, parentFlow = 'column', parentNode,
-  dialogAncestor = false, surfaceTitle, overrides,
+  dialogAncestor = false, surfaceTitle, overrides, forcedColorScheme,
 }) => {
   // Active-breakpoint setters apply as a derived patch over the document
   // node — the same non-mutating family as the runtime-evidence geometry
@@ -402,11 +409,14 @@ export const AdwaitaRenderer: React.FC<Props> = ({
   const fallbackTitle = headerBarFallbackTitle(node, surfaceTitle);
   if (fallbackTitle) attrs.title = fallbackTitle;
 
-  // Apply theme class to window/dialog roots based on doc colorScheme
+  // Apply theme class to window/dialog roots based on doc colorScheme; a
+  // render-time forcedColorScheme (render mode / renderScreenshot) wins
+  // without mutating the document.
   const isRoot = node.type === 'window' || node.type === 'dialog' ||
     node.type === 'preferences-dialog';
-  const themeClass = isRoot && doc.colorScheme !== 'auto'
-    ? `theme-${doc.colorScheme}` : '';
+  const effectiveScheme = forcedColorScheme ?? doc.colorScheme;
+  const themeClass = isRoot && effectiveScheme !== 'auto'
+    ? `theme-${effectiveScheme}` : '';
   if (themeClass) attrs['class'] = themeClass;
 
   // GtkStack, AdwViewStack, and AdwNavigationView show exactly one child.
@@ -448,6 +458,7 @@ export const AdwaitaRenderer: React.FC<Props> = ({
       dialogAncestor={childDialogAncestor}
       surfaceTitle={childSurfaceTitle}
       overrides={overrides}
+      forcedColorScheme={forcedColorScheme}
     />
   ));
   // GTK draws window controls in the header bar unless the title-button

@@ -943,7 +943,36 @@ html adw-status-page .adw-status-page-child {
     bottom: 12px;
     left: 50%;
     transform: translateX(-50%);
-    padding: 2px 6px;
+    padding: 2px 4px;
+    gap: 2px;
+    /* Never wider than the viewport (#141 presets used to clip): the
+       inline set is trimmed to essentials and the rest lives in the "⋯"
+       overflow popover, so nothing scrolls or clips down to 320px. */
+    max-width: calc(100vw - 8px);
+    flex-wrap: nowrap;
+    box-sizing: border-box;
+  }
+
+  /* Bottom-bar overflow popover (mobile only): opens upward from the "⋯"
+     button, anchored to the bar. */
+  .protota-bottombar-overflow {
+    position: absolute;
+    bottom: calc(100% + 8px);
+    right: 0;
+    z-index: 110;
+    min-width: 220px;
+    padding: var(--spacing-xs, 6px);
+    border-radius: var(--card-radius, 12px);
+    background: var(--popover-bg-color, #ffffff);
+    color: var(--window-fg-color, rgba(0, 0, 6, 0.8));
+    border: 1px solid var(--separator-color, rgba(0, 0, 6, 0.12));
+    box-shadow: 0 4px 16px rgba(0, 0, 6, 0.18);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .protota-bottombar-overflow [data-testid="device-size-presets"] {
+    padding: 0 var(--spacing-xs, 6px) var(--spacing-xs, 6px);
   }
 
   .protota-canvas-surface {
@@ -951,36 +980,74 @@ html adw-status-page .adw-status-page-child {
   }
 }
 
-/* ---- Phosh Interactive Mobile Phone Mode ---- */
-.protota-phosh-container {
-  position: absolute;
+/* ---- Full-screen interactive preview (prototype mode) ---- */
+
+/* The overlay portals to <body> and owns the entire viewport; every editor
+   surface disappears behind it. z-index above modals and panels. */
+.protota-preview-overlay {
+  position: fixed;
   inset: 0;
-  z-index: 100;
-  background: rgba(0, 0, 0, 0.85);
-  backdrop-filter: blur(10px);
+  z-index: 1500;
   display: flex;
   flex-direction: column;
+}
+
+.protota-preview-overlay--phone {
+  background: rgba(10, 10, 12, 0.96);
   align-items: center;
   justify-content: center;
-  padding: 16px;
 }
 
-.protota-phosh-header {
+.protota-preview-overlay--desktop {
+  background: #1e1e1e;
+}
+
+/* Floating preview chrome: small, unobtrusive chip clusters in the top
+   corners (back + screen picker on the left, exit on the right). */
+.protota-preview-chrome {
+  position: absolute;
+  top: 10px;
+  z-index: 10;
   display: flex;
+  gap: 8px;
   align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  max-width: 380px;
-  margin-bottom: 12px;
+}
+.protota-preview-chrome--start { left: 12px; }
+.protota-preview-chrome--end { right: 12px; }
+
+.protota-preview-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(0, 0, 6, 0.55);
   color: #ffffff;
-  font-size: 13px;
-  font-weight: 600;
+  font-size: 12px;
+  cursor: pointer;
+  backdrop-filter: blur(6px);
+}
+.protota-preview-chip:hover {
+  background: rgba(0, 0, 6, 0.75);
+}
+.protota-preview-exit {
+  padding: 6px;
+  border-radius: 50%;
+}
+.protota-preview-screen-select {
+  appearance: none;
+  max-width: 40vw;
+}
+.protota-preview-screen-select option {
+  color: #000;
 }
 
+/* Phone frame: fills the viewport height (bezel included); on true phone
+   viewports it IS the viewport — no bezel, edge to edge. */
 .protota-phosh-phone-frame {
   width: 360px;
   height: 720px;
-  max-height: 85vh;
   background: var(--window-bg-color, #fafafa);
   border-radius: 36px;
   border: 12px solid #1e1e1e;
@@ -989,22 +1056,109 @@ html adw-status-page .adw-status-page-child {
   position: relative;
 }
 
+.protota-preview-phone-frame {
+  height: min(100dvh - 16px, 85vh + 200px);
+  max-height: calc(100dvh - 16px);
+  width: auto;
+  aspect-ratio: 384 / 744; /* 360x720 screen + bezel */
+  max-width: 100vw;
+}
+
+@media (max-width: 480px) {
+  .protota-preview-phone-frame {
+    width: 100vw;
+    height: 100dvh;
+    max-height: none;
+    aspect-ratio: auto;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+  }
+}
+
 .protota-phosh-phone-frame adw-window {
   width: 100% !important;
   height: 100% !important;
   border-radius: 24px !important;
 }
 
-/* ---- GNOME Desktop Fullscreen Live Interactive Preview Mode ---- */
-.protota-gnome-desktop-container {
-  position: absolute;
-  inset: 0;
-  z-index: 100;
-  background: #1e1e1e;
-  display: flex;
-  flex-direction: column;
+@media (max-width: 480px) {
+  .protota-preview-phone-frame adw-window {
+    border-radius: 0 !important;
+  }
 }
 
+/* Desktop mode: the previewed window at its authored size, centred on the
+   GNOME wallpaper under the shell top bar. */
+.protota-preview-desktop-window {
+  overflow: auto;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
+  border-radius: 12px;
+}
+.protota-preview-desktop-window adw-window {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* Preview-mode ViewSwitcher tab strip (renderer chrome; drives the linked
+   stack through ephemeral overrides). */
+.protota-preview-switcher {
+  display: inline-flex;
+  gap: 2px;
+  padding: 2px;
+  border-radius: 8px;
+  background: color-mix(in srgb, currentColor 8%, transparent);
+}
+.protota-preview-switcher-tab {
+  border: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 12px;
+  padding: 3px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.protota-preview-switcher-tab.active {
+  background: var(--window-bg-color, #fff);
+  box-shadow: 0 1px 3px rgba(0, 0, 6, 0.15);
+  font-weight: 600;
+}
+
+/* GtkSwitch is a div-rendered widget; its ephemeral on/off toggle is only
+   reachable in preview, so the knob + on-state style is preview-scoped —
+   editor rendering (and the Broadway reference screenshots) stay unchanged. */
+:root[data-protota-preview="true"] .protota-div-switch-widget {
+  cursor: pointer;
+}
+:root[data-protota-preview="true"] .protota-div-switch-widget::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 1px 2px rgba(0, 0, 6, 0.25);
+  transition: left 0.15s ease;
+}
+:root[data-protota-preview="true"] .protota-div-switch-widget[active] {
+  background: var(--accent-bg-color, #3584e4);
+}
+:root[data-protota-preview="true"] .protota-div-switch-widget[active]::after {
+  left: 22px;
+}
+
+/* While previewing, the editor chrome behind the overlay is fully hidden —
+   it must neither catch focus nor peek around the overlay. */
+:root[data-protota-preview="true"] .protota-zoom-bar,
+:root[data-protota-preview="true"] .protota-panel,
+:root[data-protota-preview="true"] .protota-screen-delete-notice {
+  display: none !important;
+}
+
+/* ---- GNOME Desktop shell top bar (preview chrome) ---- */
 .protota-gnome-topbar {
   height: 32px;
   background: #000000;

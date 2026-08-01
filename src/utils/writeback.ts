@@ -395,7 +395,7 @@ function effectiveClass(node: CstNode, templates: Map<string, CstLocation>): str
 
 const IGNORED_KEYS = new Set(['id', 'type', 'children', 'slot', 'sourceClass']);
 const STYLE_KEYS = new Set(['suggested', 'destructive', 'flat', 'circular', 'styleClasses']);
-const UNSUPPORTED_KEYS = new Set(['bindings', 'options', 'pages', 'imageId', 'breakpointCondition']);
+const UNSUPPORTED_KEYS = new Set(['bindings', 'options', 'pages', 'imageId', 'breakpointCondition', 'breakpointSetters']);
 
 const jsonEqual = (a: unknown, b: unknown): boolean => JSON.stringify(a ?? null) === JSON.stringify(b ?? null);
 

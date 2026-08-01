@@ -73,7 +73,7 @@ const SpacingScaleField: React.FC<{
 };
 
 export const InspectorPanel: React.FC = () => {
-  const { doc, selectedNodeId, selectedNodeIds, selectedScreenId, updateNodeProps, addEdge, removeEdge } = useMockupStore();
+  const { doc, selectedNodeId, selectedNodeIds, selectedScreenId, updateNodeProps, updateScreenProps, addEdge, removeEdge } = useMockupStore();
 
   const selectedScreen = doc.screens.find((s) => s.id === selectedScreenId);
   const selectedNode: AdwNode | null = (() => {
@@ -136,6 +136,48 @@ export const InspectorPanel: React.FC = () => {
           {selectedNode.type}
         </div>
       </div>
+
+      {/* The screen root carries the screen's own geometry: live-resizable
+          here (and by the canvas drag handles / bottom-bar device presets). */}
+      {(() => {
+        const rootScreen = doc.screens.find((screen) => screen.rootNode.id === selectedNode.id);
+        if (!rootScreen) return null;
+        const commitDimension = (key: "width" | "height", raw: string) => {
+          const value = Number(raw);
+          if (!Number.isFinite(value)) return;
+          updateScreenProps(rootScreen.id, { [key]: Math.max(200, Math.round(value)) });
+        };
+        return (
+          <div data-testid="screen-size-controls">
+            <span className="protota-field-label" style={{ fontSize: "10px" }}>
+              Screen Size
+            </span>
+            <div style={{ display: "flex", gap: "6px", alignItems: "center", marginTop: "4px" }}>
+              <input
+                type="number"
+                min={200}
+                className="protota-input"
+                data-testid="screen-width-input"
+                aria-label="Screen width"
+                style={{ flex: 1, minWidth: 0 }}
+                value={rootScreen.width}
+                onChange={(e) => commitDimension("width", e.target.value)}
+              />
+              <span style={{ opacity: 0.6 }}>×</span>
+              <input
+                type="number"
+                min={200}
+                className="protota-input"
+                data-testid="screen-height-input"
+                aria-label="Screen height"
+                style={{ flex: 1, minWidth: 0 }}
+                value={rootScreen.height}
+                onChange={(e) => commitDimension("height", e.target.value)}
+              />
+            </div>
+          </div>
+        );
+      })()}
 
       {showFlowEditor && (
         <div data-testid="flow-editor">

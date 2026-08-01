@@ -19,7 +19,7 @@ const PRESETS: PresetMeta[] = [
   { id: 'authenticator', name: 'Authenticator', description: 'GNOME Circle 2FA code manager, imported from its official GtkBuilder source bundle.', screens: 1, sourcePackage: 'source-imports/authenticator.source.json' },
   { id: 'decoder', name: 'Decoder', description: 'GNOME Circle QR scanner and generator, imported from its official GtkBuilder source bundle.', screens: 1, sourcePackage: 'source-imports/decoder.source.json' },
   { id: 'text-editor', name: 'GNOME Text Editor', description: 'Document editor with header bar, save/open buttons, and content area.', screens: 1 },
-  { id: 'settings', name: 'GNOME Settings', description: 'ViewSwitcher with Wi-Fi, Bluetooth, and Display panels. Search in header bar.', screens: 1 },
+  { id: 'settings', name: 'GNOME Settings', description: 'Navigation split view with panel sidebar, imported from its official GtkBuilder source bundle — collapses below its 550sp Adw.Breakpoint.', screens: 1, sourcePackage: 'source-imports/settings.source.json' },
   { id: 'calculator', name: 'GNOME Calculator', description: 'Button grid calculator with display and arithmetic operations.', screens: 1 },
   { id: 'files', name: 'GNOME Files (Nautilus)', description: 'Sidebar + content layout with bookmarks, search, and file grid.', screens: 1 },
   { id: 'calendar', name: 'GNOME Calendar', description: 'Event list with header bar, today/prev/next navigation, and new event button.', screens: 1 },

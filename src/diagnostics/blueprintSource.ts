@@ -18,6 +18,9 @@ const CODE_MAP: Record<ImportDiagnostic['code'], { ruleId: string; tier: Diagnos
   'renderer-does-not-support-class': { ruleId: 'BLP-S001', tier: 'suggestion' },
   // Informational provenance note for code-defined composites.
   'static-source-expansion': { ruleId: 'BLP-S002', tier: 'suggestion' },
+  // A preserved Adw.Breakpoint setter names an id the import did not keep,
+  // so resizing across its condition cannot show that part of the behavior.
+  'breakpoint-setter-target-missing': { ruleId: 'BLP-W002', tier: 'warning' },
 };
 
 /** Anchor an import diagnostic to the matching custom-widget node, if live. */

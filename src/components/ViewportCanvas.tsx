@@ -9,6 +9,7 @@ import { QuantiseHintChip } from "../dnd/QuantiseHint";
 import { noteDropQuantise } from "../dnd/quantise";
 import { findNodeById } from "../utils/treeHelpers";
 import { filterShallowest, screenOf, unionSelection } from "../utils/selection";
+import { activeBreakpoints, breakpointOverrides, type ActiveBreakpoint } from "../utils/breakpoints";
 import type { AdwNode, AdwNodeType } from "../types/mockup";
 import { windowCloseSymbolic } from "@gjsify/adwaita-icons/ui";
 import { toDataUri } from "@gjsify/adwaita-icons/utils";
@@ -16,6 +17,8 @@ import { toDataUri } from "@gjsify/adwaita-icons/utils";
 const CANVAS_PADDING = 60;
 const CANVAS_GAP = 40;
 const CANVAS_BOTTOM_BAR_H = 48;
+/** Smallest usable screen edge — matches nothing in GNOME below a phone. */
+const MIN_SCREEN_SIZE = 200;
 
 /** Total world-space width of all screens + gaps + padding. */
 function getTotalContentWidth(screens: { width?: number }[]): number {
@@ -312,7 +315,7 @@ export const ViewportCanvas: React.FC = () => {
   const handleMarqueePointerDown = useCallback((e: PointerEvent) => {
     if (e.button !== 0 || spaceDown.current || isPanningRef.current) return;
     const target = e.target as Element;
-    if (target.closest?.("[data-node-id], .protota-zoom-bar, button, select, input, .protota-screen-label")) return;
+    if (target.closest?.("[data-node-id], [data-resize-handle], .protota-zoom-bar, button, select, input, .protota-screen-label")) return;
 
     const gesture = {
       startX: e.clientX, startY: e.clientY, active: false,
@@ -491,6 +494,93 @@ export const ViewportCanvas: React.FC = () => {
     resetView();
   }, [resetView]);
 
+  // --- Screen resize (#): drag handles on the screen frame ---
+  //
+  // Same preview/commit split as drag-and-drop (src/dnd/): while the gesture
+  // is in flight only this ephemeral state changes — the renderer previews
+  // from it — and pointerup commits exactly one updateScreenProps, which is
+  // exactly one undo entry and one Blueprint persistence write.
+  const [resizePreview, setResizePreview] = useState<{ screenId: string; width: number; height: number } | null>(null);
+  const resizingRef = useRef(false);
+
+  const handleResizePointerDown = useCallback((
+    e: React.PointerEvent,
+    screenId: string,
+    axes: { x: boolean; y: boolean },
+  ) => {
+    if (e.button !== 0) return;
+    e.preventDefault();
+    e.stopPropagation();
+    const screen = docRef.current.screens.find((s) => s.id === screenId);
+    if (!screen) return;
+    const start = { x: e.clientX, y: e.clientY, width: screen.width, height: screen.height };
+    const gestureZoom = zoomRef.current || 1;
+    let latest = { width: screen.width, height: screen.height };
+    let cancelled = false;
+    resizingRef.current = true;
+    document.body.style.userSelect = "none";
+    document.body.style.cursor = axes.x && axes.y ? "nwse-resize" : axes.x ? "ew-resize" : "ns-resize";
+
+    const cleanup = () => {
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerup", onUp);
+      window.removeEventListener("keydown", onKeyDown, true);
+      document.body.style.userSelect = "";
+      document.body.style.cursor = "";
+      resizingRef.current = false;
+      setResizePreview(null);
+    };
+
+    const onMove = (ev: PointerEvent) => {
+      if (cancelled) return;
+      latest = {
+        width: axes.x
+          ? Math.max(MIN_SCREEN_SIZE, Math.round(start.width + (ev.clientX - start.x) / gestureZoom))
+          : start.width,
+        height: axes.y
+          ? Math.max(MIN_SCREEN_SIZE, Math.round(start.height + (ev.clientY - start.y) / gestureZoom))
+          : start.height,
+      };
+      setResizePreview({ screenId, ...latest });
+    };
+
+    const onKeyDown = (ev: KeyboardEvent) => {
+      if (ev.key === "Escape") {
+        ev.stopPropagation();
+        cancelled = true;
+        cleanup();
+      }
+    };
+
+    const onUp = () => {
+      const commit = !cancelled && (latest.width !== start.width || latest.height !== start.height);
+      cleanup();
+      // ONE document mutation → one undo snapshot for the whole gesture.
+      if (commit) useMockupStore.getState().updateScreenProps(screenId, latest);
+    };
+
+    window.addEventListener("pointermove", onMove);
+    window.addEventListener("pointerup", onUp);
+    window.addEventListener("keydown", onKeyDown, true);
+  }, []);
+
+  // Active Adw.Breakpoints + the property overrides their setters imply, per
+  // screen, against the LIVE (preview-during-drag) dimensions. Derived state:
+  // the document is never touched.
+  const breakpointState = useMemo(() => {
+    const state: Record<string, { overrides: Record<string, Partial<AdwNode>>; active: ActiveBreakpoint[] }> = {};
+    for (const screen of doc.screens) {
+      const preview = resizePreview?.screenId === screen.id ? resizePreview : null;
+      const width = preview?.width ?? screen.width;
+      const height = preview?.height ?? screen.height;
+      state[screen.id] = {
+        overrides: breakpointOverrides(screen.rootNode, width, height),
+        active: activeBreakpoints(screen.rootNode, width, height),
+      };
+    }
+    return state;
+  }, [doc, resizePreview]);
+
   // --- Screen focus state ---
 
   // Flow-edge geometry: measured from the laid-out screen frames, in the
@@ -660,6 +750,14 @@ export const ViewportCanvas: React.FC = () => {
     });
   }, []);
 
+  // Device-size preset from the bottom bar: one updateScreenProps → one undo.
+  const handleApplySizePreset = useCallback((size: { width: number; height: number }) => {
+    const screen = docRef.current.screens[focusedScreenIdxRef.current];
+    if (screen) useMockupStore.getState().updateScreenProps(screen.id, size);
+  }, []);
+
+  const focusedScreen = doc.screens[Math.min(focusedScreenIdx, doc.screens.length - 1)] ?? null;
+
   return (
     <div
       ref={canvasRef}
@@ -733,6 +831,7 @@ export const ViewportCanvas: React.FC = () => {
             <AdwaitaRenderer
               node={activeDesktopScreen.rootNode}
               screenId={activeDesktopScreen.id}
+              overrides={breakpointState[activeDesktopScreen.id]?.overrides}
             />
           </div>
         </div>
@@ -779,6 +878,7 @@ export const ViewportCanvas: React.FC = () => {
             <AdwaitaRenderer
               node={activePhoshScreen.rootNode}
               screenId={activePhoshScreen.id}
+              overrides={breakpointState[activePhoshScreen.id]?.overrides}
             />
           </div>
         </div>
@@ -802,6 +902,8 @@ export const ViewportCanvas: React.FC = () => {
         onFocusPrev={handleFocusPrev}
         onFocusNext={handleFocusNext}
         onSelectScreen={handleFocusScreen}
+        screenSize={focusedScreen ? { width: focusedScreen.width, height: focusedScreen.height } : null}
+        onApplySizePreset={handleApplySizePreset}
       />
 
       {/* Drop preview (#79): candidate-container highlight + insertion caret.
@@ -827,7 +929,9 @@ export const ViewportCanvas: React.FC = () => {
         style={{
           transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
           transformOrigin: "50% 0",
-          transition: isPanning ? "none" : "transform 0.2s ease",
+          // The surface re-centers as a screen's width changes; animating
+          // that during a resize drag would make the frame lag the pointer.
+          transition: isPanning || resizePreview ? "none" : "transform 0.2s ease",
           display: "inline-flex",
           alignItems: "flex-start",
           gap: `${CANVAS_GAP}px`,
@@ -865,23 +969,67 @@ export const ViewportCanvas: React.FC = () => {
             ))}
           </svg>
         )}
-        {doc.screens.map((screen) => (
+        {doc.screens.map((screen) => {
+          const preview = resizePreview?.screenId === screen.id ? resizePreview : null;
+          const liveWidth = preview?.width ?? screen.width;
+          const liveHeight = preview?.height ?? screen.height;
+          const active = breakpointState[screen.id]?.active ?? [];
+          return (
           <div
             key={screen.id}
             data-protota-flow-screen={screen.id}
             style={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}
           >
-            <div className="protota-screen-label" style={{ marginBottom: "8px" }}>
+            <div className="protota-screen-label" style={{ marginBottom: "8px", display: "flex", gap: "8px", alignItems: "center" }}>
               {screen.title}
+              {active.length > 0 && (
+                <span
+                  className="protota-breakpoint-chip"
+                  data-testid={`breakpoint-active-${screen.id}`}
+                  title="Active Adw.Breakpoint — its setters are applied to the render"
+                >
+                  {active.map((entry) => entry.condition).join(" · ")}
+                </span>
+              )}
             </div>
-            <AdwaitaRenderer
-              node={screen.rootNode}
-              screenId={screen.id}
-              screenWidth={screen.width}
-              screenHeight={screen.height}
-            />
+            <div style={{ position: "relative" }} data-testid={`screen-frame-${screen.id}`}>
+              <AdwaitaRenderer
+                node={screen.rootNode}
+                screenId={screen.id}
+                screenWidth={liveWidth}
+                screenHeight={liveHeight}
+                overrides={breakpointState[screen.id]?.overrides}
+              />
+              <div
+                data-resize-handle="right"
+                data-testid={`resize-right-${screen.id}`}
+                className="protota-resize-handle protota-resize-handle-right"
+                onPointerDown={(e) => handleResizePointerDown(e, screen.id, { x: true, y: false })}
+                onClick={(e) => e.stopPropagation()}
+              />
+              <div
+                data-resize-handle="bottom"
+                data-testid={`resize-bottom-${screen.id}`}
+                className="protota-resize-handle protota-resize-handle-bottom"
+                onPointerDown={(e) => handleResizePointerDown(e, screen.id, { x: false, y: true })}
+                onClick={(e) => e.stopPropagation()}
+              />
+              <div
+                data-resize-handle="corner"
+                data-testid={`resize-corner-${screen.id}`}
+                className="protota-resize-handle protota-resize-handle-corner"
+                onPointerDown={(e) => handleResizePointerDown(e, screen.id, { x: true, y: true })}
+                onClick={(e) => e.stopPropagation()}
+              />
+              {preview && (
+                <div className="protota-resize-size-chip" data-testid={`resize-size-chip-${screen.id}`}>
+                  {liveWidth} × {liveHeight}
+                </div>
+              )}
+            </div>
           </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

@@ -34,6 +34,12 @@ interface Props {
   dialogAncestor?: boolean;
   /** Nearest ancestor window/dialog title, for AdwHeaderBar's title fallback. */
   surfaceTitle?: string;
+  /**
+   * Render-time property overrides from the active Adw.Breakpoints
+   * (utils/breakpoints.ts), keyed by node id. Derived state — the document
+   * is never mutated; resizing the screen recomputes them.
+   */
+  overrides?: Record<string, Partial<AdwNode>>;
 }
 
 /** Adw.Dialog and its subclasses — their header bars carry dialog chrome. */
@@ -291,8 +297,14 @@ function plainText(text: string): string {
 export const AdwaitaRenderer: React.FC<Props> = ({
   node, screenId, screenWidth, screenHeight,
   inheritedSlot, primaryHeaderBarId, parentFlow = 'column', parentNode,
-  dialogAncestor = false, surfaceTitle,
+  dialogAncestor = false, surfaceTitle, overrides,
 }) => {
+  // Active-breakpoint setters apply as a derived patch over the document
+  // node — the same non-mutating family as the runtime-evidence geometry
+  // overrides. A node is (or is not) a breakpoint independently of the
+  // patch, so hook order below stays stable.
+  const patch = overrides?.[node.id];
+  if (patch) node = { ...node, ...patch };
   // The screen root resolves which header bar owns the window controls.
   const primaryHeaderBar = primaryHeaderBarId ?? (screenWidth ? findPrimaryHeaderBarId(node) : undefined);
   const {
@@ -366,6 +378,9 @@ export const AdwaitaRenderer: React.FC<Props> = ({
   // GTK visibility: a hidden widget takes no space and draws nothing. This
   // must come after every hook so React's hook order stays stable.
   if (node.visible === false) return null;
+  // An Adw.Breakpoint is structure, not a widget: GTK never draws it. Its
+  // condition/setters are evaluated by utils/breakpoints.ts instead.
+  if (node.breakpointCondition !== undefined || node.sourceClass === 'Adw.Breakpoint') return null;
   // Adw.TabBar autohide: with fewer than two tabs the bar takes no space,
   // exactly like a hidden widget (unless a finishing file pinned a runtime
   // allocation via heightRequest — see utils/tabBar.ts).
@@ -409,17 +424,30 @@ export const AdwaitaRenderer: React.FC<Props> = ({
     (node.type === 'window' || DIALOG_TYPES.has(node.type)) && node.title
       ? node.title
       : surfaceTitle;
-  const children = visibleChildren?.map((child, index) => (
+  // Slots resolve against the ORIGINAL child order (childSlot is index-based
+  // for slotless children), then a collapsed split view drops its sidebar:
+  // Adw.OverlaySplitView with collapsed=true moves the sidebar into an
+  // overlay that stays hidden until runtime shows it, so statically the
+  // content pane takes the whole allocation. Breakpoint setters flipping
+  // `collapsed` are how the imported corpus adapts to narrow widths.
+  const slottedChildren = (visibleChildren ?? []).map((child, index) => ({
+    child, slot: childSlot(node, child, index),
+  }));
+  const collapsedSplit = node.type === 'overlay-split' && node.collapsed === true;
+  const children = slottedChildren
+    .filter(({ slot }) => !(collapsedSplit && slot === 'sidebar'))
+    .map(({ child, slot }) => (
     <AdwaitaRenderer
       key={child.id}
       node={child}
       screenId={screenId}
-      inheritedSlot={childSlot(node, child, index)}
+      inheritedSlot={slot}
       primaryHeaderBarId={primaryHeaderBar}
       parentFlow={parentFlowOf(node)}
       parentNode={node}
       dialogAncestor={childDialogAncestor}
       surfaceTitle={childSurfaceTitle}
+      overrides={overrides}
     />
   ));
   // GTK draws window controls in the header bar unless the title-button

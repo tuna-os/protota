@@ -1,4 +1,4 @@
-import type { MockupDocument, AdwNode, AdwNodeType, ImportDiagnostic, Screen, ScreenTemplateType } from '../types/mockup';
+import type { MockupDocument, AdwNode, AdwNodeType, BreakpointSetter, ImportDiagnostic, Screen, ScreenTemplateType } from '../types/mockup';
 import { extractValaFacts, type ValaClassFacts } from './vala';
 import { extractCFacts, type CClassFacts } from './clang';
 import { extractPythonFacts } from './python';
@@ -232,7 +232,27 @@ const CLASS_TO_WIDGET_MAP: Record<string, AdwNodeType> = {
  * boxes or count as unresolved visual coverage.
  */
 const NON_VISUAL_CLASS_PATTERN =
-  /^(Gtk\.|Gio\.|Adw\.|GtkSource\.)?(EventController[A-Za-z]*|Gesture[A-Za-z]*|ShortcutController|Shortcut|DropTarget|DragSource|Adjustment|TextBuffer|SourceBuffer|Buffer|EntryBuffer|Tooltip|StringList|ListStore|SizeGroup|FileFilter|SortListModel|FilterListModel|SingleSelection|MultiSelection|NoSelection|SignalListItemFactory|BuilderListItemFactory|Breakpoint|[A-Za-z]*Paintable)$/;
+  /^(Gtk\.|Gio\.|Adw\.|GtkSource\.)?(EventController[A-Za-z]*|Gesture[A-Za-z]*|ShortcutController|Shortcut|DropTarget|DragSource|Adjustment|TextBuffer|SourceBuffer|Buffer|EntryBuffer|Tooltip|StringList|ListStore|SizeGroup|FileFilter|SortListModel|FilterListModel|SingleSelection|MultiSelection|NoSelection|SignalListItemFactory|BuilderListItemFactory|[A-Za-z]*Paintable)$/;
+
+/**
+ * An Adw.Breakpoint takes no layout allocation, but unlike the non-visual
+ * classes above it carries structure the renderer needs: its condition and
+ * setters drive the adaptive behavior a live resize is supposed to show. It
+ * survives import as a childless node the renderer skips.
+ */
+function isBreakpointClass(rawClass: string): boolean {
+  return rawClass === 'Breakpoint' || canonicalClassName(rawClass) === 'Adw.Breakpoint';
+}
+
+/**
+ * Exported classes that accept Adw.Breakpoint children — the hosts
+ * blueprint-compiler recognises. A breakpoint under any other parent is
+ * dropped at export (emitting it would not compile).
+ */
+const BREAKPOINT_HOST_CLASSES = new Set([
+  'Adw.Window', 'Adw.ApplicationWindow', 'Adw.Dialog', 'Adw.PreferencesDialog',
+  'Adw.AlertDialog', 'Adw.AboutDialog', 'Adw.BreakpointBin',
+]);
 
 const WIDGET_CLASS_MAP: Record<string, string> = {
   window: 'Adw.ApplicationWindow',
@@ -376,7 +396,7 @@ const STRING_PROPERTIES = new Set([
 /** Editor-only bookkeeping that must never reach exported source. */
 const INTERNAL_PROPERTIES = new Set([
   'id', 'type', 'slot', 'children', 'sourceClass', 'bindings', 'styleClasses',
-  'pages', 'imageId', 'options', 'breakpointCondition', 'geometryOrigin',
+  'pages', 'imageId', 'options', 'breakpointCondition', 'breakpointSetters', 'geometryOrigin',
 ]);
 
 /**
@@ -494,6 +514,13 @@ interface ExportContext {
   /** Original id → the single exported id references should point at. */
   renames: Map<string, string>;
   /**
+   * Ids that actually appear in the emitted source. A subset of knownIds:
+   * children of a source-referenced boundary exist in the document but are
+   * not written (the boundary exports as its reference alone), and a
+   * breakpoint setter naming one would stop the file compiling.
+   */
+  emittedIds?: Set<string>;
+  /**
    * Export has two purposes and they disagree on one point. Patching back
    * into an app's own source must preserve a boundary's instance bindings,
    * where `template.` still resolves. A standalone file has no template
@@ -507,7 +534,39 @@ export interface BlueprintExportOptions {
   standalone?: boolean;
 }
 
+/**
+ * Re-emit a preserved Adw.Breakpoint in real Blueprint syntax. Setters whose
+ * target id is not in the exported document (or whose value is an unset) are
+ * dropped — blueprint-compiler validates setter targets, and an unresolvable
+ * reference would stop the whole file compiling. A condition-only breakpoint
+ * is valid Blueprint and still worth keeping.
+ */
+function breakpointToBlueprint(node: AdwNode, depth: number, context?: ExportContext): string {
+  const exportedIds = context?.emittedIds ?? context?.knownIds;
+  const setters = (node.breakpointSetters ?? []).filter((setter) =>
+    setter.value !== null && (!exportedIds || exportedIds.has(setter.target)));
+  // The breakpoint keeps its id: an anonymous re-import would mint a fresh
+  // `imported-N` that can collide with a literal id elsewhere in the file.
+  const exportedId = context?.idMap.get(node) ?? node.id;
+  let source = `${indent(depth)}Adw.Breakpoint${exportedId ? ` ${exportedId}` : ''} {\n` +
+    `${indent(depth + 1)}condition ("${escapeBlueprintString(String(node.breakpointCondition))}")\n`;
+  if (setters.length) {
+    source += `${indent(depth + 1)}setters {\n`;
+    for (const setter of setters) {
+      const target = context?.renames.get(setter.target) ?? setter.target;
+      source += `${indent(depth + 2)}${target}.${setter.property}: ${formatPropertyValue(setter.property, setter.value)};\n`;
+    }
+    source += `${indent(depth + 1)}}\n`;
+  }
+  return `${source}${indent(depth)}}\n`;
+}
+
 function nodeToBlueprint(node: AdwNode, depth: number = 0, context?: ExportContext): string {
+  // A preserved Adw.Breakpoint has its own syntax; the generic property and
+  // child emission below would mangle it.
+  if (typeof node.breakpointCondition === 'string') {
+    return breakpointToBlueprint(node, depth, context);
+  }
   // An unresolved boundary exports as its real source reference. Replacing
   // `$MathButtons` with a Protota-invented class would corrupt the app source.
   // Export the class the source declared when we know it; fall back to the
@@ -608,6 +667,10 @@ function nodeToBlueprint(node: AdwNode, depth: number = 0, context?: ExportConte
     // non-visual filter learned their class must not survive into export:
     // `buffer: $GtkSourceBuffer { }` is source we cannot honestly emit.
     .filter((child) => !(typeof child.sourceClass === 'string' && isNonVisualClass(child.sourceClass)))
+    // A breakpoint compiles only under a breakpoint-capable host. Under any
+    // other parent (a user moved it, or import attached it oddly) it is
+    // dropped rather than emitted as source that does not compile.
+    .filter((child) => typeof child.breakpointCondition !== 'string' || BREAKPOINT_HOST_CLASSES.has(className))
     .map((child) => {
     const body = nodeToBlueprint(child, depth + 1, context);
     if (!child.slot) return body;
@@ -646,13 +709,34 @@ function nodeToBlueprint(node: AdwNode, depth: number = 0, context?: ExportConte
     `${indent(depth)}}\n`;
 }
 
+/**
+ * A screen's width/height re-emitted as the faithful GTK property, so the
+ * geometry survives the Blueprint round trip localStorage persistence rides
+ * on (previously every reload reset screens to 1024×720). Windows carry
+ * `default-width`/`default-height`; the Adw.Dialog family sizes through
+ * `content-width`/`content-height`.
+ */
+function withScreenGeometry(screen: Screen): AdwNode {
+  const root = screen.rootNode;
+  if (!(screen.width > 0) || !(screen.height > 0)) return root;
+  if (root.type === 'window') {
+    return { ...root, defaultWidth: screen.width, defaultHeight: screen.height };
+  }
+  if (root.type === 'dialog' || root.type === 'preferences-dialog' ||
+      root.type === 'alert-dialog' || root.type === 'about-dialog') {
+    return { ...root, contentWidth: screen.width, contentHeight: screen.height };
+  }
+  return root;
+}
+
 export function mockupToBlueprint(doc: MockupDocument, options?: BlueprintExportOptions): string {
+  const roots = doc.screens.map(withScreenGeometry);
   const knownIds = new Set<string>();
   const collect = (node: AdwNode) => {
     if (node.id) knownIds.add(node.id);
     node.children?.forEach(collect);
   };
-  doc.screens.forEach(screen => collect(screen.rootNode));
+  roots.forEach(collect);
   // Assign exported ids up front, so a reference emitted before its target is
   // written still resolves to the right widget.
   const idMap = new Map<AdwNode, string>();
@@ -670,12 +754,26 @@ export function mockupToBlueprint(doc: MockupDocument, options?: BlueprintExport
     }
     node.children?.forEach(assign);
   };
-  doc.screens.forEach((screen) => assign(screen.rootNode));
+  roots.forEach(assign);
+
+  // Mirror the emitter's descent so breakpoint setters can be validated
+  // against ids the file will really contain: a source-referenced boundary
+  // exports as its reference alone, so its children never get ids on disk.
+  const emittedIds = new Set<string>();
+  const collectEmitted = (node: AdwNode) => {
+    if (node.id) emittedIds.add(node.id);
+    if (node.type === 'custom-widget' && node.sourceClass) return;
+    for (const child of node.children ?? []) {
+      if (typeof child.sourceClass === 'string' && isNonVisualClass(child.sourceClass)) continue;
+      collectEmitted(child);
+    }
+  };
+  roots.forEach(collectEmitted);
 
   const context: ExportContext = {
-    knownIds, usedIds, idMap, renames, standalone: options?.standalone ?? false,
+    knownIds, usedIds, idMap, renames, emittedIds, standalone: options?.standalone ?? false,
   };
-  const body = doc.screens.map(screen => nodeToBlueprint(screen.rootNode, 0, context)).join('\n');
+  const body = roots.map(root => nodeToBlueprint(root, 0, context)).join('\n');
   // A re-emitted GtkSource class (the importer canonicalizes `GtkSourceView`
   // to `GtkSource.View`) compiles only with its namespace imported.
   const gtkSourceImport = /\bGtkSource\.[A-Z]/.test(body) ? 'using GtkSource 5;\n' : '';
@@ -756,6 +854,16 @@ function parseValue(token: Token | undefined): BlueprintValue | undefined {
   if (token.value === 'true') return true;
   if (token.value === 'false') return false;
   return token.value;
+}
+
+/**
+ * The editor property key a GTK/Blueprint property spelling maps to for the
+ * given node type. Public so breakpoint setters (stored in source spelling)
+ * can be applied as render-time overrides with the exact same translation
+ * import uses for declared properties.
+ */
+export function editorPropertyName(name: string, nodeType: AdwNodeType): string {
+  return propertyNameForNode(name, nodeType);
 }
 
 function propertyNameForNode(name: string, nodeType: AdwNodeType): string {
@@ -896,9 +1004,49 @@ function parseBlueprintRoots(code: string, diagnostics: ImportDiagnostic[]): Adw
     const bindings: Record<string, string> = {};
     const children: AdwNode[] = [];
     let pendingSlot: string | undefined;
+    // Adw.Breakpoint bodies use dedicated syntax: `condition ("…")` and a
+    // `setters { id.prop: value; }` block. Without explicit handling the
+    // generic property/slot branches desynchronise the braces (the setters'
+    // `}` closes the breakpoint, whose own `}` then closes the PARENT early,
+    // silently dropping every following sibling).
+    const breakpoint = isBreakpointClass(rawClass);
+    let breakpointCondition: string | undefined;
+    const breakpointSetters: BreakpointSetter[] = [];
 
     while (cursor < tokens.length && tokens[cursor].value !== '}') {
       const key = tokens[cursor];
+
+      if (breakpoint && key?.value === 'condition' && tokens[cursor + 1]?.kind === 'string') {
+        const parsed = parseValue(tokens[cursor + 1]);
+        if (typeof parsed === 'string') breakpointCondition = parsed;
+        cursor += 2;
+        continue;
+      }
+
+      if (breakpoint && key?.value === 'setters' && tokens[cursor + 1]?.value === '{') {
+        cursor += 2;
+        while (cursor < tokens.length && tokens[cursor].value !== '}') {
+          const entry = tokens[cursor];
+          if (entry.kind === 'word' && tokens[cursor + 1]?.value === ':') {
+            cursor += 2;
+            let value: BlueprintValue | null | undefined;
+            if (tokens[cursor]?.value === 'null') { value = null; cursor++; }
+            else value = parseValue(tokens[cursor++]);
+            while (cursor < tokens.length && tokens[cursor].value !== ';' && tokens[cursor].value !== '}') cursor++;
+            if (tokens[cursor]?.value === ';') cursor++;
+            const dot = entry.value.lastIndexOf('.');
+            if (dot > 0 && value !== undefined) {
+              breakpointSetters.push({
+                target: entry.value.slice(0, dot),
+                property: entry.value.slice(dot + 1).replace(/_/g, '-'),
+                value,
+              });
+            }
+          } else cursor++;
+        }
+        if (tokens[cursor]?.value === '}') cursor++;
+        continue;
+      }
 
       if (tokens[cursor + 1]?.value === ':') {
         cursor += 2;
@@ -1022,7 +1170,15 @@ function parseBlueprintRoots(code: string, diagnostics: ImportDiagnostic[]): Adw
     }
     if (tokens[cursor]?.value === '}') cursor++;
     if (isNonVisualClass(rawClass)) return null;
-    return makeNode(rawClass, id, properties, bindings, children, diagnostics);
+    // A breakpoint with no readable condition can never activate; dropping it
+    // is the pre-existing behavior and keeps it from rendering as a stray bin.
+    if (breakpoint && breakpointCondition === undefined) return null;
+    const node = makeNode(rawClass, id, properties, bindings, children, diagnostics);
+    if (breakpoint && breakpointCondition !== undefined) {
+      node.breakpointCondition = breakpointCondition;
+      if (breakpointSetters.length) node.breakpointSetters = breakpointSetters;
+    }
+    return node;
   };
 
   const parseBlock = (): AdwNode[] => {
@@ -1126,8 +1282,29 @@ function builderElementToNode(
   const properties: Record<string, BlueprintValue> = {};
   const bindings: Record<string, string> = {};
   const children: AdwNode[] = [];
+  const breakpoint = isBreakpointClass(rawClass);
+  let breakpointCondition: string | undefined;
+  const breakpointSetters: BreakpointSetter[] = [];
 
   for (const child of element.children) {
+    if (breakpoint && child.tag === 'condition') {
+      breakpointCondition = child.text.trim();
+      continue;
+    }
+    if (breakpoint && child.tag === 'setter') {
+      const target = child.attributes.object;
+      const property = child.attributes.property;
+      if (target && property) {
+        const text = child.text.trim();
+        // An empty <setter/> unsets the property when the breakpoint applies.
+        breakpointSetters.push({
+          target,
+          property: property.replace(/_/g, '-'),
+          value: text === '' ? null : builderScalar(text),
+        });
+      }
+      continue;
+    }
     if (child.tag === 'property') {
       const name = child.attributes.name;
       if (!name) continue;
@@ -1177,7 +1354,13 @@ function builderElementToNode(
     }
     // <signal>, <accessibility>, <attributes>, <items>… are non-structural.
   }
-  return makeNode(rawClass, id, properties, bindings, children, diagnostics);
+  if (breakpoint && breakpointCondition === undefined) return null;
+  const node = makeNode(rawClass, id, properties, bindings, children, diagnostics);
+  if (breakpoint && breakpointCondition !== undefined) {
+    node.breakpointCondition = breakpointCondition;
+    if (breakpointSetters.length) node.breakpointSetters = breakpointSetters;
+  }
+  return node;
 }
 
 function parseGtkBuilderRoots(code: string, diagnostics: ImportDiagnostic[]): AdwNode[] {
@@ -1341,14 +1524,50 @@ export function blueprintToDocument(code: string, title = 'Imported GNOME App'):
   roots.forEach(resolveMultiLayoutViews);
   roots.forEach(resolveWidgetVisibilityBindings);
   const inferType = (root: AdwNode): ScreenTemplateType => root.type === 'preferences-dialog' ? 'preferences' : root.type === 'dialog' ? 'dialog' : 'standard';
-  const screens: Screen[] = roots.map((root, index) => ({
-    id: `imported-screen-${index + 1}`,
-    title: String(root.title || `${title} ${index + 1}`),
-    type: inferType(root),
-    width: 1024,
-    height: 720,
-    rootNode: root,
-  }));
+  // Screen geometry comes from the source's own declaration when it has one
+  // (default-width on windows, content-width on the Adw.Dialog family) —
+  // this is also what carries an edited screen size across the Blueprint
+  // persistence round trip.
+  const dimension = (value: unknown): number | undefined =>
+    typeof value === 'number' && value > 0 ? value : undefined;
+  const screens: Screen[] = roots.map((root, index) => {
+    const width = dimension(root.defaultWidth) ?? dimension(root.contentWidth) ?? 1024;
+    const height = dimension(root.defaultHeight) ?? dimension(root.contentHeight) ?? 720;
+    // The size properties are transport for Screen.width/height: once
+    // consumed they leave the node, so the document diff (write-back #80)
+    // never mistakes the exporter's re-injection for a user edit.
+    delete root.defaultWidth;
+    delete root.defaultHeight;
+    delete root.contentWidth;
+    delete root.contentHeight;
+    return {
+      id: `imported-screen-${index + 1}`,
+      title: String(root.title || `${title} ${index + 1}`),
+      type: inferType(root),
+      width,
+      height,
+      rootNode: root,
+    };
+  });
+  // A breakpoint setter that names an id the import did not keep can never
+  // apply; surface that as a diagnostic instead of silently ignoring it.
+  const keptIds = new Set<string>();
+  const indexIds = (node: AdwNode) => { keptIds.add(node.id); node.children?.forEach(indexIds); };
+  roots.forEach(indexIds);
+  const reportMissing = (node: AdwNode) => {
+    for (const setter of node.breakpointSetters ?? []) {
+      if (!keptIds.has(setter.target)) {
+        diagnostics.push({
+          code: 'breakpoint-setter-target-missing',
+          sourceClass: 'Adw.Breakpoint',
+          sourceId: node.id,
+          message: `Adw.Breakpoint (${node.breakpointCondition}) sets ${setter.target}.${setter.property}, but no imported widget has id "${setter.target}"; the setter cannot apply.`,
+        });
+      }
+    }
+    node.children?.forEach(reportMissing);
+  };
+  roots.forEach(reportMissing);
   return { id: 'imported-document', title, colorScheme: 'auto', edges: [], screens, importDiagnostics: diagnostics };
 }
 

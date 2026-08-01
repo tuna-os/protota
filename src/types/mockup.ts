@@ -91,13 +91,21 @@ export type AdwNodeType =
 export type ImportDiagnosticCode =
   | 'template-not-in-bundle'           // $Class reference with no template definition in the imported source
   | 'renderer-does-not-support-class'  // known-syntax GTK/Adw class outside the generic widget registry
-  | 'static-source-expansion';         // code-defined composite projected from language construction facts
+  | 'static-source-expansion'          // code-defined composite projected from language construction facts
+  | 'breakpoint-setter-target-missing'; // Adw.Breakpoint setter names an id the import did not keep
 
 export interface ImportDiagnostic {
   code: ImportDiagnosticCode;
   sourceClass: string;
   sourceId?: string;
   message: string;
+}
+
+/** One `setters` entry of an Adw.Breakpoint, in source property spelling. */
+export interface BreakpointSetter {
+  target: string;
+  property: string;
+  value: string | number | boolean | null;
 }
 
 export interface AdwNode {
@@ -199,8 +207,15 @@ export interface AdwNode {
   sourceClass?: string;
   /** Blueprint `property: bind …` values preserved as opaque source text. */
   bindings?: Record<string, string>;
-  // Breakpoint
+  // Adw.Breakpoint (import-preserved, evaluated at render time — never exported
+  // as plain properties; the exporter re-emits real Blueprint breakpoint syntax)
   breakpointCondition?: string;
+  /**
+   * The breakpoint's `setters` block: target object id → GTK property (source
+   * spelling, e.g. `visible-child-name`) → value. `null` means the setter
+   * unsets the property (GtkBuilder's empty <setter/>).
+   */
+  breakpointSetters?: BreakpointSetter[];
   // View stack pages
   pages?: AdwNode[];
   // Generic slot for extra data

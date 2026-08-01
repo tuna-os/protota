@@ -346,8 +346,73 @@ body,
 :root[data-protota-capture="true"] .protota-zoom-bar,
 :root[data-protota-capture="true"] .protota-screen-label,
 :root[data-protota-capture="true"] .protota-type-badge,
+:root[data-protota-capture="true"] .protota-resize-handle,
+:root[data-protota-capture="true"] .protota-resize-size-chip,
 :root[data-protota-capture="true"] .protota-panel {
   display: none !important;
+}
+
+/* Screen resize handles: thin hit areas hugging the rendered frame's right
+   and bottom edges (plus the corner), showing the accent color on hover so
+   the affordance is discoverable without adding permanent chrome. */
+.protota-resize-handle {
+  position: absolute;
+  z-index: 6;
+  background: transparent;
+}
+.protota-resize-handle:hover,
+.protota-resize-handle:active {
+  background: var(--accent-bg-color, #3584e4);
+  opacity: 0.55;
+}
+.protota-resize-handle-right {
+  top: 0;
+  right: -5px;
+  width: 10px;
+  height: calc(100% - 12px);
+  cursor: ew-resize;
+}
+.protota-resize-handle-bottom {
+  left: 0;
+  bottom: -5px;
+  height: 10px;
+  width: calc(100% - 12px);
+  cursor: ns-resize;
+}
+.protota-resize-handle-corner {
+  right: -6px;
+  bottom: -6px;
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  cursor: nwse-resize;
+}
+
+/* Live size readout while a resize drag is in flight. */
+.protota-resize-size-chip {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  z-index: 7;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-family: "Adwaita Mono", monospace;
+  color: #fff;
+  background: var(--accent-bg-color, #3584e4);
+  pointer-events: none;
+}
+
+/* Active Adw.Breakpoint indicator beside the screen label. */
+.protota-breakpoint-chip {
+  padding: 1px 7px;
+  border-radius: 99px;
+  font-size: 10px;
+  font-family: "Adwaita Mono", monospace;
+  color: var(--accent-color, #3584e4);
+  border: 1px solid var(--accent-color, #3584e4);
+  opacity: 0.9;
+  white-space: nowrap;
 }
 
 :root[data-protota-capture="true"] .adw-node-wrapper.selected-outline,

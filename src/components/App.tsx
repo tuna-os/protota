@@ -14,7 +14,7 @@ import { CommandPalette } from "./CommandPalette";
 import { AddScreenModal } from "./AddScreenModal";
 import { ExportModal } from "./ExportModal";
 import { Header } from "./Header";
-import { IMPORT_FILE_INPUT_ID } from "./topBarMenuData";
+import { IMPORT_FILE_INPUT_ID } from "./MenuData";
 import { setAdwaitaColorScheme } from "@gjsify/adwaita-core";
 import { downloadPng, renderScreenToPng } from "../utils/pngExport";
 import { mockupToBlueprint } from "../utils/blueprint";

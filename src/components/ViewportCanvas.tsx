@@ -11,9 +11,8 @@ import { findNodeById } from "../utils/treeHelpers";
 import { filterShallowest, screenOf, unionSelection } from "../utils/selection";
 import { activeBreakpoints, breakpointOverrides, type ActiveBreakpoint } from "../utils/breakpoints";
 import type { AdwNode, AdwNodeType } from "../types/mockup";
-import { windowCloseSymbolic } from "@gjsify/adwaita-icons/ui";
-import { toDataUri } from "@gjsify/adwaita-icons/utils";
 import { useTouchPanZoom, TOUCH_GESTURE_START_EVENT } from "../hooks/useTouchPanZoom";
+import { PreviewOverlay } from "./PreviewOverlay";
 
 const CANVAS_PADDING = 60;
 const CANVAS_GAP = 40;
@@ -886,6 +885,21 @@ export const ViewportCanvas: React.FC = () => {
     });
   }, []);
 
+  // --- Preview overlay callbacks (stable via refs) ---
+
+  // Screen changes from inside the preview (flow navigation, back, jump
+  // picker) land here: whichever mode is live follows, and the canvas focus
+  // index tracks it so exiting preview leaves the editor on the same screen.
+  const handlePreviewScreenChange = useCallback((screenId: string) => {
+    const idx = docRef.current.screens.findIndex((s) => s.id === screenId);
+    if (idx >= 0) setFocusedScreenIdx(idx);
+    if (desktopScreenIdRef.current !== null) setDesktopScreenId(screenId);
+    else if (phoshScreenIdRef.current !== null) setPhoshScreenId(screenId);
+  }, []);
+
+  const handleExitDesktop = useCallback(() => setDesktopScreenId(null), []);
+  const handleExitPhone = useCallback(() => setPhoshScreenId(null), []);
+
   // Device-size preset from the bottom bar: one updateScreenProps → one undo.
   const handleApplySizePreset = useCallback((size: { width: number; height: number }) => {
     const screen = docRef.current.screens[focusedScreenIdxRef.current];
@@ -927,102 +941,25 @@ export const ViewportCanvas: React.FC = () => {
         alignItems: "flex-start",
       }}
     >
-      {/* GNOME Desktop Fullscreen Live Interactive Preview Mode */}
+      {/* Full-screen interactive preview (prototype mode): GNOME desktop or
+          Phosh phone chrome, rendered as a top-layer portal so all editor
+          chrome disappears behind it. Interaction is native — flow-edge
+          navigation and ephemeral widget state — see PreviewOverlay. */}
       {activeDesktopScreen && (
-        <div className="protota-gnome-desktop-container">
-          <div className="protota-gnome-topbar">
-            <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-              <span style={{ fontWeight: 700 }}>Activities</span>
-              <select
-                value={desktopScreenId || ''}
-                onChange={(e) => setDesktopScreenId(e.target.value)}
-                style={{ padding: '2px 8px', borderRadius: '4px', fontSize: '12px', background: 'rgba(255,255,255,0.15)', color: '#fff', border: 'none' }}
-              >
-                {doc.screens.map((s) => (
-                  <option key={s.id} value={s.id} style={{ color: '#000' }}>{s.title}</option>
-                ))}
-              </select>
-            </div>
-            <div style={{ fontSize: '13px' }}>
-              {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-            </div>
-            <button
-              className="protota-btn suggested"
-              onClick={() => setDesktopScreenId(null)}
-              style={{ fontSize: '11px', padding: '2px 8px' }}
-            >
-              <span
-                style={{
-                  display: "inline-block",
-                  width: "12px",
-                  height: "12px",
-                  maskImage: toDataUri(windowCloseSymbolic),
-                  WebkitMaskImage: toDataUri(windowCloseSymbolic),
-                  maskSize: "contain",
-                  WebkitMaskSize: "contain",
-                  backgroundColor: "currentColor",
-                  marginRight: "4px",
-                }}
-              />
-              Exit Desktop Mode
-            </button>
-          </div>
-
-          <div className="protota-gnome-window-frame">
-            <AdwaitaRenderer
-              node={activeDesktopScreen.rootNode}
-              screenId={activeDesktopScreen.id}
-              overrides={breakpointState[activeDesktopScreen.id]?.overrides}
-            />
-          </div>
-        </div>
+        <PreviewOverlay
+          mode="desktop"
+          screenId={activeDesktopScreen.id}
+          onScreenChange={handlePreviewScreenChange}
+          onExit={handleExitDesktop}
+        />
       )}
-
-      {/* Phosh Fullscreen Phone Overlay Mode */}
       {activePhoshScreen && (
-        <div className="protota-phosh-container">
-          <div className="protota-phosh-header">
-            <span>📱 Phosh Phone View</span>
-            <div style={{ display: 'flex', gap: '8px' }}>
-              <select
-                value={phoshScreenId || ''}
-                onChange={(e) => setPhoshScreenId(e.target.value)}
-                style={{ padding: '2px 8px', borderRadius: '4px', fontSize: '12px' }}
-              >
-                {doc.screens.map((s) => (
-                  <option key={s.id} value={s.id}>{s.title}</option>
-                ))}
-              </select>
-              <button
-                className="protota-btn suggested"
-                onClick={() => setPhoshScreenId(null)}
-              >
-                <span
-                  style={{
-                    display: "inline-block",
-                    width: "12px",
-                    height: "12px",
-                    maskImage: toDataUri(windowCloseSymbolic),
-                    WebkitMaskImage: toDataUri(windowCloseSymbolic),
-                    maskSize: "contain",
-                    WebkitMaskSize: "contain",
-                    backgroundColor: "currentColor",
-                    marginRight: "4px",
-                  }}
-                />
-                Exit Phone Mode
-              </button>
-            </div>
-          </div>
-
-          <div className="protota-phosh-phone-frame">
-            <AdwaitaRenderer
-              node={activePhoshScreen.rootNode}
-              screenId={activePhoshScreen.id}
-              overrides={breakpointState[activePhoshScreen.id]?.overrides}
-            />
-          </div>
-        </div>
+        <PreviewOverlay
+          mode="phone"
+          screenId={activePhoshScreen.id}
+          onScreenChange={handlePreviewScreenChange}
+          onExit={handleExitPhone}
+        />
       )}
 
       {/* Bottom Bar — Zoom + Desktop/Phone toggles */}

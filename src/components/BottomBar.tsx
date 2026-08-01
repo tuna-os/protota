@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import { computerSymbolic, phoneSymbolic } from "@gjsify/adwaita-icons/devices";
 import {
   zoomFitBestSymbolic,
@@ -8,6 +8,7 @@ import {
   goPreviousSymbolic,
   goNextSymbolic,
   documentNewSymbolic,
+  viewMoreSymbolic,
 } from "@gjsify/adwaita-icons/actions";
 import { toDataUri } from "@gjsify/adwaita-icons/utils";
 import { BreakpointBar } from "./BreakpointBar";
@@ -60,6 +61,7 @@ const ToolbarIconButton = React.memo(
     disabled,
     active,
     children,
+    testId,
   }: {
     icon: string;
     onClick?: () => void;
@@ -67,12 +69,14 @@ const ToolbarIconButton = React.memo(
     disabled?: boolean;
     active?: boolean;
     children?: React.ReactNode;
+    testId?: string;
   }) => (
     <button
       className={`adw-button flat${children ? "" : " icon-only"}${active ? " active" : ""}${disabled ? " disabled" : ""}`}
       onClick={onClick}
       disabled={disabled}
       title={title}
+      data-testid={testId}
     >
       <span
         className="adw-toolbar-icon"
@@ -127,6 +131,36 @@ export const BottomBar: React.FC<BottomBarProps> = React.memo(
     >(null);
     const showFocusControls = screens.length > 1;
 
+    // Mobile (<=768px, the app-wide breakpoint from #99): keep only the
+    // essentials inline — zoom out / % / zoom in / fit, New Screen
+    // (icon-only), Desktop/Phone — and collapse the rest (zoom reset,
+    // focus arrows, #141's device-size presets) into a "⋯" overflow
+    // popover, so the bar never clips horizontally down to 320px wide.
+    // Tracked via matchMedia (not CSS-only hiding) so the presets render
+    // exactly once and keep their stable test ids.
+    const [isMobile, setIsMobile] = useState(
+      () => typeof window !== "undefined" && window.matchMedia("(max-width: 768px)").matches,
+    );
+    useEffect(() => {
+      const mq = window.matchMedia("(max-width: 768px)");
+      const onChange = () => setIsMobile(mq.matches);
+      mq.addEventListener("change", onChange);
+      return () => mq.removeEventListener("change", onChange);
+    }, []);
+
+    const [overflowOpen, setOverflowOpen] = useState(false);
+    const overflowRef = useRef<HTMLDivElement>(null);
+    useEffect(() => {
+      if (!overflowOpen) return;
+      const onPointerDown = (e: PointerEvent) => {
+        if (overflowRef.current && !overflowRef.current.contains(e.target as Node)) {
+          setOverflowOpen(false);
+        }
+      };
+      document.addEventListener("pointerdown", onPointerDown);
+      return () => document.removeEventListener("pointerdown", onPointerDown);
+    }, [overflowOpen]);
+
     // Set options on the adw-drop-down web component
     useEffect(() => {
       const el = dropDownRef.current;
@@ -161,33 +195,40 @@ export const BottomBar: React.FC<BottomBarProps> = React.memo(
     }, [onSelectScreen]);
 
     return (
-      <div className="protota-zoom-bar">
+      <div className="protota-zoom-bar" data-testid="bottom-bar">
         {showFocusControls && (
           <>
-            <ToolbarIconButton
-              icon={goPreviousSymbolic}
-              onClick={onFocusPrev}
-              title="Previous Screen"
-              disabled={!canFocusPrev}
-            />
+            {!isMobile && (
+              <ToolbarIconButton
+                icon={goPreviousSymbolic}
+                onClick={onFocusPrev}
+                title="Previous Screen"
+                disabled={!canFocusPrev}
+              />
+            )}
             <adw-drop-down ref={dropDownRef} className="protota-screen-dropdown" />
-            <ToolbarIconButton
-              icon={goNextSymbolic}
-              onClick={onFocusNext}
-              title="Next Screen"
-              disabled={!canFocusNext}
-            />
+            {!isMobile && (
+              <ToolbarIconButton
+                icon={goNextSymbolic}
+                onClick={onFocusNext}
+                title="Next Screen"
+                disabled={!canFocusNext}
+              />
+            )}
             <Separator />
           </>
         )}
-        <ToolbarIconButton
-          icon={zoomOriginalSymbolic}
-          onClick={onZoomReset}
-          title="Reset Zoom (Ctrl+0)"
-        />
+        {!isMobile && (
+          <ToolbarIconButton
+            icon={zoomOriginalSymbolic}
+            onClick={onZoomReset}
+            title="Reset Zoom (Ctrl+0)"
+          />
+        )}
         <ToolbarIconButton icon={zoomOutSymbolic} onClick={onZoomOut} title="Zoom Out (Ctrl+-)" />
         <span
-          style={{ fontSize: "var(--font-size-small, 9pt)", minWidth: "40px", textAlign: "center" }}
+          className="protota-zoom-percent"
+          style={{ fontSize: "var(--font-size-small, 9pt)", minWidth: isMobile ? "32px" : "40px", textAlign: "center" }}
         >
           {Math.round(zoom * 100)}%
         </span>
@@ -199,7 +240,7 @@ export const BottomBar: React.FC<BottomBarProps> = React.memo(
           onClick={() => window.dispatchEvent(new CustomEvent("protota:new-screen"))}
           title="New Screen (Ctrl+N)"
         >
-          New Screen
+          {isMobile ? undefined : "New Screen"}
         </ToolbarIconButton>
         <Separator />
         <ToolbarIconButton
@@ -214,7 +255,7 @@ export const BottomBar: React.FC<BottomBarProps> = React.memo(
           title="Toggle Phone Preview"
           active={!!phoshScreenId}
         />
-        {screenSize && (
+        {!isMobile && screenSize && (
           <>
             <Separator />
             <BreakpointBar
@@ -223,6 +264,45 @@ export const BottomBar: React.FC<BottomBarProps> = React.memo(
               onChange={onApplySizePreset}
             />
           </>
+        )}
+        {isMobile && (
+          <div ref={overflowRef} style={{ position: "relative", display: "flex" }}>
+            <ToolbarIconButton
+              icon={viewMoreSymbolic}
+              onClick={() => setOverflowOpen((open) => !open)}
+              title="More Options"
+              active={overflowOpen}
+              testId="bottombar-overflow-button"
+            />
+            {overflowOpen && (
+              <div className="protota-bottombar-overflow" data-testid="bottombar-overflow-menu">
+                {screenSize && (
+                  <>
+                    <div className="protota-menu-section-header">Screen Size</div>
+                    <BreakpointBar
+                      width={screenSize.width}
+                      height={screenSize.height}
+                      onChange={(size) => {
+                        onApplySizePreset(size);
+                        setOverflowOpen(false);
+                      }}
+                    />
+                  </>
+                )}
+                <div className="protota-menu-section-header">Zoom</div>
+                <button
+                  className="protota-menu-item"
+                  onClick={() => {
+                    onZoomReset();
+                    setOverflowOpen(false);
+                  }}
+                >
+                  <span className="protota-menu-item-label">Reset Zoom</span>
+                  <span className="protota-menu-item-shortcut">Ctrl+0</span>
+                </button>
+              </div>
+            )}
+          </div>
         )}
       </div>
     );

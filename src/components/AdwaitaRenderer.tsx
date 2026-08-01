@@ -10,6 +10,7 @@ import {
 } from '../utils/nodeGeometry';
 import { headerBarControls, headerBarFallbackTitle } from '../utils/headerBarChrome';
 import { tabBarModel } from '../utils/tabBar';
+import { usePreview, type PreviewInteraction } from '../preview/PreviewContext';
 
 interface Props {
   node: AdwNode;
@@ -301,6 +302,44 @@ function plainText(text: string): string {
   return text.replace(/<[^>]+>/g, '');
 }
 
+// --- Interactive preview (prototype mode) -------------------------------
+//
+// Widget types whose tap is an ACTIVATION: in preview it follows the
+// current screen's outgoing flow edge (screen-level edges — see doc.edges).
+const PREVIEW_ACTIVATION_TYPES = new Set<string>([
+  'button', 'button-row', 'split-button', 'list-box-row',
+]);
+// Widget types whose adw-* custom element (or inner native input) already
+// behaves interactively on its own — switch rows toggle their checkbox,
+// expander rows disclose, toggle groups re-select, entries take focus and
+// text. The preview handler only stops the click from bubbling into an
+// ancestor activation; the element's own ephemeral behavior does the rest.
+// (menu-button is here deliberately: it has no modeled menu, so it does
+// nothing — but its tap must not leak into a parent activator either.)
+const PREVIEW_LOCAL_TYPES = new Set<string>([
+  'switch-row', 'expander-row', 'toggle-group', 'toggle',
+  'entry', 'entry-row', 'password-row', 'search-entry',
+  'spin-row', 'combo-row', 'drop-down', 'menu-button', 'scale',
+]);
+
+/** First one-visible-child stack in the screen — what a ViewSwitcher drives. */
+function findFirstStack(node: AdwNode): AdwNode | null {
+  if (node.type === 'view-stack' || node.type === 'stack') return node;
+  for (const child of node.children ?? []) {
+    const found = findFirstStack(child);
+    if (found) return found;
+  }
+  return null;
+}
+
+/** The stack child a visibleChildName selects (renderer matching rules). */
+function visibleStackChild(stack: AdwNode, visibleChildName: unknown): AdwNode | undefined {
+  const children = stack.children ?? [];
+  return children.find((child) => typeof visibleChildName === 'string' &&
+    (child.id === visibleChildName || child.title === visibleChildName ||
+      (child as { name?: unknown }).name === visibleChildName)) ?? children[0];
+}
+
 export const AdwaitaRenderer: React.FC<Props> = ({
   node, screenId, screenWidth, screenHeight,
   inheritedSlot, primaryHeaderBarId, parentFlow = 'column', parentNode,
@@ -318,15 +357,19 @@ export const AdwaitaRenderer: React.FC<Props> = ({
     selectedNodeId, selectedNodeIds, selectNode, toggleNodeSelection, addChildNode, doc,
     diagnosticsEnabled, diagnostics, tierFilters, ignoredRules, ignoredInstances,
   } = useMockupStore();
-  const isSelected = selectedNodeId === node.id;
+  // Interactive preview (prototype mode): non-null inside the full-screen
+  // preview overlay. All editing chrome is suppressed and clicks act on the
+  // mockup instead of selecting.
+  const preview = usePreview();
+  const isSelected = !preview && selectedNodeId === node.id;
   // Multi-selection member that is not the primary: distinct dashed outline,
   // no badge/add-buttons — those belong to the primary only (#79).
-  const isMultiSelected = !isSelected && selectedNodeIds.includes(node.id);
+  const isMultiSelected = !isSelected && !preview && selectedNodeIds.includes(node.id);
 
   // Diagnostics outlines (#95, design §5.4): visible (filtered, non-ignored)
   // diagnostics tint this node by their worst tier. Editor chrome only —
   // excluded from PNG capture alongside the selection outline.
-  const nodeDiagnostics = diagnosticsEnabled
+  const nodeDiagnostics = diagnosticsEnabled && !preview
     ? getDiagnosticsForNode(
         filterDiagnostics(diagnostics, tierFilters, ignoredRules, ignoredInstances),
         screenId, node.id)
@@ -369,10 +412,54 @@ export const AdwaitaRenderer: React.FC<Props> = ({
   // keeps the innermost node's handler authoritative and suppresses the
   // canvas's deselect.
   const wrapperRef = useRef<HTMLDivElement>(null);
+  // Latest node/preview for the stable native listener below (node identity
+  // changes when a breakpoint patch applies; the listener must not re-attach).
+  const nodeRef = useRef(node);
+  nodeRef.current = node;
+  const previewRef = useRef<PreviewInteraction | null>(preview);
+  previewRef.current = preview;
   useEffect(() => {
     const wrapper = wrapperRef.current;
     if (!wrapper) return;
     const handleNativeClick = (event: MouseEvent) => {
+      const current = nodeRef.current;
+      const previewInteraction = previewRef.current;
+      if (previewInteraction) {
+        // Prototype mode: the click acts on the mockup. Handled types stop
+        // here; anything else bubbles up to the nearest interactive ancestor
+        // (e.g. a label inside a button). Unmodeled widgets do nothing.
+        const type = current.type;
+        if (type === 'view-switcher') {
+          event.stopPropagation();
+          const tab = (event.target as Element).closest?.('[data-preview-page]') as HTMLElement | null;
+          if (tab?.dataset.previewPage && tab.dataset.previewStack) {
+            previewInteraction.setNodeState(tab.dataset.previewStack, {
+              visibleChildName: tab.dataset.previewPage,
+            });
+          }
+          return;
+        }
+        if (type === 'switch-widget' || type === 'check-button') {
+          // Div-rendered toggles have no custom element behind them: flip
+          // the attribute the stylesheet draws from. DOM-only state — reset
+          // by the remount on navigation/exit, never stored.
+          event.stopPropagation();
+          elRef.current?.toggleAttribute('active');
+          return;
+        }
+        if (PREVIEW_ACTIVATION_TYPES.has(type) ||
+            (type === 'action-row' && current.activatable)) {
+          event.stopPropagation();
+          previewInteraction.activate(current);
+          return;
+        }
+        if (PREVIEW_LOCAL_TYPES.has(type)) {
+          // The custom element's own (ephemeral) behavior handles it.
+          event.stopPropagation();
+          return;
+        }
+        return;
+      }
       event.stopPropagation();
       // Ctrl/Cmd-click toggles multi-selection membership (#79, study §3).
       if (event.ctrlKey || event.metaKey) toggleNodeSelection(node.id, screenId);
@@ -393,10 +480,19 @@ export const AdwaitaRenderer: React.FC<Props> = ({
   // allocation via heightRequest — see utils/tabBar.ts).
   if (tabBar?.hidden) return null;
 
+  // In preview a ViewSwitcher becomes live chrome: one tab per page of the
+  // first stack in its screen; tapping a tab flips that stack's visible
+  // child through an ephemeral override (never the document). The
+  // adw-view-switcher element is pageless in our model (pages live on the
+  // stack), so preview draws its own tab strip in a plain div.
+  const previewSwitcherStack = preview && node.type === 'view-switcher'
+    ? findFirstStack(doc.screens.find((screen) => screen.id === screenId)?.rootNode ?? node)
+    : null;
+
   // adw-menu-button is icon-only; a labelled MenuButton renders as a button.
   const tag = isDialogRoot
     ? 'adw-window'
-    : node.type === 'navigation-view' || node.type === 'overlay-split'
+    : node.type === 'navigation-view' || node.type === 'overlay-split' || previewSwitcherStack
       ? 'div'
       : node.type === 'menu-button' && node.title
         ? 'adw-button'
@@ -499,6 +595,31 @@ export const AdwaitaRenderer: React.FC<Props> = ({
     attrs['data-protota-single-tab'] = 'true';
   }
 
+  // Preview-mode ViewSwitcher tab strip (see previewSwitcherStack above).
+  const previewSwitcherTabs = previewSwitcherStack ? (() => {
+    const visibleName =
+      overrides?.[previewSwitcherStack.id]?.visibleChildName ?? previewSwitcherStack.visibleChildName;
+    const active = visibleStackChild(previewSwitcherStack, visibleName);
+    const pages = (previewSwitcherStack.children ?? []).filter((page) => page.visible !== false);
+    return pages.length ? (
+      <div key="preview-switcher" className="protota-preview-switcher" role="tablist">
+        {pages.map((page, index) => (
+          <button
+            key={page.id}
+            type="button"
+            role="tab"
+            aria-selected={page === active}
+            data-preview-page={page.id}
+            data-preview-stack={previewSwitcherStack.id}
+            className={`protota-preview-switcher-tab${page === active ? ' active' : ''}`}
+          >
+            {plainText(String(page.title || `Page ${index + 1}`))}
+          </button>
+        ))}
+      </div>
+    ) : null;
+  })() : null;
+
   const iconPrefix = node.type === 'action-row' && node.iconName ? (
     <span
       aria-hidden="true"
@@ -587,6 +708,7 @@ export const AdwaitaRenderer: React.FC<Props> = ({
         iconPrefix,
         binIcon,
         tabBarTabs,
+        previewSwitcherTabs,
         ...(children ?? []),
         windowControls,
         // For label/inscription — render text content

@@ -38,6 +38,9 @@ test('generic renderer preserves GTK grid layout semantics', async ({ page }) =>
       style.style.rowGap === '6px' && style.style.columnGap === '8px';
   })).toBe(true);
   await expect(grid.getByRole('button')).toHaveCount(3);
+  // A window's primary header bar carries the shell's window controls.
+  await expect(header.locator('.protota-window-control')).toHaveCount(3);
+  await expect(header.locator('.protota-window-control.close')).toHaveCount(1);
   expect(await page.evaluate(() => ({
     source: localStorage.getItem('protota_blueprint_v1'),
     legacy: localStorage.getItem('protota_doc_v1'),
@@ -123,4 +126,93 @@ test('a projected preference row renders row chrome, suffix switch, and image ic
   // A Gtk.Image imported as a bin draws its declared icon.
   const chevron = page.locator('[data-protota-type="bin"][data-node-id="font-chevron"] .adw-icon');
   await expect(chevron).toHaveClass(/adw-icon--go-next/);
+});
+
+// Dialog header bars (libadwaita AdwDialog semantics): never minimize or
+// maximize; a close button only while end title buttons are enabled; and a
+// header bar without its own title shows the dialog's title, centered —
+// the GNOME Files compress dialog is the reference case.
+const dialogHeaderDocument = {
+  id: 'dialog-header-contract', title: 'Dialog header contract', colorScheme: 'auto', edges: [],
+  screens: [
+    {
+      id: 'compress', title: 'Compress', type: 'standard', width: 440, height: 440,
+      rootNode: {
+        id: 'dlg', type: 'dialog', title: 'Compress Files and Folders', children: [{
+          id: 'tv', type: 'toolbar-view', slot: 'child', children: [
+            {
+              id: 'hdr', type: 'header-bar', slot: 'top',
+              showStartTitleButtons: false, showEndTitleButtons: false,
+              children: [
+                { id: 'cancel', type: 'button', title: 'Cancel', slot: 'start', children: [] },
+                { id: 'go', type: 'button', title: 'Compress', suggested: true, slot: 'end', children: [] },
+              ],
+            },
+            { id: 'body', type: 'preferences-page', slot: 'content', children: [] },
+          ],
+        }],
+      },
+    },
+    {
+      id: 'closable', title: 'Closable dialog', type: 'standard', width: 400, height: 300,
+      rootNode: {
+        id: 'dlg2', type: 'dialog', title: 'Closable', children: [{
+          id: 'tv2', type: 'toolbar-view', slot: 'child', children: [
+            { id: 'hdr2', type: 'header-bar', slot: 'top', children: [] },
+            { id: 'body2', type: 'preferences-page', slot: 'content', children: [] },
+          ],
+        }],
+      },
+    },
+  ],
+};
+
+test('dialog header bars show no window controls and fall back to the dialog title', async ({ page }) => {
+  await page.goto('/');
+  await page.evaluate((document) => localStorage.setItem('protota_doc_v1', JSON.stringify(document)), dialogHeaderDocument);
+  await page.reload();
+
+  // Compress: both title-button sides disabled — no controls of any kind.
+  const compressHeader = page.locator('adw-header-bar[data-node-id="hdr"]');
+  await expect(compressHeader).toBeVisible();
+  await expect(compressHeader.locator('.protota-window-control')).toHaveCount(0);
+  // The dialog's title appears centered via AdwHeaderBar's title fallback.
+  await expect(compressHeader).toHaveAttribute('title', 'Compress Files and Folders');
+  await expect(compressHeader.locator('.adw-header-bar-center'))
+    .toContainText('Compress Files and Folders');
+
+  // Default dialog header: a close button only — never minimize/maximize.
+  const closableHeader = page.locator('adw-header-bar[data-node-id="hdr2"]');
+  await expect(closableHeader.locator('.protota-window-control.close')).toHaveCount(1);
+  await expect(closableHeader.locator('.protota-window-control.minimize')).toHaveCount(0);
+  await expect(closableHeader.locator('.protota-window-control.maximize')).toHaveCount(0);
+  await expect(closableHeader).toHaveAttribute('title', 'Closable');
+});
+
+// A window header bar with show-title-buttons false draws no controls.
+const controllessWindowDocument = {
+  id: 'controlless-window-contract', title: 'Controlless window', colorScheme: 'auto', edges: [],
+  screens: [{
+    id: 'screen', title: 'Plain', type: 'standard', width: 480, height: 320,
+    rootNode: {
+      id: 'window', type: 'window', title: 'Plain Window', children: [{
+        id: 'toolbar', type: 'toolbar-view', children: [
+          { id: 'header', type: 'header-bar', showTitleButtons: false, children: [] },
+          { id: 'body', type: 'box', children: [] },
+        ],
+      }],
+    },
+  }],
+};
+
+test('show-title-buttons false suppresses window controls on a window header bar', async ({ page }) => {
+  await page.goto('/');
+  await page.evaluate((document) => localStorage.setItem('protota_doc_v1', JSON.stringify(document)), controllessWindowDocument);
+  await page.reload();
+
+  const header = page.locator('adw-header-bar[data-node-id="header"]');
+  await expect(header).toBeVisible();
+  await expect(header.locator('.protota-window-control')).toHaveCount(0);
+  // The window title still appears through the header-bar fallback.
+  await expect(header).toHaveAttribute('title', 'Plain Window');
 });

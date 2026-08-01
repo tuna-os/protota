@@ -135,6 +135,9 @@ export interface AdwNode {
   selectedIndex?: number;
   // Header bar
   showTitleButtons?: boolean;
+  /** Adw.HeaderBar show-start-title-buttons / show-end-title-buttons. */
+  showStartTitleButtons?: boolean;
+  showEndTitleButtons?: boolean;
   // Layout
   orientation?: 'horizontal' | 'vertical';
   spacing?: number;

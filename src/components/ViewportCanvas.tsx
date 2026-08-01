@@ -13,18 +13,13 @@ import { activeBreakpoints, breakpointOverrides, type ActiveBreakpoint } from ".
 import type { AdwNode, AdwNodeType } from "../types/mockup";
 import { windowCloseSymbolic } from "@gjsify/adwaita-icons/ui";
 import { toDataUri } from "@gjsify/adwaita-icons/utils";
+import { useTouchPanZoom, TOUCH_GESTURE_START_EVENT } from "../hooks/useTouchPanZoom";
 
 const CANVAS_PADDING = 60;
 const CANVAS_GAP = 40;
 const CANVAS_BOTTOM_BAR_H = 48;
 /** Smallest usable screen edge — matches nothing in GNOME below a phone. */
 const MIN_SCREEN_SIZE = 200;
-
-/** Total world-space width of all screens + gaps + padding. */
-function getTotalContentWidth(screens: { width?: number }[]): number {
-  return screens.reduce((sum, s) => sum + (s.width || 800), 0)
-    + CANVAS_GAP * (screens.length - 1) + CANVAS_PADDING * 2;
-}
 
 /**
  * Compute new pan so that the world point under (mx, my) stays fixed
@@ -67,6 +62,20 @@ export const ViewportCanvas: React.FC = () => {
   const startPan = useRef({ x: 0, y: 0 });
   const spaceDown = useRef(false);
   const canvasRef = useRef<HTMLDivElement>(null);
+  // Transformed canvas surface (also anchors the flow overlay further down).
+  const surfaceRef = useRef<HTMLDivElement>(null);
+
+  // Two-finger pan + pinch zoom (touch only; self-contained hook).
+  const { isTouchGesturing, touchGestureActiveRef } = useTouchPanZoom({
+    canvasRef,
+    surfaceRef,
+    zoomRef,
+    panRef,
+    setPan,
+    setZoom,
+    minZoom: 0.3,
+    maxZoom: 2.5,
+  });
 
   // --- Stable zoom helpers (read from refs, never re-create) ---
 
@@ -87,6 +96,41 @@ export const ViewportCanvas: React.FC = () => {
     if (!el || docRef.current.screens.length === 0) return;
     setPan({ x: 0, y: CANVAS_PADDING });
     setZoom(1);
+  }, []);
+
+  // Fit one screen (frame + label, measured from the laid-out DOM) inside
+  // the visible canvas area: scale down — never up — and centre it. The
+  // math accounts for two things the old mobile auto-fit ignored: the
+  // surface's `50% 0` transform origin (scaling shifts the left edge
+  // rightwards) and its `safe center` flex layout (the surface pins to the
+  // canvas's left edge once wider than it). Ignoring them left the screen
+  // pushed off the right edge on narrow viewports.
+  const fitScreenToView = useCallback((idx: number) => {
+    const el = canvasRef.current;
+    const surface = surfaceRef.current;
+    const screens = docRef.current.screens;
+    if (!el || !surface || screens.length === 0) return;
+    const clampedIdx = Math.max(0, Math.min(idx, screens.length - 1));
+    const frame = surface.querySelectorAll<HTMLElement>("[data-protota-flow-screen]")[clampedIdx];
+    if (!frame) return;
+    const margin = 16;
+    const availW = el.clientWidth - margin * 2;
+    const availH = el.clientHeight - CANVAS_BOTTOM_BAR_H - margin * 2;
+    const frameW = frame.offsetWidth;
+    const frameH = frame.offsetHeight;
+    if (frameW <= 0 || frameH <= 0 || availW <= 0 || availH <= 0) return;
+    const zoom = Math.max(Math.min(availW / frameW, availH / frameH, 1), 0.1);
+    // Rendered position of a surface-local point (u, v), origin `50% 0`:
+    //   x = surface.offsetLeft + surfW / 2 + pan.x + (u - surfW / 2) * zoom
+    //   y = pan.y + v * zoom
+    const surfW = surface.offsetWidth;
+    const cu = frame.offsetLeft + frameW / 2;
+    const cv = frame.offsetTop + frameH / 2;
+    setPan({
+      x: el.clientWidth / 2 - surface.offsetLeft - surfW / 2 - (cu - surfW / 2) * zoom,
+      y: (el.clientHeight - CANVAS_BOTTOM_BAR_H) / 2 - cv * zoom,
+    });
+    setZoom(zoom);
   }, []);
 
   // --- Wheel handler (stable, reads from refs) ---
@@ -210,6 +254,7 @@ export const ViewportCanvas: React.FC = () => {
   // drop commits one moveNode (one undo entry).
   const handleNodePointerDown = useCallback((e: PointerEvent) => {
     if (e.button !== 0 || spaceDown.current || isPanningRef.current) return;
+    if (touchGestureActiveRef.current) return;
     const sourceEl = (e.target as Element).closest?.("[data-node-id]") as HTMLElement | null;
     if (!sourceEl) return;
     const nodeId = sourceEl.dataset.nodeId!;
@@ -266,10 +311,24 @@ export const ViewportCanvas: React.FC = () => {
       }
     };
 
-    const onUp = () => {
+    // A second touch pointer starts a two-finger pan/pinch: cancel the
+    // reparent gesture cleanly, exactly like Escape.
+    const onTouchGesture = () => {
+      if (!gesture.cancelled && gesture.active) dnd.endDrag();
+      gesture.cancelled = true;
+      removeListeners();
+      cleanupVisuals();
+    };
+
+    const removeListeners = () => {
       window.removeEventListener("pointermove", onMove);
       window.removeEventListener("pointerup", onUp);
       window.removeEventListener("keydown", onKeyDown, true);
+      window.removeEventListener(TOUCH_GESTURE_START_EVENT, onTouchGesture);
+    };
+
+    const onUp = () => {
+      removeListeners();
       cleanupVisuals();
       if (gesture.active) {
         // The click that follows a completed drag must not re-run selection
@@ -291,7 +350,8 @@ export const ViewportCanvas: React.FC = () => {
     window.addEventListener("pointermove", onMove);
     window.addEventListener("pointerup", onUp);
     window.addEventListener("keydown", onKeyDown, true);
-  }, []);
+    window.addEventListener(TOUCH_GESTURE_START_EVENT, onTouchGesture);
+  }, [touchGestureActiveRef]);
 
   useEffect(() => {
     const el = canvasRef.current;
@@ -314,6 +374,7 @@ export const ViewportCanvas: React.FC = () => {
 
   const handleMarqueePointerDown = useCallback((e: PointerEvent) => {
     if (e.button !== 0 || spaceDown.current || isPanningRef.current) return;
+    if (touchGestureActiveRef.current) return;
     const target = e.target as Element;
     if (target.closest?.("[data-node-id], [data-resize-handle], .protota-zoom-bar, button, select, input, .protota-screen-label")) return;
 
@@ -371,9 +432,26 @@ export const ViewportCanvas: React.FC = () => {
       applySelection(rect);
     };
 
+    // A second touch pointer starts a two-finger pan/pinch: abort the
+    // marquee and restore the pre-gesture selection.
+    const onTouchGesture = () => {
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerup", onUp);
+      window.removeEventListener(TOUCH_GESTURE_START_EVENT, onTouchGesture);
+      document.body.style.userSelect = "";
+      setMarquee(null);
+      if (gesture.active) {
+        const doc = docRef.current;
+        const last = gesture.baseline[gesture.baseline.length - 1];
+        const screen = last ? screenOf(doc.screens, last) : null;
+        useMockupStore.getState().selectNodes(gesture.baseline, screen?.id);
+      }
+    };
+
     const onUp = () => {
       window.removeEventListener("pointermove", onMove);
       window.removeEventListener("pointerup", onUp);
+      window.removeEventListener(TOUCH_GESTURE_START_EVENT, onTouchGesture);
       document.body.style.userSelect = "";
       setMarquee(null);
       if (gesture.active) {
@@ -386,7 +464,8 @@ export const ViewportCanvas: React.FC = () => {
 
     window.addEventListener("pointermove", onMove);
     window.addEventListener("pointerup", onUp);
-  }, []);
+    window.addEventListener(TOUCH_GESTURE_START_EVENT, onTouchGesture);
+  }, [touchGestureActiveRef]);
 
   useEffect(() => {
     const el = canvasRef.current;
@@ -469,30 +548,38 @@ export const ViewportCanvas: React.FC = () => {
     };
   }, [zoomAtCenter, resetView]);
 
-  // --- Auto-fit zoom on mobile screens (< 768px wide) ---
-
+  // --- Initial view ---
+  //
+  // One effect, one decision: on small viewports (the <=768px mobile
+  // breakpoint) fit-and-centre the primary screen so it is fully visible;
+  // otherwise the classic resetView. Runs once per loaded document (doc.id),
+  // not on every edit. The previous code had two racing mount effects — a
+  // mobile auto-fit followed by an unconditional resetView() that clobbered
+  // it, which is why narrow viewports loaded with the screen pushed off the
+  // right edge.
+  const initialFitDocId = useRef<string | null>(null);
   useEffect(() => {
-    const autoFitMobile = () => {
+    const fitInitial = () => {
+      const el = canvasRef.current;
       const screens = docRef.current.screens;
-      if (window.innerWidth <= 768 && screens.length > 0) {
-        const primaryWidth = screens[0].width || 800;
-        const availableWidth = window.innerWidth - 32;
-        if (primaryWidth > availableWidth) {
-          const fittedZoom = Math.max(availableWidth / primaryWidth, 0.35);
-          setZoom(fittedZoom);
-          setPan({ x: 16, y: 16 });
-        }
+      if (!el || screens.length === 0) return;
+      const primaryWidth = screens[0].width || 800;
+      if (window.innerWidth <= 768 && primaryWidth + 32 > el.clientWidth) {
+        fitScreenToView(0);
+      } else {
+        resetView();
       }
     };
-    autoFitMobile();
-    window.addEventListener('resize', autoFitMobile);
-    return () => window.removeEventListener('resize', autoFitMobile);
-  }, [doc.screens]);
-
-  // --- Center content on initial mount ---
-  useEffect(() => {
-    resetView();
-  }, [resetView]);
+    if (initialFitDocId.current !== doc.id) {
+      initialFitDocId.current = doc.id;
+      fitInitial();
+    }
+    const onResize = () => {
+      if (window.innerWidth <= 768) fitScreenToView(focusedScreenIdxRef.current);
+    };
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, [doc.id, fitScreenToView, resetView]);
 
   // --- Screen resize (#): drag handles on the screen frame ---
   //
@@ -525,10 +612,18 @@ export const ViewportCanvas: React.FC = () => {
       window.removeEventListener("pointermove", onMove);
       window.removeEventListener("pointerup", onUp);
       window.removeEventListener("keydown", onKeyDown, true);
+      window.removeEventListener(TOUCH_GESTURE_START_EVENT, onTouchGesture);
       document.body.style.userSelect = "";
       document.body.style.cursor = "";
       resizingRef.current = false;
       setResizePreview(null);
+    };
+
+    // A second touch pointer starts a two-finger pan/pinch: cancel the
+    // resize without committing, exactly like Escape.
+    const onTouchGesture = () => {
+      cancelled = true;
+      cleanup();
     };
 
     const onMove = (ev: PointerEvent) => {
@@ -562,6 +657,7 @@ export const ViewportCanvas: React.FC = () => {
     window.addEventListener("pointermove", onMove);
     window.addEventListener("pointerup", onUp);
     window.addEventListener("keydown", onKeyDown, true);
+    window.addEventListener(TOUCH_GESTURE_START_EVENT, onTouchGesture);
   }, []);
 
   // Active Adw.Breakpoints + the property overrides their setters imply, per
@@ -585,7 +681,6 @@ export const ViewportCanvas: React.FC = () => {
 
   // Flow-edge geometry: measured from the laid-out screen frames, in the
   // surface's own (pre-transform) coordinates so arrows pan/zoom with it.
-  const surfaceRef = useRef<HTMLDivElement>(null);
   const [flowPaths, setFlowPaths] = useState<Array<{ id: string; d: string }>>([]);
   useEffect(() => {
     const surface = surfaceRef.current;
@@ -644,23 +739,24 @@ export const ViewportCanvas: React.FC = () => {
   // --- Stable screen-focus callbacks (read from refs) ---
 
   const panToScreen = useCallback((idx: number) => {
+    const el = canvasRef.current;
+    const surface = surfaceRef.current;
     const screens = docRef.current.screens;
-    if (!canvasRef.current || screens.length === 0) return;
+    if (!el || !surface || screens.length === 0) return;
     const clampedIdx = Math.max(0, Math.min(idx, screens.length - 1));
-    const screen = screens[clampedIdx];
-    if (!screen) return;
+    const frame = surface.querySelectorAll<HTMLElement>("[data-protota-flow-screen]")[clampedIdx];
+    if (!frame) return;
 
+    // Measured from the laid-out DOM (robust to the mobile padding override
+    // and per-screen sizes), and corrected for the surface's layout offset
+    // under `safe center` — when the surface is wider than the canvas it is
+    // pinned to the left edge, not centred, so the old
+    // `(surfaceW/2 - screenX - screenW/2) * zoom` formula drifted right.
     const currentZoom = zoomRef.current;
-    const surfaceW = getTotalContentWidth(docRef.current.screens);
-
-    let screenX = CANVAS_PADDING;
-    for (let i = 0; i < clampedIdx; i++) {
-      screenX += (screens[i].width || 800) + CANVAS_GAP;
-    }
-
-    const screenW = screen.width || 800;
+    const surfW = surface.offsetWidth;
+    const cu = frame.offsetLeft + frame.offsetWidth / 2;
     setPan({
-      x: (surfaceW / 2 - screenX - screenW / 2) * currentZoom,
+      x: el.clientWidth / 2 - surface.offsetLeft - surfW / 2 - (cu - surfW / 2) * currentZoom,
       y: CANVAS_PADDING,
     });
   }, []);
@@ -716,19 +812,24 @@ export const ViewportCanvas: React.FC = () => {
 
   const handleZoomFit = useCallback(() => {
     const el = canvasRef.current;
-    if (!el || docRef.current.screens.length === 0) return;
-    const screens = docRef.current.screens;
+    const surface = surfaceRef.current;
+    if (!el || !surface || docRef.current.screens.length === 0) return;
     const canvasW = el.clientWidth;
-    const canvasH = el.clientHeight;
-    const totalContentW = getTotalContentWidth(screens);
-    const maxContentH = Math.max(...screens.map((s) => s.height || 600))
-      + 28 /* label */ + CANVAS_PADDING * 2;
-    const fitZoom = Math.min(canvasW / totalContentW, canvasH / maxContentH, 1.5);
+    const availH = el.clientHeight - CANVAS_BOTTOM_BAR_H;
+    // Measured surface bounds (padding + labels + every screen) instead of
+    // the old constant-based estimate, which assumed desktop padding.
+    const surfW = surface.offsetWidth;
+    const surfH = surface.offsetHeight;
+    if (surfW <= 0 || surfH <= 0) return;
+    const fitZoom = Math.min(canvasW / surfW, availH / surfH, 1.5);
     setZoom(fitZoom);
-    const scaledH = maxContentH * fitZoom;
+    // Centre the surface, correcting for its `safe center` layout offset
+    // (pinned to the left edge once wider than the canvas) and the `50% 0`
+    // transform origin; the old `x: 0` left wide content hanging off the
+    // right edge on narrow viewports.
     setPan({
-      x: 0,
-      y: (canvasH - scaledH - CANVAS_BOTTOM_BAR_H) / 2,
+      x: canvasW / 2 - surface.offsetLeft - surfW / 2,
+      y: (availH - surfH * fitZoom) / 2,
     });
   }, []);
 
@@ -774,6 +875,10 @@ export const ViewportCanvas: React.FC = () => {
         overflow: "hidden",
         position: "relative",
         outline: "none",
+        // The canvas owns its touch gestures (two-finger pan, pinch zoom);
+        // without this the browser hijacks them for page scroll/zoom. Side
+        // panels are separate elements, so their scrolling is unaffected.
+        touchAction: "none",
         cursor: isPanning ? "grabbing" : "default",
         backgroundImage: "radial-gradient(circle, rgba(128,128,128,0.25) 1px, transparent 1px)",
         backgroundSize: "20px 20px",
@@ -929,14 +1034,15 @@ export const ViewportCanvas: React.FC = () => {
         style={{
           transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
           transformOrigin: "50% 0",
-          // The surface re-centers as a screen's width changes; animating
-          // that during a resize drag would make the frame lag the pointer.
-          transition: isPanning || resizePreview ? "none" : "transform 0.2s ease",
+          // No transition while a pan, touch gesture, or resize drag is
+          // live: the surface must track the pointer/fingers 1:1, not ease
+          // towards them.
+          transition: isPanning || isTouchGesturing || resizePreview ? "none" : "transform 0.2s ease",
           display: "inline-flex",
           alignItems: "flex-start",
           gap: `${CANVAS_GAP}px`,
           padding: `${CANVAS_PADDING}px`,
-          pointerEvents: spaceHeld || isPanning ? "none" : undefined,
+          pointerEvents: spaceHeld || isPanning || isTouchGesturing ? "none" : undefined,
           // No max-width: screens keep their real sizes side by side; pan and
           // zoom handle overflow. Positioned so the flow overlay can anchor.
           boxSizing: "border-box",

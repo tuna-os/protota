@@ -13,10 +13,13 @@ test.describe('Keyboard shortcuts (#14)', () => {
       await window.click();
       await expect(page.locator('.selected-outline').first()).toBeVisible({ timeout: 3000 });
 
-      // Click an add button to create a child
-      const addBtn = page.locator('.protota-add-btn').first();
-      if (await addBtn.isVisible()) {
-        await addBtn.click();
+      // Open the compact add chip and insert a child via the popover
+      const addChip = page.locator('.protota-add-chip').first();
+      if (await addChip.isVisible()) {
+        await addChip.click();
+        const popover = page.locator('.protota-add-popover');
+        await expect(popover).toBeVisible({ timeout: 3000 });
+        await popover.locator('.protota-add-popover-item').first().click();
 
         // Now undo
         await page.keyboard.press('Control+z');

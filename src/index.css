@@ -322,6 +322,116 @@ body,
   opacity: 0.85;
 }
 
+/* ---- Compact quick-add affordance (single "+" chip + popover) ----
+   Replaces the old one-pill-per-legal-child row that flooded the canvas
+   for generic containers (50+ legal types). The chip keeps the blue pill
+   styling language via .protota-add-btn. */
+.protota-add-affordance {
+  position: absolute;
+  bottom: -28px;
+  left: 0;
+  z-index: 10;
+}
+
+/* Empty containers: center the chip over the node's (often tiny) box so the
+   affordance stays visible where the old pills advertised the container. */
+.protota-add-affordance--centered {
+  bottom: auto;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.protota-add-chip {
+  min-width: 22px;
+  line-height: 1;
+  padding: 3px 8px;
+  font-size: 13px;
+}
+
+.protota-add-popover {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  width: 240px;
+  max-height: 280px;
+  display: flex;
+  flex-direction: column;
+  background: var(--popover-bg-color, #ffffff);
+  color: var(--window-fg-color, #241f31);
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0, 0, 6, 0.28);
+  z-index: 1000;
+  overflow: hidden;
+  text-align: left;
+  cursor: default;
+}
+
+.protota-add-affordance--centered .protota-add-popover {
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.protota-add-popover-search {
+  border: none;
+  border-bottom: 1px solid var(--separator-color, rgba(0, 0, 6, 0.12));
+  background: transparent;
+  color: inherit;
+  padding: 8px 10px;
+  font-size: 12px;
+  font-family: inherit;
+  outline: none;
+}
+
+.protota-add-popover-common {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--separator-color, rgba(0, 0, 6, 0.12));
+}
+
+.protota-add-popover-list {
+  overflow-y: auto;
+  padding: 4px;
+  flex: 1;
+}
+
+.protota-add-popover-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+  padding: 5px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.protota-add-popover-item.active {
+  background: var(--button-bg-color, rgba(0, 0, 6, 0.08));
+}
+
+.protota-add-popover-item-label {
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.protota-add-popover-item-desc {
+  font-size: 10px;
+  opacity: 0.55;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.protota-add-popover-empty {
+  padding: 10px;
+  text-align: center;
+  font-size: 12px;
+  opacity: 0.5;
+}
+
 /* ---- Screen focus dropdown (opens upward in bottom bar) ---- */
 .protota-zoom-bar .protota-screen-dropdown .adw-drop-down-button {
   min-width: 32px;
@@ -379,6 +489,7 @@ body,
 :root[data-protota-capture="true"] .protota-zoom-bar,
 :root[data-protota-capture="true"] .protota-screen-label,
 :root[data-protota-capture="true"] .protota-type-badge,
+:root[data-protota-capture="true"] .protota-add-affordance,
 :root[data-protota-capture="true"] .protota-resize-handle,
 :root[data-protota-capture="true"] .protota-resize-size-chip,
 :root[data-protota-capture="true"] .protota-panel {
@@ -1654,7 +1765,8 @@ html .protota-div-tab-bar > .adw-node-wrapper > * {
 }
 
 [data-protota-capture-scope="true"] .protota-type-badge,
-[data-protota-capture-scope="true"] .protota-add-btn {
+[data-protota-capture-scope="true"] .protota-add-btn,
+[data-protota-capture-scope="true"] .protota-add-affordance {
   display: none !important;
 }
 

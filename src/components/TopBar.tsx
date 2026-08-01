@@ -3,24 +3,13 @@ import { persistDocumentSource, useMockupStore } from "../store/mockupStore";
 import { exportDocumentFile, importDocumentFile } from "../utils/exportImport";
 import { filterDiagnostics } from "../diagnostics/engine";
 import { openMenuSymbolic, toolsCheckSpellingSymbolic } from "@gjsify/adwaita-icons/actions";
-import { toDataUri } from "@gjsify/adwaita-icons/utils";
+import { iconStyle } from "../utils/iconStyles";
 
-const maskIconStyle = (svg: string): React.CSSProperties => ({
-  display: "inline-block",
-  width: "16px",
-  height: "16px",
-  maskImage: toDataUri(svg),
-  WebkitMaskImage: toDataUri(svg),
-  maskSize: "contain",
-  WebkitMaskSize: "contain",
-  backgroundColor: "currentColor",
-});
-
-const hamburgerIconStyle = maskIconStyle(openMenuSymbolic);
+const hamburgerIconStyle = iconStyle(openMenuSymbolic);
 // The @gjsify/adwaita-icons package does not ship diagnostics-symbolic
 // (upstream development category); the design's sanctioned fallback is the
 // spell-check icon (design §5.2).
-const diagnosticsIconStyle = maskIconStyle(toolsCheckSpellingSymbolic);
+const diagnosticsIconStyle = iconStyle(toolsCheckSpellingSymbolic);
 
 interface MenuItem {
   label: string;

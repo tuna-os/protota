@@ -20,22 +20,11 @@ import {
   editRedoSymbolic,
   sidebarShowRightSymbolic,
 } from "@gjsify/adwaita-icons/actions";
-import { toDataUri } from "@gjsify/adwaita-icons/utils";
 import { exportDocumentFile } from "../utils/exportImport";
 import { downloadPng, renderScreenToPng } from "../utils/pngExport";
 import { mockupToBlueprint } from "../utils/blueprint";
 import { settleRender } from "../utils/settle";
-
-const iconStyle = (svg: string): React.CSSProperties => ({
-  display: "inline-block",
-  width: "16px",
-  height: "16px",
-  maskImage: toDataUri(svg),
-  WebkitMaskImage: toDataUri(svg),
-  maskSize: "contain",
-  WebkitMaskSize: "contain",
-  backgroundColor: "currentColor",
-});
+import { iconStyle } from "../utils/iconStyles";
 
 /** Single share implementation (tests/sharing.spec.ts): base64 of the UTF-8
  * document JSON in the URL hash. TextEncoder replaces the deprecated

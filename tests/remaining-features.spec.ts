@@ -35,7 +35,9 @@ test.describe('Remaining features (#9, #16, #18-#24)', () => {
   });
 
   test('#21 Preset gallery accessible', async ({ page }) => {
-    await page.getByRole('button', { name: /preset/i }).click();
+    // Load Preset moved into the File menu (#106 layout reorder).
+    await page.getByRole('button', { name: 'File', exact: true }).click();
+    await page.getByRole('button', { name: /load preset/i }).click();
     await expect(page.locator('.protota-preset-item').first()).toBeVisible({ timeout: 3000 });
   });
 

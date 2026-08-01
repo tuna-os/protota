@@ -11,6 +11,7 @@ import {
 import { headerBarControls, headerBarFallbackTitle } from '../utils/headerBarChrome';
 import { tabBarModel } from '../utils/tabBar';
 import { usePreview, type PreviewInteraction } from '../preview/PreviewContext';
+import { AddChildChip } from './AddChildChip';
 
 interface Props {
   node: AdwNode;
@@ -354,7 +355,7 @@ export const AdwaitaRenderer: React.FC<Props> = ({
   // The screen root resolves which header bar owns the window controls.
   const primaryHeaderBar = primaryHeaderBarId ?? (screenWidth ? findPrimaryHeaderBarId(node) : undefined);
   const {
-    selectedNodeId, selectedNodeIds, selectNode, toggleNodeSelection, addChildNode, doc,
+    selectedNodeId, selectedNodeIds, selectNode, toggleNodeSelection, doc,
     diagnosticsEnabled, diagnostics, tierFilters, ignoredRules, ignoredInstances,
   } = useMockupStore();
   // Interactive preview (prototype mode): non-null inside the full-screen
@@ -463,6 +464,12 @@ export const AdwaitaRenderer: React.FC<Props> = ({
         }
         return;
       }
+      // Clicks inside the quick-add affordance (the "+" chip and its
+      // popover) belong to its React handlers. stopPropagation here would
+      // keep the event from ever reaching React's root-delegated listener,
+      // so let these through untouched — the affordance stops synthetic
+      // propagation itself, which keeps the canvas deselect suppressed.
+      if ((event.target as Element).closest?.('.protota-add-affordance')) return;
       event.stopPropagation();
       // Ctrl/Cmd-click toggles multi-selection membership (#79, study §3).
       if (event.ctrlKey || event.metaKey) toggleNodeSelection(node.id, screenId);
@@ -755,17 +762,17 @@ export const AdwaitaRenderer: React.FC<Props> = ({
       )}
 
       {isSelected && legalAdds.length > 0 && (
-        <div style={{ position: 'absolute', bottom: '-28px', left: '0', display: 'flex', gap: '4px', flexWrap: 'wrap', zIndex: 10 }}>
-          {legalAdds.map((type) => (
-            <button
-              key={type}
-              className="protota-add-btn"
-              onClick={(e) => { e.stopPropagation(); addChildNode(node.id, type); }}
-            >
-              + {type.replace(/-/g, ' ')}
-            </button>
-          ))}
-        </div>
+        // Compact quick-add: one "+" chip opening a searchable popover over
+        // the same LEGAL_CHILDREN data the old per-type pill row used. An
+        // empty container centers the chip over its (near-zero) box so the
+        // affordance stays discoverable; a populated one keeps the chip at
+        // the old pill-row position below the node.
+        <AddChildChip
+          nodeId={node.id}
+          nodeType={node.type}
+          legalAdds={legalAdds}
+          centered={!node.children || node.children.length === 0}
+        />
       )}
     </div>
   );

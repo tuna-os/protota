@@ -77,15 +77,71 @@ test.describe('Interactive canvas (#10)', () => {
       await expect(page.locator('.selected-outline')).toHaveCount(0, { timeout: 3000 });
     });
 
-    test('selected element shows context-sensitive add buttons', async ({ page }) => {
+    test('selected element shows a single compact add chip', async ({ page }) => {
       // Select the toolbar-view (contains header-bar as legal child)
       const toolbarView = page.locator('adw-toolbar-view').first();
       await toolbarView.click();
       await expect(page.locator('.selected-outline').first()).toBeVisible({ timeout: 3000 });
 
-      // Add buttons should appear for legal children
-      const addBtn = page.locator('.protota-add-btn').first();
-      await expect(addBtn).toBeVisible({ timeout: 3000 });
+      // Exactly one "+" chip should appear — not one pill per legal type
+      const chip = page.locator('.protota-add-chip');
+      await expect(chip).toHaveCount(1);
+      await expect(chip).toBeVisible({ timeout: 3000 });
+    });
+
+    test('add chip opens searchable popover; search + insert + undo', async ({ page }) => {
+      const toolbarView = page.locator('adw-toolbar-view').first();
+      await toolbarView.click();
+      await expect(page.locator('.selected-outline').first()).toBeVisible({ timeout: 3000 });
+
+      const before = await page.locator('adw-toolbar-view adw-button').count();
+
+      // Open the popover from the chip
+      await page.locator('.protota-add-chip').click();
+      const popover = page.locator('.protota-add-popover');
+      await expect(popover).toBeVisible({ timeout: 3000 });
+
+      // Common shortcuts row front-loads frequent types for this container
+      await expect(popover.locator('.protota-add-popover-common .protota-add-btn').first())
+        .toBeVisible();
+
+      // Search narrows the legal-children list
+      const search = popover.locator('.protota-add-popover-search');
+      await search.fill('button');
+      const items = popover.locator('.protota-add-popover-item');
+      await expect(items.first()).toBeVisible();
+
+      // Pick "Button" (exact label — "Button Row" also matches the search)
+      // — inserts exactly like the old pills did
+      await items
+        .filter({ has: page.locator('.protota-add-popover-item-label', { hasText: /^Button$/ }) })
+        .first().click();
+      await expect(popover).toBeHidden();
+      await expect(page.locator('adw-toolbar-view adw-button')).toHaveCount(before + 1);
+
+      // Undo removes the inserted child (same single-step history)
+      await page.keyboard.press('Control+z');
+      await expect(page.locator('adw-toolbar-view adw-button')).toHaveCount(before);
+    });
+
+    test('add popover supports keyboard navigation and Escape', async ({ page }) => {
+      const toolbarView = page.locator('adw-toolbar-view').first();
+      await toolbarView.click();
+      await expect(page.locator('.selected-outline').first()).toBeVisible({ timeout: 3000 });
+
+      await page.locator('.protota-add-chip').click();
+      const popover = page.locator('.protota-add-popover');
+      await expect(popover).toBeVisible({ timeout: 3000 });
+
+      // Arrow keys move the active row
+      const search = popover.locator('.protota-add-popover-search');
+      await search.press('ArrowDown');
+      await expect(popover.locator('.protota-add-popover-item.active')).toHaveCount(1);
+
+      // Escape closes the popover without inserting or deselecting focus
+      await search.press('Escape');
+      await expect(popover).toBeHidden();
+      await expect(page.locator('.selected-outline').first()).toBeVisible();
     });
   });
 });

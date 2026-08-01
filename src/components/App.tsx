@@ -22,6 +22,7 @@ import {
   sidebarShowRightSymbolic,
 } from "@gjsify/adwaita-icons/actions";
 import { toDataUri } from "@gjsify/adwaita-icons/utils";
+import { settleRender } from "../utils/settle";
 
 const iconStyle = (svg: string): React.CSSProperties => ({
   display: "inline-block",
@@ -94,28 +95,16 @@ export const App: React.FC = () => {
     e.target.value = "";
   };
 
-  // Listen for MenuBar custom events
-  // Rendering settles asynchronously: webfonts load, the runtime icon
-  // registry injects CSS, and the adw-* custom elements upgrade. Publish a
-  // readiness flag once all of that has painted so automation — screenshot
-  // tests, the capture tooling, anything driving the editor — can wait for a
-  // settled frame instead of guessing with a timeout.
+  // Publish a readiness flag once rendering has settled (utils/settle.ts) so
+  // automation — screenshot tests, the capture tooling, anything driving the
+  // editor — can wait for a settled frame instead of guessing with a timeout.
   useEffect(() => {
     let cancelled = false;
     const root = document.documentElement;
     delete root.dataset.prototaReady;
-    const settle = async () => {
-      try {
-        await document.fonts.ready;
-      } catch {
-        // A browser without the font API still gets the frame wait below.
-      }
-      await new Promise<void>((resolve) =>
-        requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
-      );
+    void settleRender().then(() => {
       if (!cancelled) root.dataset.prototaReady = "true";
-    };
-    void settle();
+    });
     return () => { cancelled = true; };
   }, [doc]);
 

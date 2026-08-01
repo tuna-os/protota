@@ -22,20 +22,26 @@ test.describe('Screen duplication & context menu (#18, #19)', () => {
   });
 
   test('delete key removes selected element', async ({ page }) => {
-    // Select a header bar inside the window
+    // Clicking the header bar selects the innermost node under the cursor —
+    // its window-title, an adopted child of adw-header-bar's internal DOM.
     const headerBar = page.locator('.protota-canvas adw-header-bar').first();
     await headerBar.click();
     await expect(page.locator('.selected-outline').first()).toBeVisible({ timeout: 3000 });
-
-    // Count header bars before
-    const before = await page.locator('.protota-canvas adw-header-bar').count();
+    const selectedId = await page
+      .locator('.selected-outline [data-node-id]').first()
+      .getAttribute('data-node-id');
+    expect(selectedId).toBeTruthy();
 
     // Press Delete
     await page.keyboard.press('Delete');
     await page.waitForTimeout(300);
 
-    // Header bar should be deleted
-    const after = await page.locator('.protota-canvas adw-header-bar').count();
-    expect(after).toBeLessThan(before);
+    // The selected node is gone…
+    expect(await page.locator(`[data-node-id="${selectedId}"]`).count()).toBe(0);
+    // …and the app survived the commit (#137): deleting an adopted child
+    // used to crash React's removeChild and unmount the entire app, which
+    // made the old "header bar count decreased" assertion pass vacuously —
+    // the count hit zero because the whole canvas was gone.
+    expect(await page.locator('.protota-canvas adw-window').count()).toBeGreaterThan(0);
   });
 });

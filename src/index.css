@@ -1466,3 +1466,33 @@ html .protota-div-tab-bar > .adw-node-wrapper > * {
 [data-protota-capture-scope="true"] [data-protota-diag-count]::after {
   content: none;
 }
+
+/* In-canvas containment card for a crashed screen render (#137). The card
+   replaces only the failed screen frame; the editor chrome, the store, and
+   undo stay alive around it. */
+.protota-render-error-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: flex-start;
+  min-width: 260px;
+  max-width: 420px;
+  padding: 18px 20px;
+  border-radius: 12px;
+  border: 1px solid rgba(192, 28, 40, 0.4);
+  background: color-mix(in srgb, #c01c28 8%, var(--window-bg-color, #fafafa));
+  color: var(--window-fg-color, #241f31);
+  font-size: 13px;
+}
+
+.protota-render-error-card strong {
+  color: #c01c28;
+  font-size: 14px;
+}
+
+.protota-render-error-message {
+  font-family: monospace;
+  font-size: 12px;
+  opacity: 0.85;
+  overflow-wrap: anywhere;
+}

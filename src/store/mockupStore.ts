@@ -727,13 +727,31 @@ export const useMockupStore = create<MockupState>((set, get) => {
     },
 
     deleteNode: (nodeId) => {
+      // Imported presets reuse node ids across screens (every Clocks screen
+      // roots at `imported-1`), so a global first-match search can delete a
+      // node on a screen the user never touched (#137). When the id being
+      // deleted is the current selection, its screen is known — scope the
+      // search to exactly that screen.
+      const { selectedNodeId, selectedScreenId } = get();
+      const scopedScreenId =
+        nodeId === selectedNodeId && selectedScreenId ? selectedScreenId : null;
+      let removed = false;
       const nextDoc = produce(get().doc, (draft) => {
-        for (const screen of draft.screens) {
+        const screens = scopedScreenId
+          ? draft.screens.filter((screen) => screen.id === scopedScreenId)
+          : draft.screens;
+        for (const screen of screens) {
+          // Screen roots are anchors: deleting one must be a no-op — not a
+          // fallthrough that removes a same-id node from another screen.
           if (screen.rootNode.id === nodeId) continue;
           const loc = findNodeLocation(screen.rootNode, nodeId);
-          if (loc) { loc.parentChildren.splice(loc.index, 1); break; }
+          if (loc) { loc.parentChildren.splice(loc.index, 1); removed = true; break; }
         }
       });
+      // A delete that removed nothing (screen root, unknown id) must leave
+      // both the document and the history untouched — pushing an identical
+      // snapshot would turn the user's next undo into a visible no-op.
+      if (!removed) return;
       const nextState = pushSnapshot(nextDoc);
       if (get().selectedNodeId === nodeId) {
         (nextState as MockupState).selectedNodeId = null;

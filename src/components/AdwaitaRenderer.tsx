@@ -8,6 +8,7 @@ import {
   boundaryGeometryConfidence, boundaryGeometryFacts, containerLayout,
   parentFlowOf, placementLayout, type ParentFlow,
 } from '../utils/nodeGeometry';
+import { headerBarControls, headerBarFallbackTitle } from '../utils/headerBarChrome';
 import { tabBarModel } from '../utils/tabBar';
 
 interface Props {
@@ -26,7 +27,19 @@ interface Props {
    * split view happens to contain. Computed per screen at the root.
    */
   primaryHeaderBarId?: string;
+  /**
+   * True when any ancestor node is an Adw dialog. A header bar inside a
+   * dialog never shows minimize/maximize — at most a close button.
+   */
+  dialogAncestor?: boolean;
+  /** Nearest ancestor window/dialog title, for AdwHeaderBar's title fallback. */
+  surfaceTitle?: string;
 }
+
+/** Adw.Dialog and its subclasses — their header bars carry dialog chrome. */
+const DIALOG_TYPES = new Set<string>([
+  'dialog', 'preferences-dialog', 'alert-dialog', 'about-dialog',
+]);
 
 /**
  * The header bar that carries the window controls: the first visible one
@@ -278,6 +291,7 @@ function plainText(text: string): string {
 export const AdwaitaRenderer: React.FC<Props> = ({
   node, screenId, screenWidth, screenHeight,
   inheritedSlot, primaryHeaderBarId, parentFlow = 'column', parentNode,
+  dialogAncestor = false, surfaceTitle,
 }) => {
   // The screen root resolves which header bar owns the window controls.
   const primaryHeaderBar = primaryHeaderBarId ?? (screenWidth ? findPrimaryHeaderBarId(node) : undefined);
@@ -366,6 +380,12 @@ export const AdwaitaRenderer: React.FC<Props> = ({
         ? 'adw-button'
         : TAG_MAP[node.type] || 'div';
   const attrs = nodeProps(node, inheritedSlot);
+  // AdwHeaderBar with no title-widget shows the enclosing window's/dialog's
+  // title centered (the compress dialog's heading comes from this fallback).
+  // adw-header-bar only draws the title attribute when its center slot is
+  // empty, so a window-title/view-switcher child still wins.
+  const fallbackTitle = headerBarFallbackTitle(node, surfaceTitle);
+  if (fallbackTitle) attrs.title = fallbackTitle;
 
   // Apply theme class to window/dialog roots based on doc colorScheme
   const isRoot = node.type === 'window' || node.type === 'dialog' ||
@@ -384,6 +404,11 @@ export const AdwaitaRenderer: React.FC<Props> = ({
         (child.id === node.visibleChildName || child.title === node.visibleChildName || (child as { name?: unknown }).name === node.visibleChildName)) ?? node.children[0]]
     : node.children;
 
+  const childDialogAncestor = dialogAncestor || DIALOG_TYPES.has(node.type);
+  const childSurfaceTitle =
+    (node.type === 'window' || DIALOG_TYPES.has(node.type)) && node.title
+      ? node.title
+      : surfaceTitle;
   const children = visibleChildren?.map((child, index) => (
     <AdwaitaRenderer
       key={child.id}
@@ -393,15 +418,23 @@ export const AdwaitaRenderer: React.FC<Props> = ({
       primaryHeaderBarId={primaryHeaderBar}
       parentFlow={parentFlowOf(node)}
       parentNode={node}
+      dialogAncestor={childDialogAncestor}
+      surfaceTitle={childSurfaceTitle}
     />
   ));
-  // GTK draws window controls in the header bar unless show-title-buttons is
-  // false (Adw.HeaderBar defaults to true). Real app windows always show
-  // them, so a mockup without them never matches a native screenshot.
-  const windowControls = node.type === 'header-bar' && node.showTitleButtons !== false && node.id === primaryHeaderBar ? (
+  // GTK draws window controls in the header bar unless the title-button
+  // properties disable them (Adw.HeaderBar defaults to true). Inside a
+  // dialog, libadwaita draws at most a close button — never minimize or
+  // maximize — and none at all when end title buttons are disabled, exactly
+  // like the Files compress dialog. See utils/headerBarChrome.ts.
+  const controlsKind = headerBarControls(node, {
+    inDialog: dialogAncestor,
+    isPrimary: node.id === primaryHeaderBar,
+  });
+  const windowControls = controlsKind !== 'none' ? (
     <div key="window-controls" slot="end" className="protota-window-controls" aria-hidden="true">
-      <span className="protota-window-control minimize" />
-      <span className="protota-window-control maximize" />
+      {controlsKind === 'window' && <span className="protota-window-control minimize" />}
+      {controlsKind === 'window' && <span className="protota-window-control maximize" />}
       <span className="protota-window-control close" />
     </div>
   ) : null;

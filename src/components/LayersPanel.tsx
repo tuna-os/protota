@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useMockupStore } from '../store/mockupStore';
-import type { AdwNode, AdwNodeType } from '../types/mockup';
+import type { AdwNode, AdwNodeType, Screen } from '../types/mockup';
 import { LEGAL_CHILDREN } from '../types/mockup';
 import { findNodeById, findNodeLocation } from '../utils/treeHelpers';
 import { useDndStore } from '../dnd/dndStore';
@@ -28,6 +28,14 @@ interface LayerRow {
   expanded: boolean;
 }
 
+/**
+ * The keyboard walks screens and nodes as one visible order (#138): each
+ * screen row is a real tree item, followed by its widget subtree.
+ */
+type VisibleRow =
+  | { kind: 'screen'; screen: Screen }
+  | { kind: 'node'; row: LayerRow };
+
 /** The id of the container holding `nodeId`, or null. */
 function findParentIdOf(root: AdwNode, nodeId: string): string | null {
   if (root.children?.some((child) => child.id === nodeId)) return root.id;
@@ -43,6 +51,7 @@ export const LayersPanel: React.FC = () => {
     doc, selectedNodeId, selectedNodeIds, selectNode, toggleNodeSelection,
     selectNodes, updateNodeProps, moveNodeUp, moveNodeDown,
     moveNode, addChildNode,
+    selectScreen, selectedScreenId, screenSelected, deleteScreen, updateScreenProps,
   } = useMockupStore();
 
   // The panel had no expand state before keyboard navigation; collapse is a
@@ -66,18 +75,44 @@ export const LayersPanel: React.FC = () => {
     return out;
   }, [doc, collapsedIds]);
 
+  // Screens and nodes interleaved in the order the arrow keys walk (#138).
+  const visibleRows = useMemo(() => {
+    const out: VisibleRow[] = [];
+    for (const screen of doc.screens) {
+      out.push({ kind: 'screen', screen });
+      for (const row of rows) {
+        if (row.screenId === screen.id) out.push({ kind: 'node', row });
+      }
+    }
+    return out;
+  }, [doc.screens, rows]);
+
+  const visibleId = (entry: VisibleRow) =>
+    entry.kind === 'screen' ? entry.screen.id : entry.row.node.id;
+
+  /** Index of the current selection — screen or node — in visible order. */
+  const selectedVisibleIndex = screenSelected
+    ? visibleRows.findIndex((entry) => entry.kind === 'screen' && entry.screen.id === selectedScreenId)
+    : visibleRows.findIndex((entry) => entry.kind === 'node' && entry.row.node.id === selectedNodeId);
+
+  const selectVisible = (entry: VisibleRow) => {
+    if (entry.kind === 'screen') selectScreen(entry.screen.id);
+    else selectNode(entry.row.node.id, entry.row.screenId);
+  };
+
   // Roving tabindex: exactly one row is tabbable — the selection, else the top.
-  const focusableId = rows.some((r) => r.node.id === selectedNodeId)
-    ? selectedNodeId
-    : rows[0]?.node.id ?? null;
+  const focusableId = selectedVisibleIndex >= 0
+    ? visibleId(visibleRows[selectedVisibleIndex])
+    : visibleRows[0] ? visibleId(visibleRows[0]) : null;
 
   // Focus follows selection, but only while the tree owns focus — clicking a
   // node on the canvas must not yank focus into the panel.
+  const selectionFocusId = screenSelected ? selectedScreenId : selectedNodeId;
   useEffect(() => {
-    if (!selectedNodeId || renamingId) return;
+    if (!selectionFocusId || renamingId) return;
     if (!treeRef.current?.contains(document.activeElement)) return;
-    rowRefs.current.get(selectedNodeId)?.focus();
-  }, [selectedNodeId, rows, renamingId]);
+    rowRefs.current.get(selectionFocusId)?.focus();
+  }, [selectionFocusId, rows, renamingId]);
 
   const setCollapsed = (nodeId: string, collapsed: boolean) => {
     setCollapsedIds((prev) => {
@@ -88,24 +123,30 @@ export const LayersPanel: React.FC = () => {
     });
   };
 
-  const beginRename = (row: LayerRow) => {
-    setRenamingId(row.node.id);
-    setDraftTitle(row.node.title ?? '');
+  const beginRename = (id: string, currentTitle: string) => {
+    setRenamingId(id);
+    setDraftTitle(currentTitle);
   };
 
   const endRename = (commit: boolean) => {
-    const nodeId = renamingId;
-    if (!nodeId) return;
-    if (commit) updateNodeProps(nodeId, { title: draftTitle });
+    const id = renamingId;
+    if (!id) return;
+    if (commit) {
+      // The rename target may be a screen row (#138) or a widget node.
+      if (doc.screens.some((screen) => screen.id === id)) updateScreenProps(id, { title: draftTitle });
+      else updateNodeProps(id, { title: draftTitle });
+    }
     setRenamingId(null);
     // The input unmounts on the next render; hand focus back to the row.
-    requestAnimationFrame(() => rowRefs.current.get(nodeId)?.focus());
+    requestAnimationFrame(() => rowRefs.current.get(id)?.focus());
   };
 
   const handleTreeKeyDown = (e: React.KeyboardEvent) => {
     if (renamingId) return; // The rename input owns the keyboard.
-    const index = rows.findIndex((r) => r.node.id === selectedNodeId);
-    const row = index >= 0 ? rows[index] : null;
+    const index = selectedVisibleIndex;
+    const entry = index >= 0 ? visibleRows[index] : null;
+    const row = entry?.kind === 'node' ? entry.row : null;
+    const screen = entry?.kind === 'screen' ? entry.screen : null;
 
     const handled = () => {
       // Stop before the window listeners in App/ViewportCanvas so tree
@@ -125,38 +166,62 @@ export const LayersPanel: React.FC = () => {
     switch (e.key) {
       case 'ArrowDown': {
         handled();
-        const next = index < 0 ? rows[0] : rows[index + 1];
-        if (next) selectNode(next.node.id, next.screenId);
+        const next = index < 0 ? visibleRows[0] : visibleRows[index + 1];
+        if (next) selectVisible(next);
         return;
       }
       case 'ArrowUp': {
         handled();
-        const prev = index < 0 ? rows[rows.length - 1] : rows[index - 1];
-        if (prev) selectNode(prev.node.id, prev.screenId);
+        const prev = index < 0 ? visibleRows[visibleRows.length - 1] : visibleRows[index - 1];
+        if (prev) selectVisible(prev);
         return;
       }
       case 'ArrowRight': {
+        if (screen) {
+          // A screen row "expands" into its root widget.
+          handled();
+          const next = visibleRows[index + 1];
+          if (next) selectVisible(next);
+          return;
+        }
         if (!row || !row.hasChildren) return;
         handled();
         if (!row.expanded) setCollapsed(row.node.id, false);
         else {
-          const firstChild = rows[index + 1];
-          if (firstChild) selectNode(firstChild.node.id, firstChild.screenId);
+          const firstChild = visibleRows[index + 1];
+          if (firstChild) selectVisible(firstChild);
         }
         return;
       }
       case 'ArrowLeft': {
+        if (screen) return; // Screen rows are top-level: nowhere shallower.
         if (!row) return;
         handled();
         if (row.expanded) setCollapsed(row.node.id, true);
         else if (row.parentId) selectNode(row.parentId, row.screenId);
+        else selectScreen(row.screenId); // root widget → up to its screen row
         return;
       }
       case 'Enter':
       case 'F2': {
+        if (screen) {
+          handled();
+          beginRename(screen.id, screen.title);
+          return;
+        }
         if (!row) return;
         handled();
-        beginRename(row);
+        beginRename(row.node.id, row.node.title ?? '');
+        return;
+      }
+      case 'Delete':
+      case 'Backspace': {
+        // Whole-screen deletion is handled HERE (#138) — screen selection
+        // cleared the node selection, so the global App.tsx shortcut no-ops.
+        // Node rows keep bubbling to the global handler as before.
+        if (!screen) return;
+        handled();
+        deleteScreen(screen.id);
         return;
       }
     }
@@ -302,7 +367,7 @@ export const LayersPanel: React.FC = () => {
           else rowRefs.current.delete(node.id);
         }}
         role="treeitem"
-        aria-level={depth + 1}
+        aria-level={depth + 2 /* level 1 is the screen row (#138) */}
         aria-selected={isSelected}
         aria-expanded={hasChildren ? expanded : undefined}
         tabIndex={node.id === focusableId ? 0 : -1}
@@ -313,7 +378,7 @@ export const LayersPanel: React.FC = () => {
         style={{ marginLeft: `${depth * 14}px` }}
         className={`protota-tree-item${isSelected ? ' protota-tree-item--selected' : ''}${isPrimary ? ' protota-tree-item--primary' : ''}${hint ? ` protota-tree-item--drop-${hint}` : ''}`}
         onClick={(e) => handleRowClick(row, e)}
-        onDoubleClick={() => beginRename(row)}
+        onDoubleClick={() => beginRename(row.node.id, row.node.title ?? '')}
         onDragStart={(e) => handleRowDragStart(row, e)}
         onDragOver={(e) => handleRowDragOver(row, e)}
         onDragLeave={(e) => {
@@ -361,6 +426,56 @@ export const LayersPanel: React.FC = () => {
     );
   };
 
+  // Screen rows are real tree items (#138): selectable, renamable, deletable.
+  const renderScreenRow = (screen: Screen) => {
+    const isSelected = screenSelected && selectedScreenId === screen.id;
+    const isRenaming = renamingId === screen.id;
+    return (
+      <div
+        ref={(el) => {
+          if (el) rowRefs.current.set(screen.id, el);
+          else rowRefs.current.delete(screen.id);
+        }}
+        role="treeitem"
+        aria-level={1}
+        aria-selected={isSelected}
+        tabIndex={screen.id === focusableId ? 0 : -1}
+        data-testid="screen-row"
+        data-screen-id={screen.id}
+        className={`protota-tree-item protota-screen-row${isSelected ? ' protota-tree-item--selected protota-tree-item--primary' : ''}`}
+        style={{ marginBottom: '6px' }}
+        onClick={() => selectScreen(screen.id)}
+        onDoubleClick={() => beginRename(screen.id, screen.title)}
+      >
+        <span className="protota-screen-label" style={{ display: 'flex', alignItems: 'center', gap: '4px', minWidth: 0, flex: 1 }}>
+          <span aria-hidden="true" style={{ flexShrink: 0 }}>🖥</span>
+          {isRenaming ? (
+            <input
+              data-testid="screen-rename-input"
+              aria-label="Rename screen"
+              // eslint-disable-next-line jsx-a11y/no-autofocus -- rename begins on explicit user action
+              autoFocus
+              value={draftTitle}
+              onChange={(e) => setDraftTitle(e.target.value)}
+              onClick={(e) => e.stopPropagation()}
+              onKeyDown={(e) => {
+                e.stopPropagation();
+                if (e.key === 'Enter') endRename(true);
+                else if (e.key === 'Escape') endRename(false);
+              }}
+              onBlur={() => endRename(true)}
+              style={{ flex: 1, minWidth: 0, font: 'inherit' }}
+            />
+          ) : (
+            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {screen.title}
+            </span>
+          )}
+        </span>
+      </div>
+    );
+  };
+
   // Rows render flat (indent via margin); screens group their own subtrees.
   let cursor = 0;
   return (
@@ -373,9 +488,7 @@ export const LayersPanel: React.FC = () => {
         }
         return (
           <div key={screen.id} style={{ marginBottom: '16px' }}>
-            <div className="protota-screen-label" style={{ marginBottom: '6px' }}>
-              🖥 {screen.title}
-            </div>
+            {renderScreenRow(screen)}
             {screenRows.map(renderRow)}
           </div>
         );

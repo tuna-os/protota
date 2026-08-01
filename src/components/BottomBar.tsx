@@ -10,8 +10,8 @@ import {
   documentNewSymbolic,
   viewMoreSymbolic,
 } from "@gjsify/adwaita-icons/actions";
-import { toDataUri } from "@gjsify/adwaita-icons/utils";
 import { BreakpointBar } from "./BreakpointBar";
+import { iconStyle } from "../utils/iconStyles";
 
 interface ScreenOption {
   id: string;
@@ -41,17 +41,6 @@ interface BottomBarProps {
   onApplySizePreset: (size: { width: number; height: number }) => void;
 }
 
-/** Cached data URIs for SVG icons — avoids re-encoding on every render. */
-const dataUriCache = new Map<string, string>();
-function cachedDataUri(svg: string): string {
-  let uri = dataUriCache.get(svg);
-  if (uri === undefined) {
-    uri = toDataUri(svg);
-    dataUriCache.set(svg, uri);
-  }
-  return uri;
-}
-
 /** Reusable toolbar icon button — memoized so it skips re-render when props are unchanged. */
 const ToolbarIconButton = React.memo(
   ({
@@ -78,13 +67,7 @@ const ToolbarIconButton = React.memo(
       title={title}
       data-testid={testId}
     >
-      <span
-        className="adw-toolbar-icon"
-        style={{
-          maskImage: cachedDataUri(icon),
-          WebkitMaskImage: cachedDataUri(icon),
-        }}
-      />
+      <span className="adw-toolbar-icon" style={iconStyle(icon)} />
       {children}
     </button>
   ),

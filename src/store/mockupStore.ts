@@ -397,7 +397,8 @@ interface MockupState {
    * undoable step) and then propagates.
    */
   runInTransaction: (fn: () => void) => void;
-  toggleColorScheme: () => void;
+  /** Direct theme picker (mobile overflow menu's 3-circle switcher). */
+  setColorScheme: (scheme: MockupDocument['colorScheme']) => void;
   toggleDiagnostics: () => void;
   setTierFilter: (tier: DiagnosticTier, on: boolean) => void;
   ignoreRule: (ruleId: string) => void;
@@ -920,12 +921,10 @@ export const useMockupStore = create<MockupState>((set, get) => {
 
     setShowAddScreenModal: (show) => set({ showAddScreenModal: show }),
 
-    toggleColorScheme: () => {
+    setColorScheme: (scheme) => {
+      if (get().doc.colorScheme === scheme) return;
       const next = produce(get().doc, (draft) => {
-        const cycle: Record<string, MockupDocument['colorScheme']> = {
-          auto: 'dark', dark: 'light', light: 'auto',
-        };
-        draft.colorScheme = cycle[draft.colorScheme];
+        draft.colorScheme = scheme;
       });
       set(pushSnapshot(next));
     },

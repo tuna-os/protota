@@ -21,6 +21,7 @@ import {
   sidebarShowRightSymbolic,
 } from "@gjsify/adwaita-icons/actions";
 import { exportDocumentFile } from "../utils/exportImport";
+import { setAdwaitaColorScheme } from "@gjsify/adwaita-core";
 import { downloadPng, renderScreenToPng } from "../utils/pngExport";
 import { mockupToBlueprint } from "../utils/blueprint";
 import { settleRender } from "../utils/settle";
@@ -143,6 +144,22 @@ export const App: React.FC = () => {
       cancelled = true;
     };
   }, [doc]);
+
+  // Manual theme selection (desktop cycle button, mobile 3-circle switcher)
+  // applies to the app chrome AND the mockup: adwaita-web's skin re-scopes
+  // its variable palettes at :root.theme-light/:root.theme-dark, and the
+  // core color-scheme machine is told the effective scheme ('auto' resolves
+  // to the system preference app-side; the core state is binary light|dark).
+  useEffect(() => {
+    const root = document.documentElement;
+    root.classList.remove("theme-light", "theme-dark");
+    if (doc.colorScheme === "light") root.classList.add("theme-light");
+    else if (doc.colorScheme === "dark") root.classList.add("theme-dark");
+    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    setAdwaitaColorScheme(
+      doc.colorScheme === "auto" ? (prefersDark ? "dark" : "light") : doc.colorScheme,
+    );
+  }, [doc.colorScheme]);
 
   useEffect(() => {
     const onToggleLayers = () => setLeftOpen((v) => !v);

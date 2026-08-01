@@ -12,16 +12,18 @@ import { ImportAppDialog } from "./ImportAppDialog";
 import { ExportWritebackDialog } from "./ExportWritebackDialog";
 import { CommandPalette } from "./CommandPalette";
 import { AddScreenModal } from "./AddScreenModal";
+import { ExportModal } from "./ExportModal";
 import { TopBar } from "./TopBar";
 import {
   sidebarShowSymbolic,
   editUndoSymbolic,
   editRedoSymbolic,
-  documentNewSymbolic,
-  viewGridSymbolic,
   sidebarShowRightSymbolic,
 } from "@gjsify/adwaita-icons/actions";
 import { toDataUri } from "@gjsify/adwaita-icons/utils";
+import { exportDocumentFile } from "../utils/exportImport";
+import { downloadPng, renderScreenToPng } from "../utils/pngExport";
+import { mockupToBlueprint } from "../utils/blueprint";
 import { settleRender } from "../utils/settle";
 
 const iconStyle = (svg: string): React.CSSProperties => ({
@@ -34,6 +36,44 @@ const iconStyle = (svg: string): React.CSSProperties => ({
   WebkitMaskSize: "contain",
   backgroundColor: "currentColor",
 });
+
+/** Single share implementation (tests/sharing.spec.ts): base64 of the UTF-8
+ * document JSON in the URL hash. TextEncoder replaces the deprecated
+ * `unescape` spelling while producing byte-identical URLs. */
+const shareDocument = async () => {
+  const { doc } = useMockupStore.getState();
+  const json = JSON.stringify(doc);
+  const bytes = new TextEncoder().encode(json);
+  let binary = "";
+  for (const byte of bytes) binary += String.fromCharCode(byte);
+  const encoded = btoa(binary);
+  const url = `${window.location.origin}${window.location.pathname}#doc=${encoded}`;
+  try {
+    await navigator.clipboard.writeText(url);
+  } catch {
+    prompt("Share this URL:", url);
+  }
+};
+
+const exportPng = async () => {
+  downloadPng(await renderScreenToPng());
+};
+
+const exportBlueprint = () => {
+  const { doc, runExportCheck } = useMockupStore.getState();
+  // Round-trip fidelity check (BLP-E001, design flow D): export proceeds,
+  // but anything the importer cannot faithfully read back gets a card.
+  runExportCheck();
+  const xml = mockupToBlueprint(doc);
+  // Blueprint is plain text, not XML.
+  const blob = new Blob([xml], { type: "text/plain" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `${doc.title.toLowerCase().replace(/\s+/g, "-")}.blp`;
+  a.click();
+  URL.revokeObjectURL(url);
+};
 
 export const App: React.FC = () => {
   const {
@@ -60,8 +100,12 @@ export const App: React.FC = () => {
     diagnosticsEnabled,
   } = useMockupStore();
 
-  const [leftOpen, setLeftOpen] = useState(() => typeof window !== 'undefined' ? window.innerWidth >= 768 : true);
-  const [rightOpen, setRightOpen] = useState(() => typeof window !== 'undefined' ? window.innerWidth >= 768 : true);
+  const [leftOpen, setLeftOpen] = useState(() =>
+    typeof window !== "undefined" ? window.innerWidth >= 768 : true,
+  );
+  const [rightOpen, setRightOpen] = useState(() =>
+    typeof window !== "undefined" ? window.innerWidth >= 768 : true,
+  );
   /** Two-tab right drawer: Properties (inspector) | Diagnostics (design §5.1). */
   const [rightTab, setRightTab] = useState<"properties" | "diagnostics">("properties");
   /** Two-tab left drawer: Layers (tree) | Widgets (draggable palette, #79). */
@@ -71,6 +115,7 @@ export const App: React.FC = () => {
   const [showIconLibrary, setShowIconLibrary] = useState(false);
   const [showImportApp, setShowImportApp] = useState(false);
   const [showWriteback, setShowWriteback] = useState(false);
+  const [showExportModal, setShowExportModal] = useState(false);
   const [showCommandPalette, setShowCommandPalette] = useState(false);
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -105,7 +150,9 @@ export const App: React.FC = () => {
     void settleRender().then(() => {
       if (!cancelled) root.dataset.prototaReady = "true";
     });
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [doc]);
 
   useEffect(() => {
@@ -121,6 +168,11 @@ export const App: React.FC = () => {
     const onShowIconLibrary = () => setShowIconLibrary(true);
     const onShowImportApp = () => setShowImportApp(true);
     const onShowWriteback = () => setShowWriteback(true);
+    const onNewScreen = () => useMockupStore.getState().setShowAddScreenModal(true);
+    const onCodeExport = () => setShowExportModal(true);
+    const onExportPng = () => void exportPng();
+    const onExportBlueprint = () => exportBlueprint();
+    const onShare = () => void shareDocument();
     window.addEventListener("protota:show-import-app", onShowImportApp);
     window.addEventListener("protota:show-writeback", onShowWriteback);
     window.addEventListener("protota:toggle-layers", onToggleLayers);
@@ -129,6 +181,11 @@ export const App: React.FC = () => {
     window.addEventListener("protota:show-presets", onShowPresets);
     window.addEventListener("protota:show-diagnostics", onShowDiagnostics);
     window.addEventListener("protota:show-icon-library", onShowIconLibrary);
+    window.addEventListener("protota:new-screen", onNewScreen);
+    window.addEventListener("protota:code-export", onCodeExport);
+    window.addEventListener("protota:export-png", onExportPng);
+    window.addEventListener("protota:export-blueprint", onExportBlueprint);
+    window.addEventListener("protota:share", onShare);
     return () => {
       window.removeEventListener("protota:toggle-layers", onToggleLayers);
       window.removeEventListener("protota:toggle-properties", onToggleProperties);
@@ -138,6 +195,11 @@ export const App: React.FC = () => {
       window.removeEventListener("protota:show-icon-library", onShowIconLibrary);
       window.removeEventListener("protota:show-import-app", onShowImportApp);
       window.removeEventListener("protota:show-writeback", onShowWriteback);
+      window.removeEventListener("protota:new-screen", onNewScreen);
+      window.removeEventListener("protota:code-export", onCodeExport);
+      window.removeEventListener("protota:export-png", onExportPng);
+      window.removeEventListener("protota:export-blueprint", onExportBlueprint);
+      window.removeEventListener("protota:share", onShare);
     };
   }, []);
 
@@ -307,8 +369,8 @@ export const App: React.FC = () => {
       {/* Adwaita Toolbar View — frames the entire app */}
       <adw-toolbar-view style={{ flex: 1, display: "flex", flexDirection: "column" }}>
         {/* Header Bar — combines menu + actions */}
-        <adw-header-bar slot="top" title={doc.title || "Protota"}>
-          {/* Start slot: Layers toggle + Menu buttons */}
+        <adw-header-bar slot="top">
+          {/* Start slot: Layers toggle + Undo/Redo + Menu buttons */}
           <div slot="start" style={{ display: "flex", gap: "2px", alignItems: "center" }}>
             <button
               className={`adw-button flat${leftOpen ? " active" : ""}`}
@@ -318,31 +380,43 @@ export const App: React.FC = () => {
             >
               <span style={iconStyle(sidebarShowSymbolic)} />
             </button>
-            <TopBar />
-          </div>
-          {/* End slot: Core actions + Properties toggle */}
-          <div slot="end" style={{ display: "flex", gap: "2px", alignItems: "center" }}>
             <button className="adw-button flat" onClick={undo} title="Undo (Ctrl+Z)">
               <span style={iconStyle(editUndoSymbolic)} />
             </button>
             <button className="adw-button flat" onClick={redo} title="Redo (Ctrl+Shift+Z)">
               <span style={iconStyle(editRedoSymbolic)} />
             </button>
+            <TopBar />
+          </div>
+          {/* End slot: Export actions + Properties toggle */}
+          <div slot="end" style={{ display: "flex", gap: "2px", alignItems: "center" }}>
             <button
               className="adw-button flat protota-desktop-only"
-              onClick={() => setShowAddScreenModal(true)}
-              title="New Screen (Ctrl+N)"
+              onClick={() => window.dispatchEvent(new CustomEvent("protota:share"))}
+              title="Copy a shareable link"
             >
-              <span style={iconStyle(documentNewSymbolic)} />
-              <span style={{ marginLeft: '4px' }}>New Screen</span>
+              Share
             </button>
             <button
               className="adw-button flat protota-desktop-only"
-              onClick={() => setShowPresets(true)}
-              title="Load Preset"
+              onClick={() => exportDocumentFile(doc)}
+              title="Download the document as .mockup.json"
             >
-              <span style={iconStyle(viewGridSymbolic)} />
-              <span style={{ marginLeft: '4px' }}>Load Preset</span>
+              Save JSON
+            </button>
+            <button
+              className="adw-button flat protota-desktop-only"
+              onClick={() => setShowExportModal(true)}
+              title="View generated Blueprint code"
+            >
+              Code Export
+            </button>
+            <button
+              className="adw-button flat protota-desktop-only"
+              onClick={() => window.dispatchEvent(new CustomEvent("protota:export-png"))}
+              title="Export the focused screen as PNG"
+            >
+              PNG
             </button>
             <button
               className={`adw-button flat${rightOpen ? " active" : ""}`}
@@ -356,14 +430,12 @@ export const App: React.FC = () => {
         </adw-header-bar>
 
         {/* Main Workspace — content slot of toolbar-view */}
-        <div className="protota-workspace-container" style={{ display: "flex", flex: 1, overflow: "hidden", position: "relative" }}>
+        <div
+          className="protota-workspace-container"
+          style={{ display: "flex", flex: 1, overflow: "hidden", position: "relative" }}
+        >
           {/* Left Drawer (Layers) Backdrop on Mobile */}
-          {leftOpen && (
-            <div
-              className="protota-mobile-scrim"
-              onClick={() => setLeftOpen(false)}
-            />
-          )}
+          {leftOpen && <div className="protota-mobile-scrim" onClick={() => setLeftOpen(false)} />}
 
           {/* Left Drawer (Layers) — Adwaita sidebar styling */}
           {leftOpen && (
@@ -404,12 +476,7 @@ export const App: React.FC = () => {
           <ViewportCanvas />
 
           {/* Right Drawer (Inspector) Backdrop on Mobile */}
-          {rightOpen && (
-            <div
-              className="protota-mobile-scrim"
-              onClick={() => setRightOpen(false)}
-            />
-          )}
+          {rightOpen && <div className="protota-mobile-scrim" onClick={() => setRightOpen(false)} />}
 
           {/* Right Drawer (Inspector) — Adwaita sidebar styling */}
           {rightOpen && (
@@ -447,6 +514,8 @@ export const App: React.FC = () => {
           )}
         </div>
       </adw-toolbar-view>
+
+      <ExportModal isOpen={showExportModal} onClose={() => setShowExportModal(false)} />
 
       <AddScreenModal isOpen={showAddScreenModal} onClose={() => setShowAddScreenModal(false)} />
 

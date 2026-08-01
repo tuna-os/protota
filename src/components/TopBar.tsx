@@ -1,9 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { persistDocumentSource, useMockupStore } from "../store/mockupStore";
 import { exportDocumentFile, importDocumentFile } from "../utils/exportImport";
-import { mockupToBlueprint } from "../utils/blueprint";
-import { downloadPng, renderScreenToPng } from "../utils/pngExport";
-import { ExportModal } from "./ExportModal";
 import { filterDiagnostics } from "../diagnostics/engine";
 import { openMenuSymbolic, toolsCheckSpellingSymbolic } from "@gjsify/adwaita-icons/actions";
 import { toDataUri } from "@gjsify/adwaita-icons/utils";
@@ -53,23 +50,17 @@ export const TopBar: React.FC = () => {
     liveBlueprintDiagnostics,
     ignoredRules,
     ignoredInstances,
-    runExportCheck,
     showFlows,
     toggleShowFlows,
     clearCanvas,
     setShowAddScreenModal,
   } = useMockupStore();
   const [openMenu, setOpenMenu] = useState<string | null>(null);
-  const [showExportModal, setShowExportModal] = useState(false);
   const menuBarRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const themeLabel =
     doc.colorScheme === "dark" ? "Light" : doc.colorScheme === "light" ? "Auto" : "Dark";
-
-  const handleExportPNG = async () => {
-    downloadPng(await renderScreenToPng());
-  };
 
   // Badge counts ignore dismissed diagnostics but not the panel's tier chips,
   // so the number on the toggle always matches "what would I see with all
@@ -88,31 +79,6 @@ export const TopBar: React.FC = () => {
       window.dispatchEvent(new CustomEvent("protota:show-diagnostics"));
     }
     toggleDiagnostics();
-  };
-
-  const handleExportBlueprint = () => {
-    // Round-trip fidelity check (BLP-E001, design flow D): export proceeds,
-    // but anything the importer cannot faithfully read back gets a card.
-    runExportCheck();
-    const xml = mockupToBlueprint(doc);
-    const blob = new Blob([xml], { type: "application/xml" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${doc.title.toLowerCase().replace(/\s+/g, "-")}.blp`;
-    a.click();
-    URL.revokeObjectURL(url);
-  };
-
-  const handleShare = async () => {
-    const json = JSON.stringify(doc);
-    const encoded = btoa(unescape(encodeURIComponent(json)));
-    const url = `${window.location.origin}${window.location.pathname}#doc=${encoded}`;
-    try {
-      await navigator.clipboard.writeText(url);
-    } catch {
-      prompt("Share this URL:", url);
-    }
   };
 
   const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -137,6 +103,10 @@ export const TopBar: React.FC = () => {
           label: "New Project",
           action: clearCanvas,
         },
+        {
+          label: "Load Preset",
+          action: () => window.dispatchEvent(new CustomEvent("protota:show-presets")),
+        },
         { label: "divider", divider: true },
         {
           label: "Import...",
@@ -150,8 +120,15 @@ export const TopBar: React.FC = () => {
           label: "Import App (Folder / Zip / URL)…",
           action: () => window.dispatchEvent(new CustomEvent("protota:show-import-app")),
         },
-        { label: "Export as PNG", action: handleExportPNG },
-        { label: "Export Blueprint (.blp)", action: handleExportBlueprint, shortcut: "Ctrl+E" },
+        {
+          label: "Export as PNG",
+          action: () => window.dispatchEvent(new CustomEvent("protota:export-png")),
+        },
+        {
+          label: "Export Blueprint (.blp)",
+          action: () => window.dispatchEvent(new CustomEvent("protota:export-blueprint")),
+          shortcut: "Ctrl+E",
+        },
         {
           // Write-back UX bridge (ADR 0001 Part 3 item 1): download +
           // generated protota-writeback command, plus the File System
@@ -160,7 +137,11 @@ export const TopBar: React.FC = () => {
           action: () => window.dispatchEvent(new CustomEvent("protota:show-writeback")),
         },
         { label: "divider", divider: true },
-        { label: "Share URL", action: handleShare, shortcut: "Ctrl+S" },
+        {
+          label: "Share URL",
+          action: () => window.dispatchEvent(new CustomEvent("protota:share")),
+          shortcut: "Ctrl+S",
+        },
       ],
     },
     {
@@ -256,18 +237,18 @@ export const TopBar: React.FC = () => {
   // not fit, so everything collapses into a single hamburger overflow menu
   // (issue #99). The extra "Actions" group surfaces the direct-access
   // toolbar buttons plus the header-bar actions that are hidden on mobile.
+  // (Load Preset lives in the spread File group, so it is not repeated here.)
   const mobileMenus: MenuGroup[] = [
     {
       label: "Actions",
       items: [
         { label: "New Screen", action: () => setShowAddScreenModal(true), shortcut: "Ctrl+N" },
-        {
-          label: "Load Preset",
-          action: () => window.dispatchEvent(new CustomEvent("protota:show-presets")),
-        },
         { label: "divider", divider: true },
         { label: "Save JSON", action: () => exportDocumentFile(doc) },
-        { label: "Code Export", action: () => setShowExportModal(true) },
+        {
+          label: "Code Export",
+          action: () => window.dispatchEvent(new CustomEvent("protota:code-export")),
+        },
       ],
     },
     ...menus,
@@ -359,9 +340,7 @@ export const TopBar: React.FC = () => {
           )}
         </div>
       ))}
-      {/* Direct-access toolbar actions. These are the working contract of
-          issues #5/#8/#11/#12/#17/#24/#25 — visible buttons, not only menu
-          entries. */}
+      {/* Direct-access toolbar actions */}
       <button
         className={`adw-button flat protota-desktop-only${showFlows ? " active" : ""}`}
         data-active={showFlows ? "true" : undefined}
@@ -401,22 +380,13 @@ export const TopBar: React.FC = () => {
           </span>
         )}
       </button>
-      <button className="adw-button flat protota-desktop-only" onClick={toggleColorScheme} title={`Switch theme (${themeLabel})`}>
+      <button
+        className="adw-button flat protota-desktop-only"
+        onClick={toggleColorScheme}
+        title={`Switch theme (${themeLabel})`}
+      >
         Theme
       </button>
-      <button className="adw-button flat protota-desktop-only" onClick={handleShare} title="Copy a shareable link">
-        Share
-      </button>
-      <button className="adw-button flat protota-desktop-only" onClick={() => exportDocumentFile(doc)} title="Download the document as .mockup.json">
-        Save JSON
-      </button>
-      <button className="adw-button flat protota-desktop-only" onClick={() => setShowExportModal(true)} title="View generated Blueprint code">
-        Code Export
-      </button>
-      <button className="adw-button flat protota-desktop-only" onClick={handleExportPNG} title="Export the focused screen as PNG">
-        PNG
-      </button>
-      <ExportModal isOpen={showExportModal} onClose={() => setShowExportModal(false)} />
       <input
         ref={fileInputRef}
         type="file"

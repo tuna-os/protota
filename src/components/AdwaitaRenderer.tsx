@@ -390,12 +390,15 @@ export const AdwaitaRenderer: React.FC<Props> = ({
   const isDialogRoot = Boolean(screenWidth) &&
     (node.type === 'dialog' || node.type === 'preferences-dialog' || node.type === 'about-dialog' || node.type === 'alert-dialog');
 
-  useEffect(() => {
-    if ((node.type === 'window' || node.type === 'dialog' || isDialogRoot) && elRef.current && screenWidth) {
-      elRef.current.style.width = `${screenWidth}px`;
-      if (screenHeight) elRef.current.style.height = `${screenHeight}px`;
-    }
-  }, [node.type, isDialogRoot, screenWidth, screenHeight]);
+  // Root window/dialog sizing is part of the element's style prop (merged
+  // into the createElement style below) rather than an imperative effect:
+  // the keyed host remount (see hostKey) replaces the element without
+  // changing this component's deps, so an effect-applied size would be lost
+  // on the fresh element while React-managed style always re-applies.
+  const rootSizeStyle: React.CSSProperties | undefined =
+    (node.type === 'window' || node.type === 'dialog' || isDialogRoot) && screenWidth
+      ? { width: `${screenWidth}px`, ...(screenHeight ? { height: `${screenHeight}px` } : {}) }
+      : undefined;
 
   useEffect(() => {
     ensureAdwIcon(node.iconName);
@@ -469,16 +472,31 @@ export const AdwaitaRenderer: React.FC<Props> = ({
     return () => wrapper.removeEventListener('click', handleNativeClick);
   }, [node.id, screenId, selectNode, toggleNodeSelection]);
 
-  // GTK visibility: a hidden widget takes no space and draws nothing. This
-  // must come after every hook so React's hook order stays stable.
-  if (node.visible === false) return null;
+  // GTK visibility: a hidden widget takes no space and draws nothing — but it
+  // must keep a stable DOM placeholder rather than render null. Several adw-*
+  // custom elements adopt their light-DOM children into internal wrappers on
+  // connect (see the hostKey note below); if a child later flipped to null,
+  // React would removeChild() through the adopting host and crash (#137). A
+  // display:none shell draws nothing, takes no space, and is reconciled in
+  // place (div → div), so React never performs a structural op on the host.
+  // These checks come after every hook so React's hook order stays stable.
+  const hiddenShell = (
+    <div
+      ref={wrapperRef}
+      slot={node.slot ?? inheritedSlot}
+      className="adw-node-wrapper"
+      style={{ display: 'none' }}
+      data-hidden-node-id={node.id}
+    />
+  );
+  if (node.visible === false) return hiddenShell;
   // An Adw.Breakpoint is structure, not a widget: GTK never draws it. Its
   // condition/setters are evaluated by utils/breakpoints.ts instead.
-  if (node.breakpointCondition !== undefined || node.sourceClass === 'Adw.Breakpoint') return null;
+  if (node.breakpointCondition !== undefined || node.sourceClass === 'Adw.Breakpoint') return hiddenShell;
   // Adw.TabBar autohide: with fewer than two tabs the bar takes no space,
   // exactly like a hidden widget (unless a finishing file pinned a runtime
   // allocation via heightRequest — see utils/tabBar.ts).
-  if (tabBar?.hidden) return null;
+  if (tabBar?.hidden) return hiddenShell;
 
   // In preview a ViewSwitcher becomes live chrome: one tab per page of the
   // first stack in its screen; tapping a tab flips that stack's visible
@@ -540,8 +558,9 @@ export const AdwaitaRenderer: React.FC<Props> = ({
     child, slot: childSlot(node, child, index),
   }));
   const collapsedSplit = node.type === 'overlay-split' && node.collapsed === true;
-  const children = slottedChildren
-    .filter(({ slot }) => !(collapsedSplit && slot === 'sidebar'))
+  const renderedSlotted = slottedChildren
+    .filter(({ slot }) => !(collapsedSplit && slot === 'sidebar'));
+  const children = renderedSlotted
     .map(({ child, slot }) => (
     <AdwaitaRenderer
       key={child.id}
@@ -657,6 +676,23 @@ export const AdwaitaRenderer: React.FC<Props> = ({
     : '';
   const elementClass = [divClass, styleClasses, diagnosticClass].filter(Boolean).join(' ');
 
+  // Several adw-* custom elements ADOPT their light-DOM children on connect:
+  // adw-toolbar-view, adw-header-bar, and adw-toast-overlay snapshot the
+  // children React rendered into them and move (or discard) them via
+  // this.replaceChildren(...) into internal wrapper divs. From then on
+  // React's picture of the host's child list disagrees with the real DOM,
+  // and the next structural operation on the host — removeChild for a
+  // deleted node, insertBefore for an added one — throws NotFoundError and
+  // blanks the whole app (#137). Keying the host element on its rendered
+  // child list makes any structural change remount the host itself: React
+  // only ever removes the old host from the wrapper div it owns (never a
+  // reparented child), and the fresh host re-adopts its children on connect.
+  const hostKey = tag.startsWith('adw-')
+    ? renderedSlotted.map(({ child, slot }) => `${child.id}@${slot ?? ''}`)
+        .concat(controlsKind, iconPrefix ? 'icon-prefix' : '')
+        .join('|')
+    : undefined;
+
   return (
     <div
       ref={wrapperRef}
@@ -672,6 +708,7 @@ export const AdwaitaRenderer: React.FC<Props> = ({
       )}
 
       {React.createElement(tag, {
+        key: hostKey,
         ref: elRef,
         ...attrs,
         'data-protota-type': node.type,
@@ -702,7 +739,7 @@ export const AdwaitaRenderer: React.FC<Props> = ({
         // layout-transparent (display: contents): the element itself is the
         // flex/grid item its parent lays out, so GTK expand and attach
         // semantics propagate instead of stopping at each wrapper.
-        style: { ...containerLayout(node), ...placementLayout(node, parentFlow) },
+        style: { ...containerLayout(node), ...placementLayout(node, parentFlow), ...rootSizeStyle },
         className: elementClass || undefined,
       },
         iconPrefix,

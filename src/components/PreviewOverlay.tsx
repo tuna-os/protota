@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { useMockupStore } from '../store/mockupStore';
 import { AdwaitaRenderer } from './AdwaitaRenderer';
 import { PreviewContext, type PreviewInteraction } from '../preview/PreviewContext';
+import { CanvasErrorBoundary } from './CanvasErrorBoundary';
 import type { AdwNode } from '../types/mockup';
 import { breakpointOverrides } from '../utils/breakpoints';
 import { windowCloseSymbolic } from '@gjsify/adwaita-icons/ui';
@@ -186,12 +187,16 @@ export const PreviewOverlay: React.FC<PreviewOverlayProps> = ({
 
   const rendered = (
     <PreviewContext.Provider value={interaction}>
-      <AdwaitaRenderer
-        key={renderKey}
-        node={screen.rootNode}
-        screenId={screen.id}
-        overrides={overrides}
-      />
+      {/* Same commit-phase containment as the canvas (#137): a crash inside
+          the preview shows a card instead of blanking the overlay. */}
+      <CanvasErrorBoundary resetKey={renderKey}>
+        <AdwaitaRenderer
+          key={renderKey}
+          node={screen.rootNode}
+          screenId={screen.id}
+          overrides={overrides}
+        />
+      </CanvasErrorBoundary>
     </PreviewContext.Provider>
   );
 

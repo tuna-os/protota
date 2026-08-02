@@ -87,13 +87,22 @@ const finishing = existsSync(finishingPath) ? JSON.parse(readFileSync(finishingP
 const probePath = new URL(`../presets-src/${appId}.probe.json`, import.meta.url);
 const probeDump = existsSync(probePath) ? JSON.parse(readFileSync(probePath, 'utf8')) : null;
 
-function validateProbeEvidenceEntries(overrides, label) {
+function probeForScreen(spec) {
+  if (!spec.probeFile) return { dump: probeDump, label: `${appId}.probe.json` };
+  const path = new URL(`../presets-src/${spec.probeFile}`, import.meta.url);
+  return {
+    dump: existsSync(path) ? JSON.parse(readFileSync(path, 'utf8')) : null,
+    label: spec.probeFile,
+  };
+}
+
+function validateProbeEvidenceEntries(overrides, label, screenProbeDump) {
   const errors = [];
   let evidenced = 0;
   for (const override of overrides ?? []) {
     if (!override.probeEvidence) continue;
     evidenced++;
-    for (const error of validateProbeEvidence(override.probeEvidence, probeDump)) {
+    for (const error of validateProbeEvidence(override.probeEvidence, screenProbeDump)) {
       errors.push(`${label} / ${override.id}: ${error}`);
     }
   }
@@ -138,6 +147,7 @@ let evidencedTotal = 0;
 let diagnosticsTotal = 0;
 let projectedRuntimeTotal = 0;
 for (const spec of screenSpecs) {
+  const screenProbe = probeForScreen(spec);
   const entry = spec.entry ?? defaultEntry;
   const generated = blueprintBundleToDocument(files, entry, finishing?.title ?? appId);
   const screen = generated.screens[0];
@@ -145,19 +155,19 @@ for (const spec of screenSpecs) {
   if (spec.title) screen.title = spec.title;
   if (spec.width) screen.width = spec.width;
   if (spec.height) screen.height = spec.height;
-  evidencedTotal += validateProbeEvidenceEntries(spec.overrides, screen.id);
+  evidencedTotal += validateProbeEvidenceEntries(spec.overrides, screen.id, screenProbe.dump);
   appliedTotal += applyOverrides(screen, spec.overrides, screen.id);
   // Runtime-generated stock widgets (for example Settings' category rows)
   // do not exist in the declarative bundle. An explicitly opted-in screen
   // consumes the committed semantic probe: source widgets are matched first,
   // then only unmatched mapped branches are projected into that source tree.
   if ((spec.runtimeProbe ?? finishing?.runtimeProbe) === true) {
-    if (!probeDump) {
-      console.error(`${screen.id}: runtimeProbe is enabled but presets-src/${appId}.probe.json is missing`);
+    if (!screenProbe.dump) {
+      console.error(`${screen.id}: runtimeProbe is enabled but presets-src/${screenProbe.label} is missing`);
       process.exit(1);
     }
-    const runtimeReport = matchRuntimeProfile(probeDump, screen.rootNode);
-    const applied = applyRuntimeEvidence(screen.rootNode, runtimeReport, probeDump);
+    const runtimeReport = matchRuntimeProfile(screenProbe.dump, screen.rootNode);
+    const applied = applyRuntimeEvidence(screen.rootNode, runtimeReport, screenProbe.dump);
     projectedRuntimeTotal += applied.projected.length;
     if (runtimeReport.matchRate < 0.5) {
       console.error(`${screen.id}: runtime probe matched only ${(runtimeReport.matchRate * 100).toFixed(1)}% of source widgets; refusing an unreliable projection`);

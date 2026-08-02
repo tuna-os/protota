@@ -330,7 +330,15 @@ export function applyRuntimeEvidence(root: AdwNode, report: RuntimeProfileReport
   const nodes: AdwNode[] = [];
   walkSource(root, nodes);
   const nodeById = new Map(nodes.map((node) => [node.id, node]));
-  const matchesByPath = new Map(report.matches.map(match => [match.indexPath.join(','), match]));
+  const matchByNodeId = new Map(report.matches.map(match => [match.nodeId, match]));
+  const parentByNode = new Map<AdwNode, AdwNode>();
+  const indexParents = (node: AdwNode): void => {
+    for (const child of [...(node.children ?? []), ...(node.pages ?? [])]) {
+      parentByNode.set(child, node);
+      indexParents(child);
+    }
+  };
+  indexParents(root);
   const applied: AppliedRuntimeEvidence = { suppressed: [], revealed: [], allocated: [], projected: [] };
   for (const match of report.matches) {
     const node = nodeById.get(match.nodeId);
@@ -356,9 +364,16 @@ export function applyRuntimeEvidence(root: AdwNode, report: RuntimeProfileReport
     // while placing major panes/header/content at Broadway's coordinates.
     if (probe && match.bounds && node !== root) {
       let ancestorMatch: RuntimeMatch | undefined;
-      for (let length = match.indexPath.length - 1; length > 0; length--) {
-        ancestorMatch = matchesByPath.get(match.indexPath.slice(0, length).join(','));
-        if (ancestorMatch?.bounds) break;
+      let sourceAncestor = parentByNode.get(node);
+      while (sourceAncestor) {
+        const candidate = matchByNodeId.get(sourceAncestor.id);
+        const isRuntimeAncestor = candidate && candidate.indexPath.length < match.indexPath.length
+          && candidate.indexPath.every((part, index) => match.indexPath[index] === part);
+        if (candidate?.bounds && isRuntimeAncestor) {
+          ancestorMatch = candidate;
+          break;
+        }
+        sourceAncestor = parentByNode.get(sourceAncestor);
       }
       const ancestorBounds = ancestorMatch?.bounds ?? { x: 0, y: 0, width: 0, height: 0 };
       node.runtimeEvidence = {
@@ -474,8 +489,14 @@ export function projectRuntimeBranches(root: AdwNode, report: RuntimeProfileRepo
   const build = (widget: ProbeWidget, parentBounds: ProbeBounds | null): AdwNode[] => {
     if (!widget.mapped || !widget.visible || matchByPath.has(widget.indexPath.join(','))) return [];
     const node = runtimeNode(widget, parentBounds, report.probeVersion);
+    // Flattened GTK implementation internals do not create a rendered
+    // positioning context. Their supported descendants must therefore stay
+    // relative to the nearest ancestor that *does* render, not to the
+    // skipped widget's allocation. Otherwise deep custom views (Calendar's
+    // month/week grids) collapse all descendants into the skipped origin.
+    const descendantParentBounds = node ? widget.bounds ?? parentBounds : parentBounds;
     const descendants = (children.get(widget.indexPath.join(',')) ?? [])
-      .flatMap(child => build(child, widget.bounds ?? parentBounds));
+      .flatMap(child => build(child, descendantParentBounds));
     if (!node) return descendants; // flatten unsupported GTK internals
     node.children = presentationOwners.has(node.type) ? [] : descendants;
     if (node.children.length) node.runtimeProjectionHost = true;

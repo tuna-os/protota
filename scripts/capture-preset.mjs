@@ -41,7 +41,7 @@ await page.evaluate(() => {
   const store = window.__mockupStore;
   if (store && !store.getState().showFlows) store.getState().toggleShowFlows();
 });
-await page.waitForSelector('[data-protota-render-surface="true"]', { timeout: 10000 });
+await page.waitForSelector('[data-protota-render-surface="true"]', { timeout: 30000 });
 for (let index = 0; index < zoomOut; index++) {
   await page.evaluate(() => window.dispatchEvent(new Event('protota:zoom-out')));
 }

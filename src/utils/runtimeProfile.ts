@@ -166,9 +166,15 @@ class ProbeTree {
         siblings.push(widget);
         this.children.set(parentKey, siblings);
       }
-      // First occurrence wins: a duplicated id would otherwise be ambiguous.
-      if (widget.buildableId && !this.byBuildableId.has(widget.buildableId)) {
-        this.byBuildableId.set(widget.buildableId, widget);
+      // GtkBuilder ids are template-scoped, so the probe may contain the same
+      // id in an application's dormant template instance and its presented
+      // dialog. Prefer the mapped occurrence; two equally mapped occurrences
+      // remain structurally ambiguous and retain stable first occurrence.
+      if (widget.buildableId) {
+        const existing = this.byBuildableId.get(widget.buildableId);
+        if (!existing || (!existing.mapped && widget.mapped)) {
+          this.byBuildableId.set(widget.buildableId, widget);
+        }
       }
     }
   }

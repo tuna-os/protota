@@ -575,10 +575,18 @@ export const AdwaitaRenderer: React.FC<Props> = ({
       })),
   ) : null;
 
+  const isAppCompositeRow = node.type === 'action-row' && (node.children?.length ?? 0) > 0 &&
+    typeof node.sourceClass === 'string' && !/^(Adw|Gtk)[.A-Z]/.test(node.sourceClass);
+  const hasAppCompositeRow = node.type === 'preferences-group' && node.children?.some((child) =>
+    child.type === 'action-row' && typeof child.sourceClass === 'string' && !/^(Adw|Gtk)[.A-Z]/.test(child.sourceClass));
+  const hasNonPreferenceRow = node.type === 'preferences-group' && node.children?.some((child) =>
+    !['action-row', 'switch-row', 'combo-row', 'spin-row', 'button-row', 'entry-row', 'expander-row'].includes(child.type));
+  const isExpandedPreferenceComposite = isAppCompositeRow || hasAppCompositeRow || hasNonPreferenceRow;
+
   // adw-menu-button is icon-only; a labelled MenuButton renders as a button.
   const tag = isDialogRoot
     ? 'adw-window'
-    : node.type === 'navigation-view' || node.type === 'overlay-split'
+    : node.type === 'navigation-view' || node.type === 'overlay-split' || isExpandedPreferenceComposite
       ? 'div'
       : node.type === 'menu-button' && node.title
         ? 'adw-button'
@@ -724,7 +732,7 @@ export const AdwaitaRenderer: React.FC<Props> = ({
   // A custom-widget with projected children is a resolved composite: render it
   // as a plain container, not a striped unresolved boundary.
   const isExpandedBoundary = node.type === 'custom-widget' && (node.children?.length ?? 0) > 0;
-  const divClass = DIV_TYPES.has(node.type)
+  const divClass = DIV_TYPES.has(node.type) || isExpandedPreferenceComposite
     ? isExpandedBoundary ? 'protota-div-custom-widget-expanded' : `protota-div-${node.type}`
     : '';
   // GTK style classes the source declared. Adwaita defines several that

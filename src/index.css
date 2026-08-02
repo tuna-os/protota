@@ -1404,6 +1404,16 @@ adw-header-bar adw-view-switcher > .adw-view-switcher-content {
   display: none;
 }
 
+/* Composite PreferencesRow subclasses may own arbitrary template children,
+   which adwaita-web's title/subtitle-only row element would discard. */
+.protota-div-preferences-group,
+.protota-div-action-row {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+}
+
 /* GtkSwitch is a div-rendered widget; its ephemeral on/off toggle is only
    reachable in preview, so the knob + on-state style is preview-scoped —
    editor rendering (and the Broadway reference screenshots) stay unchanged. */

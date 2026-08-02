@@ -127,6 +127,20 @@ describe('runtime profile matching (#58)', () => {
     });
   });
 
+  it('prefers the mapped occurrence of a template-scoped duplicate id', () => {
+    const root = blueprintToNode('Adw.ApplicationWindow window { Gtk.Button action { label: "Go"; } }');
+    const report = matchRuntimeProfile(probe([
+      widget({ gtype: 'AdwApplicationWindow', indexPath: [0], buildableId: 'window' }),
+      widget({ gtype: 'GtkButton', indexPath: [0, 0], buildableId: 'action', mapped: false }),
+      widget({ gtype: 'GtkButton', indexPath: [0, 1], buildableId: 'action', mapped: true }),
+    ]), root);
+
+    expect(report.matches.find((match) => match.nodeId === 'action')).toMatchObject({
+      mapped: true,
+      indexPath: [0, 1],
+    });
+  });
+
   it('emits native:* facts at the top native confidence tier', () => {
     const facts = nativeFactsFor(widget({
       gtype: 'MathButtons', indexPath: [0, 2],

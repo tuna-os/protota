@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exportedAt": "2026-08-02T16:11:45.301Z",
+  "exportedAt": "2026-08-02T16:20:27.642Z",
   "generatedBy": "scripts/generate-preset.mjs",
   "document": {
     "id": "clocks-preset",
@@ -1966,13 +1966,9 @@
                                               "sourceClass": "Adw.StatusPage",
                                               "title": "",
                                               "description": "",
-                                              "visible": true,
-                                              "geometryOrigin": {
-                                                "visible": "native"
-                                              },
                                               "runtimeEvidence": {
                                                 "probeVersion": 2,
-                                                "matchedBy": "structure",
+                                                "matchedBy": "buildable-id",
                                                 "buildableId": "empty_view",
                                                 "gtype": "AdwStatusPage",
                                                 "mapped": true,
@@ -2039,6 +2035,7 @@
                                       ],
                                       "sourceClass": "ClocksAlarmFace",
                                       "slot": "child",
+                                      "runtimeProjectionHost": true,
                                       "runtimeEvidence": {
                                         "probeVersion": 2,
                                         "matchedBy": "buildable-id",
@@ -2058,8 +2055,7 @@
                                           "width": 870,
                                           "height": 644
                                         }
-                                      },
-                                      "runtimeProjectionHost": true
+                                      }
                                     }
                                   ],
                                   "name": "alarm",
@@ -7901,7 +7897,8 @@
                               "sourceClass": "Adw.ButtonRow"
                             }
                           ],
-                          "sourceClass": "Adw.PreferencesGroup"
+                          "sourceClass": "Adw.PreferencesGroup",
+                          "visible": false
                         }
                       ],
                       "sourceClass": "Adw.PreferencesPage"

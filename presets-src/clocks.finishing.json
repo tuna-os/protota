@@ -33,7 +33,14 @@
                              "expect": { "visibleChildName": "timer", "mapped": true } },
           "why": "Version-matched Clocks 49.0 probe with panel-id=timer." }
       ] },
-    { "id": "alarm-setup", "entry": "data/ui/alarm-setup-dialog.ui", "title": "New Alarm", "width": 520, "height": 580 }
+    { "id": "alarm-setup", "entry": "data/ui/alarm-setup-dialog.ui", "title": "New Alarm", "width": 520, "height": 580,
+      "probeFile": "clocks-alarm-setup.probe.json",
+      "overrides": [
+        { "id": "delete_group", "set": { "visible": false },
+          "probeEvidence": { "probeVersion": 2, "buildableId": "delete_group",
+                             "expect": { "mapped": false, "visible": false } },
+          "why": "The native New Alarm state hides the removal action; it is shown only while editing an existing alarm." }
+      ] }
   ],
   "edges": [
     { "from": "world", "to": "alarms", "why": "View switcher → Alarms" },

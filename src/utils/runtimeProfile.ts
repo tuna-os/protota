@@ -469,7 +469,7 @@ export function projectRuntimeBranches(root: AdwNode, report: RuntimeProfileRepo
     'label', 'inscription', 'button', 'menu-button', 'split-button', 'entry', 'search-entry',
     'switch-widget', 'check-button', 'status-page', 'action-row', 'switch-row', 'combo-row',
     'spin-row', 'button-row', 'entry-row', 'password-row', 'avatar', 'progress-bar',
-    'scale', 'level-bar', 'spinner',
+    'scale', 'level-bar', 'spinner', 'banner', 'view-switcher',
   ]);
   const build = (widget: ProbeWidget, parentBounds: ProbeBounds | null): AdwNode[] => {
     if (!widget.mapped || !widget.visible || matchByPath.has(widget.indexPath.join(','))) return [];
@@ -486,6 +486,7 @@ export function projectRuntimeBranches(root: AdwNode, report: RuntimeProfileRepo
     const parent = sourceById.get(match.nodeId);
     const runtimeParent = widgetByPath.get(match.indexPath.join(','));
     if (!parent || !runtimeParent || !match.mapped) continue;
+    if (presentationOwners.has(parent.type)) continue;
     const additions = (children.get(match.indexPath.join(',')) ?? [])
       .flatMap(child => build(child, runtimeParent.bounds));
     if (!additions.length) continue;

@@ -81,7 +81,7 @@ static const char *align_nick(GtkAlign align) {
  * state is deliberately excluded from the snapshot contract. */
 static const char *semantic_properties[] = {
   "title", "subtitle", "description", "label", "text", "icon-name",
-  "placeholder-text", "active", "orientation", "spacing", "selected", NULL
+  "placeholder-text", "active", "selected", NULL
 };
 
 static gboolean append_semantic_value(GString *out, const GValue *value) {
@@ -178,10 +178,17 @@ static void append_widget(GString *out, GtkWidget *widget, GtkWidget *toplevel,
 
   g_string_append(out, ",\"properties\":{");
   gboolean first_property = TRUE;
+  const char *runtime_type = G_OBJECT_TYPE_NAME(widget);
+  gboolean stock_semantics = g_str_has_prefix(runtime_type, "Gtk") ||
+                             g_str_has_prefix(runtime_type, "Adw");
   for (guint i = 0; semantic_properties[i] != NULL; i++) {
+    if (!stock_semantics) break;
     const char *name = semantic_properties[i];
     GParamSpec *property = g_object_class_find_property(G_OBJECT_GET_CLASS(widget), name);
     if (property == NULL || !(property->flags & G_PARAM_READABLE)) continue;
+    if (g_getenv("PROBE_TRACE_PROPERTIES") != NULL) {
+      fprintf(stderr, "protota-probe: reading %s.%s\n", G_OBJECT_TYPE_NAME(widget), name);
+    }
     GValue value = G_VALUE_INIT;
     g_value_init(&value, property->value_type);
     g_object_get_property(G_OBJECT(widget), name, &value);

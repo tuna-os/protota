@@ -569,9 +569,13 @@ export const AdwaitaRenderer: React.FC<Props> = ({
   const renderedSlotted = slottedChildren
     .filter(({ slot }) => !(collapsedSplit && slot === 'sidebar'));
   const children = renderedSlotted
-    .map(({ child, slot }) => (
+    .map(({ child, slot }, index) => (
     <AdwaitaRenderer
-      key={child.id}
+      // GtkBuilder IDs are scoped to a template, so expanding several
+      // templates can legitimately put repeated IDs under one projected
+      // parent. Keep the source ID for editing, but include structural
+      // position in React identity so siblings are never omitted/duplicated.
+      key={`${child.id}:${index}`}
       node={child}
       screenId={screenId}
       inheritedSlot={slot}

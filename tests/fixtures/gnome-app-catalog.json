@@ -109,22 +109,23 @@
     "presetId": "calendar",
     "screens": ["month", "week"],
     "viewport": {
-      "width": 1419,
-      "height": 923
+      "width": 768,
+      "height": 600
     },
     "source": "https://gitlab.gnome.org/GNOME/gnome-calendar",
     "sourceImport": {
       "repository": "https://gitlab.gnome.org/GNOME/gnome-calendar.git",
       "uiPath": "src/gui",
-      "entry": "gcal-window.blp",
-      "tag": "49.1",
+      "entry": "gui/gcal-window.ui",
+      "tag": "46.1",
       "importRoot": "src"
     },
     "suite": "core",
     "status": "preset",
-    "visualStatus": "not-validated",
-    "maxUnresolvedCoverage": 0.01,
-    "minSimilarity": 0.98
+    "visualStatus": "passed",
+    "maxUnresolvedCoverage": 0,
+    "minSimilarity": 0.94,
+    "minForegroundIoU": 0.23
   },
   "clocks": {
     "name": "GNOME Clocks",

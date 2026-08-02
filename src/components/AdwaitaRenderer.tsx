@@ -711,8 +711,13 @@ export const AdwaitaRenderer: React.FC<Props> = ({
       slot={node.slot ?? inheritedSlot}
       className={`adw-node-wrapper${isSelected ? ' selected-outline' : ''}${isMultiSelected ? ' multi-selected-outline' : ''}`}
       style={{
+        // Normal wrappers are layout-transparent, but a handful of
+        // single-child container rules materialise them as flex conduits.
+        // Applying native absolute placement here as well as on the widget
+        // doubles every offset in those containers (a -1671px Week scroll
+        // position became -3342px). Placement belongs to the rendered
+        // widget; only selection chrome needs its own positioned anchor.
         ...(isSelected || isMultiSelected ? { position: 'relative' } : {}),
-        ...placementLayout(node, parentFlow),
       }}
     >
       {isSelected && (

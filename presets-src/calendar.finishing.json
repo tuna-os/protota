@@ -1,7 +1,7 @@
 {
   "title": "GNOME Calendar",
   "screens": [
-    { "id": "month", "entry": "gui/gcal-window.ui", "title": "Month", "width": 1024, "height": 700,
+    { "id": "month", "entry": "gui/gcal-window.ui", "title": "Month", "width": 768, "height": 600,
       "runtimeProbe": true,
       "overrides": [
         { "id": "views_stack", "set": { "visibleChildName": "month" },
@@ -9,7 +9,7 @@
                              "expect": { "visibleChildName": "month", "mapped": true } },
           "why": "Native probe (2026-08-02): views_stack shows the month page in the default GSettings active-view; its settled stock-widget descendants are projected from the same frame." }
       ] },
-    { "id": "week", "entry": "gui/gcal-window.ui", "title": "Week", "width": 1024, "height": 700,
+    { "id": "week", "entry": "gui/gcal-window.ui", "title": "Week", "width": 768, "height": 600,
       "runtimeProbe": true,
       "probeFile": "calendar-week.probe.json",
       "overrides": [

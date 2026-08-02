@@ -25,7 +25,7 @@ export const PRESET_CATALOG: PresetMeta[] = [
   { id: 'settings', name: 'GNOME Settings', description: 'Navigation split view generated from its official Blueprint source — collapses below its 550sp Adw.Breakpoint.', screens: 1 },
   { id: 'calculator', name: 'GNOME Calculator', description: 'Button grid calculator with display and arithmetic operations.', screens: 1 },
   { id: 'files', name: 'GNOME Files (Nautilus)', description: 'Sidebar + content layout with bookmarks, search, and file grid.', screens: 1 },
-  { id: 'calendar', name: 'GNOME Calendar', description: 'Event list with header bar, today/prev/next navigation, and new event button.', screens: 1 },
+  { id: 'calendar', name: 'GNOME Calendar', description: 'Month and week views reconstructed from version-matched source and native runtime state.', screens: 2 },
   { id: 'weather', name: 'GNOME Weather', description: 'City forecast view with status header and 7-day temperature trends.', screens: 1 },
   { id: 'clocks', name: 'GNOME Clocks', description: 'World clocks, alarms, stopwatch, and timers with ViewSwitcher tabs.', screens: 1 },
   { id: 'disks', name: 'GNOME Disks', description: 'Disk partition utility with drive list sidebar and volume allocation.', screens: 1 },

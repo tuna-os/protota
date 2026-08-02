@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exportedAt": "2026-08-02T15:41:30.951Z",
+  "exportedAt": "2026-08-02T15:44:58.253Z",
   "generatedBy": "scripts/generate-preset.mjs",
   "document": {
     "id": "calendar-preset",
@@ -11,8 +11,8 @@
         "id": "month",
         "title": "Month",
         "type": "standard",
-        "width": 1024,
-        "height": 700,
+        "width": 768,
+        "height": 600,
         "rootNode": {
           "id": "imported-1",
           "type": "window",
@@ -44277,8 +44277,8 @@
         "id": "week",
         "title": "Week",
         "type": "standard",
-        "width": 1024,
-        "height": 700,
+        "width": 768,
+        "height": 600,
         "rootNode": {
           "id": "imported-1",
           "type": "window",

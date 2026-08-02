@@ -90,7 +90,9 @@ test.describe('Icon library', () => {
     await expect(page.locator('.protota-icon-trigger')).toContainText('weather-clear');
   });
 
-  test('appears in the mobile overflow menu', async ({ page }) => {
+  test('opens from the app-menu on mobile viewports', async ({ page }) => {
+    // The app-menu button renders on every viewport with the same entries;
+    // Icon Library must be reachable from it on mobile too.
     await page.setViewportSize({ width: 390, height: 844 });
     await page.getByTestId('mobile-menu-button').click();
     await page.getByTestId('mobile-menu').getByRole('menuitem', { name: /icon library/i }).click();

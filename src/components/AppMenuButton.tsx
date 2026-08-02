@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef } from "react";
 import { objectSelectSymbolic } from "@gjsify/adwaita-icons/actions";
 import { toDataUri } from "@gjsify/adwaita-icons/utils";
 import type { AdwMenuItem } from "@gjsify/adwaita-web";
@@ -20,20 +20,6 @@ const THEME_CHOICES: Array<{ choice: ThemeChoice; label: string; circleClass: st
 
 /** objectSelectSymbolic as a mask URI — the white check in the selected badge. */
 const checkUri = toDataUri(objectSelectSymbolic);
-
-/** App-wide mobile breakpoint (mirrors BottomBar and the CSS media query). */
-function useIsMobile(): boolean {
-  const [isMobile, setIsMobile] = useState(
-    () => typeof window !== "undefined" && window.matchMedia("(max-width: 768px)").matches,
-  );
-  useEffect(() => {
-    const mq = window.matchMedia("(max-width: 768px)");
-    const onChange = () => setIsMobile(mq.matches);
-    mq.addEventListener("change", onChange);
-    return () => mq.removeEventListener("change", onChange);
-  }, []);
-  return isMobile;
-}
 
 /**
  * Build the 3-circle theme switcher (GNOME Settings appearance idiom) as DOM.
@@ -95,9 +81,10 @@ function syncThemeSwitcher(group: HTMLElement, selected: string): void {
  * The header app-menu button: an <adw-menu-button> (the flat header app-menu
  * button, default open-menu icon) at the header end before the Properties
  * toggle, on every viewport. It holds the app-menu idiom — theme switcher +
- * Icon Library + Show Shortcuts. "Open" and "Export" are labelled header
- * menu buttons on every viewport, so they are not spread into this menu;
- * mobile only adds the overflow "Actions" group (New Screen).
+ * Icon Library + Show Shortcuts — and the same entries on mobile as on
+ * desktop (the mobile-only "Actions" overflow group is gone; New Screen lives
+ * in the bottom bar). "Open" and "Export" are labelled header menu buttons on
+ * every viewport, so they are not spread into this menu.
  *
  * Menu items go in through the element's own flat {id,label,icon} model; the
  * theme switcher, the extra group headers, and the separators cannot be
@@ -110,15 +97,13 @@ export const AppMenuButton: React.FC = () => {
   const btnRef = useRef<AdwMenuButtonElement>(null);
   /** Latest id→action map, read by the (once-registered) activation listener. */
   const actionsRef = useRef<Record<string, () => void>>({});
-  const isMobile = useIsMobile();
-  const { mobileMenus, appMenuItems } = useMenus();
+  const { appMenuItems } = useMenus();
   const colorScheme = useMockupStore((s) => s.doc.colorScheme);
   const setColorScheme = useMockupStore((s) => s.setColorScheme);
 
-  // The menu contents per viewport. Desktop: one headerless group with the
-  // app-menu entries; mobile: the overflow groups (group 0's label becomes
-  // the native menu-title).
-  const groups: MenuGroup[] = isMobile ? mobileMenus : [{ label: "", items: appMenuItems }];
+  // The menu contents are the same on every viewport: one headerless group
+  // with the app-menu entries.
+  const groups: MenuGroup[] = [{ label: "", items: appMenuItems }];
 
   // Flatten the groups into the element's flat item model, recording where
   // the separators and the extra group headers belong, and map every item's
@@ -163,12 +148,16 @@ export const AppMenuButton: React.FC = () => {
 
     // Drive the element's own model (the property API — same path the demo's
     // "Programmatic API" section uses; the menu attribute would need JSON
-    // escaping). Only the mobile overflow has a popover title.
-    el.menuTitle = isMobile ? (groups[0]?.label ?? "") : "";
+    // escaping). The app-menu has no popover title on either viewport.
     el.menuItems = flatItems;
     // The element derives the trigger's aria-label from menu-title; a global
     // app menu keeps the hamburger's established accessible name instead.
-    el.querySelector("button")?.setAttribute("aria-label", "Main Menu");
+    const trigger = el.querySelector("button");
+    if (trigger) {
+      trigger.setAttribute("aria-label", "Main Menu");
+      // Tooltip, matching the other header icon buttons (HeaderIconButton).
+      trigger.setAttribute("title", "Menu");
+    }
 
     const pop = el.querySelector(".adw-menu-button-popover");
     if (!pop) return;

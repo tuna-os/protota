@@ -259,7 +259,6 @@ export const Header: React.FC<HeaderProps> = ({
           title="Show navigation flow connectors between screens"
           ariaLabel="Flows"
           active={showFlows}
-          className="protota-desktop-only"
         />
         {/* The @gjsify/adwaita-icons package does not ship diagnostics-symbolic
             (upstream development category); the design's sanctioned fallback is
@@ -270,7 +269,6 @@ export const Header: React.FC<HeaderProps> = ({
           ariaLabel="Diagnostics — HIG lint"
           title={`Diagnostics (HIG lint)${countable.length ? ` — ${countable.length} issue(s)` : ""} (Ctrl+.)`}
           active={diagnosticsEnabled}
-          className="protota-desktop-only"
           testId="diagnostics-toggle"
         >
           {diagnosticsEnabled && countable.length > 0 && (

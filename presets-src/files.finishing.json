@@ -5,9 +5,23 @@
       "probeFile": "files-browser.probe.json",
       "runtimeSemanticRoots": ["imported-1"],
       "runtimeProjectionRoots": ["places_sidebar", "path_bar_buttons_box", "tab_view"] },
-    { "id": "properties", "entry": "nautilus-properties-window.ui", "title": "Properties", "width": 480, "height": 640 },
-    { "id": "new-folder", "entry": "nautilus-new-folder-dialog.ui", "title": "New Folder", "width": 400, "height": 220 },
-    { "id": "compress", "entry": "nautilus-compress-dialog.ui", "title": "Compress", "width": 440, "height": 440 }
+    { "id": "properties", "entry": "nautilus-properties-window.ui", "title": "Properties", "width": 480, "height": 640,
+      "overrides": [
+        { "id": "icon_image", "set": { "iconName": "folder" }, "why": "The properties template binds this GtkImage to the selected file's runtime icon; this screen represents the Home folder selected in the browser preset." },
+        { "id": "name_value_label", "set": { "title": "home" }, "why": "Representative runtime value for the Home folder selected in the browser preset." },
+        { "id": "type_value_label", "set": { "visible": true, "title": "Folder" }, "why": "setup_basic_page() makes detailed_type visible for ordinary folders." },
+        { "id": "contents_box", "set": { "visible": true }, "why": "setup_basic_page() makes the contents field visible when the selected file is a directory." },
+        { "id": "contents_value_label", "set": { "title": "0 items" }, "why": "Representative settled deep-count value for the empty Home folder in the native fixture." },
+        { "id": "locations_group", "set": { "visible": true }, "why": "setup_basic_page() shows Locations for ordinary filesystem items." },
+        { "id": "parent_folder_row", "set": { "visible": true, "subtitle": "Fedora Linux" }, "why": "The selected Home folder is shown beneath the root volume in the browser fixture." },
+        { "id": "times_group", "set": { "visible": true }, "why": "setup_basic_page() shows available filesystem timestamps for an ordinary folder." },
+        { "id": "modified_row", "set": { "visible": true, "subtitle": "Today" }, "why": "Representative runtime timestamp; the row is programmatically revealed for filesystem folders." },
+        { "id": "created_row", "set": { "visible": true, "subtitle": "Today" }, "why": "Representative runtime timestamp; the row is programmatically revealed when creation time is available." },
+        { "id": "accessed_row", "set": { "visible": true, "subtitle": "Today" }, "why": "Representative runtime timestamp; the row is programmatically revealed for filesystem folders." },
+        { "id": "permissions_value_label", "set": { "title": "Create and delete files" }, "why": "Representative settled permissions summary for the fixture's user-owned Home folder." }
+      ] },
+    { "id": "new-folder", "entry": "nautilus-new-folder-dialog.ui", "title": "New Folder", "width": 450, "height": 220 },
+    { "id": "compress", "entry": "nautilus-compress-dialog.ui", "title": "Compress", "width": 500, "height": 440 }
   ],
   "edges": [
     { "from": "browser", "to": "properties", "why": "Context menu → Properties" },

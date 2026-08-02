@@ -199,7 +199,7 @@ function nodeProps(node: AdwNode, inheritedSlot?: string): Record<string, string
     if (t === 'window-title' && node.subtitle) p.subtitle = node.subtitle;
   }
   if (t === 'action-row' || t === 'switch-row' || t === 'combo-row' ||
-      t === 'spin-row' || t === 'entry-row' || t === 'expander-row') {
+      t === 'spin-row' || t === 'entry-row' || t === 'password-row' || t === 'expander-row') {
     if (node.title) p.title = node.title;
     if (node.subtitle) p.subtitle = node.subtitle;
   }
@@ -305,6 +305,11 @@ function childSlot(parent: AdwNode, child: AdwNode, index: number): string | und
     if (centerIndex !== -1) return index < centerIndex ? 'start' : 'end';
     return child.type === 'menu-button' ? 'end' : 'start';
   }
+  // AdwActionRow and its editable/selectable row subclasses treat ordinary
+  // GtkBuilder children as suffix widgets. adwaita-web exposes that implicit
+  // GTK child role as an explicit light-DOM slot.
+  if (['action-row', 'switch-row', 'combo-row', 'spin-row', 'entry-row', 'password-row']
+    .includes(parent.type)) return 'suffix';
   return undefined;
 }
 
@@ -589,7 +594,7 @@ export const AdwaitaRenderer: React.FC<Props> = ({
   const hasAppCompositeRow = node.type === 'preferences-group' && node.children?.some((child) =>
     child.type === 'action-row' && typeof child.sourceClass === 'string' && !/^(Adw|Gtk)[.A-Z]/.test(child.sourceClass));
   const hasNonPreferenceRow = node.type === 'preferences-group' && node.children?.some((child) =>
-    !['action-row', 'switch-row', 'combo-row', 'spin-row', 'button-row', 'entry-row', 'expander-row'].includes(child.type));
+    !['action-row', 'switch-row', 'combo-row', 'spin-row', 'button-row', 'entry-row', 'password-row', 'expander-row'].includes(child.type));
   const isExpandedPreferenceComposite = isAppCompositeRow || hasAppCompositeRow || hasNonPreferenceRow;
 
   // adw-menu-button is icon-only; a labelled MenuButton renders as a button.

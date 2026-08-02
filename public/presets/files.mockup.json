@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exportedAt": "2026-08-02T16:48:03.666Z",
+  "exportedAt": "2026-08-02T17:10:03.726Z",
   "generatedBy": "scripts/generate-preset.mjs",
   "document": {
     "id": "files-preset",
@@ -5188,7 +5188,7 @@
                                                       "id": "icon_image",
                                                       "type": "bin",
                                                       "children": [],
-                                                      "iconName": "image-missing",
+                                                      "iconName": "folder",
                                                       "sourceClass": "Gtk.Image",
                                                       "slot": "child"
                                                     }
@@ -5295,7 +5295,8 @@
                                               "wrapMode": "PANGO_WRAP_WORD_CHAR",
                                               "lines": 3,
                                               "justify": "center",
-                                              "sourceClass": "Gtk.Label"
+                                              "sourceClass": "Gtk.Label",
+                                              "title": "home"
                                             },
                                             {
                                               "id": "type_value_label",
@@ -5303,8 +5304,9 @@
                                               "children": [],
                                               "ellipsize": "end",
                                               "selectable": true,
-                                              "visible": false,
-                                              "sourceClass": "Gtk.Label"
+                                              "visible": true,
+                                              "sourceClass": "Gtk.Label",
+                                              "title": "Folder"
                                             },
                                             {
                                               "id": "type_file_system_label",
@@ -5336,7 +5338,8 @@
                                                   "selectable": true,
                                                   "ellipsize": "end",
                                                   "justify": "center",
-                                                  "sourceClass": "Gtk.Label"
+                                                  "sourceClass": "Gtk.Label",
+                                                  "title": "0 items"
                                                 },
                                                 {
                                                   "id": "contents_spinner",
@@ -5347,7 +5350,7 @@
                                                 }
                                               ],
                                               "halign": "center",
-                                              "visible": false,
+                                              "visible": true,
                                               "spacing": 12,
                                               "orientation": "horizontal",
                                               "sourceClass": "Gtk.Box"
@@ -5558,15 +5561,16 @@
                                         }
                                       ],
                                       "title": "Parent Folder",
-                                      "visible": false,
+                                      "visible": true,
                                       "selectable": false,
                                       "subtitleSelectable": true,
                                       "useUnderline": true,
                                       "useMarkup": false,
-                                      "sourceClass": "Adw.ActionRow"
+                                      "sourceClass": "Adw.ActionRow",
+                                      "subtitle": "Fedora Linux"
                                     }
                                   ],
-                                  "visible": false,
+                                  "visible": true,
                                   "sourceClass": "Adw.PreferencesGroup"
                                 },
                                 {
@@ -5607,39 +5611,42 @@
                                       "type": "action-row",
                                       "children": [],
                                       "title": "Accessed",
-                                      "visible": false,
+                                      "visible": true,
                                       "selectable": false,
                                       "subtitleSelectable": true,
                                       "subtitleLines": 1,
                                       "useMarkup": false,
-                                      "sourceClass": "Adw.ActionRow"
+                                      "sourceClass": "Adw.ActionRow",
+                                      "subtitle": "Today"
                                     },
                                     {
                                       "id": "modified_row",
                                       "type": "action-row",
                                       "children": [],
                                       "title": "Modified",
-                                      "visible": false,
+                                      "visible": true,
                                       "selectable": false,
                                       "subtitleSelectable": true,
                                       "subtitleLines": 1,
                                       "useMarkup": false,
-                                      "sourceClass": "Adw.ActionRow"
+                                      "sourceClass": "Adw.ActionRow",
+                                      "subtitle": "Today"
                                     },
                                     {
                                       "id": "created_row",
                                       "type": "action-row",
                                       "children": [],
                                       "title": "Created",
-                                      "visible": false,
+                                      "visible": true,
                                       "selectable": false,
                                       "subtitleSelectable": true,
                                       "subtitleLines": 1,
                                       "useMarkup": false,
-                                      "sourceClass": "Adw.ActionRow"
+                                      "sourceClass": "Adw.ActionRow",
+                                      "subtitle": "Today"
                                     }
                                   ],
-                                  "visible": false,
+                                  "visible": true,
                                   "sourceClass": "Adw.PreferencesGroup"
                                 },
                                 {
@@ -5655,7 +5662,8 @@
                                           "type": "label",
                                           "children": [],
                                           "ellipsize": "end",
-                                          "sourceClass": "Gtk.Label"
+                                          "sourceClass": "Gtk.Label",
+                                          "title": "Create and delete files"
                                         },
                                         {
                                           "id": "imported-27",
@@ -6027,7 +6035,7 @@
         "id": "new-folder",
         "title": "New Folder",
         "type": "dialog",
-        "width": 400,
+        "width": 450,
         "height": 220,
         "rootNode": {
           "id": "imported-1",
@@ -6117,7 +6125,7 @@
         "id": "compress",
         "title": "Compress",
         "type": "dialog",
-        "width": 440,
+        "width": 500,
         "height": 440,
         "rootNode": {
           "id": "imported-1",

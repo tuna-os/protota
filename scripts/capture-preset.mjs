@@ -19,6 +19,7 @@ const args = process.argv.slice(2);
 const appId = args.find((argument) => !argument.startsWith('--'));
 const zoomOut = Number(args[args.indexOf('--zoom-out') + 1] || 6);
 const outDir = args.includes('--out') ? args[args.indexOf('--out') + 1] : join(repoRoot, 'artifacts');
+const prototaUrl = process.env.PROTOTA_URL || 'http://localhost:5173/';
 
 if (!appId) {
   console.error('Usage: npx tsx scripts/capture-preset.mjs <appId> [--zoom-out N] [--out dir]');
@@ -30,7 +31,7 @@ mkdirSync(outDir, { recursive: true });
 
 const browser = await chromium.launch();
 const page = await browser.newPage({ viewport: { width: 1700, height: 1000 } });
-await page.goto('http://localhost:5173/');
+await page.goto(prototaUrl);
 await page.evaluate((doc) => {
   localStorage.clear();
   localStorage.setItem('protota_doc_v1', JSON.stringify(doc));

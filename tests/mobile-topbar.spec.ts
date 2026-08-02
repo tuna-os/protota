@@ -1,14 +1,14 @@
 import { test, expect } from '@playwright/test';
 
 // Issue #99: on mobile-sized viewports the top bar collapses into a compact
-// header — labelled Open/Export menu buttons, the Flows/Diagnostics toggles,
-// and an app-menu button at the header end — instead of the desktop menu bar
-// and direct-access buttons overflowing the screen. The labelled Open/Export
-// menu buttons, the Flows/Diagnostics toggles and the app-menu button render
-// on every viewport; the app-menu holds the same entries everywhere (a
-// 3-circle theme switcher first, then Icon Library + Show Shortcuts). The
-// mobile-only "Actions" overflow group is gone — New Screen lives in the
-// bottom bar.
+// header — icon-only Open/Export triggers and an app-menu button at the header
+// end — instead of the desktop menu bar and direct-access buttons overflowing
+// the screen. Open/Export stay reachable but become icon-only (their accessible
+// names keep the label text); the Flows/Diagnostics toggles move into the
+// app-menu as checkable entries; the app-menu holds the same base entries
+// everywhere (a 3-circle theme switcher first, then Icon Library + Show
+// Shortcuts). The mobile-only "Actions" overflow group is gone — New Screen
+// lives in the bottom bar.
 test.describe('Mobile topbar (#99)', () => {
   test.use({ viewport: { width: 390, height: 844 } });
 
@@ -23,14 +23,15 @@ test.describe('Mobile topbar (#99)', () => {
     expect(box).not.toBeNull();
     expect(box!.width).toBeLessThanOrEqual(390);
 
-    // Hamburger, labelled Open/Export menus and the Flows/Diagnostics
-    // toggles render on mobile too; the old menu bar is gone.
+    // Hamburger and icon-only Open/Export menus render on mobile; the old menu
+    // bar and the desktop Flows/Diagnostics icon toggles are gone (they moved
+    // into the app-menu).
     await expect(page.getByTestId('mobile-menu-button')).toBeVisible();
     await expect(page.getByTestId('mobile-menu-button').getByRole('button')).toHaveAttribute('title', 'Menu');
     await expect(header.getByRole('button', { name: 'Open', exact: true })).toBeVisible();
     await expect(header.getByRole('button', { name: 'Export', exact: true })).toBeVisible();
-    await expect(header.getByRole('button', { name: /flow/i })).toBeVisible();
-    await expect(header.getByRole('button', { name: /hig lint/i })).toBeVisible();
+    await expect(header.getByRole('button', { name: /flow/i })).toHaveCount(0);
+    await expect(header.getByRole('button', { name: /diagnostics/i })).toHaveCount(0);
     await expect(header.getByRole('button', { name: /save json/i })).toHaveCount(0);
 
     // The page itself must not scroll horizontally.
@@ -49,15 +50,19 @@ test.describe('Mobile topbar (#99)', () => {
     const menu = page.getByTestId('mobile-menu');
     await expect(menu).toBeVisible();
 
-    // The app-menu holds the same entries on mobile as on desktop: the theme
-    // switcher first, then the app items. The old mobile-only Actions group
-    // (New Screen) is gone — New Screen lives in the bottom bar. (Accessible
-    // names include keyboard shortcuts, e.g. "Show Shortcuts ?"; the
-    // adw-menu-button renders items as role=menuitem.) Open/Export are
-    // labelled header buttons on every viewport, so Load Preset / Export /
-    // Share URL are not in the app-menu.
+    // The app-menu on mobile holds the theme switcher first, then the
+    // mobile-only Flows/Diagnostics toggles that left the compact header
+    // (labelled by the state they'd switch to, Enable/Disable), then Icon
+    // Library + Show Shortcuts last — the same base app entries as desktop.
+    // The old mobile-only Actions group (New Screen) is gone — New Screen
+    // lives in the bottom bar. (Accessible names include keyboard shortcuts,
+    // e.g. "Show Shortcuts Ctrl+?"; the adw-menu-button renders items as
+    // role=menuitem.) Open/Export are icon-only header buttons on mobile, so
+    // Load Preset / Export / Share URL are not in the app-menu.
     await expect(menu.getByRole('menuitem', { name: /icon library/i })).toBeVisible();
     await expect(menu.getByRole('menuitem', { name: /show shortcuts/i })).toBeVisible();
+    await expect(menu.getByRole('menuitem', { name: /enable screen flows/i })).toBeVisible();
+    await expect(menu.getByRole('menuitem', { name: /enable diagnostics/i })).toBeVisible();
     await expect(menu.getByRole('menuitem', { name: /new screen/i })).toHaveCount(0);
 
     // The menu itself fits the viewport.
@@ -71,7 +76,7 @@ test.describe('Mobile topbar (#99)', () => {
     await expect(page.getByTestId('icon-library')).toBeVisible();
 
     // New Screen is still reachable on mobile — from the bottom bar.
-    await page.getByRole('button', { name: 'Close' }).click();
+    await page.getByRole('button', { name: 'Close', exact: true }).click();
     await expect(page.getByTitle('New Screen (Ctrl+N)')).toBeVisible();
   });
 
@@ -125,12 +130,14 @@ test.describe('Mobile topbar (#99)', () => {
 
     // Open/Export stay as labelled header buttons, Flows/Diagnostics stay as
     // icon toggles, and the hamburger (app-menu button) is present too — the
-    // same header controls as on mobile. The app-menu holds the same entries
-    // as the mobile menu: theme switcher + Icon Library + Show Shortcuts.
+    // same header controls as on mobile (except the mobile-only Flows /
+    // Diagnostics menu entries, which stay in the header here). The app-menu
+    // holds the same base entries as the mobile menu: theme switcher + Icon
+    // Library + Show Shortcuts.
     await expect(page.getByTestId('app-header-bar').getByRole('button', { name: 'Open', exact: true })).toBeVisible();
     await expect(page.getByTestId('app-header-bar').getByRole('button', { name: 'Export', exact: true })).toBeVisible();
     await expect(page.getByTestId('app-header-bar').getByRole('button', { name: /flow/i })).toBeVisible();
-    await expect(page.getByTestId('app-header-bar').getByRole('button', { name: /hig lint/i })).toBeVisible();
+    await expect(page.getByTestId('app-header-bar').getByRole('button', { name: 'Diagnostics', exact: true })).toBeVisible();
     await expect(page.getByTestId('mobile-menu-button')).toBeVisible();
     await page.getByTestId('mobile-menu-button').click();
     const menu = page.getByTestId('mobile-menu');
@@ -138,6 +145,7 @@ test.describe('Mobile topbar (#99)', () => {
     await expect(menu.locator('.protota-theme-switcher')).toBeVisible();
     await expect(menu.getByRole('menuitem', { name: /icon library/i })).toBeVisible();
     await expect(menu.getByRole('menuitem', { name: /show shortcuts/i })).toBeVisible();
+    await expect(menu.getByRole('menuitem', { name: /screen flows|diagnostics/i })).toHaveCount(0);
     await expect(menu.getByRole('menuitem', { name: /new screen/i })).toHaveCount(0);
 
     // The app-menu items work: Icon Library opens its panel.

@@ -3,7 +3,8 @@ import { objectSelectSymbolic } from "@gjsify/adwaita-icons/actions";
 import { toDataUri } from "@gjsify/adwaita-icons/utils";
 import type { AdwMenuItem } from "@gjsify/adwaita-web";
 import { useMockupStore } from "../store/mockupStore";
-import { useMenus, type MenuGroup } from "./MenuData";
+import { useIsMobile } from "../hooks/useIsMobile";
+import { useMenus, type MenuGroup, type MenuItem } from "./MenuData";
 
 type AdwMenuButtonElement = HTMLElement & {
   menuItems: AdwMenuItem[];
@@ -97,13 +98,39 @@ export const AppMenuButton: React.FC = () => {
   const btnRef = useRef<AdwMenuButtonElement>(null);
   /** Latest id→action map, read by the (once-registered) activation listener. */
   const actionsRef = useRef<Record<string, () => void>>({});
-  const { appMenuItems } = useMenus();
+  const { appMenuItems, handleToggleDiagnostics } = useMenus();
   const colorScheme = useMockupStore((s) => s.doc.colorScheme);
   const setColorScheme = useMockupStore((s) => s.setColorScheme);
+  const showFlows = useMockupStore((s) => s.showFlows);
+  const toggleShowFlows = useMockupStore((s) => s.toggleShowFlows);
+  const diagnosticsEnabled = useMockupStore((s) => s.diagnosticsEnabled);
+  const isMobile = useIsMobile();
+
+  // On mobile the Flows/Diagnostics toggles leave the cramped header bar and
+  // surface as app-menu entries right after the theme picker, labelled by the
+  // state they'd switch to (Enable/Disable), with their shortcuts. On desktop
+  // the header keeps its icon toggles, so the menu stays as-is. Icon Library
+  // and Show Shortcuts are always the last entries.
+  const mobileToggleItems: MenuItem[] = isMobile
+    ? [
+        {
+          label: showFlows ? "Disable Screen Flows" : "Enable Screen Flows",
+          action: toggleShowFlows,
+          shortcut: "Ctrl+;",
+        },
+        {
+          label: diagnosticsEnabled ? "Disable Diagnostics" : "Enable Diagnostics",
+          action: handleToggleDiagnostics,
+          shortcut: "Ctrl+'",
+        },
+        { label: "divider", divider: true },
+      ]
+    : [];
 
   // The menu contents are the same on every viewport: one headerless group
-  // with the app-menu entries.
-  const groups: MenuGroup[] = [{ label: "", items: appMenuItems }];
+  // with the app-menu entries, plus the mobile-only Flows/Diagnostics toggles
+  // ahead of them on mobile.
+  const groups: MenuGroup[] = [{ label: "", items: [...mobileToggleItems, ...appMenuItems] }];
 
   // Flatten the groups into the element's flat item model, recording where
   // the separators and the extra group headers belong, and map every item's
@@ -114,6 +141,7 @@ export const AppMenuButton: React.FC = () => {
   const flatItems: AdwMenuItem[] = [];
   const dividerAfter: number[] = [];
   const groupStarts: number[] = [];
+  const shortcuts: Record<string, string> = {};
   const actions: Record<string, () => void> = {};
   for (const group of groups) {
     groupStarts.push(flatItems.length);
@@ -124,6 +152,7 @@ export const AppMenuButton: React.FC = () => {
         const id = `${group.label ? `${group.label}:` : ""}${item.label}`;
         flatItems.push({ id, label: item.label });
         if (item.action) actions[id] = item.action;
+        if (item.shortcut) shortcuts[id] = item.shortcut;
       }
     }
   }
@@ -177,10 +206,10 @@ export const AppMenuButton: React.FC = () => {
     // before each group's first item, the same class the native menu-title
     // attribute renders. Empty labels (the flat app-menu entries on mobile)
     // get no header.
-    const itemNodes = Array.from(pop.querySelectorAll(".adw-menu-button-item"));
+    const headerItemNodes = Array.from(pop.querySelectorAll(".adw-menu-button-item"));
     for (let g = 1; g < groups.length; g++) {
       if (!groups[g].label) continue;
-      const first = itemNodes[groupStarts[g]];
+      const first = headerItemNodes[groupStarts[g]];
       if (!first) continue;
       const sep = document.createElement("div");
       sep.className = "protota-menu-divider";
@@ -198,6 +227,18 @@ export const AppMenuButton: React.FC = () => {
       sep.className = "protota-menu-divider";
       nodes[idx]?.after(sep);
     }
+
+    // Right-aligned shortcut column (Show Shortcuts, and the mobile-only
+    // Flows/Diagnostics toggles), the same idiom as the labelled menus.
+    nodes.forEach((node, i) => {
+      const shortcut = shortcuts[flatItems[i]?.id ?? ""];
+      if (shortcut) {
+        const sc = document.createElement("span");
+        sc.className = "adw-menu-button-item-shortcut";
+        sc.textContent = shortcut;
+        node.appendChild(sc);
+      }
+    });
 
     // Stable test target (the element does not forward attributes into its
     // popover, so this is part of the post-render insertion).

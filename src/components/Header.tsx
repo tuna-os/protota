@@ -8,9 +8,12 @@ import {
   toolsCheckSpellingSymbolic,
 } from "@gjsify/adwaita-icons/actions";
 import { panDownSymbolic, focusLegacySystraySymbolic } from "@gjsify/adwaita-icons/ui";
+import { folderOpenSymbolic } from "@gjsify/adwaita-icons/status";
+import { documentSendSymbolic } from "@gjsify/adwaita-icons/actions";
 import type { AdwMenuItem } from "@gjsify/adwaita-web";
 import { exportDocumentFile } from "../utils/exportImport";
 import { iconStyle } from "../utils/iconStyles";
+import { useIsMobile } from "../hooks/useIsMobile";
 import { useMenus, IMPORT_FILE_INPUT_ID, type MenuItem } from "./MenuData";
 import { AppMenuButton } from "./AppMenuButton";
 
@@ -37,12 +40,16 @@ const chevronStyle = iconStyle(panDownSymbolic);
  * .adw-menu-button-item buttons are roving-tabindex'd. Click-to-toggle,
  * outside-click dismissal, Escape→trigger focus and ArrowUp/Down navigation
  * are the element's own private handlers.
+ *
+ * On mobile (<=768px) the trigger is icon-only — a symbolic icon instead of
+ * the text label + chevron — so the compact header fits the viewport (#99).
  */
 const LabeledMenuButton: React.FC<{
   label: string;
   items: MenuItem[];
   testId: string;
-}> = ({ label, items, testId }) => {
+  icon?: string;
+}> = ({ label, items, testId, icon }) => {
   const btnRef = useRef<AdwMenuButtonElement>(null);
   /** Latest id→action map, read by the (once-registered) activation listener. */
   const actionsRef = useRef<Record<string, () => void>>({});
@@ -87,18 +94,27 @@ const LabeledMenuButton: React.FC<{
     // wipes the label + chevron injected below.
     el.menuItems = flatItems;
 
-    // Trigger: bold text label + trailing chevron, flush against the label.
+    // Trigger: bold text label + trailing chevron (desktop), or the symbolic
+    // icon alone (mobile) — flush against the label, matching the other
+    // header icon buttons' 34px size.
     const btn = el.querySelector<HTMLButtonElement>(".adw-menu-button-button");
     if (btn) {
       btn.replaceChildren();
-      const labelEl = document.createElement("span");
-      labelEl.className = "adw-menu-button-button-label";
-      labelEl.textContent = label;
-      const chevron = document.createElement("span");
-      chevron.className = "adw-menu-button-button-chevron";
-      chevron.setAttribute("aria-hidden", "true");
-      Object.assign(chevron.style, chevronStyle);
-      btn.append(labelEl, chevron);
+      if (icon) {
+        const iconEl = document.createElement("span");
+        iconEl.className = "adw-toolbar-icon";
+        Object.assign(iconEl.style, iconStyle(icon));
+        btn.append(iconEl);
+      } else {
+        const labelEl = document.createElement("span");
+        labelEl.className = "adw-menu-button-button-label";
+        labelEl.textContent = label;
+        const chevron = document.createElement("span");
+        chevron.className = "adw-menu-button-button-chevron";
+        chevron.setAttribute("aria-hidden", "true");
+        Object.assign(chevron.style, chevronStyle);
+        btn.append(labelEl, chevron);
+      }
       // The element derives the trigger's aria-label from menu-title; these
       // are labelled buttons, so keep the visible text as the name.
       btn.setAttribute("aria-label", label);
@@ -122,7 +138,7 @@ const LabeledMenuButton: React.FC<{
         node.appendChild(sc);
       }
     });
-  }, [items, label]);
+  }, [items, label, icon]);
 
   return <adw-menu-button ref={btnRef} data-testid={testId} />;
 };
@@ -170,6 +186,7 @@ export const Header: React.FC<HeaderProps> = ({
   const { doc, undo, redo, clearCanvas, showFlows, toggleShowFlows, diagnosticsEnabled } =
     useMockupStore();
   const { countable, errorCount, handleToggleDiagnostics } = useMenus();
+  const isMobile = useIsMobile();
 
   // "Open" — project + import actions.
   const openMenuItems = useMemo<MenuItem[]>(
@@ -236,7 +253,12 @@ export const Header: React.FC<HeaderProps> = ({
           ariaLabel="Toggle Layers"
           active={leftOpen}
         />
-        <LabeledMenuButton label="Open" items={openMenuItems} testId="open-menu-button" />
+        <LabeledMenuButton
+          label="Open"
+          items={openMenuItems}
+          testId="open-menu-button"
+          icon={isMobile ? folderOpenSymbolic : undefined}
+        />
         <HeaderIconButton
           icon={editUndoSymbolic}
           onClick={undo}
@@ -252,48 +274,57 @@ export const Header: React.FC<HeaderProps> = ({
       </div>
       {/* End slot: Export menu + Flows/Diagnostics + app-menu button + Properties toggle */}
       <div slot="end" style={{ display: "flex", gap: "2px", alignItems: "center" }}>
-        <LabeledMenuButton label="Export" items={exportMenuItems} testId="export-menu-button" />
-        <HeaderIconButton
-          icon={focusLegacySystraySymbolic}
-          onClick={toggleShowFlows}
-          title="Show navigation flow connectors between screens"
-          ariaLabel="Flows"
-          active={showFlows}
+        <LabeledMenuButton
+          label="Export"
+          items={exportMenuItems}
+          testId="export-menu-button"
+          icon={isMobile ? documentSendSymbolic : undefined}
         />
-        {/* The @gjsify/adwaita-icons package does not ship diagnostics-symbolic
-            (upstream development category); the design's sanctioned fallback is
-            the spell-check icon (design §5.2). */}
-        <HeaderIconButton
-          icon={toolsCheckSpellingSymbolic}
-          onClick={handleToggleDiagnostics}
-          ariaLabel="Diagnostics — HIG lint"
-          title={`Diagnostics (HIG lint)${countable.length ? ` — ${countable.length} issue(s)` : ""} (Ctrl+.)`}
-          active={diagnosticsEnabled}
-          testId="diagnostics-toggle"
-        >
-          {diagnosticsEnabled && countable.length > 0 && (
-            <span
-              data-testid="diagnostics-badge"
-              style={{
-                position: "absolute",
-                top: "2px",
-                right: "2px",
-                fontSize: "10px",
-                fontWeight: 700,
-                minWidth: "16px",
-                padding: "0 4px",
-                borderRadius: "8px",
-                textAlign: "center",
-                color: "#fff",
-                background: errorCount > 0
-                  ? "var(--destructive-bg-color, #e01b24)"
-                  : "var(--dim-fg-color, rgba(0,0,6,0.55))",
-              }}
+        {!isMobile && (
+          <>
+            <HeaderIconButton
+              icon={focusLegacySystraySymbolic}
+              onClick={toggleShowFlows}
+              title="Toggle Screen Flows (Ctrl+;)"
+              ariaLabel="Flows"
+              active={showFlows}
+            />
+            {/* The @gjsify/adwaita-icons package does not ship diagnostics-symbolic
+                (upstream development category); the design's sanctioned fallback is
+                the spell-check icon (design §5.2). */}
+            <HeaderIconButton
+              icon={toolsCheckSpellingSymbolic}
+              onClick={handleToggleDiagnostics}
+              ariaLabel="Diagnostics"
+              title={`Toggle Diagnostics${countable.length ? `: ${countable.length} issues` : ""} (Ctrl+')`}
+              active={diagnosticsEnabled}
+              testId="diagnostics-toggle"
             >
-              {countable.length}
-            </span>
-          )}
-        </HeaderIconButton>
+              {diagnosticsEnabled && countable.length > 0 && (
+                <span
+                  data-testid="diagnostics-badge"
+                  style={{
+                    position: "absolute",
+                    top: "2px",
+                    right: "2px",
+                    fontSize: "10px",
+                    fontWeight: 700,
+                    minWidth: "16px",
+                    padding: "0 4px",
+                    borderRadius: "8px",
+                    textAlign: "center",
+                    color: "#fff",
+                    background: errorCount > 0
+                      ? "var(--destructive-bg-color, #e01b24)"
+                      : "var(--dim-fg-color, rgba(0,0,6,0.55))",
+                  }}
+                >
+                  {countable.length}
+                </span>
+              )}
+            </HeaderIconButton>
+          </>
+        )}
         <AppMenuButton />
         <HeaderIconButton
           icon={sidebarShowRightSymbolic}

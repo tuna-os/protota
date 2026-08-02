@@ -1,4 +1,5 @@
 import React, { useRef, useEffect, useState } from "react";
+import { useIsMobile } from "../hooks/useIsMobile";
 import { computerSymbolic, phoneSymbolic } from "@gjsify/adwaita-icons/devices";
 import {
   zoomFitBestSymbolic,
@@ -121,15 +122,7 @@ export const BottomBar: React.FC<BottomBarProps> = React.memo(
     // popover, so the bar never clips horizontally down to 320px wide.
     // Tracked via matchMedia (not CSS-only hiding) so the presets render
     // exactly once and keep their stable test ids.
-    const [isMobile, setIsMobile] = useState(
-      () => typeof window !== "undefined" && window.matchMedia("(max-width: 768px)").matches,
-    );
-    useEffect(() => {
-      const mq = window.matchMedia("(max-width: 768px)");
-      const onChange = () => setIsMobile(mq.matches);
-      mq.addEventListener("change", onChange);
-      return () => mq.removeEventListener("change", onChange);
-    }, []);
+    const isMobile = useIsMobile();
 
     const [overflowOpen, setOverflowOpen] = useState(false);
     const overflowRef = useRef<HTMLDivElement>(null);

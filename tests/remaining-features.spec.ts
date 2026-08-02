@@ -43,7 +43,7 @@ test.describe('Remaining features (#9, #16, #18-#24)', () => {
   });
 
   test('#22 A11y lint rule covers icon-only buttons', async ({ page }) => {
-    const lintBtn = page.getByRole('button', { name: /lint/i });
+    const lintBtn = page.getByRole('button', { name: /diagnostics/i });
     await lintBtn.click();
     await expect(lintBtn).toHaveAttribute('data-active', 'true');
   });

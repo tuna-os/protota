@@ -6,6 +6,7 @@ interface CatalogEntry {
   aptPackage: string;
   command: string;
   presetId: string;
+  screens?: string[];
   viewport: { width: number; height: number };
   source: string;
   suite: 'core' | 'circle';
@@ -49,6 +50,19 @@ describe('GNOME app conformance catalogue', () => {
         expect(app.minSimilarity, `${id}: passed apps need a resolved-similarity gate`).toBeTypeOf('number');
         expect(app.minForegroundIoU, `${id}: passed apps need a meaningful foreground-overlap gate`).toBeTypeOf('number');
       }
+    }
+  });
+
+  it('catalogues every screen of every Core preset', () => {
+    for (const [id, app] of Object.entries(catalog)) {
+      if (app.suite !== 'core' || app.status !== 'preset') continue;
+      const preset = JSON.parse(readFileSync(
+        new URL(`../../public/presets/${app.presetId}.mockup.json`, import.meta.url),
+        'utf8',
+      )) as { document: { screens: Array<{ id: string }> } };
+      const shippedScreenIds = preset.document.screens.map(screen => screen.id);
+      expect(app.screens, `${id}: Core screens must be explicit so none silently fall out of fidelity testing`)
+        .toEqual(shippedScreenIds);
     }
   });
 });

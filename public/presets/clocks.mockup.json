@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exportedAt": "2026-08-02T16:20:27.642Z",
+  "exportedAt": "2026-08-02T16:30:33.488Z",
   "generatedBy": "scripts/generate-preset.mjs",
   "document": {
     "id": "clocks-preset",
@@ -191,7 +191,7 @@
                                   "sourceClass": "Adw.HeaderBar",
                                   "runtimeEvidence": {
                                     "probeVersion": 2,
-                                    "matchedBy": "structure",
+                                    "matchedBy": "buildable-id",
                                     "buildableId": "header_bar",
                                     "gtype": "AdwHeaderBar",
                                     "mapped": true,
@@ -1080,7 +1080,9 @@
                               "height": 690
                             }
                           },
-                          "runtimeProjectionHost": true
+                          "runtimeProjectionHost": true,
+                          "widthRequest": 870,
+                          "heightRequest": 690
                         }
                       ],
                       "title": "Clocks",
@@ -1209,7 +1211,7 @@
                                           "visibleChildName": "world",
                                           "runtimeEvidence": {
                                             "probeVersion": 2,
-                                            "matchedBy": "structure",
+                                            "matchedBy": "buildable-id",
                                             "buildableId": "stack",
                                             "gtype": "GtkStack",
                                             "mapped": true,
@@ -1629,8 +1631,8 @@
             }
           ],
           "hideOnClose": true,
-          "widthRequest": 360,
-          "heightRequest": 294,
+          "widthRequest": 870,
+          "heightRequest": 690,
           "sourceClass": "ClocksWindow",
           "runtimeProjectionHost": true
         }
@@ -1819,7 +1821,7 @@
                                   "sourceClass": "Adw.HeaderBar",
                                   "runtimeEvidence": {
                                     "probeVersion": 2,
-                                    "matchedBy": "structure",
+                                    "matchedBy": "buildable-id",
                                     "buildableId": "header_bar",
                                     "gtype": "AdwHeaderBar",
                                     "mapped": true,
@@ -1966,6 +1968,10 @@
                                               "sourceClass": "Adw.StatusPage",
                                               "title": "",
                                               "description": "",
+                                              "visible": true,
+                                              "geometryOrigin": {
+                                                "visible": "native"
+                                              },
                                               "runtimeEvidence": {
                                                 "probeVersion": 2,
                                                 "matchedBy": "buildable-id",
@@ -2035,7 +2041,6 @@
                                       ],
                                       "sourceClass": "ClocksAlarmFace",
                                       "slot": "child",
-                                      "runtimeProjectionHost": true,
                                       "runtimeEvidence": {
                                         "probeVersion": 2,
                                         "matchedBy": "buildable-id",
@@ -2055,7 +2060,8 @@
                                           "width": 870,
                                           "height": 644
                                         }
-                                      }
+                                      },
+                                      "runtimeProjectionHost": true
                                     }
                                   ],
                                   "name": "alarm",
@@ -2705,7 +2711,9 @@
                               "height": 690
                             }
                           },
-                          "runtimeProjectionHost": true
+                          "runtimeProjectionHost": true,
+                          "widthRequest": 870,
+                          "heightRequest": 690
                         }
                       ],
                       "title": "Clocks",
@@ -2834,7 +2842,7 @@
                                           "visibleChildName": "alarm",
                                           "runtimeEvidence": {
                                             "probeVersion": 2,
-                                            "matchedBy": "structure",
+                                            "matchedBy": "buildable-id",
                                             "buildableId": "stack",
                                             "gtype": "GtkStack",
                                             "mapped": true,
@@ -3254,8 +3262,8 @@
             }
           ],
           "hideOnClose": true,
-          "widthRequest": 360,
-          "heightRequest": 294,
+          "widthRequest": 870,
+          "heightRequest": 690,
           "sourceClass": "ClocksWindow",
           "runtimeProjectionHost": true
         }
@@ -3444,7 +3452,7 @@
                                   "sourceClass": "Adw.HeaderBar",
                                   "runtimeEvidence": {
                                     "probeVersion": 2,
-                                    "matchedBy": "structure",
+                                    "matchedBy": "buildable-id",
                                     "buildableId": "header_bar",
                                     "gtype": "AdwHeaderBar",
                                     "mapped": true,
@@ -4164,7 +4172,9 @@
                                               "height": 644
                                             }
                                           },
-                                          "runtimeProjectionHost": true
+                                          "runtimeProjectionHost": true,
+                                          "widthRequest": 870,
+                                          "heightRequest": 644
                                         }
                                       ],
                                       "sourceClass": "ClocksStopwatchFace",
@@ -4592,7 +4602,9 @@
                               "height": 690
                             }
                           },
-                          "runtimeProjectionHost": true
+                          "runtimeProjectionHost": true,
+                          "widthRequest": 870,
+                          "heightRequest": 690
                         }
                       ],
                       "title": "Clocks",
@@ -5141,8 +5153,8 @@
             }
           ],
           "hideOnClose": true,
-          "widthRequest": 360,
-          "heightRequest": 294,
+          "widthRequest": 870,
+          "heightRequest": 690,
           "sourceClass": "ClocksWindow",
           "runtimeProjectionHost": true
         }
@@ -5331,7 +5343,7 @@
                                   "sourceClass": "Adw.HeaderBar",
                                   "runtimeEvidence": {
                                     "probeVersion": 2,
-                                    "matchedBy": "structure",
+                                    "matchedBy": "buildable-id",
                                     "buildableId": "header_bar",
                                     "gtype": "AdwHeaderBar",
                                     "mapped": true,
@@ -6669,7 +6681,9 @@
                                                               "height": 401
                                                             }
                                                           },
-                                                          "runtimeProjectionHost": true
+                                                          "runtimeProjectionHost": true,
+                                                          "widthRequest": 304,
+                                                          "heightRequest": 401
                                                         },
                                                         {
                                                           "id": "start_button",
@@ -6787,7 +6801,9 @@
                                                       "height": 644
                                                     }
                                                   },
-                                                  "runtimeProjectionHost": true
+                                                  "runtimeProjectionHost": true,
+                                                  "widthRequest": 870,
+                                                  "heightRequest": 644
                                                 }
                                               ],
                                               "name": "empty",
@@ -7142,7 +7158,9 @@
                               "height": 690
                             }
                           },
-                          "runtimeProjectionHost": true
+                          "runtimeProjectionHost": true,
+                          "widthRequest": 870,
+                          "heightRequest": 690
                         }
                       ],
                       "title": "Clocks",
@@ -7271,7 +7289,7 @@
                                           "visibleChildName": "timer",
                                           "runtimeEvidence": {
                                             "probeVersion": 2,
-                                            "matchedBy": "structure",
+                                            "matchedBy": "buildable-id",
                                             "buildableId": "stack",
                                             "gtype": "GtkStack",
                                             "mapped": true,
@@ -7691,8 +7709,8 @@
             }
           ],
           "hideOnClose": true,
-          "widthRequest": 360,
-          "heightRequest": 294,
+          "widthRequest": 870,
+          "heightRequest": 690,
           "sourceClass": "ClocksWindow",
           "runtimeProjectionHost": true
         }
@@ -7772,14 +7790,16 @@
                                   "numeric": true,
                                   "wrap": true,
                                   "widthRequest": 60,
-                                  "sourceClass": "Gtk.SpinButton"
+                                  "sourceClass": "Gtk.SpinButton",
+                                  "value": "16"
                                 },
                                 {
                                   "id": "label2",
                                   "type": "label",
                                   "children": [],
                                   "title": "∶",
-                                  "sourceClass": "Gtk.Label"
+                                  "sourceClass": "Gtk.Label",
+                                  "value": "∶"
                                 },
                                 {
                                   "id": "m_spinbutton",
@@ -7791,7 +7811,8 @@
                                   "numeric": true,
                                   "wrap": true,
                                   "widthRequest": 60,
-                                  "sourceClass": "Gtk.SpinButton"
+                                  "sourceClass": "Gtk.SpinButton",
+                                  "value": "10"
                                 },
                                 {
                                   "id": "am_pm_bin",
@@ -7837,11 +7858,260 @@
                                     {
                                       "id": "box",
                                       "type": "box",
-                                      "children": [],
+                                      "children": [
+                                        {
+                                          "id": "runtime_0_0_1_0_0_1_0_0_0_1_0_0_0_0_2_0_1_0_0_0_1_0",
+                                          "type": "button",
+                                          "sourceClass": "GtkToggleButton",
+                                          "children": [],
+                                          "title": "S",
+                                          "active": false,
+                                          "marginStart": 0,
+                                          "marginEnd": 0,
+                                          "marginTop": 0,
+                                          "marginBottom": 0,
+                                          "geometryOrigin": {
+                                            "visible": "native"
+                                          },
+                                          "runtimeEvidence": {
+                                            "probeVersion": 2,
+                                            "matchedBy": "structure",
+                                            "buildableId": null,
+                                            "gtype": "GtkToggleButton",
+                                            "mapped": true,
+                                            "visible": true,
+                                            "bounds": {
+                                              "x": 212,
+                                              "y": 332,
+                                              "width": 34,
+                                              "height": 34
+                                            },
+                                            "relativeBounds": {
+                                              "x": 0,
+                                              "y": 0,
+                                              "width": 34,
+                                              "height": 34
+                                            }
+                                          }
+                                        },
+                                        {
+                                          "id": "runtime_0_0_1_0_0_1_0_0_0_1_0_0_0_0_2_0_1_0_0_0_1_1",
+                                          "type": "button",
+                                          "sourceClass": "GtkToggleButton",
+                                          "children": [],
+                                          "title": "M",
+                                          "active": false,
+                                          "marginStart": 0,
+                                          "marginEnd": 0,
+                                          "marginTop": 0,
+                                          "marginBottom": 0,
+                                          "geometryOrigin": {
+                                            "visible": "native"
+                                          },
+                                          "runtimeEvidence": {
+                                            "probeVersion": 2,
+                                            "matchedBy": "structure",
+                                            "buildableId": null,
+                                            "gtype": "GtkToggleButton",
+                                            "mapped": true,
+                                            "visible": true,
+                                            "bounds": {
+                                              "x": 252,
+                                              "y": 332,
+                                              "width": 34,
+                                              "height": 34
+                                            },
+                                            "relativeBounds": {
+                                              "x": 40,
+                                              "y": 0,
+                                              "width": 34,
+                                              "height": 34
+                                            }
+                                          }
+                                        },
+                                        {
+                                          "id": "runtime_0_0_1_0_0_1_0_0_0_1_0_0_0_0_2_0_1_0_0_0_1_2",
+                                          "type": "button",
+                                          "sourceClass": "GtkToggleButton",
+                                          "children": [],
+                                          "title": "T",
+                                          "active": false,
+                                          "marginStart": 0,
+                                          "marginEnd": 0,
+                                          "marginTop": 0,
+                                          "marginBottom": 0,
+                                          "geometryOrigin": {
+                                            "visible": "native"
+                                          },
+                                          "runtimeEvidence": {
+                                            "probeVersion": 2,
+                                            "matchedBy": "structure",
+                                            "buildableId": null,
+                                            "gtype": "GtkToggleButton",
+                                            "mapped": true,
+                                            "visible": true,
+                                            "bounds": {
+                                              "x": 292,
+                                              "y": 332,
+                                              "width": 34,
+                                              "height": 34
+                                            },
+                                            "relativeBounds": {
+                                              "x": 80,
+                                              "y": 0,
+                                              "width": 34,
+                                              "height": 34
+                                            }
+                                          }
+                                        },
+                                        {
+                                          "id": "runtime_0_0_1_0_0_1_0_0_0_1_0_0_0_0_2_0_1_0_0_0_1_3",
+                                          "type": "button",
+                                          "sourceClass": "GtkToggleButton",
+                                          "children": [],
+                                          "title": "W",
+                                          "active": false,
+                                          "marginStart": 0,
+                                          "marginEnd": 0,
+                                          "marginTop": 0,
+                                          "marginBottom": 0,
+                                          "geometryOrigin": {
+                                            "visible": "native"
+                                          },
+                                          "runtimeEvidence": {
+                                            "probeVersion": 2,
+                                            "matchedBy": "structure",
+                                            "buildableId": null,
+                                            "gtype": "GtkToggleButton",
+                                            "mapped": true,
+                                            "visible": true,
+                                            "bounds": {
+                                              "x": 332,
+                                              "y": 332,
+                                              "width": 34,
+                                              "height": 34
+                                            },
+                                            "relativeBounds": {
+                                              "x": 120,
+                                              "y": 0,
+                                              "width": 34,
+                                              "height": 34
+                                            }
+                                          }
+                                        },
+                                        {
+                                          "id": "runtime_0_0_1_0_0_1_0_0_0_1_0_0_0_0_2_0_1_0_0_0_1_4",
+                                          "type": "button",
+                                          "sourceClass": "GtkToggleButton",
+                                          "children": [],
+                                          "title": "T",
+                                          "active": false,
+                                          "marginStart": 0,
+                                          "marginEnd": 0,
+                                          "marginTop": 0,
+                                          "marginBottom": 0,
+                                          "geometryOrigin": {
+                                            "visible": "native"
+                                          },
+                                          "runtimeEvidence": {
+                                            "probeVersion": 2,
+                                            "matchedBy": "structure",
+                                            "buildableId": null,
+                                            "gtype": "GtkToggleButton",
+                                            "mapped": true,
+                                            "visible": true,
+                                            "bounds": {
+                                              "x": 372,
+                                              "y": 332,
+                                              "width": 34,
+                                              "height": 34
+                                            },
+                                            "relativeBounds": {
+                                              "x": 160,
+                                              "y": 0,
+                                              "width": 34,
+                                              "height": 34
+                                            }
+                                          }
+                                        },
+                                        {
+                                          "id": "runtime_0_0_1_0_0_1_0_0_0_1_0_0_0_0_2_0_1_0_0_0_1_5",
+                                          "type": "button",
+                                          "sourceClass": "GtkToggleButton",
+                                          "children": [],
+                                          "title": "F",
+                                          "active": false,
+                                          "marginStart": 0,
+                                          "marginEnd": 0,
+                                          "marginTop": 0,
+                                          "marginBottom": 0,
+                                          "geometryOrigin": {
+                                            "visible": "native"
+                                          },
+                                          "runtimeEvidence": {
+                                            "probeVersion": 2,
+                                            "matchedBy": "structure",
+                                            "buildableId": null,
+                                            "gtype": "GtkToggleButton",
+                                            "mapped": true,
+                                            "visible": true,
+                                            "bounds": {
+                                              "x": 412,
+                                              "y": 332,
+                                              "width": 34,
+                                              "height": 34
+                                            },
+                                            "relativeBounds": {
+                                              "x": 200,
+                                              "y": 0,
+                                              "width": 34,
+                                              "height": 34
+                                            }
+                                          }
+                                        },
+                                        {
+                                          "id": "runtime_0_0_1_0_0_1_0_0_0_1_0_0_0_0_2_0_1_0_0_0_1_6",
+                                          "type": "button",
+                                          "sourceClass": "GtkToggleButton",
+                                          "children": [],
+                                          "title": "S",
+                                          "active": false,
+                                          "marginStart": 0,
+                                          "marginEnd": 0,
+                                          "marginTop": 0,
+                                          "marginBottom": 0,
+                                          "geometryOrigin": {
+                                            "visible": "native"
+                                          },
+                                          "runtimeEvidence": {
+                                            "probeVersion": 2,
+                                            "matchedBy": "structure",
+                                            "buildableId": null,
+                                            "gtype": "GtkToggleButton",
+                                            "mapped": true,
+                                            "visible": true,
+                                            "bounds": {
+                                              "x": 452,
+                                              "y": 332,
+                                              "width": 34,
+                                              "height": 34
+                                            },
+                                            "relativeBounds": {
+                                              "x": 240,
+                                              "y": 0,
+                                              "width": 34,
+                                              "height": 34
+                                            }
+                                          }
+                                        }
+                                      ],
                                       "valign": "center",
                                       "spacing": 6,
                                       "orientation": "horizontal",
-                                      "sourceClass": "Gtk.Box"
+                                      "sourceClass": "Gtk.Box",
+                                      "runtimeProjectionHost": true,
+                                      "widthRequest": 445,
+                                      "heightRequest": 34
                                     }
                                   ],
                                   "spacing": 9,
@@ -7870,7 +8140,13 @@
                               "children": [],
                               "activatable": false,
                               "title": "Ring Duration",
-                              "sourceClass": "Adw.ComboRow"
+                              "sourceClass": "Adw.ComboRow",
+                              "subtitle": "",
+                              "selectedIndex": 1,
+                              "options": [
+                                "",
+                                "5 minutes"
+                              ]
                             },
                             {
                               "id": "snooze_duration",
@@ -7878,7 +8154,14 @@
                               "children": [],
                               "activatable": false,
                               "title": "Snooze Duration",
-                              "sourceClass": "Adw.ComboRow"
+                              "sourceClass": "Adw.ComboRow",
+                              "subtitle": "",
+                              "selectedIndex": 2,
+                              "options": [
+                                "",
+                                "",
+                                "10 minutes"
+                              ]
                             }
                           ],
                           "sourceClass": "Adw.PreferencesGroup"

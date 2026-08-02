@@ -742,6 +742,37 @@ body,
   display: block;
 }
 
+/* GtkSpinButton with vertical orientation is used as the large clock-time
+   picker. It has no direct adwaita-web primitive, so preserve its native
+   three-part control instead of degrading it to a plain text entry. */
+.protota-gtk-spin-button {
+  display: grid;
+  grid-template-rows: 42px 45px 42px;
+  width: 60px;
+  height: 129px;
+  overflow: hidden;
+  border: 1px solid var(--border-color, rgba(0, 0, 6, 0.18));
+  border-radius: var(--button-radius, 9px);
+  background: var(--view-bg-color, #fff);
+  box-sizing: border-box;
+}
+.protota-gtk-spin-button button {
+  border: 0;
+  border-radius: 0;
+  background: var(--headerbar-shade-color, rgba(0, 0, 6, 0.04));
+  color: inherit;
+  font: inherit;
+  font-size: 20px;
+  padding: 0;
+}
+.protota-gtk-spin-button span {
+  display: grid;
+  place-items: center;
+  border-block: 1px solid var(--border-color, rgba(0, 0, 6, 0.14));
+  font-size: 24px;
+  font-weight: 600;
+}
+
 /* A source-declared widget implemented in C/GJS/Vala. This is a visible
    layout boundary, never a fake approximation of its runtime contents. */
 .protota-div-custom-widget {
@@ -1412,6 +1443,28 @@ adw-header-bar adw-view-switcher > .adw-view-switcher-content {
   flex-direction: column;
   min-width: 0;
   min-height: 0;
+}
+
+/* When a custom PreferencesRow subclass is expanded from its template, keep
+   the boxed-list surface owned by its PreferencesGroup. The arbitrary child
+   support above must not turn a native card into ungrouped floating rows. */
+.protota-div-preferences-group:has(> .adw-node-wrapper > .protota-div-action-row) {
+  margin-inline: -19px;
+  overflow: hidden;
+  border-radius: var(--card-radius, 12px);
+  background: var(--card-bg-color, #fff);
+  box-shadow: 0 1px 3px rgba(0, 0, 6, 0.18);
+}
+.protota-div-preferences-group:has(> .adw-node-wrapper > .protota-div-action-row)
+  > .adw-node-wrapper > adw-entry-row,
+.protota-div-preferences-group:has(> .adw-node-wrapper > .protota-div-action-row)
+  > .adw-node-wrapper > adw-combo-row {
+  min-height: 55px;
+  box-sizing: border-box;
+}
+.protota-div-preferences-group:has(> .adw-node-wrapper > .protota-div-action-row)
+  > .adw-node-wrapper:not(:first-child) > * {
+  border-block-start: 1px solid var(--separator-color, rgba(0, 0, 6, 0.1));
 }
 
 /* GtkSwitch is a div-rendered widget; its ephemeral on/off toggle is only

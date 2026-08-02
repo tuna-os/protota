@@ -251,6 +251,10 @@ function nodeProps(node: AdwNode, inheritedSlot?: string): Record<string, string
     if (node.value) p.value = node.value;
     if (node.placeholder) p.placeholder = node.placeholder;
   }
+  if (t === 'combo-row' && node.options?.length) {
+    p.items = JSON.stringify(node.options);
+    p.selected = String(node.selectedIndex ?? 0);
+  }
 
   // Boolean attribute flags (set as empty string so hasAttribute() returns true)
   const boolFlags: Record<string, string[]> = {
@@ -584,7 +588,10 @@ export const AdwaitaRenderer: React.FC<Props> = ({
   const isExpandedPreferenceComposite = isAppCompositeRow || hasAppCompositeRow || hasNonPreferenceRow;
 
   // adw-menu-button is icon-only; a labelled MenuButton renders as a button.
-  const tag = isDialogRoot
+  const isGtkSpinButton = node.type === 'entry' && /Gtk[.]?SpinButton$/.test(node.sourceClass ?? '');
+  const tag = isGtkSpinButton
+    ? 'div'
+    : isDialogRoot
     ? 'adw-window'
     : node.type === 'navigation-view' || node.type === 'overlay-split' || isExpandedPreferenceComposite
       ? 'div'
@@ -727,6 +734,13 @@ export const AdwaitaRenderer: React.FC<Props> = ({
       className={`adw-icon adw-icon--${node.iconName.replace(/-symbolic$/, '')}`}
     />
   ) : null;
+  const gtkSpinButton = isGtkSpinButton ? (
+    <>
+      <button aria-hidden="true" tabIndex={-1}>+</button>
+      <span>{plainText(String(node.value ?? node.text ?? 0))}</span>
+      <button aria-hidden="true" tabIndex={-1}>−</button>
+    </>
+  ) : null;
 
   // Div-only types get Adwaita-styled classes for layout/structure.
   // A custom-widget with projected children is a resolved composite: render it
@@ -746,7 +760,7 @@ export const AdwaitaRenderer: React.FC<Props> = ({
   const diagnosticClass = diagnosticTier && !isSelected
     ? `protota-diag-outline-${diagnosticTier}`
     : '';
-  const elementClass = [divClass, styleClasses, diagnosticClass].filter(Boolean).join(' ');
+  const elementClass = [isGtkSpinButton ? 'protota-gtk-spin-button' : '', divClass, styleClasses, diagnosticClass].filter(Boolean).join(' ');
 
   // Several adw-* custom elements ADOPT their light-DOM children on connect:
   // adw-toolbar-view, adw-header-bar, and adw-toast-overlay snapshot the
@@ -821,6 +835,7 @@ export const AdwaitaRenderer: React.FC<Props> = ({
       },
         iconPrefix,
         binIcon,
+        gtkSpinButton,
         tabBarTabs,
         previewSwitcherTabs,
         directHeaderSwitcher,

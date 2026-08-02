@@ -35,6 +35,8 @@
       ] },
     { "id": "alarm-setup", "entry": "data/ui/alarm-setup-dialog.ui", "title": "New Alarm", "width": 520, "height": 580,
       "probeFile": "clocks-alarm-setup.probe.json",
+      "runtimeSemanticRoots": ["time_box", "ring_duration", "snooze_duration"],
+      "runtimeProjectionRoots": ["repeats"],
       "overrides": [
         { "id": "delete_group", "set": { "visible": false },
           "probeEvidence": { "probeVersion": 2, "buildableId": "delete_group",

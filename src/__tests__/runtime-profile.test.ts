@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { blueprintToNode } from '../utils/blueprint';
 import { boundaryGeometryConfidence } from '../utils/nodeGeometry';
 import {
-  matchRuntimeProfile, nativeFactsFor, type ProbeDocument, type ProbeWidget,
+  applyRuntimeSemantics, matchRuntimeProfile, nativeFactsFor, type ProbeDocument, type ProbeWidget,
 } from '../utils/runtimeProfile';
 
 /** Minimal probe widget with defaults, so fixtures state only what matters. */
@@ -139,6 +139,30 @@ describe('runtime profile matching (#58)', () => {
       mapped: true,
       indexPath: [0, 1],
     });
+  });
+
+  it('applies settled entry text and combo selection from the runtime', () => {
+    const root = blueprintToNode(`
+      Adw.ApplicationWindow window {
+        Gtk.Box controls {
+          Gtk.Entry time { text: "0"; }
+          Adw.ComboRow duration { title: "Duration"; }
+        }
+      }
+    `);
+    const runtime = probe([
+      widget({ gtype: 'AdwApplicationWindow', indexPath: [0], buildableId: 'window' }),
+      widget({ gtype: 'GtkBox', indexPath: [0, 0], buildableId: 'controls' }),
+      widget({ gtype: 'GtkEntry', indexPath: [0, 0, 0], buildableId: 'time', properties: { text: '16' } }),
+      widget({ gtype: 'AdwComboRow', indexPath: [0, 0, 1], buildableId: 'duration', properties: { title: 'Duration', selected: 2 } }),
+      widget({ gtype: 'GtkLabel', indexPath: [0, 0, 1, 0], properties: { label: '10 minutes' } }),
+    ]);
+    const report = matchRuntimeProfile(runtime, root);
+
+    expect(applyRuntimeSemantics(root, report, runtime, ['controls'])).toEqual(expect.arrayContaining(['time', 'duration']));
+    expect(root.children?.[0].children?.[0].value).toBe('16');
+    expect(root.children?.[0].children?.[1].selectedIndex).toBe(2);
+    expect(root.children?.[0].children?.[1].options).toEqual(['', '', '10 minutes']);
   });
 
   it('emits native:* facts at the top native confidence tier', () => {

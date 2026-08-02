@@ -40,7 +40,10 @@
 import { readdirSync, readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { blueprintBundleToDocument } from '../src/utils/blueprint.ts';
-import { applyRuntimeEvidence, matchRuntimeProfile, validateProbeEvidence } from '../src/utils/runtimeProfile.ts';
+import {
+  applyRuntimeEvidence, applyRuntimeSemantics, matchRuntimeProfile,
+  projectRuntimeBranches, validateProbeEvidence,
+} from '../src/utils/runtimeProfile.ts';
 
 const [appId, sourceRoot, defaultEntry] = process.argv.slice(2);
 if (!appId || !sourceRoot || !defaultEntry) {
@@ -161,14 +164,26 @@ for (const spec of screenSpecs) {
   // do not exist in the declarative bundle. An explicitly opted-in screen
   // consumes the committed semantic probe: source widgets are matched first,
   // then only unmatched mapped branches are projected into that source tree.
-  if ((spec.runtimeProbe ?? finishing?.runtimeProbe) === true) {
+  const fullRuntimeProbe = (spec.runtimeProbe ?? finishing?.runtimeProbe) === true;
+  const semanticRoots = Array.isArray(spec.runtimeSemanticRoots) ? spec.runtimeSemanticRoots : [];
+  const projectionRoots = Array.isArray(spec.runtimeProjectionRoots) ? spec.runtimeProjectionRoots : [];
+  if (fullRuntimeProbe || semanticRoots.length || projectionRoots.length) {
     if (!screenProbe.dump) {
       console.error(`${screen.id}: runtimeProbe is enabled but presets-src/${screenProbe.label} is missing`);
       process.exit(1);
     }
     const runtimeReport = matchRuntimeProfile(screenProbe.dump, screen.rootNode);
-    const applied = applyRuntimeEvidence(screen.rootNode, runtimeReport, screenProbe.dump);
-    projectedRuntimeTotal += applied.projected.length;
+    if (fullRuntimeProbe) {
+      const applied = applyRuntimeEvidence(screen.rootNode, runtimeReport, screenProbe.dump);
+      projectedRuntimeTotal += applied.projected.length;
+    } else {
+      if (semanticRoots.length) applyRuntimeSemantics(screen.rootNode, runtimeReport, screenProbe.dump, semanticRoots);
+      if (projectionRoots.length) {
+        projectedRuntimeTotal += projectRuntimeBranches(
+          screen.rootNode, runtimeReport, screenProbe.dump, projectionRoots,
+        ).length;
+      }
+    }
     if (runtimeReport.matchRate < 0.5) {
       console.error(`${screen.id}: runtime probe matched only ${(runtimeReport.matchRate * 100).toFixed(1)}% of source widgets; refusing an unreliable projection`);
       process.exit(1);

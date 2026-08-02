@@ -153,7 +153,7 @@ export function nativeFactsFor(widget: ProbeWidget): GeometryFact[] {
 class ProbeTree {
   readonly widgets: ProbeWidget[];
   private readonly children = new Map<string, ProbeWidget[]>();
-  readonly byBuildableId = new Map<string, ProbeWidget>();
+  readonly byBuildableId = new Map<string, ProbeWidget[]>();
 
   constructor(widgets: ProbeWidget[]) {
     this.widgets = widgets.filter((widget) => Array.isArray(widget.indexPath));
@@ -166,15 +166,10 @@ class ProbeTree {
         siblings.push(widget);
         this.children.set(parentKey, siblings);
       }
-      // GtkBuilder ids are template-scoped, so the probe may contain the same
-      // id in an application's dormant template instance and its presented
-      // dialog. Prefer the mapped occurrence; two equally mapped occurrences
-      // remain structurally ambiguous and retain stable first occurrence.
       if (widget.buildableId) {
-        const existing = this.byBuildableId.get(widget.buildableId);
-        if (!existing || (!existing.mapped && widget.mapped)) {
-          this.byBuildableId.set(widget.buildableId, widget);
-        }
+        const candidates = this.byBuildableId.get(widget.buildableId) ?? [];
+        candidates.push(widget);
+        this.byBuildableId.set(widget.buildableId, candidates);
       }
     }
   }
@@ -192,17 +187,61 @@ export function matchRuntimeProfile(probe: ProbeDocument, root: AdwNode): Runtim
   const tree = new ProbeTree(probe.widgets ?? []);
   const sourceNodes: AdwNode[] = [];
   walkSource(root, sourceNodes);
+  const sourceParent = new Map<AdwNode, AdwNode>();
+  const indexSourceParents = (node: AdwNode): void => {
+    for (const child of [...(node.children ?? []), ...(node.pages ?? [])]) {
+      sourceParent.set(child, node);
+      indexSourceParents(child);
+    }
+  };
+  indexSourceParents(root);
   // GtkStackPage wrappers are not runtime widgets; they are not matchable.
   const matchableNodes = sourceNodes.filter((node) => node.type !== 'stack-page');
 
   const matchedWidgetByNode = new Map<AdwNode, { widget: ProbeWidget; by: 'buildable-id' | 'structure' }>();
   const claimedWidgets = new Set<ProbeWidget>();
 
-  // Pass 1 — buildable id: authoritative, position-independent.
+  // Seed the source root before id matching so template-scoped duplicate ids
+  // can be resolved inside the presented window/dialog branch.
+  const rootClass = expectedClass(root);
+  const rootId = declaredSourceId(root);
+  const rootById = rootId ? (tree.byBuildableId.get(rootId) ?? [])
+    .find((widget) => !rootClass || canonicalGType(widget.gtype) === rootClass) : undefined;
+  const exactRoot = rootClass
+    ? tree.widgets.find((widget) => widget.mapped && canonicalGType(widget.gtype) === rootClass)
+    : undefined;
+  const runtimeRoot = rootById ?? exactRoot ?? tree.toplevels().find((widget) => widget.mapped) ?? tree.toplevels()[0];
+  if (runtimeRoot) {
+    matchedWidgetByNode.set(root, { widget: runtimeRoot, by: rootById ? 'buildable-id' : 'structure' });
+    claimedWidgets.add(runtimeRoot);
+  }
+
+  // Pass 1 — buildable id. IDs are authoritative only within their template
+  // scope; select the class-compatible candidate below the nearest matched
+  // source ancestor, preferring the mapped instance when a dormant copy also
+  // exists.
   for (const node of matchableNodes) {
+    if (node === root) continue;
     const id = declaredSourceId(node);
     if (!id) continue;
-    const widget = tree.byBuildableId.get(id);
+    let ancestor = sourceParent.get(node);
+    let ancestorWidget: ProbeWidget | undefined;
+    while (ancestor && !ancestorWidget) {
+      ancestorWidget = matchedWidgetByNode.get(ancestor)?.widget;
+      ancestor = sourceParent.get(ancestor);
+    }
+    const expected = expectedClass(node);
+    const isBelowAncestor = (candidate: ProbeWidget) => !ancestorWidget ||
+      (candidate.indexPath.length > ancestorWidget.indexPath.length &&
+        ancestorWidget.indexPath.every((part, index) => candidate.indexPath[index] === part));
+    const candidates = (tree.byBuildableId.get(id) ?? [])
+      .filter((candidate) => !claimedWidgets.has(candidate) && isBelowAncestor(candidate))
+      .sort((a, b) => Number(Boolean(expected && canonicalGType(b.gtype) === expected))
+          - Number(Boolean(expected && canonicalGType(a.gtype) === expected))
+        || Number(b.mapped) - Number(a.mapped)
+        || (ancestorWidget ? a.indexPath.length - ancestorWidget.indexPath.length : a.indexPath.length)
+          - (ancestorWidget ? b.indexPath.length - ancestorWidget.indexPath.length : b.indexPath.length));
+    const widget = candidates[0];
     if (widget && !claimedWidgets.has(widget)) {
       matchedWidgetByNode.set(node, { widget, by: 'buildable-id' });
       claimedWidgets.add(widget);
@@ -210,24 +249,7 @@ export function matchRuntimeProfile(probe: ProbeDocument, root: AdwNode): Runtim
   }
 
   // Pass 2 — structure: within an already-matched parent, align children by
-  // gtype ordinal. Seeded at the root: the screen's window node is the first
-  // mapped toplevel (the comparison depicts exactly that window).
-  if (!matchedWidgetByNode.has(root)) {
-    // A presented AdwDialog lives inside AdwDialogHost rather than in GTK's
-    // toplevel list. When the imported template retained its concrete class,
-    // prefer that exact mapped GType anywhere in the tree; only ordinary
-    // window roots fall back to the first mapped toplevel.
-    const rootClass = expectedClass(root);
-    const exactRoot = rootClass
-      ? tree.widgets.find((widget) => widget.mapped && canonicalGType(widget.gtype) === rootClass)
-      : undefined;
-    const toplevel = exactRoot ?? tree.toplevels().find((widget) => widget.mapped) ?? tree.toplevels()[0];
-    if (toplevel && !claimedWidgets.has(toplevel)) {
-      matchedWidgetByNode.set(root, { widget: toplevel, by: 'structure' });
-      claimedWidgets.add(toplevel);
-    }
-  }
-
+  // gtype ordinal.
   const alignChildren = (sourceNode: AdwNode, parentWidget: ProbeWidget): void => {
     const sourceChildren = runtimeChildrenWithPageNames(sourceNode);
     const probeChildren = tree.childrenOf(parentWidget);
@@ -324,6 +346,87 @@ export interface AppliedRuntimeEvidence {
   projected: string[];
 }
 
+function sourceIdsWithin(root: AdwNode, selectedRootIds?: readonly string[]): Set<string> | null {
+  if (!selectedRootIds?.length) return null;
+  const selected = new Set(selectedRootIds);
+  const ids = new Set<string>();
+  const collect = (node: AdwNode, inside: boolean): void => {
+    const selectedHere = inside || selected.has(node.id);
+    if (selectedHere) ids.add(node.id);
+    for (const child of [...(node.children ?? []), ...(node.pages ?? [])]) collect(child, selectedHere);
+  };
+  collect(root, false);
+  return ids;
+}
+
+/** Apply only settled semantic properties, optionally within source subtrees. */
+export function applyRuntimeSemantics(
+  root: AdwNode,
+  report: RuntimeProfileReport,
+  probe: ProbeDocument,
+  selectedRootIds?: readonly string[],
+): string[] {
+  const nodes: AdwNode[] = [];
+  walkSource(root, nodes);
+  const nodeById = new Map(nodes.map((node) => [node.id, node]));
+  const allowed = sourceIdsWithin(root, selectedRootIds);
+  const probeWidgetByPath = new Map((probe.widgets ?? []).map(widget => [widget.indexPath.join(','), widget]));
+  const applied: string[] = [];
+  for (const match of report.matches) {
+    if (allowed && !allowed.has(match.nodeId)) continue;
+    const node = nodeById.get(match.nodeId);
+    if (!node) continue;
+    const runtimeProperties = probeWidgetByPath.get(match.indexPath.join(','))?.properties ?? {};
+    const runtimeLabel = ['label', 'text'].map(key => runtimeProperties[key])
+      .find(value => typeof value === 'string') as string | undefined;
+    const displayedRuntimeLabel = runtimeLabel !== undefined && node.useUnderline
+      ? runtimeLabel.replace(/__|_./g, (value) => value === '__' ? '_' : value.slice(1))
+      : runtimeLabel;
+    const runtimeTitle = typeof runtimeProperties.title === 'string' ? runtimeProperties.title : undefined;
+    let changed = false;
+    if ((node.type === 'label' || node.type === 'inscription') && displayedRuntimeLabel !== undefined) {
+      node.title = displayedRuntimeLabel;
+      node.value = displayedRuntimeLabel;
+      changed = true;
+    } else if ((node.type === 'button' || node.type === 'menu-button' || node.type === 'split-button') && displayedRuntimeLabel !== undefined) {
+      node.title = displayedRuntimeLabel;
+      changed = true;
+    } else if (runtimeTitle !== undefined) {
+      node.title = runtimeTitle;
+      changed = true;
+    }
+    if (typeof runtimeProperties.subtitle === 'string') { node.subtitle = runtimeProperties.subtitle; changed = true; }
+    if (typeof runtimeProperties.description === 'string') { node.description = runtimeProperties.description; changed = true; }
+    if (typeof runtimeProperties['icon-name'] === 'string') { node.iconName = runtimeProperties['icon-name']; changed = true; }
+    if (typeof runtimeProperties['placeholder-text'] === 'string') { node.placeholder = runtimeProperties['placeholder-text']; changed = true; }
+    if (typeof runtimeProperties.active === 'boolean') { node.active = runtimeProperties.active; changed = true; }
+    if (typeof runtimeProperties.selected === 'number' &&
+        (node.type === 'combo-row' || node.type === 'drop-down')) {
+      node.selectedIndex = runtimeProperties.selected;
+      const path = match.indexPath;
+      const selectedLabel = (probe.widgets ?? [])
+        .filter(widget => widget.indexPath.length > path.length &&
+          path.every((part, index) => widget.indexPath[index] === part) &&
+          widget.mapped && widget.visible && widget.gtype === 'GtkLabel' &&
+          typeof widget.properties?.label === 'string' && widget.properties.label.length > 0 &&
+          widget.properties.label !== runtimeTitle)
+        .sort((left, right) => (right.bounds?.x ?? 0) - (left.bounds?.x ?? 0))[0]?.properties?.label;
+      if (typeof selectedLabel === 'string') {
+        node.options = Array.from({ length: runtimeProperties.selected + 1 }, (_, index) =>
+          index === runtimeProperties.selected ? selectedLabel : '');
+      }
+      changed = true;
+    }
+    if (typeof runtimeProperties.text === 'string' &&
+        (node.type === 'entry' || node.type === 'entry-row' || node.type === 'password-row' || node.type === 'search-entry')) {
+      node.value = runtimeProperties.text;
+      changed = true;
+    }
+    if (changed) applied.push(node.id);
+  }
+  return applied;
+}
+
 /**
  * Consume a runtime join in the render path (#55 exit, ADR 0001 consumer 1).
  * Mutates the document tree the comparison renders:
@@ -345,7 +448,7 @@ export function applyRuntimeEvidence(root: AdwNode, report: RuntimeProfileReport
   walkSource(root, nodes);
   const nodeById = new Map(nodes.map((node) => [node.id, node]));
   const matchByNodeId = new Map(report.matches.map(match => [match.nodeId, match]));
-  const probeWidgetByPath = new Map((probe?.widgets ?? []).map(widget => [widget.indexPath.join(','), widget]));
+  if (probe) applyRuntimeSemantics(root, report, probe);
   const parentByNode = new Map<AdwNode, AdwNode>();
   const indexParents = (node: AdwNode): void => {
     for (const child of [...(node.children ?? []), ...(node.pages ?? [])]) {
@@ -358,30 +461,6 @@ export function applyRuntimeEvidence(root: AdwNode, report: RuntimeProfileReport
   for (const match of report.matches) {
     const node = nodeById.get(match.nodeId);
     if (!node) continue;
-    const runtimeProperties = probeWidgetByPath.get(match.indexPath.join(','))?.properties ?? {};
-    // A matched stock widget's settled semantic value is as authoritative as
-    // its allocation. This covers labels populated by application code
-    // (Clocks' 00:00.0 stopwatch), runtime button text, selected toggles and
-    // icons without inventing app-specific finishing overrides.
-    const runtimeLabel = ['label', 'text'].map(key => runtimeProperties[key])
-      .find(value => typeof value === 'string') as string | undefined;
-    const displayedRuntimeLabel = runtimeLabel !== undefined && node.useUnderline
-      ? runtimeLabel.replace(/__|_./g, (match) => match === '__' ? '_' : match.slice(1))
-      : runtimeLabel;
-    const runtimeTitle = typeof runtimeProperties.title === 'string' ? runtimeProperties.title : undefined;
-    if ((node.type === 'label' || node.type === 'inscription') && displayedRuntimeLabel !== undefined) {
-      node.title = displayedRuntimeLabel;
-      node.value = displayedRuntimeLabel;
-    } else if ((node.type === 'button' || node.type === 'menu-button' || node.type === 'split-button') && displayedRuntimeLabel !== undefined) {
-      node.title = displayedRuntimeLabel;
-    } else if (runtimeTitle !== undefined) {
-      node.title = runtimeTitle;
-    }
-    if (typeof runtimeProperties.subtitle === 'string') node.subtitle = runtimeProperties.subtitle;
-    if (typeof runtimeProperties.description === 'string') node.description = runtimeProperties.description;
-    if (typeof runtimeProperties['icon-name'] === 'string') node.iconName = runtimeProperties['icon-name'];
-    if (typeof runtimeProperties['placeholder-text'] === 'string') node.placeholder = runtimeProperties['placeholder-text'];
-    if (typeof runtimeProperties.active === 'boolean') node.active = runtimeProperties.active;
     if (!match.mapped || !match.visible) {
       node.visible = false;
       node.geometryOrigin = { ...node.geometryOrigin, visible: 'native' };
@@ -504,10 +583,16 @@ function runtimeNode(widget: ProbeWidget, parentBounds: ProbeBounds | null, prob
  * A matched runtime path is never projected, so declarative children remain
  * authoritative and GTK implementation internals cannot duplicate them.
  */
-export function projectRuntimeBranches(root: AdwNode, report: RuntimeProfileReport, probe: ProbeDocument): string[] {
+export function projectRuntimeBranches(
+  root: AdwNode,
+  report: RuntimeProfileReport,
+  probe: ProbeDocument,
+  selectedRootIds?: readonly string[],
+): string[] {
   const sourceNodes: AdwNode[] = [];
   walkSource(root, sourceNodes);
   const sourceById = new Map(sourceNodes.map(node => [node.id, node]));
+  const allowed = sourceIdsWithin(root, selectedRootIds);
   const matchByPath = new Map(report.matches.map(match => [match.indexPath.join(','), match]));
   const widgets = [...(probe.widgets ?? [])].sort((a, b) => a.indexPath.length - b.indexPath.length);
   const widgetByPath = new Map(widgets.map(widget => [widget.indexPath.join(','), widget]));
@@ -543,6 +628,7 @@ export function projectRuntimeBranches(root: AdwNode, report: RuntimeProfileRepo
     return [node];
   };
   for (const match of report.matches) {
+    if (allowed && !allowed.has(match.nodeId)) continue;
     const parent = sourceById.get(match.nodeId);
     const runtimeParent = widgetByPath.get(match.indexPath.join(','));
     if (!parent || !runtimeParent || !match.mapped) continue;
@@ -552,6 +638,14 @@ export function projectRuntimeBranches(root: AdwNode, report: RuntimeProfileRepo
     if (!additions.length) continue;
     parent.children = [...(parent.children ?? []), ...additions];
     parent.runtimeProjectionHost = true;
+    // Projected children use their native relative allocations, so their
+    // source host must retain the allocation they were measured inside.
+    // Otherwise absolutely placed children contribute no intrinsic size and
+    // the following source row overlaps the projected branch.
+    if (match.bounds) {
+      parent.widthRequest = Math.max(parent.widthRequest ?? 0, match.bounds.width);
+      parent.heightRequest = Math.max(parent.heightRequest ?? 0, match.bounds.height);
+    }
   }
   return projected;
 }

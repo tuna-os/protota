@@ -188,7 +188,7 @@
                                                                                           "children": [
                                                                                             {
                                                                                               "id": "overlay",
-                                                                                              "type": "bin",
+                                                                                              "type": "overlay",
                                                                                               "children": [
                                                                                                 {
                                                                                                   "id": "carousel",
@@ -1608,7 +1608,7 @@
                                                                           "children": [
                                                                             {
                                                                               "id": "overlay",
-                                                                              "type": "bin",
+                                                                              "type": "overlay",
                                                                               "children": [
                                                                                 {
                                                                                   "id": "carousel",
@@ -2491,7 +2491,7 @@
                                                                               "children": [
                                                                                 {
                                                                                   "id": "template-imported-229",
-                                                                                  "type": "bin",
+                                                                                  "type": "overlay",
                                                                                   "children": [
                                                                                     {
                                                                                       "id": "carousel",

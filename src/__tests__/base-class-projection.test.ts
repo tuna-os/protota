@@ -100,6 +100,9 @@ describe('base-class projection', () => {
     const exported = mockupToBlueprint(doc);
     expect(exported).toContain('Adw.ActionRow');
     expect(exported).not.toContain('Protota.CustomWidget');
+    expect(wrap?.children?.[0].id).toMatch(/^[A-Za-z_][A-Za-z0-9_]*$/);
+    expect(exported).toContain(`${wrap?.children?.[0].id} {`);
+    expect(exported).not.toContain('wrap-toggle');
   });
 
   it('leaves a plain Gtk.Widget subclass as an honest boundary', () => {

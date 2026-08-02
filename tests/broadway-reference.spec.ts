@@ -12,7 +12,7 @@ const broadwayUrl = process.env.BROADWAY_URL;
 // passed app fails CI rather than surfacing in a quarterly audit.
 const appCatalog = JSON.parse(
   readFileSync(new URL('./fixtures/gnome-app-catalog.json', import.meta.url), 'utf8'),
-) as Record<string, { maxUnresolvedCoverage?: number; minSimilarity?: number }>;
+) as Record<string, { maxUnresolvedCoverage?: number; minSimilarity?: number; minForegroundIoU?: number }>;
 // Native runtime probe dump (#58), written by the containerized app when the
 // runner is started with a /probe volume. Optional: a missing or unreadable
 // probe file is "no evidence", never a failure (ADR 0001 containment rule).
@@ -339,6 +339,10 @@ test.describe('Broadway reference captures', () => {
     if (maximumUnresolvedWidgetCoverage) {
       expect(unresolvedWidgetCoverage, `Unresolved custom-widget coverage for ${appId}`).toBeLessThanOrEqual(Number(maximumUnresolvedWidgetCoverage));
     }
+    const minimumForegroundIoU = process.env.BROADWAY_MIN_FOREGROUND_IOU;
+    if (minimumForegroundIoU) {
+      expect(foreground.foregroundIoU, `Foreground overlap for ${appId}`).toBeGreaterThanOrEqual(Number(minimumForegroundIoU));
+    }
 
     // Catalog-carried per-app gates (#59): each value traces to a committed
     // measured artifact for this app (see docs/gnome-app-conformance.md).
@@ -349,6 +353,9 @@ test.describe('Broadway reference captures', () => {
     }
     if (gates?.minSimilarity !== undefined) {
       expect(sourceResolvedSimilarity, `Catalog source-resolved-similarity gate for ${appId}`).toBeGreaterThanOrEqual(gates.minSimilarity);
+    }
+    if (gates?.minForegroundIoU !== undefined) {
+      expect(foreground.foregroundIoU, `Catalog foreground-overlap gate for ${appId}`).toBeGreaterThanOrEqual(gates.minForegroundIoU);
     }
   });
 });

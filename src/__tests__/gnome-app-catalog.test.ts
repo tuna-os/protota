@@ -11,6 +11,9 @@ interface CatalogEntry {
   suite: 'core' | 'circle';
   status: 'preset' | 'planned';
   visualStatus: 'not-validated' | 'needs-tuning' | 'passed';
+  maxUnresolvedCoverage?: number;
+  minSimilarity?: number;
+  minForegroundIoU?: number;
 }
 
 const catalog = JSON.parse(
@@ -41,6 +44,11 @@ describe('GNOME app conformance catalogue', () => {
       expect(app.viewport.width, id).toBeGreaterThan(0);
       expect(app.viewport.height, id).toBeGreaterThan(0);
       expect(app.visualStatus, id).toMatch(/^(not-validated|needs-tuning|passed)$/);
+      if (app.visualStatus === 'passed') {
+        expect(app.maxUnresolvedCoverage, `${id}: passed apps need an unresolved-coverage gate`).toBeTypeOf('number');
+        expect(app.minSimilarity, `${id}: passed apps need a resolved-similarity gate`).toBeTypeOf('number');
+        expect(app.minForegroundIoU, `${id}: passed apps need a meaningful foreground-overlap gate`).toBeTypeOf('number');
+      }
     }
   });
 });

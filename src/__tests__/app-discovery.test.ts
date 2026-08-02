@@ -12,6 +12,7 @@ import {
   isDiscoveryRelevantPath,
   isIgnoredPath,
 } from '../utils/appDiscovery';
+import { blueprintBundleToDocument, mockupToBlueprint } from '../utils/blueprint';
 
 const WINDOW_BLP = `using Gtk 4.0;
 using Adw 1;
@@ -71,12 +72,37 @@ describe('discoverAppSources (file map)', () => {
     const result = discoverAppSources({
       'src/window.blp': WINDOW_BLP,
       'src/window.vala': 'public class DemoWindow {}',
+      'src/window.py': 'class DemoWindow: pass',
       'src/main.c': 'int main() { return 0; }',
       'builddir/generated.ui': '<interface/>',
       '.git/blob.blp': 'garbage',
     });
     expect(result.files.map((file) => file.path)).toEqual(['src/window.blp']);
-    expect(result.codeFiles.map((file) => file.path)).toEqual(['src/main.c', 'src/window.vala']);
+    expect(result.codeFiles.map((file) => file.path)).toEqual(['src/main.c', 'src/window.py', 'src/window.vala']);
+  });
+
+  it('feeds discovered implementation files into an export-safe enriched bundle', () => {
+    const result = discoverAppSources({
+      'src/window.blp': 'using Gtk 4.0; using Adw 1; Adw.ApplicationWindow { content: $CodePanel code_panel {}; }',
+      'src/code-panel.c': `
+        G_DEFINE_TYPE (CodePanel, code_panel, GTK_TYPE_BOX);
+        static void code_panel_init (CodePanel *self) {
+          GtkWidget *action = gtk_button_new ();
+          gtk_button_set_label (GTK_BUTTON (action), "From source code");
+          gtk_box_append (GTK_BOX (self), action);
+        }
+      `,
+    });
+    const doc = blueprintBundleToDocument(
+      [...result.files, ...result.codeFiles],
+      'src/window.blp',
+    );
+    const panel = doc.screens[0].rootNode.children?.[0];
+    expect(panel).toMatchObject({ id: 'code_panel', type: 'box' });
+    expect(panel?.children?.[0]).toMatchObject({
+      id: 'code_panel_action', type: 'button', title: 'From source code',
+    });
+    expect(mockupToBlueprint(doc)).toContain('Gtk.Button code_panel_action');
   });
 });
 

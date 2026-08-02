@@ -805,6 +805,26 @@ adw-window > .adw-node-wrapper > *,
   flex-direction: column;
   min-height: 0;
 }
+
+/* GtkOverlay allocates every child over the same rectangle. Grid layering
+ * preserves normal intrinsic sizing for the base child while overlay slots
+ * paint above it without pushing later siblings down the page. */
+.protota-div-overlay {
+  display: grid;
+  min-width: 0;
+  min-height: 0;
+}
+
+.protota-div-overlay > .adw-node-wrapper,
+.protota-div-overlay > .adw-node-wrapper > * {
+  grid-area: 1 / 1;
+  min-width: 0;
+  min-height: 0;
+}
+
+.protota-div-overlay > .adw-node-wrapper[slot="overlay"] > * {
+  z-index: 1;
+}
 .protota-div-navigation-view > .adw-node-wrapper {
   flex: 1 1 auto;
   min-height: 0;

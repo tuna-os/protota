@@ -10,6 +10,7 @@ const CLASS_TO_WIDGET_MAP: Record<string, AdwNodeType> = {
   'Adw.ApplicationWindow': 'window',
   'Adw.Window': 'window',
   'Adw.PreferencesDialog': 'preferences-dialog',
+  'Adw.PreferencesWindow': 'window',
   'Adw.Dialog': 'dialog',
   'Adw.AlertDialog': 'alert-dialog',
   'Adw.AboutDialog': 'about-dialog',
@@ -75,11 +76,14 @@ const CLASS_TO_WIDGET_MAP: Record<string, AdwNodeType> = {
   'Adw.Toggle': 'toggle',
   'Adw.ToggleGroup': 'toggle-group',
   'Gtk.Entry': 'entry',
+  'Gtk.PasswordEntry': 'entry',
+  'Gtk.Text': 'entry',
   'Adw.StatusPage': 'status-page',
   'Adw.ToastOverlay': 'toast-overlay',
   'Adw.Banner': 'banner',
   'Adw.Spinner': 'spinner',
   'Gtk.FlowBox': 'flow-box',
+  'Gtk.FlowBoxChild': 'bin',
   'Gtk.Box': 'box',
   'Gtk.Grid': 'grid',
   'Gtk.CenterBox': 'center-box',
@@ -123,6 +127,10 @@ const CLASS_TO_WIDGET_MAP: Record<string, AdwNodeType> = {
   AdwPreferencesGroup: 'preferences-group',
   GtkButton: 'button',
   GtkEntry: 'entry',
+  GtkPasswordEntry: 'entry',
+  PasswordEntry: 'entry',
+  GtkText: 'entry',
+  Text: 'entry',
   GtkBox: 'box',
   GtkGrid: 'grid',
   GtkStack: 'stack',
@@ -130,6 +138,8 @@ const CLASS_TO_WIDGET_MAP: Record<string, AdwNodeType> = {
   GtkScrolledWindow: 'scrolled-window',
   GtkLabel: 'label',
   GtkListBox: 'list-box',
+  GtkFlowBoxChild: 'bin',
+  FlowBoxChild: 'bin',
   ListBox: 'list-box',
   Viewport: 'bin',
   GtkViewport: 'bin',
@@ -142,6 +152,8 @@ const CLASS_TO_WIDGET_MAP: Record<string, AdwNodeType> = {
   'Gtk.TextView': 'entry',
   GtkSourceView: 'entry',
   'GtkSource.View': 'entry',
+  GtkSourceMap: 'entry',
+  'GtkSource.Map': 'entry',
   Label: 'label',
   Image: 'bin',
   GtkImage: 'bin',
@@ -208,9 +220,9 @@ const CLASS_TO_WIDGET_MAP: Record<string, AdwNodeType> = {
   Spinner: 'spinner',
   GtkSpinner: 'spinner',
   'Gtk.Spinner': 'spinner',
-  Overlay: 'bin',
-  GtkOverlay: 'bin',
-  'Gtk.Overlay': 'bin',
+  Overlay: 'overlay',
+  GtkOverlay: 'overlay',
+  'Gtk.Overlay': 'overlay',
   Revealer: 'bin',
   'Gtk.Revealer': 'bin',
   WindowHandle: 'bin',
@@ -222,6 +234,18 @@ const CLASS_TO_WIDGET_MAP: Record<string, AdwNodeType> = {
   Widget: 'bin',
   GtkWidget: 'bin',
   'Gtk.Widget': 'bin',
+  // GtkInfoBar is a message area plus an action area. Keeping its declared
+  // children in a horizontal layout is closer to GTK than an opaque boundary
+  // and, unlike Adw.Banner, does not discard the child content.
+  InfoBar: 'box',
+  GtkInfoBar: 'box',
+  'Gtk.InfoBar': 'box',
+  'Adw.ShortcutsDialog': 'preferences-dialog',
+  AdwShortcutsDialog: 'preferences-dialog',
+  'Adw.ShortcutsSection': 'preferences-group',
+  AdwShortcutsSection: 'preferences-group',
+  'Adw.ShortcutsItem': 'action-row',
+  AdwShortcutsItem: 'action-row',
 };
 
 /**
@@ -232,7 +256,7 @@ const CLASS_TO_WIDGET_MAP: Record<string, AdwNodeType> = {
  * boxes or count as unresolved visual coverage.
  */
 const NON_VISUAL_CLASS_PATTERN =
-  /^(Gtk\.|Gio\.|Adw\.|GtkSource\.)?(EventController[A-Za-z]*|Gesture[A-Za-z]*|ShortcutController|Shortcut|DropTarget|DragSource|Adjustment|TextBuffer|SourceBuffer|Buffer|EntryBuffer|Tooltip|StringList|ListStore|SizeGroup|FileFilter|SortListModel|FilterListModel|SingleSelection|MultiSelection|NoSelection|SignalListItemFactory|BuilderListItemFactory|[A-Za-z]*Paintable)$/;
+  /^(Gtk\.|Gio\.|Adw\.|GtkSource\.)?(EventController[A-Za-z]*|Gesture[A-Za-z]*|ShortcutController|Shortcut|DropTarget|DragSource|Adjustment|TextBuffer|SourceBuffer|Buffer|EntryBuffer|Tooltip|StringList|ListStore|SizeGroup|FileFilter|FileDialog|ColumnViewColumn|EnumList|Toast|[A-Za-z]*Model|SingleSelection|MultiSelection|NoSelection|SignalListItemFactory|BuilderListItemFactory|[A-Za-z]*Paintable)$/;
 
 /**
  * An Adw.Breakpoint takes no layout allocation, but unlike the non-visual
@@ -299,6 +323,7 @@ const WIDGET_CLASS_MAP: Record<string, string> = {
   stack: 'Gtk.Stack',
   'stack-page': 'Gtk.StackPage',
   'scrolled-window': 'Gtk.ScrolledWindow',
+  overlay: 'Gtk.Overlay',
   'search-entry': 'Gtk.SearchEntry',
   'progress-bar': 'Gtk.ProgressBar',
   scale: 'Gtk.Scale',
@@ -871,6 +896,7 @@ function propertyNameForNode(name: string, nodeType: AdwNodeType): string {
   const rawName = name.replace(/_/g, '-');
   if ((rawName === 'label' || rawName === 'text') && (nodeType === 'button' || nodeType === 'toggle' || nodeType === 'label' || nodeType === 'inscription' || nodeType === 'menu-button' || nodeType === 'split-button')) return 'title';
   if (rawName === 'icon-name') return 'iconName';
+  if (rawName === 'placeholder-text') return 'placeholder';
   if (rawName === 'show-title-buttons') return 'showTitleButtons';
   if (rawName === 'selected') return 'selectedIndex';
   return rawName.replace(/-([a-z])/g, (_, letter: string) => letter.toUpperCase());
@@ -1809,7 +1835,7 @@ function valaCompositeSnippet(
   // subclass almost certainly populates itself at runtime. A base that draws
   // its own chrome (a row, an entry) is that widget even when empty.
   const CHROMELESS_CONTAINER_TYPES = new Set([
-    'bin', 'box', 'grid', 'center-box', 'clamp', 'stack', 'scrolled-window',
+    'bin', 'box', 'grid', 'center-box', 'clamp', 'stack', 'scrolled-window', 'overlay',
     'list-box', 'wrap-box', 'overlay-split', 'toolbar-view',
   ]);
   if (!selfChildren && CHROMELESS_CONTAINER_TYPES.has(CLASS_TO_WIDGET_MAP[canonicalBase])) return null;
@@ -1940,7 +1966,11 @@ function enrichWithValaFacts(doc: MockupDocument, valaFiles: BlueprintSourceFile
       // share a `toggle`.
       const projected = roots[0];
       const namespaceIds = (child: AdwNode): void => {
-        child.id = `${node.id}-${child.id}`;
+        // Browser persistence immediately exports enriched documents back to
+        // Blueprint. Keep generated ids inside Blueprint's identifier grammar;
+        // a hyphen tokenizes as subtraction and made the app disappear on reload.
+        child.id = `${node.id}_${child.id}`.replace(/[^A-Za-z0-9_]/g, '_');
+        if (/^[0-9]/.test(child.id)) child.id = `node_${child.id}`;
         child.children?.forEach(namespaceIds);
       };
       projected.children?.forEach(namespaceIds);

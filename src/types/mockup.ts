@@ -35,6 +35,7 @@ export type AdwNodeType =
   | 'stack'            // GtkStack — visible page container
   | 'stack-page'       // GtkStackPage — named stack child
   | 'scrolled-window'  // GtkScrolledWindow — viewport with overflow
+  | 'overlay'          // GtkOverlay — base child with stacked overlay children
 
   // Preferences rows (boxed-list children)
   | 'action-row'       // AdwActionRow — title + subtitle + prefix/suffix
@@ -284,6 +285,7 @@ export const LEGAL_SLOTS: Partial<Record<AdwNodeType, string[]>> = {
   bin: ['child'],
   clamp: ['child'],
   'scrolled-window': ['child'],
+  overlay: ['child', 'overlay'],
   'toast-overlay': ['child'],
   'menu-button': ['popover', 'child'],
   'split-button': ['popover'],
@@ -302,7 +304,7 @@ const CONTAINER_CHILDREN: AdwNodeType[] = [
   'toolbar-view', 'header-bar', 'window-title',
   'view-stack', 'view-switcher', 'navigation-view', 'tab-view', 'tab-bar', 'overlay-split',
   'clamp', 'bin', 'custom-widget', 'box', 'grid', 'center-box', 'stack', 'stack-page',
-  'scrolled-window', 'wrap-box', 'popover',
+  'scrolled-window', 'overlay', 'wrap-box', 'popover',
   'action-row', 'switch-row', 'combo-row', 'spin-row', 'button-row', 'expander-row',
   'entry-row', 'password-row', 'list-box-row',
   'preferences-page', 'preferences-group',
@@ -356,6 +358,7 @@ export const LEGAL_CHILDREN: Record<AdwNodeType, AdwNodeType[]> = {
   stack: CONTAINER_CHILDREN,
   'stack-page': CONTAINER_CHILDREN,
   'scrolled-window': CONTAINER_CHILDREN,
+  overlay: CONTAINER_CHILDREN,
   // === Preferences rows ===
   'action-row': ['box', 'bin', 'label', 'button', 'menu-button', 'switch-widget', 'check-button', 'avatar', 'progress-bar', 'level-bar', 'spinner', 'entry', 'inscription', 'custom-widget'],
   'switch-row': ['box', 'bin', 'label', 'button', 'menu-button', 'switch-widget', 'check-button', 'avatar', 'progress-bar', 'level-bar', 'spinner', 'entry', 'inscription', 'custom-widget'],

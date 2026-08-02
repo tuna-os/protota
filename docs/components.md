@@ -10,7 +10,7 @@ build with, whether from the palette, the agent API, or a Blueprint import.
 - **Properties** — what the inspector and the builder can set.
 - **Accepts** — legal children; generic containers accept any widget.
 
-58 components.
+59 components.
 
 ## `about-dialog`
 
@@ -212,6 +212,13 @@ build with, whether from the palette, the agent API, or a Blueprint import.
 
 - **Exports as:** `Adw.NavigationView`
 - **Slots:** `content`
+- **Properties:** —
+- **Accepts:** any widget (generic container)
+
+## `overlay`
+
+- **Exports as:** `Gtk.Overlay`
+- **Slots:** `child`, `overlay`
 - **Properties:** —
 - **Accepts:** any widget (generic container)
 

@@ -98,6 +98,7 @@ export const WIDGET_SCHEMAS: Record<AdwNodeType, PropSchema[]> = {
     { key: 'title', label: 'Page title', type: 'string', defaultValue: '' },
   ],
   'scrolled-window': [],
+  overlay: [],
 
   // === Preferences rows ===
   'action-row': [

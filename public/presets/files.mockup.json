@@ -682,7 +682,7 @@
                                                   "children": [
                                                     {
                                                       "id": "icon_overlay",
-                                                      "type": "bin",
+                                                      "type": "overlay",
                                                       "children": [
                                                         {
                                                           "id": "imported-11",

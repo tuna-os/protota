@@ -152,6 +152,7 @@ const TAG_MAP: Record<string, string | null> = {
   stack:                 null,
   'stack-page':          null,
   'scrolled-window':     null,
+  overlay:               null,
   'search-entry':        null,
   'switch-widget':       null,
   'check-button':        null,
@@ -167,7 +168,7 @@ const TAG_MAP: Record<string, string | null> = {
  * already selects the visible page. */
 const DIV_TYPES = new Set([
   'bin', 'custom-widget', 'box', 'grid', 'center-box', 'stack', 'stack-page', 'scrolled-window', 'search-entry', 'switch-widget',
-  'check-button', 'list-box', 'label', 'inscription', 'navigation-view', 'view-stack',
+  'check-button', 'list-box', 'label', 'inscription', 'navigation-view', 'view-stack', 'overlay',
   'progress-bar', 'scale', 'level-bar', 'popover', 'list-box-row', 'tab-bar',
   // adw-overlay-split-view collects [slot="content"] with an unscoped query,
   // so it hoists the content child of any nested toolbar view into its own

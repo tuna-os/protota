@@ -1,27 +1,39 @@
 {
   "title": "GNOME Clocks",
   "screens": [
-    { "id": "world", "entry": "window.ui", "title": "World", "width": 360, "height": 600,
+    { "id": "world", "entry": "data/ui/window.ui", "title": "World", "width": 870, "height": 690,
+      "runtimeProbe": true,
       "overrides": [
         { "id": "stack", "set": { "visibleChildName": "world" },
-          "why": "Default AdwViewStack page; official world.png screenshot." }
+          "probeEvidence": { "probeVersion": 2, "buildableId": "stack",
+                             "expect": { "visibleChildName": "world", "mapped": true } },
+          "why": "Version-matched Clocks 49.0 native probe: the settled default window shows the World page." }
       ] },
-    { "id": "alarms", "entry": "window.ui", "title": "Alarms", "width": 360, "height": 600,
+    { "id": "alarms", "entry": "data/ui/window.ui", "title": "Alarms", "width": 870, "height": 690,
+      "runtimeProbe": true, "probeFile": "clocks-alarm.probe.json",
       "overrides": [
         { "id": "stack", "set": { "visibleChildName": "alarm" },
-          "why": "Alarm view page; official alarm.png screenshot." }
+          "probeEvidence": { "probeVersion": 2, "buildableId": "stack",
+                             "expect": { "visibleChildName": "alarm", "mapped": true } },
+          "why": "Version-matched Clocks 49.0 probe with panel-id=alarm." }
       ] },
-    { "id": "stopwatch", "entry": "window.ui", "title": "Stopwatch", "width": 360, "height": 600,
+    { "id": "stopwatch", "entry": "data/ui/window.ui", "title": "Stopwatch", "width": 870, "height": 690,
+      "runtimeProbe": true, "probeFile": "clocks-stopwatch.probe.json",
       "overrides": [
         { "id": "stack", "set": { "visibleChildName": "stopwatch" },
-          "why": "Stopwatch view page." }
+          "probeEvidence": { "probeVersion": 2, "buildableId": "stack",
+                             "expect": { "visibleChildName": "stopwatch", "mapped": true } },
+          "why": "Version-matched Clocks 49.0 probe with panel-id=stopwatch." }
       ] },
-    { "id": "timer", "entry": "window.ui", "title": "Timer", "width": 360, "height": 600,
+    { "id": "timer", "entry": "data/ui/window.ui", "title": "Timer", "width": 870, "height": 690,
+      "runtimeProbe": true, "probeFile": "clocks-timer.probe.json",
       "overrides": [
         { "id": "stack", "set": { "visibleChildName": "timer" },
-          "why": "Timer view page." }
+          "probeEvidence": { "probeVersion": 2, "buildableId": "stack",
+                             "expect": { "visibleChildName": "timer", "mapped": true } },
+          "why": "Version-matched Clocks 49.0 probe with panel-id=timer." }
       ] },
-    { "id": "alarm-setup", "entry": "alarm-setup-dialog.ui", "title": "New Alarm", "width": 360, "height": 500 }
+    { "id": "alarm-setup", "entry": "data/ui/alarm-setup-dialog.ui", "title": "New Alarm", "width": 520, "height": 580 }
   ],
   "edges": [
     { "from": "world", "to": "alarms", "why": "View switcher → Alarms" },

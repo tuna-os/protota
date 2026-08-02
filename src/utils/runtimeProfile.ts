@@ -207,7 +207,15 @@ export function matchRuntimeProfile(probe: ProbeDocument, root: AdwNode): Runtim
   // gtype ordinal. Seeded at the root: the screen's window node is the first
   // mapped toplevel (the comparison depicts exactly that window).
   if (!matchedWidgetByNode.has(root)) {
-    const toplevel = tree.toplevels().find((widget) => widget.mapped) ?? tree.toplevels()[0];
+    // A presented AdwDialog lives inside AdwDialogHost rather than in GTK's
+    // toplevel list. When the imported template retained its concrete class,
+    // prefer that exact mapped GType anywhere in the tree; only ordinary
+    // window roots fall back to the first mapped toplevel.
+    const rootClass = expectedClass(root);
+    const exactRoot = rootClass
+      ? tree.widgets.find((widget) => widget.mapped && canonicalGType(widget.gtype) === rootClass)
+      : undefined;
+    const toplevel = exactRoot ?? tree.toplevels().find((widget) => widget.mapped) ?? tree.toplevels()[0];
     if (toplevel && !claimedWidgets.has(toplevel)) {
       matchedWidgetByNode.set(root, { widget: toplevel, by: 'structure' });
       claimedWidgets.add(toplevel);
@@ -331,6 +339,7 @@ export function applyRuntimeEvidence(root: AdwNode, report: RuntimeProfileReport
   walkSource(root, nodes);
   const nodeById = new Map(nodes.map((node) => [node.id, node]));
   const matchByNodeId = new Map(report.matches.map(match => [match.nodeId, match]));
+  const probeWidgetByPath = new Map((probe?.widgets ?? []).map(widget => [widget.indexPath.join(','), widget]));
   const parentByNode = new Map<AdwNode, AdwNode>();
   const indexParents = (node: AdwNode): void => {
     for (const child of [...(node.children ?? []), ...(node.pages ?? [])]) {
@@ -343,6 +352,30 @@ export function applyRuntimeEvidence(root: AdwNode, report: RuntimeProfileReport
   for (const match of report.matches) {
     const node = nodeById.get(match.nodeId);
     if (!node) continue;
+    const runtimeProperties = probeWidgetByPath.get(match.indexPath.join(','))?.properties ?? {};
+    // A matched stock widget's settled semantic value is as authoritative as
+    // its allocation. This covers labels populated by application code
+    // (Clocks' 00:00.0 stopwatch), runtime button text, selected toggles and
+    // icons without inventing app-specific finishing overrides.
+    const runtimeLabel = ['label', 'text'].map(key => runtimeProperties[key])
+      .find(value => typeof value === 'string') as string | undefined;
+    const displayedRuntimeLabel = runtimeLabel !== undefined && node.useUnderline
+      ? runtimeLabel.replace(/__|_./g, (match) => match === '__' ? '_' : match.slice(1))
+      : runtimeLabel;
+    const runtimeTitle = typeof runtimeProperties.title === 'string' ? runtimeProperties.title : undefined;
+    if ((node.type === 'label' || node.type === 'inscription') && displayedRuntimeLabel !== undefined) {
+      node.title = displayedRuntimeLabel;
+      node.value = displayedRuntimeLabel;
+    } else if ((node.type === 'button' || node.type === 'menu-button' || node.type === 'split-button') && displayedRuntimeLabel !== undefined) {
+      node.title = displayedRuntimeLabel;
+    } else if (runtimeTitle !== undefined) {
+      node.title = runtimeTitle;
+    }
+    if (typeof runtimeProperties.subtitle === 'string') node.subtitle = runtimeProperties.subtitle;
+    if (typeof runtimeProperties.description === 'string') node.description = runtimeProperties.description;
+    if (typeof runtimeProperties['icon-name'] === 'string') node.iconName = runtimeProperties['icon-name'];
+    if (typeof runtimeProperties['placeholder-text'] === 'string') node.placeholder = runtimeProperties['placeholder-text'];
+    if (typeof runtimeProperties.active === 'boolean') node.active = runtimeProperties.active;
     if (!match.mapped || !match.visible) {
       node.visible = false;
       node.geometryOrigin = { ...node.geometryOrigin, visible: 'native' };
@@ -484,7 +517,7 @@ export function projectRuntimeBranches(root: AdwNode, report: RuntimeProfileRepo
     'label', 'inscription', 'button', 'menu-button', 'split-button', 'entry', 'search-entry',
     'switch-widget', 'check-button', 'status-page', 'action-row', 'switch-row', 'combo-row',
     'spin-row', 'button-row', 'entry-row', 'password-row', 'avatar', 'progress-bar',
-    'scale', 'level-bar', 'spinner', 'banner', 'view-switcher',
+    'scale', 'level-bar', 'spinner', 'banner', 'view-switcher', 'header-bar',
   ]);
   const build = (widget: ProbeWidget, parentBounds: ProbeBounds | null): AdwNode[] => {
     if (!widget.mapped || !widget.visible || matchByPath.has(widget.indexPath.join(','))) return [];

@@ -1387,11 +1387,21 @@ adw-menu-button[data-testid="open-menu-button"] .adw-menu-button-popover {
   padding: 3px 10px;
   border-radius: 6px;
   cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
 .protota-preview-switcher-tab.active {
   background: var(--window-bg-color, #fff);
   box-shadow: 0 1px 3px rgba(0, 0, 6, 0.15);
   font-weight: 600;
+}
+
+/* A header ViewSwitcher is paired with a separate ViewStack. adwaita-web's
+   standalone element also creates a content holder for its page bodies; the
+   paired header form renders only the tab bar, as libadwaita does. */
+adw-header-bar adw-view-switcher > .adw-view-switcher-content {
+  display: none;
 }
 
 /* GtkSwitch is a div-rendered widget; its ephemeral on/off toggle is only

@@ -279,6 +279,9 @@ function nodeProps(node: AdwNode, inheritedSlot?: string): Record<string, string
  * structure while documents imported from Blueprint keep their explicit slot.
  */
 function childSlot(parent: AdwNode, child: AdwNode, index: number): string | undefined {
+  // GtkBuilder names AdwHeaderBar's title-widget child `title`; adwaita-web
+  // exposes the equivalent light-DOM slot as `center`.
+  if (parent.type === 'header-bar' && child.slot === 'title') return 'center';
   if (child.slot) return child.slot;
   if (parent.type === 'toolbar-view') {
     return child.type === 'header-bar' ? 'top' : 'content';
@@ -332,6 +335,19 @@ function findFirstStack(node: AdwNode): AdwNode | null {
     if (found) return found;
   }
   return null;
+}
+
+function findViewSwitcherStack(node: AdwNode, id: string): AdwNode | null {
+  const candidates: AdwNode[] = [];
+  const visit = (candidate: AdwNode): void => {
+    if (candidate.id === id) candidates.push(candidate);
+    candidate.children?.forEach(visit);
+  };
+  visit(node);
+  // GtkBuilder ids are template-scoped, so an expanded composite can legally
+  // contain another `stack`. A ViewSwitcher binds to an AdwViewStack; prefer
+  // that typed candidate instead of whichever duplicate id traversal meets.
+  return candidates.find((candidate) => candidate.type === 'view-stack') ?? candidates[0] ?? null;
 }
 
 /** The stack child a visibleChildName selects (renderer matching rules). */
@@ -491,7 +507,7 @@ export const AdwaitaRenderer: React.FC<Props> = ({
   const hiddenShell = (
     <div
       ref={wrapperRef}
-      slot={node.slot ?? inheritedSlot}
+      slot={inheritedSlot ?? node.slot}
       className="adw-node-wrapper"
       style={{ display: 'none' }}
       data-hidden-node-id={node.id}
@@ -511,14 +527,58 @@ export const AdwaitaRenderer: React.FC<Props> = ({
   // child through an ephemeral override (never the document). The
   // adw-view-switcher element is pageless in our model (pages live on the
   // stack), so preview draws its own tab strip in a plain div.
-  const previewSwitcherStack = preview && node.type === 'view-switcher'
-    ? findFirstStack(doc.screens.find((screen) => screen.id === screenId)?.rootNode ?? node)
+  const screenRoot = doc.screens.find((screen) => screen.id === screenId)?.rootNode;
+  const boundStackId = typeof node.stack === 'string' ? node.stack : null;
+  const switcherStack = node.type === 'view-switcher'
+    ? boundStackId && screenRoot
+      ? findViewSwitcherStack(screenRoot, boundStackId)
+      : preview ? findFirstStack(screenRoot ?? node) : null
     : null;
+  const headerSwitcherNode = node.type === 'header-bar'
+    ? node.children?.find((child) => child.type === 'view-switcher')
+    : undefined;
+  const headerSwitcherStackId = typeof headerSwitcherNode?.stack === 'string' ? headerSwitcherNode.stack : null;
+  const headerSwitcherStack = headerSwitcherStackId && screenRoot
+    ? findViewSwitcherStack(screenRoot, headerSwitcherStackId)
+    : null;
+  // The generated page elements are consumed immediately by the custom
+  // element, so register their source icons before that first connection.
+  headerSwitcherStack?.children?.forEach((page) => ensureAdwIcon(page.iconName));
+  const headerSwitcherPages = (headerSwitcherStack?.children ?? []).filter((page) => page.visible !== false);
+  const headerSwitcherActive = Math.max(0, headerSwitcherPages.findIndex((page) =>
+    typeof headerSwitcherStack?.visibleChildName === 'string' &&
+    (page.id === headerSwitcherStack.visibleChildName ||
+      (page as { name?: string }).name === headerSwitcherStack.visibleChildName)));
+  const directHeaderSwitcher = headerSwitcherNode && headerSwitcherStack ? React.createElement(
+    'adw-view-switcher',
+    {
+      key: 'header-view-switcher',
+      slot: 'center',
+      policy: headerSwitcherNode.policy ?? 'wide',
+      active: headerSwitcherActive,
+      ...(headerSwitcherNode.runtimeEvidence?.relativeBounds
+        ? { style: {
+            position: 'absolute',
+            left: headerSwitcherNode.runtimeEvidence.relativeBounds.x,
+            top: headerSwitcherNode.runtimeEvidence.relativeBounds.y,
+            width: headerSwitcherNode.runtimeEvidence.relativeBounds.width,
+            height: headerSwitcherNode.runtimeEvidence.relativeBounds.height,
+          } }
+        : {}),
+    },
+    ...headerSwitcherPages.map((page, index) =>
+      React.createElement('adw-view-switcher-page', {
+        key: page.id,
+        name: (page as { name?: string }).name ?? page.id,
+        title: plainText(String(page.title || `Page ${index + 1}`)),
+        'icon-name': page.iconName,
+      })),
+  ) : null;
 
   // adw-menu-button is icon-only; a labelled MenuButton renders as a button.
   const tag = isDialogRoot
     ? 'adw-window'
-    : node.type === 'navigation-view' || node.type === 'overlay-split' || previewSwitcherStack
+    : node.type === 'navigation-view' || node.type === 'overlay-split'
       ? 'div'
       : node.type === 'menu-button' && node.title
         ? 'adw-button'
@@ -567,7 +627,7 @@ export const AdwaitaRenderer: React.FC<Props> = ({
   }));
   const collapsedSplit = node.type === 'overlay-split' && node.collapsed === true;
   const renderedSlotted = slottedChildren
-    .filter(({ slot }) => !(collapsedSplit && slot === 'sidebar'));
+    .filter(({ child, slot }) => !(collapsedSplit && slot === 'sidebar') && child !== headerSwitcherNode);
   const children = renderedSlotted
     .map(({ child, slot }, index) => (
     <AdwaitaRenderer
@@ -627,28 +687,20 @@ export const AdwaitaRenderer: React.FC<Props> = ({
   }
 
   // Preview-mode ViewSwitcher tab strip (see previewSwitcherStack above).
-  const previewSwitcherTabs = previewSwitcherStack ? (() => {
+  const previewSwitcherTabs = switcherStack ? (() => {
     const visibleName =
-      overrides?.[previewSwitcherStack.id]?.visibleChildName ?? previewSwitcherStack.visibleChildName;
-    const active = visibleStackChild(previewSwitcherStack, visibleName);
-    const pages = (previewSwitcherStack.children ?? []).filter((page) => page.visible !== false);
-    return pages.length ? (
-      <div key="preview-switcher" className="protota-preview-switcher" role="tablist">
-        {pages.map((page, index) => (
-          <button
-            key={page.id}
-            type="button"
-            role="tab"
-            aria-selected={page === active}
-            data-preview-page={page.id}
-            data-preview-stack={previewSwitcherStack.id}
-            className={`protota-preview-switcher-tab${page === active ? ' active' : ''}`}
-          >
-            {plainText(String(page.title || `Page ${index + 1}`))}
-          </button>
-        ))}
-      </div>
-    ) : null;
+      overrides?.[switcherStack.id]?.visibleChildName ?? switcherStack.visibleChildName;
+    const active = visibleStackChild(switcherStack, visibleName);
+    const pages = (switcherStack.children ?? []).filter((page) => page.visible !== false);
+    return pages.length ? pages.map((page, index) => React.createElement('adw-view-switcher-page', {
+      key: page.id,
+      name: (page as { name?: string }).name ?? page.id,
+      title: plainText(String(page.title || `Page ${index + 1}`)),
+      'icon-name': page.iconName,
+      'data-preview-page': page.id,
+      'data-preview-stack': switcherStack.id,
+      ...(page === active ? { active: '' } : {}),
+    })) : null;
   })() : null;
 
   const iconPrefix = node.type === 'action-row' && node.iconName ? (
@@ -763,6 +815,7 @@ export const AdwaitaRenderer: React.FC<Props> = ({
         binIcon,
         tabBarTabs,
         previewSwitcherTabs,
+        directHeaderSwitcher,
         ...(children ?? []),
         windowControls,
         // For label/inscription — render text content

@@ -309,6 +309,12 @@ static gboolean on_frame_tick(GtkWidget *toplevel, GdkFrameClock *frame_clock,
   return G_SOURCE_CONTINUE;
 }
 
+static gboolean write_delayed_probe(gpointer user_data) {
+  (void)user_data;
+  write_probe_output();
+  return G_SOURCE_REMOVE;
+}
+
 /* Runs on the main loop every 100ms until a mapped toplevel exists, then
  * arms the frame-clock settle watch on it. */
 static gboolean arm_probe(gpointer user_data) {
@@ -319,6 +325,16 @@ static gboolean arm_probe(gpointer user_data) {
     GtkWidget *toplevel = GTK_WIDGET(g_list_model_get_item(toplevels, i));
     gboolean mapped = gtk_widget_get_mapped(toplevel);
     if (mapped) {
+      const char *delay_raw = g_getenv("PROBE_DELAY_MS");
+      const int delay_ms = delay_raw != NULL ? atoi(delay_raw) : 0;
+      if (delay_ms > 0) {
+        /* Interaction-state capture: give the Broadway driver a bounded
+         * window to open a dialog or select a page, then serialize the latest
+         * tree. The default remains frame-settled and unchanged. */
+        g_timeout_add((guint)delay_ms, write_delayed_probe, NULL);
+        g_object_unref(toplevel);
+        return G_SOURCE_REMOVE;
+      }
       ProbeSettleState *state = g_new0(ProbeSettleState, 1);
       state->last_width = -1.0;
       state->last_height = -1.0;

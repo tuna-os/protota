@@ -110,6 +110,23 @@ describe('runtime profile matching (#58)', () => {
     expect(report.matches).toEqual([]);
   });
 
+  it('matches a presented composite dialog below the application toplevel', () => {
+    const dialogRoot = {
+      id: 'dialog', type: 'dialog', sourceClass: 'ExampleSetupDialog', children: [],
+    } as ReturnType<typeof blueprintToNode>;
+    const report = matchRuntimeProfile(probe([
+      widget({ gtype: 'ExampleWindow', indexPath: [0], buildableId: 'window' }),
+      widget({ gtype: 'AdwDialogHost', indexPath: [0, 0] }),
+      widget({ gtype: 'ExampleSetupDialog', indexPath: [0, 0, 1], buildableId: 'ExampleSetupDialog' }),
+    ]), dialogRoot);
+
+    expect(report.matches[0]).toMatchObject({
+      nodeId: 'dialog',
+      gtype: 'ExampleSetupDialog',
+      indexPath: [0, 0, 1],
+    });
+  });
+
   it('emits native:* facts at the top native confidence tier', () => {
     const facts = nativeFactsFor(widget({
       gtype: 'MathButtons', indexPath: [0, 2],

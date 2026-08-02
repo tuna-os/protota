@@ -382,6 +382,21 @@ describe('Blueprint import', () => {
     expect(doc.importDiagnostics).toEqual([]);
   });
 
+  it('retains a GtkBuilder template root concrete class for runtime matching', () => {
+    const doc = blueprintBundleToDocument([
+      { path: 'dialog.ui', content: `<interface>
+        <template class="ExampleSetupDialog" parent="AdwDialog">
+          <child><object class="GtkLabel" id="heading"><property name="label">Setup</property></object></child>
+        </template>
+      </interface>` },
+    ], 'dialog.ui');
+
+    expect(doc.screens[0].rootNode).toMatchObject({
+      type: 'dialog',
+      sourceClass: 'ExampleSetupDialog',
+    });
+  });
+
   it.skipIf(!process.env.OFFICIAL_SOURCE_ROOT)('imports the official Calculator Blueprint bundle without a hand-authored preset', () => {
     const sourceRoot = process.env.OFFICIAL_SOURCE_ROOT!;
     const files = readdirSync(sourceRoot, { recursive: true, withFileTypes: true })

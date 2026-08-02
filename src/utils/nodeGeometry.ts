@@ -132,6 +132,12 @@ export function placementLayout(node: AdwNode, flow: ParentFlow = 'column'): CSS
     placement.height = node.runtimeEvidence.bounds.height;
     placement.flexGrow = 0;
     placement.flexShrink = 0;
+    // GTK uses a zero allocation to collapse adaptive chrome. DOM children
+    // otherwise overflow that zero-sized box (for example Clocks' hidden
+    // wide-mode ViewSwitcherBar still painted four icons below the window).
+    if (node.runtimeEvidence.bounds.width === 0 || node.runtimeEvidence.bounds.height === 0) {
+      placement.overflow = 'hidden';
+    }
   }
   if (node.runtimeEvidence?.relativeBounds) {
     placement.position = 'absolute';

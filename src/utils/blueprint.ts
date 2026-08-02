@@ -1389,6 +1389,14 @@ function builderElementToNode(
   }
   if (breakpoint && breakpointCondition === undefined) return null;
   const node = makeNode(rawClass, id, properties, bindings, children, diagnostics);
+  // A GtkBuilder template's concrete GType is its `class`, even though its
+  // renderer shape comes from `parent`. Preserve both facts: `type` remains
+  // the supported parent widget while sourceClass lets runtime matching join
+  // a presented composite dialog (ClocksAlarmSetupDialog) instead of
+  // incorrectly seeding it at the application's first toplevel window.
+  if (element.tag === 'template' && element.attributes.class) {
+    node.sourceClass = element.attributes.class;
+  }
   if (breakpoint && breakpointCondition !== undefined) {
     node.breakpointCondition = breakpointCondition;
     if (breakpointSetters.length) node.breakpointSetters = breakpointSetters;
@@ -1448,6 +1456,26 @@ function resolveBuilderTemplates(node: AdwNode, templates: Map<string, AdwNode>,
   if (!template || seen.has(node.sourceClass)) return;
   resolved.add(`${node.sourceClass}:${node.id}`);
   const projected = structuredClone(template);
+  // GtkBuilder composite templates commonly bind an inner widget to a
+  // property supplied by the concrete instance, e.g. ClocksHeaderBar's
+  // `AdwViewSwitcher.stack <- ClocksHeaderBar.stack` while the instance sets
+  // `stack=stack`. Once the template is flattened there is no GObject owner
+  // left to perform that binding, so carry any source-known instance literal
+  // onto the projected child. Dynamic properties remain as bindings.
+  const resolveInstanceBindings = (projectedNode: AdwNode): void => {
+    for (const [targetProperty, expression] of Object.entries(projectedNode.bindings ?? {})) {
+      const reference = /^([A-Za-z_][A-Za-z0-9_]*)\.([A-Za-z0-9_-]+)$/.exec(expression);
+      if (!reference || reference[1] !== node.sourceClass) continue;
+      const sourceKey = editorPropertyName(reference[2], node.type);
+      const value = node[sourceKey];
+      if (value === undefined) continue;
+      projectedNode[editorPropertyName(targetProperty, projectedNode.type)] = value;
+      delete projectedNode.bindings![targetProperty];
+    }
+    if (projectedNode.bindings && Object.keys(projectedNode.bindings).length === 0) delete projectedNode.bindings;
+    projectedNode.children?.forEach(resolveInstanceBindings);
+  };
+  resolveInstanceBindings(projected);
   node.type = projected.type;
   node.children = projected.children ?? [];
   if (node.title === node.sourceClass) delete node.title;

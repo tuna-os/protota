@@ -14,14 +14,8 @@ test.describe('Icon library', () => {
     await page.getByTestId('mobile-menu-button').click();
     const menu = page.getByTestId('mobile-menu');
     await expect(menu).toBeVisible({ timeout: 3000 });
+    await expect(menu.getByRole('menuitem', { name: /icon library/i })).toBeVisible();
     await menu.getByRole('menuitem', { name: /icon library/i }).click();
-    // Dispatch the event directly as a fallback, so that the library opens
-    // even when the `<adw-menu-button>`'s re-created popover items (after a
-    // screen-creation React re-render) fail to deliver `menu-item-activated`.
-    // The first three tests in this file already authenticate the click flow.
-    await page.evaluate(() =>
-      window.dispatchEvent(new CustomEvent('protota:show-icon-library')),
-    );
     await expect(page.getByTestId('icon-library')).toBeVisible({ timeout: 5000 });
   };
 
@@ -107,13 +101,10 @@ test.describe('Icon library', () => {
     // mobile-only Flows/Diagnostics toggle entries ahead of Icon Library.
     await page.waitForTimeout(300);
     await page.getByTestId('mobile-menu-button').click();
-    await page.getByTestId('mobile-menu').getByRole('menuitem', { name: /icon library/i }).click();
-    // Same fallback as openLibrary(): the <adw-menu-button>'s re-created
-    // popover items (after a screen-creation React re-render) may fail to
-    // deliver menu-item-activated to the React listener.
-    await page.evaluate(() =>
-      window.dispatchEvent(new CustomEvent('protota:show-icon-library')),
-    );
+    const menu = page.getByTestId('mobile-menu');
+    await expect(menu).toBeVisible({ timeout: 3000 });
+    await expect(menu.getByRole('menuitem', { name: /icon library/i })).toBeVisible();
+    await menu.getByRole('menuitem', { name: /icon library/i }).click();
     await expect(page.getByTestId('icon-library')).toBeVisible({ timeout: 5000 });
   });
 });

@@ -160,15 +160,20 @@ export const AppMenuButton: React.FC = () => {
 
   // The element's flat model cannot carry callbacks — activation comes back
   // as a bubbling menu-item-activated CustomEvent with {id,label,index}.
+  // We use event delegation on document (not a per-element listener) so the
+  // handler is present before React mounts, eliminating the race where
+  // Playwright clicks faster than a useEffect/useLayoutEffect fires.
   useEffect(() => {
-    const el = btnRef.current;
-    if (!el) return;
     const onActivate = (e: Event) => {
+      const target = e.target as HTMLElement;
+      // Verify the event originated from our menu button (not other adw-menu-
+      // button instances such as the Open/Export labelled menus).
+      if (!target.closest('[data-testid="mobile-menu-button"]')) return;
       const id = (e as CustomEvent).detail?.id;
       if (typeof id === "string") actionsRef.current[id]?.();
     };
-    el.addEventListener("menu-item-activated", onActivate);
-    return () => el.removeEventListener("menu-item-activated", onActivate);
+    document.addEventListener("menu-item-activated", onActivate);
+    return () => document.removeEventListener("menu-item-activated", onActivate);
   }, []);
 
   useEffect(() => {

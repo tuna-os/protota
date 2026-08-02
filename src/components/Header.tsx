@@ -249,7 +249,7 @@ export const Header: React.FC<HeaderProps> = ({
         <HeaderIconButton
           icon={sidebarShowSymbolic}
           onClick={onToggleLeft}
-          title="Toggle Layers Panel (Ctrl+\)"
+          title="Toggle Layers Panel (Ctrl+[)"
           ariaLabel="Toggle Layers"
           active={leftOpen}
         />

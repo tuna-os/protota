@@ -96,6 +96,7 @@ const CLASS_TO_WIDGET_MAP: Record<string, AdwNodeType> = {
   'Gtk.ListBox': 'list-box',
   'Gtk.Label': 'label',
   'Gtk.Inscription': 'inscription',
+  'Gtk.Picture': 'bin',
   // Blueprint's short widget names are common in real application templates.
   Bin: 'bin',
   Box: 'box',

@@ -1,7 +1,10 @@
 {
   "title": "GNOME Files",
   "screens": [
-    { "id": "browser", "entry": "nautilus-window.ui", "title": "Files", "width": 950, "height": 640 },
+    { "id": "browser", "entry": "nautilus-window.ui", "title": "Files", "width": 890, "height": 550,
+      "probeFile": "files-browser.probe.json",
+      "runtimeSemanticRoots": ["imported-1"],
+      "runtimeProjectionRoots": ["places_sidebar", "path_bar_buttons_box", "tab_view"] },
     { "id": "properties", "entry": "nautilus-properties-window.ui", "title": "Properties", "width": 480, "height": 640 },
     { "id": "new-folder", "entry": "nautilus-new-folder-dialog.ui", "title": "New Folder", "width": 400, "height": 220 },
     { "id": "compress", "entry": "nautilus-compress-dialog.ui", "title": "Compress", "width": 440, "height": 440 }

@@ -742,6 +742,16 @@ body,
   display: block;
 }
 
+/* A runtime GtkPicture can carry a custom GdkPaintable that has no serialised
+   icon-name. Preserve its measured picture allocation with a recognisable
+   HIG thumbnail instead of leaving a large invisible hole. */
+.protota-runtime-picture {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: url('/adwaita-folder.svg') center / contain no-repeat;
+}
+
 /* GtkSpinButton with vertical orientation is used as the large clock-time
    picker. It has no direct adwaita-web primitive, so preserve its native
    three-part control instead of degrading it to a plain text entry. */
@@ -809,7 +819,9 @@ adw-window > .adw-node-wrapper,
 .protota-div-bin > .adw-node-wrapper,
 .protota-div-stack > .adw-node-wrapper,
 .protota-div-view-stack > .adw-node-wrapper,
-.protota-div-stack-page > .adw-node-wrapper {
+.protota-div-stack-page > .adw-node-wrapper,
+.protota-div-tab-view > .adw-node-wrapper,
+.protota-div-tab-page > .adw-node-wrapper {
   flex: 1 1 auto;
   min-height: 0;
   display: flex;
@@ -823,7 +835,9 @@ adw-window > .adw-node-wrapper > *,
 .protota-div-bin > .adw-node-wrapper > *,
 .protota-div-stack > .adw-node-wrapper > *,
 .protota-div-view-stack > .adw-node-wrapper > *,
-.protota-div-stack-page > .adw-node-wrapper > * {
+.protota-div-stack-page > .adw-node-wrapper > *,
+.protota-div-tab-view > .adw-node-wrapper > *,
+.protota-div-tab-page > .adw-node-wrapper > * {
   flex: 1 1 auto;
   min-height: 0;
 }
@@ -831,6 +845,8 @@ adw-window > .adw-node-wrapper > *,
 .protota-div-stack,
 .protota-div-view-stack,
 .protota-div-stack-page,
+.protota-div-tab-view,
+.protota-div-tab-page,
 .protota-div-navigation-view {
   display: flex;
   flex-direction: column;
@@ -1621,6 +1637,10 @@ html .protota-div-overlay-split > [slot="sidebar"] > * {
   min-width: 0;
   background-color: var(--sidebar-bg-color, rgba(0, 0, 6, 0.04));
   border-inline-end: 1px solid var(--sidebar-border-color, rgba(0, 0, 6, 0.07));
+}
+html .protota-div-overlay-split > [slot="sidebar"] adw-toolbar-view,
+html .protota-div-overlay-split > [slot="sidebar"] .adw-toolbar-view-content {
+  background-color: var(--sidebar-bg-color, rgba(0, 0, 6, 0.04));
 }
 html .protota-div-overlay-split > [slot="content"] > *,
 html .protota-div-overlay-split > .adw-node-wrapper:not([slot]) > * {

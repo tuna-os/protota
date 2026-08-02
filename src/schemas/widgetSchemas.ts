@@ -58,6 +58,9 @@ export const WIDGET_SCHEMAS: Record<AdwNodeType, PropSchema[]> = {
   'view-switcher': [],
   'navigation-view': [],
   'tab-view': [],
+  'tab-page': [
+    { key: 'title', label: 'Title', type: 'string', defaultValue: '' },
+  ],
   'tab-bar': [
     // The id of the Adw.TabView this bar presents; tabs derive from that
     // view's statically declared pages.

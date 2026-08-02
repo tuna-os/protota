@@ -22,6 +22,7 @@ export type AdwNodeType =
   | 'view-switcher'    // AdwViewSwitcher — flat tab switcher (3-5 tabs)
   | 'navigation-view'  // AdwNavigationView — push/pop navigation
   | 'tab-view'         // AdwTabView — multi-document tab pages
+  | 'tab-page'         // AdwTabPage — page metadata/content owned by TabView
   | 'tab-bar'          // AdwTabBar — tab strip bound to a TabView
   | 'overlay-split'    // AdwOverlaySplitView — sidebar + content
 
@@ -306,7 +307,7 @@ export const LEGAL_SLOTS: Partial<Record<AdwNodeType, string[]>> = {
  */
 const CONTAINER_CHILDREN: AdwNodeType[] = [
   'toolbar-view', 'header-bar', 'window-title',
-  'view-stack', 'view-switcher', 'navigation-view', 'tab-view', 'tab-bar', 'overlay-split',
+  'view-stack', 'view-switcher', 'navigation-view', 'tab-view', 'tab-page', 'tab-bar', 'overlay-split',
   'clamp', 'bin', 'custom-widget', 'box', 'grid', 'center-box', 'stack', 'stack-page',
   'scrolled-window', 'overlay', 'wrap-box', 'popover',
   'action-row', 'switch-row', 'combo-row', 'spin-row', 'button-row', 'expander-row',
@@ -347,6 +348,7 @@ export const LEGAL_CHILDREN: Record<AdwNodeType, AdwNodeType[]> = {
   'view-switcher': [],
   'navigation-view': CONTAINER_CHILDREN,
   'tab-view': CONTAINER_CHILDREN,
+  'tab-page': CONTAINER_CHILDREN,
   // Adw.TabBar draws its tabs from the linked TabView's pages; its only real
   // child positions are the start/end action-widget slots (single widget each,
   // buttons in every audited app that uses them).

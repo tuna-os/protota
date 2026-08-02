@@ -2,7 +2,8 @@ import { describe, expect, it } from 'vitest';
 import { blueprintToNode } from '../utils/blueprint';
 import { boundaryGeometryConfidence } from '../utils/nodeGeometry';
 import {
-  applyRuntimeSemantics, matchRuntimeProfile, nativeFactsFor, type ProbeDocument, type ProbeWidget,
+  applyRuntimeSemantics, matchRuntimeProfile, nativeFactsFor, projectRuntimeBranches,
+  type ProbeDocument, type ProbeWidget,
 } from '../utils/runtimeProfile';
 
 /** Minimal probe widget with defaults, so fixtures state only what matters. */
@@ -224,5 +225,34 @@ describe('runtime profile matching (#58)', () => {
     expect(facts).toEqual(expect.arrayContaining([
       { property: 'mapped', value: false, origin: 'native:mapped', confidence: 'native' },
     ]));
+  });
+
+  it('preserves runtime application composites and wraps projected tab content', () => {
+    const root = blueprintToNode(`
+      Adw.ApplicationWindow window {
+        Adw.TabView pages { }
+      }
+    `);
+    const runtime = probe([
+      widget({ gtype: 'AdwApplicationWindow', indexPath: [0], buildableId: 'window' }),
+      widget({ gtype: 'AdwTabView', indexPath: [0, 0], buildableId: 'pages' }),
+      widget({ gtype: 'ExampleGridCell', indexPath: [0, 0, 0] }),
+      widget({ gtype: 'GtkPicture', indexPath: [0, 0, 0, 0] }),
+    ]);
+    const report = matchRuntimeProfile(runtime, root);
+
+    projectRuntimeBranches(root, report, runtime, ['pages']);
+
+    const page = root.children?.[0].children?.[0];
+    expect(page?.type).toBe('tab-page');
+    expect(page?.children?.[0]).toMatchObject({
+      type: 'custom-widget',
+      sourceClass: 'ExampleGridCell',
+      runtimeProjectionHost: true,
+    });
+    expect(page?.children?.[0].children?.[0]).toMatchObject({
+      type: 'bin',
+      sourceClass: 'GtkPicture',
+    });
   });
 });

@@ -531,7 +531,12 @@ export function applyRuntimeEvidence(root: AdwNode, report: RuntimeProfileReport
 }
 
 function runtimeNode(widget: ProbeWidget, parentBounds: ProbeBounds | null, probeVersion: number): AdwNode | null {
-  const type = widgetTypeForClass(widget.gtype);
+  const knownType = widgetTypeForClass(widget.gtype);
+  // Runtime-only application composites often provide the missing allocation
+  // context for their ordinary GTK descendants (factory-created grid/list
+  // cells are the common case). Preserve that context as an expanded custom
+  // container; unsupported toolkit implementation details still flatten.
+  const type = knownType ?? (/^(Gtk|Adw|Gdk|Gsk|Pango)/.test(widget.gtype) ? null : 'custom-widget');
   if (!type || type === 'window' || !widget.mapped || !widget.visible) return null;
   const properties = widget.properties ?? {};
   const text = (...keys: string[]) => keys.map(key => properties[key]).find(value => typeof value === 'string' && value.length) as string | undefined;
@@ -622,7 +627,20 @@ export function projectRuntimeBranches(
     const descendants = (children.get(widget.indexPath.join(',')) ?? [])
       .flatMap(child => build(child, descendantParentBounds));
     if (!node) return descendants; // flatten unsupported GTK internals
-    node.children = presentationOwners.has(node.type) ? [] : descendants;
+    if (presentationOwners.has(node.type)) {
+      const semanticDescendants: AdwNode[] = [];
+      const collect = (candidate: AdwNode): void => {
+        semanticDescendants.push(candidate);
+        for (const child of candidate.children ?? []) collect(child);
+      };
+      descendants.forEach(collect);
+      node.title ??= semanticDescendants.find(candidate =>
+        (candidate.type === 'label' || candidate.type === 'inscription') && candidate.title)?.title;
+      node.iconName ??= semanticDescendants.find(candidate => candidate.iconName)?.iconName;
+      node.children = [];
+    } else {
+      node.children = descendants;
+    }
     if (node.children.length) node.runtimeProjectionHost = true;
     projected.push(node.id);
     return [node];
@@ -636,7 +654,17 @@ export function projectRuntimeBranches(
     const additions = (children.get(match.indexPath.join(',')) ?? [])
       .flatMap(child => build(child, runtimeParent.bounds));
     if (!additions.length) continue;
-    parent.children = [...(parent.children ?? []), ...additions];
+    const projectedAdditions = parent.type === 'tab-view' &&
+      additions.some(addition => addition.type !== 'tab-page')
+      ? [{
+          id: `runtime_page_${match.indexPath.join('_')}`,
+          type: 'tab-page' as const,
+          title: '',
+          children: additions,
+          runtimeProjectionHost: true,
+        }]
+      : additions;
+    parent.children = [...(parent.children ?? []), ...projectedAdditions];
     parent.runtimeProjectionHost = true;
     // Projected children use their native relative allocations, so their
     // source host must retain the allocation they were measured inside.

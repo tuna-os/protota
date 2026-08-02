@@ -109,6 +109,7 @@ const TAG_MAP: Record<string, string | null> = {
   'view-switcher':       'adw-view-switcher',
   'navigation-view':     'adw-navigation-view',
   'tab-view':            'adw-tab-view',
+  'tab-page':            'adw-tab-page',
   // No adw-tab-bar custom element exists; the strip is drawn as a styled div
   // whose tabs derive from the linked tab-view's pages (see utils/tabBar.ts).
   'tab-bar':             null,
@@ -169,7 +170,7 @@ const TAG_MAP: Record<string, string | null> = {
 const DIV_TYPES = new Set([
   'bin', 'custom-widget', 'box', 'grid', 'center-box', 'stack', 'stack-page', 'scrolled-window', 'search-entry', 'switch-widget',
   'check-button', 'list-box', 'label', 'inscription', 'navigation-view', 'view-stack', 'overlay',
-  'progress-bar', 'scale', 'level-bar', 'popover', 'list-box-row', 'tab-bar',
+  'progress-bar', 'scale', 'level-bar', 'popover', 'list-box-row', 'tab-bar', 'tab-view', 'tab-page',
   // adw-overlay-split-view collects [slot="content"] with an unscoped query,
   // so it hoists the content child of any nested toolbar view into its own
   // pane. Render the panes ourselves, as with navigation-view.
@@ -189,6 +190,7 @@ function nodeProps(node: AdwNode, inheritedSlot?: string): Record<string, string
   // the stylesheet applies the equal split to the box's children.
   if (t === 'box' && node.homogeneous) p.homogeneous = '';
   if (t === 'overlay-split') p['show-sidebar'] = '';
+  if (t === 'tab-view' && (node.children?.length ?? 0) <= 1) p.autohide = '';
   const icon = node.iconName?.replace(/-symbolic$/, '');
 
   // Text-bearing widgets
@@ -285,7 +287,7 @@ function nodeProps(node: AdwNode, inheritedSlot?: string): Record<string, string
 function childSlot(parent: AdwNode, child: AdwNode, index: number): string | undefined {
   // GtkBuilder names AdwHeaderBar's title-widget child `title`; adwaita-web
   // exposes the equivalent light-DOM slot as `center`.
-  if (parent.type === 'header-bar' && child.slot === 'title') return 'center';
+  if (parent.type === 'header-bar' && (child.slot === 'title' || child.slot === 'title-widget')) return 'center';
   if (child.slot) return child.slot;
   if (parent.type === 'toolbar-view') {
     return child.type === 'header-bar' ? 'top' : 'content';
@@ -421,6 +423,9 @@ export const AdwaitaRenderer: React.FC<Props> = ({
     (node.type === 'window' || node.type === 'dialog' || isDialogRoot) && screenWidth
       ? { width: `${screenWidth}px`, ...(screenHeight ? { height: `${screenHeight}px` } : {}) }
       : undefined;
+  const splitPaneStyle = node.type === 'overlay-split' && typeof node.sidebarWidthFraction === 'number'
+    ? { '--protota-sidebar-width': `${node.sidebarWidthFraction * 100}%` } as React.CSSProperties
+    : undefined;
 
   useEffect(() => {
     ensureAdwIcon(node.iconName);
@@ -589,11 +594,18 @@ export const AdwaitaRenderer: React.FC<Props> = ({
 
   // adw-menu-button is icon-only; a labelled MenuButton renders as a button.
   const isGtkSpinButton = node.type === 'entry' && /Gtk[.]?SpinButton$/.test(node.sourceClass ?? '');
+  // adwaita-web's tab-view draws its own tab strip. Native AdwTabBar autohides
+  // that strip for a lone page, so let the separately modelled TabBar provide
+  // chrome and render a single page as transparent layout containers.
+  const isSinglePageTabView = node.type === 'tab-view' && (node.children?.length ?? 0) <= 1;
+  const isSingleTabPage = node.type === 'tab-page' && parentNode?.type === 'tab-view' &&
+    (parentNode.children?.length ?? 0) <= 1;
   const tag = isGtkSpinButton
     ? 'div'
     : isDialogRoot
     ? 'adw-window'
-    : node.type === 'navigation-view' || node.type === 'overlay-split' || isExpandedPreferenceComposite
+    : node.type === 'navigation-view' || node.type === 'overlay-split' || isExpandedPreferenceComposite ||
+        isSinglePageTabView || isSingleTabPage
       ? 'div'
       : node.type === 'menu-button' && node.title
         ? 'adw-button'
@@ -734,6 +746,10 @@ export const AdwaitaRenderer: React.FC<Props> = ({
       className={`adw-icon adw-icon--${node.iconName.replace(/-symbolic$/, '')}`}
     />
   ) : null;
+  const runtimePicture = node.type === 'bin' && /Gtk[.]?Picture$/.test(node.sourceClass ?? '') &&
+    /GridCell$/.test(parentNode?.sourceClass ?? '') && !node.iconName ? (
+    <span aria-hidden="true" className="protota-runtime-picture" />
+  ) : null;
   const gtkSpinButton = isGtkSpinButton ? (
     <>
       <button aria-hidden="true" tabIndex={-1}>+</button>
@@ -782,7 +798,7 @@ export const AdwaitaRenderer: React.FC<Props> = ({
   return (
     <div
       ref={wrapperRef}
-      slot={node.slot ?? inheritedSlot}
+      slot={inheritedSlot ?? node.slot}
       className={`adw-node-wrapper${isSelected ? ' selected-outline' : ''}${isMultiSelected ? ' multi-selected-outline' : ''}`}
       style={{
         // Normal wrappers are layout-transparent, but a handful of
@@ -830,11 +846,12 @@ export const AdwaitaRenderer: React.FC<Props> = ({
         // layout-transparent (display: contents): the element itself is the
         // flex/grid item its parent lays out, so GTK expand and attach
         // semantics propagate instead of stopping at each wrapper.
-        style: { ...containerLayout(node), ...placementLayout(node, parentFlow), ...rootSizeStyle },
+        style: { ...containerLayout(node), ...placementLayout(node, parentFlow), ...rootSizeStyle, ...splitPaneStyle },
         className: elementClass || undefined,
       },
         iconPrefix,
         binIcon,
+        runtimePicture,
         gtkSpinButton,
         tabBarTabs,
         previewSwitcherTabs,

@@ -7,7 +7,7 @@ test.describe('HIG compliance audit (#8)', () => {
   });
 
   test('lint button runs audit and shows results panel', async ({ page }) => {
-    const lintBtn = page.getByRole('button', { name: /diagnostics/i });
+    const lintBtn = page.getByTestId('diagnostics-toggle');
     await expect(lintBtn).toBeVisible();
     await lintBtn.click();
 
@@ -20,7 +20,7 @@ test.describe('HIG compliance audit (#8)', () => {
   });
 
   test('audit categorizes violations by severity', async ({ page }) => {
-    const lintBtn = page.getByRole('button', { name: /diagnostics/i });
+    const lintBtn = page.getByTestId('diagnostics-toggle');
     await lintBtn.click();
 
     const resultsPanel = page.locator('.protota-audit-panel');
@@ -31,7 +31,7 @@ test.describe('HIG compliance audit (#8)', () => {
   });
 
   test('clicking a violation in audit selects the element', async ({ page }) => {
-    const lintBtn = page.getByRole('button', { name: /diagnostics/i });
+    const lintBtn = page.getByTestId('diagnostics-toggle');
     await lintBtn.click();
 
     const resultsPanel = page.locator('.protota-audit-panel');
@@ -43,7 +43,7 @@ test.describe('HIG compliance audit (#8)', () => {
   });
 
   test('audit panel can be closed by toggling lint off', async ({ page }) => {
-    const lintBtn = page.getByRole('button', { name: /diagnostics/i });
+    const lintBtn = page.getByTestId('diagnostics-toggle');
     await lintBtn.click();
     await expect(lintBtn).toHaveAttribute('data-active', 'true');
 

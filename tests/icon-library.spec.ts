@@ -94,6 +94,9 @@ test.describe('Icon library', () => {
     // The app-menu button renders on every viewport with the same entries;
     // Icon Library must be reachable from it on mobile too.
     await page.setViewportSize({ width: 390, height: 844 });
+    // Let React flush the isMobile re-render so the menu items reflect the
+    // mobile-only Flows/Diagnostics toggle entries ahead of Icon Library.
+    await page.waitForTimeout(300);
     await page.getByTestId('mobile-menu-button').click();
     await page.getByTestId('mobile-menu').getByRole('menuitem', { name: /icon library/i }).click();
     await expect(page.getByTestId('icon-library')).toBeVisible({ timeout: 5000 });

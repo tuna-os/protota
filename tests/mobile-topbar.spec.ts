@@ -60,7 +60,7 @@ test.describe('Mobile topbar (#99)', () => {
     // role=menuitem.) Open/Export are icon-only header buttons on mobile, so
     // Load Preset / Export / Share URL are not in the app-menu.
     await expect(menu.getByRole('menuitem', { name: /icon library/i })).toBeVisible();
-    await expect(menu.getByRole('menuitem', { name: /show shortcuts/i })).toBeVisible();
+    await expect(menu.getByRole('menuitem', { name: /keyboard shortcuts/i })).toBeVisible();
     await expect(menu.getByRole('menuitem', { name: /enable screen flows/i })).toBeVisible();
     await expect(menu.getByRole('menuitem', { name: /enable diagnostics/i })).toBeVisible();
     await expect(menu.getByRole('menuitem', { name: /new screen/i })).toHaveCount(0);
@@ -144,7 +144,7 @@ test.describe('Mobile topbar (#99)', () => {
     await expect(menu).toBeVisible();
     await expect(menu.locator('.protota-theme-switcher')).toBeVisible();
     await expect(menu.getByRole('menuitem', { name: /icon library/i })).toBeVisible();
-    await expect(menu.getByRole('menuitem', { name: /show shortcuts/i })).toBeVisible();
+    await expect(menu.getByRole('menuitem', { name: /keyboard shortcuts/i })).toBeVisible();
     await expect(menu.getByRole('menuitem', { name: /screen flows|diagnostics/i })).toHaveCount(0);
     await expect(menu.getByRole('menuitem', { name: /new screen/i })).toHaveCount(0);
 

@@ -65,9 +65,9 @@ export function useMenus() {
     action: () => window.dispatchEvent(new CustomEvent("protota:show-icon-library")),
   };
   const showShortcutsItem: MenuItem = {
-    label: "Show Shortcuts",
+    label: "Keyboard Shortcuts",
     action: () => window.dispatchEvent(new CustomEvent("protota:show-shortcuts")),
-    shortcut: "?",
+    shortcut: "Ctrl+?",
   };
   const appMenuItems: MenuItem[] = [iconLibraryItem, showShortcutsItem];
 

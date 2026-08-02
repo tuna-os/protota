@@ -297,7 +297,7 @@ export const App: React.FC = () => {
         return;
       }
       // Help
-      if (e.key === "?" && !mod) {
+      if (e.key === "?" && mod) {
         e.preventDefault();
         setShowShortcuts(true);
         return;
@@ -491,8 +491,7 @@ export const App: React.FC = () => {
           >
             <h3 style={{ marginTop: 0 }}>Keyboard Shortcuts</h3>
             <p style={{ fontSize: "12px", opacity: 0.65, marginBottom: "16px" }}>
-              Press <kbd style={kbdStyle}>?</kbd> to toggle this overlay. Platform: Ctrl = ⌘ on
-              macOS.
+              Press <kbd style={kbdStyle}>Ctrl+?</kbd> to toggle this overlay.
             </p>
             {SHORTCUT_GROUPS.map((group) => (
               <div key={group.title} style={{ marginBottom: "16px" }}>
@@ -599,7 +598,7 @@ const SHORTCUT_GROUPS = [
       { keys: "Ctrl+]", label: "Toggle Properties panel" },
       { keys: "Ctrl+.", label: "Toggle Diagnostics (HIG lint)" },
       { keys: "Ctrl+/", label: "Toggle Preview mode" },
-      { keys: "?", label: "Show this help" },
+      { keys: "Ctrl+?", label: "Show this help" },
     ],
   },
 ];

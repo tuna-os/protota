@@ -121,9 +121,9 @@ test.describe('Keyboard shortcuts (#14)', () => {
   });
 
   test.describe('Shortcuts help', () => {
-    test('? opens keyboard shortcuts help overlay', async ({ page }) => {
+    test('Ctrl+? opens keyboard shortcuts help overlay', async ({ page }) => {
       await page.locator('body').click();
-      await page.keyboard.press('?');
+      await page.keyboard.press('Control+?');
 
       const overlay = page.locator('[data-testid="shortcuts-overlay"]');
       await expect(overlay).toBeVisible({ timeout: 5000 });

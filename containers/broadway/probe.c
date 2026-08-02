@@ -81,7 +81,7 @@ static const char *align_nick(GtkAlign align) {
  * state is deliberately excluded from the snapshot contract. */
 static const char *semantic_properties[] = {
   "title", "subtitle", "description", "label", "text", "icon-name", "gicon",
-  "placeholder-text", "active", "selected", NULL
+  "placeholder-text", "active", "selected", "sensitive", "xalign", NULL
 };
 
 static gboolean append_semantic_value(GString *out, const GValue *value) {
@@ -95,6 +95,8 @@ static gboolean append_semantic_value(GString *out, const GValue *value) {
     g_string_append_printf(out, "%u", g_value_get_uint(value));
   } else if (G_VALUE_HOLDS_DOUBLE(value)) {
     g_string_append_printf(out, "%.6g", g_value_get_double(value));
+  } else if (G_VALUE_HOLDS_FLOAT(value)) {
+    g_string_append_printf(out, "%.6g", (double)g_value_get_float(value));
   } else if (G_TYPE_IS_ENUM(G_VALUE_TYPE(value))) {
     GEnumClass *klass = G_ENUM_CLASS(g_type_class_ref(G_VALUE_TYPE(value)));
     GEnumValue *entry = g_enum_get_value(klass, g_value_get_enum(value));
@@ -320,6 +322,19 @@ static gboolean write_delayed_probe(gpointer user_data) {
   return G_SOURCE_REMOVE;
 }
 
+/* Optional deterministic state setup for dialog/page captures. GTK action
+ * lookup starts at the widget and walks its ancestors, so trying every
+ * descendant reaches action groups owned by runtime-created views without
+ * importing or linking application-private APIs into the probe. */
+static gboolean activate_action_in_tree(GtkWidget *widget, const char *action) {
+  if (gtk_widget_activate_action(widget, action, NULL)) return TRUE;
+  for (GtkWidget *child = gtk_widget_get_first_child(widget); child != NULL;
+       child = gtk_widget_get_next_sibling(child)) {
+    if (activate_action_in_tree(child, action)) return TRUE;
+  }
+  return FALSE;
+}
+
 /* Runs on the main loop every 100ms until a mapped toplevel exists, then
  * arms the frame-clock settle watch on it. */
 static gboolean arm_probe(gpointer user_data) {
@@ -330,6 +345,17 @@ static gboolean arm_probe(gpointer user_data) {
     GtkWidget *toplevel = GTK_WIDGET(g_list_model_get_item(toplevels, i));
     gboolean mapped = gtk_widget_get_mapped(toplevel);
     if (mapped) {
+      const char *probe_action = g_getenv("PROBE_ACTION");
+      if (probe_action != NULL && probe_action[0] != '\0') {
+        gboolean activated = activate_action_in_tree(toplevel, probe_action);
+        fprintf(stderr, "protota-probe: action %s %s\n", probe_action,
+                activated ? "activated" : "not-found");
+        const char *delay_raw = g_getenv("PROBE_DELAY_MS");
+        const int delay_ms = delay_raw != NULL ? atoi(delay_raw) : 1000;
+        g_timeout_add((guint)MAX(delay_ms, 1), write_delayed_probe, NULL);
+        g_object_unref(toplevel);
+        return G_SOURCE_REMOVE;
+      }
       const char *delay_raw = g_getenv("PROBE_DELAY_MS");
       const int delay_ms = delay_raw != NULL ? atoi(delay_raw) : 0;
       if (delay_ms > 0) {

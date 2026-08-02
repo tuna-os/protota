@@ -1369,13 +1369,16 @@ function builderElementToNode(
       continue;
     }
     if (child.tag === 'style') {
+      const styleNames: string[] = [];
       for (const styleClass of child.children) {
         const name = styleClass.attributes.name;
+        if (name) styleNames.push(name);
         if (name === 'suggested-action') properties.suggested = true;
         if (name === 'destructive-action') properties.destructive = true;
         if (name === 'flat') properties.flat = true;
         if (name === 'circular') properties.circular = true;
       }
+      if (styleNames.length) properties.styleClasses = styleNames.join(' ');
       continue;
     }
     if (child.tag === 'layout') {

@@ -560,9 +560,11 @@ function runtimeNode(widget: ProbeWidget, parentBounds: ProbeBounds | null, prob
     iconName,
     placeholder: text('placeholder-text'),
     active: boolean('active'),
+    sensitive: boolean('sensitive'),
     orientation: properties.orientation === 'vertical' ? 'vertical'
       : properties.orientation === 'horizontal' ? 'horizontal' : undefined,
     spacing: number('spacing'),
+    xalign: number('xalign'),
     marginStart: widget.marginStart,
     marginEnd: widget.marginEnd,
     marginTop: widget.marginTop,

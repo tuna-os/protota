@@ -127,11 +127,16 @@ export interface AdwNode {
   imageId?: string;
   placeholder?: string;
   value?: string;
+  /** GtkLabel horizontal text alignment, 0=start, .5=center, 1=end. */
+  xalign?: number;
+  justify?: string;
   // Buttons
   suggested?: boolean;
   destructive?: boolean;
   flat?: boolean;
   circular?: boolean;
+  /** GTK sensitive=false: widget remains visible but cannot be activated. */
+  sensitive?: boolean;
   // Rows
   activatable?: boolean;
   // Switch row

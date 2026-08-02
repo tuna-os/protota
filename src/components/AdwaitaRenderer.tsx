@@ -191,6 +191,7 @@ function nodeProps(node: AdwNode, inheritedSlot?: string): Record<string, string
   if (t === 'box' && node.homogeneous) p.homogeneous = '';
   if (t === 'overlay-split') p['show-sidebar'] = '';
   if (t === 'tab-view' && (node.children?.length ?? 0) <= 1) p.autohide = '';
+  if (node.sensitive === false) p.disabled = '';
   const icon = node.iconName?.replace(/-symbolic$/, '');
 
   // Text-bearing widgets
@@ -363,7 +364,7 @@ function findViewSwitcherStack(node: AdwNode, id: string): AdwNode | null {
 
 /** The stack child a visibleChildName selects (renderer matching rules). */
 function visibleStackChild(stack: AdwNode, visibleChildName: unknown): AdwNode | undefined {
-  const children = stack.children ?? [];
+  const children = (stack.children ?? []).filter((child) => child.visible !== false);
   return children.find((child) => typeof visibleChildName === 'string' &&
     (child.id === visibleChildName || child.title === visibleChildName ||
       (child as { name?: unknown }).name === visibleChildName)) ?? children[0];
@@ -430,6 +431,9 @@ export const AdwaitaRenderer: React.FC<Props> = ({
       : undefined;
   const splitPaneStyle = node.type === 'overlay-split' && typeof node.sidebarWidthFraction === 'number'
     ? { '--protota-sidebar-width': `${node.sidebarWidthFraction * 100}%` } as React.CSSProperties
+    : undefined;
+  const labelTextStyle: React.CSSProperties | undefined = node.type === 'label'
+    ? { textAlign: (node.xalign ?? 0.5) <= 0.25 ? 'left' : (node.xalign ?? 0.5) >= 0.75 ? 'right' : 'center' }
     : undefined;
 
   useEffect(() => {
@@ -639,11 +643,11 @@ export const AdwaitaRenderer: React.FC<Props> = ({
   // NavigationView starts on its root page).
   const showsOneChild = node.type === 'stack' || node.type === 'view-stack' || node.type === 'navigation-view';
   const visibleChildren = showsOneChild && node.children?.length
-    ? [node.children.find((child) => typeof node.visibleChildName === 'string' &&
-        (child.id === node.visibleChildName || child.title === node.visibleChildName || (child as { name?: unknown }).name === node.visibleChildName)) ?? node.children[0]]
+    ? [visibleStackChild(node, node.visibleChildName)].filter((child): child is AdwNode => Boolean(child))
     : node.children;
 
-  const childDialogAncestor = dialogAncestor || DIALOG_TYPES.has(node.type);
+  const childDialogAncestor = dialogAncestor || DIALOG_TYPES.has(node.type) ||
+    (node.type === 'window' && node.modal === true);
   const childSurfaceTitle =
     (node.type === 'window' || DIALOG_TYPES.has(node.type)) && node.title
       ? node.title
@@ -745,14 +749,16 @@ export const AdwaitaRenderer: React.FC<Props> = ({
 
   // A Gtk.Image imports as a bin carrying its declared icon-name; drawing
   // that icon is source-grounded (the go-next chevron on a font row).
-  const binIcon = node.type === 'bin' && node.iconName ? (
+  const isFolderPaintable = node.type === 'bin' && node.iconName?.replace(/-symbolic$/, '') === 'folder' &&
+    /Gtk[.]?Frame$/.test(parentNode?.sourceClass ?? '');
+  const binIcon = node.type === 'bin' && node.iconName && !isFolderPaintable ? (
     <span
       aria-hidden="true"
       className={`adw-icon adw-icon--${node.iconName.replace(/-symbolic$/, '')}`}
     />
   ) : null;
-  const runtimePicture = node.type === 'bin' && /Gtk[.]?Picture$/.test(node.sourceClass ?? '') &&
-    /GridCell$/.test(parentNode?.sourceClass ?? '') && !node.iconName ? (
+  const runtimePicture = node.type === 'bin' && ((/Gtk[.]?Picture$/.test(node.sourceClass ?? '') &&
+    /GridCell$/.test(parentNode?.sourceClass ?? '') && !node.iconName) || isFolderPaintable) ? (
     <span aria-hidden="true" className="protota-runtime-picture" />
   ) : null;
   const gtkSpinButton = isGtkSpinButton ? (
@@ -828,6 +834,7 @@ export const AdwaitaRenderer: React.FC<Props> = ({
         // the node's real box (the wrapper is display: contents), so drop
         // resolution and the insertion indicator both key off this attribute.
         'data-node-id': node.id,
+        ...(node.sourceClass ? { 'data-protota-source-class': node.sourceClass } : {}),
         ...(nodeDiagnostics.length > 1 && !isSelected
           ? { 'data-protota-diag-count': String(nodeDiagnostics.length) }
           : {}),
@@ -851,7 +858,7 @@ export const AdwaitaRenderer: React.FC<Props> = ({
         // layout-transparent (display: contents): the element itself is the
         // flex/grid item its parent lays out, so GTK expand and attach
         // semantics propagate instead of stopping at each wrapper.
-        style: { ...containerLayout(node), ...placementLayout(node, parentFlow), ...rootSizeStyle, ...splitPaneStyle },
+        style: { ...containerLayout(node), ...placementLayout(node, parentFlow), ...rootSizeStyle, ...splitPaneStyle, ...labelTextStyle },
         className: elementClass || undefined,
       },
         iconPrefix,

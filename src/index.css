@@ -749,7 +749,19 @@ body,
   display: block;
   width: 100%;
   height: 100%;
+  min-height: 96px;
   background: url('/adwaita-folder.svg') center / contain no-repeat;
+}
+
+/* Gtk list/grid factories report descendant bounds in the list item's
+   content coordinate space. A custom GridCell's snapshot is painted in the
+   cell coordinate space instead (the content inset is already consumed by
+   the factory). Remove that duplicated inset from projected descendants. */
+[data-protota-source-class$="GridCell"] > .adw-node-wrapper > [data-protota-source-class] {
+  transform: translate(-18px, -6px);
+}
+[data-protota-source-class$="GridCell"] .protota-style-icon-ui-labels-box .protota-div-label {
+  text-align: center;
 }
 
 /* GtkSpinButton with vertical orientation is used as the large clock-time
@@ -963,12 +975,15 @@ html adw-status-page .adw-status-page-child {
 
 /* Center-box — start/center/end layout. */
 .protota-div-center-box {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: center;
-  justify-content: space-between;
   padding: 0;
   gap: 12px;
 }
+.protota-div-center-box > .adw-node-wrapper[slot="start"] > * { grid-column: 1; justify-self: start; }
+.protota-div-center-box > .adw-node-wrapper[slot="center"] > * { grid-column: 2; justify-self: center; }
+.protota-div-center-box > .adw-node-wrapper[slot="end"] > * { grid-column: 3; justify-self: end; }
 
 .protota-div-label {
   font-size: var(--font-size-base, 11pt);
@@ -1460,6 +1475,9 @@ adw-header-bar adw-view-switcher > .adw-view-switcher-content {
   min-width: 0;
   min-height: 0;
 }
+.protota-div-preferences-group {
+  width: 100%;
+}
 
 /* A mixed PreferencesGroup (for example an EntryRow followed by validation
    feedback and a standalone action button) cannot be handed to
@@ -1470,10 +1488,19 @@ adw-header-bar adw-view-switcher > .adw-view-switcher-content {
   adw-switch-row, adw-spin-row, adw-expander-row
 ) {
   width: 100%;
+  min-height: 55px;
   box-sizing: border-box;
   border-radius: var(--card-radius, 12px);
   background: var(--card-bg-color, #fff);
   box-shadow: 0 1px 3px rgba(0, 0, 6, 0.18);
+}
+
+/* Libadwaita's pill class deliberately enlarges a standalone action beyond
+   an ordinary header-bar button's compact allocation. */
+:is(adw-button, button).protota-style-pill {
+  min-height: 44px;
+  padding-inline: 27px;
+  border-radius: 9999px;
 }
 
 /* When a custom PreferencesRow subclass is expanded from its template, keep

@@ -16,7 +16,7 @@ import type { AdwNode } from '../types/mockup';
 export type ParentFlow = 'row' | 'column' | 'grid';
 
 export function parentFlowOf(node: AdwNode): ParentFlow {
-  if (node.type === 'grid') return 'grid';
+  if (node.type === 'grid' || node.type === 'overlay') return 'grid';
   if (node.type === 'box' || node.type === 'center-box' || node.type === 'wrap-box') {
     return node.orientation === 'horizontal' ? 'row' : 'column';
   }

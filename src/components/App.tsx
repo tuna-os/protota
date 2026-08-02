@@ -80,6 +80,7 @@ export const App: React.FC = () => {
     pasteNodes,
     duplicateNodes,
     toggleDiagnostics,
+    toggleShowFlows,
     diagnosticsEnabled,
   } = useMockupStore();
 
@@ -303,7 +304,7 @@ export const App: React.FC = () => {
         return;
       }
       // Panel toggles
-      if (e.key === "\\" && mod) {
+      if (e.key === "[" && mod) {
         e.preventDefault();
         setLeftOpen((v) => !v);
         return;
@@ -313,13 +314,19 @@ export const App: React.FC = () => {
         setRightOpen((v) => !v);
         return;
       }
-      // Diagnostics (HIG lint) toggle
-      if (e.key === "." && mod) {
+      // Diagnostics toggle
+      if (e.key === "'" && mod) {
         e.preventDefault();
         if (!diagnosticsEnabled) {
           window.dispatchEvent(new CustomEvent("protota:show-diagnostics"));
         }
         toggleDiagnostics();
+        return;
+      }
+      // Screen Flows toggle
+      if (e.key === ";" && mod) {
+        e.preventDefault();
+        toggleShowFlows();
         return;
       }
       // New screen
@@ -357,6 +364,7 @@ export const App: React.FC = () => {
     showShortcuts,
     showCommandPalette,
     toggleDiagnostics,
+    toggleShowFlows,
     diagnosticsEnabled,
   ]);
 
@@ -594,10 +602,11 @@ const SHORTCUT_GROUPS = [
   {
     title: "Interface",
     items: [
-      { keys: "Ctrl+\\", label: "Toggle Layers panel" },
-      { keys: "Ctrl+]", label: "Toggle Properties panel" },
-      { keys: "Ctrl+.", label: "Toggle Diagnostics (HIG lint)" },
-      { keys: "Ctrl+/", label: "Toggle Preview mode" },
+      { keys: "Ctrl+[", label: "Toggle Layers Panel" },
+      { keys: "Ctrl+]", label: "Toggle Properties Panel" },
+      { keys: "Ctrl+;", label: "Toggle Screen Flows" },
+      { keys: "Ctrl+'", label: "Toggle Diagnostics" },
+      { keys: "Ctrl+/", label: "Toggle Preview Mode" },
       { keys: "Ctrl+?", label: "Show this help" },
     ],
   },

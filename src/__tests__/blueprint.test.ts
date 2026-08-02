@@ -465,6 +465,20 @@ describe('Blueprint export long tail', () => {
     expect(exported).not.toContain('orientation');
   });
 
+  it('exports GObject-spelled classes with their Blueprint namespace', () => {
+    // Runtime probes report GType names (`GtkBox`, `AdwHeaderBar`). Blueprint
+    // reads an unqualified name as a Gtk type, so `GtkBox` does not compile.
+    const exported = mockupToBlueprint(screen({
+      id: 'w', type: 'window', children: [
+        { id: 'bar', type: 'header-bar', sourceClass: 'AdwHeaderBar' },
+        { id: 'body', type: 'box', sourceClass: 'GtkBox', orientation: 'vertical' },
+      ],
+    }));
+    expect(exported).toContain('Adw.HeaderBar bar');
+    expect(exported).toContain('Gtk.Box body');
+    expect(exported).not.toMatch(/^\s*(Gtk|Adw)[A-Z]/m);
+  });
+
   it('converts C enum constants to Blueprint member idents', () => {
     const exported = mockupToBlueprint(screen({
       id: 'w', type: 'window', children: [{ id: 'l', type: 'label', title: 'x', wrapMode: 'PANGO_WRAP_WORD_CHAR' }],

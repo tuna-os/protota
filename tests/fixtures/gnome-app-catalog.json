@@ -193,7 +193,7 @@
     },
     "suite": "core",
     "status": "preset",
-    "visualStatus": "passed",
+    "visualStatus": "not-validated",
     "maxUnresolvedCoverage": 0.01,
     "minSimilarity": 0.95
   },

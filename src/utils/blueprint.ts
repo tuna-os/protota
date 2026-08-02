@@ -608,14 +608,20 @@ function nodeToBlueprint(node: AdwNode, depth: number = 0, context?: ExportConte
   // that was resolved from a template exports as the widget it resolved to,
   // because `ClocksHeaderBar` means nothing outside that app's source.
   const declaredClass = typeof node.sourceClass === 'string' ? node.sourceClass : '';
-  const isKnownLibraryClass = !!declaredClass && !!CLASS_TO_WIDGET_MAP[declaredClass];
+  // Runtime probes and GtkBuilder spell classes as GObject names (`GtkBox`),
+  // which Blueprint reads as an unqualified name in the Gtk namespace and
+  // rejects. Emit the namespaced spelling of any class the registry knows.
+  const canonicalDeclared = canonicalClassName(declaredClass);
+  const libraryClass = declaredClass && CLASS_TO_WIDGET_MAP[canonicalDeclared]
+    ? canonicalDeclared
+    : declaredClass && CLASS_TO_WIDGET_MAP[declaredClass]
+      ? declaredClass
+      : '';
   // A `$` reference names a GType, which has no dots: an unresolved
   // `Gtk.SourceBuffer` boundary is `$GtkSourceBuffer`.
   const className = node.type === 'custom-widget' && declaredClass
     ? `$${declaredClass.replace(/\./g, '')}`
-    : isKnownLibraryClass
-      ? declaredClass
-      : WIDGET_CLASS_MAP[node.type] || node.type;
+    : libraryClass || WIDGET_CLASS_MAP[node.type] || node.type;
   const props: string[] = [];
   const layout: string[] = [];
   const classProperties = className.startsWith('$') ? null : propertiesOf(className);

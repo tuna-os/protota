@@ -222,7 +222,7 @@ test.describe('Adw.Breakpoint behavior (GNOME Settings preset)', () => {
     const state = await storeState(page);
     // Wide: the navigation split view's sidebar pane is rendered, no
     // breakpoint is active.
-    const sidebar = page.locator('.protota-canvas [data-node-id="panel_list_page"]');
+    const sidebar = page.locator('.protota-canvas [data-node-id="split_view"] [slot="sidebar"]');
     await expect(sidebar).toBeVisible();
     await expect(page.getByTestId(`breakpoint-active-${state.screen.id}`)).toHaveCount(0);
 
@@ -255,7 +255,7 @@ test.describe('Adw.Breakpoint behavior (GNOME Settings preset)', () => {
     await loadSettingsPreset(page);
 
     const state = await storeState(page);
-    const sidebar = page.locator('.protota-canvas [data-node-id="panel_list_page"]');
+    const sidebar = page.locator('.protota-canvas [data-node-id="split_view"] [slot="sidebar"]');
     await expect(sidebar).toBeVisible();
 
     const handle = page.getByTestId(`resize-right-${state.screen.id}`);

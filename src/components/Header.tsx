@@ -49,7 +49,8 @@ const LabeledMenuButton: React.FC<{
   items: MenuItem[];
   testId: string;
   icon?: string;
-}> = ({ label, items, testId, icon }) => {
+  tooltip?: string;
+}> = ({ label, items, testId, icon, tooltip }) => {
   const btnRef = useRef<AdwMenuButtonElement>(null);
   /** Latest id→action map, read by the (once-registered) activation listener. */
   const actionsRef = useRef<Record<string, () => void>>({});
@@ -118,6 +119,7 @@ const LabeledMenuButton: React.FC<{
       // The element derives the trigger's aria-label from menu-title; these
       // are labelled buttons, so keep the visible text as the name.
       btn.setAttribute("aria-label", label);
+      if (tooltip) btn.setAttribute("title", tooltip);
     }
 
     // Separators + right-aligned shortcuts into the compiled popover rows.
@@ -258,6 +260,7 @@ export const Header: React.FC<HeaderProps> = ({
           items={openMenuItems}
           testId="open-menu-button"
           icon={isMobile ? folderOpenSymbolic : undefined}
+          tooltip={isMobile ? "Open or Create" : undefined}
         />
         <HeaderIconButton
           icon={editUndoSymbolic}
@@ -279,6 +282,7 @@ export const Header: React.FC<HeaderProps> = ({
           items={exportMenuItems}
           testId="export-menu-button"
           icon={isMobile ? documentSendSymbolic : undefined}
+          tooltip={isMobile ? "Export" : undefined}
         />
         {!isMobile && (
           <>

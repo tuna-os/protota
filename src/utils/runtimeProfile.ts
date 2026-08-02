@@ -542,6 +542,10 @@ function runtimeNode(widget: ProbeWidget, parentBounds: ProbeBounds | null, prob
   const text = (...keys: string[]) => keys.map(key => properties[key]).find(value => typeof value === 'string' && value.length) as string | undefined;
   const number = (key: string) => typeof properties[key] === 'number' ? properties[key] as number : undefined;
   const boolean = (key: string) => typeof properties[key] === 'boolean' ? properties[key] as boolean : undefined;
+  const serializedIcon = text('icon-name', 'gicon');
+  const iconName = serializedIcon?.startsWith('. GThemedIcon ')
+    ? serializedIcon.split(/\s+/)[2]
+    : serializedIcon;
   const node: AdwNode = {
     id: `runtime_${widget.indexPath.join('_')}`,
     type,
@@ -550,7 +554,10 @@ function runtimeNode(widget: ProbeWidget, parentBounds: ProbeBounds | null, prob
     title: text('title', 'label', 'text'),
     subtitle: text('subtitle'),
     description: text('description'),
-    iconName: text('icon-name'),
+    // GtkImage may be fed either through icon-name or through its GIcon
+    // property (common for list factories and file-model bindings). Probe v2
+    // serializes both to the same themed-icon name contract.
+    iconName,
     placeholder: text('placeholder-text'),
     active: boolean('active'),
     orientation: properties.orientation === 'vertical' ? 'vertical'

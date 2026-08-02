@@ -80,7 +80,7 @@ static const char *align_nick(GtkAlign align) {
  * Only primitive, readable values are admitted; object-valued application
  * state is deliberately excluded from the snapshot contract. */
 static const char *semantic_properties[] = {
-  "title", "subtitle", "description", "label", "text", "icon-name",
+  "title", "subtitle", "description", "label", "text", "icon-name", "gicon",
   "placeholder-text", "active", "selected", NULL
 };
 
@@ -100,6 +100,11 @@ static gboolean append_semantic_value(GString *out, const GValue *value) {
     GEnumValue *entry = g_enum_get_value(klass, g_value_get_enum(value));
     json_string(out, entry != NULL ? entry->value_nick : NULL);
     g_type_class_unref(klass);
+  } else if (G_VALUE_HOLDS(value, G_TYPE_ICON)) {
+    GIcon *icon = G_ICON(g_value_get_object(value));
+    char *serialized = icon != NULL ? g_icon_to_string(icon) : NULL;
+    json_string(out, serialized);
+    g_free(serialized);
   } else {
     return FALSE;
   }

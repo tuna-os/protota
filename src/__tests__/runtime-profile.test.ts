@@ -238,6 +238,10 @@ describe('runtime profile matching (#58)', () => {
       widget({ gtype: 'AdwTabView', indexPath: [0, 0], buildableId: 'pages' }),
       widget({ gtype: 'ExampleGridCell', indexPath: [0, 0, 0] }),
       widget({ gtype: 'GtkPicture', indexPath: [0, 0, 0, 0] }),
+      widget({
+        gtype: 'GtkImage', indexPath: [0, 0, 0, 1],
+        properties: { gicon: '. GThemedIcon user-home-symbolic user-symbolic user-home user' },
+      }),
     ]);
     const report = matchRuntimeProfile(runtime, root);
 
@@ -253,6 +257,11 @@ describe('runtime profile matching (#58)', () => {
     expect(page?.children?.[0].children?.[0]).toMatchObject({
       type: 'bin',
       sourceClass: 'GtkPicture',
+    });
+    expect(page?.children?.[0].children?.[1]).toMatchObject({
+      type: 'bin',
+      sourceClass: 'GtkImage',
+      iconName: 'user-home-symbolic',
     });
   });
 });

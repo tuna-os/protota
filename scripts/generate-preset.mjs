@@ -40,7 +40,7 @@
 import { readdirSync, readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { blueprintBundleToDocument } from '../src/utils/blueprint.ts';
-import { validateProbeEvidence } from '../src/utils/runtimeProfile.ts';
+import { applyRuntimeEvidence, matchRuntimeProfile, validateProbeEvidence } from '../src/utils/runtimeProfile.ts';
 
 const [appId, sourceRoot, defaultEntry] = process.argv.slice(2);
 if (!appId || !sourceRoot || !defaultEntry) {
@@ -136,6 +136,7 @@ const screens = [];
 let appliedTotal = 0;
 let evidencedTotal = 0;
 let diagnosticsTotal = 0;
+let projectedRuntimeTotal = 0;
 for (const spec of screenSpecs) {
   const entry = spec.entry ?? defaultEntry;
   const generated = blueprintBundleToDocument(files, entry, finishing?.title ?? appId);
@@ -146,6 +147,23 @@ for (const spec of screenSpecs) {
   if (spec.height) screen.height = spec.height;
   evidencedTotal += validateProbeEvidenceEntries(spec.overrides, screen.id);
   appliedTotal += applyOverrides(screen, spec.overrides, screen.id);
+  // Runtime-generated stock widgets (for example Settings' category rows)
+  // do not exist in the declarative bundle. An explicitly opted-in screen
+  // consumes the committed semantic probe: source widgets are matched first,
+  // then only unmatched mapped branches are projected into that source tree.
+  if ((spec.runtimeProbe ?? finishing?.runtimeProbe) === true) {
+    if (!probeDump) {
+      console.error(`${screen.id}: runtimeProbe is enabled but presets-src/${appId}.probe.json is missing`);
+      process.exit(1);
+    }
+    const runtimeReport = matchRuntimeProfile(probeDump, screen.rootNode);
+    const applied = applyRuntimeEvidence(screen.rootNode, runtimeReport, probeDump);
+    projectedRuntimeTotal += applied.projected.length;
+    if (runtimeReport.matchRate < 0.5) {
+      console.error(`${screen.id}: runtime probe matched only ${(runtimeReport.matchRate * 100).toFixed(1)}% of source widgets; refusing an unreliable projection`);
+      process.exit(1);
+    }
+  }
   diagnosticsTotal += generated.importDiagnostics?.length ?? 0;
   screens.push(screen);
 }
@@ -189,4 +207,4 @@ writeFileSync(outputPath, JSON.stringify({
   // Source-grounded: never a similar-looking substitute for missing art.
   sourceIcons: sourceIconAssets,
 }, null, 2) + '\n');
-console.error(`Wrote public/presets/${appId}.mockup.json — ${screens.length} screen(s), ${document.edges.length} edge(s), ${appliedTotal} finishing overrides (${evidencedTotal} probe-evidenced), ${diagnosticsTotal} import diagnostics`);
+console.error(`Wrote public/presets/${appId}.mockup.json — ${screens.length} screen(s), ${document.edges.length} edge(s), ${appliedTotal} finishing overrides (${evidencedTotal} probe-evidenced), ${projectedRuntimeTotal} runtime widgets, ${diagnosticsTotal} import diagnostics`);

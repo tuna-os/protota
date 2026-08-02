@@ -197,7 +197,11 @@ export interface AdwNode {
     mapped: boolean;
     visible: boolean;
     bounds: { x: number; y: number; width: number; height: number } | null;
+    /** Allocation relative to the projected runtime parent, for snapshot layout. */
+    relativeBounds?: { x: number; y: number; width: number; height: number } | null;
   };
+  /** Source node that anchors absolutely allocated runtime-only descendants. */
+  runtimeProjectionHost?: boolean;
   /** GTK visibility. `false` renders nothing, exactly like a hidden widget. */
   visible?: boolean;
   /**

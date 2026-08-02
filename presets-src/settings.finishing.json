@@ -1,0 +1,10 @@
+{
+  "title": "GNOME Settings",
+  "runtimeProbe": true,
+  "screen": {
+    "id": "settings-main",
+    "title": "Settings",
+    "width": 1047,
+    "height": 738
+  }
+}

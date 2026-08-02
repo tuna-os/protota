@@ -30,7 +30,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define PROBE_VERSION 1
+#define PROBE_VERSION 2
 #define DEFAULT_SETTLE_TICKS 5
 
 static int settle_ticks_target(void) {
@@ -74,6 +74,36 @@ static const char *align_nick(GtkAlign align) {
     case GTK_ALIGN_CENTER: return "center";
     default: return "baseline";
   }
+}
+
+/* Semantic properties needed to reconstruct runtime-created stock widgets.
+ * Only primitive, readable values are admitted; object-valued application
+ * state is deliberately excluded from the snapshot contract. */
+static const char *semantic_properties[] = {
+  "title", "subtitle", "description", "label", "text", "icon-name",
+  "placeholder-text", "active", "orientation", "spacing", "selected", NULL
+};
+
+static gboolean append_semantic_value(GString *out, const GValue *value) {
+  if (G_VALUE_HOLDS_STRING(value)) {
+    json_string(out, g_value_get_string(value));
+  } else if (G_VALUE_HOLDS_BOOLEAN(value)) {
+    g_string_append(out, g_value_get_boolean(value) ? "true" : "false");
+  } else if (G_VALUE_HOLDS_INT(value)) {
+    g_string_append_printf(out, "%d", g_value_get_int(value));
+  } else if (G_VALUE_HOLDS_UINT(value)) {
+    g_string_append_printf(out, "%u", g_value_get_uint(value));
+  } else if (G_VALUE_HOLDS_DOUBLE(value)) {
+    g_string_append_printf(out, "%.6g", g_value_get_double(value));
+  } else if (G_TYPE_IS_ENUM(G_VALUE_TYPE(value))) {
+    GEnumClass *klass = G_ENUM_CLASS(g_type_class_ref(G_VALUE_TYPE(value)));
+    GEnumValue *entry = g_enum_get_value(klass, g_value_get_enum(value));
+    json_string(out, entry != NULL ? entry->value_nick : NULL);
+    g_type_class_unref(klass);
+  } else {
+    return FALSE;
+  }
+  return TRUE;
 }
 
 /* ---------- widget serialization (main thread only) ---------------------- */
@@ -145,6 +175,28 @@ static void append_widget(GString *out, GtkWidget *widget, GtkWidget *toplevel,
     g_strfreev(css_classes);
   }
   g_string_append_c(out, ']');
+
+  g_string_append(out, ",\"properties\":{");
+  gboolean first_property = TRUE;
+  for (guint i = 0; semantic_properties[i] != NULL; i++) {
+    const char *name = semantic_properties[i];
+    GParamSpec *property = g_object_class_find_property(G_OBJECT_GET_CLASS(widget), name);
+    if (property == NULL || !(property->flags & G_PARAM_READABLE)) continue;
+    GValue value = G_VALUE_INIT;
+    g_value_init(&value, property->value_type);
+    g_object_get_property(G_OBJECT(widget), name, &value);
+    GString *encoded = g_string_new(NULL);
+    if (append_semantic_value(encoded, &value)) {
+      if (!first_property) g_string_append_c(out, ',');
+      first_property = FALSE;
+      json_string(out, name);
+      g_string_append_c(out, ':');
+      g_string_append_len(out, encoded->str, encoded->len);
+    }
+    g_string_free(encoded, TRUE);
+    g_value_unset(&value);
+  }
+  g_string_append_c(out, '}');
 
   /* GtkStack and AdwViewStack both expose a string "visible-child-name"
    * property. Property lookup avoids linking libadwaita. */

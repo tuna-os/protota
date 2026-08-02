@@ -345,6 +345,13 @@ export function widgetClassForType(type: string): string | null {
   return WIDGET_CLASS_MAP[type] ?? null;
 }
 
+/** Resolve a GTK/Adwaita runtime class to the renderer's generic node type. */
+export function widgetTypeForClass(rawClass: string): AdwNodeType | null {
+  return CLASS_TO_WIDGET_MAP[rawClass]
+    ?? CLASS_TO_WIDGET_MAP[canonicalClassName(rawClass)]
+    ?? null;
+}
+
 function indent(n: number): string { return '  '.repeat(n); }
 
 function escapeBlueprintString(value: string): string {

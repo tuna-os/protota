@@ -133,6 +133,11 @@ export function placementLayout(node: AdwNode, flow: ParentFlow = 'column'): CSS
     placement.flexGrow = 0;
     placement.flexShrink = 0;
   }
+  if (node.runtimeEvidence?.relativeBounds) {
+    placement.position = 'absolute';
+    placement.left = node.runtimeEvidence.relativeBounds.x;
+    placement.top = node.runtimeEvidence.relativeBounds.y;
+  }
   if (node.column !== undefined) placement.gridColumn = `${node.column + 1} / span ${node.columnSpan ?? 1}`;
   if (node.row !== undefined) placement.gridRow = `${node.row + 1} / span ${node.rowSpan ?? 1}`;
   return Object.keys(placement).length ? placement : undefined;
@@ -144,8 +149,9 @@ export function placementLayout(node: AdwNode, flow: ParentFlow = 'column'): CSS
  * copies of the same layout and squeeze the element into its own grid cell.
  */
 export function containerLayout(node: AdwNode): CSSProperties | undefined {
+  const projectionHost = node.runtimeProjectionHost ? { position: 'relative' as const } : {};
   if (node.type === 'box') {
-    return { gap: node.spacing ?? 12 };
+    return { gap: node.spacing ?? 12, ...projectionHost };
   }
   if (node.type === 'grid') {
     // GtkGrid has no declared column count; derive it from the children's
@@ -160,16 +166,17 @@ export function containerLayout(node: AdwNode): CSSProperties | undefined {
       // rows; without it a keypad collapses to its buttons' minimum height
       // instead of filling the region GTK gives it.
       ...(node.rowHomogeneous ? { gridAutoRows: 'minmax(0, 1fr)', height: '100%' } : {}),
+      ...projectionHost,
     };
   }
-  if (node.type === 'scrolled-window') return { overflow: 'auto' };
+  if (node.type === 'scrolled-window') return { overflow: 'auto', ...projectionHost };
   if (node.type === 'clamp' && typeof node.maximumSize === 'number') {
     // Adw.Clamp constrains its child to maximum-size, centered. Published as
     // a CSS variable the clamp child rule consumes; tightening-threshold
     // only shapes the transition curve, which a static render cannot show.
-    return { '--protota-clamp-max': `${node.maximumSize}px` } as CSSProperties;
+    return { '--protota-clamp-max': `${node.maximumSize}px`, ...projectionHost } as unknown as CSSProperties;
   }
-  return undefined;
+  return Object.keys(projectionHost).length ? projectionHost : undefined;
 }
 
 /**

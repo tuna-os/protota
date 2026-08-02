@@ -216,9 +216,10 @@
     },
     "suite": "core",
     "status": "preset",
-    "visualStatus": "not-validated",
+    "visualStatus": "passed",
     "maxUnresolvedCoverage": 0.01,
-    "minSimilarity": 0.94
+    "minSimilarity": 0.94,
+    "minForegroundIoU": 0.25
   },
   "software": {
     "name": "Software",

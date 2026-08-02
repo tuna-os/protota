@@ -22,7 +22,7 @@
  */
 import type { AdwNode } from '../types/mockup';
 import type { GeometryFact } from './nodeGeometry';
-import { widgetClassForType } from './blueprint';
+import { widgetClassForType, widgetTypeForClass } from './blueprint';
 
 export interface ProbeBounds { x: number; y: number; width: number; height: number }
 
@@ -48,6 +48,8 @@ export interface ProbeWidget {
   heightRequest?: number;
   cssClasses?: string[];
   visibleChildName?: string | null;
+  /** Read-only semantic GObject properties captured by probe v2+. */
+  properties?: Record<string, string | number | boolean | null>;
 }
 
 export interface ProbeDocument {
@@ -304,6 +306,8 @@ export interface AppliedRuntimeEvidence {
   revealed: string[];
   /** Unresolved-boundary node ids that took allocation from native bounds. */
   allocated: string[];
+  /** Runtime-only semantic branches projected into their matched source parent. */
+  projected: string[];
 }
 
 /**
@@ -322,11 +326,12 @@ export interface AppliedRuntimeEvidence {
  * Resolved nodes keep their statically imported geometry: the probe is
  * evidence for what static import cannot settle, not a pixel overlay.
  */
-export function applyRuntimeEvidence(root: AdwNode, report: RuntimeProfileReport): AppliedRuntimeEvidence {
+export function applyRuntimeEvidence(root: AdwNode, report: RuntimeProfileReport, probe?: ProbeDocument): AppliedRuntimeEvidence {
   const nodes: AdwNode[] = [];
   walkSource(root, nodes);
   const nodeById = new Map(nodes.map((node) => [node.id, node]));
-  const applied: AppliedRuntimeEvidence = { suppressed: [], revealed: [], allocated: [] };
+  const matchesByPath = new Map(report.matches.map(match => [match.indexPath.join(','), match]));
+  const applied: AppliedRuntimeEvidence = { suppressed: [], revealed: [], allocated: [], projected: [] };
   for (const match of report.matches) {
     const node = nodeById.get(match.nodeId);
     if (!node) continue;
@@ -345,6 +350,34 @@ export function applyRuntimeEvidence(root: AdwNode, report: RuntimeProfileReport
       node.geometryOrigin = { ...node.geometryOrigin, visible: 'native' };
       applied.revealed.push(node.id);
     }
+    // Probe-backed preset generation is a semantic runtime snapshot. Preserve
+    // GTK's finished allocation for matched source containers too, relative
+    // to their nearest matched runtime ancestor. This keeps source identity
+    // while placing major panes/header/content at Broadway's coordinates.
+    if (probe && match.bounds && node !== root) {
+      let ancestorMatch: RuntimeMatch | undefined;
+      for (let length = match.indexPath.length - 1; length > 0; length--) {
+        ancestorMatch = matchesByPath.get(match.indexPath.slice(0, length).join(','));
+        if (ancestorMatch?.bounds) break;
+      }
+      const ancestorBounds = ancestorMatch?.bounds ?? { x: 0, y: 0, width: 0, height: 0 };
+      node.runtimeEvidence = {
+        probeVersion: report.probeVersion,
+        matchedBy: match.matchedBy,
+        buildableId: match.buildableId,
+        gtype: match.gtype,
+        mapped: match.mapped,
+        visible: match.visible,
+        bounds: match.bounds,
+        relativeBounds: {
+          x: match.bounds.x - ancestorBounds.x,
+          y: match.bounds.y - ancestorBounds.y,
+          width: match.bounds.width,
+          height: match.bounds.height,
+        },
+      };
+      if (ancestorMatch) nodeById.get(ancestorMatch.nodeId)!.runtimeProjectionHost = true;
+    }
     const isUnresolvedBoundary = node.type === 'custom-widget'
       && (node.children?.length ?? 0) === 0 && (node.pages?.length ?? 0) === 0;
     if (isUnresolvedBoundary && match.bounds) {
@@ -360,7 +393,106 @@ export function applyRuntimeEvidence(root: AdwNode, report: RuntimeProfileReport
       applied.allocated.push(node.id);
     }
   }
+  if (probe) applied.projected = projectRuntimeBranches(root, report, probe);
   return applied;
+}
+
+function runtimeNode(widget: ProbeWidget, parentBounds: ProbeBounds | null, probeVersion: number): AdwNode | null {
+  const type = widgetTypeForClass(widget.gtype);
+  if (!type || type === 'window' || !widget.mapped || !widget.visible) return null;
+  const properties = widget.properties ?? {};
+  const text = (...keys: string[]) => keys.map(key => properties[key]).find(value => typeof value === 'string' && value.length) as string | undefined;
+  const number = (key: string) => typeof properties[key] === 'number' ? properties[key] as number : undefined;
+  const boolean = (key: string) => typeof properties[key] === 'boolean' ? properties[key] as boolean : undefined;
+  const node: AdwNode = {
+    id: `runtime_${widget.indexPath.join('_')}`,
+    type,
+    sourceClass: widget.gtype,
+    children: [],
+    title: text('title', 'label', 'text'),
+    subtitle: text('subtitle'),
+    description: text('description'),
+    iconName: text('icon-name'),
+    placeholder: text('placeholder-text'),
+    active: boolean('active'),
+    orientation: properties.orientation === 'vertical' ? 'vertical'
+      : properties.orientation === 'horizontal' ? 'horizontal' : undefined,
+    spacing: number('spacing'),
+    marginStart: widget.marginStart,
+    marginEnd: widget.marginEnd,
+    marginTop: widget.marginTop,
+    marginBottom: widget.marginBottom,
+    hexpand: widget.hexpandSet ? widget.hexpand : undefined,
+    vexpand: widget.vexpandSet ? widget.vexpand : undefined,
+    geometryOrigin: { visible: 'native' },
+    runtimeEvidence: {
+      probeVersion,
+      matchedBy: 'structure',
+      buildableId: widget.buildableId,
+      gtype: widget.gtype,
+      mapped: widget.mapped,
+      visible: widget.visible,
+      bounds: widget.bounds,
+      relativeBounds: widget.bounds && parentBounds ? {
+        x: widget.bounds.x - parentBounds.x,
+        y: widget.bounds.y - parentBounds.y,
+        width: widget.bounds.width,
+        height: widget.bounds.height,
+      } : widget.bounds,
+    },
+  };
+  if (type === 'label' || type === 'inscription') node.value = node.title;
+  return node;
+}
+
+/**
+ * Merge mapped runtime-only widget branches into the nearest source widget.
+ * A matched runtime path is never projected, so declarative children remain
+ * authoritative and GTK implementation internals cannot duplicate them.
+ */
+export function projectRuntimeBranches(root: AdwNode, report: RuntimeProfileReport, probe: ProbeDocument): string[] {
+  const sourceNodes: AdwNode[] = [];
+  walkSource(root, sourceNodes);
+  const sourceById = new Map(sourceNodes.map(node => [node.id, node]));
+  const matchByPath = new Map(report.matches.map(match => [match.indexPath.join(','), match]));
+  const widgets = [...(probe.widgets ?? [])].sort((a, b) => a.indexPath.length - b.indexPath.length);
+  const widgetByPath = new Map(widgets.map(widget => [widget.indexPath.join(','), widget]));
+  const children = new Map<string, ProbeWidget[]>();
+  for (const widget of widgets) {
+    const parent = widget.indexPath.slice(0, -1).join(',');
+    const list = children.get(parent) ?? [];
+    list.push(widget);
+    children.set(parent, list);
+  }
+  const projected: string[] = [];
+  const presentationOwners = new Set([
+    'label', 'inscription', 'button', 'menu-button', 'split-button', 'entry', 'search-entry',
+    'switch-widget', 'check-button', 'status-page', 'action-row', 'switch-row', 'combo-row',
+    'spin-row', 'button-row', 'entry-row', 'password-row', 'avatar', 'progress-bar',
+    'scale', 'level-bar', 'spinner',
+  ]);
+  const build = (widget: ProbeWidget, parentBounds: ProbeBounds | null): AdwNode[] => {
+    if (!widget.mapped || !widget.visible || matchByPath.has(widget.indexPath.join(','))) return [];
+    const node = runtimeNode(widget, parentBounds, report.probeVersion);
+    const descendants = (children.get(widget.indexPath.join(',')) ?? [])
+      .flatMap(child => build(child, widget.bounds ?? parentBounds));
+    if (!node) return descendants; // flatten unsupported GTK internals
+    node.children = presentationOwners.has(node.type) ? [] : descendants;
+    if (node.children.length) node.runtimeProjectionHost = true;
+    projected.push(node.id);
+    return [node];
+  };
+  for (const match of report.matches) {
+    const parent = sourceById.get(match.nodeId);
+    const runtimeParent = widgetByPath.get(match.indexPath.join(','));
+    if (!parent || !runtimeParent || !match.mapped) continue;
+    const additions = (children.get(match.indexPath.join(',')) ?? [])
+      .flatMap(child => build(child, runtimeParent.bounds));
+    if (!additions.length) continue;
+    parent.children = [...(parent.children ?? []), ...additions];
+    parent.runtimeProjectionHost = true;
+  }
+  return projected;
 }
 
 /**

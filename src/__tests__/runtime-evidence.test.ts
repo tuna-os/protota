@@ -129,6 +129,34 @@ describe('applyRuntimeEvidence (#55 exit wiring)', () => {
     // No evidence: the boundary keeps its static facts and tier.
     expect(boundaryGeometryConfidence(boundaryGeometryFacts(buttons))).not.toBe('native');
   });
+
+  it('projects semantic runtime-only branches under their matched source parent', () => {
+    const root = blueprintToNode(`
+      Adw.ApplicationWindow window {
+        Gtk.Box shell { orientation: vertical; }
+      }
+    `);
+    const runtime = probe([
+      widget({ gtype: 'AdwApplicationWindow', indexPath: [0], buildableId: 'window' }),
+      widget({ gtype: 'GtkBox', indexPath: [0, 0], buildableId: 'shell' }),
+      // Created by application code after the builder source loaded.
+      widget({ gtype: 'GtkListBox', indexPath: [0, 0, 0] }),
+      widget({ gtype: 'GtkListBoxRow', indexPath: [0, 0, 0, 0] }),
+      widget({
+        gtype: 'GtkLabel', indexPath: [0, 0, 0, 0, 0],
+        properties: { label: 'Wi-Fi' },
+      }),
+    ]);
+
+    const applied = applyRuntimeEvidence(root, matchRuntimeProfile(runtime, root), runtime);
+
+    expect(applied.projected).toEqual(expect.arrayContaining([
+      'runtime_0_0_0', 'runtime_0_0_0_0', 'runtime_0_0_0_0_0',
+    ]));
+    const label = findNode(root, 'runtime_0_0_0_0_0');
+    expect(label).toMatchObject({ type: 'label', title: 'Wi-Fi', value: 'Wi-Fi', sourceClass: 'GtkLabel' });
+    expect(findNode(root, 'shell').children?.[0]).toMatchObject({ type: 'list-box' });
+  });
 });
 
 describe('validateProbeEvidence (probe-generated finishing entries)', () => {

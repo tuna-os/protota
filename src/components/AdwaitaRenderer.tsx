@@ -635,7 +635,6 @@ export const AdwaitaRenderer: React.FC<Props> = ({
   const effectiveScheme = forcedColorScheme ?? doc.colorScheme;
   const themeClass = isRoot && effectiveScheme !== 'auto'
     ? `theme-${effectiveScheme}` : '';
-  if (themeClass) attrs['class'] = themeClass;
 
   // GtkStack, AdwViewStack, and AdwNavigationView show exactly one child.
   // The visible child is the named one when declared (matched by page name,
@@ -787,7 +786,10 @@ export const AdwaitaRenderer: React.FC<Props> = ({
   const diagnosticClass = diagnosticTier && !isSelected
     ? `protota-diag-outline-${diagnosticTier}`
     : '';
-  const elementClass = [isGtkSpinButton ? 'protota-gtk-spin-button' : '', divClass, styleClasses, diagnosticClass].filter(Boolean).join(' ');
+  // The theme scope belongs in the same class list: React's `className` wins
+  // over any `class` attribute, so a root that also carries GTK style classes
+  // (Nautilus' window declares `view`) would otherwise lose its theme.
+  const elementClass = [isGtkSpinButton ? 'protota-gtk-spin-button' : '', themeClass, divClass, styleClasses, diagnosticClass].filter(Boolean).join(' ');
 
   // Several adw-* custom elements ADOPT their light-DOM children on connect:
   // adw-toolbar-view, adw-header-bar, and adw-toast-overlay snapshot the

@@ -13,18 +13,12 @@ import { ExportWritebackDialog } from "./ExportWritebackDialog";
 import { CommandPalette } from "./CommandPalette";
 import { AddScreenModal } from "./AddScreenModal";
 import { ExportModal } from "./ExportModal";
-import { TopBar } from "./TopBar";
-import {
-  sidebarShowSymbolic,
-  editUndoSymbolic,
-  editRedoSymbolic,
-  sidebarShowRightSymbolic,
-} from "@gjsify/adwaita-icons/actions";
-import { exportDocumentFile } from "../utils/exportImport";
+import { Header } from "./Header";
+import { IMPORT_FILE_INPUT_ID } from "./MenuData";
+import { setAdwaitaColorScheme } from "@gjsify/adwaita-core";
 import { downloadPng, renderScreenToPng } from "../utils/pngExport";
 import { mockupToBlueprint } from "../utils/blueprint";
 import { settleRender } from "../utils/settle";
-import { iconStyle } from "../utils/iconStyles";
 
 /** Single share implementation (tests/sharing.spec.ts): base64 of the UTF-8
  * document JSON in the URL hash. TextEncoder replaces the deprecated
@@ -86,6 +80,7 @@ export const App: React.FC = () => {
     pasteNodes,
     duplicateNodes,
     toggleDiagnostics,
+    toggleShowFlows,
     diagnosticsEnabled,
   } = useMockupStore();
 
@@ -143,6 +138,22 @@ export const App: React.FC = () => {
       cancelled = true;
     };
   }, [doc]);
+
+  // Manual theme selection (desktop cycle button, mobile 3-circle switcher)
+  // applies to the app chrome AND the mockup: adwaita-web's skin re-scopes
+  // its variable palettes at :root.theme-light/:root.theme-dark, and the
+  // core color-scheme machine is told the effective scheme ('auto' resolves
+  // to the system preference app-side; the core state is binary light|dark).
+  useEffect(() => {
+    const root = document.documentElement;
+    root.classList.remove("theme-light", "theme-dark");
+    if (doc.colorScheme === "light") root.classList.add("theme-light");
+    else if (doc.colorScheme === "dark") root.classList.add("theme-dark");
+    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    setAdwaitaColorScheme(
+      doc.colorScheme === "auto" ? (prefersDark ? "dark" : "light") : doc.colorScheme,
+    );
+  }, [doc.colorScheme]);
 
   useEffect(() => {
     const onToggleLayers = () => setLeftOpen((v) => !v);
@@ -287,13 +298,13 @@ export const App: React.FC = () => {
         return;
       }
       // Help
-      if (e.key === "?" && !mod) {
+      if (e.key === "?" && mod) {
         e.preventDefault();
         setShowShortcuts(true);
         return;
       }
       // Panel toggles
-      if (e.key === "\\" && mod) {
+      if (e.key === "[" && mod) {
         e.preventDefault();
         setLeftOpen((v) => !v);
         return;
@@ -303,13 +314,19 @@ export const App: React.FC = () => {
         setRightOpen((v) => !v);
         return;
       }
-      // Diagnostics (HIG lint) toggle
-      if (e.key === "." && mod) {
+      // Diagnostics toggle
+      if (e.key === "'" && mod) {
         e.preventDefault();
         if (!diagnosticsEnabled) {
           window.dispatchEvent(new CustomEvent("protota:show-diagnostics"));
         }
         toggleDiagnostics();
+        return;
+      }
+      // Screen Flows toggle
+      if (e.key === ";" && mod) {
+        e.preventDefault();
+        toggleShowFlows();
         return;
       }
       // New screen
@@ -347,6 +364,7 @@ export const App: React.FC = () => {
     showShortcuts,
     showCommandPalette,
     toggleDiagnostics,
+    toggleShowFlows,
     diagnosticsEnabled,
   ]);
 
@@ -357,66 +375,13 @@ export const App: React.FC = () => {
     >
       {/* Adwaita Toolbar View — frames the entire app */}
       <adw-toolbar-view style={{ flex: 1, display: "flex", flexDirection: "column" }}>
-        {/* Header Bar — combines menu + actions */}
-        <adw-header-bar slot="top">
-          {/* Start slot: Layers toggle + Undo/Redo + Menu buttons */}
-          <div slot="start" style={{ display: "flex", gap: "2px", alignItems: "center" }}>
-            <button
-              className={`adw-button flat${leftOpen ? " active" : ""}`}
-              onClick={() => setLeftOpen((v) => !v)}
-              title="Toggle Layers Panel (Ctrl+\)"
-              aria-label="Toggle Layers"
-            >
-              <span style={iconStyle(sidebarShowSymbolic)} />
-            </button>
-            <button className="adw-button flat" onClick={undo} title="Undo (Ctrl+Z)">
-              <span style={iconStyle(editUndoSymbolic)} />
-            </button>
-            <button className="adw-button flat" onClick={redo} title="Redo (Ctrl+Shift+Z)">
-              <span style={iconStyle(editRedoSymbolic)} />
-            </button>
-            <TopBar />
-          </div>
-          {/* End slot: Export actions + Properties toggle */}
-          <div slot="end" style={{ display: "flex", gap: "2px", alignItems: "center" }}>
-            <button
-              className="adw-button flat protota-desktop-only"
-              onClick={() => window.dispatchEvent(new CustomEvent("protota:share"))}
-              title="Copy a shareable link"
-            >
-              Share
-            </button>
-            <button
-              className="adw-button flat protota-desktop-only"
-              onClick={() => exportDocumentFile(doc)}
-              title="Download the document as .mockup.json"
-            >
-              Save JSON
-            </button>
-            <button
-              className="adw-button flat protota-desktop-only"
-              onClick={() => setShowExportModal(true)}
-              title="View generated Blueprint code"
-            >
-              Code Export
-            </button>
-            <button
-              className="adw-button flat protota-desktop-only"
-              onClick={() => window.dispatchEvent(new CustomEvent("protota:export-png"))}
-              title="Export the focused screen as PNG"
-            >
-              PNG
-            </button>
-            <button
-              className={`adw-button flat${rightOpen ? " active" : ""}`}
-              onClick={() => setRightOpen((v) => !v)}
-              title="Toggle Properties Panel (Ctrl+])"
-              aria-label="Toggle Properties"
-            >
-              <span style={iconStyle(sidebarShowRightSymbolic)} />
-            </button>
-          </div>
-        </adw-header-bar>
+        {/* Header Bar — menu bar, app-menu button, export actions, panel toggles */}
+        <Header
+          leftOpen={leftOpen}
+          onToggleLeft={() => setLeftOpen((v) => !v)}
+          rightOpen={rightOpen}
+          onToggleRight={() => setRightOpen((v) => !v)}
+        />
 
         {/* Main Workspace — content slot of toolbar-view */}
         <div
@@ -534,8 +499,7 @@ export const App: React.FC = () => {
           >
             <h3 style={{ marginTop: 0 }}>Keyboard Shortcuts</h3>
             <p style={{ fontSize: "12px", opacity: 0.65, marginBottom: "16px" }}>
-              Press <kbd style={kbdStyle}>?</kbd> to toggle this overlay. Platform: Ctrl = ⌘ on
-              macOS.
+              Press <kbd style={kbdStyle}>Ctrl+?</kbd> to toggle this overlay.
             </p>
             {SHORTCUT_GROUPS.map((group) => (
               <div key={group.title} style={{ marginBottom: "16px" }}>
@@ -583,8 +547,10 @@ export const App: React.FC = () => {
         </div>
       )}
 
-      {/* Hidden file input for import */}
+      {/* Hidden file input for import (shared by the desktop and mobile
+          overflow menus' Import… items — one import front door, #118) */}
       <input
+        id={IMPORT_FILE_INPUT_ID}
         ref={fileInputRef}
         type="file"
         accept=".mockup.json,.json,.blp,.ui"
@@ -636,11 +602,12 @@ const SHORTCUT_GROUPS = [
   {
     title: "Interface",
     items: [
-      { keys: "Ctrl+\\", label: "Toggle Layers panel" },
-      { keys: "Ctrl+]", label: "Toggle Properties panel" },
-      { keys: "Ctrl+.", label: "Toggle Diagnostics (HIG lint)" },
-      { keys: "Ctrl+/", label: "Toggle Preview mode" },
-      { keys: "?", label: "Show this help" },
+      { keys: "Ctrl+[", label: "Toggle Layers Panel" },
+      { keys: "Ctrl+]", label: "Toggle Properties Panel" },
+      { keys: "Ctrl+;", label: "Toggle Screen Flows" },
+      { keys: "Ctrl+'", label: "Toggle Diagnostics" },
+      { keys: "Ctrl+/", label: "Toggle Preview Mode" },
+      { keys: "Ctrl+?", label: "Show this help" },
     ],
   },
 ];

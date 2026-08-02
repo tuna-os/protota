@@ -37,7 +37,7 @@ declare module "react" {
       "adw-banner": HTMLAttributes<HTMLElement>;
       "adw-toggle-group": HTMLAttributes<HTMLElement>;
       "adw-split-button": HTMLAttributes<HTMLElement>;
-      "adw-menu-button": HTMLAttributes<HTMLElement>;
+      "adw-menu-button": HTMLAttributes<HTMLElement> & RefAttributes<HTMLElement>;
       "adw-spinner": HTMLAttributes<HTMLElement>;
       "adw-icon": HTMLAttributes<HTMLElement>;
       "adw-toggle": HTMLAttributes<HTMLElement>;

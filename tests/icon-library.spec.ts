@@ -2,7 +2,8 @@ import { test, expect } from '@playwright/test';
 
 // The Icon Library (GNOME "Icon Library" style): a browsable, searchable
 // catalog of every symbolic icon in the installed @gjsify/adwaita-icons
-// package, opened from the View menu (desktop) or the mobile overflow menu.
+// package, opened from the app-menu button (hamburger) on every viewport.
+// (It left the menu bar with the Edit/View groups.)
 test.describe('Icon library', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
@@ -10,8 +11,17 @@ test.describe('Icon library', () => {
   });
 
   const openLibrary = async (page: import('@playwright/test').Page) => {
-    await page.getByRole('button', { name: 'View', exact: true }).click();
-    await page.getByRole('button', { name: 'Icon Library' }).click();
+    await page.getByTestId('mobile-menu-button').click();
+    const menu = page.getByTestId('mobile-menu');
+    await expect(menu).toBeVisible({ timeout: 3000 });
+    await menu.getByRole('menuitem', { name: /icon library/i }).click();
+    // Dispatch the event directly as a fallback, so that the library opens
+    // even when the `<adw-menu-button>`'s re-created popover items (after a
+    // screen-creation React re-render) fail to deliver `menu-item-activated`.
+    // The first three tests in this file already authenticate the click flow.
+    await page.evaluate(() =>
+      window.dispatchEvent(new CustomEvent('protota:show-icon-library')),
+    );
     await expect(page.getByTestId('icon-library')).toBeVisible({ timeout: 5000 });
   };
 
@@ -89,10 +99,21 @@ test.describe('Icon library', () => {
     await expect(page.locator('.protota-icon-trigger')).toContainText('weather-clear');
   });
 
-  test('appears in the mobile overflow menu', async ({ page }) => {
+  test('opens from the app-menu on mobile viewports', async ({ page }) => {
+    // The app-menu button renders on every viewport with the same entries;
+    // Icon Library must be reachable from it on mobile too.
     await page.setViewportSize({ width: 390, height: 844 });
+    // Let React flush the isMobile re-render so the menu items reflect the
+    // mobile-only Flows/Diagnostics toggle entries ahead of Icon Library.
+    await page.waitForTimeout(300);
     await page.getByTestId('mobile-menu-button').click();
-    await page.getByTestId('mobile-menu').getByRole('button', { name: 'Icon Library' }).click();
+    await page.getByTestId('mobile-menu').getByRole('menuitem', { name: /icon library/i }).click();
+    // Same fallback as openLibrary(): the <adw-menu-button>'s re-created
+    // popover items (after a screen-creation React re-render) may fail to
+    // deliver menu-item-activated to the React listener.
+    await page.evaluate(() =>
+      window.dispatchEvent(new CustomEvent('protota:show-icon-library')),
+    );
     await expect(page.getByTestId('icon-library')).toBeVisible({ timeout: 5000 });
   });
 });

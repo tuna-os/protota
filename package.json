@@ -15,6 +15,7 @@
     "test:ui": "playwright test --ui"
   },
   "dependencies": {
+    "@gjsify/adwaita-core": "^0.26.0",
     "@gjsify/adwaita-web": "^0.26.0",
     "html2canvas": "^1.4.1",
     "immer": "^11.1.15",

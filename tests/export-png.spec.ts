@@ -7,18 +7,18 @@ test.describe('Export to PNG (#17)', () => {
   });
 
   const openFileMenu = async (page: import('@playwright/test').Page) => {
-    await page.getByRole('button', { name: 'File' }).click();
+    await page.getByTestId('app-header-bar').getByRole('button', { name: 'Export', exact: true }).click();
   };
 
-  test('Blueprint export command exists in the File menu', async ({ page }) => {
+  test('Blueprint export command exists in the Export menu', async ({ page }) => {
     await openFileMenu(page);
-    const exportBtn = page.getByText('Export Blueprint (.blp)', { exact: true });
+    const exportBtn = page.getByRole('menuitem', { name: /export to blueprint/i });
     await expect(exportBtn).toBeVisible();
   });
 
   test('clicking Blueprint export triggers download of .blp', async ({ page }) => {
     await openFileMenu(page);
-    const exportBtn = page.getByText('Export Blueprint (.blp)', { exact: true });
+    const exportBtn = page.getByRole('menuitem', { name: /export to blueprint/i });
 
     const [download] = await Promise.all([
       page.waitForEvent('download', { timeout: 5000 }),
@@ -28,9 +28,9 @@ test.describe('Export to PNG (#17)', () => {
     expect(download.suggestedFilename()).toContain('.blp');
   });
 
-  test('PNG export button triggers image download', async ({ page }) => {
+  test('PNG export action triggers image download', async ({ page }) => {
     await openFileMenu(page);
-    const pngBtn = page.getByText('Export as PNG', { exact: true });
+    const pngBtn = page.getByRole('menuitem', { name: /export screen to png/i });
     await expect(pngBtn).toBeVisible();
 
     const [download] = await Promise.all([

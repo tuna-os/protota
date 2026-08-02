@@ -6,8 +6,9 @@ test.describe('Remaining features (#9, #16, #18-#24)', () => {
     await page.waitForSelector('adw-window', { timeout: 10000 });
   });
 
-  test('#9 Blueprint export button exists', async ({ page }) => {
-    await expect(page.getByRole('button', { name: /code export/i })).toBeVisible();
+  test('#9 Code export command exists in the Export menu', async ({ page }) => {
+    await page.getByTestId('app-header-bar').getByRole('button', { name: 'Export', exact: true }).click();
+    await expect(page.getByRole('menuitem', { name: /export code/i })).toBeVisible();
   });
 
   test('#16 Screen width defaults exist in store', async ({ page }) => {
@@ -35,14 +36,14 @@ test.describe('Remaining features (#9, #16, #18-#24)', () => {
   });
 
   test('#21 Preset gallery accessible', async ({ page }) => {
-    // Load Preset moved into the File menu (#106 layout reorder).
-    await page.getByRole('button', { name: 'File', exact: true }).click();
-    await page.getByRole('button', { name: /load preset/i }).click();
+    // Load Preset moved into the Open menu (#106 layout reorder).
+    await page.getByTestId('app-header-bar').getByRole('button', { name: 'Open', exact: true }).click();
+    await page.getByRole('menuitem', { name: /load preset/i }).click();
     await expect(page.locator('.protota-preset-item').first()).toBeVisible({ timeout: 3000 });
   });
 
   test('#22 A11y lint rule covers icon-only buttons', async ({ page }) => {
-    const lintBtn = page.getByRole('button', { name: /lint/i });
+    const lintBtn = page.getByTestId('diagnostics-toggle');
     await lintBtn.click();
     await expect(lintBtn).toHaveAttribute('data-active', 'true');
   });
@@ -54,9 +55,10 @@ test.describe('Remaining features (#9, #16, #18-#24)', () => {
     await expect(page.locator('.protota-command-palette')).toBeVisible({ timeout: 3000 });
   });
 
-  test('#24 Export + PNG buttons visible', async ({ page }) => {
-    await expect(page.getByRole('button', { name: /save json/i })).toBeVisible();
-    await expect(page.getByRole('button', { name: /png/i })).toBeVisible();
+  test('#24 Export + PNG actions live in the Export menu', async ({ page }) => {
+    await page.getByTestId('app-header-bar').getByRole('button', { name: 'Export', exact: true }).click();
+    await expect(page.getByRole('menuitem', { name: /export to json/i })).toBeVisible();
+    await expect(page.getByRole('menuitem', { name: /export screen to png/i })).toBeVisible();
   });
 });
 

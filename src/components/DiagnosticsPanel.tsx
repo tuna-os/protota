@@ -96,7 +96,7 @@ export const DiagnosticsPanel: React.FC = () => {
   if (!diagnosticsEnabled) {
     return (
       <div data-testid="diagnostics-panel" style={{ padding: '16px', opacity: 0.5, fontStyle: 'italic' }}>
-        Diagnostics are off. Toggle them in the top bar (Ctrl+.) to audit this
+        Diagnostics are off. Toggle them in the top bar (Ctrl+') to audit this
         mockup against the GNOME HIG.
       </div>
     );

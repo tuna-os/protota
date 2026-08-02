@@ -198,9 +198,9 @@ async function loadSettingsPreset(page: Page) {
   // Generous first-paint budget: a cold dev server transforms the whole app
   // on this request, and parallel workers may be importing presets at once.
   await page.waitForSelector('adw-window', { timeout: 30000 });
-  // Load Preset moved into the File menu (#106 layout reorder).
-  await page.getByRole('button', { name: 'File', exact: true }).click();
-  await page.getByRole('button', { name: /load preset/i }).click();
+  // Load Preset moved into the Open menu (#106 layout reorder).
+  await page.getByTestId('app-header-bar').getByRole('button', { name: 'Open', exact: true }).click();
+  await page.getByRole('menuitem', { name: /load preset/i }).click();
   await page.locator('.protota-preset-item').filter({ hasText: /GNOME Settings/i }).first().click();
   await expect
     .poll(

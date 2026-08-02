@@ -12,7 +12,9 @@ test.describe('Icon library', () => {
 
   const openLibrary = async (page: import('@playwright/test').Page) => {
     await page.getByTestId('mobile-menu-button').click();
-    await page.getByRole('menuitem', { name: /icon library/i }).click();
+    const menu = page.getByTestId('mobile-menu');
+    await expect(menu).toBeVisible({ timeout: 3000 });
+    await menu.getByRole('menuitem', { name: /icon library/i }).click();
     await expect(page.getByTestId('icon-library')).toBeVisible({ timeout: 5000 });
   };
 

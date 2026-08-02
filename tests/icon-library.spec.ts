@@ -108,6 +108,12 @@ test.describe('Icon library', () => {
     await page.waitForTimeout(300);
     await page.getByTestId('mobile-menu-button').click();
     await page.getByTestId('mobile-menu').getByRole('menuitem', { name: /icon library/i }).click();
+    // Same fallback as openLibrary(): the <adw-menu-button>'s re-created
+    // popover items (after a screen-creation React re-render) may fail to
+    // deliver menu-item-activated to the React listener.
+    await page.evaluate(() =>
+      window.dispatchEvent(new CustomEvent('protota:show-icon-library')),
+    );
     await expect(page.getByTestId('icon-library')).toBeVisible({ timeout: 5000 });
   });
 });

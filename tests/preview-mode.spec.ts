@@ -194,7 +194,7 @@ test.describe('Mobile bottom bar', () => {
     await expect(bar.getByTitle('Fit All Screens')).toBeVisible();
     await expect(bar.getByTitle('New Screen (Ctrl+N)')).toBeVisible();
     await expect(bar.getByTitle('Toggle Phone Preview')).toBeVisible();
-    await expect(bar.getByTitle('Toggle Desktop Preview')).toBeVisible();
+    await expect(bar.getByTitle('Toggle Desktop Preview')).not.toBeVisible();
     await expect(page.getByTestId('size-preset-800x600')).toHaveCount(0);
   });
 

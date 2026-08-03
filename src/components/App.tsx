@@ -16,6 +16,7 @@ import { ExportModal } from "./ExportModal";
 import { Header } from "./Header";
 import { IMPORT_FILE_INPUT_ID } from "./MenuData";
 import { setAdwaitaColorScheme } from "@gjsify/adwaita-core";
+import { useIsMobile } from "../hooks/useIsMobile";
 import { downloadPng, renderScreenToPng } from "../utils/pngExport";
 import { mockupToBlueprint } from "../utils/blueprint";
 import { settleRender } from "../utils/settle";
@@ -94,6 +95,7 @@ export const App: React.FC = () => {
   const [rightTab, setRightTab] = useState<"properties" | "diagnostics">("properties");
   /** Two-tab left drawer: Layers (tree) | Widgets (draggable palette, #79). */
   const [leftTab, setLeftTab] = useState<"layers" | "widgets">("layers");
+  const isMobile = useIsMobile();
   const [showShortcuts, setShowShortcuts] = useState(false);
   const [showPresets, setShowPresets] = useState(false);
   const [showIconLibrary, setShowIconLibrary] = useState(false);
@@ -154,6 +156,14 @@ export const App: React.FC = () => {
       doc.colorScheme === "auto" ? (prefersDark ? "dark" : "light") : doc.colorScheme,
     );
   }, [doc.colorScheme]);
+
+  // Auto-close panels when the viewport transitions to mobile.
+  useEffect(() => {
+    if (isMobile) {
+      setLeftOpen(false);
+      setRightOpen(false);
+    }
+  }, [isMobile]);
 
   useEffect(() => {
     const onToggleLayers = () => setLeftOpen((v) => !v);

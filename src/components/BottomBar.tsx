@@ -218,13 +218,15 @@ export const BottomBar: React.FC<BottomBarProps> = React.memo(
         >
           {isMobile ? undefined : "New Screen"}
         </ToolbarIconButton>
-        <Separator />
-        <ToolbarIconButton
-          icon={computerSymbolic}
-          onClick={onToggleDesktop}
-          title="Toggle Desktop Preview"
-          active={!!desktopScreenId}
-        />
+        {!isMobile && <Separator />}
+        {!isMobile && (
+          <ToolbarIconButton
+            icon={computerSymbolic}
+            onClick={onToggleDesktop}
+            title="Toggle Desktop Preview"
+            active={!!desktopScreenId}
+          />
+        )}
         <ToolbarIconButton
           icon={phoneSymbolic}
           onClick={onTogglePhone}

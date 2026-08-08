@@ -2,6 +2,7 @@ import { readFileSync } from 'node:fs';
 
 const catalog = JSON.parse(readFileSync(new URL('../tests/fixtures/gnome-app-catalog.json', import.meta.url), 'utf8'));
 const appId = process.argv[2] || 'calculator';
+const requestedScreenId = process.argv[3] || process.env.BROADWAY_SCREEN_ID;
 if (appId === '--list') {
   for (const [id, app] of Object.entries(catalog)) {
     if (app.status === 'preset') console.log(id);
@@ -16,12 +17,16 @@ if (!app) {
 if (app.status !== 'preset') {
   throw new Error(`GNOME app "${appId}" has no preset/reference capture target yet.`);
 }
+if (requestedScreenId && !app.screens?.includes(requestedScreenId)) {
+  throw new Error(`Unknown screen "${requestedScreenId}" for ${appId}. Expected one of: ${(app.screens ?? []).join(', ')}`);
+}
 
 const environment = {
   BROADWAY_APP_ID: appId,
   BROADWAY_APP_PACKAGE: app.aptPackage,
   BROADWAY_APP_COMMAND: app.command,
   BROADWAY_PRESET_ID: app.presetId,
+  ...(requestedScreenId ? { BROADWAY_SCREEN_ID: requestedScreenId } : {}),
   BROADWAY_VIEWPORT_WIDTH: app.viewport.width,
   BROADWAY_VIEWPORT_HEIGHT: app.viewport.height,
 };

@@ -46,7 +46,7 @@ test.describe('URL render mode', () => {
     // its `max-width: 550sp` breakpoint (#141). Wide render: sidebar pane
     // present.
     await gotoRender(page, 'preset=settings&width=900&height=600');
-    const sidebar = page.locator('#protota-render-root [data-node-id="panel_list_page"]');
+    const sidebar = page.locator('#protota-render-root [data-node-id="split_view"] [slot="sidebar"]');
     await expect(sidebar).toBeVisible();
 
     // Narrow render of the SAME screen: the breakpoint's
@@ -54,7 +54,7 @@ test.describe('URL render mode', () => {
     // leaves the DOM.
     await gotoRender(page, 'preset=settings&width=480&height=600');
     await expect(page.locator('#protota-render-root [data-protota-render-surface]')).toBeVisible();
-    await expect(page.locator('#protota-render-root [data-node-id="panel_list_page"]')).toHaveCount(0);
+    await expect(page.locator('#protota-render-root [data-node-id="split_view"] [slot="sidebar"]')).toHaveCount(0);
   });
 
   test('theme=dark forces the dark scheme on the rendered window', async ({ page }) => {

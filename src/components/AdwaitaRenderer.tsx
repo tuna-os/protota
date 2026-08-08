@@ -109,6 +109,7 @@ const TAG_MAP: Record<string, string | null> = {
   'view-switcher':       'adw-view-switcher',
   'navigation-view':     'adw-navigation-view',
   'tab-view':            'adw-tab-view',
+  'tab-page':            'adw-tab-page',
   // No adw-tab-bar custom element exists; the strip is drawn as a styled div
   // whose tabs derive from the linked tab-view's pages (see utils/tabBar.ts).
   'tab-bar':             null,
@@ -152,6 +153,7 @@ const TAG_MAP: Record<string, string | null> = {
   stack:                 null,
   'stack-page':          null,
   'scrolled-window':     null,
+  overlay:               null,
   'search-entry':        null,
   'switch-widget':       null,
   'check-button':        null,
@@ -167,8 +169,8 @@ const TAG_MAP: Record<string, string | null> = {
  * already selects the visible page. */
 const DIV_TYPES = new Set([
   'bin', 'custom-widget', 'box', 'grid', 'center-box', 'stack', 'stack-page', 'scrolled-window', 'search-entry', 'switch-widget',
-  'check-button', 'list-box', 'label', 'inscription', 'navigation-view', 'view-stack',
-  'progress-bar', 'scale', 'level-bar', 'popover', 'list-box-row', 'tab-bar',
+  'check-button', 'list-box', 'label', 'inscription', 'navigation-view', 'view-stack', 'overlay',
+  'progress-bar', 'scale', 'level-bar', 'popover', 'list-box-row', 'tab-bar', 'tab-view', 'tab-page',
   // adw-overlay-split-view collects [slot="content"] with an unscoped query,
   // so it hoists the content child of any nested toolbar view into its own
   // pane. Render the panes ourselves, as with navigation-view.
@@ -188,6 +190,8 @@ function nodeProps(node: AdwNode, inheritedSlot?: string): Record<string, string
   // the stylesheet applies the equal split to the box's children.
   if (t === 'box' && node.homogeneous) p.homogeneous = '';
   if (t === 'overlay-split') p['show-sidebar'] = '';
+  if (t === 'tab-view' && (node.children?.length ?? 0) <= 1) p.autohide = '';
+  if (node.sensitive === false) p.disabled = '';
   const icon = node.iconName?.replace(/-symbolic$/, '');
 
   // Text-bearing widgets
@@ -196,7 +200,7 @@ function nodeProps(node: AdwNode, inheritedSlot?: string): Record<string, string
     if (t === 'window-title' && node.subtitle) p.subtitle = node.subtitle;
   }
   if (t === 'action-row' || t === 'switch-row' || t === 'combo-row' ||
-      t === 'spin-row' || t === 'entry-row' || t === 'expander-row') {
+      t === 'spin-row' || t === 'entry-row' || t === 'password-row' || t === 'expander-row') {
     if (node.title) p.title = node.title;
     if (node.subtitle) p.subtitle = node.subtitle;
   }
@@ -250,6 +254,10 @@ function nodeProps(node: AdwNode, inheritedSlot?: string): Record<string, string
     if (node.value) p.value = node.value;
     if (node.placeholder) p.placeholder = node.placeholder;
   }
+  if (t === 'combo-row' && node.options?.length) {
+    p.items = JSON.stringify(node.options);
+    p.selected = String(node.selectedIndex ?? 0);
+  }
 
   // Boolean attribute flags (set as empty string so hasAttribute() returns true)
   const boolFlags: Record<string, string[]> = {
@@ -278,6 +286,9 @@ function nodeProps(node: AdwNode, inheritedSlot?: string): Record<string, string
  * structure while documents imported from Blueprint keep their explicit slot.
  */
 function childSlot(parent: AdwNode, child: AdwNode, index: number): string | undefined {
+  // GtkBuilder names AdwHeaderBar's title-widget child `title`; adwaita-web
+  // exposes the equivalent light-DOM slot as `center`.
+  if (parent.type === 'header-bar' && (child.slot === 'title' || child.slot === 'title-widget')) return 'center';
   if (child.slot) return child.slot;
   if (parent.type === 'toolbar-view') {
     return child.type === 'header-bar' ? 'top' : 'content';
@@ -295,6 +306,11 @@ function childSlot(parent: AdwNode, child: AdwNode, index: number): string | und
     if (centerIndex !== -1) return index < centerIndex ? 'start' : 'end';
     return child.type === 'menu-button' ? 'end' : 'start';
   }
+  // AdwActionRow and its editable/selectable row subclasses treat ordinary
+  // GtkBuilder children as suffix widgets. adwaita-web exposes that implicit
+  // GTK child role as an explicit light-DOM slot.
+  if (['action-row', 'switch-row', 'combo-row', 'spin-row', 'entry-row', 'password-row']
+    .includes(parent.type)) return 'suffix';
   return undefined;
 }
 
@@ -333,9 +349,22 @@ function findFirstStack(node: AdwNode): AdwNode | null {
   return null;
 }
 
+function findViewSwitcherStack(node: AdwNode, id: string): AdwNode | null {
+  const candidates: AdwNode[] = [];
+  const visit = (candidate: AdwNode): void => {
+    if (candidate.id === id) candidates.push(candidate);
+    candidate.children?.forEach(visit);
+  };
+  visit(node);
+  // GtkBuilder ids are template-scoped, so an expanded composite can legally
+  // contain another `stack`. A ViewSwitcher binds to an AdwViewStack; prefer
+  // that typed candidate instead of whichever duplicate id traversal meets.
+  return candidates.find((candidate) => candidate.type === 'view-stack') ?? candidates[0] ?? null;
+}
+
 /** The stack child a visibleChildName selects (renderer matching rules). */
 function visibleStackChild(stack: AdwNode, visibleChildName: unknown): AdwNode | undefined {
-  const children = stack.children ?? [];
+  const children = (stack.children ?? []).filter((child) => child.visible !== false);
   return children.find((child) => typeof visibleChildName === 'string' &&
     (child.id === visibleChildName || child.title === visibleChildName ||
       (child as { name?: unknown }).name === visibleChildName)) ?? children[0];
@@ -400,6 +429,12 @@ export const AdwaitaRenderer: React.FC<Props> = ({
     (node.type === 'window' || node.type === 'dialog' || isDialogRoot) && screenWidth
       ? { width: `${screenWidth}px`, ...(screenHeight ? { height: `${screenHeight}px` } : {}) }
       : undefined;
+  const splitPaneStyle = node.type === 'overlay-split' && typeof node.sidebarWidthFraction === 'number'
+    ? { '--protota-sidebar-width': `${node.sidebarWidthFraction * 100}%` } as React.CSSProperties
+    : undefined;
+  const labelTextStyle: React.CSSProperties | undefined = node.type === 'label'
+    ? { textAlign: (node.xalign ?? 0.5) <= 0.25 ? 'left' : (node.xalign ?? 0.5) >= 0.75 ? 'right' : 'center' }
+    : undefined;
 
   useEffect(() => {
     ensureAdwIcon(node.iconName);
@@ -490,7 +525,7 @@ export const AdwaitaRenderer: React.FC<Props> = ({
   const hiddenShell = (
     <div
       ref={wrapperRef}
-      slot={node.slot ?? inheritedSlot}
+      slot={inheritedSlot ?? node.slot}
       className="adw-node-wrapper"
       style={{ display: 'none' }}
       data-hidden-node-id={node.id}
@@ -510,14 +545,76 @@ export const AdwaitaRenderer: React.FC<Props> = ({
   // child through an ephemeral override (never the document). The
   // adw-view-switcher element is pageless in our model (pages live on the
   // stack), so preview draws its own tab strip in a plain div.
-  const previewSwitcherStack = preview && node.type === 'view-switcher'
-    ? findFirstStack(doc.screens.find((screen) => screen.id === screenId)?.rootNode ?? node)
+  const screenRoot = doc.screens.find((screen) => screen.id === screenId)?.rootNode;
+  const boundStackId = typeof node.stack === 'string' ? node.stack : null;
+  const switcherStack = node.type === 'view-switcher'
+    ? boundStackId && screenRoot
+      ? findViewSwitcherStack(screenRoot, boundStackId)
+      : preview ? findFirstStack(screenRoot ?? node) : null
     : null;
+  const headerSwitcherNode = node.type === 'header-bar'
+    ? node.children?.find((child) => child.type === 'view-switcher')
+    : undefined;
+  const headerSwitcherStackId = typeof headerSwitcherNode?.stack === 'string' ? headerSwitcherNode.stack : null;
+  const headerSwitcherStack = headerSwitcherStackId && screenRoot
+    ? findViewSwitcherStack(screenRoot, headerSwitcherStackId)
+    : null;
+  // The generated page elements are consumed immediately by the custom
+  // element, so register their source icons before that first connection.
+  headerSwitcherStack?.children?.forEach((page) => ensureAdwIcon(page.iconName));
+  const headerSwitcherPages = (headerSwitcherStack?.children ?? []).filter((page) => page.visible !== false);
+  const headerSwitcherActive = Math.max(0, headerSwitcherPages.findIndex((page) =>
+    typeof headerSwitcherStack?.visibleChildName === 'string' &&
+    (page.id === headerSwitcherStack.visibleChildName ||
+      (page as { name?: string }).name === headerSwitcherStack.visibleChildName)));
+  const directHeaderSwitcher = headerSwitcherNode && headerSwitcherStack ? React.createElement(
+    'adw-view-switcher',
+    {
+      key: 'header-view-switcher',
+      slot: 'center',
+      policy: headerSwitcherNode.policy ?? 'wide',
+      active: headerSwitcherActive,
+      ...(headerSwitcherNode.runtimeEvidence?.relativeBounds
+        ? { style: {
+            position: 'absolute',
+            left: headerSwitcherNode.runtimeEvidence.relativeBounds.x,
+            top: headerSwitcherNode.runtimeEvidence.relativeBounds.y,
+            width: headerSwitcherNode.runtimeEvidence.relativeBounds.width,
+            height: headerSwitcherNode.runtimeEvidence.relativeBounds.height,
+          } }
+        : {}),
+    },
+    ...headerSwitcherPages.map((page, index) =>
+      React.createElement('adw-view-switcher-page', {
+        key: page.id,
+        name: (page as { name?: string }).name ?? page.id,
+        title: plainText(String(page.title || `Page ${index + 1}`)),
+        'icon-name': page.iconName,
+      })),
+  ) : null;
+
+  const isAppCompositeRow = node.type === 'action-row' && (node.children?.length ?? 0) > 0 &&
+    typeof node.sourceClass === 'string' && !/^(Adw|Gtk)[.A-Z]/.test(node.sourceClass);
+  const hasAppCompositeRow = node.type === 'preferences-group' && node.children?.some((child) =>
+    child.type === 'action-row' && typeof child.sourceClass === 'string' && !/^(Adw|Gtk)[.A-Z]/.test(child.sourceClass));
+  const hasNonPreferenceRow = node.type === 'preferences-group' && node.children?.some((child) =>
+    !['action-row', 'switch-row', 'combo-row', 'spin-row', 'button-row', 'entry-row', 'password-row', 'expander-row'].includes(child.type));
+  const isExpandedPreferenceComposite = isAppCompositeRow || hasAppCompositeRow || hasNonPreferenceRow;
 
   // adw-menu-button is icon-only; a labelled MenuButton renders as a button.
-  const tag = isDialogRoot
+  const isGtkSpinButton = node.type === 'entry' && /Gtk[.]?SpinButton$/.test(node.sourceClass ?? '');
+  // adwaita-web's tab-view draws its own tab strip. Native AdwTabBar autohides
+  // that strip for a lone page, so let the separately modelled TabBar provide
+  // chrome and render a single page as transparent layout containers.
+  const isSinglePageTabView = node.type === 'tab-view' && (node.children?.length ?? 0) <= 1;
+  const isSingleTabPage = node.type === 'tab-page' && parentNode?.type === 'tab-view' &&
+    (parentNode.children?.length ?? 0) <= 1;
+  const tag = isGtkSpinButton
+    ? 'div'
+    : isDialogRoot
     ? 'adw-window'
-    : node.type === 'navigation-view' || node.type === 'overlay-split' || previewSwitcherStack
+    : node.type === 'navigation-view' || node.type === 'overlay-split' || isExpandedPreferenceComposite ||
+        isSinglePageTabView || isSingleTabPage
       ? 'div'
       : node.type === 'menu-button' && node.title
         ? 'adw-button'
@@ -538,7 +635,6 @@ export const AdwaitaRenderer: React.FC<Props> = ({
   const effectiveScheme = forcedColorScheme ?? doc.colorScheme;
   const themeClass = isRoot && effectiveScheme !== 'auto'
     ? `theme-${effectiveScheme}` : '';
-  if (themeClass) attrs['class'] = themeClass;
 
   // GtkStack, AdwViewStack, and AdwNavigationView show exactly one child.
   // The visible child is the named one when declared (matched by page name,
@@ -546,11 +642,11 @@ export const AdwaitaRenderer: React.FC<Props> = ({
   // NavigationView starts on its root page).
   const showsOneChild = node.type === 'stack' || node.type === 'view-stack' || node.type === 'navigation-view';
   const visibleChildren = showsOneChild && node.children?.length
-    ? [node.children.find((child) => typeof node.visibleChildName === 'string' &&
-        (child.id === node.visibleChildName || child.title === node.visibleChildName || (child as { name?: unknown }).name === node.visibleChildName)) ?? node.children[0]]
+    ? [visibleStackChild(node, node.visibleChildName)].filter((child): child is AdwNode => Boolean(child))
     : node.children;
 
-  const childDialogAncestor = dialogAncestor || DIALOG_TYPES.has(node.type);
+  const childDialogAncestor = dialogAncestor || DIALOG_TYPES.has(node.type) ||
+    (node.type === 'window' && node.modal === true);
   const childSurfaceTitle =
     (node.type === 'window' || DIALOG_TYPES.has(node.type)) && node.title
       ? node.title
@@ -566,11 +662,15 @@ export const AdwaitaRenderer: React.FC<Props> = ({
   }));
   const collapsedSplit = node.type === 'overlay-split' && node.collapsed === true;
   const renderedSlotted = slottedChildren
-    .filter(({ slot }) => !(collapsedSplit && slot === 'sidebar'));
+    .filter(({ child, slot }) => !(collapsedSplit && slot === 'sidebar') && child !== headerSwitcherNode);
   const children = renderedSlotted
-    .map(({ child, slot }) => (
+    .map(({ child, slot }, index) => (
     <AdwaitaRenderer
-      key={child.id}
+      // GtkBuilder IDs are scoped to a template, so expanding several
+      // templates can legitimately put repeated IDs under one projected
+      // parent. Keep the source ID for editing, but include structural
+      // position in React identity so siblings are never omitted/duplicated.
+      key={`${child.id}:${index}`}
       node={child}
       screenId={screenId}
       inheritedSlot={slot}
@@ -622,28 +722,20 @@ export const AdwaitaRenderer: React.FC<Props> = ({
   }
 
   // Preview-mode ViewSwitcher tab strip (see previewSwitcherStack above).
-  const previewSwitcherTabs = previewSwitcherStack ? (() => {
+  const previewSwitcherTabs = switcherStack ? (() => {
     const visibleName =
-      overrides?.[previewSwitcherStack.id]?.visibleChildName ?? previewSwitcherStack.visibleChildName;
-    const active = visibleStackChild(previewSwitcherStack, visibleName);
-    const pages = (previewSwitcherStack.children ?? []).filter((page) => page.visible !== false);
-    return pages.length ? (
-      <div key="preview-switcher" className="protota-preview-switcher" role="tablist">
-        {pages.map((page, index) => (
-          <button
-            key={page.id}
-            type="button"
-            role="tab"
-            aria-selected={page === active}
-            data-preview-page={page.id}
-            data-preview-stack={previewSwitcherStack.id}
-            className={`protota-preview-switcher-tab${page === active ? ' active' : ''}`}
-          >
-            {plainText(String(page.title || `Page ${index + 1}`))}
-          </button>
-        ))}
-      </div>
-    ) : null;
+      overrides?.[switcherStack.id]?.visibleChildName ?? switcherStack.visibleChildName;
+    const active = visibleStackChild(switcherStack, visibleName);
+    const pages = (switcherStack.children ?? []).filter((page) => page.visible !== false);
+    return pages.length ? pages.map((page, index) => React.createElement('adw-view-switcher-page', {
+      key: page.id,
+      name: (page as { name?: string }).name ?? page.id,
+      title: plainText(String(page.title || `Page ${index + 1}`)),
+      'icon-name': page.iconName,
+      'data-preview-page': page.id,
+      'data-preview-stack': switcherStack.id,
+      ...(page === active ? { active: '' } : {}),
+    })) : null;
   })() : null;
 
   const iconPrefix = node.type === 'action-row' && node.iconName ? (
@@ -656,18 +748,31 @@ export const AdwaitaRenderer: React.FC<Props> = ({
 
   // A Gtk.Image imports as a bin carrying its declared icon-name; drawing
   // that icon is source-grounded (the go-next chevron on a font row).
-  const binIcon = node.type === 'bin' && node.iconName ? (
+  const isFolderPaintable = node.type === 'bin' && node.iconName?.replace(/-symbolic$/, '') === 'folder' &&
+    /Gtk[.]?Frame$/.test(parentNode?.sourceClass ?? '');
+  const binIcon = node.type === 'bin' && node.iconName && !isFolderPaintable ? (
     <span
       aria-hidden="true"
       className={`adw-icon adw-icon--${node.iconName.replace(/-symbolic$/, '')}`}
     />
+  ) : null;
+  const runtimePicture = node.type === 'bin' && ((/Gtk[.]?Picture$/.test(node.sourceClass ?? '') &&
+    /GridCell$/.test(parentNode?.sourceClass ?? '') && !node.iconName) || isFolderPaintable) ? (
+    <span aria-hidden="true" className="protota-runtime-picture" />
+  ) : null;
+  const gtkSpinButton = isGtkSpinButton ? (
+    <>
+      <button aria-hidden="true" tabIndex={-1}>+</button>
+      <span>{plainText(String(node.value ?? node.text ?? 0))}</span>
+      <button aria-hidden="true" tabIndex={-1}>−</button>
+    </>
   ) : null;
 
   // Div-only types get Adwaita-styled classes for layout/structure.
   // A custom-widget with projected children is a resolved composite: render it
   // as a plain container, not a striped unresolved boundary.
   const isExpandedBoundary = node.type === 'custom-widget' && (node.children?.length ?? 0) > 0;
-  const divClass = DIV_TYPES.has(node.type)
+  const divClass = DIV_TYPES.has(node.type) || isExpandedPreferenceComposite
     ? isExpandedBoundary ? 'protota-div-custom-widget-expanded' : `protota-div-${node.type}`
     : '';
   // GTK style classes the source declared. Adwaita defines several that
@@ -681,7 +786,10 @@ export const AdwaitaRenderer: React.FC<Props> = ({
   const diagnosticClass = diagnosticTier && !isSelected
     ? `protota-diag-outline-${diagnosticTier}`
     : '';
-  const elementClass = [divClass, styleClasses, diagnosticClass].filter(Boolean).join(' ');
+  // The theme scope belongs in the same class list: React's `className` wins
+  // over any `class` attribute, so a root that also carries GTK style classes
+  // (Nautilus' window declares `view`) would otherwise lose its theme.
+  const elementClass = [isGtkSpinButton ? 'protota-gtk-spin-button' : '', themeClass, divClass, styleClasses, diagnosticClass].filter(Boolean).join(' ');
 
   // Several adw-* custom elements ADOPT their light-DOM children on connect:
   // adw-toolbar-view, adw-header-bar, and adw-toast-overlay snapshot the
@@ -703,11 +811,16 @@ export const AdwaitaRenderer: React.FC<Props> = ({
   return (
     <div
       ref={wrapperRef}
-      slot={node.slot ?? inheritedSlot}
+      slot={inheritedSlot ?? node.slot}
       className={`adw-node-wrapper${isSelected ? ' selected-outline' : ''}${isMultiSelected ? ' multi-selected-outline' : ''}`}
       style={{
+        // Normal wrappers are layout-transparent, but a handful of
+        // single-child container rules materialise them as flex conduits.
+        // Applying native absolute placement here as well as on the widget
+        // doubles every offset in those containers (a -1671px Week scroll
+        // position became -3342px). Placement belongs to the rendered
+        // widget; only selection chrome needs its own positioned anchor.
         ...(isSelected || isMultiSelected ? { position: 'relative' } : {}),
-        ...placementLayout(node, parentFlow),
       }}
     >
       {isSelected && (
@@ -723,6 +836,7 @@ export const AdwaitaRenderer: React.FC<Props> = ({
         // the node's real box (the wrapper is display: contents), so drop
         // resolution and the insertion indicator both key off this attribute.
         'data-node-id': node.id,
+        ...(node.sourceClass ? { 'data-protota-source-class': node.sourceClass } : {}),
         ...(nodeDiagnostics.length > 1 && !isSelected
           ? { 'data-protota-diag-count': String(nodeDiagnostics.length) }
           : {}),
@@ -746,13 +860,16 @@ export const AdwaitaRenderer: React.FC<Props> = ({
         // layout-transparent (display: contents): the element itself is the
         // flex/grid item its parent lays out, so GTK expand and attach
         // semantics propagate instead of stopping at each wrapper.
-        style: { ...containerLayout(node), ...placementLayout(node, parentFlow), ...rootSizeStyle },
+        style: { ...containerLayout(node), ...placementLayout(node, parentFlow), ...rootSizeStyle, ...splitPaneStyle, ...labelTextStyle },
         className: elementClass || undefined,
       },
         iconPrefix,
         binIcon,
+        runtimePicture,
+        gtkSpinButton,
         tabBarTabs,
         previewSwitcherTabs,
+        directHeaderSwitcher,
         ...(children ?? []),
         windowControls,
         // For label/inscription — render text content

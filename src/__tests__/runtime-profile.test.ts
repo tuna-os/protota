@@ -2,7 +2,8 @@ import { describe, expect, it } from 'vitest';
 import { blueprintToNode } from '../utils/blueprint';
 import { boundaryGeometryConfidence } from '../utils/nodeGeometry';
 import {
-  matchRuntimeProfile, nativeFactsFor, type ProbeDocument, type ProbeWidget,
+  applyRuntimeSemantics, matchRuntimeProfile, nativeFactsFor, projectRuntimeBranches,
+  type ProbeDocument, type ProbeWidget,
 } from '../utils/runtimeProfile';
 
 /** Minimal probe widget with defaults, so fixtures state only what matters. */
@@ -110,6 +111,61 @@ describe('runtime profile matching (#58)', () => {
     expect(report.matches).toEqual([]);
   });
 
+  it('matches a presented composite dialog below the application toplevel', () => {
+    const dialogRoot = {
+      id: 'dialog', type: 'dialog', sourceClass: 'ExampleSetupDialog', children: [],
+    } as ReturnType<typeof blueprintToNode>;
+    const report = matchRuntimeProfile(probe([
+      widget({ gtype: 'ExampleWindow', indexPath: [0], buildableId: 'window' }),
+      widget({ gtype: 'AdwDialogHost', indexPath: [0, 0] }),
+      widget({ gtype: 'ExampleSetupDialog', indexPath: [0, 0, 1], buildableId: 'ExampleSetupDialog' }),
+    ]), dialogRoot);
+
+    expect(report.matches[0]).toMatchObject({
+      nodeId: 'dialog',
+      gtype: 'ExampleSetupDialog',
+      indexPath: [0, 0, 1],
+    });
+  });
+
+  it('prefers the mapped occurrence of a template-scoped duplicate id', () => {
+    const root = blueprintToNode('Adw.ApplicationWindow window { Gtk.Button action { label: "Go"; } }');
+    const report = matchRuntimeProfile(probe([
+      widget({ gtype: 'AdwApplicationWindow', indexPath: [0], buildableId: 'window' }),
+      widget({ gtype: 'GtkButton', indexPath: [0, 0], buildableId: 'action', mapped: false }),
+      widget({ gtype: 'GtkButton', indexPath: [0, 1], buildableId: 'action', mapped: true }),
+    ]), root);
+
+    expect(report.matches.find((match) => match.nodeId === 'action')).toMatchObject({
+      mapped: true,
+      indexPath: [0, 1],
+    });
+  });
+
+  it('applies settled entry text and combo selection from the runtime', () => {
+    const root = blueprintToNode(`
+      Adw.ApplicationWindow window {
+        Gtk.Box controls {
+          Gtk.Entry time { text: "0"; }
+          Adw.ComboRow duration { title: "Duration"; }
+        }
+      }
+    `);
+    const runtime = probe([
+      widget({ gtype: 'AdwApplicationWindow', indexPath: [0], buildableId: 'window' }),
+      widget({ gtype: 'GtkBox', indexPath: [0, 0], buildableId: 'controls' }),
+      widget({ gtype: 'GtkEntry', indexPath: [0, 0, 0], buildableId: 'time', properties: { text: '16' } }),
+      widget({ gtype: 'AdwComboRow', indexPath: [0, 0, 1], buildableId: 'duration', properties: { title: 'Duration', selected: 2 } }),
+      widget({ gtype: 'GtkLabel', indexPath: [0, 0, 1, 0], properties: { label: '10 minutes' } }),
+    ]);
+    const report = matchRuntimeProfile(runtime, root);
+
+    expect(applyRuntimeSemantics(root, report, runtime, ['controls'])).toEqual(expect.arrayContaining(['time', 'duration']));
+    expect(root.children?.[0].children?.[0].value).toBe('16');
+    expect(root.children?.[0].children?.[1].selectedIndex).toBe(2);
+    expect(root.children?.[0].children?.[1].options).toEqual(['', '', '10 minutes']);
+  });
+
   it('emits native:* facts at the top native confidence tier', () => {
     const facts = nativeFactsFor(widget({
       gtype: 'MathButtons', indexPath: [0, 2],
@@ -169,5 +225,43 @@ describe('runtime profile matching (#58)', () => {
     expect(facts).toEqual(expect.arrayContaining([
       { property: 'mapped', value: false, origin: 'native:mapped', confidence: 'native' },
     ]));
+  });
+
+  it('preserves runtime application composites and wraps projected tab content', () => {
+    const root = blueprintToNode(`
+      Adw.ApplicationWindow window {
+        Adw.TabView pages { }
+      }
+    `);
+    const runtime = probe([
+      widget({ gtype: 'AdwApplicationWindow', indexPath: [0], buildableId: 'window' }),
+      widget({ gtype: 'AdwTabView', indexPath: [0, 0], buildableId: 'pages' }),
+      widget({ gtype: 'ExampleGridCell', indexPath: [0, 0, 0] }),
+      widget({ gtype: 'GtkPicture', indexPath: [0, 0, 0, 0] }),
+      widget({
+        gtype: 'GtkImage', indexPath: [0, 0, 0, 1],
+        properties: { gicon: '. GThemedIcon user-home-symbolic user-symbolic user-home user' },
+      }),
+    ]);
+    const report = matchRuntimeProfile(runtime, root);
+
+    projectRuntimeBranches(root, report, runtime, ['pages']);
+
+    const page = root.children?.[0].children?.[0];
+    expect(page?.type).toBe('tab-page');
+    expect(page?.children?.[0]).toMatchObject({
+      type: 'custom-widget',
+      sourceClass: 'ExampleGridCell',
+      runtimeProjectionHost: true,
+    });
+    expect(page?.children?.[0].children?.[0]).toMatchObject({
+      type: 'bin',
+      sourceClass: 'GtkPicture',
+    });
+    expect(page?.children?.[0].children?.[1]).toMatchObject({
+      type: 'bin',
+      sourceClass: 'GtkImage',
+      iconName: 'user-home-symbolic',
+    });
   });
 });

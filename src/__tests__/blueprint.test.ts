@@ -182,7 +182,7 @@ describe('Blueprint import', () => {
         Gtk.Entry field {
           GestureClick { button: 0; }
           ShortcutController { Shortcut { trigger: "Menu"; } }
-
+          Adw.EnumListModel choices {}
         }
         Gtk.Button after { label: "OK"; }
       }
@@ -190,6 +190,53 @@ describe('Blueprint import', () => {
     expect(roots[0].children?.map(child => child.id)).toEqual(['field', 'after']);
     expect(roots[0].children?.[0].children).toEqual([]);
     expect(diagnostics).toEqual([]);
+  });
+
+  it('filters GtkBuilder model objects regardless of their concrete model class', () => {
+    const doc = blueprintBundleToDocument([
+      { path: 'window.ui', content: `<interface>
+        <object class="GtkBox" id="shell">
+          <child><object class="GtkLabel" id="title"><property name="label">Visible</property></object></child>
+          <child><object class="AdwEnumListModel" id="choices"/></child>
+          <child><object class="GtkFilterListModel" id="filtered"/></child>
+          <child><object class="GtkColumnViewColumn" id="column"/></child>
+          <child><object class="GtkFileDialog" id="picker"/></child>
+          <child><object class="AdwToast" id="toast"/></child>
+        </object>
+      </interface>` },
+    ], 'window.ui');
+    expect(doc.screens[0].rootNode.children?.map(child => child.id)).toEqual(['title']);
+    expect(doc.importDiagnostics).toEqual([]);
+  });
+
+  it('maps GtkPasswordEntry as an entry instead of an app boundary', () => {
+    const doc = blueprintBundleToDocument([
+      { path: 'unlock.ui', content: `<interface>
+        <object class="GtkPasswordEntry" id="password">
+          <property name="placeholder-text">Password</property>
+        </object>
+      </interface>` },
+    ], 'unlock.ui');
+    expect(doc.screens[0].rootNode).toMatchObject({
+      id: 'password', type: 'entry', placeholder: 'Password', sourceClass: 'Gtk.PasswordEntry',
+    });
+    expect(doc.importDiagnostics).toEqual([]);
+  });
+
+  it('maps stock text and information widgets without opaque boundaries', () => {
+    const doc = blueprintBundleToDocument([
+      { path: 'widgets.ui', content: `<interface><object class="GtkBox" id="shell">
+        <child><object class="GtkInfoBar" id="notice"><child><object class="GtkLabel" id="message"><property name="label">Changed</property></object></child></object></child>
+        <child><object class="GtkSourceMap" id="map"/></child>
+        <child><object class="GtkText" id="text"/></child>
+      </object></interface>` },
+    ], 'widgets.ui');
+    expect(doc.screens[0].rootNode.children).toEqual(expect.arrayContaining([
+      expect.objectContaining({ id: 'notice', type: 'box' }),
+      expect.objectContaining({ id: 'map', type: 'entry' }),
+      expect.objectContaining({ id: 'text', type: 'entry' }),
+    ]));
+    expect(doc.importDiagnostics).toEqual([]);
   });
 
   it('maps a can-unfold=false leaflet to a stack, not a split view', () => {
@@ -213,6 +260,24 @@ describe('Blueprint import', () => {
     const nav = doc.screens[0].rootNode;
     expect(nav).toMatchObject({ id: 'nav', type: 'view-stack', sourceClass: 'Adw.Leaflet' });
     expect(nav.children?.map(child => child.type)).toEqual(['stack-page', 'stack-page']);
+  });
+
+  it('preserves GtkOverlay as layered layout through import and export', () => {
+    const doc = blueprintBundleToDocument([
+      { path: 'overlay.ui', content: `<interface><object class="GtkOverlay" id="overlay">
+        <property name="child"><object class="GtkLabel" id="base"><property name="label">Base</property></object></property>
+        <child type="overlay"><object class="GtkLabel" id="badge"><property name="label">Badge</property></object></child>
+      </object></interface>` },
+    ], 'overlay.ui');
+    expect(doc.screens[0].rootNode).toMatchObject({ id: 'overlay', type: 'overlay' });
+    expect(doc.screens[0].rootNode.children).toEqual(expect.arrayContaining([
+      expect.objectContaining({ id: 'base', slot: 'child' }),
+      expect.objectContaining({ id: 'badge', slot: 'overlay' }),
+    ]));
+    const exported = mockupToBlueprint(doc);
+    expect(exported).toContain('Gtk.Overlay overlay');
+    expect(exported).toContain('[overlay]');
+    expect(exported).toContain('Gtk.Label badge');
   });
 
   it('keeps an unfoldable leaflet as a split view', () => {
@@ -317,6 +382,21 @@ describe('Blueprint import', () => {
     expect(doc.importDiagnostics).toEqual([]);
   });
 
+  it('retains a GtkBuilder template root concrete class for runtime matching', () => {
+    const doc = blueprintBundleToDocument([
+      { path: 'dialog.ui', content: `<interface>
+        <template class="ExampleSetupDialog" parent="AdwDialog">
+          <child><object class="GtkLabel" id="heading"><property name="label">Setup</property></object></child>
+        </template>
+      </interface>` },
+    ], 'dialog.ui');
+
+    expect(doc.screens[0].rootNode).toMatchObject({
+      type: 'dialog',
+      sourceClass: 'ExampleSetupDialog',
+    });
+  });
+
   it.skipIf(!process.env.OFFICIAL_SOURCE_ROOT)('imports the official Calculator Blueprint bundle without a hand-authored preset', () => {
     const sourceRoot = process.env.OFFICIAL_SOURCE_ROOT!;
     const files = readdirSync(sourceRoot, { recursive: true, withFileTypes: true })
@@ -383,6 +463,20 @@ describe('Blueprint export long tail', () => {
     }));
     expect(exported).toContain('ActionBar bar');
     expect(exported).not.toContain('orientation');
+  });
+
+  it('exports GObject-spelled classes with their Blueprint namespace', () => {
+    // Runtime probes report GType names (`GtkBox`, `AdwHeaderBar`). Blueprint
+    // reads an unqualified name as a Gtk type, so `GtkBox` does not compile.
+    const exported = mockupToBlueprint(screen({
+      id: 'w', type: 'window', children: [
+        { id: 'bar', type: 'header-bar', sourceClass: 'AdwHeaderBar' },
+        { id: 'body', type: 'box', sourceClass: 'GtkBox', orientation: 'vertical' },
+      ],
+    }));
+    expect(exported).toContain('Adw.HeaderBar bar');
+    expect(exported).toContain('Gtk.Box body');
+    expect(exported).not.toMatch(/^\s*(Gtk|Adw)[A-Z]/m);
   });
 
   it('converts C enum constants to Blueprint member idents', () => {

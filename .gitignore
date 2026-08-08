@@ -6,3 +6,6 @@ dist
 .gnome-source*/
 .probe-local/
 artifacts/
+# Playwright test output (regenerated every run)
+playwright-report/
+test-results/

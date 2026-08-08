@@ -396,9 +396,24 @@ export const AdwaitaRenderer: React.FC<Props> = ({
   // the keyed host remount (see hostKey) replaces the element without
   // changing this component's deps, so an effect-applied size would be lost
   // on the fresh element while React-managed style always re-applies.
+  // The screen's size is the surface's size, exactly: it is the window the
+  // user resized, or the native window a capture is being compared against.
+  // A root window carries GTK size requests like any other widget, and
+  // placementLayout turns those into min-width/min-height — which CSS ranks
+  // above width/height, so a source-declared `height-request` would silently
+  // stretch the surface past the requested size (GNOME Calculator's
+  // `height-request: 616` rendering a 460px screen 616px tall). The request
+  // is a minimum for a window free to pick its own size; a screen with a
+  // declared size has already picked one. Pin both bounds so neither the
+  // request nor content overflow can move the surface off that size.
   const rootSizeStyle: React.CSSProperties | undefined =
     (node.type === 'window' || node.type === 'dialog' || isDialogRoot) && screenWidth
-      ? { width: `${screenWidth}px`, ...(screenHeight ? { height: `${screenHeight}px` } : {}) }
+      ? {
+          width: `${screenWidth}px`, minWidth: `${screenWidth}px`, maxWidth: `${screenWidth}px`,
+          ...(screenHeight
+            ? { height: `${screenHeight}px`, minHeight: `${screenHeight}px`, maxHeight: `${screenHeight}px` }
+            : {}),
+        }
       : undefined;
 
   useEffect(() => {

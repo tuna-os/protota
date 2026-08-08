@@ -22,6 +22,11 @@ on:
         required: false
         default: ''
         type: string
+      screen:
+        description: Optional preset screen ID (validated against the app catalog)
+        required: false
+        default: ''
+        type: string
 
 permissions:
   contents: read
@@ -80,7 +85,7 @@ jobs:
         run: npm ci
       - if: steps.select.outputs.enabled == 'true'
         name: Load app catalog entry
-        run: node scripts/broadway-app.mjs "${{ matrix.app }}" >> "$GITHUB_ENV"
+        run: node scripts/broadway-app.mjs "${{ matrix.app }}" "${{ inputs.screen }}" >> "$GITHUB_ENV"
       - if: steps.select.outputs.enabled == 'true'
         name: Clone official declarative UI source
         # Check out the catalog's pinned tag, not the upstream default branch.
@@ -141,7 +146,7 @@ jobs:
         name: Capture native and Protota output
         env:
           BROADWAY_MAX_DIFF_RATIO: ${{ inputs.max_diff_ratio }}
-        run: BROADWAY_URL=http://127.0.0.1:8085/ BROADWAY_PRESET_ID="$BROADWAY_PRESET_ID" BROADWAY_VIEWPORT_WIDTH="$BROADWAY_VIEWPORT_WIDTH" BROADWAY_VIEWPORT_HEIGHT="$BROADWAY_VIEWPORT_HEIGHT" BROADWAY_SOURCE_ROOT="$BROADWAY_SOURCE_ROOT" BROADWAY_SOURCE_ENTRY="$BROADWAY_SOURCE_ENTRY" BROADWAY_PROBE_FILE="$PWD/.probe-local/probe.json" npx playwright test tests/broadway-reference.spec.ts
+        run: BROADWAY_URL=http://127.0.0.1:8085/ BROADWAY_PRESET_ID="$BROADWAY_PRESET_ID" BROADWAY_SCREEN_ID="$BROADWAY_SCREEN_ID" BROADWAY_VIEWPORT_WIDTH="$BROADWAY_VIEWPORT_WIDTH" BROADWAY_VIEWPORT_HEIGHT="$BROADWAY_VIEWPORT_HEIGHT" BROADWAY_SOURCE_ROOT="$BROADWAY_SOURCE_ROOT" BROADWAY_SOURCE_ENTRY="$BROADWAY_SOURCE_ENTRY" BROADWAY_PROBE_FILE="$PWD/.probe-local/probe.json" npx playwright test tests/broadway-reference.spec.ts
       - name: Native runner logs
         # The app can also die between the readiness check and the capture,
         # which reaches Playwright only as ERR_CONNECTION_REFUSED. Its stderr

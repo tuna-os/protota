@@ -35,7 +35,7 @@ export function headerBarFallbackTitle(
   node: AdwNode,
   surfaceTitle: string | undefined,
 ): string | undefined {
-  if (node.type !== 'header-bar' || node.title || !surfaceTitle) return undefined;
+  if (node.type !== 'header-bar' || node.showTitle === false || node.title || !surfaceTitle) return undefined;
   const hasTitleWidget = node.children?.some(
     (child) => child.type === 'window-title' && child.visible !== false,
   );

@@ -32,7 +32,7 @@ export type AppFileMap = Record<string, string>;
 export interface AppDiscoveryResult {
   /** The declarative UI sources, sorted by path. */
   files: BlueprintSourceFile[];
-  /** .vala/.c sources for Phase 4 enrichment, sorted by path. */
+  /** .vala/.c/.py sources for static composite enrichment, sorted by path. */
   codeFiles: BlueprintSourceFile[];
   /** Human-readable description of how the files were selected. */
   discovery: string;
@@ -49,7 +49,7 @@ export interface AppBundleManifest {
 
 /** True when discovery could ever care about this path (cheap ingest filter). */
 export function isDiscoveryRelevantPath(path: string): boolean {
-  return /\.(blp|ui|vala|c)$/.test(path)
+  return /\.(blp|ui|vala|c|py)$/.test(path)
     || path.endsWith('.gresource.xml')
     || path.endsWith('/meson.build')
     || path === 'meson.build';
@@ -132,7 +132,7 @@ export function discoverAppSources(fileMap: AppFileMap): AppDiscoveryResult {
   selected.sort();
   const files = selected.map((path) => ({ path, content: contentOf.get(path)! }));
   const codeFiles = sortedPaths
-    .filter((path) => /\.(vala|c)$/.test(path))
+    .filter((path) => /\.(vala|c|py)$/.test(path))
     .map((path) => ({ path, content: contentOf.get(path)! }));
   return { files, codeFiles, discovery, notes };
 }

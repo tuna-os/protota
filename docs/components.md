@@ -10,7 +10,7 @@ build with, whether from the palette, the agent API, or a Blueprint import.
 - **Properties** — what the inspector and the builder can set.
 - **Accepts** — legal children; generic containers accept any widget.
 
-58 components.
+60 components.
 
 ## `about-dialog`
 
@@ -215,6 +215,13 @@ build with, whether from the palette, the agent API, or a Blueprint import.
 - **Properties:** —
 - **Accepts:** any widget (generic container)
 
+## `overlay`
+
+- **Exports as:** `Gtk.Overlay`
+- **Slots:** `child`, `overlay`
+- **Properties:** —
+- **Accepts:** any widget (generic container)
+
 ## `overlay-split`
 
 - **Exports as:** `Adw.OverlaySplitView`
@@ -347,6 +354,13 @@ build with, whether from the palette, the agent API, or a Blueprint import.
 - **Slots:** `start-action-widget`, `end-action-widget`
 - **Properties:** `view` (string), `autohide` (boolean)
 - **Accepts:** `button`, `menu-button`, `split-button`, `box`
+
+## `tab-page`
+
+- **Exports as:** `—` _(no introspection data)_
+- **Slots:** —
+- **Properties:** —
+- **Accepts:** any widget (generic container)
 
 ## `tab-view`
 

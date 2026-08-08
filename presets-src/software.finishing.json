@@ -1,5 +1,6 @@
 {
   "title": "GNOME Software",
+  "runtimeProbe": true,
   "screen": {
     "title": "Software",
     "width": 1024,
@@ -19,7 +20,7 @@
         "visibleChildName": "main"
       },
       "probeEvidence": {
-        "probeVersion": 1,
+        "probeVersion": 2,
         "buildableId": "stack_loading",
         "expect": {
           "visibleChildName": "main"
@@ -33,7 +34,7 @@
         "visibleChildName": "main"
       },
       "probeEvidence": {
-        "probeVersion": 1,
+        "probeVersion": 2,
         "buildableId": "details_leaflet",
         "expect": {
           "visibleChildName": "main"
@@ -47,7 +48,7 @@
         "visibleChildName": "main"
       },
       "probeEvidence": {
-        "probeVersion": 1,
+        "probeVersion": 2,
         "buildableId": "main_leaflet",
         "expect": {
           "visibleChildName": "main"
@@ -61,7 +62,7 @@
         "visibleChildName": "overview"
       },
       "probeEvidence": {
-        "probeVersion": 1,
+        "probeVersion": 2,
         "buildableId": "stack_main",
         "expect": {
           "visibleChildName": "overview"

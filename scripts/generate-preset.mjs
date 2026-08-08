@@ -40,7 +40,10 @@
 import { readdirSync, readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { blueprintBundleToDocument } from '../src/utils/blueprint.ts';
-import { validateProbeEvidence } from '../src/utils/runtimeProfile.ts';
+import {
+  applyRuntimeEvidence, applyRuntimeSemantics, matchRuntimeProfile,
+  projectRuntimeBranches, validateProbeEvidence,
+} from '../src/utils/runtimeProfile.ts';
 
 const [appId, sourceRoot, defaultEntry] = process.argv.slice(2);
 if (!appId || !sourceRoot || !defaultEntry) {
@@ -87,13 +90,22 @@ const finishing = existsSync(finishingPath) ? JSON.parse(readFileSync(finishingP
 const probePath = new URL(`../presets-src/${appId}.probe.json`, import.meta.url);
 const probeDump = existsSync(probePath) ? JSON.parse(readFileSync(probePath, 'utf8')) : null;
 
-function validateProbeEvidenceEntries(overrides, label) {
+function probeForScreen(spec) {
+  if (!spec.probeFile) return { dump: probeDump, label: `${appId}.probe.json` };
+  const path = new URL(`../presets-src/${spec.probeFile}`, import.meta.url);
+  return {
+    dump: existsSync(path) ? JSON.parse(readFileSync(path, 'utf8')) : null,
+    label: spec.probeFile,
+  };
+}
+
+function validateProbeEvidenceEntries(overrides, label, screenProbeDump) {
   const errors = [];
   let evidenced = 0;
   for (const override of overrides ?? []) {
     if (!override.probeEvidence) continue;
     evidenced++;
-    for (const error of validateProbeEvidence(override.probeEvidence, probeDump)) {
+    for (const error of validateProbeEvidence(override.probeEvidence, screenProbeDump)) {
       errors.push(`${label} / ${override.id}: ${error}`);
     }
   }
@@ -136,7 +148,9 @@ const screens = [];
 let appliedTotal = 0;
 let evidencedTotal = 0;
 let diagnosticsTotal = 0;
+let projectedRuntimeTotal = 0;
 for (const spec of screenSpecs) {
+  const screenProbe = probeForScreen(spec);
   const entry = spec.entry ?? defaultEntry;
   const generated = blueprintBundleToDocument(files, entry, finishing?.title ?? appId);
   const screen = generated.screens[0];
@@ -144,8 +158,37 @@ for (const spec of screenSpecs) {
   if (spec.title) screen.title = spec.title;
   if (spec.width) screen.width = spec.width;
   if (spec.height) screen.height = spec.height;
-  evidencedTotal += validateProbeEvidenceEntries(spec.overrides, screen.id);
+  evidencedTotal += validateProbeEvidenceEntries(spec.overrides, screen.id, screenProbe.dump);
   appliedTotal += applyOverrides(screen, spec.overrides, screen.id);
+  // Runtime-generated stock widgets (for example Settings' category rows)
+  // do not exist in the declarative bundle. An explicitly opted-in screen
+  // consumes the committed semantic probe: source widgets are matched first,
+  // then only unmatched mapped branches are projected into that source tree.
+  const fullRuntimeProbe = (spec.runtimeProbe ?? finishing?.runtimeProbe) === true;
+  const semanticRoots = Array.isArray(spec.runtimeSemanticRoots) ? spec.runtimeSemanticRoots : [];
+  const projectionRoots = Array.isArray(spec.runtimeProjectionRoots) ? spec.runtimeProjectionRoots : [];
+  if (fullRuntimeProbe || semanticRoots.length || projectionRoots.length) {
+    if (!screenProbe.dump) {
+      console.error(`${screen.id}: runtimeProbe is enabled but presets-src/${screenProbe.label} is missing`);
+      process.exit(1);
+    }
+    const runtimeReport = matchRuntimeProfile(screenProbe.dump, screen.rootNode);
+    if (fullRuntimeProbe) {
+      const applied = applyRuntimeEvidence(screen.rootNode, runtimeReport, screenProbe.dump);
+      projectedRuntimeTotal += applied.projected.length;
+    } else {
+      if (semanticRoots.length) applyRuntimeSemantics(screen.rootNode, runtimeReport, screenProbe.dump, semanticRoots);
+      if (projectionRoots.length) {
+        projectedRuntimeTotal += projectRuntimeBranches(
+          screen.rootNode, runtimeReport, screenProbe.dump, projectionRoots,
+        ).length;
+      }
+    }
+    if (runtimeReport.matchRate < 0.5) {
+      console.error(`${screen.id}: runtime probe matched only ${(runtimeReport.matchRate * 100).toFixed(1)}% of source widgets; refusing an unreliable projection`);
+      process.exit(1);
+    }
+  }
   diagnosticsTotal += generated.importDiagnostics?.length ?? 0;
   screens.push(screen);
 }
@@ -189,4 +232,4 @@ writeFileSync(outputPath, JSON.stringify({
   // Source-grounded: never a similar-looking substitute for missing art.
   sourceIcons: sourceIconAssets,
 }, null, 2) + '\n');
-console.error(`Wrote public/presets/${appId}.mockup.json — ${screens.length} screen(s), ${document.edges.length} edge(s), ${appliedTotal} finishing overrides (${evidencedTotal} probe-evidenced), ${diagnosticsTotal} import diagnostics`);
+console.error(`Wrote public/presets/${appId}.mockup.json — ${screens.length} screen(s), ${document.edges.length} edge(s), ${appliedTotal} finishing overrides (${evidencedTotal} probe-evidenced), ${projectedRuntimeTotal} runtime widgets, ${diagnosticsTotal} import diagnostics`);

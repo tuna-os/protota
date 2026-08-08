@@ -133,7 +133,11 @@ export const ImportAppDialog: React.FC<Props> = ({ isOpen, onClose }) => {
   const handleImport = () => {
     if (!ingested || !entry) return;
     try {
-      const doc = blueprintBundleToDocument(ingested.discovery.files, entry, ingested.suggestedTitle);
+      // Language adapters need the implementation files as well as the
+      // declarative UI bundle. Discovery deliberately reports them
+      // separately for the manifest, but import must consume both.
+      const sourceBundle = [...ingested.discovery.files, ...ingested.discovery.codeFiles];
+      const doc = blueprintBundleToDocument(sourceBundle, entry, ingested.suggestedTitle);
       doc.colorScheme = doc.colorScheme || 'auto';
       // Same confirmation/undo semantics as the preset gallery: persist and
       // reload; Undo (Ctrl+Z) restores the previous document.
@@ -260,6 +264,11 @@ export const ImportAppDialog: React.FC<Props> = ({ isOpen, onClose }) => {
                 </li>
               ))}
             </ul>
+            {ingested.discovery.codeFiles.length > 0 && (
+              <div data-testid="import-app-code-files" style={{ marginTop: '6px', opacity: 0.75 }}>
+                Code adapters: {ingested.discovery.codeFiles.map(file => file.path).join(', ')}
+              </div>
+            )}
 
             <div style={{ fontWeight: 600, margin: '10px 0 4px' }}>Entry file</div>
             {manifest.entryCandidates.length === 0 && (

@@ -91,7 +91,7 @@ const openPresetGallery = async (page: import('@playwright/test').Page) => {
         if (payload.sourceIcons) {
           localStorage.setItem('protota_source_icons_v1', JSON.stringify(payload.sourceIcons));
         }
-        return { screens: payload.document.screens.length };
+        return { screenIds: payload.document.screens.map((screen: { id: string }) => screen.id) };
       }, presetId);
       await page.reload();
       // Published once fonts, runtime icon CSS and custom-element upgrades
@@ -103,13 +103,28 @@ const openPresetGallery = async (page: import('@playwright/test').Page) => {
       // count is a ceiling rather than an equality.
       const surfaces = page.locator('[data-protota-render-surface="true"]');
       expect(await surfaces.count()).toBeGreaterThan(0);
-      expect(await surfaces.count()).toBeLessThanOrEqual(expected.screens);
+      expect(await surfaces.count()).toBeLessThanOrEqual(expected.screenIds.length);
       await expect(surfaces.first()).toBeVisible();
 
       // A window that rendered nothing would still satisfy a count, so require
       // real widgets inside the first screen.
       const widgets = surfaces.first().locator('[data-protota-type]');
       expect(await widgets.count()).toBeGreaterThan(3);
+
+      // Exercise every screen through the same stable URL used by exports and
+      // screenshot tooling. Loading all screens into the editor at once only
+      // proved that the first window painted; blank secondary modes and
+      // dialogs could otherwise ship unnoticed.
+      for (const screenId of expected.screenIds) {
+        await page.goto(`/?render=1&preset=${presetId}&screen=${encodeURIComponent(screenId)}`);
+        await page.waitForSelector('html[data-protota-ready]', { timeout: 15000 });
+        const rendered = page.locator('[data-protota-render-surface="true"]');
+        await expect(rendered, `${presetId}/${screenId} must expose a render surface`).toBeVisible();
+        expect(
+          await rendered.locator('[data-protota-type]').count(),
+          `${presetId}/${screenId} must render more than an empty window shell`,
+        ).toBeGreaterThan(3);
+      }
     });
   }
 });

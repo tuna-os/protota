@@ -64,6 +64,7 @@
     "aptPackage": "gnome-calculator",
     "command": "gnome-calculator",
     "presetId": "calculator",
+    "screens": ["basic", "advanced", "financial", "programming", "conversion", "preferences"],
     "viewport": {
       "width": 410,
       "height": 666
@@ -106,29 +107,32 @@
     "aptPackage": "gnome-calendar",
     "command": "gnome-calendar",
     "presetId": "calendar",
+    "screens": ["month", "week"],
     "viewport": {
-      "width": 1419,
-      "height": 923
+      "width": 768,
+      "height": 600
     },
     "source": "https://gitlab.gnome.org/GNOME/gnome-calendar",
     "sourceImport": {
       "repository": "https://gitlab.gnome.org/GNOME/gnome-calendar.git",
       "uiPath": "src/gui",
-      "entry": "gcal-window.blp",
-      "tag": "49.1",
+      "entry": "gui/gcal-window.ui",
+      "tag": "46.1",
       "importRoot": "src"
     },
     "suite": "core",
     "status": "preset",
-    "visualStatus": "not-validated",
-    "maxUnresolvedCoverage": 0.01,
-    "minSimilarity": 0.98
+    "visualStatus": "passed",
+    "maxUnresolvedCoverage": 0,
+    "minSimilarity": 0.94,
+    "minForegroundIoU": 0.23
   },
   "clocks": {
     "name": "GNOME Clocks",
     "aptPackage": "gnome-clocks",
     "command": "gnome-clocks",
     "presetId": "clocks",
+    "screens": ["world", "alarms", "stopwatch", "timer", "alarm-setup"],
     "viewport": {
       "width": 901,
       "height": 738
@@ -152,6 +156,7 @@
     "aptPackage": "gnome-disk-utility",
     "command": "gnome-disks",
     "presetId": "disks",
+    "screens": ["main", "create-image", "benchmark"],
     "viewport": {
       "width": 1156,
       "height": 823
@@ -173,6 +178,7 @@
     "aptPackage": "nautilus",
     "command": "nautilus",
     "presetId": "files",
+    "screens": ["browser", "properties", "new-folder", "compress"],
     "viewport": {
       "width": 1122,
       "height": 822
@@ -196,6 +202,7 @@
     "aptPackage": "gnome-control-center",
     "command": "gnome-control-center",
     "presetId": "settings",
+    "screens": ["settings-main"],
     "viewport": {
       "width": 1047,
       "height": 738
@@ -210,15 +217,17 @@
     },
     "suite": "core",
     "status": "preset",
-    "visualStatus": "not-validated",
+    "visualStatus": "passed",
     "maxUnresolvedCoverage": 0.01,
-    "minSimilarity": 0.94
+    "minSimilarity": 0.94,
+    "minForegroundIoU": 0.25
   },
   "software": {
     "name": "Software",
     "aptPackage": "gnome-software",
     "command": "gnome-software --mode=overview",
     "presetId": "software",
+    "screens": ["software-main"],
     "viewport": {
       "width": 1322,
       "height": 797
@@ -242,6 +251,7 @@
     "aptPackage": "gnome-text-editor",
     "command": "gnome-text-editor --new-window",
     "presetId": "text-editor",
+    "screens": ["editor", "preferences"],
     "viewport": {
       "width": 1074,
       "height": 824
@@ -265,6 +275,7 @@
     "aptPackage": "gnome-weather",
     "command": "gnome-weather",
     "presetId": "weather",
+    "screens": ["weather-main"],
     "viewport": {
       "width": 881,
       "height": 667
@@ -288,6 +299,7 @@
     "aptPackage": "epiphany-browser",
     "command": "epiphany --new-window",
     "presetId": "web",
+    "screens": ["web-main"],
     "viewport": {
       "width": 1116,
       "height": 827

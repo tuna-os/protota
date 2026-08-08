@@ -12,20 +12,20 @@ export interface PresetMeta {
   description: string;
   screens: number;
   sourceImportPending?: boolean;
-  /** Present for live source imports: official Blueprint/GtkBuilder bundle. */
+  /** Use live browser import when it is richer than the shipped preset artifact. */
   sourcePackage?: string;
 }
 
 export const PRESET_CATALOG: PresetMeta[] = [
-  { id: 'amberol', name: 'Amberol', description: 'GNOME Circle music player, imported from its official Blueprint source bundle.', screens: 1, sourcePackage: 'source-imports/amberol.source.json' },
-  { id: 'apostrophe', name: 'Apostrophe', description: 'GNOME Circle Markdown editor, imported from its official GtkBuilder source bundle.', screens: 1, sourcePackage: 'source-imports/apostrophe.source.json' },
-  { id: 'authenticator', name: 'Authenticator', description: 'GNOME Circle 2FA code manager, imported from its official GtkBuilder source bundle.', screens: 1, sourcePackage: 'source-imports/authenticator.source.json' },
-  { id: 'decoder', name: 'Decoder', description: 'GNOME Circle QR scanner and generator, imported from its official GtkBuilder source bundle.', screens: 1, sourcePackage: 'source-imports/decoder.source.json' },
+  { id: 'amberol', name: 'Amberol', description: 'GNOME Circle music player, generated from its official Blueprint source.', screens: 1 },
+  { id: 'apostrophe', name: 'Apostrophe', description: 'GNOME Circle Markdown editor, imported from its official GtkBuilder source.', screens: 1, sourcePackage: 'source-imports/apostrophe.source.json' },
+  { id: 'authenticator', name: 'Authenticator', description: 'GNOME Circle 2FA code manager, imported from its official GtkBuilder source.', screens: 1, sourcePackage: 'source-imports/authenticator.source.json' },
+  { id: 'decoder', name: 'Decoder', description: 'GNOME Circle QR scanner and generator, imported from its official GtkBuilder source.', screens: 1, sourcePackage: 'source-imports/decoder.source.json' },
   { id: 'text-editor', name: 'GNOME Text Editor', description: 'Document editor with header bar, save/open buttons, and content area.', screens: 1 },
-  { id: 'settings', name: 'GNOME Settings', description: 'Navigation split view with panel sidebar, imported from its official GtkBuilder source bundle — collapses below its 550sp Adw.Breakpoint.', screens: 1, sourcePackage: 'source-imports/settings.source.json' },
+  { id: 'settings', name: 'GNOME Settings', description: 'Navigation split view generated from its official Blueprint source — collapses below its 550sp Adw.Breakpoint.', screens: 1 },
   { id: 'calculator', name: 'GNOME Calculator', description: 'Button grid calculator with display and arithmetic operations.', screens: 1 },
   { id: 'files', name: 'GNOME Files (Nautilus)', description: 'Sidebar + content layout with bookmarks, search, and file grid.', screens: 1 },
-  { id: 'calendar', name: 'GNOME Calendar', description: 'Event list with header bar, today/prev/next navigation, and new event button.', screens: 1 },
+  { id: 'calendar', name: 'GNOME Calendar', description: 'Month and week views reconstructed from version-matched source and native runtime state.', screens: 2 },
   { id: 'weather', name: 'GNOME Weather', description: 'City forecast view with status header and 7-day temperature trends.', screens: 1 },
   { id: 'clocks', name: 'GNOME Clocks', description: 'World clocks, alarms, stopwatch, and timers with ViewSwitcher tabs.', screens: 1 },
   { id: 'disks', name: 'GNOME Disks', description: 'Disk partition utility with drive list sidebar and volume allocation.', screens: 1 },
@@ -41,10 +41,9 @@ export interface LoadedPreset {
 }
 
 /**
- * Load a preset document by id. Catalog entries with a source package go
- * through the live Blueprint/GtkBuilder import (the same pipeline the
- * gallery uses); every other id resolves to `public/presets/<id>.mockup.json`
- * — which also covers generated presets not surfaced in the gallery.
+ * Load the best available artifact for a gallery preset. Enriched generated
+ * presets win when available; selected legacy entries still use live source
+ * import when that is richer than their stale manual mockup artifact.
  * Unknown ids reject with an actionable error; callers must surface it, not
  * fall back.
  */

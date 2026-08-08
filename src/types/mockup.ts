@@ -22,6 +22,7 @@ export type AdwNodeType =
   | 'view-switcher'    // AdwViewSwitcher — flat tab switcher (3-5 tabs)
   | 'navigation-view'  // AdwNavigationView — push/pop navigation
   | 'tab-view'         // AdwTabView — multi-document tab pages
+  | 'tab-page'         // AdwTabPage — page metadata/content owned by TabView
   | 'tab-bar'          // AdwTabBar — tab strip bound to a TabView
   | 'overlay-split'    // AdwOverlaySplitView — sidebar + content
 
@@ -35,6 +36,7 @@ export type AdwNodeType =
   | 'stack'            // GtkStack — visible page container
   | 'stack-page'       // GtkStackPage — named stack child
   | 'scrolled-window'  // GtkScrolledWindow — viewport with overflow
+  | 'overlay'          // GtkOverlay — base child with stacked overlay children
 
   // Preferences rows (boxed-list children)
   | 'action-row'       // AdwActionRow — title + subtitle + prefix/suffix
@@ -125,11 +127,16 @@ export interface AdwNode {
   imageId?: string;
   placeholder?: string;
   value?: string;
+  /** GtkLabel horizontal text alignment, 0=start, .5=center, 1=end. */
+  xalign?: number;
+  justify?: string;
   // Buttons
   suggested?: boolean;
   destructive?: boolean;
   flat?: boolean;
   circular?: boolean;
+  /** GTK sensitive=false: widget remains visible but cannot be activated. */
+  sensitive?: boolean;
   // Rows
   activatable?: boolean;
   // Switch row
@@ -196,7 +203,11 @@ export interface AdwNode {
     mapped: boolean;
     visible: boolean;
     bounds: { x: number; y: number; width: number; height: number } | null;
+    /** Allocation relative to the projected runtime parent, for snapshot layout. */
+    relativeBounds?: { x: number; y: number; width: number; height: number } | null;
   };
+  /** Source node that anchors absolutely allocated runtime-only descendants. */
+  runtimeProjectionHost?: boolean;
   /** GTK visibility. `false` renders nothing, exactly like a hidden widget. */
   visible?: boolean;
   /**
@@ -284,6 +295,7 @@ export const LEGAL_SLOTS: Partial<Record<AdwNodeType, string[]>> = {
   bin: ['child'],
   clamp: ['child'],
   'scrolled-window': ['child'],
+  overlay: ['child', 'overlay'],
   'toast-overlay': ['child'],
   'menu-button': ['popover', 'child'],
   'split-button': ['popover'],
@@ -300,9 +312,9 @@ export const LEGAL_SLOTS: Partial<Record<AdwNodeType, string[]>> = {
  */
 const CONTAINER_CHILDREN: AdwNodeType[] = [
   'toolbar-view', 'header-bar', 'window-title',
-  'view-stack', 'view-switcher', 'navigation-view', 'tab-view', 'tab-bar', 'overlay-split',
+  'view-stack', 'view-switcher', 'navigation-view', 'tab-view', 'tab-page', 'tab-bar', 'overlay-split',
   'clamp', 'bin', 'custom-widget', 'box', 'grid', 'center-box', 'stack', 'stack-page',
-  'scrolled-window', 'wrap-box', 'popover',
+  'scrolled-window', 'overlay', 'wrap-box', 'popover',
   'action-row', 'switch-row', 'combo-row', 'spin-row', 'button-row', 'expander-row',
   'entry-row', 'password-row', 'list-box-row',
   'preferences-page', 'preferences-group',
@@ -341,6 +353,7 @@ export const LEGAL_CHILDREN: Record<AdwNodeType, AdwNodeType[]> = {
   'view-switcher': [],
   'navigation-view': CONTAINER_CHILDREN,
   'tab-view': CONTAINER_CHILDREN,
+  'tab-page': CONTAINER_CHILDREN,
   // Adw.TabBar draws its tabs from the linked TabView's pages; its only real
   // child positions are the start/end action-widget slots (single widget each,
   // buttons in every audited app that uses them).
@@ -356,6 +369,7 @@ export const LEGAL_CHILDREN: Record<AdwNodeType, AdwNodeType[]> = {
   stack: CONTAINER_CHILDREN,
   'stack-page': CONTAINER_CHILDREN,
   'scrolled-window': CONTAINER_CHILDREN,
+  overlay: CONTAINER_CHILDREN,
   // === Preferences rows ===
   'action-row': ['box', 'bin', 'label', 'button', 'menu-button', 'switch-widget', 'check-button', 'avatar', 'progress-bar', 'level-bar', 'spinner', 'entry', 'inscription', 'custom-widget'],
   'switch-row': ['box', 'bin', 'label', 'button', 'menu-button', 'switch-widget', 'check-button', 'avatar', 'progress-bar', 'level-bar', 'spinner', 'entry', 'inscription', 'custom-widget'],

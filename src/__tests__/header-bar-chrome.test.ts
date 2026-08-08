@@ -62,6 +62,11 @@ describe('headerBarFallbackTitle', () => {
       .toBeUndefined();
   });
 
+  it('show-title false suppresses the surface-title fallback', () => {
+    expect(headerBarFallbackTitle(headerBar({ showTitle: false }), 'Properties'))
+      .toBeUndefined();
+  });
+
   it('a window-title child wins over the surface title', () => {
     const node = headerBar({
       children: [{ id: 'wt', type: 'window-title', title: 'Widget', children: [] }],

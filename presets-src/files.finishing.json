@@ -1,10 +1,41 @@
 {
   "title": "GNOME Files",
   "screens": [
-    { "id": "browser", "entry": "nautilus-window.ui", "title": "Files", "width": 950, "height": 640 },
-    { "id": "properties", "entry": "nautilus-properties-window.ui", "title": "Properties", "width": 480, "height": 640 },
-    { "id": "new-folder", "entry": "nautilus-new-folder-dialog.ui", "title": "New Folder", "width": 400, "height": 220 },
-    { "id": "compress", "entry": "nautilus-compress-dialog.ui", "title": "Compress", "width": 440, "height": 440 }
+    { "id": "browser", "entry": "nautilus-window.ui", "title": "Files", "width": 890, "height": 550,
+      "probeFile": "files-browser.probe.json",
+      "runtimeSemanticRoots": ["imported-1"],
+      "runtimeProjectionRoots": ["places_sidebar", "path_bar_buttons_box", "tab_view"] },
+    { "id": "properties", "entry": "nautilus-properties-window.ui", "title": "Properties", "width": 480, "height": 581,
+      "overrides": [
+        { "id": "star_button", "set": { "visible": true, "iconName": "non-starred-symbolic" }, "why": "setup_star_button() reveals the unstarred control for the single ordinary folder represented by this screen." },
+        { "id": "imported-9", "set": { "visible": false }, "why": "The native folder-properties frame selects icon_overlay after setup_image_widget() installs the file paintable and edit affordance." },
+        { "id": "icon_stack", "set": { "widthRequest": 114, "heightRequest": 114 }, "why": "Native properties probe: the settled editable icon stack allocation is 114×114." },
+        { "id": "imported-11", "set": { "widthRequest": 98, "heightRequest": 98, "halign": "center", "valign": "center" }, "why": "Native properties probe: the image frame is a centered 98×98 allocation inside the 114×114 overlay." },
+        { "id": "imported-12", "set": { "iconName": "folder", "widthRequest": 96, "heightRequest": 96 }, "why": "The icon-overlay GtkImage is bound to the selected directory's runtime paintable; the native allocation is 96×96." },
+        { "id": "name_value_label", "set": { "title": "protota-files-home" }, "why": "Runtime value from the native directory fixture used to validate this screen." },
+        { "id": "type_value_label", "set": { "visible": false }, "why": "The settled directory fixture keeps the separate detailed-type label hidden and summarizes it through the contents field." },
+        { "id": "contents_box", "set": { "visible": true }, "why": "setup_basic_page() makes the contents field visible when the selected file is a directory." },
+        { "id": "contents_value_label", "set": { "title": "Empty folder" }, "why": "Settled deep-count value from the empty native directory fixture." },
+        { "id": "free_space_value_label", "set": { "visible": true, "title": "234.8 MB Free" }, "why": "The native directory fixture reports the containing filesystem's available space beneath the contents count." },
+        { "id": "locations_group", "set": { "visible": true }, "why": "setup_basic_page() shows Locations for ordinary filesystem items." },
+        { "id": "parent_folder_row", "set": { "visible": true, "subtitle": "/tmp/" }, "why": "Runtime location from the native directory fixture." },
+        { "id": "times_group", "set": { "visible": true }, "why": "setup_basic_page() shows available filesystem timestamps for an ordinary folder." },
+        { "id": "modified_row", "set": { "visible": true, "subtitle": "8/2/2026, 17:25:56" }, "why": "Runtime timestamp from the native directory fixture." },
+        { "id": "created_row", "set": { "visible": true, "subtitle": "8/2/2026, 17:25:56" }, "why": "Runtime timestamp from the native directory fixture." },
+        { "id": "accessed_row", "set": { "visible": false }, "why": "The native directory fixture exposes Modified and Created but keeps Accessed hidden." },
+        { "id": "permissions_value_label", "set": { "title": "Create and Delete Files" }, "why": "Settled permissions summary from the native user-owned directory fixture." }
+      ] },
+    { "id": "new-folder", "entry": "nautilus-new-folder-dialog.ui", "title": "New Folder", "width": 450, "height": 220,
+      "overrides": [
+        { "id": "imported-8", "set": { "sensitive": false, "marginTop": 17 }, "why": "The Create button's sensitive property is bound to validator.passed and is false for the dialog's initially empty Folder Name entry; the settled group allocation leaves 17px above the pill action." }
+      ] },
+    { "id": "compress", "entry": "nautilus-compress-dialog.ui", "title": "Compress", "width": 500, "height": 440,
+      "overrides": [
+        { "id": "name_entry", "set": { "value": "sample" }, "why": "Runtime value from the native fixture after selecting sample.txt; Nautilus selects the base name for editing." },
+        { "id": "extension_combo_row", "set": { "options": ["ZIP (.zip)"], "selectedIndex": 0 }, "why": "Runtime default from the native compression-format model." },
+        { "id": "passphrase_entry", "set": { "sensitive": false }, "why": "The default ZIP format in the native fixture disables password entry." },
+        { "id": "passphrase_confirm_entry", "set": { "sensitive": false }, "why": "The default ZIP format in the native fixture disables password confirmation." }
+      ] }
   ],
   "edges": [
     { "from": "browser", "to": "properties", "why": "Context menu → Properties" },

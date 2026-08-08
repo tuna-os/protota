@@ -742,6 +742,59 @@ body,
   display: block;
 }
 
+/* A runtime GtkPicture can carry a custom GdkPaintable that has no serialised
+   icon-name. Preserve its measured picture allocation with a recognisable
+   HIG thumbnail instead of leaving a large invisible hole. */
+.protota-runtime-picture {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 96px;
+  background: url('/adwaita-folder.svg') center / contain no-repeat;
+}
+
+/* Gtk list/grid factories report descendant bounds in the list item's
+   content coordinate space. A custom GridCell's snapshot is painted in the
+   cell coordinate space instead (the content inset is already consumed by
+   the factory). Remove that duplicated inset from projected descendants. */
+[data-protota-source-class$="GridCell"] > .adw-node-wrapper > [data-protota-source-class] {
+  transform: translate(-18px, -6px);
+}
+[data-protota-source-class$="GridCell"] .protota-style-icon-ui-labels-box .protota-div-label {
+  text-align: center;
+}
+
+/* GtkSpinButton with vertical orientation is used as the large clock-time
+   picker. It has no direct adwaita-web primitive, so preserve its native
+   three-part control instead of degrading it to a plain text entry. */
+.protota-gtk-spin-button {
+  display: grid;
+  grid-template-rows: 42px 45px 42px;
+  width: 60px;
+  height: 129px;
+  overflow: hidden;
+  border: 1px solid var(--border-color, rgba(0, 0, 6, 0.18));
+  border-radius: var(--button-radius, 9px);
+  background: var(--view-bg-color, #fff);
+  box-sizing: border-box;
+}
+.protota-gtk-spin-button button {
+  border: 0;
+  border-radius: 0;
+  background: var(--headerbar-shade-color, rgba(0, 0, 6, 0.04));
+  color: inherit;
+  font: inherit;
+  font-size: 20px;
+  padding: 0;
+}
+.protota-gtk-spin-button span {
+  display: grid;
+  place-items: center;
+  border-block: 1px solid var(--border-color, rgba(0, 0, 6, 0.14));
+  font-size: 24px;
+  font-weight: 600;
+}
+
 /* A source-declared widget implemented in C/GJS/Vala. This is a visible
    layout boundary, never a fake approximation of its runtime contents. */
 .protota-div-custom-widget {
@@ -778,7 +831,9 @@ adw-window > .adw-node-wrapper,
 .protota-div-bin > .adw-node-wrapper,
 .protota-div-stack > .adw-node-wrapper,
 .protota-div-view-stack > .adw-node-wrapper,
-.protota-div-stack-page > .adw-node-wrapper {
+.protota-div-stack-page > .adw-node-wrapper,
+.protota-div-tab-view > .adw-node-wrapper,
+.protota-div-tab-page > .adw-node-wrapper {
   flex: 1 1 auto;
   min-height: 0;
   display: flex;
@@ -792,7 +847,9 @@ adw-window > .adw-node-wrapper > *,
 .protota-div-bin > .adw-node-wrapper > *,
 .protota-div-stack > .adw-node-wrapper > *,
 .protota-div-view-stack > .adw-node-wrapper > *,
-.protota-div-stack-page > .adw-node-wrapper > * {
+.protota-div-stack-page > .adw-node-wrapper > *,
+.protota-div-tab-view > .adw-node-wrapper > *,
+.protota-div-tab-page > .adw-node-wrapper > * {
   flex: 1 1 auto;
   min-height: 0;
 }
@@ -800,10 +857,32 @@ adw-window > .adw-node-wrapper > *,
 .protota-div-stack,
 .protota-div-view-stack,
 .protota-div-stack-page,
+.protota-div-tab-view,
+.protota-div-tab-page,
 .protota-div-navigation-view {
   display: flex;
   flex-direction: column;
   min-height: 0;
+}
+
+/* GtkOverlay allocates every child over the same rectangle. Grid layering
+ * preserves normal intrinsic sizing for the base child while overlay slots
+ * paint above it without pushing later siblings down the page. */
+.protota-div-overlay {
+  display: grid;
+  min-width: 0;
+  min-height: 0;
+}
+
+.protota-div-overlay > .adw-node-wrapper,
+.protota-div-overlay > .adw-node-wrapper > * {
+  grid-area: 1 / 1;
+  min-width: 0;
+  min-height: 0;
+}
+
+.protota-div-overlay > .adw-node-wrapper[slot="overlay"] > * {
+  z-index: 1;
 }
 .protota-div-navigation-view > .adw-node-wrapper {
   flex: 1 1 auto;
@@ -896,12 +975,15 @@ html adw-status-page .adw-status-page-child {
 
 /* Center-box — start/center/end layout. */
 .protota-div-center-box {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: center;
-  justify-content: space-between;
   padding: 0;
   gap: 12px;
 }
+.protota-div-center-box > .adw-node-wrapper[slot="start"] > * { grid-column: 1; justify-self: start; }
+.protota-div-center-box > .adw-node-wrapper[slot="center"] > * { grid-column: 2; justify-self: center; }
+.protota-div-center-box > .adw-node-wrapper[slot="end"] > * { grid-column: 3; justify-self: end; }
 
 .protota-div-label {
   font-size: var(--font-size-base, 11pt);
@@ -1367,11 +1449,80 @@ adw-menu-button[data-testid="open-menu-button"] .adw-menu-button-popover {
   padding: 3px 10px;
   border-radius: 6px;
   cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
 .protota-preview-switcher-tab.active {
   background: var(--window-bg-color, #fff);
   box-shadow: 0 1px 3px rgba(0, 0, 6, 0.15);
   font-weight: 600;
+}
+
+/* A header ViewSwitcher is paired with a separate ViewStack. adwaita-web's
+   standalone element also creates a content holder for its page bodies; the
+   paired header form renders only the tab bar, as libadwaita does. */
+adw-header-bar adw-view-switcher > .adw-view-switcher-content {
+  display: none;
+}
+
+/* Composite PreferencesRow subclasses may own arbitrary template children,
+   which adwaita-web's title/subtitle-only row element would discard. */
+.protota-div-preferences-group,
+.protota-div-action-row {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+}
+.protota-div-preferences-group {
+  width: 100%;
+}
+
+/* A mixed PreferencesGroup (for example an EntryRow followed by validation
+   feedback and a standalone action button) cannot be handed to
+   adw-preferences-group because that element adopts row children and drops
+   the extra GTK widgets. Keep each real row's native boxed-list surface. */
+.protota-div-preferences-group > .adw-node-wrapper > :is(
+  adw-entry-row, adw-password-entry-row, adw-combo-row, adw-action-row,
+  adw-switch-row, adw-spin-row, adw-expander-row
+) {
+  width: 100%;
+  min-height: 55px;
+  box-sizing: border-box;
+  border-radius: var(--card-radius, 12px);
+  background: var(--card-bg-color, #fff);
+  box-shadow: 0 1px 3px rgba(0, 0, 6, 0.18);
+}
+
+/* Libadwaita's pill class deliberately enlarges a standalone action beyond
+   an ordinary header-bar button's compact allocation. */
+:is(adw-button, button).protota-style-pill {
+  min-height: 44px;
+  padding-inline: 27px;
+  border-radius: 9999px;
+}
+
+/* When a custom PreferencesRow subclass is expanded from its template, keep
+   the boxed-list surface owned by its PreferencesGroup. The arbitrary child
+   support above must not turn a native card into ungrouped floating rows. */
+.protota-div-preferences-group:has(> .adw-node-wrapper > .protota-div-action-row) {
+  margin-inline: -19px;
+  overflow: hidden;
+  border-radius: var(--card-radius, 12px);
+  background: var(--card-bg-color, #fff);
+  box-shadow: 0 1px 3px rgba(0, 0, 6, 0.18);
+}
+.protota-div-preferences-group:has(> .adw-node-wrapper > .protota-div-action-row)
+  > .adw-node-wrapper > adw-entry-row,
+.protota-div-preferences-group:has(> .adw-node-wrapper > .protota-div-action-row)
+  > .adw-node-wrapper > adw-combo-row {
+  min-height: 55px;
+  box-sizing: border-box;
+}
+.protota-div-preferences-group:has(> .adw-node-wrapper > .protota-div-action-row)
+  > .adw-node-wrapper:not(:first-child) > * {
+  border-block-start: 1px solid var(--separator-color, rgba(0, 0, 6, 0.1));
 }
 
 /* GtkSwitch is a div-rendered widget; its ephemeral on/off toggle is only
@@ -1528,6 +1679,10 @@ html .protota-div-overlay-split > [slot="sidebar"] > * {
   min-width: 0;
   background-color: var(--sidebar-bg-color, rgba(0, 0, 6, 0.04));
   border-inline-end: 1px solid var(--sidebar-border-color, rgba(0, 0, 6, 0.07));
+}
+html .protota-div-overlay-split > [slot="sidebar"] adw-toolbar-view,
+html .protota-div-overlay-split > [slot="sidebar"] .adw-toolbar-view-content {
+  background-color: var(--sidebar-bg-color, rgba(0, 0, 6, 0.04));
 }
 html .protota-div-overlay-split > [slot="content"] > *,
 html .protota-div-overlay-split > .adw-node-wrapper:not([slot]) > * {

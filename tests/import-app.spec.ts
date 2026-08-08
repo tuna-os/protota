@@ -76,6 +76,7 @@ test.describe('Import App front door (#118)', () => {
     await expect(manifest).toContainText('src/panel.blp');
     await expect(manifest).toContainText('src/scratch.blp'); // in the exclusion note
     await expect(page.getByTestId('import-app-file')).toHaveCount(2);
+    await expect(page.getByTestId('import-app-code-files')).toContainText('src/code-panel.c');
     await expect(page.getByTestId('import-app-unresolved')).toContainText('ThirdPartyWidget');
 
     // The single window-bearing candidate is pre-selected as the entry.
@@ -85,6 +86,11 @@ test.describe('Import App front door (#118)', () => {
     await page.waitForSelector('adw-window', { timeout: 10000 });
     // The imported app renders: template-expanded panel button from panel.blp.
     await expect(page.locator('adw-window').getByText('Open', { exact: true }).first())
+      .toBeVisible({ timeout: 10000 });
+    // The browser importer must feed implementation files to the same static
+    // adapters as the CLI; otherwise uploaded code-defined widgets remain
+    // empty custom boundaries.
+    await expect(page.locator('adw-window').getByText('From C adapter', { exact: true }).first())
       .toBeVisible({ timeout: 10000 });
   });
 

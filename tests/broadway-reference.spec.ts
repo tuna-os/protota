@@ -12,7 +12,7 @@ const broadwayUrl = process.env.BROADWAY_URL;
 // passed app fails CI rather than surfacing in a quarterly audit.
 const appCatalog = JSON.parse(
   readFileSync(new URL('./fixtures/gnome-app-catalog.json', import.meta.url), 'utf8'),
-) as Record<string, { maxUnresolvedCoverage?: number; minSimilarity?: number }>;
+) as Record<string, { maxUnresolvedCoverage?: number; minSimilarity?: number; minForegroundIoU?: number }>;
 // Native runtime probe dump (#58), written by the containerized app when the
 // runner is started with a /probe volume. Optional: a missing or unreadable
 // probe file is "no evidence", never a failure (ADR 0001 containment rule).
@@ -160,7 +160,7 @@ test.describe('Broadway reference captures', () => {
         // widgets the probe saw unmapped (runtime-invisible siblings stop
         // squeezing their neighbours) and let unresolved boundaries take
         // their allocation from GTK's own measured bounds.
-        appliedEvidence = applyRuntimeEvidence(chosen.rootNode, runtimeProfile);
+        appliedEvidence = applyRuntimeEvidence(chosen.rootNode, runtimeProfile, probe);
       } catch {
         runtimeProfile = null; // malformed probe output stays "no evidence"
         appliedEvidence = null;
@@ -179,15 +179,25 @@ test.describe('Broadway reference captures', () => {
       // This is a renderer contract, not an app-specific layout adjustment.
       chosen.width = width;
       chosen.height = height;
-      // The editor persists an edited document as Blueprint source under its
-      // own key, which takes precedence over this injected JSON document.
-      // Clear it so the comparison always renders this run's import.
+      // Inject the measured document directly into the live renderer store.
+      // Probe allocations are deliberately non-exported audit data; routing
+      // this tree through Blueprint persistence would discard the evidence
+      // before the screenshot and could make the harness compare a fallback
+      // empty document instead of the requested app.
       localStorage.clear();
-      localStorage.setItem('protota_doc_v1', JSON.stringify(preset.document));
       // App-shipped artwork embedded by the preset generator.
       if (preset.sourceIcons) localStorage.setItem('protota_source_icons_v1', JSON.stringify(preset.sourceIcons));
+      const store = (window as unknown as {
+        __mockupStore?: { setState: (state: Record<string, unknown>) => void };
+      }).__mockupStore;
+      if (!store) throw new Error('Protota renderer store is unavailable');
+      store.setState({
+        doc: preset.document,
+        selectedScreenId: chosen.id,
+        selectedNodeId: null,
+        selectedNodeIds: [],
+      });
     }, { id: presetId, width: reference.width, height: reference.height, document: sourceDocument, screenId });
-    await page.reload();
     // The comparison target is the application render surface.  Explicitly
     // switch off editor-only chrome that may otherwise be positioned above it.
     await page.evaluate(() => {
@@ -339,6 +349,10 @@ test.describe('Broadway reference captures', () => {
     if (maximumUnresolvedWidgetCoverage) {
       expect(unresolvedWidgetCoverage, `Unresolved custom-widget coverage for ${appId}`).toBeLessThanOrEqual(Number(maximumUnresolvedWidgetCoverage));
     }
+    const minimumForegroundIoU = process.env.BROADWAY_MIN_FOREGROUND_IOU;
+    if (minimumForegroundIoU) {
+      expect(foreground.foregroundIoU, `Foreground overlap for ${appId}`).toBeGreaterThanOrEqual(Number(minimumForegroundIoU));
+    }
 
     // Catalog-carried per-app gates (#59): each value traces to a committed
     // measured artifact for this app (see docs/gnome-app-conformance.md).
@@ -349,6 +363,9 @@ test.describe('Broadway reference captures', () => {
     }
     if (gates?.minSimilarity !== undefined) {
       expect(sourceResolvedSimilarity, `Catalog source-resolved-similarity gate for ${appId}`).toBeGreaterThanOrEqual(gates.minSimilarity);
+    }
+    if (gates?.minForegroundIoU !== undefined) {
+      expect(foreground.foregroundIoU, `Catalog foreground-overlap gate for ${appId}`).toBeGreaterThanOrEqual(gates.minForegroundIoU);
     }
   });
 });

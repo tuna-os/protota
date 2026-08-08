@@ -10,6 +10,7 @@ const CLASS_TO_WIDGET_MAP: Record<string, AdwNodeType> = {
   'Adw.ApplicationWindow': 'window',
   'Adw.Window': 'window',
   'Adw.PreferencesDialog': 'preferences-dialog',
+  'Adw.PreferencesWindow': 'window',
   'Adw.Dialog': 'dialog',
   'Adw.AlertDialog': 'alert-dialog',
   'Adw.AboutDialog': 'about-dialog',
@@ -75,11 +76,14 @@ const CLASS_TO_WIDGET_MAP: Record<string, AdwNodeType> = {
   'Adw.Toggle': 'toggle',
   'Adw.ToggleGroup': 'toggle-group',
   'Gtk.Entry': 'entry',
+  'Gtk.PasswordEntry': 'entry',
+  'Gtk.Text': 'entry',
   'Adw.StatusPage': 'status-page',
   'Adw.ToastOverlay': 'toast-overlay',
   'Adw.Banner': 'banner',
   'Adw.Spinner': 'spinner',
   'Gtk.FlowBox': 'flow-box',
+  'Gtk.FlowBoxChild': 'bin',
   'Gtk.Box': 'box',
   'Gtk.Grid': 'grid',
   'Gtk.CenterBox': 'center-box',
@@ -92,6 +96,7 @@ const CLASS_TO_WIDGET_MAP: Record<string, AdwNodeType> = {
   'Gtk.ListBox': 'list-box',
   'Gtk.Label': 'label',
   'Gtk.Inscription': 'inscription',
+  'Gtk.Picture': 'bin',
   // Blueprint's short widget names are common in real application templates.
   Bin: 'bin',
   Box: 'box',
@@ -123,6 +128,10 @@ const CLASS_TO_WIDGET_MAP: Record<string, AdwNodeType> = {
   AdwPreferencesGroup: 'preferences-group',
   GtkButton: 'button',
   GtkEntry: 'entry',
+  GtkPasswordEntry: 'entry',
+  PasswordEntry: 'entry',
+  GtkText: 'entry',
+  Text: 'entry',
   GtkBox: 'box',
   GtkGrid: 'grid',
   GtkStack: 'stack',
@@ -130,6 +139,8 @@ const CLASS_TO_WIDGET_MAP: Record<string, AdwNodeType> = {
   GtkScrolledWindow: 'scrolled-window',
   GtkLabel: 'label',
   GtkListBox: 'list-box',
+  GtkFlowBoxChild: 'bin',
+  FlowBoxChild: 'bin',
   ListBox: 'list-box',
   Viewport: 'bin',
   GtkViewport: 'bin',
@@ -142,6 +153,8 @@ const CLASS_TO_WIDGET_MAP: Record<string, AdwNodeType> = {
   'Gtk.TextView': 'entry',
   GtkSourceView: 'entry',
   'GtkSource.View': 'entry',
+  GtkSourceMap: 'entry',
+  'GtkSource.Map': 'entry',
   Label: 'label',
   Image: 'bin',
   GtkImage: 'bin',
@@ -208,9 +221,9 @@ const CLASS_TO_WIDGET_MAP: Record<string, AdwNodeType> = {
   Spinner: 'spinner',
   GtkSpinner: 'spinner',
   'Gtk.Spinner': 'spinner',
-  Overlay: 'bin',
-  GtkOverlay: 'bin',
-  'Gtk.Overlay': 'bin',
+  Overlay: 'overlay',
+  GtkOverlay: 'overlay',
+  'Gtk.Overlay': 'overlay',
   Revealer: 'bin',
   'Gtk.Revealer': 'bin',
   WindowHandle: 'bin',
@@ -222,6 +235,18 @@ const CLASS_TO_WIDGET_MAP: Record<string, AdwNodeType> = {
   Widget: 'bin',
   GtkWidget: 'bin',
   'Gtk.Widget': 'bin',
+  // GtkInfoBar is a message area plus an action area. Keeping its declared
+  // children in a horizontal layout is closer to GTK than an opaque boundary
+  // and, unlike Adw.Banner, does not discard the child content.
+  InfoBar: 'box',
+  GtkInfoBar: 'box',
+  'Gtk.InfoBar': 'box',
+  'Adw.ShortcutsDialog': 'preferences-dialog',
+  AdwShortcutsDialog: 'preferences-dialog',
+  'Adw.ShortcutsSection': 'preferences-group',
+  AdwShortcutsSection: 'preferences-group',
+  'Adw.ShortcutsItem': 'action-row',
+  AdwShortcutsItem: 'action-row',
 };
 
 /**
@@ -232,7 +257,7 @@ const CLASS_TO_WIDGET_MAP: Record<string, AdwNodeType> = {
  * boxes or count as unresolved visual coverage.
  */
 const NON_VISUAL_CLASS_PATTERN =
-  /^(Gtk\.|Gio\.|Adw\.|GtkSource\.)?(EventController[A-Za-z]*|Gesture[A-Za-z]*|ShortcutController|Shortcut|DropTarget|DragSource|Adjustment|TextBuffer|SourceBuffer|Buffer|EntryBuffer|Tooltip|StringList|ListStore|SizeGroup|FileFilter|SortListModel|FilterListModel|SingleSelection|MultiSelection|NoSelection|SignalListItemFactory|BuilderListItemFactory|[A-Za-z]*Paintable)$/;
+  /^(Gtk\.|Gio\.|Adw\.|GtkSource\.)?(EventController[A-Za-z]*|Gesture[A-Za-z]*|ShortcutController|Shortcut|DropTarget|DragSource|Adjustment|TextBuffer|SourceBuffer|Buffer|EntryBuffer|Tooltip|StringList|ListStore|SizeGroup|FileFilter|FileDialog|ColumnViewColumn|EnumList|Toast|[A-Za-z]*Model|SingleSelection|MultiSelection|NoSelection|SignalListItemFactory|BuilderListItemFactory|[A-Za-z]*Paintable)$/;
 
 /**
  * An Adw.Breakpoint takes no layout allocation, but unlike the non-visual
@@ -299,6 +324,7 @@ const WIDGET_CLASS_MAP: Record<string, string> = {
   stack: 'Gtk.Stack',
   'stack-page': 'Gtk.StackPage',
   'scrolled-window': 'Gtk.ScrolledWindow',
+  overlay: 'Gtk.Overlay',
   'search-entry': 'Gtk.SearchEntry',
   'progress-bar': 'Gtk.ProgressBar',
   scale: 'Gtk.Scale',
@@ -318,6 +344,13 @@ const WIDGET_CLASS_MAP: Record<string, string> = {
 /** The GTK/libadwaita class a renderer type exports as. */
 export function widgetClassForType(type: string): string | null {
   return WIDGET_CLASS_MAP[type] ?? null;
+}
+
+/** Resolve a GTK/Adwaita runtime class to the renderer's generic node type. */
+export function widgetTypeForClass(rawClass: string): AdwNodeType | null {
+  return CLASS_TO_WIDGET_MAP[rawClass]
+    ?? CLASS_TO_WIDGET_MAP[canonicalClassName(rawClass)]
+    ?? null;
 }
 
 function indent(n: number): string { return '  '.repeat(n); }
@@ -575,14 +608,20 @@ function nodeToBlueprint(node: AdwNode, depth: number = 0, context?: ExportConte
   // that was resolved from a template exports as the widget it resolved to,
   // because `ClocksHeaderBar` means nothing outside that app's source.
   const declaredClass = typeof node.sourceClass === 'string' ? node.sourceClass : '';
-  const isKnownLibraryClass = !!declaredClass && !!CLASS_TO_WIDGET_MAP[declaredClass];
+  // Runtime probes and GtkBuilder spell classes as GObject names (`GtkBox`),
+  // which Blueprint reads as an unqualified name in the Gtk namespace and
+  // rejects. Emit the namespaced spelling of any class the registry knows.
+  const canonicalDeclared = canonicalClassName(declaredClass);
+  const libraryClass = declaredClass && CLASS_TO_WIDGET_MAP[canonicalDeclared]
+    ? canonicalDeclared
+    : declaredClass && CLASS_TO_WIDGET_MAP[declaredClass]
+      ? declaredClass
+      : '';
   // A `$` reference names a GType, which has no dots: an unresolved
   // `Gtk.SourceBuffer` boundary is `$GtkSourceBuffer`.
   const className = node.type === 'custom-widget' && declaredClass
     ? `$${declaredClass.replace(/\./g, '')}`
-    : isKnownLibraryClass
-      ? declaredClass
-      : WIDGET_CLASS_MAP[node.type] || node.type;
+    : libraryClass || WIDGET_CLASS_MAP[node.type] || node.type;
   const props: string[] = [];
   const layout: string[] = [];
   const classProperties = className.startsWith('$') ? null : propertiesOf(className);
@@ -871,6 +910,7 @@ function propertyNameForNode(name: string, nodeType: AdwNodeType): string {
   const rawName = name.replace(/_/g, '-');
   if ((rawName === 'label' || rawName === 'text') && (nodeType === 'button' || nodeType === 'toggle' || nodeType === 'label' || nodeType === 'inscription' || nodeType === 'menu-button' || nodeType === 'split-button')) return 'title';
   if (rawName === 'icon-name') return 'iconName';
+  if (rawName === 'placeholder-text') return 'placeholder';
   if (rawName === 'show-title-buttons') return 'showTitleButtons';
   if (rawName === 'selected') return 'selectedIndex';
   return rawName.replace(/-([a-z])/g, (_, letter: string) => letter.toUpperCase());
@@ -1335,13 +1375,16 @@ function builderElementToNode(
       continue;
     }
     if (child.tag === 'style') {
+      const styleNames: string[] = [];
       for (const styleClass of child.children) {
         const name = styleClass.attributes.name;
+        if (name) styleNames.push(name);
         if (name === 'suggested-action') properties.suggested = true;
         if (name === 'destructive-action') properties.destructive = true;
         if (name === 'flat') properties.flat = true;
         if (name === 'circular') properties.circular = true;
       }
+      if (styleNames.length) properties.styleClasses = styleNames.join(' ');
       continue;
     }
     if (child.tag === 'layout') {
@@ -1356,6 +1399,14 @@ function builderElementToNode(
   }
   if (breakpoint && breakpointCondition === undefined) return null;
   const node = makeNode(rawClass, id, properties, bindings, children, diagnostics);
+  // A GtkBuilder template's concrete GType is its `class`, even though its
+  // renderer shape comes from `parent`. Preserve both facts: `type` remains
+  // the supported parent widget while sourceClass lets runtime matching join
+  // a presented composite dialog (ClocksAlarmSetupDialog) instead of
+  // incorrectly seeding it at the application's first toplevel window.
+  if (element.tag === 'template' && element.attributes.class) {
+    node.sourceClass = element.attributes.class;
+  }
   if (breakpoint && breakpointCondition !== undefined) {
     node.breakpointCondition = breakpointCondition;
     if (breakpointSetters.length) node.breakpointSetters = breakpointSetters;
@@ -1415,6 +1466,26 @@ function resolveBuilderTemplates(node: AdwNode, templates: Map<string, AdwNode>,
   if (!template || seen.has(node.sourceClass)) return;
   resolved.add(`${node.sourceClass}:${node.id}`);
   const projected = structuredClone(template);
+  // GtkBuilder composite templates commonly bind an inner widget to a
+  // property supplied by the concrete instance, e.g. ClocksHeaderBar's
+  // `AdwViewSwitcher.stack <- ClocksHeaderBar.stack` while the instance sets
+  // `stack=stack`. Once the template is flattened there is no GObject owner
+  // left to perform that binding, so carry any source-known instance literal
+  // onto the projected child. Dynamic properties remain as bindings.
+  const resolveInstanceBindings = (projectedNode: AdwNode): void => {
+    for (const [targetProperty, expression] of Object.entries(projectedNode.bindings ?? {})) {
+      const reference = /^([A-Za-z_][A-Za-z0-9_]*)\.([A-Za-z0-9_-]+)$/.exec(expression);
+      if (!reference || reference[1] !== node.sourceClass) continue;
+      const sourceKey = editorPropertyName(reference[2], node.type);
+      const value = node[sourceKey];
+      if (value === undefined) continue;
+      projectedNode[editorPropertyName(targetProperty, projectedNode.type)] = value;
+      delete projectedNode.bindings![targetProperty];
+    }
+    if (projectedNode.bindings && Object.keys(projectedNode.bindings).length === 0) delete projectedNode.bindings;
+    projectedNode.children?.forEach(resolveInstanceBindings);
+  };
+  resolveInstanceBindings(projected);
   node.type = projected.type;
   node.children = projected.children ?? [];
   if (node.title === node.sourceClass) delete node.title;
@@ -1809,7 +1880,7 @@ function valaCompositeSnippet(
   // subclass almost certainly populates itself at runtime. A base that draws
   // its own chrome (a row, an entry) is that widget even when empty.
   const CHROMELESS_CONTAINER_TYPES = new Set([
-    'bin', 'box', 'grid', 'center-box', 'clamp', 'stack', 'scrolled-window',
+    'bin', 'box', 'grid', 'center-box', 'clamp', 'stack', 'scrolled-window', 'overlay',
     'list-box', 'wrap-box', 'overlay-split', 'toolbar-view',
   ]);
   if (!selfChildren && CHROMELESS_CONTAINER_TYPES.has(CLASS_TO_WIDGET_MAP[canonicalBase])) return null;
@@ -1940,7 +2011,11 @@ function enrichWithValaFacts(doc: MockupDocument, valaFiles: BlueprintSourceFile
       // share a `toggle`.
       const projected = roots[0];
       const namespaceIds = (child: AdwNode): void => {
-        child.id = `${node.id}-${child.id}`;
+        // Browser persistence immediately exports enriched documents back to
+        // Blueprint. Keep generated ids inside Blueprint's identifier grammar;
+        // a hyphen tokenizes as subtraction and made the app disappear on reload.
+        child.id = `${node.id}_${child.id}`.replace(/[^A-Za-z0-9_]/g, '_');
+        if (/^[0-9]/.test(child.id)) child.id = `node_${child.id}`;
         child.children?.forEach(namespaceIds);
       };
       projected.children?.forEach(namespaceIds);

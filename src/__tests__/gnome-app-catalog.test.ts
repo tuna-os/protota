@@ -6,11 +6,15 @@ interface CatalogEntry {
   aptPackage: string;
   command: string;
   presetId: string;
+  screens?: string[];
   viewport: { width: number; height: number };
   source: string;
   suite: 'core' | 'circle';
   status: 'preset' | 'planned';
   visualStatus: 'not-validated' | 'needs-tuning' | 'passed';
+  maxUnresolvedCoverage?: number;
+  minSimilarity?: number;
+  minForegroundIoU?: number;
 }
 
 const catalog = JSON.parse(
@@ -41,6 +45,24 @@ describe('GNOME app conformance catalogue', () => {
       expect(app.viewport.width, id).toBeGreaterThan(0);
       expect(app.viewport.height, id).toBeGreaterThan(0);
       expect(app.visualStatus, id).toMatch(/^(not-validated|needs-tuning|passed)$/);
+      if (app.visualStatus === 'passed') {
+        expect(app.maxUnresolvedCoverage, `${id}: passed apps need an unresolved-coverage gate`).toBeTypeOf('number');
+        expect(app.minSimilarity, `${id}: passed apps need a resolved-similarity gate`).toBeTypeOf('number');
+        expect(app.minForegroundIoU, `${id}: passed apps need a meaningful foreground-overlap gate`).toBeTypeOf('number');
+      }
+    }
+  });
+
+  it('catalogues every screen of every Core preset', () => {
+    for (const [id, app] of Object.entries(catalog)) {
+      if (app.suite !== 'core' || app.status !== 'preset') continue;
+      const preset = JSON.parse(readFileSync(
+        new URL(`../../public/presets/${app.presetId}.mockup.json`, import.meta.url),
+        'utf8',
+      )) as { document: { screens: Array<{ id: string }> } };
+      const shippedScreenIds = preset.document.screens.map(screen => screen.id);
+      expect(app.screens, `${id}: Core screens must be explicit so none silently fall out of fidelity testing`)
+        .toEqual(shippedScreenIds);
     }
   });
 });

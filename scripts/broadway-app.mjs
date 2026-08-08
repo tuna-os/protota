@@ -36,6 +36,10 @@ if (app.sourceImport) {
   // sources for static enrichment); fall back to the legacy uiPath.
   environment.BROADWAY_SOURCE_UI_PATH = app.sourceImport.importRoot ?? app.sourceImport.uiPath;
   environment.BROADWAY_SOURCE_ENTRY = app.sourceImport.entry;
+  // The tag is the upstream release this app's entry path and per-app gates
+  // were calibrated against, so the capture must check it out rather than
+  // whatever the default branch happens to hold today.
+  if (app.sourceImport.tag) environment.BROADWAY_SOURCE_TAG = app.sourceImport.tag;
 }
 
 for (const [key, value] of Object.entries(environment)) {

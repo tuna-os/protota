@@ -88,9 +88,21 @@ jobs:
         run: node scripts/broadway-app.mjs "${{ matrix.app }}" "${{ inputs.screen }}" >> "$GITHUB_ENV"
       - if: steps.select.outputs.enabled == 'true'
         name: Clone official declarative UI source
+        # Check out the catalog's pinned tag, not the upstream default branch.
+        # An unpinned clone silently re-points the visual oracle at whatever
+        # upstream landed since: Nautilus converted its .ui templates to .blp
+        # after 49.1, which deleted the catalogued entry file out from under a
+        # green catalog entry and failed the capture with "Blueprint entry file
+        # not found in source bundle: nautilus-window.ui".
         run: |
           if [[ -n "${BROADWAY_SOURCE_REPOSITORY:-}" ]]; then
-            git clone --depth 1 "$BROADWAY_SOURCE_REPOSITORY" .gnome-source
+            clone_args=(--depth 1)
+            if [[ -n "${BROADWAY_SOURCE_TAG:-}" ]]; then
+              clone_args+=(--branch "$BROADWAY_SOURCE_TAG")
+            else
+              echo "::warning::$BROADWAY_APP_ID has no catalogued source tag; cloning the default branch, which can drift."
+            fi
+            git clone "${clone_args[@]}" "$BROADWAY_SOURCE_REPOSITORY" .gnome-source
             echo "BROADWAY_SOURCE_ROOT=$PWD/.gnome-source/$BROADWAY_SOURCE_UI_PATH" >> "$GITHUB_ENV"
           fi
       - if: steps.select.outputs.enabled == 'true'
@@ -103,17 +115,46 @@ jobs:
         # The /probe volume opts in to the read-only runtime probe (#58).
         # A capture without a probe.json proceeds unchanged — the probe is
         # evidence, never a gate on the capture itself.
+        # Deliberately no --rm: the entrypoint exec's the app as PID 1, so an
+        # app that exits (a missing system service, a crash) takes the whole
+        # container with it, and an auto-removed container takes the only
+        # record of why along with it.
         run: |
           mkdir -p "$PWD/.probe-local" && chmod 777 "$PWD/.probe-local"
-          docker run --detach --rm --name protota-broadway-app -p 8085:8085 -v "$PWD/.probe-local:/probe" protota-broadway-app
+          docker run --detach --name protota-broadway-app -p 8085:8085 -v "$PWD/.probe-local:/probe" protota-broadway-app
       - if: steps.select.outputs.enabled == 'true'
         name: Wait for Broadway
-        run: until curl --fail --silent http://127.0.0.1:8085/; do sleep 1; done
+        # gtk4-broadwayd binds the port before the app has drawn anything, so a
+        # bare curl loop can pass against a container that is already dying and
+        # hand Playwright an ERR_CONNECTION_REFUSED with no explanation. Require
+        # the app to still be running, and give up loudly with the runner's own
+        # output instead of spinning until the job timeout.
+        run: |
+          for _ in $(seq 60); do
+            if [[ "$(docker inspect -f '{{.State.Running}}' protota-broadway-app)" != true ]]; then
+              echo "::error::The native app container exited before Broadway was reachable."
+              docker logs protota-broadway-app 2>&1 | tail -100
+              exit 1
+            fi
+            if curl --fail --silent http://127.0.0.1:8085/ >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          echo "::error::Broadway did not accept connections within 60s."
+          docker logs protota-broadway-app 2>&1 | tail -100
+          exit 1
       - if: steps.select.outputs.enabled == 'true'
         name: Capture native and Protota output
         env:
           BROADWAY_MAX_DIFF_RATIO: ${{ inputs.max_diff_ratio }}
         run: BROADWAY_URL=http://127.0.0.1:8085/ BROADWAY_PRESET_ID="$BROADWAY_PRESET_ID" BROADWAY_SCREEN_ID="$BROADWAY_SCREEN_ID" BROADWAY_VIEWPORT_WIDTH="$BROADWAY_VIEWPORT_WIDTH" BROADWAY_VIEWPORT_HEIGHT="$BROADWAY_VIEWPORT_HEIGHT" BROADWAY_SOURCE_ROOT="$BROADWAY_SOURCE_ROOT" BROADWAY_SOURCE_ENTRY="$BROADWAY_SOURCE_ENTRY" BROADWAY_PROBE_FILE="$PWD/.probe-local/probe.json" npx playwright test tests/broadway-reference.spec.ts
+      - name: Native runner logs
+        # The app can also die between the readiness check and the capture,
+        # which reaches Playwright only as ERR_CONNECTION_REFUSED. Its stderr
+        # is the evidence for why, so publish it either way.
+        if: always() && steps.select.outputs.enabled == 'true'
+        run: |
+          docker inspect -f 'container state: {{.State.Status}} (exit {{.State.ExitCode}})' protota-broadway-app || true
+          docker logs protota-broadway-app 2>&1 | tail -100 || true
       - name: Upload reference captures
         if: always() && steps.select.outputs.enabled == 'true'
         uses: actions/upload-artifact@v7

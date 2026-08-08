@@ -216,3 +216,35 @@ test('show-title-buttons false suppresses window controls on a window header bar
   // The window title still appears through the header-bar fallback.
   await expect(header).toHaveAttribute('title', 'Plain Window');
 });
+
+// A GTK size request on the root window is a minimum for a window that picks
+// its own size — it must never override a screen's declared size. GNOME
+// Calculator's `height-request: 616` used to stretch a 460px screen to 616px,
+// which broke the Broadway capture contract that renders the Protota surface
+// at exactly the native window's measured size.
+const oversizedRequestDocument = {
+  id: 'root-size-request-contract', title: 'Root size request', colorScheme: 'auto', edges: [],
+  screens: [{
+    id: 'screen', title: 'Requested', type: 'standard', width: 410, height: 460,
+    rootNode: {
+      id: 'window', type: 'window', title: 'Requested', heightRequest: 616, widthRequest: 700, children: [{
+        id: 'toolbar', type: 'toolbar-view', children: [
+          { id: 'header', type: 'header-bar', title: 'Requested', children: [] },
+          { id: 'body', type: 'box', children: [] },
+        ],
+      }],
+    },
+  }],
+};
+
+test('a root size request never resizes the screen surface', async ({ page }) => {
+  await page.goto('/');
+  await page.evaluate((document) => localStorage.setItem('protota_doc_v1', JSON.stringify(document)), oversizedRequestDocument);
+  await page.reload();
+
+  const surface = page.locator('[data-protota-render-surface="true"]');
+  await expect(surface).toBeVisible();
+  const box = await surface.boundingBox();
+  expect(Math.round(box!.width), 'width must equal the screen, not the width request').toBe(410);
+  expect(Math.round(box!.height), 'height must equal the screen, not the height request').toBe(460);
+});

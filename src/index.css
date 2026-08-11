@@ -1157,6 +1157,51 @@ html adw-status-page .adw-status-page-child {
   padding: var(--spacing-xs, 6px) var(--spacing-s, 9px) var(--spacing-s, 9px);
 }
 
+/* Window-buttons preference picker (#163): two segmented rows (button set +
+   position), same popover idiom as the theme switcher. */
+.protota-window-buttons-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.protota-window-buttons-picker-popover {
+  padding: var(--spacing-xs, 6px) var(--spacing-s, 9px) var(--spacing-s, 9px);
+}
+.protota-window-buttons-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.protota-window-buttons-caption {
+  font-size: 12px;
+  color: var(--window-fg-color, rgba(0, 0, 6, 0.8));
+  opacity: 0.8;
+}
+.protota-window-buttons-segment {
+  display: inline-flex;
+  border-radius: 8px;
+  background-color: var(--headerbar-button-bg, rgba(0, 0, 6, 0.08));
+  padding: 2px;
+}
+.protota-window-buttons-option {
+  border: none;
+  background: transparent;
+  color: var(--window-fg-color, rgba(0, 0, 6, 0.8));
+  font-size: 12px;
+  padding: 3px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.protota-window-buttons-option:hover {
+  background-color: var(--button-hover-color, rgba(0, 0, 6, 0.1));
+}
+.protota-window-buttons-option.selected,
+.protota-window-buttons-option[aria-pressed="true"] {
+  background-color: var(--accent-bg-color, #3584e4);
+  color: #ffffff;
+}
+
 /* The header app-menu popover must float above the canvas on every
    viewport (the element's own z-index 10 can lose to later canvas layers).
    On mobile it also anchors to the viewport so it never spills past the
@@ -1589,6 +1634,11 @@ adw-header-bar adw-view-switcher > .adw-view-switcher-content {
   align-items: center;
   gap: 6px;
   margin-left: 6px;
+}
+/* Top-left window buttons (#163): mirrored spacing for the start slot. */
+.protota-window-controls-start {
+  margin-left: 0;
+  margin-right: 6px;
 }
 .protota-window-control {
   width: 24px;

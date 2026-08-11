@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { headerBarControls, headerBarFallbackTitle } from '../utils/headerBarChrome';
+import { headerBarControls, headerBarFallbackTitle, DEFAULT_WINDOW_BUTTONS } from '../utils/headerBarChrome';
 import type { AdwNode } from '../types/mockup';
 
 const headerBar = (extra: Partial<AdwNode> = {}): AdwNode => ({
@@ -48,6 +48,29 @@ describe('headerBarControls', () => {
   it('non header-bar nodes never carry controls', () => {
     expect(headerBarControls({ id: 'b', type: 'box', children: [] },
       { inDialog: false, isPrimary: true })).toBe('none');
+  });
+
+  it('close-only preference drops minimize/maximize on a window', () => {
+    expect(headerBarControls(headerBar(), { inDialog: false, isPrimary: true },
+      { ...DEFAULT_WINDOW_BUTTONS, buttons: 'close' })).toBe('close');
+  });
+
+  it('the side preference does not affect which controls are drawn', () => {
+    expect(headerBarControls(headerBar(), { inDialog: false, isPrimary: true },
+      { ...DEFAULT_WINDOW_BUTTONS, side: 'start' })).toBe('window');
+    expect(headerBarControls(headerBar(), { inDialog: false, isPrimary: true },
+      { ...DEFAULT_WINDOW_BUTTONS, buttons: 'close', side: 'start' })).toBe('close');
+  });
+
+  it('close-only preference still respects the title-button properties', () => {
+    expect(headerBarControls(headerBar({ showTitleButtons: false }),
+      { inDialog: false, isPrimary: true },
+      { ...DEFAULT_WINDOW_BUTTONS, buttons: 'close' })).toBe('none');
+  });
+
+  it('dialog context stays close-only regardless of the preference', () => {
+    expect(headerBarControls(headerBar(), { inDialog: true, isPrimary: true },
+      { ...DEFAULT_WINDOW_BUTTONS, buttons: 'window' })).toBe('close');
   });
 });
 

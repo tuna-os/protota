@@ -44,6 +44,10 @@ test.describe('Remaining features (#9, #16, #18-#24)', () => {
 
   test('#22 A11y lint rule covers icon-only buttons', async ({ page }) => {
     const lintBtn = page.getByTestId('diagnostics-toggle');
+    // Diagnostics are on by default (#161); the icon-only button stays tappable.
+    await expect(lintBtn).toHaveAttribute('data-active', 'true');
+    await lintBtn.click();
+    await expect(lintBtn).toHaveAttribute('data-active', 'false');
     await lintBtn.click();
     await expect(lintBtn).toHaveAttribute('data-active', 'true');
   });

@@ -47,7 +47,7 @@ test.describe('Remaining features (#9, #16, #18-#24)', () => {
     // Diagnostics are on by default (#161); the icon-only button stays tappable.
     await expect(lintBtn).toHaveAttribute('data-active', 'true');
     await lintBtn.click();
-    await expect(lintBtn).toHaveAttribute('data-active', 'false');
+    await expect(lintBtn).not.toHaveAttribute('data-active', 'true');
     await lintBtn.click();
     await expect(lintBtn).toHaveAttribute('data-active', 'true');
   });

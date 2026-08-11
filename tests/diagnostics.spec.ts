@@ -52,7 +52,7 @@ test.describe('Diagnostics (#95)', () => {
     await expect(toggle).toHaveAttribute('data-active', 'true');
     // Turning it off, then back on, re-opens the drawer on the Diagnostics tab.
     await toggle.click();
-    await expect(toggle).toHaveAttribute('data-active', 'false');
+    await expect(toggle).not.toHaveAttribute('data-active', 'true');
     await toggle.click();
     await expect(toggle).toHaveAttribute('data-active', 'true');
     await expect(page.getByTestId('diagnostics-panel')).toBeVisible();

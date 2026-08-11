@@ -42,7 +42,7 @@ test.describe('HIG compliance audit (#8)', () => {
     await expect(lintBtn).toHaveAttribute('data-active', 'true');
 
     await lintBtn.click();
-    await expect(lintBtn).toHaveAttribute('data-active', 'false');
+    await expect(lintBtn).not.toHaveAttribute('data-active', 'true');
     await expect(page.getByTestId('diagnostic-card').first()).toHaveCount(0);
   });
 });

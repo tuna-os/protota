@@ -342,6 +342,7 @@ export const ViewportCanvas: React.FC = () => {
         ev.stopPropagation();
         gesture.cancelled = true;
         dnd.endDrag();
+        removeListeners();
         cleanupVisuals();
       }
     };

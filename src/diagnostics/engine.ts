@@ -95,10 +95,9 @@ export function filterDiagnostics(
   const rules = new Set(ignoredRules);
   const instances = new Set(ignoredInstances);
   return diagnostics.filter((d) =>
-    // Blueprint-source diagnostics keep their own panel group and are not
-    // hidden by the HIG tier chips (design flow C); rule/instance ignores
-    // still apply to them.
-    (d.source === 'blueprint' || tierFilters[d.tier]) &&
+    // Blueprint-source diagnostics are included in the tier toggles
+    // alongside HIG; rule/instance ignores still apply.
+    tierFilters[d.tier] &&
     !rules.has(d.ruleId) &&
     !instances.has(instanceKey(d.ruleId, d.nodeId)));
 }

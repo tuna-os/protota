@@ -94,13 +94,13 @@ describe('engine ordering and helpers', () => {
     expect(filterDiagnostics(diagnostics, { error: true, warning: true, suggestion: true }, [], ['HIG-W001:other'])).toHaveLength(1);
   });
 
-  it('tier chips never hide blueprint-source diagnostics', () => {
+  it('tier chips hide blueprint-source diagnostics alongside HIG', () => {
     const blp: Diagnostic = {
       ruleId: 'BLP-S001', tier: 'suggestion', source: 'blueprint',
       message: 'boundary', screenId: '', nodeId: '', nodeType: null,
     };
     const kept = filterDiagnostics([blp], { error: true, warning: true, suggestion: false }, [], []);
-    expect(kept).toHaveLength(1);
+    expect(kept).toHaveLength(0);
   });
 });
 

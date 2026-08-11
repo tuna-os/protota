@@ -62,7 +62,7 @@ test.describe('Mobile topbar (#99)', () => {
     await expect(menu.getByRole('menuitem', { name: /icon library/i })).toBeVisible();
     await expect(menu.getByRole('menuitem', { name: /keyboard shortcuts/i })).toBeVisible();
     await expect(menu.getByRole('menuitem', { name: /enable screen flows/i })).toBeVisible();
-    await expect(menu.getByRole('menuitem', { name: /enable diagnostics/i })).toBeVisible();
+    await expect(menu.getByRole('menuitem', { name: /disable diagnostics/i })).toBeVisible();
     await expect(menu.getByRole('menuitem', { name: /new screen/i })).toHaveCount(0);
 
     // The menu itself fits the viewport.

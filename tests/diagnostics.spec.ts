@@ -48,6 +48,11 @@ test.describe('Diagnostics (#95)', () => {
   test('toggle opens the diagnostics panel in the right drawer', async ({ page }) => {
     const toggle = page.getByTestId('diagnostics-toggle');
     await expect(toggle).toBeVisible();
+    // Diagnostics are on by default (#161), so the toggle starts active.
+    await expect(toggle).toHaveAttribute('data-active', 'true');
+    // Turning it off, then back on, re-opens the drawer on the Diagnostics tab.
+    await toggle.click();
+    await expect(toggle).not.toHaveAttribute('data-active', 'true');
     await toggle.click();
     await expect(toggle).toHaveAttribute('data-active', 'true');
     await expect(page.getByTestId('diagnostics-panel')).toBeVisible();
@@ -59,7 +64,7 @@ test.describe('Diagnostics (#95)', () => {
 
   test('a seeded violation appears as a card with its tier and rule id', async ({ page }) => {
     await seedSpacingViolation(page);
-    await page.getByTestId('diagnostics-toggle').click();
+    await page.getByTestId('right-tab-diagnostics').click();
 
     const card = page.locator('[data-testid="diagnostic-card"][data-rule-id="HIG-W001"]');
     await expect(card).toBeVisible();
@@ -72,7 +77,7 @@ test.describe('Diagnostics (#95)', () => {
 
   test('clicking a card selects the offending node on the canvas', async ({ page }) => {
     const boxId = await seedSpacingViolation(page);
-    await page.getByTestId('diagnostics-toggle').click();
+    await page.getByTestId('right-tab-diagnostics').click();
 
     await page.locator('[data-testid="diagnostic-card"][data-rule-id="HIG-W001"]').click();
     await expect(page.locator('.selected-outline').first()).toBeVisible();
@@ -82,7 +87,7 @@ test.describe('Diagnostics (#95)', () => {
 
   test('badge counts issues and updates when one is ignored', async ({ page }) => {
     await seedSpacingViolation(page);
-    await page.getByTestId('diagnostics-toggle').click();
+    await page.getByTestId('right-tab-diagnostics').click();
 
     const badge = page.getByTestId('diagnostics-badge');
     await expect(badge).toHaveText('1');
@@ -99,7 +104,7 @@ test.describe('Diagnostics (#95)', () => {
 
   test('tier filter chips hide and restore cards without re-running the engine', async ({ page }) => {
     await seedSpacingViolation(page);
-    await page.getByTestId('diagnostics-toggle').click();
+    await page.getByTestId('right-tab-diagnostics').click();
 
     const card = page.locator('[data-testid="diagnostic-card"][data-rule-id="HIG-W001"]');
     await expect(card).toBeVisible();
@@ -111,7 +116,7 @@ test.describe('Diagnostics (#95)', () => {
 
   test('quick fix repairs the document and clears the card', async ({ page }) => {
     const boxId = await seedSpacingViolation(page);
-    await page.getByTestId('diagnostics-toggle').click();
+    await page.getByTestId('right-tab-diagnostics').click();
 
     await page.locator('[data-testid="diagnostic-card"][data-rule-id="HIG-W001"]').click();
     await page.getByTestId('diagnostic-fix').click();
@@ -135,7 +140,7 @@ test.describe('Diagnostics (#95)', () => {
   test('canvas outlines mark diagnosed nodes and clear with the toggle', async ({ page }) => {
     await seedSpacingViolation(page);
     const toggle = page.getByTestId('diagnostics-toggle');
-    await toggle.click();
+    // Diagnostics are on by default, so the outline is already marked.
     await expect(page.locator('.protota-diag-outline-warning')).toHaveCount(1);
     await toggle.click();
     await expect(page.locator('.protota-diag-outline-warning')).toHaveCount(0);

@@ -2103,3 +2103,15 @@ html .protota-div-tab-bar > .adw-node-wrapper > * {
   opacity: 0.85;
   overflow-wrap: anywhere;
 }
+
+/* adwaita-web's AdwDialog keeps its scrim position:fixed (out of normal flow),
+   so the <adw-dialog> host collapses to a 0×0 box even when open. Playwright's
+   visibility check (and any consumer reading the element's box) then reports
+   the dialog hidden although it is presented. Give the open host the viewport
+   box (the scrim still covers it at a higher z-index, so clicks land there). */
+adw-dialog.open {
+  display: block;
+  position: fixed;
+  inset: 0;
+  z-index: 1040;
+}

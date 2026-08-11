@@ -16,14 +16,38 @@ import type { AdwNode } from '../types/mockup';
  */
 export type HeaderBarControls = 'window' | 'close' | 'none';
 
+/**
+ * User preference for renderer-drawn window chrome (#163). A personal
+ * setting, not document content: it lives in localStorage and applies to
+ * every mockup's primary header bar, like the theme picker.
+ * - `buttons`: 'window' draws minimize/maximize/close; 'close' draws a
+ *   single close button (GNOME's Settings/Preferences idiom).
+ * - `side`: 'end' draws the controls at the header bar's end (GNOME
+ *   default); 'start' moves them top-left (a la Apple).
+ */
+export type WindowButtonsPreference = {
+  buttons: 'window' | 'close';
+  side: 'end' | 'start';
+};
+
+export const DEFAULT_WINDOW_BUTTONS: WindowButtonsPreference = {
+  buttons: 'window',
+  side: 'end',
+};
+
 export function headerBarControls(
   node: AdwNode,
   context: { inDialog: boolean; isPrimary: boolean },
+  preference: WindowButtonsPreference = DEFAULT_WINDOW_BUTTONS,
 ): HeaderBarControls {
   if (node.type !== 'header-bar' || !context.isPrimary) return 'none';
   const endButtons = node.showTitleButtons !== false && node.showEndTitleButtons !== false;
   if (!endButtons) return 'none';
-  return context.inDialog ? 'close' : 'window';
+  if (context.inDialog) return 'close';
+  // The close-only option is a user preference: with it, even a window's
+  // primary header bar drops minimize/maximize, keeping just the close
+  // button (GNOME default for dialogs and single-button windows).
+  return preference.buttons === 'close' ? 'close' : 'window';
 }
 
 /**

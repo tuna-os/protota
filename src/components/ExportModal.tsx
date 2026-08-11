@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useMockupStore } from '../store/mockupStore';
 import { mockupToBlueprint } from '../utils/blueprint';
 import { generatePythonBindings, generateRustBindings, generateValaBindings, generateBroadwayScript } from '../utils/codeGenerator';
@@ -11,6 +11,23 @@ interface Props {
 export const ExportModal: React.FC<Props> = ({ isOpen, onClose }) => {
   const { doc } = useMockupStore();
   const [activeTab, setActiveTab] = useState<'blp' | 'python' | 'rust' | 'vala' | 'broadway'>('blp');
+  const dialogRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const el = dialogRef.current;
+    if (!el) return;
+    if (isOpen) {
+      (el as any).present?.();
+    }
+  }, [isOpen]);
+
+  useEffect(() => {
+    const el = dialogRef.current;
+    if (!el) return;
+    const handler = () => onClose();
+    el.addEventListener('closed', handler);
+    return () => el.removeEventListener('closed', handler);
+  }, [onClose]);
 
   if (!isOpen) return null;
 
@@ -48,9 +65,13 @@ export const ExportModal: React.FC<Props> = ({ isOpen, onClose }) => {
   };
 
   return (
-    <div className="protota-modal-backdrop" onClick={onClose}>
-      <div className="protota-modal" onClick={(e) => e.stopPropagation()} style={{ width: '680px', maxHeight: '85vh' }}>
-        <h3 style={{ marginTop: 0 }}>Export GTK4 / Libadwaita Code</h3>
+    <adw-dialog
+      ref={dialogRef}
+      title="Export GTK4 / Libadwaita Code"
+      content-width={680}
+      can-close=""
+    >
+      <div style={{ padding: '0 24px 24px', display: 'flex', flexDirection: 'column', maxHeight: '85vh' }}>
         
         {/* Export Tabs */}
         <div style={{ display: 'flex', gap: '8px', borderBottom: '1px solid var(--separator-color, rgba(0,0,6,0.12))', marginBottom: '12px' }}>
@@ -118,6 +139,6 @@ export const ExportModal: React.FC<Props> = ({ isOpen, onClose }) => {
           <button className="protota-btn" onClick={onClose}>Close</button>
         </div>
       </div>
-    </div>
+    </adw-dialog>
   );
 };

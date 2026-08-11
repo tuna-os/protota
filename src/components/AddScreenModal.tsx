@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useMockupStore } from '../store/mockupStore';
 import type { ScreenTemplateType } from '../types/mockup';
 import { SCREEN_DEFAULTS } from '../types/mockup';
@@ -60,6 +60,23 @@ export const AddScreenModal: React.FC<Props> = ({ isOpen, onClose }) => {
   const { addScreen } = useMockupStore();
   const [title, setTitle] = useState('New Screen');
   const [template, setTemplate] = useState<ScreenTemplateType>('standard');
+  const dialogRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const el = dialogRef.current;
+    if (!el) return;
+    if (isOpen) {
+      (el as any).present?.();
+    }
+  }, [isOpen]);
+
+  useEffect(() => {
+    const el = dialogRef.current;
+    if (!el) return;
+    const handler = () => onClose();
+    el.addEventListener('closed', handler);
+    return () => el.removeEventListener('closed', handler);
+  }, [onClose]);
 
   if (!isOpen) return null;
 
@@ -71,9 +88,13 @@ export const AddScreenModal: React.FC<Props> = ({ isOpen, onClose }) => {
   };
 
   return (
-    <div className="protota-modal-backdrop" onClick={onClose}>
-      <div className="protota-modal" onClick={(e) => e.stopPropagation()} style={{ width: '480px' }}>
-        <h3 style={{ marginTop: 0 }}>Add Screen — GNOME HIG Template</h3>
+    <adw-dialog
+      ref={dialogRef}
+      title="Add Screen — GNOME HIG Template"
+      content-width={480}
+      can-close=""
+    >
+      <div style={{ padding: '0 24px 24px' }}>
         <p style={{ fontSize: '12px', opacity: 0.65, marginBottom: '16px' }}>
           Each template scaffolds a HIG-compliant widget tree. Legal nesting is enforced.
         </p>
@@ -138,6 +159,6 @@ export const AddScreenModal: React.FC<Props> = ({ isOpen, onClose }) => {
           </button>
         </div>
       </div>
-    </div>
+    </adw-dialog>
   );
 };

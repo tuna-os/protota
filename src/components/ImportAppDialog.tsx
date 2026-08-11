@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { persistDocumentSource } from '../store/mockupStore';
 import { blueprintBundleToDocument } from '../utils/blueprint';
 import {
@@ -47,6 +47,23 @@ export const ImportAppDialog: React.FC<Props> = ({ isOpen, onClose }) => {
   const [dragOver, setDragOver] = useState(false);
   const folderInputRef = useRef<HTMLInputElement>(null);
   const zipInputRef = useRef<HTMLInputElement>(null);
+  const dialogRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const el = dialogRef.current;
+    if (!el) return;
+    if (isOpen) {
+      (el as any).present?.();
+    }
+  }, [isOpen]);
+
+  useEffect(() => {
+    const el = dialogRef.current;
+    if (!el) return;
+    const handler = () => onClose();
+    el.addEventListener('closed', handler);
+    return () => el.removeEventListener('closed', handler);
+  }, [onClose]);
 
   if (!isOpen) return null;
 
@@ -152,14 +169,14 @@ export const ImportAppDialog: React.FC<Props> = ({ isOpen, onClose }) => {
   const manifest = ingested?.manifest;
 
   return (
-    <div className="protota-modal-backdrop" onClick={onClose}>
-      <div
-        className="protota-modal"
-        data-testid="import-app-dialog"
-        onClick={(event) => event.stopPropagation()}
-        style={{ width: 'min(640px, 94vw)', maxHeight: '85vh', display: 'flex', flexDirection: 'column' }}
-      >
-        <h3 style={{ marginTop: 0, marginBottom: '4px' }}>Import App</h3>
+    <adw-dialog
+      ref={dialogRef}
+      data-testid="import-app-dialog"
+      title="Import App"
+      content-width={640}
+      can-close=""
+    >
+      <div style={{ padding: '0 24px 24px', display: 'flex', flexDirection: 'column', maxHeight: '85vh' }}>
         <p style={{ fontSize: '12px', opacity: 0.65, margin: '0 0 4px' }}>
           Bring a GNOME app checkout into the designer: drop its source folder, pick a .zip,
           or paste its repository URL. Importing replaces the current document —
@@ -330,6 +347,7 @@ export const ImportAppDialog: React.FC<Props> = ({ isOpen, onClose }) => {
             </button>
           )}
         </div>
+      </div>
 
         {/* Hidden pickers; setInputFiles targets these in tests. */}
         <input
@@ -350,7 +368,6 @@ export const ImportAppDialog: React.FC<Props> = ({ isOpen, onClose }) => {
           onChange={handleZipPick}
           style={{ display: 'none' }}
         />
-      </div>
-    </div>
+    </adw-dialog>
   );
 };

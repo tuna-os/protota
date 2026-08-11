@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { persistDocumentSource } from '../store/mockupStore';
 import { registerSourceIcons, SOURCE_ICONS_STORAGE_KEY } from '../utils/adwIcons';
 import { loadPresetDocument, PRESET_CATALOG as PRESETS } from '../utils/presetCatalog';
@@ -10,6 +10,23 @@ interface Props {
 
 export const PresetGallery: React.FC<Props> = ({ isOpen, onClose }) => {
   const [loading, setLoading] = useState(false);
+  const dialogRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const el = dialogRef.current;
+    if (!el) return;
+    if (isOpen) {
+      (el as any).present?.();
+    }
+  }, [isOpen]);
+
+  useEffect(() => {
+    const el = dialogRef.current;
+    if (!el) return;
+    const handler = () => onClose();
+    el.addEventListener('closed', handler);
+    return () => el.removeEventListener('closed', handler);
+  }, [onClose]);
 
   if (!isOpen) return null;
 
@@ -35,9 +52,13 @@ export const PresetGallery: React.FC<Props> = ({ isOpen, onClose }) => {
   };
 
   return (
-    <div className="protota-modal-backdrop" onClick={onClose}>
-      <div className="protota-modal" onClick={(e) => e.stopPropagation()} style={{ width: '520px', maxHeight: '80vh' }}>
-        <h3 style={{ marginTop: 0 }}>Load Preset — GNOME Apps</h3>
+    <adw-dialog
+      ref={dialogRef}
+      title="Load Preset — GNOME Apps"
+      content-width={520}
+      can-close=""
+    >
+      <div style={{ padding: '0 24px 24px', maxHeight: '80vh' }}>
         <p style={{ fontSize: '12px', opacity: 0.65, marginBottom: '16px' }}>
           Replace the current document with a pre-built mockup. Your current work will be lost.
           Use Undo (Ctrl+Z) to restore after loading.
@@ -97,6 +118,6 @@ export const PresetGallery: React.FC<Props> = ({ isOpen, onClose }) => {
           <button className="protota-btn" onClick={onClose}>Cancel</button>
         </div>
       </div>
-    </div>
+    </adw-dialog>
   );
 };

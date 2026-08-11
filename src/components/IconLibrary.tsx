@@ -25,6 +25,7 @@ export const IconLibrary: React.FC<Props> = ({ isOpen, onClose }) => {
   const [activeCat, setActiveCat] = useState<string | null>(null);
   const [copied, setCopied] = useState<string | null>(null);
   const copiedTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const dialogRef = useRef<HTMLElement>(null);
 
   useEffect(() => () => {
     if (copiedTimer.current) clearTimeout(copiedTimer.current);
@@ -57,6 +58,22 @@ export const IconLibrary: React.FC<Props> = ({ isOpen, onClose }) => {
   );
   const visibleCount = visible.reduce((sum, category) => sum + category.icons.length, 0);
 
+  useEffect(() => {
+    const el = dialogRef.current;
+    if (!el) return;
+    if (isOpen) {
+      (el as any).present?.();
+    }
+  }, [isOpen]);
+
+  useEffect(() => {
+    const el = dialogRef.current;
+    if (!el) return;
+    const handler = () => onClose();
+    el.addEventListener('closed', handler);
+    return () => el.removeEventListener('closed', handler);
+  }, [onClose]);
+
   if (!isOpen) return null;
 
   const handlePick = (name: string) => {
@@ -74,19 +91,14 @@ export const IconLibrary: React.FC<Props> = ({ isOpen, onClose }) => {
   };
 
   return (
-    <div className="protota-modal-backdrop" onClick={onClose}>
-      <div
-        className="protota-modal"
-        data-testid="icon-library"
-        onClick={(e) => e.stopPropagation()}
-        style={{
-          width: 'min(720px, 94vw)',
-          maxHeight: '85vh',
-          display: 'flex',
-          flexDirection: 'column',
-        }}
-      >
-        <h3 style={{ marginTop: 0, marginBottom: '4px' }}>Icon Library</h3>
+    <adw-dialog
+      ref={dialogRef}
+      data-testid="icon-library"
+      title="Icon Library"
+      content-width={720}
+      can-close=""
+    >
+      <div style={{ padding: '0 24px 24px', display: 'flex', flexDirection: 'column', maxHeight: '85vh' }}>
         <p style={{ fontSize: '12px', opacity: 0.65, margin: '0 0 12px' }}>
           All {ICON_CATALOG_TOTAL} symbolic icons from the installed Adwaita icon set.
           Click an icon to copy its name
@@ -248,6 +260,6 @@ export const IconLibrary: React.FC<Props> = ({ isOpen, onClose }) => {
           </button>
         </div>
       </div>
-    </div>
+    </adw-dialog>
   );
 };

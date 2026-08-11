@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useMockupStore } from '../store/mockupStore';
 import { exportDocumentFile } from '../utils/exportImport';
 import { discoverAppSources, appBundleManifest, type AppDiscoveryResult } from '../utils/appDiscovery';
@@ -57,6 +57,24 @@ export const ExportWritebackDialog: React.FC<Props> = ({ isOpen, onClose }) => {
     () => `npx tsx scripts/protota-writeback.mjs --checkout ${shellPath(checkoutPath.trim() || '~/src/my-app')} --document ${shellPath(documentFileName)}`,
     [checkoutPath, documentFileName],
   );
+
+  const dialogRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const el = dialogRef.current;
+    if (!el) return;
+    if (isOpen) {
+      (el as any).present?.();
+    }
+  }, [isOpen]);
+
+  useEffect(() => {
+    const el = dialogRef.current;
+    if (!el) return;
+    const handler = () => onClose();
+    el.addEventListener('closed', handler);
+    return () => el.removeEventListener('closed', handler);
+  }, [onClose]);
 
   if (!isOpen) return null;
 
@@ -140,14 +158,14 @@ export const ExportWritebackDialog: React.FC<Props> = ({ isOpen, onClose }) => {
     .join('\n');
 
   return (
-    <div className="protota-modal-backdrop" onClick={close}>
-      <div
-        className="protota-modal"
-        data-testid="writeback-dialog"
-        onClick={(event) => event.stopPropagation()}
-        style={{ width: 'min(680px, 94vw)', maxHeight: '85vh', display: 'flex', flexDirection: 'column', overflow: 'auto' }}
-      >
-        <h3 style={{ marginTop: 0, marginBottom: '4px' }}>Export → Patch into Checkout</h3>
+    <adw-dialog
+      ref={dialogRef}
+      data-testid="writeback-dialog"
+      title="Export → Patch into Checkout"
+      content-width={680}
+      can-close=""
+    >
+      <div style={{ padding: '0 24px 24px', display: 'flex', flexDirection: 'column', maxHeight: '85vh', overflow: 'auto' }}>
         <p style={{ fontSize: '12px', opacity: 0.65, margin: '0 0 4px' }}>
           Patch your edits back into a real app checkout&apos;s own Blueprint files —
           minimal diffs, comments and translation wrappers preserved, untouched files byte-identical.
@@ -366,6 +384,6 @@ export const ExportWritebackDialog: React.FC<Props> = ({ isOpen, onClose }) => {
           )}
         </div>
       </div>
-    </div>
+    </adw-dialog>
   );
 };

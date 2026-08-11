@@ -13,6 +13,7 @@ export const CommandPalette: React.FC<Props> = ({ isOpen, onClose }) => {
   const { doc, selectedNodeId, selectedScreenId, addChildNode } = useMockupStore();
   const [search, setSearch] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
+  const dialogRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     if (isOpen) {
@@ -21,6 +22,22 @@ export const CommandPalette: React.FC<Props> = ({ isOpen, onClose }) => {
       return () => clearTimeout(timer);
     }
   }, [isOpen]);
+
+  useEffect(() => {
+    const el = dialogRef.current;
+    if (!el) return;
+    if (isOpen) {
+      (el as any).present?.();
+    }
+  }, [isOpen]);
+
+  useEffect(() => {
+    const el = dialogRef.current;
+    if (!el) return;
+    const handler = () => onClose();
+    el.addEventListener('closed', handler);
+    return () => el.removeEventListener('closed', handler);
+  }, [onClose]);
 
   if (!isOpen) return null;
 
@@ -44,16 +61,17 @@ export const CommandPalette: React.FC<Props> = ({ isOpen, onClose }) => {
   };
 
   return (
-    <div className="protota-modal-backdrop" onClick={onClose} style={{ zIndex: 2000 }}>
+    <adw-dialog
+      ref={dialogRef}
+      title="Add Widget"
+      content-width={440}
+      can-close=""
+      style={{ zIndex: 2000 }}
+    >
       <div
         className="protota-command-palette"
-        onClick={(e) => e.stopPropagation()}
         style={{
-          width: "440px",
           maxHeight: "340px",
-          background: "var(--popover-bg-color, #fff)",
-          borderRadius: "12px",
-          boxShadow: "0 12px 32px rgba(0,0,6,0.28)",
           overflow: "hidden",
           display: "flex",
           flexDirection: "column",
@@ -122,6 +140,6 @@ export const CommandPalette: React.FC<Props> = ({ isOpen, onClose }) => {
           )}
         </div>
       </div>
-    </div>
+    </adw-dialog>
   );
 };

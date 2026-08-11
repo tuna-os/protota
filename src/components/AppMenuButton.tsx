@@ -95,7 +95,6 @@ const SIDE_CHOICES: Array<{ value: WindowButtonsPreference['side']; label: strin
 ];
 
 function buildWindowButtonsPicker(
-  preference: WindowButtonsPreference,
   onButtons: (buttons: WindowButtonsPreference['buttons']) => void,
   onSide: (side: WindowButtonsPreference['side']) => void,
 ): HTMLElement {
@@ -104,7 +103,7 @@ function buildWindowButtonsPicker(
   section.setAttribute("role", "group");
   section.setAttribute("aria-label", "Window buttons");
 
-  const row = (title: string, ariaLabel: string, choices: Array<{ value: string; label: string }>, selected: string, onPick: (value: string) => void) => {
+  const row = (title: string, ariaLabel: string, choices: Array<{ value: string; label: string }>, onPick: (value: string) => void) => {
     const rowEl = document.createElement("div");
     rowEl.className = "protota-window-buttons-row";
     const caption = document.createElement("span");
@@ -129,10 +128,10 @@ function buildWindowButtonsPicker(
     section.appendChild(rowEl);
   };
 
-  row("Window controls", "Window button set", BUTTON_CHOICES, preference.buttons, (value) => {
+  row("Window controls", "Window button set", BUTTON_CHOICES, (value) => {
     if (value === "close" || value === "window") onButtons(value);
   });
-  row("Position", "Window button position", SIDE_CHOICES, preference.side, (value) => {
+  row("Position", "Window button position", SIDE_CHOICES, (value) => {
     if (value === "start" || value === "end") onSide(value);
   });
   return section;
@@ -289,7 +288,6 @@ export const AppMenuButton: React.FC = () => {
     let buttonsPicker = pop.querySelector<HTMLElement>(":scope > .protota-window-buttons-picker");
     if (!buttonsPicker) {
       buttonsPicker = buildWindowButtonsPicker(
-        windowButtons,
         (buttons) => setWindowButtons({ buttons }),
         (side) => setWindowButtons({ side }),
       );

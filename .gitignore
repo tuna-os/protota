@@ -9,3 +9,6 @@ artifacts/
 # Playwright test output (regenerated every run)
 playwright-report/
 test-results/
+
+# Pi agent runtime artifacts (regenerated every session)
+.pi/

@@ -1092,6 +1092,7 @@ html adw-status-page .adw-status-page-child {
 .protota-theme-switcher {
   display: flex;
   gap: 10px;
+  justify-content: center;
 }
 .protota-theme-swatch {
   position: relative;

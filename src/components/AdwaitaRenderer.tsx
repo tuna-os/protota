@@ -386,6 +386,7 @@ export const AdwaitaRenderer: React.FC<Props> = ({
   const {
     selectedNodeId, selectedNodeIds, selectNode, toggleNodeSelection, doc,
     diagnosticsEnabled, diagnostics, tierFilters, ignoredRules, ignoredInstances,
+    windowButtons,
   } = useMockupStore();
   // Interactive preview (prototype mode): non-null inside the full-screen
   // preview overlay. All editing chrome is suppressed and clicks act on the
@@ -706,9 +707,16 @@ export const AdwaitaRenderer: React.FC<Props> = ({
   const controlsKind = headerBarControls(node, {
     inDialog: dialogAncestor,
     isPrimary: node.id === primaryHeaderBar,
-  });
+  }, windowButtons);
+  // The window-buttons preference (#163) picks the side the renderer-drawn
+  // chrome sits on: end (GNOME default) or start (top-left, a la Apple).
   const windowControls = controlsKind !== 'none' ? (
-    <div key="window-controls" slot="end" className="protota-window-controls" aria-hidden="true">
+    <div
+      key={windowButtons.side === 'start' ? 'window-controls-start' : 'window-controls'}
+      slot={windowButtons.side === 'start' ? 'start' : 'end'}
+      className={`protota-window-controls${windowButtons.side === 'start' ? ' protota-window-controls-start' : ''}`}
+      aria-hidden="true"
+    >
       {controlsKind === 'window' && <span className="protota-window-control minimize" />}
       {controlsKind === 'window' && <span className="protota-window-control maximize" />}
       <span className="protota-window-control close" />

@@ -15,6 +15,11 @@
     {
       "matchUpdateTypes": ["major", "minor", "patch", "pin", "digest"],
       "automerge": true
+    },
+    {
+      "description": "@gjsify/adwaita-web >=0.32.0 breaks preset/icon rendering (Playwright: html[data-protota-ready] never appears, icon-library toBeVisible failures). Re-enabled once the app is adapted to the new API; tracked in the linked issue.",
+      "matchPackageNames": ["@gjsify/adwaita-web"],
+      "allowedVersions": "<0.32.0"
     }
   ]
 }

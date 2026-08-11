@@ -103,7 +103,7 @@ export const DiagnosticsPanel: React.FC = () => {
   }
 
   const tierCount = (tier: DiagnosticTier) =>
-    notIgnored.filter((d) => d.source === 'hig' && d.tier === tier).length;
+    notIgnored.filter((d) => d.tier === tier).length;
 
   const renderCard = (d: Diagnostic, index: number, isIgnoredCard = false) => {
     const key = cardKey(d, index);

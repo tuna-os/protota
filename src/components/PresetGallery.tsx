@@ -17,6 +17,8 @@ export const PresetGallery: React.FC<Props> = ({ isOpen, onClose }) => {
     if (!el) return;
     if (isOpen) {
       (el as any).present?.();
+    } else {
+      (el as any).close?.();
     }
   }, [isOpen]);
 
@@ -26,10 +28,7 @@ export const PresetGallery: React.FC<Props> = ({ isOpen, onClose }) => {
     const handler = () => onClose();
     el.addEventListener('closed', handler);
     return () => el.removeEventListener('closed', handler);
-  }, [onClose]);
-
-  if (!isOpen) return null;
-
+  }, [isOpen, onClose]);
   const handleLoad = async (id: string) => {
     setLoading(true);
     try {
@@ -58,7 +57,7 @@ export const PresetGallery: React.FC<Props> = ({ isOpen, onClose }) => {
       content-width={520}
       can-close=""
     >
-      <div style={{ padding: '0 24px 24px', maxHeight: '80vh' }}>
+      <div className="protota-modal" style={{ padding: '0 24px 24px', maxHeight: '80vh' }}>
         <p style={{ fontSize: '12px', opacity: 0.65, marginBottom: '16px' }}>
           Replace the current document with a pre-built mockup. Your current work will be lost.
           Use Undo (Ctrl+Z) to restore after loading.

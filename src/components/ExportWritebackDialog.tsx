@@ -65,6 +65,8 @@ export const ExportWritebackDialog: React.FC<Props> = ({ isOpen, onClose }) => {
     if (!el) return;
     if (isOpen) {
       (el as any).present?.();
+    } else {
+      (el as any).close?.();
     }
   }, [isOpen]);
 
@@ -74,10 +76,17 @@ export const ExportWritebackDialog: React.FC<Props> = ({ isOpen, onClose }) => {
     const handler = () => onClose();
     el.addEventListener('closed', handler);
     return () => el.removeEventListener('closed', handler);
-  }, [onClose]);
+  }, [isOpen, onClose]);
 
-  if (!isOpen) return null;
-
+  // Reset in-page state when the dialog closes
+  useEffect(() => {
+    if (!isOpen) {
+      setDirect(null);
+      setWritten(null);
+      setError(null);
+      setBusy(null);
+    }
+  }, [isOpen]);
   const handleCopy = (label: string, text: string) => {
     void navigator.clipboard.writeText(text);
     setCopied(label);
@@ -165,7 +174,7 @@ export const ExportWritebackDialog: React.FC<Props> = ({ isOpen, onClose }) => {
       content-width={680}
       can-close=""
     >
-      <div style={{ padding: '0 24px 24px', display: 'flex', flexDirection: 'column', maxHeight: '85vh', overflow: 'auto' }}>
+      <div className="protota-modal" style={{ padding: '0 24px 24px', display: 'flex', flexDirection: 'column', maxHeight: '85vh', overflow: 'auto' }}>
         <p style={{ fontSize: '12px', opacity: 0.65, margin: '0 0 4px' }}>
           Patch your edits back into a real app checkout&apos;s own Blueprint files —
           minimal diffs, comments and translation wrappers preserved, untouched files byte-identical.

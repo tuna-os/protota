@@ -18,6 +18,8 @@ export const ExportModal: React.FC<Props> = ({ isOpen, onClose }) => {
     if (!el) return;
     if (isOpen) {
       (el as any).present?.();
+    } else {
+      (el as any).close?.();
     }
   }, [isOpen]);
 
@@ -27,10 +29,7 @@ export const ExportModal: React.FC<Props> = ({ isOpen, onClose }) => {
     const handler = () => onClose();
     el.addEventListener('closed', handler);
     return () => el.removeEventListener('closed', handler);
-  }, [onClose]);
-
-  if (!isOpen) return null;
-
+  }, [isOpen, onClose]);
   const blpCode = mockupToBlueprint(doc);
   const pythonCode = generatePythonBindings(doc);
   const rustCode = generateRustBindings(doc);
@@ -71,7 +70,7 @@ export const ExportModal: React.FC<Props> = ({ isOpen, onClose }) => {
       content-width={680}
       can-close=""
     >
-      <div style={{ padding: '0 24px 24px', display: 'flex', flexDirection: 'column', maxHeight: '85vh' }}>
+      <div className="protota-modal" style={{ padding: '0 24px 24px', display: 'flex', flexDirection: 'column', maxHeight: '85vh' }}>
         
         {/* Export Tabs */}
         <div style={{ display: 'flex', gap: '8px', borderBottom: '1px solid var(--separator-color, rgba(0,0,6,0.12))', marginBottom: '12px' }}>

@@ -54,6 +54,8 @@ export const ImportAppDialog: React.FC<Props> = ({ isOpen, onClose }) => {
     if (!el) return;
     if (isOpen) {
       (el as any).present?.();
+    } else {
+      (el as any).close?.();
     }
   }, [isOpen]);
 
@@ -63,10 +65,7 @@ export const ImportAppDialog: React.FC<Props> = ({ isOpen, onClose }) => {
     const handler = () => onClose();
     el.addEventListener('closed', handler);
     return () => el.removeEventListener('closed', handler);
-  }, [onClose]);
-
-  if (!isOpen) return null;
-
+  }, [isOpen, onClose]);
   const reset = () => {
     setIngested(null);
     setEntry('');
@@ -176,7 +175,7 @@ export const ImportAppDialog: React.FC<Props> = ({ isOpen, onClose }) => {
       content-width={640}
       can-close=""
     >
-      <div style={{ padding: '0 24px 24px', display: 'flex', flexDirection: 'column', maxHeight: '85vh' }}>
+      <div className="protota-modal" style={{ padding: '0 24px 24px', display: 'flex', flexDirection: 'column', maxHeight: '85vh' }}>
         <p style={{ fontSize: '12px', opacity: 0.65, margin: '0 0 4px' }}>
           Bring a GNOME app checkout into the designer: drop its source folder, pick a .zip,
           or paste its repository URL. Importing replaces the current document —

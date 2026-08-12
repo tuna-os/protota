@@ -63,6 +63,8 @@ export const IconLibrary: React.FC<Props> = ({ isOpen, onClose }) => {
     if (!el) return;
     if (isOpen) {
       (el as any).present?.();
+    } else {
+      (el as any).close?.();
     }
   }, [isOpen]);
 
@@ -72,10 +74,7 @@ export const IconLibrary: React.FC<Props> = ({ isOpen, onClose }) => {
     const handler = () => onClose();
     el.addEventListener('closed', handler);
     return () => el.removeEventListener('closed', handler);
-  }, [onClose]);
-
-  if (!isOpen) return null;
-
+  }, [isOpen, onClose]);
   const handlePick = (name: string) => {
     // Always copy — the library doubles as a reference tool, exactly like
     // GNOME's Icon Library app.
@@ -98,7 +97,7 @@ export const IconLibrary: React.FC<Props> = ({ isOpen, onClose }) => {
       content-width={720}
       can-close=""
     >
-      <div style={{ padding: '0 24px 24px', display: 'flex', flexDirection: 'column', maxHeight: '85vh' }}>
+      <div className="protota-modal" style={{ padding: '0 24px 24px', display: 'flex', flexDirection: 'column', maxHeight: '85vh' }}>
         <p style={{ fontSize: '12px', opacity: 0.65, margin: '0 0 12px' }}>
           All {ICON_CATALOG_TOTAL} symbolic icons from the installed Adwaita icon set.
           Click an icon to copy its name

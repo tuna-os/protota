@@ -28,6 +28,8 @@ export const CommandPalette: React.FC<Props> = ({ isOpen, onClose }) => {
     if (!el) return;
     if (isOpen) {
       (el as any).present?.();
+    } else {
+      (el as any).close?.();
     }
   }, [isOpen]);
 
@@ -37,10 +39,7 @@ export const CommandPalette: React.FC<Props> = ({ isOpen, onClose }) => {
     const handler = () => onClose();
     el.addEventListener('closed', handler);
     return () => el.removeEventListener('closed', handler);
-  }, [onClose]);
-
-  if (!isOpen) return null;
-
+  }, [isOpen, onClose]);
   const selectedNode = (() => {
     if (!selectedNodeId || !selectedScreenId) return null;
     const screen = doc.screens.find((s) => s.id === selectedScreenId);
@@ -69,7 +68,7 @@ export const CommandPalette: React.FC<Props> = ({ isOpen, onClose }) => {
       style={{ zIndex: 2000 }}
     >
       <div
-        className="protota-command-palette"
+        className="protota-modal protota-command-palette"
         style={{
           maxHeight: "340px",
           overflow: "hidden",

@@ -69,6 +69,8 @@ export const KeyboardShortcuts: React.FC<Props> = ({ isOpen, onClose }) => {
     if (!el) return;
     if (isOpen) {
       (el as any).present?.();
+    } else {
+      (el as any).close?.();
     }
   }, [isOpen]);
 
@@ -80,7 +82,7 @@ export const KeyboardShortcuts: React.FC<Props> = ({ isOpen, onClose }) => {
     const handler = () => onClose();
     el.addEventListener("closed", handler);
     return () => el.removeEventListener("closed", handler);
-  }, [onClose]);
+  }, [isOpen, onClose]);
 
   return (
     <adw-dialog
@@ -90,7 +92,7 @@ export const KeyboardShortcuts: React.FC<Props> = ({ isOpen, onClose }) => {
       content-width={520}
       can-close=""
     >
-      <div style={{ padding: "0 24px 24px", overflow: "auto" }}>
+      <div className="protota-modal" style={{ padding: "0 24px 24px", overflow: "auto" }}>
         <p style={{ fontSize: "12px", opacity: 0.65, marginBottom: "16px" }}>
           Press <kbd style={kbdStyle}>Ctrl+?</kbd> to toggle this overlay.
         </p>

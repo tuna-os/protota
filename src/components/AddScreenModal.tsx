@@ -67,6 +67,8 @@ export const AddScreenModal: React.FC<Props> = ({ isOpen, onClose }) => {
     if (!el) return;
     if (isOpen) {
       (el as any).present?.();
+    } else {
+      (el as any).close?.();
     }
   }, [isOpen]);
 
@@ -76,10 +78,15 @@ export const AddScreenModal: React.FC<Props> = ({ isOpen, onClose }) => {
     const handler = () => onClose();
     el.addEventListener('closed', handler);
     return () => el.removeEventListener('closed', handler);
-  }, [onClose]);
+  }, [isOpen, onClose]);
 
-  if (!isOpen) return null;
-
+  // Reset form state when the dialog opens
+  useEffect(() => {
+    if (isOpen) {
+      setTitle('New Screen');
+      setTemplate('standard');
+    }
+  }, [isOpen]);
   const defaults = SCREEN_DEFAULTS[template];
 
   const handleCreate = () => {
@@ -94,7 +101,7 @@ export const AddScreenModal: React.FC<Props> = ({ isOpen, onClose }) => {
       content-width={480}
       can-close=""
     >
-      <div style={{ padding: '0 24px 24px' }}>
+      <div className="protota-modal" style={{ padding: '0 24px 24px' }}>
         <p style={{ fontSize: '12px', opacity: 0.65, marginBottom: '16px' }}>
           Each template scaffolds a HIG-compliant widget tree. Legal nesting is enforced.
         </p>

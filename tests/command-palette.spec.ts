@@ -63,9 +63,8 @@ test.describe('Command palette (#15)', () => {
 
     await expect(page.locator('.protota-command-palette')).toBeVisible({ timeout: 3000 });
 
-    // Close by clicking the backdrop
-    const backdrop = page.locator('.protota-modal-backdrop').last();
-    await backdrop.click({ position: { x: 10, y: 10 } });
+    // Close by pressing Escape
+    await page.keyboard.press('Escape');
     await expect(page.locator('.protota-command-palette')).not.toBeVisible({ timeout: 3000 });
   });
 });

@@ -641,24 +641,138 @@ body,
   background-color: var(--button-active-color, rgba(0, 0, 6, 0.19));
 }
 
-/* ---- Modal overlay ---- */
+/* ---- Modal overlay (Adw.Dialog-aligned) ---- */
 .protota-modal-backdrop {
   position: fixed;
   inset: 0;
-  background: var(--dialog-scrim-color, rgba(0, 0, 6, 0.32));
+  background: var(--dialog-scrim-color, rgba(0, 0, 0, 0.36));
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
+  /* Adwaita dialogs fade the scrim */
+  animation: protota-modal-backdrop-in 0.2s ease-out;
+}
+
+@keyframes protota-modal-backdrop-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 .protota-modal {
   background: var(--popover-bg-color, #ffffff);
   color: var(--popover-fg-color, rgba(0, 0, 6, 0.8));
-  border-radius: var(--card-radius, 12px);
+  border-radius: var(--dialog-radius, 18px);
   padding: var(--spacing-xl, 24px);
   width: 400px;
-  box-shadow: 0 12px 32px rgba(0, 0, 6, 0.24);
+  box-shadow:
+    0 0 0 1px var(--dialog-border-color, rgba(0, 0, 6, 0.06)),
+    0 8px 24px rgba(0, 0, 6, 0.12),
+    0 2px 6px rgba(0, 0, 6, 0.08);
+  /* Adwaita dialogs animate in with a scale+fade */
+  animation: protota-modal-in 0.25s ease-out;
+}
+
+@keyframes protota-modal-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* ---- Dialog action buttons (Adw.Dialog-aligned) ---- */
+.protota-btn {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 34px;
+  min-width: 34px;
+  margin: 0;
+  padding: 4px 14px;
+  border: none;
+  border-radius: var(--button-radius, 9px);
+  background-color: var(--button-bg-color, rgba(0, 0, 6, 0.08));
+  color: var(--window-fg-color, rgba(0, 0, 6, 0.8));
+  font-family: var(--font-family, inherit);
+  font-size: var(--font-size-base, 11pt);
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  transition: background-color 0.1s ease;
+  user-select: none;
+}
+
+.protota-btn:hover {
+  background-color: var(--button-hover-color, rgba(0, 0, 6, 0.13));
+}
+
+.protota-btn:active {
+  background-color: var(--button-active-color, rgba(0, 0, 6, 0.19));
+}
+
+.protota-btn:focus-visible {
+  outline: 2px solid var(--accent-color, #1c71d8);
+  outline-offset: 1px;
+}
+
+.protota-btn:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.protota-btn.suggested,
+.protota-btn--primary {
+  background-color: var(--accent-bg-color, #3584e4);
+  color: var(--accent-fg-color, #ffffff);
+}
+
+.protota-btn.suggested:hover,
+.protota-btn--primary:hover {
+  background-color: var(--accent-color, #1c71d8);
+}
+
+.protota-btn--destructive {
+  background-color: var(--destructive-bg-color, #e01b24);
+  color: var(--destructive-fg-color, #ffffff);
+}
+
+.protota-btn--destructive:hover {
+  background-color: var(--destructive-bg-hover, #c01c28);
+}
+
+/* Dialog field input styling */
+.protota-input {
+  box-sizing: border-box;
+  padding: 6px 10px;
+  border-radius: var(--button-radius, 9px);
+  border: 1px solid var(--entry-border-color, rgba(0, 0, 6, 0.18));
+  background: var(--entry-bg-color, #ffffff);
+  color: var(--window-fg-color, rgba(0, 0, 6, 0.8));
+  font-family: var(--font-family, inherit);
+  font-size: var(--font-size-base, 11pt);
+  outline: none;
+}
+
+.protota-input:focus {
+  border-color: var(--accent-color, #1c71d8);
+}
+
+/* Code block styling — adapts to light/dark via theme variables */
+.protota-code-block {
+  background: var(--code-bg-color, var(--card-bg-color, #f6f6f6));
+  color: var(--code-fg-color, var(--window-fg-color, rgba(0, 0, 6, 0.8)));
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-family: monospace;
+  line-height: 1.4;
+  overflow: auto;
 }
 
 /* ---- Property inspector labels ---- */
@@ -2037,6 +2151,9 @@ html .protota-div-tab-bar > .adw-node-wrapper > * {
   --popover-fg-color: rgba(0, 0, 6, 0.8);
   --popover-shade-color: rgba(0, 0, 6, 0.07);
   --dialog-scrim-color: rgba(0, 0, 6, 0.32);
+  --dialog-border-color: rgba(0, 0, 6, 0.07);
+  --code-bg-color: #f6f6f6;
+  --code-fg-color: rgba(0, 0, 6, 0.85);
   --button-bg-color: rgba(0, 0, 6, 0.08);
   --button-hover-color: rgba(0, 0, 6, 0.13);
   --button-active-color: rgba(0, 0, 6, 0.19);
@@ -2049,6 +2166,7 @@ html .protota-div-tab-bar > .adw-node-wrapper > * {
   --switch-knob-bg: #ffffff;
   --window-radius: 15px;
   --card-radius: 12px;
+  --dialog-radius: 18px;
   --button-radius: 9px;
   --spacing-xs: 6px;
   --spacing-s: 9px;
@@ -2080,6 +2198,9 @@ html .protota-div-tab-bar > .adw-node-wrapper > * {
   --popover-fg-color: #ffffff;
   --popover-shade-color: rgba(0, 0, 6, 0.36);
   --dialog-scrim-color: rgba(0, 0, 6, 0.55);
+  --dialog-border-color: rgba(255, 255, 255, 0.06);
+  --code-bg-color: #1e1e21;
+  --code-fg-color: #f8f8f2;
   --button-bg-color: rgba(255, 255, 255, 0.1);
   --button-hover-color: rgba(255, 255, 255, 0.15);
   --button-active-color: rgba(255, 255, 255, 0.22);
@@ -2090,6 +2211,9 @@ html .protota-div-tab-bar > .adw-node-wrapper > * {
   --destructive-fg-color: #ffffff;
   --switch-off-bg: rgba(255, 255, 255, 0.2);
   --switch-knob-bg: #deddda;
+  --dialog-radius: 18px;
+  --card-radius: 12px;
+  --button-radius: 9px;
   --active-toggle-fg-color: rgba(0, 0, 6, 0.8);
 }
 

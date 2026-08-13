@@ -9,16 +9,41 @@
   "packageRules": [
     {
       "description": "The Broadway reference runners are the visual oracle: their base image pins the GNOME app versions the presets were imported against. Bumping them changes the oracle, so they are updated manually, version-aligned with the source tags in tests/fixtures/gnome-app-catalog.json.",
-      "matchFileNames": ["containers/broadway/**"],
+      "matchFileNames": [
+        "containers/broadway/**"
+      ],
       "enabled": false
     },
     {
-      "matchUpdateTypes": ["major", "minor", "patch", "pin", "digest"],
+      "matchUpdateTypes": [
+        "major",
+        "minor",
+        "patch",
+        "pin",
+        "digest"
+      ],
       "automerge": true
     },
     {
+      "description": "fedora base image major bumps are manually reviewed: the fedora:46/rawhide image dnf repos serve fc45-built packages with a keyring mismatch, breaking container builds. Revert this rule once the upstream image is consistent.",
+      "matchDatasources": [
+        "docker"
+      ],
+      "matchPackageNames": [
+        "registry.fedoraproject.org/fedora",
+        "quay.io/fedora/fedora",
+        "quay.io/fedora/fedora-bootc"
+      ],
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "automerge": false
+    },
+    {
       "description": "@gjsify/adwaita-web >=0.32.0 breaks preset/icon rendering (Playwright: html[data-protota-ready] never appears, icon-library toBeVisible failures). Re-enabled once the app is adapted to the new API; tracked in the linked issue.",
-      "matchPackageNames": ["@gjsify/adwaita-web"],
+      "matchPackageNames": [
+        "@gjsify/adwaita-web"
+      ],
       "allowedVersions": "<0.32.0"
     }
   ]

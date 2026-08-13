@@ -157,6 +157,6 @@ Reported per edit as `NOT WRITTEN`, with exit code 4:
 
 ## Round-trip guarantee (tested in `src/__tests__/round-trip-cli.test.ts`)
 
-import → edit → write-back → re-import reflects the edit; files without
+Import → edit → write-back → re-import reflects the edit; files without
 edited widgets stay byte-identical; a template-owned edit lands in the
 template's file; custom classes survive verbatim.

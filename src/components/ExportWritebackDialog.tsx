@@ -180,7 +180,9 @@ export const ExportWritebackDialog: React.FC<Props> = ({ isOpen, onClose }) => {
         <pre
           data-testid="writeback-command"
           style={{
-            background: 'var(--card-bg-color, #1e1e1e)', color: '#f8f8f2', padding: '10px',
+            background: 'var(--code-bg-color, var(--card-bg-color, #f6f6f6))',
+            color: 'var(--code-fg-color, var(--window-fg-color, rgba(0,0,6,0.8)))',
+            padding: '10px',
             borderRadius: '8px', fontSize: '12px', overflow: 'auto', whiteSpace: 'pre-wrap',
             wordBreak: 'break-all', margin: '0 0 6px',
           }}
@@ -295,7 +297,9 @@ export const ExportWritebackDialog: React.FC<Props> = ({ isOpen, onClose }) => {
                   <pre
                     data-testid="writeback-diff"
                     style={{
-                      background: 'var(--card-bg-color, #1e1e1e)', color: '#f8f8f2', padding: '10px',
+                      background: 'var(--code-bg-color, var(--card-bg-color, #f6f6f6))',
+                      color: 'var(--code-fg-color, var(--window-fg-color, rgba(0,0,6,0.8)))',
+                      padding: '10px',
                       borderRadius: '8px', fontSize: '11px', overflow: 'auto', maxHeight: '220px',
                     }}
                   >
@@ -324,7 +328,9 @@ export const ExportWritebackDialog: React.FC<Props> = ({ isOpen, onClose }) => {
             {plan && plan.changedFiles.size > 0 && validateCommands && (
               <pre
                 style={{
-                  background: 'var(--card-bg-color, #1e1e1e)', color: '#f8f8f2', padding: '8px',
+                  background: 'var(--code-bg-color, var(--card-bg-color, #f6f6f6))',
+                  color: 'var(--code-fg-color, var(--window-fg-color, rgba(0,0,6,0.8)))',
+                  padding: '8px',
                   borderRadius: '8px', fontSize: '11px', overflow: 'auto', margin: '4px 0 0',
                 }}
               >

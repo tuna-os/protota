@@ -87,8 +87,8 @@ export const ExportModal: React.FC<Props> = ({ isOpen, onClose }) => {
         </div>
 
         <pre style={{
-          background: 'var(--card-bg-color, #1e1e1e)',
-          color: '#f8f8f2',
+          background: 'var(--code-bg-color, var(--card-bg-color, #f6f6f6))',
+          color: 'var(--code-fg-color, var(--window-fg-color, rgba(0,0,6,0.8)))',
           padding: '12px',
           borderRadius: '8px',
           maxHeight: '380px',

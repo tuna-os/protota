@@ -2,7 +2,7 @@
 
 Every preset in `public/presets/` with `"generatedBy": "scripts/generate-preset.mjs"`
 is produced from pinned official GNOME source (see `sourceImport` in
-[`tests/fixtures/gnome-app-catalog.json`](../tests/fixtures/gnome-app-catalog.json))
+[`tests/fixtures/gnome-app-catalog.json`](https://github.com/tuna-os/protota/blob/main/tests/fixtures/gnome-app-catalog.json))
 plus a reviewable hand-finishing file in `presets-src/`. Whatever the importer
 cannot honestly resolve from that source is kept as an explicit
 `custom-widget` boundary node — a labelled, allocated region, never a

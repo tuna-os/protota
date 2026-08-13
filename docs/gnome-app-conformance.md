@@ -1,7 +1,7 @@
 # GNOME app visual conformance
 
 The machine-readable source of truth is
-[`tests/fixtures/gnome-app-catalog.json`](../tests/fixtures/gnome-app-catalog.json).
+[`tests/fixtures/gnome-app-catalog.json`](https://github.com/tuna-os/protota/blob/main/tests/fixtures/gnome-app-catalog.json).
 An app is **passed** only after its isolated native Broadway image, isolated
 Protota image, and generated diff have all been visually inspected. A passing
 test alone is not enough.

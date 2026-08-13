@@ -136,7 +136,7 @@ buttons remain runtime/probe territory).
 ## Per-app boundary list
 
 Reasons below come from the finishing files (`presets-src/*.finishing.json`),
-import diagnostics, `docs/gnome-source-import.md`,
+import diagnostics from `docs/gnome-source-import.md`,
 `docs/gnome-app-conformance.md`, `docs/custom-widget-handoff.md`, and the
 maintainer's recorded assessments on #32/#81. Nothing here is inferred from
 guesswork about upstream code.

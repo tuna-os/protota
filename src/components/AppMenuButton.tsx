@@ -3,6 +3,7 @@ import { objectSelectSymbolic } from "@gjsify/adwaita-icons/actions";
 import { toDataUri } from "@gjsify/adwaita-icons/utils";
 import type { AdwMenuItem } from "@gjsify/adwaita-web";
 import { useMockupStore } from "../store/mockupStore";
+import type { WindowButtonsPreference } from "../utils/headerBarChrome";
 import { useIsMobile } from "../hooks/useIsMobile";
 import { useMenus, type MenuGroup, type MenuItem } from "./MenuData";
 
@@ -79,6 +80,77 @@ function syncThemeSwitcher(group: HTMLElement, selected: string): void {
 }
 
 /**
+ * The window-buttons preference picker (#163): two segmented rows — which
+ * buttons (Full / Close only) and where they sit (End / Start). Rendered
+ * post-render like the theme switcher; options carry aria-pressed and a
+ * `.selected` class so selection survives any CSS stacking.
+ */
+const BUTTON_CHOICES: Array<{ value: WindowButtonsPreference['buttons']; label: string }> = [
+  { value: "window", label: "Full" },
+  { value: "close", label: "Close only" },
+];
+const SIDE_CHOICES: Array<{ value: WindowButtonsPreference['side']; label: string }> = [
+  { value: "end", label: "End" },
+  { value: "start", label: "Start" },
+];
+
+function buildWindowButtonsPicker(
+  onButtons: (buttons: WindowButtonsPreference['buttons']) => void,
+  onSide: (side: WindowButtonsPreference['side']) => void,
+): HTMLElement {
+  const section = document.createElement("div");
+  section.className = "protota-window-buttons-picker protota-window-buttons-picker-popover";
+  section.setAttribute("role", "group");
+  section.setAttribute("aria-label", "Window buttons");
+
+  const row = (title: string, ariaLabel: string, choices: Array<{ value: string; label: string }>, onPick: (value: string) => void) => {
+    const rowEl = document.createElement("div");
+    rowEl.className = "protota-window-buttons-row";
+    const caption = document.createElement("span");
+    caption.className = "protota-window-buttons-caption";
+    caption.textContent = title;
+    rowEl.appendChild(caption);
+    const seg = document.createElement("div");
+    seg.className = "protota-window-buttons-segment";
+    seg.setAttribute("role", "group");
+    seg.setAttribute("aria-label", ariaLabel);
+    for (const { value, label } of choices) {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "protota-window-buttons-option";
+      btn.dataset.value = value;
+      btn.textContent = label;
+      btn.setAttribute("aria-label", label);
+      btn.addEventListener("click", () => onPick(value));
+      seg.appendChild(btn);
+    }
+    rowEl.appendChild(seg);
+    section.appendChild(rowEl);
+  };
+
+  row("Window controls", "Window button set", BUTTON_CHOICES, (value) => {
+    if (value === "close" || value === "window") onButtons(value);
+  });
+  row("Position", "Window button position", SIDE_CHOICES, (value) => {
+    if (value === "start" || value === "end") onSide(value);
+  });
+  return section;
+}
+
+/** Mirror of syncThemeSwitcher for the picker's two segmented rows. */
+function syncWindowButtonsPicker(section: HTMLElement, preference: WindowButtonsPreference): void {
+  section.querySelectorAll<HTMLElement>(".protota-window-buttons-option").forEach((btn) => {
+    const row = btn.closest<HTMLElement>(".protota-window-buttons-row");
+    const key = row?.querySelector<HTMLElement>(".protota-window-buttons-segment")?.getAttribute("aria-label");
+    const on = key === "Window button set"
+      ? btn.dataset.value === preference.buttons
+      : btn.dataset.value === preference.side;
+    btn.classList.toggle("selected", on);
+    btn.setAttribute("aria-pressed", String(on));
+  });
+}
+
+/**
  * The header app-menu button: an <adw-menu-button> (the flat header app-menu
  * button, default open-menu icon) at the header end before the Properties
  * toggle, on every viewport. It holds the app-menu idiom — theme switcher +
@@ -101,6 +173,8 @@ export const AppMenuButton: React.FC = () => {
   const { appMenuItems, handleToggleDiagnostics } = useMenus();
   const colorScheme = useMockupStore((s) => s.doc.colorScheme);
   const setColorScheme = useMockupStore((s) => s.setColorScheme);
+  const windowButtons = useMockupStore((s) => s.windowButtons);
+  const setWindowButtons = useMockupStore((s) => s.setWindowButtons);
   const showFlows = useMockupStore((s) => s.showFlows);
   const toggleShowFlows = useMockupStore((s) => s.toggleShowFlows);
   const diagnosticsEnabled = useMockupStore((s) => s.diagnosticsEnabled);
@@ -160,20 +234,19 @@ export const AppMenuButton: React.FC = () => {
 
   // The element's flat model cannot carry callbacks — activation comes back
   // as a bubbling menu-item-activated CustomEvent with {id,label,index}.
-  // We use event delegation on document (not a per-element listener) so the
-  // handler is present before React mounts, eliminating the race where
-  // Playwright clicks faster than a useEffect/useLayoutEffect fires.
+  // Listener is attached directly to the element (same pattern as the
+  // labelled Open/Export menus in Header.tsx) so it stays scoped to this
+  // button and does not depend on DOM traversal that can race against
+  // popover teardown when an item is clicked.
   useEffect(() => {
+    const el = btnRef.current;
+    if (!el) return;
     const onActivate = (e: Event) => {
-      const target = e.target as HTMLElement;
-      // Verify the event originated from our menu button (not other adw-menu-
-      // button instances such as the Open/Export labelled menus).
-      if (!target.closest('[data-testid="mobile-menu-button"]')) return;
       const id = (e as CustomEvent).detail?.id;
       if (typeof id === "string") actionsRef.current[id]?.();
     };
-    document.addEventListener("menu-item-activated", onActivate);
-    return () => document.removeEventListener("menu-item-activated", onActivate);
+    el.addEventListener("menu-item-activated", onActivate);
+    return () => el.removeEventListener("menu-item-activated", onActivate);
   }, []);
 
   useEffect(() => {
@@ -206,6 +279,25 @@ export const AppMenuButton: React.FC = () => {
       pop.insertBefore(sep, switcher.nextSibling);
     }
     syncThemeSwitcher(switcher, colorScheme);
+
+    // Window-buttons picker (#163) — right after the theme switcher's
+    // divider, before the app-menu entries. A personal preference like the
+    // theme, so it lives with the theme picker until a Preferences window
+    // exists (issue #163).
+    let buttonsPicker = pop.querySelector<HTMLElement>(":scope > .protota-window-buttons-picker");
+    if (!buttonsPicker) {
+      buttonsPicker = buildWindowButtonsPicker(
+        (buttons) => setWindowButtons({ buttons }),
+        (side) => setWindowButtons({ side }),
+      );
+      const firstItem = pop.querySelector<HTMLElement>(".adw-menu-button-item");
+      if (firstItem) pop.insertBefore(buttonsPicker, firstItem);
+      else pop.appendChild(buttonsPicker);
+      const sep = document.createElement("div");
+      sep.className = "protota-menu-divider";
+      pop.insertBefore(sep, buttonsPicker.nextSibling);
+    }
+    syncWindowButtonsPicker(buttonsPicker, windowButtons);
 
     // Extra group headers (groups 1..n) — divider + menu-title-styled header
     // before each group's first item, the same class the native menu-title
@@ -248,7 +340,7 @@ export const AppMenuButton: React.FC = () => {
     // Stable test target (the element does not forward attributes into its
     // popover, so this is part of the post-render insertion).
     pop.setAttribute("data-testid", "mobile-menu");
-  }, [flatKey, colorScheme, setColorScheme]);
+  }, [flatKey, colorScheme, setColorScheme, windowButtons, setWindowButtons]);
 
   return <adw-menu-button ref={btnRef} data-testid="mobile-menu-button" />;
 };

@@ -9,19 +9,13 @@ test.describe('HIG compliance audit (#8)', () => {
   test('lint button runs audit and shows results panel', async ({ page }) => {
     const lintBtn = page.getByTestId('diagnostics-toggle');
     await expect(lintBtn).toBeVisible();
-    await lintBtn.click();
-
-    // Results panel should appear (only if violations exist)
-    const resultsPanel = page.locator('.protota-audit-panel');
-    // The panel shows when lint is on and violations > 0
-    // In the default template it may have violations or not
-    // Just verify the button toggles correctly
+    // Diagnostics are on by default (#161), so lint starts active.
     await expect(lintBtn).toHaveAttribute('data-active', 'true');
   });
 
   test('audit categorizes violations by severity', async ({ page }) => {
     const lintBtn = page.getByTestId('diagnostics-toggle');
-    await lintBtn.click();
+    await expect(lintBtn).toHaveAttribute('data-active', 'true');
 
     const resultsPanel = page.locator('.protota-audit-panel');
     // Panel appears when violations exist and lint is on
@@ -32,7 +26,7 @@ test.describe('HIG compliance audit (#8)', () => {
 
   test('clicking a violation in audit selects the element', async ({ page }) => {
     const lintBtn = page.getByTestId('diagnostics-toggle');
-    await lintBtn.click();
+    await expect(lintBtn).toHaveAttribute('data-active', 'true');
 
     const resultsPanel = page.locator('.protota-audit-panel');
     const violation = resultsPanel.locator('.protota-audit-item').first();
@@ -44,11 +38,11 @@ test.describe('HIG compliance audit (#8)', () => {
 
   test('audit panel can be closed by toggling lint off', async ({ page }) => {
     const lintBtn = page.getByTestId('diagnostics-toggle');
-    await lintBtn.click();
+    // Lint is on by default; toggling it off hides the diagnostic cards.
     await expect(lintBtn).toHaveAttribute('data-active', 'true');
 
     await lintBtn.click();
-    const resultsPanel = page.locator('.protota-audit-panel');
-    await expect(resultsPanel).not.toBeVisible({ timeout: 3000 });
+    await expect(lintBtn).not.toHaveAttribute('data-active', 'true');
+    await expect(page.getByTestId('diagnostic-card').first()).toHaveCount(0);
   });
 });

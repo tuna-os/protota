@@ -10,12 +10,15 @@ import { runRoundTripCheck } from '../diagnostics/blueprintSource';
 import { findNodeLocation, findNodeById } from '../utils/treeHelpers';
 import { toggleSelection, unionSelection, filterShallowest } from '../utils/selection';
 import { blueprintToDocument, mockupToBlueprint } from '../utils/blueprint';
+import { DEFAULT_WINDOW_BUTTONS, type WindowButtonsPreference } from '../utils/headerBarChrome';
 
 const BLUEPRINT_STORAGE_KEY = 'protota_blueprint_v1';
 const METADATA_STORAGE_KEY = 'protota_editor_metadata_v1';
 const LEGACY_STORAGE_KEY = 'protota_doc_v1';
 /** Diagnostic ignores are editor state, not document content (design §2.4). */
 const IGNORES_STORAGE_KEY = 'protota_diagnostics_ignores_v1';
+/** Window-buttons preference is editor state, not document content (#163). */
+const WINDOW_BUTTONS_STORAGE_KEY = 'protota_window_buttons_v1';
 const MAX_HISTORY = 50;
 
 interface PersistedIgnores {
@@ -39,6 +42,24 @@ function loadIgnores(): PersistedIgnores {
 
 function saveIgnores(ignores: PersistedIgnores) {
   localStorage.setItem(IGNORES_STORAGE_KEY, JSON.stringify(ignores));
+}
+
+function loadWindowButtons(): WindowButtonsPreference {
+  try {
+    const raw = localStorage.getItem(WINDOW_BUTTONS_STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw) as Partial<WindowButtonsPreference>;
+      const pref: WindowButtonsPreference = { ...DEFAULT_WINDOW_BUTTONS };
+      if (parsed.buttons === 'close' || parsed.buttons === 'window') pref.buttons = parsed.buttons;
+      if (parsed.side === 'start' || parsed.side === 'end') pref.side = parsed.side;
+      return pref;
+    }
+  } catch { /* corrupt cache means default buttons */ }
+  return { ...DEFAULT_WINDOW_BUTTONS };
+}
+
+function saveWindowButtons(preference: WindowButtonsPreference) {
+  localStorage.setItem(WINDOW_BUTTONS_STORAGE_KEY, JSON.stringify(preference));
 }
 
 interface EditorMetadata {
@@ -330,6 +351,8 @@ interface MockupState {
   ignoredRules: string[];
   /** `${ruleId}:${nodeId}` dismissals (persisted). */
   ignoredInstances: string[];
+  /** Window-buttons preference (persisted, #163): buttons set + position. */
+  windowButtons: WindowButtonsPreference;
   /** Flow-edge connectors between screens (#11) drawn on the canvas. */
   showFlows: boolean;
 
@@ -405,6 +428,11 @@ interface MockupState {
   ignoreInstance: (ruleId: string, nodeId: string) => void;
   /** Re-enable all rules and un-dismiss all instances. */
   clearIgnores: () => void;
+  /**
+   * Update the window-buttons preference (#163). Persisted to localStorage
+   * (editor state, like the theme picker), never part of the document.
+   */
+  setWindowButtons: (patch: Partial<WindowButtonsPreference>) => void;
   /** Apply a machine fix expressed as data over existing mutations (§6). */
   applyQuickFix: (d: Diagnostic) => void;
   /** Export round-trip check (BLP-E001); returns the diagnostics it stored. */
@@ -564,8 +592,8 @@ export const useMockupStore = create<MockupState>((set, get) => {
     history: [startDoc],
     historyIndex: 0,
     showAddScreenModal: false,
-    diagnosticsEnabled: false,
-    diagnostics: [],
+    diagnosticsEnabled: true,
+    diagnostics: runDiagnostics(startDoc),
     exportCheck: [],
     liveBlueprintEnabled: false,
     liveBlueprintStatus: 'off',
@@ -573,6 +601,7 @@ export const useMockupStore = create<MockupState>((set, get) => {
     liveBlueprintDiagnostics: [],
     tierFilters: { error: true, warning: true, suggestion: true },
     ...(() => { const ignores = loadIgnores(); return { ignoredRules: ignores.rules, ignoredInstances: ignores.instances }; })(),
+    windowButtons: loadWindowButtons(),
     showFlows: false,
 
     selectNode: (nodeId, screenId) =>
@@ -959,6 +988,13 @@ export const useMockupStore = create<MockupState>((set, get) => {
     clearIgnores: () => {
       saveIgnores({ rules: [], instances: [] });
       set({ ignoredRules: [], ignoredInstances: [] });
+    },
+
+    setWindowButtons: (patch) => {
+      const next: WindowButtonsPreference = { ...get().windowButtons, ...patch };
+      if (next.buttons === get().windowButtons.buttons && next.side === get().windowButtons.side) return;
+      saveWindowButtons(next);
+      set({ windowButtons: next });
     },
 
     applyQuickFix: (d) => {

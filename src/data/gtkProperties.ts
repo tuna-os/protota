@@ -21,7 +21,8 @@ export const GTK_PROPERTY_DATA: {
   "Adw-1.gir",
   "GObject-2.0.gir",
   "Gio-2.0.gir",
-  "Gtk-4.0.gir"
+  "Gtk-4.0.gir",
+  "GtkSource-5.gir"
  ],
  "classes": {
   "Adw.AboutDialog": {
@@ -5885,6 +5886,480 @@ export const GTK_PROPERTY_DATA: {
    "properties": [
     "child"
    ]
+  },
+  "GtkSource.Annotation": {
+   "parent": "GObject.Object",
+   "implements": [],
+   "properties": [
+    "description",
+    "icon",
+    "line",
+    "style"
+   ]
+  },
+  "GtkSource.AnnotationProvider": {
+   "parent": "GObject.Object",
+   "implements": [],
+   "properties": []
+  },
+  "GtkSource.Annotations": {
+   "parent": "GObject.Object",
+   "implements": [],
+   "properties": []
+  },
+  "GtkSource.Buffer": {
+   "parent": "Gtk.TextBuffer",
+   "implements": [],
+   "properties": [
+    "highlight-matching-brackets",
+    "highlight-syntax",
+    "implicit-trailing-newline",
+    "language",
+    "loading",
+    "style-scheme"
+   ]
+  },
+  "GtkSource.Completion": {
+   "parent": "GObject.Object",
+   "implements": [],
+   "properties": [
+    "buffer",
+    "page-size",
+    "remember-info-visibility",
+    "select-on-show",
+    "show-icons",
+    "view"
+   ]
+  },
+  "GtkSource.CompletionCell": {
+   "parent": "Gtk.Widget",
+   "implements": [
+    "Gtk.Accessible",
+    "Gtk.Buildable",
+    "Gtk.ConstraintTarget"
+   ],
+   "properties": [
+    "column",
+    "markup",
+    "paintable",
+    "text",
+    "widget"
+   ]
+  },
+  "GtkSource.CompletionContext": {
+   "parent": "GObject.Object",
+   "implements": [
+    "Gio.ListModel"
+   ],
+   "properties": [
+    "busy",
+    "completion",
+    "empty"
+   ]
+  },
+  "GtkSource.CompletionSnippets": {
+   "parent": "GObject.Object",
+   "implements": [
+    "GtkSource.CompletionProvider"
+   ],
+   "properties": [
+    "priority",
+    "title"
+   ]
+  },
+  "GtkSource.CompletionWords": {
+   "parent": "GObject.Object",
+   "implements": [
+    "GtkSource.CompletionProvider"
+   ],
+   "properties": [
+    "minimum-word-size",
+    "priority",
+    "proposals-batch-size",
+    "scan-batch-size",
+    "title"
+   ]
+  },
+  "GtkSource.File": {
+   "parent": "GObject.Object",
+   "implements": [],
+   "properties": [
+    "compression-type",
+    "encoding",
+    "location",
+    "newline-type",
+    "read-only"
+   ]
+  },
+  "GtkSource.FileLoader": {
+   "parent": "GObject.Object",
+   "implements": [],
+   "properties": [
+    "buffer",
+    "file",
+    "input-stream",
+    "location"
+   ]
+  },
+  "GtkSource.FileSaver": {
+   "parent": "GObject.Object",
+   "implements": [],
+   "properties": [
+    "buffer",
+    "compression-type",
+    "encoding",
+    "file",
+    "flags",
+    "location",
+    "newline-type"
+   ]
+  },
+  "GtkSource.Gutter": {
+   "parent": "Gtk.Widget",
+   "implements": [
+    "Gtk.Accessible",
+    "Gtk.Buildable",
+    "Gtk.ConstraintTarget"
+   ],
+   "properties": [
+    "view",
+    "window-type"
+   ]
+  },
+  "GtkSource.GutterLines": {
+   "parent": "GObject.Object",
+   "implements": [],
+   "properties": []
+  },
+  "GtkSource.GutterRenderer": {
+   "parent": "Gtk.Widget",
+   "implements": [
+    "Gtk.Accessible",
+    "Gtk.Buildable",
+    "Gtk.ConstraintTarget"
+   ],
+   "properties": [
+    "alignment-mode",
+    "lines",
+    "view",
+    "xalign",
+    "xpad",
+    "yalign",
+    "ypad"
+   ]
+  },
+  "GtkSource.GutterRendererPixbuf": {
+   "parent": "GtkSource.GutterRenderer",
+   "implements": [
+    "Gtk.Accessible",
+    "Gtk.Buildable",
+    "Gtk.ConstraintTarget"
+   ],
+   "properties": [
+    "gicon",
+    "icon-name",
+    "paintable",
+    "pixbuf"
+   ]
+  },
+  "GtkSource.GutterRendererText": {
+   "parent": "GtkSource.GutterRenderer",
+   "implements": [
+    "Gtk.Accessible",
+    "Gtk.Buildable",
+    "Gtk.ConstraintTarget"
+   ],
+   "properties": [
+    "markup",
+    "text"
+   ]
+  },
+  "GtkSource.Hover": {
+   "parent": "GObject.Object",
+   "implements": [],
+   "properties": [
+    "hover-delay"
+   ]
+  },
+  "GtkSource.HoverContext": {
+   "parent": "GObject.Object",
+   "implements": [],
+   "properties": []
+  },
+  "GtkSource.HoverDisplay": {
+   "parent": "Gtk.Widget",
+   "implements": [
+    "Gtk.Accessible",
+    "Gtk.Buildable",
+    "Gtk.ConstraintTarget"
+   ],
+   "properties": []
+  },
+  "GtkSource.Language": {
+   "parent": "GObject.Object",
+   "implements": [],
+   "properties": [
+    "hidden",
+    "id",
+    "name",
+    "section"
+   ]
+  },
+  "GtkSource.LanguageManager": {
+   "parent": "GObject.Object",
+   "implements": [],
+   "properties": [
+    "language-ids",
+    "search-path"
+   ]
+  },
+  "GtkSource.Map": {
+   "parent": "GtkSource.View",
+   "implements": [
+    "Gtk.Accessible",
+    "Gtk.AccessibleText",
+    "Gtk.Buildable",
+    "Gtk.ConstraintTarget",
+    "Gtk.Scrollable"
+   ],
+   "properties": [
+    "font-desc",
+    "view"
+   ]
+  },
+  "GtkSource.Mark": {
+   "parent": "Gtk.TextMark",
+   "implements": [],
+   "properties": [
+    "category"
+   ]
+  },
+  "GtkSource.MarkAttributes": {
+   "parent": "GObject.Object",
+   "implements": [],
+   "properties": [
+    "background",
+    "gicon",
+    "icon-name",
+    "pixbuf"
+   ]
+  },
+  "GtkSource.PrintCompositor": {
+   "parent": "GObject.Object",
+   "implements": [],
+   "properties": [
+    "body-font-name",
+    "buffer",
+    "footer-font-name",
+    "header-font-name",
+    "highlight-syntax",
+    "line-numbers-font-name",
+    "n-pages",
+    "print-footer",
+    "print-header",
+    "print-line-numbers",
+    "tab-width",
+    "wrap-mode"
+   ]
+  },
+  "GtkSource.Region": {
+   "parent": "GObject.Object",
+   "implements": [],
+   "properties": [
+    "buffer"
+   ]
+  },
+  "GtkSource.SearchContext": {
+   "parent": "GObject.Object",
+   "implements": [],
+   "properties": [
+    "buffer",
+    "highlight",
+    "match-style",
+    "occurrences-count",
+    "regex-error",
+    "settings"
+   ]
+  },
+  "GtkSource.SearchSettings": {
+   "parent": "GObject.Object",
+   "implements": [],
+   "properties": [
+    "at-word-boundaries",
+    "case-sensitive",
+    "regex-enabled",
+    "search-text",
+    "visible-only",
+    "wrap-around"
+   ]
+  },
+  "GtkSource.Snippet": {
+   "parent": "GObject.Object",
+   "implements": [],
+   "properties": [
+    "buffer",
+    "description",
+    "focus-position",
+    "language-id",
+    "name",
+    "trigger"
+   ]
+  },
+  "GtkSource.SnippetChunk": {
+   "parent": "GObject.InitiallyUnowned",
+   "implements": [],
+   "properties": [
+    "context",
+    "focus-position",
+    "spec",
+    "text",
+    "text-set",
+    "tooltip-text"
+   ]
+  },
+  "GtkSource.SnippetContext": {
+   "parent": "GObject.Object",
+   "implements": [],
+   "properties": []
+  },
+  "GtkSource.SnippetManager": {
+   "parent": "GObject.Object",
+   "implements": [],
+   "properties": [
+    "search-path"
+   ]
+  },
+  "GtkSource.SpaceDrawer": {
+   "parent": "GObject.Object",
+   "implements": [],
+   "properties": [
+    "enable-matrix",
+    "matrix"
+   ]
+  },
+  "GtkSource.Style": {
+   "parent": "GObject.Object",
+   "implements": [],
+   "properties": [
+    "background",
+    "background-set",
+    "bold",
+    "bold-set",
+    "foreground",
+    "foreground-set",
+    "italic",
+    "italic-set",
+    "line-background",
+    "line-background-set",
+    "pango-underline",
+    "scale",
+    "scale-set",
+    "strikethrough",
+    "strikethrough-set",
+    "underline-color",
+    "underline-color-set",
+    "underline-set",
+    "weight",
+    "weight-set"
+   ]
+  },
+  "GtkSource.StyleScheme": {
+   "parent": "GObject.Object",
+   "implements": [],
+   "properties": [
+    "description",
+    "filename",
+    "id",
+    "name"
+   ]
+  },
+  "GtkSource.StyleSchemeChooserButton": {
+   "parent": "Gtk.Button",
+   "implements": [
+    "Gtk.Accessible",
+    "Gtk.Actionable",
+    "Gtk.Buildable",
+    "Gtk.ConstraintTarget",
+    "GtkSource.StyleSchemeChooser"
+   ],
+   "properties": []
+  },
+  "GtkSource.StyleSchemeChooserWidget": {
+   "parent": "Gtk.Widget",
+   "implements": [
+    "Gtk.Accessible",
+    "Gtk.Buildable",
+    "Gtk.ConstraintTarget",
+    "GtkSource.StyleSchemeChooser"
+   ],
+   "properties": []
+  },
+  "GtkSource.StyleSchemeManager": {
+   "parent": "GObject.Object",
+   "implements": [],
+   "properties": [
+    "scheme-ids",
+    "search-path"
+   ]
+  },
+  "GtkSource.StyleSchemePreview": {
+   "parent": "Gtk.Widget",
+   "implements": [
+    "Gtk.Accessible",
+    "Gtk.Actionable",
+    "Gtk.Buildable",
+    "Gtk.ConstraintTarget"
+   ],
+   "properties": [
+    "scheme",
+    "selected"
+   ]
+  },
+  "GtkSource.Tag": {
+   "parent": "Gtk.TextTag",
+   "implements": [],
+   "properties": [
+    "draw-spaces",
+    "draw-spaces-set"
+   ]
+  },
+  "GtkSource.View": {
+   "parent": "Gtk.TextView",
+   "implements": [
+    "Gtk.Accessible",
+    "Gtk.AccessibleText",
+    "Gtk.Buildable",
+    "Gtk.ConstraintTarget",
+    "Gtk.Scrollable"
+   ],
+   "properties": [
+    "annotations",
+    "auto-indent",
+    "background-pattern",
+    "completion",
+    "enable-snippets",
+    "highlight-current-line",
+    "indent-on-tab",
+    "indent-width",
+    "indenter",
+    "insert-spaces-instead-of-tabs",
+    "right-margin-position",
+    "show-line-marks",
+    "show-line-numbers",
+    "show-right-margin",
+    "smart-backspace",
+    "smart-home-end",
+    "space-drawer",
+    "tab-width"
+   ]
+  },
+  "GtkSource.VimIMContext": {
+   "parent": "Gtk.IMContext",
+   "implements": [],
+   "properties": [
+    "command-bar-text",
+    "command-text"
+   ]
   }
  },
  "interfaces": {
@@ -6039,6 +6514,14 @@ export const GTK_PROPERTY_DATA: {
   "Gtk.TreeDragDest": [],
   "Gtk.TreeDragSource": [],
   "Gtk.TreeModel": [],
-  "Gtk.TreeSortable": []
+  "Gtk.TreeSortable": [],
+  "GtkSource.CompletionProposal": [],
+  "GtkSource.CompletionProvider": [],
+  "GtkSource.HoverProvider": [],
+  "GtkSource.Indenter": [],
+  "GtkSource.StyleSchemeChooser": [
+   "style-scheme"
+  ]
  }
 };
+

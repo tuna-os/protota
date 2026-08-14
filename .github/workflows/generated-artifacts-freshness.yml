@@ -1,0 +1,99 @@
+name: Generated Artifacts Freshness
+
+# protota#237: two committed artifacts are generated from other sources with
+# no CI check that they still match:
+#
+# - src/data/gtkProperties.ts (from GObject introspection data via
+#   scripts/extract-gtk-properties.mjs) -- the committed .ts and what the
+#   generator produces could silently drift apart with no automation
+#   catching it.
+# - docs/components.md (from the widget/property tables in src/, via
+#   scripts/generate-component-reference.mjs) -- README.md claims this file
+#   "is generated from the code, so it cannot drift", but nothing enforced
+#   that. Verified false right now: regenerating it turned up a real,
+#   already-drifted line (tab-page's Properties field was missing `title`).
+#
+# Both jobs regenerate the artifact and fail the build on any diff, turning
+# "cannot drift" from a doc claim into an enforced invariant.
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'scripts/extract-gtk-properties.mjs'
+      - 'src/data/gtkProperties.ts'
+      - 'scripts/generate-component-reference.mjs'
+      - 'docs/components.md'
+      - 'src/types/mockup.ts'
+      - 'src/schemas/widgetSchemas.ts'
+      - 'src/utils/blueprint.ts'
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/extract-gtk-properties.mjs'
+      - 'src/data/gtkProperties.ts'
+      - 'scripts/generate-component-reference.mjs'
+      - 'docs/components.md'
+      - 'src/types/mockup.ts'
+      - 'src/schemas/widgetSchemas.ts'
+      - 'src/utils/blueprint.ts'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  # Needs real GIR files (GTK4/libadwaita/GtkSourceView introspection data),
+  # so this one runs in a Fedora container rather than plain ubuntu-latest.
+  gtk-properties:
+    runs-on: ubuntu-latest
+    container:
+      image: fedora:43
+    steps:
+      - name: Install GTK4 + libadwaita + GtkSourceView introspection data
+        run: |
+          dnf install -y --setopt=install_weak_deps=False \
+            nodejs \
+            npm \
+            gtk4-devel \
+            libadwaita-devel \
+            gtksourceview5-devel \
+          && dnf clean all
+
+      - uses: actions/checkout@v7
+
+      - name: Regenerate src/data/gtkProperties.ts
+        run: node scripts/extract-gtk-properties.mjs > /tmp/gtkProperties.regenerated.ts
+
+      - name: Fail on drift between committed and regenerated output
+        run: |
+          if ! diff -u src/data/gtkProperties.ts /tmp/gtkProperties.regenerated.ts; then
+            echo "::error::src/data/gtkProperties.ts is stale. Regenerate with:" >&2
+            echo "::error::  node scripts/extract-gtk-properties.mjs > src/data/gtkProperties.ts" >&2
+            echo "::error::(needs gtk4-devel, libadwaita-devel, gtksourceview5-devel — see docs/preset-workflow.md)" >&2
+            exit 1
+          fi
+          echo "src/data/gtkProperties.ts matches the GIR data in this image."
+
+  # Reads only committed source (LEGAL_CHILDREN/LEGAL_SLOTS/WIDGET_SCHEMAS
+  # and the already-committed gtkProperties.ts) -- no native toolkit needed,
+  # so this one is a plain Node job.
+  component-reference:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Regenerate docs/components.md
+        run: npx tsx scripts/generate-component-reference.mjs
+      - name: Fail on drift
+        run: |
+          if ! git diff --exit-code docs/components.md; then
+            echo "::error::docs/components.md is stale. Regenerate with:" >&2
+            echo "::error::  npx tsx scripts/generate-component-reference.mjs" >&2
+            exit 1
+          fi
+          echo "docs/components.md matches the generator's output."

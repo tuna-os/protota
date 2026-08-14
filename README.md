@@ -77,3 +77,7 @@ Required checks should be allowed to complete normally. If the repository has
 no merge queue and a maintainer explicitly authorizes a protected-branch
 merge, use the approved maintainer merge path. See [AGENTS.md](AGENTS.md) for
 the exact procedure and resource-use guidance.
+
+## License
+
+Apache-2.0 — see [LICENSE](LICENSE).

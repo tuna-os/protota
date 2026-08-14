@@ -4,7 +4,7 @@
     "config:recommended"
   ],
   "dependencyDashboard": false,
-  "automerge": true,
+  "automerge": false,
   "platformAutomerge": true,
   "packageRules": [
     {
@@ -16,10 +16,9 @@
     },
     {
       "matchUpdateTypes": [
-        "major",
-        "minor",
         "patch",
         "pin",
+        "pinDigest",
         "digest"
       ],
       "automerge": true

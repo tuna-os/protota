@@ -59,6 +59,14 @@ jobs:
 
       - run: npm ci
 
+      - name: Typecheck
+        # deploy's `npm run build` (tsc -b && vite build) is the only other
+        # place types get checked, and deploy only runs on main pushes — a
+        # type error in a test file passes this job, merges, then breaks
+        # deploy post-merge with nothing left to bisect against but the
+        # deploy log. Catch it here, on the PR, instead. See #211.
+        run: npx tsc -b
+
       - name: Run renderer conformance tests
         run: npm run test:unit
 

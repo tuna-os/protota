@@ -86,7 +86,8 @@ describe('exportDocumentFile', () => {
     // Intercept the serialized payload via a Blob-backed URL: jsdom-less
     // node gives us a real Blob from createObjectURL's argument.
     const blobArgs: Blob[] = [];
-    vi.spyOn(URL, 'createObjectURL').mockImplementation((blob: Blob) => {
+    vi.spyOn(URL, 'createObjectURL').mockImplementation((blob) => {
+      if (!(blob instanceof Blob)) throw new Error('expected a Blob');
       blobArgs.push(blob);
       return 'blob:test';
     });
@@ -111,7 +112,8 @@ describe('exportDocumentFile', () => {
     });
 
     const blobArgs: Blob[] = [];
-    vi.spyOn(URL, 'createObjectURL').mockImplementation((blob: Blob) => {
+    vi.spyOn(URL, 'createObjectURL').mockImplementation((blob) => {
+      if (!(blob instanceof Blob)) throw new Error('expected a Blob');
       blobArgs.push(blob);
       return 'blob:test';
     });
@@ -134,7 +136,8 @@ describe('exportDocumentFile', () => {
     mockGetImageBlob.mockResolvedValue(null);
 
     const blobArgs: Blob[] = [];
-    vi.spyOn(URL, 'createObjectURL').mockImplementation((blob: Blob) => {
+    vi.spyOn(URL, 'createObjectURL').mockImplementation((blob) => {
+      if (!(blob instanceof Blob)) throw new Error('expected a Blob');
       blobArgs.push(blob);
       return 'blob:test';
     });

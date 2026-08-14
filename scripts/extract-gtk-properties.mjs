@@ -1,13 +1,15 @@
 /**
  * Extract the property set of every GTK and libadwaita class from GIR data.
  *
- *   npx tsx scripts/extract-gtk-properties.mjs > src/data/gtkProperties.json
+ *   npx tsx scripts/extract-gtk-properties.mjs > src/data/gtkProperties.ts
  *
  * Run this where the GObject introspection files are installed — a container
  * with gtk4-devel and libadwaita-devel is enough (see docs/preset-workflow.md).
  * The result is committed so the exporter can drop properties a class does not
  * have without needing the toolkit at runtime, and regenerated when Protota
- * targets a newer GNOME.
+ * targets a newer GNOME. Emits the committed .ts module directly (not JSON)
+ * so there is no separate hand-conversion step for the committed artifact to
+ * silently drift from (tunaos/protota#237).
  *
  * GIR is the authority here. Guessing which properties a widget accepts is how
  * we ended up emitting Blueprint that would not compile.
@@ -77,5 +79,26 @@ for (const file of files) {
   }
 }
 
-console.log(JSON.stringify({ generatedFrom: files, classes, interfaces }, null, 1));
+const data = { generatedFrom: files, classes, interfaces };
+
+console.log(`/**
+ * GTK and libadwaita property tables, generated from GObject introspection
+ * data by scripts/extract-gtk-properties.mjs. Regenerate when Protota targets
+ * a newer GNOME; do not hand-edit.
+ *
+ * A TypeScript module rather than JSON so it loads identically under Vite and
+ * the test runner, which disagree about JSON import attributes.
+ */
+export interface GtkClassInfo {
+  parent: string | null;
+  implements?: string[];
+  properties: string[];
+}
+
+export const GTK_PROPERTY_DATA: {
+  generatedFrom: string[];
+  classes: Record<string, GtkClassInfo>;
+  interfaces: Record<string, string[]>;
+} = ${JSON.stringify(data, null, 1)};
+`);
 console.error(`${Object.keys(classes).length} classes and ${Object.keys(interfaces).length} interfaces from ${files.join(', ')}`);

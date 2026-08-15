@@ -7,7 +7,7 @@
 ## Mission
 
 Protota is a GNOME HIG-compliant mockup tool for Adwaita app UIs. It uses real
-[`@gjsify/adwaita-web`](https://github.com/gjsify/adwaita-web) web components so
+[`@gjsify/adwaita-web`](https://github.com/gjsify/gjsify/tree/main/packages/web/adwaita-web) web components so
 mockups look *and behave* like real Adwaita — not pixel replicas. Live at
 <https://tuna-os.github.io/protota/>.
 

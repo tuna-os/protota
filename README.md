@@ -2,7 +2,7 @@
 
 GNOME HIG-compliant mockup tool for Adwaita app UIs.
 
-Uses real [`@gjsify/adwaita-web`](https://github.com/gjsify/adwaita-web) web components so mockups look **and behave** like real Adwaita — not pixel replicas.
+Uses real [`@gjsify/adwaita-web`](https://github.com/gjsify/gjsify/tree/main/packages/web/adwaita-web) web components so mockups look **and behave** like real Adwaita — not pixel replicas.
 
 **Live:** https://tuna-os.github.io/protota/
 

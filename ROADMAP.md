@@ -1,6 +1,6 @@
 # protota Roadmap
 
-**Last updated**: 2026-08-10 | **Maintainer**: tuna-os (hanthor)
+**Last updated**: 2026-08-24 | **Maintainer**: tuna-os (hanthor)
 
 ---
 
@@ -17,20 +17,20 @@ mockups look *and behave* like real Adwaita — not pixel replicas. Live at
 
 - Active development (commits daily); Playwright E2E suite in place.
 - **Community health files landed** (CODE_OF_CONDUCT.md, CONTRIBUTING.md,
-  SECURITY.md) — LICENSE still missing (tracked in #173).
-- 9 open issues; the backlog is dominated by Adwaita-conformance refinements
-  (modals → `Adw.Dialog`, shortcuts → `Adw.ShortcutsDialog`) and two flaky
-  Playwright tests.
+  SECURITY.md, LICENSE — #173 closed).
+- **2 open issues** (08-24): Broadway Reference Capture red 5 consecutive
+  nightly runs (#255, ci-maintainer) and CI baseline adoption (#184).
+- Prior roadmap trackers **all closed**: flaky E2E tests (#156/#165),
+  LICENSE (#173), Adwaita conformance modals/shortcuts (#159/#160), window
+  buttons (#158/#163).
 
 ### Priorities
 
 | Priority | Item | Tracking | Status |
 |----------|------|----------|--------|
-| P1 | Fix flaky E2E tests (drag-and-drop, mobile topbar) | #156, #165 | 🔴 Open |
-| P1 | Add missing LICENSE + remaining health files | #173 | 🔴 Open |
-| P2 | Adwaita conformance: modals → `Adw.Dialog`, shortcuts → `Adw.ShortcutsDialog` | #159, #160 | ⬜ Not started |
-| P2 | Enable Diagnostics by default + Blueprint in groups toggle | #161, #162 | ⬜ Not started |
-| P3 | Window button options (close-only, top-left) | #163, #158 | ⬜ Not started |
+| P0 | Broadway Reference Capture — red 5 consecutive nightlies | #255 | 🔴 Open |
+| P1 | Adopt TunaOS project CI baseline | #184 | 🟡 Open |
+| P2 | ROADMAP freshness — this document updated 08-24 | (org #1997) | ✅ Done |
 
 ---
 
@@ -42,7 +42,7 @@ mockups look *and behave* like real Adwaita — not pixel replicas. Live at
 
 | Goal | Owner | Tracking | Status |
 |------|-------|----------|--------|
-| Green E2E suite (no flaky tests) | protota | #156, #165 | 🔴 Open |
+| Green E2E suite (no flaky tests) | protota | #156, #165 | ✅ Done — drag/drop covered (#263/#264) |
 | Complete community health files (LICENSE) | guide / protota | #173 | 🔴 Open |
 | Adwaita component conformance pass | protota | #159, #160 | ⬜ Not started |
 

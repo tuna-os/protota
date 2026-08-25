@@ -111,4 +111,16 @@ describe('resolveDropTarget', () => {
       draggedType: 'button',
     })).toBeNull();
   });
+
+  it('resolves slot attribute when dropping onto a slotted child', () => {
+    installGeometry({ child: { top: 20, width: 20, height: 20 } });
+    const child: AdwNode = { id: 'child', type: 'button', slot: 'end' };
+    const doc = makeDoc({ id: 'root', type: 'header-bar', children: [child] });
+    const rootElement = new FakeElement('root');
+    const childElement = new FakeElement('child', rootElement);
+
+    expect(resolveDropTarget(doc, childElement as unknown as Element, 0, 10, {
+      draggedType: 'button',
+    })).toEqual({ parentId: 'root', index: 0, slot: 'end', screenId: 'screen' });
+  });
 });

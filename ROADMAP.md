@@ -43,8 +43,8 @@ mockups look *and behave* like real Adwaita — not pixel replicas. Live at
 | Goal | Owner | Tracking | Status |
 |------|-------|----------|--------|
 | Green E2E suite (no flaky tests) | protota | #156, #165 | ✅ Done — drag/drop covered (#263/#264) |
-| Complete community health files (LICENSE) | guide / protota | #173 | 🔴 Open |
-| Adwaita component conformance pass | protota | #159, #160 | ⬜ Not started |
+| Complete community health files (LICENSE) | guide / protota | #173 | ✅ Done |
+| Adwaita component conformance pass | protota | #159, #160 | ✅ Done — modals/shortcuts integrated |
 
 ### Next Quarter (2026 Q4) — "Mature"
 
@@ -58,8 +58,8 @@ mockups look *and behave* like real Adwaita — not pixel replicas. Live at
 
 | Item | Issue | Priority | Effort |
 |------|-------|----------|--------|
-| Flaky Playwright tests masking regressions | #156, #165 | P1 | S |
-| Missing LICENSE | #173 | P1 | S |
+| Flaky Playwright tests masking regressions | #156, #165 | P1 | S | (Closed) |
+| Missing LICENSE | #173 | P1 | S | (Closed) |
 
 ---
 

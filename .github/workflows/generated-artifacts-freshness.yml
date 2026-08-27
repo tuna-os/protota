@@ -48,7 +48,7 @@ jobs:
   gtk-properties:
     runs-on: ubuntu-latest
     container:
-      image: fedora:45
+      image: fedora:46
     steps:
       - name: Install GTK4 + libadwaita + GtkSourceView introspection data
         run: |

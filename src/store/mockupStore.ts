@@ -9,72 +9,18 @@ import { runDiagnostics } from '../diagnostics/engine';
 import { runRoundTripCheck } from '../diagnostics/blueprintSource';
 import { findNodeLocation, findNodeById } from '../utils/treeHelpers';
 import { toggleSelection, unionSelection, filterShallowest } from '../utils/selection';
-import { blueprintToDocument, mockupToBlueprint } from '../utils/blueprint';
-import { DEFAULT_WINDOW_BUTTONS, type WindowButtonsPreference } from '../utils/headerBarChrome';
+import type { WindowButtonsPreference } from '../utils/headerBarChrome';
+import {
+  loadIgnores,
+  loadPersistedDocument,
+  loadWindowButtons,
+  persistDocumentSource,
+  saveIgnores,
+  saveWindowButtons,
+} from './persistence';
+export { persistDocumentSource } from './persistence';
 
-const BLUEPRINT_STORAGE_KEY = 'protota_blueprint_v1';
-const METADATA_STORAGE_KEY = 'protota_editor_metadata_v1';
-const LEGACY_STORAGE_KEY = 'protota_doc_v1';
-/** Diagnostic ignores are editor state, not document content (design §2.4). */
-const IGNORES_STORAGE_KEY = 'protota_diagnostics_ignores_v1';
-/** Window-buttons preference is editor state, not document content (#163). */
-const WINDOW_BUTTONS_STORAGE_KEY = 'protota_window_buttons_v1';
 const MAX_HISTORY = 50;
-
-interface PersistedIgnores {
-  rules: string[];
-  instances: string[];
-}
-
-function loadIgnores(): PersistedIgnores {
-  try {
-    const raw = localStorage.getItem(IGNORES_STORAGE_KEY);
-    if (raw) {
-      const parsed = JSON.parse(raw) as Partial<PersistedIgnores>;
-      return {
-        rules: Array.isArray(parsed.rules) ? parsed.rules : [],
-        instances: Array.isArray(parsed.instances) ? parsed.instances : [],
-      };
-    }
-  } catch { /* corrupt cache means no ignores */ }
-  return { rules: [], instances: [] };
-}
-
-function saveIgnores(ignores: PersistedIgnores) {
-  localStorage.setItem(IGNORES_STORAGE_KEY, JSON.stringify(ignores));
-}
-
-function loadWindowButtons(): WindowButtonsPreference {
-  try {
-    const raw = localStorage.getItem(WINDOW_BUTTONS_STORAGE_KEY);
-    if (raw) {
-      const parsed = JSON.parse(raw) as Partial<WindowButtonsPreference>;
-      const pref: WindowButtonsPreference = { ...DEFAULT_WINDOW_BUTTONS };
-      if (parsed.buttons === 'close' || parsed.buttons === 'window') pref.buttons = parsed.buttons;
-      if (parsed.side === 'start' || parsed.side === 'end') pref.side = parsed.side;
-      return pref;
-    }
-  } catch { /* corrupt cache means default buttons */ }
-  return { ...DEFAULT_WINDOW_BUTTONS };
-}
-
-function saveWindowButtons(preference: WindowButtonsPreference) {
-  localStorage.setItem(WINDOW_BUTTONS_STORAGE_KEY, JSON.stringify(preference));
-}
-
-interface EditorMetadata {
-  title?: string;
-  colorScheme?: MockupDocument['colorScheme'];
-}
-
-/** Persist the UI as Blueprint; JSON is reserved for editor-only metadata. */
-export function persistDocumentSource(doc: MockupDocument) {
-  localStorage.setItem(BLUEPRINT_STORAGE_KEY, mockupToBlueprint(doc));
-  localStorage.setItem(
-    METADATA_STORAGE_KEY,
-    JSON.stringify({ title: doc.title, colorScheme: doc.colorScheme } satisfies EditorMetadata),
-  );
-}
 
 function uid(prefix: string): string {
   return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
@@ -539,26 +485,7 @@ function withFreshIds(node: AdwNode): AdwNode {
 }
 
 export const useMockupStore = create<MockupState>((set, get) => {
-  const saved = (() => {
-    try {
-      const source = localStorage.getItem(BLUEPRINT_STORAGE_KEY);
-      if (source) {
-        const metadata = JSON.parse(localStorage.getItem(METADATA_STORAGE_KEY) || '{}') as EditorMetadata;
-        const document = blueprintToDocument(source, metadata.title);
-        document.colorScheme = metadata.colorScheme || 'auto';
-        return document;
-      }
-      // One-time migration for documents created before Blueprint became the
-      // persisted UI format. New writes never store a JSON widget tree.
-      const legacy = localStorage.getItem(LEGACY_STORAGE_KEY);
-      if (!legacy) return null;
-      const document = JSON.parse(legacy) as MockupDocument;
-      persistDocumentSource(document);
-      localStorage.removeItem(LEGACY_STORAGE_KEY);
-      return document;
-    }
-    catch { return null; }
-  })();
+  const saved = loadPersistedDocument();
   const startDoc: MockupDocument = saved || initialDocument;
 
   /** >0 while runInTransaction runs: per-mutation snapshots are suspended. */

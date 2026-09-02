@@ -111,4 +111,48 @@ describe('resolveDropTarget', () => {
       draggedType: 'button',
     })).toBeNull();
   });
+
+  it('resolves slot from child node when dropping on a slotted container', () => {
+    installGeometry({ child: { left: 10, width: 20, height: 10 } });
+    const child: AdwNode = { id: 'child', type: 'button', slot: 'start' };
+    const container: AdwNode = { id: 'header', type: 'header-bar', children: [child] };
+    const doc = makeDoc(container);
+
+    const headerEl = new FakeElement('header');
+    const childEl = new FakeElement('child', headerEl);
+
+    const target = resolveDropTarget(doc, childEl as unknown as Element, 0, 0, {
+      draggedType: 'button',
+    });
+    expect(target).toEqual({
+      parentId: 'header',
+      index: 0,
+      slot: 'start',
+      screenId: 'screen',
+    });
+  });
+
+  it('calculates flowAxis correctly for header-bar, overlay-split, and list-box-row containers', () => {
+    installGeometry({
+      b1: { left: 10, width: 20, height: 10 },
+      b2: { left: 40, width: 20, height: 10 },
+    });
+    const children: AdwNode[] = [
+      { id: 'b1', type: 'button' },
+      { id: 'b2', type: 'button' },
+    ];
+    const header: AdwNode = { id: 'header', type: 'header-bar', children };
+    const split: AdwNode = { id: 'split', type: 'overlay-split', children };
+    const row: AdwNode = { id: 'row', type: 'list-box-row', children };
+
+    expect(insertionIndexFor(header, 19, 0)).toBe(0);
+    expect(insertionIndexFor(header, 35, 0)).toBe(1);
+
+    expect(insertionIndexFor(split, 19, 0)).toBe(0);
+    expect(insertionIndexFor(split, 35, 0)).toBe(1);
+
+    expect(insertionIndexFor(row, 19, 0)).toBe(0);
+    expect(insertionIndexFor(row, 35, 0)).toBe(1);
+  });
 });
+

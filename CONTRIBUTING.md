@@ -22,7 +22,7 @@ so mockups look *and behave* like real Adwaita.
 |---|---|
 | `src/` | The app: widget tree, renderer, presets, Blueprint/GtkBuilder import/export |
 | `presets-src/` | Preset source files |
-| `docs/` | `components.md` (generated component catalog) and other docs |
+| `docs/` | `components.md` (generated component catalog), `spec/` (vendored GNOME HIG/spec snapshot), and other docs |
 | `tests/` | Vitest unit tests (Blueprint/renderer conformance) |
 | `public/` | Static assets |
 | `scripts/` | Build and maintenance scripts |

@@ -18,6 +18,8 @@
 | Preferences in main window | `AdwPreferencesDialog` |
 | `GtkWindow` | `AdwApplicationWindow` |
 | `GtkHeaderBar` | `AdwHeaderBar` |
+| Custom `GtkImage` for user avatars | `AdwAvatar` with `show-initials: true` |
+| Full login forms in a popover | Account header in popover + `AdwDialog` for credentials |
 
 ## Build Checklist
 

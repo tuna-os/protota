@@ -25,8 +25,10 @@ Vendored: `audits/`, `reference/` (including the mirrored HIG pages and the
 
 Deliberately **not** vendored:
 
-- `components/` (36 per-widget files) — Protota's widget contract comes from its
+- `components/` (per-widget files) — Protota's widget contract comes from its
   own registry, and a second hand-written list would drift from it.
+  Protota keeps `components/popover.md` as an exception, to describe how
+  Libadwaita popovers show account details (#268).
 - `skills/`, `SKILL.md`, `ONBOARD.md`, `INDEX.md`, `QUICKSTART.md`,
   `GNOME-AGENT-GUIDE.md` — agent-harness routing for *building* GNOME apps,
   which is not what Protota does.

@@ -27,8 +27,8 @@ Deliberately **not** vendored:
 
 - `components/` (per-widget files) — Protota's widget contract comes from its
   own registry, and a second hand-written list would drift from it.
-  `components/popover.md` is vendored selectively to document GNOME HIG
-  account presentation patterns in Libadwaita popovers (#268).
+  Protota keeps `components/popover.md` as an exception, to describe how
+  Libadwaita popovers show account details (#268).
 - `skills/`, `SKILL.md`, `ONBOARD.md`, `INDEX.md`, `QUICKSTART.md`,
   `GNOME-AGENT-GUIDE.md` — agent-harness routing for *building* GNOME apps,
   which is not what Protota does.

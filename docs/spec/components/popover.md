@@ -30,13 +30,13 @@
 
 ## Account Presentation within Popovers (GNOME HIG & Libadwaita)
 
-> Consulted in [tuna-os/protota#268](https://github.com/tuna-os/protota/issues/268) — standardizing account details in popovers according to Libadwaita and GNOME HIG principles.
+> Consulted in [tuna-os/protota#268](https://github.com/tuna-os/protota/issues/268) — the Libadwaita and GNOME HIG conventions for account details in a popover.
 
-When apps present account status (such as a profile picture, user display name, handle or email, and account-scoped actions), legacy GTK3/GTK4 patterns often rely on hand-rolled box layouts with custom image widgets, hardcoded font sizing, or manual CSS border-radius hacks. Modern Libadwaita apps follow HIG conventions using native Libadwaita primitives (`AdwAvatar`, typography style classes, `AdwActionRow`, and `GtkPopoverMenu` custom sections).
+An app can show account status: a profile picture, display name, handle or email, and account actions. Older GTK3 and GTK4 code often uses hand-built box layouts, custom image widgets, fixed font sizes, or CSS hacks for rounded corners. Modern Libadwaita apps use the native widgets instead: `AdwAvatar`, typography style classes, `AdwActionRow`, and `GtkPopoverMenu` custom sections.
 
 ### 1. Header Bar Trigger (Avatar Button)
 
-The trigger in the header bar is typically a circular menu button showing the current user's avatar:
+The trigger in the header bar is usually a circular menu button with the current user's avatar:
 
 - **Widget**: `GtkMenuButton` with style classes `.flat` and `.circular`.
 - **Child**: `AdwAvatar` (size 28–32px).
@@ -66,7 +66,7 @@ Inside the popover, the account detail section should appear at the top, cleanly
 
 1. **Header Container**: `GtkBox` with horizontal orientation, `spacing: 12`, and standard margin (6–12px).
 2. **Profile Avatar**: `AdwAvatar` with `size: 48` (or 56):
-   - Handles circular masking natively without CSS `border-radius: 50%` or `overflow: hidden` hacks.
+   - Cuts the avatar to a circle, with no CSS `border-radius: 50%` or `overflow: hidden` hacks.
    - Provides initials fallback via `show-initials: true` and `text`.
    - Adapts to system light/dark theme variants.
 3. **Text Column**: `GtkBox` with vertical orientation, `spacing: 2`, `valign: center`, and `hexpand: true`.
@@ -168,7 +168,7 @@ gtk_menu_button_set_popover (account_btn, GTK_WIDGET (popover));
 
 ### 4. Alternative: Boxed List / ActionRow Pattern
 
-When the account header itself should be activatable (e.g. drilling down to profile settings) or when presenting multiple accounts in a switcher:
+Use this pattern when the account header itself must be activatable, for example to open profile settings. Use it also when the popover lists more than one account:
 
 - Use a `GtkListBox` with the `.boxed-list` style class (or `AdwPreferencesGroup`).
 - Embed an `AdwActionRow`:

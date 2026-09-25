@@ -1332,8 +1332,8 @@ adw-menu-button[data-testid="mobile-menu-button"] .adw-menu-button-popover {
  * right-aligns by default, which would spill it past the screen edge). Export
  * stays right-anchored: it sits before the app-menu button at the end slot,
  * where a left-anchored popover would overflow the viewport. */
-adw-menu-button[data-testid="open-menu-button"] .adw-menu-button-button,
-adw-menu-button[data-testid="export-menu-button"] .adw-menu-button-button {
+gtk-menu-button[data-testid="open-menu-button"] .adw-menu-button-button,
+gtk-menu-button[data-testid="export-menu-button"] .adw-menu-button-button {
   font-family: var(--font-family);
   font-size: var(--font-size-base);
   font-weight: 700;
@@ -1344,19 +1344,19 @@ adw-menu-button[data-testid="export-menu-button"] .adw-menu-button-button {
    the :hover (also 0,3,0) by source order. Re-establish hover/active for
    flat menu buttons the same way _button.scss does — with higher-specificity
    selectors that win the cascade. */
-adw-menu-button.flat .adw-menu-button-button:hover {
+gtk-menu-button.flat .adw-menu-button-button:hover {
   background-color: var(--button-hover-color, rgba(0, 0, 6, 0.13));
 }
-adw-menu-button.flat .adw-menu-button-button:active {
+gtk-menu-button.flat .adw-menu-button-button:active {
   background-color: var(--button-active-color, rgba(0, 0, 6, 0.20));
 }
 
-adw-menu-button[data-testid="open-menu-button"] .adw-menu-button-popover,
-adw-menu-button[data-testid="export-menu-button"] .adw-menu-button-popover {
+gtk-menu-button[data-testid="open-menu-button"] .adw-menu-button-popover,
+gtk-menu-button[data-testid="export-menu-button"] .adw-menu-button-popover {
   z-index: 1000;
 }
 
-adw-menu-button[data-testid="open-menu-button"] .adw-menu-button-popover {
+gtk-menu-button[data-testid="open-menu-button"] .adw-menu-button-popover {
   left: 0;
   right: auto;
 }
@@ -1657,7 +1657,7 @@ adw-header-bar adw-view-switcher > .adw-view-switcher-content {
 
 /* Libadwaita's pill class deliberately enlarges a standalone action beyond
    an ordinary header-bar button's compact allocation. */
-:is(adw-button, button).protota-style-pill {
+:is(gtk-button, button).protota-style-pill {
   min-height: 44px;
   padding-inline: 27px;
   border-radius: 9999px;

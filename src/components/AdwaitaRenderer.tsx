@@ -119,7 +119,7 @@ const TAG_MAP: Record<string, string | null> = {
   'custom-widget':       null,
   avatar:                'adw-avatar',
   'wrap-box':            'adw-wrap-box',
-  'drop-down':           'adw-drop-down',
+  'drop-down':           'gtk-drop-down',
   'progress-bar':        null,
   scale:                 null,
   'level-bar':           null,
@@ -135,12 +135,12 @@ const TAG_MAP: Record<string, string | null> = {
   'password-row':        'adw-password-entry-row',
   'preferences-page':    'adw-preferences-page',
   'preferences-group':   'adw-preferences-group',
-  button:                'adw-button',
+  button:                'gtk-button',
   'split-button':        'adw-split-button',
-  'menu-button':         'adw-menu-button',
+  'menu-button':         'gtk-menu-button',
   toggle:                'adw-toggle',
   'toggle-group':        'adw-toggle-group',
-  entry:                 'adw-entry',
+  entry:                 'gtk-entry',
   'status-page':         'adw-status-page',
   'toast-overlay':       'adw-toast-overlay',
   banner:                'adw-banner',
@@ -617,7 +617,7 @@ export const AdwaitaRenderer: React.FC<Props> = ({
     !['action-row', 'switch-row', 'combo-row', 'spin-row', 'button-row', 'entry-row', 'password-row', 'expander-row'].includes(child.type));
   const isExpandedPreferenceComposite = isAppCompositeRow || hasAppCompositeRow || hasNonPreferenceRow;
 
-  // adw-menu-button is icon-only; a labelled MenuButton renders as a button.
+  // gtk-menu-button is icon-only; a labelled MenuButton renders as a button.
   const isGtkSpinButton = node.type === 'entry' && /Gtk[.]?SpinButton$/.test(node.sourceClass ?? '');
   // adwaita-web's tab-view draws its own tab strip. Native AdwTabBar autohides
   // that strip for a lone page, so let the separately modelled TabBar provide
@@ -633,7 +633,7 @@ export const AdwaitaRenderer: React.FC<Props> = ({
         isSinglePageTabView || isSingleTabPage
       ? 'div'
       : node.type === 'menu-button' && node.title
-        ? 'adw-button'
+        ? 'gtk-button'
         : TAG_MAP[node.type] || 'div';
   const attrs = nodeProps(node, inheritedSlot);
   // AdwHeaderBar with no title-widget shows the enclosing window's/dialog's
@@ -814,18 +814,19 @@ export const AdwaitaRenderer: React.FC<Props> = ({
   // (Nautilus' window declares `view`) would otherwise lose its theme.
   const elementClass = [isGtkSpinButton ? 'protota-gtk-spin-button' : '', themeClass, divClass, styleClasses, diagnosticClass].filter(Boolean).join(' ');
 
-  // Several adw-* custom elements ADOPT their light-DOM children on connect:
+  // Several custom elements ADOPT their light-DOM children on connect:
   // adw-toolbar-view, adw-header-bar, and adw-toast-overlay snapshot the
   // children React rendered into them and move (or discard) them via
-  // this.replaceChildren(...) into internal wrapper divs. From then on
-  // React's picture of the host's child list disagrees with the real DOM,
-  // and the next structural operation on the host — removeChild for a
+  // this.replaceChildren(...) into internal wrapper divs; gtk-menu-button
+  // likewise replaces its children with its own trigger and popover. From
+  // then on React's picture of the host's child list disagrees with the real
+  // DOM, and the next structural operation on the host — removeChild for a
   // deleted node, insertBefore for an added one — throws NotFoundError and
   // blanks the whole app (#137). Keying the host element on its rendered
   // child list makes any structural change remount the host itself: React
   // only ever removes the old host from the wrapper div it owns (never a
   // reparented child), and the fresh host re-adopts its children on connect.
-  const hostKey = tag.startsWith('adw-')
+  const hostKey = tag.startsWith('adw-') || tag.startsWith('gtk-')
     ? renderedSlotted.map(({ child, slot }) => `${child.id}@${slot ?? ''}`)
         .concat(controlsKind, iconPrefix ? 'icon-prefix' : '')
         .join('|')

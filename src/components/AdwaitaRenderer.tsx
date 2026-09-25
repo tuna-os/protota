@@ -854,9 +854,14 @@ export const AdwaitaRenderer: React.FC<Props> = ({
   // child list makes any structural change remount the host itself: React
   // only ever removes the old host from the wrapper div it owns (never a
   // reparented child), and the fresh host re-adopts its children on connect.
+  // The window-controls child's identity carries the side preference (a
+  // different React key and slot), so the host key must record the side too:
+  // flipping end→start is a structural change to an adopted host, and keying
+  // on controlsKind alone left the host in place to throw on removeChild.
+  const windowControlsKey = controlsKind === 'none' ? 'none' : `${controlsKind}@${windowButtons.side}`;
   const hostKey = tag.startsWith('adw-') || tag.startsWith('gtk-')
     ? renderedSlotted.map(({ child, slot }) => `${child.id}@${slot ?? ''}`)
-        .concat(controlsKind, iconPrefix ? 'icon-prefix' : '')
+        .concat(windowControlsKey, iconPrefix ? 'icon-prefix' : '')
         .join('|')
     : undefined;
 

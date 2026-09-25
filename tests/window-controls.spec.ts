@@ -38,13 +38,21 @@ test.describe('window-button position preference (#163)', () => {
     await page.getByTestId('mobile-menu-button').getByRole('button').click();
     await expect(page.getByTestId('mobile-menu')).toBeVisible();
 
-    // The reported repro: flip the position to the start side.
+    const controlOrder = () =>
+      page.locator('.protota-window-control')
+        .evaluateAll((els) => els.map((el) => el.className.replace('protota-window-control ', '')));
+    expect(await controlOrder()).toEqual(['minimize', 'maximize', 'close']);
+
+    // The reported repro: flip the position to the start side. The buttons
+    // mirror, so the order reverses — close against the window edge.
     await pickPosition(page, 'start');
     await expect(page.locator('.protota-window-controls-start')).toHaveCount(1);
+    expect(await controlOrder()).toEqual(['close', 'maximize', 'minimize']);
 
     // Exercise the reverse structural change too.
     await pickPosition(page, 'end');
     await expect(page.locator('.protota-window-controls-start')).toHaveCount(0);
+    expect(await controlOrder()).toEqual(['minimize', 'maximize', 'close']);
 
     // No uncaught commit-phase exception, no blank canvas, no containment card.
     expect(crashes, crashes.join('\n')).toHaveLength(0);

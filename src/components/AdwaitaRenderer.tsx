@@ -736,8 +736,9 @@ export const AdwaitaRenderer: React.FC<Props> = ({
     inDialog: dialogAncestor,
     isPrimary: node.id === primaryHeaderBar,
   }, windowButtons);
-  // The window-buttons preference (#163) picks the side the renderer-drawn
-  // chrome sits on: end (GNOME default) or start (top-left, a la Apple).
+  const controlOrder = windowButtons.side === 'start'
+    ? ['close', 'maximize', 'minimize']
+    : ['minimize', 'maximize', 'close'];
   const windowControls = controlsKind !== 'none' ? (
     <div
       key={windowButtons.side === 'start' ? 'window-controls-start' : 'window-controls'}
@@ -745,9 +746,9 @@ export const AdwaitaRenderer: React.FC<Props> = ({
       className={`protota-window-controls${windowButtons.side === 'start' ? ' protota-window-controls-start' : ''}`}
       aria-hidden="true"
     >
-      {controlsKind === 'window' && <span className="protota-window-control minimize" />}
-      {controlsKind === 'window' && <span className="protota-window-control maximize" />}
-      <span className="protota-window-control close" />
+      {controlOrder
+        .filter((name) => name === 'close' || controlsKind === 'window')
+        .map((name) => <span key={name} className={`protota-window-control ${name}`} />)}
     </div>
   ) : null;
 

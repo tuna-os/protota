@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useCallback } from 'react';
 import type { AdwNode } from '../types/mockup';
 import { LEGAL_CHILDREN } from '../types/mockup';
 import { useMockupStore } from '../store/mockupStore';
@@ -263,7 +263,6 @@ function nodeProps(node: AdwNode, inheritedSlot?: string): Record<string, string
   const boolFlags: Record<string, string[]> = {
     button: ['suggested', 'destructive', 'flat', 'circular'],
     'header-bar': ['showTitleButtons'],
-    'action-row': ['activatable'],
     'switch-row': ['active'],
     'button-row': ['destructive'],
     'switch-widget': ['active'],
@@ -312,6 +311,21 @@ function childSlot(parent: AdwNode, child: AdwNode, index: number): string | und
   if (['action-row', 'switch-row', 'combo-row', 'spin-row', 'entry-row', 'password-row']
     .includes(parent.type)) return 'suffix';
   return undefined;
+}
+
+/**
+ * The light-DOM `slot=` for a rendered node's wrapper — the ONE place the
+ * model's slot vocabulary is translated into adwaita-web's.
+ *
+ * The model names the default child slot `child` (the GTK `<child>` tag), but
+ * adwaita-web takes that child as the DEFAULT slot, with no `slot=` attribute.
+ * An unmatched name is routed nowhere, and an element that installs its own
+ * subtree with `replaceChildren` (`adw-dialog`, `adw-toast-overlay`) then
+ * DESTROYS the child — `files/browser` collapsed from 173 nodes to 2.
+ */
+function wrapperSlot(inherited: string | undefined, own: string | undefined): string | undefined {
+  const slot = inherited ?? own;
+  return slot === 'child' ? undefined : slot;
 }
 
 /** GTK label markup (Pango) is not renderable text; show the plain string. */
@@ -409,6 +423,20 @@ export const AdwaitaRenderer: React.FC<Props> = ({
 
   const legalAdds = LEGAL_CHILDREN[node.type] || [];
   const elRef = useRef<HTMLElement>(null);
+
+  // `Adw.ActionRow:activatable` is GETTER-ONLY in 0.52 (derived from
+  // `activatable-widget`), and React 19 assigns a custom-element prop as a
+  // PROPERTY when the name already exists on the instance — passing it through
+  // JSX threw and blanked the screen (#335). The element observes the
+  // ATTRIBUTE, so set that from a ref CALLBACK: the keyed host remount
+  // (hostKey) swaps the element without changing this component's deps, so an
+  // effect-applied attribute would be lost.
+  const hostRef = useCallback((el: HTMLElement | null) => {
+    elRef.current = el;
+    if (el && node.type === 'action-row') {
+      el.toggleAttribute('activatable', node.activatable === true);
+    }
+  }, [node.type, node.activatable]);
 
   // Adw.TabBar derives its tabs from the linked tab-view's declared pages;
   // its autohide semantics can hide the whole strip (checked after hooks).
@@ -541,7 +569,7 @@ export const AdwaitaRenderer: React.FC<Props> = ({
   const hiddenShell = (
     <div
       ref={wrapperRef}
-      slot={inheritedSlot ?? node.slot}
+      slot={wrapperSlot(inheritedSlot, node.slot)}
       className="adw-node-wrapper"
       style={{ display: 'none' }}
       data-hidden-node-id={node.id}
@@ -835,7 +863,7 @@ export const AdwaitaRenderer: React.FC<Props> = ({
   return (
     <div
       ref={wrapperRef}
-      slot={inheritedSlot ?? node.slot}
+      slot={wrapperSlot(inheritedSlot, node.slot)}
       className={`adw-node-wrapper${isSelected ? ' selected-outline' : ''}${isMultiSelected ? ' multi-selected-outline' : ''}`}
       style={{
         // Normal wrappers are layout-transparent, but a handful of
@@ -853,7 +881,7 @@ export const AdwaitaRenderer: React.FC<Props> = ({
 
       {React.createElement(tag, {
         key: hostKey,
-        ref: elRef,
+        ref: hostRef,
         ...attrs,
         'data-protota-type': node.type,
         // Hit-testing anchor for drag-and-drop (#79): the rendered element is

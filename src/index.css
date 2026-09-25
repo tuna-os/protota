@@ -1319,8 +1319,11 @@ html adw-status-page .adw-status-page-child {
 /* The header app-menu popover must float above the canvas on every
    viewport (the element's own z-index 10 can lose to later canvas layers).
    On mobile it also anchors to the viewport so it never spills past the
-   screen edge under the compact header bar. */
-adw-menu-button[data-testid="mobile-menu-button"] .adw-menu-button-popover {
+   screen edge under the compact header bar. The app-menu surface is a
+   Protota-owned <gtk-popover> (not a <gtk-menu-button>'s own popover), so
+   it is addressed directly; [menu] lifts specificity past the skin's
+   `gtk-popover[data-position=bottom][data-align=end]`. */
+gtk-popover[data-testid="mobile-menu"][menu] {
   z-index: 1000;
 }
 
@@ -1361,16 +1364,11 @@ gtk-menu-button[data-testid="open-menu-button"] .adw-menu-button-popover {
   right: auto;
 }
 
-/* Right-aligned shortcut column inside the compiled modelbutton rows. */
+/* Right-aligned shortcut column inside the compiled modelbutton rows.
+   Only declare nowrap for the row — the accelerator already has
+   `.adw-popover-item-accel` applied. */
 .adw-menu-button-item {
   white-space: nowrap;
-}
-
-.adw-menu-button-item-shortcut {
-  margin-left: auto;
-  font-family: var(--font-family);
-  font-size: var(--font-size-small, 9pt);
-  opacity: var(--dim-opacity, 0.55);
 }
 
 /* Header icon buttons are 34×34 like the app-menu button, so the labelled
@@ -1386,7 +1384,7 @@ gtk-menu-button[data-testid="open-menu-button"] .adw-menu-button-popover {
   /* The app-menu popover anchors to the viewport (like the old overflow
      dropdown) so it never spills past the screen edge under the compact
      header bar. */
-  adw-menu-button[data-testid="mobile-menu-button"] .adw-menu-button-popover {
+  gtk-popover[data-testid="mobile-menu"][menu] {
     position: fixed;
     top: 48px;
     left: 8px;

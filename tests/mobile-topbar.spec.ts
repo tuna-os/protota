@@ -56,9 +56,10 @@ test.describe('Mobile topbar (#99)', () => {
     // Library + Show Shortcuts last — the same base app entries as desktop.
     // The old mobile-only Actions group (New Screen) is gone — New Screen
     // lives in the bottom bar. (Accessible names include keyboard shortcuts,
-    // e.g. "Show Shortcuts Ctrl+?"; the adw-menu-button renders items as
-    // role=menuitem.) Open/Export are icon-only header buttons on mobile, so
-    // Load Preset / Export / Share URL are not in the app-menu.
+    // e.g. "Show Shortcuts Ctrl+?"; the Protota-owned <gtk-popover> surface
+    // renders its rows as role=menuitem.) Open/Export are icon-only header
+    // buttons on mobile, so Load Preset / Export / Share URL are not in the
+    // app-menu.
     await expect(menu.getByRole('menuitem', { name: /icon library/i })).toBeVisible();
     await expect(menu.getByRole('menuitem', { name: /keyboard shortcuts/i })).toBeVisible();
     await expect(menu.getByRole('menuitem', { name: /enable screen flows/i })).toBeVisible();

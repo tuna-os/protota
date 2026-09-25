@@ -13,9 +13,9 @@ This uses real `@gjsify/adwaita-web` components to make prototypes look *and beh
 
 - **Vite Plus project**
 - Pure browser webapp — no GJS, no Node runtime, no native bridges
-- `@gjsify/adwaita-web` — 44 custom elements, real look + behavior, self-applies CSS on import
+- `@gjsify/adwaita-web` — custom elements (tag names carry the owning library's prefix: `adw-*` for libadwaita, `gtk-*` for GTK), real look + behavior, self-applies CSS on import
 - `@gjsify/adwaita-core` — headless behavior (toast queue, combo/spin/toggle/expander state machines, breakpoints, color-scheme observable). Already composed into adwaita-web; import directly only when driving behavior from app code
-- `@gjsify/adwaita-fonts` + `@gjsify/adwaita-icons` — transitive deps, no GJS
+- `@gjsify/adwaita-fonts` + `@gjsify/adwaita-icons` — direct deps (no GJS). Fonts are **not** auto-loaded by adwaita-web's entry; see the package table below
 - Dependency chain is clean: every package declares `gjs: "none"`. Zero `gi://`/`@girs/*` in adwaita-web source.
 
 ## Navigating the gjsify codebase
@@ -27,13 +27,13 @@ consult when building it. All paths relative to the repo root.
 
 | Path | What's there |
 |---|---|
-| `packages/web/adwaita-web/src/index.ts` | Root entry — imports fonts, self-applies CSS, registers all 44 custom elements. Import this once. |
-| `packages/web/adwaita-web/src/elements/adw-*.ts` | One file per custom element (44 files). Read these to learn each widget's properties, slots, events. |
-| `packages/web/adwaita-web/scss/` | 50 SCSS partials (`_window.scss`, `_headerbar.scss`, `_switch_row.scss`…). Selectors target `adw-*` tag names directly. |
+| `packages/web/adwaita-web/src/index.ts` | Root entry — self-applies CSS, registers all custom elements (widget classes are reachable as `Adw.*` / `Gtk.*`, not as flat `AdwWindow`-style exports). Import this once. It does **not** import fonts. |
+| `packages/web/adwaita-web/src/elements/adw-*.ts`, `gtk-*.ts` | One file per custom element (some register several tags). Read these to learn each widget's properties, slots, events. |
+| `packages/web/adwaita-web/scss/` | 50 SCSS partials (`_window.scss`, `_headerbar.scss`, `_switch_row.scss`…). Selectors target the element tag names directly (`adw-*` **and** `gtk-*` — GTK-owned widgets were renamed from `adw-*` in 0.48; their CSS classes kept the `adw-` prefix). |
 | `packages/web/adwaita-web/scss/adwaita-skin.scss` | Main SCSS entry — `@use`s all partials. |
 | `packages/web/adwaita-web/style.css` export | Pre-compiled CSS at `@gjsify/adwaita-web/style.css` (for a `<link>`). |
 | `packages/web/adwaita-core/src/` | Headless behavior: `breakpoint.ts`, `color-scheme.ts`, `toast.ts`, `dialog.ts`, `rows.ts`. Pure TS, no platform imports. |
-| `packages/web/adwaita-fonts/` | `@font-face` CSS + TTF files. Auto-loaded by adwaita-web. |
+| `packages/web/adwaita-fonts/` | `@font-face` CSS + TTF files. adwaita-web's main entry does **not** import fonts (0.52 removed the side-effect import; the faces travel through `@gjsify/adwaita-web/fonts` as 2.39 MB of data-URIs, opt-in). Protota loads them itself: `src/index.css` `@import`s `@fontsource/adwaita-sans`/`adwaita-mono` from CDN, and `src/fonts.ts` re-declares `'Adwaita Sans'` as a variable font from `@gjsify/adwaita-fonts/files/*.ttf` so real weights render instead of synthesised bold. |
 | `packages/web/adwaita-icons/` | Adwaita symbolic icons as importable SVG strings + `toDataUri()` helper. |
 
 ### Storybook contract + logic (our property schema source) (`packages/framework/`)
@@ -332,7 +332,7 @@ so preview mode is additive when both land together.
 
 | Gives us | We build |
 |---|---|
-| 44 widgets, real look + behavior | viewport (horizontal grid + zoom) |
+| widgets, real look + behavior | viewport (horizontal grid + zoom) |
 | light/dark, fonts, icons, CSS | document model + serialization |
 | toast/combo/spin/toggle/expander state machines | element palette (context-sensitive) |
 | breakpoints + color-scheme observable | selection chrome |

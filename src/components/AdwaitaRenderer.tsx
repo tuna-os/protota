@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useCallback } from 'react';
 import type { AdwNode } from '../types/mockup';
 import { LEGAL_CHILDREN } from '../types/mockup';
 import { useMockupStore } from '../store/mockupStore';
@@ -119,7 +119,7 @@ const TAG_MAP: Record<string, string | null> = {
   'custom-widget':       null,
   avatar:                'adw-avatar',
   'wrap-box':            'adw-wrap-box',
-  'drop-down':           'adw-drop-down',
+  'drop-down':           'gtk-drop-down',
   'progress-bar':        null,
   scale:                 null,
   'level-bar':           null,
@@ -135,12 +135,12 @@ const TAG_MAP: Record<string, string | null> = {
   'password-row':        'adw-password-entry-row',
   'preferences-page':    'adw-preferences-page',
   'preferences-group':   'adw-preferences-group',
-  button:                'adw-button',
+  button:                'gtk-button',
   'split-button':        'adw-split-button',
-  'menu-button':         'adw-menu-button',
+  'menu-button':         'gtk-menu-button',
   toggle:                'adw-toggle',
   'toggle-group':        'adw-toggle-group',
-  entry:                 'adw-entry',
+  entry:                 'gtk-entry',
   'status-page':         'adw-status-page',
   'toast-overlay':       'adw-toast-overlay',
   banner:                'adw-banner',
@@ -263,7 +263,6 @@ function nodeProps(node: AdwNode, inheritedSlot?: string): Record<string, string
   const boolFlags: Record<string, string[]> = {
     button: ['suggested', 'destructive', 'flat', 'circular'],
     'header-bar': ['showTitleButtons'],
-    'action-row': ['activatable'],
     'switch-row': ['active'],
     'button-row': ['destructive'],
     'switch-widget': ['active'],
@@ -312,6 +311,21 @@ function childSlot(parent: AdwNode, child: AdwNode, index: number): string | und
   if (['action-row', 'switch-row', 'combo-row', 'spin-row', 'entry-row', 'password-row']
     .includes(parent.type)) return 'suffix';
   return undefined;
+}
+
+/**
+ * The light-DOM `slot=` for a rendered node's wrapper — the ONE place the
+ * model's slot vocabulary is translated into adwaita-web's.
+ *
+ * The model names the default child slot `child` (the GTK `<child>` tag), but
+ * adwaita-web takes that child as the DEFAULT slot, with no `slot=` attribute.
+ * An unmatched name is routed nowhere, and an element that installs its own
+ * subtree with `replaceChildren` (`adw-dialog`, `adw-toast-overlay`) then
+ * DESTROYS the child — `files/browser` collapsed from 173 nodes to 2.
+ */
+function wrapperSlot(inherited: string | undefined, own: string | undefined): string | undefined {
+  const slot = inherited ?? own;
+  return slot === 'child' ? undefined : slot;
 }
 
 /** GTK label markup (Pango) is not renderable text; show the plain string. */
@@ -409,6 +423,20 @@ export const AdwaitaRenderer: React.FC<Props> = ({
 
   const legalAdds = LEGAL_CHILDREN[node.type] || [];
   const elRef = useRef<HTMLElement>(null);
+
+  // `Adw.ActionRow:activatable` is GETTER-ONLY in 0.52 (derived from
+  // `activatable-widget`), and React 19 assigns a custom-element prop as a
+  // PROPERTY when the name already exists on the instance — passing it through
+  // JSX threw and blanked the screen (#335). The element observes the
+  // ATTRIBUTE, so set that from a ref CALLBACK: the keyed host remount
+  // (hostKey) swaps the element without changing this component's deps, so an
+  // effect-applied attribute would be lost.
+  const hostRef = useCallback((el: HTMLElement | null) => {
+    elRef.current = el;
+    if (el && node.type === 'action-row') {
+      el.toggleAttribute('activatable', node.activatable === true);
+    }
+  }, [node.type, node.activatable]);
 
   // Adw.TabBar derives its tabs from the linked tab-view's declared pages;
   // its autohide semantics can hide the whole strip (checked after hooks).
@@ -541,7 +569,7 @@ export const AdwaitaRenderer: React.FC<Props> = ({
   const hiddenShell = (
     <div
       ref={wrapperRef}
-      slot={inheritedSlot ?? node.slot}
+      slot={wrapperSlot(inheritedSlot, node.slot)}
       className="adw-node-wrapper"
       style={{ display: 'none' }}
       data-hidden-node-id={node.id}
@@ -617,7 +645,7 @@ export const AdwaitaRenderer: React.FC<Props> = ({
     !['action-row', 'switch-row', 'combo-row', 'spin-row', 'button-row', 'entry-row', 'password-row', 'expander-row'].includes(child.type));
   const isExpandedPreferenceComposite = isAppCompositeRow || hasAppCompositeRow || hasNonPreferenceRow;
 
-  // adw-menu-button is icon-only; a labelled MenuButton renders as a button.
+  // gtk-menu-button is icon-only; a labelled MenuButton renders as a button.
   const isGtkSpinButton = node.type === 'entry' && /Gtk[.]?SpinButton$/.test(node.sourceClass ?? '');
   // adwaita-web's tab-view draws its own tab strip. Native AdwTabBar autohides
   // that strip for a lone page, so let the separately modelled TabBar provide
@@ -633,7 +661,7 @@ export const AdwaitaRenderer: React.FC<Props> = ({
         isSinglePageTabView || isSingleTabPage
       ? 'div'
       : node.type === 'menu-button' && node.title
-        ? 'adw-button'
+        ? 'gtk-button'
         : TAG_MAP[node.type] || 'div';
   const attrs = nodeProps(node, inheritedSlot);
   // AdwHeaderBar with no title-widget shows the enclosing window's/dialog's
@@ -708,8 +736,9 @@ export const AdwaitaRenderer: React.FC<Props> = ({
     inDialog: dialogAncestor,
     isPrimary: node.id === primaryHeaderBar,
   }, windowButtons);
-  // The window-buttons preference (#163) picks the side the renderer-drawn
-  // chrome sits on: end (GNOME default) or start (top-left, a la Apple).
+  const controlOrder = windowButtons.side === 'start'
+    ? ['close', 'maximize', 'minimize']
+    : ['minimize', 'maximize', 'close'];
   const windowControls = controlsKind !== 'none' ? (
     <div
       key={windowButtons.side === 'start' ? 'window-controls-start' : 'window-controls'}
@@ -717,9 +746,9 @@ export const AdwaitaRenderer: React.FC<Props> = ({
       className={`protota-window-controls${windowButtons.side === 'start' ? ' protota-window-controls-start' : ''}`}
       aria-hidden="true"
     >
-      {controlsKind === 'window' && <span className="protota-window-control minimize" />}
-      {controlsKind === 'window' && <span className="protota-window-control maximize" />}
-      <span className="protota-window-control close" />
+      {controlOrder
+        .filter((name) => name === 'close' || controlsKind === 'window')
+        .map((name) => <span key={name} className={`protota-window-control ${name}`} />)}
     </div>
   ) : null;
 
@@ -814,27 +843,33 @@ export const AdwaitaRenderer: React.FC<Props> = ({
   // (Nautilus' window declares `view`) would otherwise lose its theme.
   const elementClass = [isGtkSpinButton ? 'protota-gtk-spin-button' : '', themeClass, divClass, styleClasses, diagnosticClass].filter(Boolean).join(' ');
 
-  // Several adw-* custom elements ADOPT their light-DOM children on connect:
+  // Several custom elements ADOPT their light-DOM children on connect:
   // adw-toolbar-view, adw-header-bar, and adw-toast-overlay snapshot the
   // children React rendered into them and move (or discard) them via
-  // this.replaceChildren(...) into internal wrapper divs. From then on
-  // React's picture of the host's child list disagrees with the real DOM,
-  // and the next structural operation on the host — removeChild for a
+  // this.replaceChildren(...) into internal wrapper divs; gtk-menu-button
+  // likewise replaces its children with its own trigger and popover. From
+  // then on React's picture of the host's child list disagrees with the real
+  // DOM, and the next structural operation on the host — removeChild for a
   // deleted node, insertBefore for an added one — throws NotFoundError and
   // blanks the whole app (#137). Keying the host element on its rendered
   // child list makes any structural change remount the host itself: React
   // only ever removes the old host from the wrapper div it owns (never a
   // reparented child), and the fresh host re-adopts its children on connect.
-  const hostKey = tag.startsWith('adw-')
+  // The window-controls child's identity carries the side preference (a
+  // different React key and slot), so the host key must record the side too:
+  // flipping end→start is a structural change to an adopted host, and keying
+  // on controlsKind alone left the host in place to throw on removeChild.
+  const windowControlsKey = controlsKind === 'none' ? 'none' : `${controlsKind}@${windowButtons.side}`;
+  const hostKey = tag.startsWith('adw-') || tag.startsWith('gtk-')
     ? renderedSlotted.map(({ child, slot }) => `${child.id}@${slot ?? ''}`)
-        .concat(controlsKind, iconPrefix ? 'icon-prefix' : '')
+        .concat(windowControlsKey, iconPrefix ? 'icon-prefix' : '')
         .join('|')
     : undefined;
 
   return (
     <div
       ref={wrapperRef}
-      slot={inheritedSlot ?? node.slot}
+      slot={wrapperSlot(inheritedSlot, node.slot)}
       className={`adw-node-wrapper${isSelected ? ' selected-outline' : ''}${isMultiSelected ? ' multi-selected-outline' : ''}`}
       style={{
         // Normal wrappers are layout-transparent, but a handful of
@@ -852,7 +887,7 @@ export const AdwaitaRenderer: React.FC<Props> = ({
 
       {React.createElement(tag, {
         key: hostKey,
-        ref: elRef,
+        ref: hostRef,
         ...attrs,
         'data-protota-type': node.type,
         // Hit-testing anchor for drag-and-drop (#79): the rendered element is

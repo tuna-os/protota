@@ -109,7 +109,7 @@ export const BottomBar: React.FC<BottomBarProps> = React.memo(
   }) => {
     const dropDownRef = useRef<
       HTMLElement & {
-        options: { value: string; label: string }[];
+        model: { value: string; label: string }[];
         selected: number;
       }
     >(null);
@@ -137,11 +137,10 @@ export const BottomBar: React.FC<BottomBarProps> = React.memo(
       return () => document.removeEventListener("pointerdown", onPointerDown);
     }, [overflowOpen]);
 
-    // Set options on the adw-drop-down web component
     useEffect(() => {
       const el = dropDownRef.current;
       if (!el) return;
-      el.options = screens.map((s) => ({ value: s.id, label: s.title }));
+      el.model = screens.map((s) => ({ value: s.id, label: s.title }));
     }, [screens]);
 
     // Sync selected index from parent state → web component, then override
@@ -182,7 +181,7 @@ export const BottomBar: React.FC<BottomBarProps> = React.memo(
                 disabled={!canFocusPrev}
               />
             )}
-            <adw-drop-down ref={dropDownRef} className="protota-screen-dropdown" />
+            <gtk-drop-down ref={dropDownRef} className="protota-screen-dropdown" />
             {!isMobile && (
               <ToolbarIconButton
                 icon={goNextSymbolic}

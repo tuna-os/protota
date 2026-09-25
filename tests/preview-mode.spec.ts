@@ -119,7 +119,7 @@ test.describe('Full-screen interactive preview', () => {
     await expect(overlay.getByTestId('preview-back')).toHaveCount(0);
 
     // The button is an activation: it follows Home's outgoing flow edge.
-    await overlay.locator('adw-button', { hasText: 'Open Details' }).click();
+    await overlay.locator('gtk-button', { hasText: 'Open Details' }).click();
     await expect(overlay).toHaveAttribute('data-preview-screen', detailsId);
     await expect(overlay).toContainText('Details');
 

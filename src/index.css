@@ -1271,56 +1271,14 @@ html adw-status-page .adw-status-page-child {
   padding: var(--spacing-xs, 6px) var(--spacing-s, 9px) var(--spacing-s, 9px);
 }
 
-/* Window-buttons preference picker (#163): two segmented rows (button set +
-   position), same popover idiom as the theme switcher. */
-.protota-window-buttons-picker {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-.protota-window-buttons-picker-popover {
-  padding: var(--spacing-xs, 6px) var(--spacing-s, 9px) var(--spacing-s, 9px);
-}
-.protota-window-buttons-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
-.protota-window-buttons-caption {
-  font-size: 12px;
-  color: var(--window-fg-color, rgba(0, 0, 6, 0.8));
-  opacity: 0.8;
-}
-.protota-window-buttons-segment {
-  display: inline-flex;
-  border-radius: 8px;
-  background-color: var(--headerbar-button-bg, rgba(0, 0, 6, 0.08));
-  padding: 2px;
-}
-.protota-window-buttons-option {
-  border: none;
-  background: transparent;
-  color: var(--window-fg-color, rgba(0, 0, 6, 0.8));
-  font-size: 12px;
-  padding: 3px 10px;
-  border-radius: 6px;
-  cursor: pointer;
-}
-.protota-window-buttons-option:hover {
-  background-color: var(--button-hover-color, rgba(0, 0, 6, 0.1));
-}
-.protota-window-buttons-option.selected,
-.protota-window-buttons-option[aria-pressed="true"] {
-  background-color: var(--accent-bg-color, #3584e4);
-  color: #ffffff;
-}
-
 /* The header app-menu popover must float above the canvas on every
    viewport (the element's own z-index 10 can lose to later canvas layers).
    On mobile it also anchors to the viewport so it never spills past the
-   screen edge under the compact header bar. */
-adw-menu-button[data-testid="mobile-menu-button"] .adw-menu-button-popover {
+   screen edge under the compact header bar. The app-menu surface is a
+   Protota-owned <gtk-popover> (not a <gtk-menu-button>'s own popover), so
+   it is addressed directly; [menu] lifts specificity past the skin's
+   `gtk-popover[data-position=bottom][data-align=end]`. */
+gtk-popover[data-testid="mobile-menu"][menu] {
   z-index: 1000;
 }
 
@@ -1332,8 +1290,8 @@ adw-menu-button[data-testid="mobile-menu-button"] .adw-menu-button-popover {
  * right-aligns by default, which would spill it past the screen edge). Export
  * stays right-anchored: it sits before the app-menu button at the end slot,
  * where a left-anchored popover would overflow the viewport. */
-adw-menu-button[data-testid="open-menu-button"] .adw-menu-button-button,
-adw-menu-button[data-testid="export-menu-button"] .adw-menu-button-button {
+gtk-menu-button[data-testid="open-menu-button"] .adw-menu-button-button,
+gtk-menu-button[data-testid="export-menu-button"] .adw-menu-button-button {
   font-family: var(--font-family);
   font-size: var(--font-size-base);
   font-weight: 700;
@@ -1344,33 +1302,28 @@ adw-menu-button[data-testid="export-menu-button"] .adw-menu-button-button {
    the :hover (also 0,3,0) by source order. Re-establish hover/active for
    flat menu buttons the same way _button.scss does — with higher-specificity
    selectors that win the cascade. */
-adw-menu-button.flat .adw-menu-button-button:hover {
+gtk-menu-button.flat .adw-menu-button-button:hover {
   background-color: var(--button-hover-color, rgba(0, 0, 6, 0.13));
 }
-adw-menu-button.flat .adw-menu-button-button:active {
+gtk-menu-button.flat .adw-menu-button-button:active {
   background-color: var(--button-active-color, rgba(0, 0, 6, 0.20));
 }
 
-adw-menu-button[data-testid="open-menu-button"] .adw-menu-button-popover,
-adw-menu-button[data-testid="export-menu-button"] .adw-menu-button-popover {
+gtk-menu-button[data-testid="open-menu-button"] .adw-menu-button-popover,
+gtk-menu-button[data-testid="export-menu-button"] .adw-menu-button-popover {
   z-index: 1000;
 }
 
-adw-menu-button[data-testid="open-menu-button"] .adw-menu-button-popover {
+gtk-menu-button[data-testid="open-menu-button"] .adw-menu-button-popover {
   left: 0;
   right: auto;
 }
 
-/* Right-aligned shortcut column inside the compiled modelbutton rows. */
+/* Right-aligned shortcut column inside the compiled modelbutton rows.
+   Only declare nowrap for the row — the accelerator already has
+   `.adw-popover-item-accel` applied. */
 .adw-menu-button-item {
   white-space: nowrap;
-}
-
-.adw-menu-button-item-shortcut {
-  margin-left: auto;
-  font-family: var(--font-family);
-  font-size: var(--font-size-small, 9pt);
-  opacity: var(--dim-opacity, 0.55);
 }
 
 /* Header icon buttons are 34×34 like the app-menu button, so the labelled
@@ -1386,7 +1339,7 @@ adw-menu-button[data-testid="open-menu-button"] .adw-menu-button-popover {
   /* The app-menu popover anchors to the viewport (like the old overflow
      dropdown) so it never spills past the screen edge under the compact
      header bar. */
-  adw-menu-button[data-testid="mobile-menu-button"] .adw-menu-button-popover {
+  gtk-popover[data-testid="mobile-menu"][menu] {
     position: fixed;
     top: 48px;
     left: 8px;
@@ -1657,7 +1610,7 @@ adw-header-bar adw-view-switcher > .adw-view-switcher-content {
 
 /* Libadwaita's pill class deliberately enlarges a standalone action beyond
    an ordinary header-bar button's compact allocation. */
-:is(adw-button, button).protota-style-pill {
+:is(gtk-button, button).protota-style-pill {
   min-height: 44px;
   padding-inline: 27px;
   border-radius: 9999px;

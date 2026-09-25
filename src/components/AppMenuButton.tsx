@@ -1,15 +1,15 @@
-import React, { useEffect, useRef } from "react";
-import { objectSelectSymbolic, openMenuSymbolic } from "@gjsify/adwaita-icons/actions";
+import React, { useEffect, useLayoutEffect, useRef } from "react";
+import { objectSelectSymbolic } from "@gjsify/adwaita-icons/actions";
 import { toDataUri } from "@gjsify/adwaita-icons/utils";
 import { useMockupStore } from "../store/mockupStore";
+import type { AdwMenuItem, AdwMenuNode } from "@gjsify/adwaita-web";
 import type { WindowButtonsPreference } from "../utils/headerBarChrome";
-import { iconStyle } from "../utils/iconStyles";
 import { useIsMobile } from "../hooks/useIsMobile";
-import { useMenus, type MenuItem } from "./MenuData";
+import { useMenus } from "./MenuData";
 
-type GtkPopoverElement = HTMLElement & {
-  open: boolean;
-  anchor: HTMLElement | null;
+/** The `<gtk-menu-button>` surface, typed for the portable menu model. */
+type GtkMenuButtonElement = HTMLElement & {
+  menuModel: AdwMenuNode[];
 };
 
 type ThemeChoice = "auto" | "light" | "dark";
@@ -74,96 +74,67 @@ function syncThemeSwitcher(group: HTMLElement, selected: string): void {
 }
 
 /**
- * The window-buttons preference picker (#163): two segmented rows — which
- * buttons (Full / Close only) and where they sit (End / Start). Options carry
- * aria-pressed and a `.selected` class so selection survives any CSS stacking.
+ * The window-control preference (#163) as text menu entries: which controls
+ * the primary header bar draws, and which side they sit on. Each entry is
+ * labelled by the state it switches to — "Reduce Window Controls" while the
+ * full set is drawn, "Show Full Window Controls" while only close is; "Apply
+ * Left Window Controls" while they sit at the end, "Apply Right" at the start
+ * — the same idiom as the mobile Flows/Diagnostics entries.
  */
-const BUTTON_CHOICES: Array<{ value: WindowButtonsPreference['buttons']; label: string }> = [
-  { value: "window", label: "Full" },
-  { value: "close", label: "Close only" },
-];
-const SIDE_CHOICES: Array<{ value: WindowButtonsPreference['side']; label: string }> = [
-  { value: "end", label: "End" },
-  { value: "start", label: "Start" },
-];
-
-function buildWindowButtonsPicker(
-  onButtons: (buttons: WindowButtonsPreference['buttons']) => void,
-  onSide: (side: WindowButtonsPreference['side']) => void,
-): HTMLElement {
-  const section = document.createElement("div");
-  section.className = "protota-window-buttons-picker protota-window-buttons-picker-popover";
-  section.setAttribute("role", "group");
-  section.setAttribute("aria-label", "Window buttons");
-
-  const row = (title: string, ariaLabel: string, choices: Array<{ value: string; label: string }>, onPick: (value: string) => void) => {
-    const rowEl = document.createElement("div");
-    rowEl.className = "protota-window-buttons-row";
-    const caption = document.createElement("span");
-    caption.className = "protota-window-buttons-caption";
-    caption.textContent = title;
-    rowEl.appendChild(caption);
-    const seg = document.createElement("div");
-    seg.className = "protota-window-buttons-segment";
-    seg.setAttribute("role", "group");
-    seg.setAttribute("aria-label", ariaLabel);
-    for (const { value, label } of choices) {
-      const btn = document.createElement("button");
-      btn.type = "button";
-      btn.className = "protota-window-buttons-option";
-      btn.dataset.value = value;
-      btn.textContent = label;
-      btn.setAttribute("aria-label", label);
-      btn.addEventListener("click", () => onPick(value));
-      seg.appendChild(btn);
-    }
-    rowEl.appendChild(seg);
-    section.appendChild(rowEl);
-  };
-
-  row("Window controls", "Window button set", BUTTON_CHOICES, (value) => {
-    if (value === "close" || value === "window") onButtons(value);
-  });
-  row("Position", "Window button position", SIDE_CHOICES, (value) => {
-    if (value === "start" || value === "end") onSide(value);
-  });
-  return section;
-}
-
-/** Mirror of syncThemeSwitcher for the picker's two segmented rows. */
-function syncWindowButtonsPicker(section: HTMLElement, preference: WindowButtonsPreference): void {
-  section.querySelectorAll<HTMLElement>(".protota-window-buttons-option").forEach((btn) => {
-    const row = btn.closest<HTMLElement>(".protota-window-buttons-row");
-    const key = row?.querySelector<HTMLElement>(".protota-window-buttons-segment")?.getAttribute("aria-label");
-    const on = key === "Window button set"
-      ? btn.dataset.value === preference.buttons
-      : btn.dataset.value === preference.side;
-    btn.classList.toggle("selected", on);
-    btn.setAttribute("aria-pressed", String(on));
-  });
-}
-
-function menuDivider(): HTMLElement {
-  const sep = document.createElement("div");
-  sep.className = "protota-menu-divider";
-  return sep;
+function windowControlItems(preference: WindowButtonsPreference): AdwMenuItem[] {
+  return [
+    {
+      kind: "item",
+      id: "window-buttons",
+      label: preference.buttons === "window" ? "Reduce Window Controls" : "Show Full Window Controls",
+    },
+    {
+      kind: "item",
+      id: "window-side",
+      label: preference.side === "end" ? "Apply Left Window Controls" : "Apply Right Window Controls",
+    },
+  ];
 }
 
 /**
- * The header app-menu button: a flat header button (the open-menu icon) that
- * toggles a Protota-owned `<gtk-popover>` — the app-menu idiom of theme
- * switcher + window-buttons picker + Icon Library + Show Shortcuts.
+ * Put the theme switcher at the top of the `<gtk-menu-button>`'s popover,
+ * above the model-drawn rows. The switcher is the one piece of the surface
+ * the portable menu model cannot express, so it is injected after each
+ * `render()` (which `replaceChildren()`es the popover) rather than carried as
+ * a row. The divider is the skin's own separator so it matches the section
+ * boundaries the view draws.
+ */
+function injectThemeSwitcher(
+  menuButton: HTMLElement,
+  colorScheme: ThemeChoice,
+  onChoose: (choice: ThemeChoice) => void,
+): void {
+  const popover = menuButton.querySelector<HTMLElement>("gtk-popover");
+  if (!popover) return;
+  popover.setAttribute("data-testid", "mobile-menu");
+  const switcher = buildThemeSwitcher(onChoose);
+  syncThemeSwitcher(switcher, colorScheme);
+  const divider = document.createElement("div");
+  divider.className = "adw-popover-separator";
+  divider.setAttribute("role", "separator");
+  popover.prepend(divider);
+  popover.prepend(switcher);
+}
+
+/**
+ * The header app-menu button: a `<gtk-menu-button>` whose portable menu model
+ * carries the window-control entries (#163), the mobile Flows/Diagnostics
+ * toggles, and Icon Library + Keyboard Shortcuts. The model is the same one
+ * the Open/Export menus use, so the rows, separators and accelerators are the
+ * skin's `modelbutton`s, not bespoke DOM.
  *
- * The children are built imperatively. `PopoverMenuView.render()` calls
- * `replaceChildren()` on the popover owned by `gtk-menu-button`, so injected
- * content is wiped on every render, and the theme switcher + window-buttons
- * picker are custom DOM the menu model cannot express. Rows carry the compiled
- * skin's `.adw-popover-item` contract; the popover keeps the element's Escape /
- * outside-click dismissal, and item activation is the row's own click listener.
+ * The theme switcher is the one entry the menu model cannot express, so it is
+ * injected into the popover after each render (see injectThemeSwitcher).
+ * Activation comes back as the bubbling `menu-item-activated` event, whose id
+ * addresses the action map — the model itself carries no callbacks.
  */
 export const AppMenuButton: React.FC = () => {
-  const triggerRef = useRef<HTMLButtonElement>(null);
-  const popoverRef = useRef<GtkPopoverElement>(null);
+  const menuButtonRef = useRef<GtkMenuButtonElement>(null);
   const { appMenuItems, handleToggleDiagnostics } = useMenus();
   const colorScheme = useMockupStore((s) => s.doc.colorScheme);
   const setColorScheme = useMockupStore((s) => s.setColorScheme);
@@ -174,118 +145,107 @@ export const AppMenuButton: React.FC = () => {
   const diagnosticsEnabled = useMockupStore((s) => s.diagnosticsEnabled);
   const isMobile = useIsMobile();
 
-  // On mobile the Flows/Diagnostics toggles leave the cramped header bar and
-  // surface as app-menu entries right after the theme picker, labelled by the
-  // state they'd switch to (Enable/Disable), with their shortcuts. On desktop
-  // the header keeps its icon toggles, so the menu stays as-is. Icon Library
-  // and Show Shortcuts are always the last entries.
-  const mobileToggleItems: MenuItem[] = isMobile
-    ? [
-        {
-          label: showFlows ? "Disable Screen Flows" : "Enable Screen Flows",
-          action: toggleShowFlows,
-          shortcut: "Ctrl+;",
-        },
-        {
-          label: diagnosticsEnabled ? "Disable Diagnostics" : "Enable Diagnostics",
-          action: handleToggleDiagnostics,
-          shortcut: "Ctrl+'",
-        },
-      ]
-    : [];
+  /** Latest id→action map, read by the once-registered activation listener. */
+  const actionsRef = useRef<Record<string, () => void>>({});
+  /** The model text last rendered, so a re-render only rebuilds when it changed. */
+  const modelKeyRef = useRef<string | null>(null);
 
-  const items: MenuItem[] = [...mobileToggleItems, ...appMenuItems];
-  // Rebuild the surface only when the entry list actually changes; the actions
-  // and shortcuts travel with the rows.
-  const itemsKey = JSON.stringify(items.map((item) => [item.label, item.shortcut ?? ""]));
-
-  // Anchor the popover to the trigger, so the surface positions against the
-  // button and hands focus back to it on Escape.
+  // Activation arrives as a bubbling menu-item-activated CustomEvent with
+  // {id,label,path} — the model cannot carry callbacks.
   useEffect(() => {
-    const pop = popoverRef.current;
-    const trigger = triggerRef.current;
-    if (pop && trigger) pop.anchor = trigger;
+    const el = menuButtonRef.current;
+    if (!el) return;
+    const onActivate = (e: Event) => {
+      const id = (e as CustomEvent).detail?.id;
+      if (typeof id === "string") actionsRef.current[id]?.();
+    };
+    el.addEventListener("menu-item-activated", onActivate);
+    return () => el.removeEventListener("menu-item-activated", onActivate);
   }, []);
 
-  // Build the surface's children: the theme switcher and window-buttons picker
-  // (custom DOM the menu model cannot carry), then the app-menu rows.
-  useEffect(() => {
-    const pop = popoverRef.current;
-    if (!pop) return;
+  // A layout effect, not a passive one: a `<gtk-menu-button>` with an empty
+  // model refuses to open, so the model must be set before the first paint or
+  // a click on the freshly-rendered button is silently a no-op.
+  useLayoutEffect(() => {
+    const el = menuButtonRef.current;
+    if (!el) return;
 
-    const switcher = buildThemeSwitcher((choice) => setColorScheme(choice));
-    syncThemeSwitcher(switcher, colorScheme);
-    pop.appendChild(switcher);
-    pop.appendChild(menuDivider());
+    const actions: Record<string, () => void> = {};
+    actions["window-buttons"] = () =>
+      setWindowButtons({ buttons: windowButtons.buttons === "window" ? "close" : "window" });
+    actions["window-side"] = () =>
+      setWindowButtons({ side: windowButtons.side === "end" ? "start" : "end" });
 
-    // Window-buttons picker (#163).
-    const picker = buildWindowButtonsPicker(
-      (buttons) => setWindowButtons({ buttons }),
-      (side) => setWindowButtons({ side }),
-    );
-    syncWindowButtonsPicker(picker, windowButtons);
-    pop.appendChild(picker);
-    pop.appendChild(menuDivider());
-
-    // The app-menu rows, carrying the compiled skin's `.adw-popover-item`
-    // contract so `<gtk-popover>` navigates them and the stylesheet styles them.
-    for (const item of items) {
-      const row = document.createElement("button");
-      row.type = "button";
-      row.className = "adw-popover-item adw-menu-button-item";
-      row.setAttribute("role", "menuitem");
-      row.tabIndex = -1;
-      const label = document.createElement("span");
-      label.className = "adw-menu-button-item-label";
-      label.textContent = item.label;
-      row.appendChild(label);
-      if (item.shortcut) {
-        const accel = document.createElement("span");
-        accel.className = "adw-popover-item-accel";
-        accel.textContent = item.shortcut;
-        row.appendChild(accel);
-      }
-      if (item.action) {
-        row.addEventListener("click", () => {
-          item.action?.();
-          pop.open = false;
-        });
-      }
-      pop.appendChild(row);
+    // On mobile the Flows/Diagnostics toggles leave the cramped header bar and
+    // surface as menu entries labelled by the state they'd switch to, with
+    // their shortcuts. On desktop the header keeps its icon toggles, so the
+    // section is empty. Icon Library and Show Shortcuts are always last.
+    const menuItems: AdwMenuItem[] = [];
+    if (isMobile) {
+      menuItems.push(
+        {
+          kind: "item",
+          id: "toggle-flows",
+          label: showFlows ? "Disable Screen Flows" : "Enable Screen Flows",
+          accel: "Ctrl+;",
+        },
+        {
+          kind: "item",
+          id: "toggle-diagnostics",
+          label: diagnosticsEnabled ? "Disable Diagnostics" : "Enable Diagnostics",
+          accel: "Ctrl+'",
+        },
+      );
+      actions["toggle-flows"] = toggleShowFlows;
+      actions["toggle-diagnostics"] = handleToggleDiagnostics;
+    }
+    for (const item of appMenuItems) {
+      menuItems.push({
+        kind: "item",
+        id: item.label,
+        label: item.label,
+        ...(item.shortcut ? { accel: item.shortcut } : {}),
+      });
+      if (item.action) actions[item.label] = item.action;
     }
 
-    return () => { pop.replaceChildren(); };
-  }, [itemsKey, colorScheme, windowButtons, setColorScheme, setWindowButtons]);
+    // Two sections: the window-control entries, then the rest. The view draws
+    // the boundary between them as the skin's separator.
+    const model: AdwMenuNode[] = [
+      { kind: "section", items: windowControlItems(windowButtons) },
+      { kind: "section", items: menuItems },
+    ];
+    const modelKey = JSON.stringify(model);
 
-  const toggle = () => {
-    const pop = popoverRef.current;
-    if (pop) pop.open = !pop.open;
-  };
+    const btn = el.querySelector<HTMLButtonElement>(".adw-menu-button-button");
+    if (btn) {
+      btn.setAttribute("title", "Menu");
+      btn.setAttribute("aria-label", "Main Menu");
+    }
 
-  return (
-    <div
-      data-testid="mobile-menu-button"
-      className="protota-app-menu-button"
-      style={{ position: "relative", display: "inline-flex" }}
-    >
-      <button
-        ref={triggerRef}
-        type="button"
-        className="adw-button flat protota-header-icon-button"
-        aria-label="Main Menu"
-        aria-haspopup="menu"
-        title="Menu"
-        onClick={toggle}
-      >
-        <span className="adw-toolbar-icon" style={iconStyle(openMenuSymbolic)} />
-      </button>
-      <gtk-popover
-        ref={popoverRef}
-        data-testid="mobile-menu"
-        role="menu"
-        menu=""
-        align="end"
-      />
-    </div>
-  );
+    if (modelKey !== modelKeyRef.current) {
+      modelKeyRef.current = modelKey;
+      actionsRef.current = actions;
+      // Setting menuModel rebuilds the popover, so the switcher must follow it.
+      el.menuModel = model;
+      injectThemeSwitcher(el, colorScheme, setColorScheme);
+    } else {
+      // The rows are unchanged (a theme pick only), so just move the selection.
+      const switcher = el.querySelector<HTMLElement>(".protota-theme-switcher");
+      if (switcher) syncThemeSwitcher(switcher, colorScheme);
+    }
+  }, [
+    appMenuItems,
+    colorScheme,
+    windowButtons,
+    isMobile,
+    showFlows,
+    toggleShowFlows,
+    diagnosticsEnabled,
+    handleToggleDiagnostics,
+    setColorScheme,
+    setWindowButtons,
+  ]);
+
+  return <gtk-menu-button ref={menuButtonRef} data-testid="mobile-menu-button" />;
 };

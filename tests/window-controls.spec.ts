@@ -14,13 +14,15 @@ import { test, expect, type Page } from '@playwright/test';
  * the wrapper div React still owns) instead.
  */
 
-async function pickPosition(page: Page, side: 'start' | 'end') {
-  // AppMenuButton rebuilds the popover's children whenever the preference
-  // changes, so re-query the picker on every pick.
-  await page
-    .getByTestId('mobile-menu')
-    .locator(`.protota-window-buttons-option[data-value="${side}"]`)
-    .click();
+async function pickPosition(page: Page, name: RegExp) {
+  // Each window-control entry closes the app-menu, so reopen it before every
+  // pick; AppMenuButton rebuilds the popover's children whenever the
+  // preference changes, so re-query the row after opening.
+  await page.getByTestId('mobile-menu-button').getByRole('button').click();
+  const menu = page.getByTestId('mobile-menu');
+  await expect(menu).toBeVisible();
+  await menu.getByRole('menuitem', { name }).click();
+  await expect(menu).not.toBeVisible();
 }
 
 test.describe('window-button position preference (#163)', () => {
@@ -33,24 +35,23 @@ test.describe('window-button position preference (#163)', () => {
     const widgets = await page.locator('[data-protota-type]').count();
     expect(widgets).toBeGreaterThan(0);
 
-    // The window-buttons picker lives in the app-menu (present on every
+    // The window-control entries live in the app-menu (present on every
     // viewport). Default preference draws the controls at the end.
-    await page.getByTestId('mobile-menu-button').getByRole('button').click();
-    await expect(page.getByTestId('mobile-menu')).toBeVisible();
-
     const controlOrder = () =>
       page.locator('.protota-window-control')
         .evaluateAll((els) => els.map((el) => el.className.replace('protota-window-control ', '')));
     expect(await controlOrder()).toEqual(['minimize', 'maximize', 'close']);
 
     // The reported repro: flip the position to the start side. The buttons
-    // mirror, so the order reverses — close against the window edge.
-    await pickPosition(page, 'start');
+    // mirror, so the order reverses — close against the window edge. The entry
+    // is labelled by the state it switches to, so with the default (end)
+    // preference it offers the left side.
+    await pickPosition(page, /apply left window controls/i);
     await expect(page.locator('.protota-window-controls-start')).toHaveCount(1);
     expect(await controlOrder()).toEqual(['close', 'maximize', 'minimize']);
 
     // Exercise the reverse structural change too.
-    await pickPosition(page, 'end');
+    await pickPosition(page, /apply right window controls/i);
     await expect(page.locator('.protota-window-controls-start')).toHaveCount(0);
     expect(await controlOrder()).toEqual(['minimize', 'maximize', 'close']);
 

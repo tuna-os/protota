@@ -10,7 +10,7 @@ import {
 import { panDownSymbolic, focusLegacySystraySymbolic } from "@gjsify/adwaita-icons/ui";
 import { folderOpenSymbolic } from "@gjsify/adwaita-icons/status";
 import { documentSendSymbolic } from "@gjsify/adwaita-icons/actions";
-import type { AdwMenuItem } from "@gjsify/adwaita-web";
+import type { AdwMenuItem, AdwMenuNode } from "@gjsify/adwaita-web";
 import { exportDocumentFile } from "../utils/exportImport";
 import { iconStyle } from "../utils/iconStyles";
 import { useIsMobile } from "../hooks/useIsMobile";
@@ -25,21 +25,19 @@ interface HeaderProps {
 }
 
 type AdwMenuButtonElement = HTMLElement & {
-  menuItems: AdwMenuItem[];
+  menuModel: AdwMenuNode[];
   menuTitle: string;
 };
 
 const chevronStyle = iconStyle(panDownSymbolic);
 
 /**
- * A labelled <adw-menu-button>: a text trigger with a trailing pan-down
+ * A labelled <gtk-menu-button>: a text trigger with a trailing pan-down
  * chevron, reusing the compiled skin's popover surface and modelbutton rows.
- * The element's flat {id,label} item model cannot carry separators or
- * shortcuts, so they are post-rendered into the popover (the same bridge as
- * AppMenuButton); arrow-key navigation skips them because only
- * .adw-menu-button-item buttons are roving-tabindex'd. Click-to-toggle,
- * outside-click dismissal, Escape→trigger focus and ArrowUp/Down navigation
- * are the element's own private handlers.
+ * Separators and shortcuts are native to the portable menu model now — each
+ * divider opens a new section (drawn as a separator) and each shortcut travels
+ * as the item's `accel`. The element's trigger is icon-only, so the text label
+ * + chevron are written over it after upgrade.
  *
  * On mobile (<=768px) the trigger is icon-only — a symbolic icon instead of
  * the text label + chevron — so the compact header fits the viewport (#99).
@@ -56,7 +54,7 @@ const LabeledMenuButton: React.FC<{
   const actionsRef = useRef<Record<string, () => void>>({});
 
   // Activation comes back as a bubbling menu-item-activated CustomEvent with
-  // {id,label,index} — the element's flat model cannot carry callbacks.
+  // {id,label,path} — the model cannot carry callbacks.
   useEffect(() => {
     const el = btnRef.current;
     if (!el) return;
@@ -72,32 +70,38 @@ const LabeledMenuButton: React.FC<{
     const el = btnRef.current;
     if (!el) return;
 
-    // Flatten into the element's item model, recording where separators and
-    // shortcuts belong, and map every item's id back to its action.
-    const flatItems: AdwMenuItem[] = [];
-    const dividerAfter: number[] = [];
-    const shortcuts: Record<string, string> = {};
+    // Group the flat list into the portable menu model: each divider opens a
+    // new section (the surface draws the boundary as a separator), and each
+    // shortcut travels as the item's `accel`. Map every item's id back to its
+    // action for the activation listener.
+    const model: AdwMenuNode[] = [];
     const actions: Record<string, () => void> = {};
+    let section: AdwMenuItem[] = [];
     for (const item of items) {
       if (item.divider) {
-        if (flatItems.length > 0) dividerAfter.push(flatItems.length - 1);
+        if (section.length > 0) {
+          model.push({ kind: "section", items: section });
+          section = [];
+        }
       } else {
-        flatItems.push({ id: item.label, label: item.label });
+        section.push({
+          kind: "item",
+          id: item.label,
+          label: item.label,
+          ...(item.shortcut ? { accel: item.shortcut } : {}),
+        });
         if (item.action) actions[item.label] = item.action;
-        if (item.shortcut) shortcuts[item.label] = item.shortcut;
       }
     }
+    if (section.length > 0) model.push({ kind: "section", items: section });
     actionsRef.current = actions;
 
-    // Setting menuItems always rebuilds the popover from scratch, which keeps
-    // this effect idempotent under StrictMode double-invocation. menuTitle is
+    // Setting menuModel rebuilds the popover from scratch, which keeps this
+    // effect idempotent under StrictMode double-invocation. menuTitle is
     // deliberately left unset: setting it re-renders the trigger button and
-    // wipes the label + chevron injected below.
-    el.menuItems = flatItems;
+    // wipes the label + chevron written below.
+    el.menuModel = model;
 
-    // Trigger: bold text label + trailing chevron (desktop), or the symbolic
-    // icon alone (mobile) — flush against the label, matching the other
-    // header icon buttons' 34px size.
     const btn = el.querySelector<HTMLButtonElement>(".adw-menu-button-button");
     if (btn) {
       btn.replaceChildren();
@@ -121,28 +125,9 @@ const LabeledMenuButton: React.FC<{
       btn.setAttribute("aria-label", label);
       if (tooltip) btn.setAttribute("title", tooltip);
     }
-
-    // Separators + right-aligned shortcuts into the compiled popover rows.
-    const pop = el.querySelector(".adw-menu-button-popover");
-    if (!pop) return;
-    const itemNodes = Array.from(pop.querySelectorAll(".adw-menu-button-item"));
-    for (const idx of dividerAfter) {
-      const sep = document.createElement("div");
-      sep.className = "protota-menu-divider";
-      itemNodes[idx]?.after(sep);
-    }
-    itemNodes.forEach((node, i) => {
-      const shortcut = shortcuts[flatItems[i]?.label ?? ""];
-      if (shortcut) {
-        const sc = document.createElement("span");
-        sc.className = "adw-menu-button-item-shortcut";
-        sc.textContent = shortcut;
-        node.appendChild(sc);
-      }
-    });
   }, [items, label, icon]);
 
-  return <adw-menu-button ref={btnRef} data-testid={testId} />;
+  return <gtk-menu-button ref={btnRef} data-testid={testId} />;
 };
 
 /** A 34×34 flat header icon button (Layers, Undo/Redo, Flows, Diagnostics, Properties). */

@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom/client';
 import { App } from './components/App';
 import { RenderView } from './components/RenderView';
 import { parseRenderParams } from './utils/renderRequest';
-import { protota } from './utils/agent-api';
+import { protota } from './runtime/agentHandle';
 
 // Adwaita web components first — their stylesheet self-applies on import —
 // then ours. Our sheet is the override layer, so equal-specificity rules

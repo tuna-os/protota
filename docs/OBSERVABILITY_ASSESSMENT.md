@@ -13,7 +13,7 @@ Under Telemetry Agent Policy (Hold-Gated Mode), telemetry agents do not introduc
 ### Current Architecture & Signal Surface
 - **Frontend Stack**: React 19, Vite 8, Zustand, Playwright, Vitest.
 - **Client-Side Diagnostics Engine**: In-browser diagnostics rules and blueprint syntax checker (`src/diagnostics/engine.ts`, `src/diagnostics/liveBlueprintClient.ts`).
-- **Agent Surface**: Global window contract (`window.protota`) exposed for testing, automation, and UI inspection (`src/utils/agent-api.ts`).
+- **Agent Surface**: Global window contract (`window.protota`) exposed for testing, automation, and UI inspection (`src/runtime/agentHandle.ts`).
 - **Telemetry Infrastructure**: None currently enabled or exporting data.
 
 ### Recommended Stack Architecture (Future Operator Wiring)

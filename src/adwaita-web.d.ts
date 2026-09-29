@@ -37,17 +37,23 @@ declare module "react" {
       "adw-banner": HTMLAttributes<HTMLElement>;
       "adw-toggle-group": HTMLAttributes<HTMLElement>;
       "adw-split-button": HTMLAttributes<HTMLElement>;
-      "adw-menu-button": HTMLAttributes<HTMLElement> & RefAttributes<HTMLElement>;
+      "gtk-menu-button": HTMLAttributes<HTMLElement> & RefAttributes<HTMLElement>;
       "adw-spinner": HTMLAttributes<HTMLElement>;
-      "adw-icon": HTMLAttributes<HTMLElement>;
+      "gtk-image": HTMLAttributes<HTMLElement>;
       "adw-toggle": HTMLAttributes<HTMLElement>;
-      "adw-button": HTMLAttributes<HTMLElement>;
-      "adw-entry": HTMLAttributes<HTMLElement>;
+      "gtk-button": HTMLAttributes<HTMLElement>;
+      "gtk-entry": HTMLAttributes<HTMLElement>;
       "adw-wrap-box": HTMLAttributes<HTMLElement>;
-      "adw-drop-down": HTMLAttributes<HTMLElement> & RefAttributes<HTMLElement> & {
-        options?: { value: string; label: string }[];
+      "gtk-drop-down": HTMLAttributes<HTMLElement> & RefAttributes<HTMLElement> & {
+        model?: Array<string | { value?: string; label?: string }>;
         selected?: number;
         "enable-search"?: boolean;
+      };
+      "gtk-popover": HTMLAttributes<HTMLElement> & RefAttributes<HTMLElement> & {
+        open?: boolean;
+        menu?: string;
+        align?: string;
+        position?: string;
       };
     }
   }

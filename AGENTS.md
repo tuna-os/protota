@@ -58,12 +58,12 @@ checkout cannot launch Chromium; use the `himachal` worktree and a Playwright
 container instead. Pull the browser image before the first run:
 
 ```sh
-# One-time on himachal: podman pull mcr.microsoft.com/playwright:v1.62.1-noble
+# One-time on himachal: podman pull mcr.microsoft.com/playwright:v1.63.0-noble
 # Do not mutate /var/home/james/work/protota — it carries local modifications.
 ssh himachal 'cd /var/home/james/work/protota && git fetch \
   && git worktree add -f /var/home/james/pr<N> FETCH_HEAD'
 ssh himachal 'podman run --rm -v /var/home/james/pr<N>:/w:z -w /w \
-  mcr.microsoft.com/playwright:v1.62.1-noble \
+  mcr.microsoft.com/playwright:v1.63.0-noble \
   sh -c "npm ci --silent && npx playwright test <spec> --reporter=line"'
 ```
 

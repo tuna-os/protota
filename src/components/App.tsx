@@ -109,7 +109,16 @@ export const App: React.FC = () => {
 
   const handleContextMenu = (e: React.MouseEvent) => {
     e.preventDefault();
-    setContextMenu({ x: e.clientX, y: e.clientY });
+    // Right-click dismisses an open menu rather than re-anchoring it.
+    setContextMenu((prev) => (prev ? null : { x: e.clientX, y: e.clientY }));
+  };
+
+  // Capture so a child's stopPropagation cannot strand the menu open; on click,
+  // not pointerdown, so the click still reaches the canvas and selects.
+  const handleAppClick = (e: React.MouseEvent) => {
+    if (!contextMenu) return;
+    if ((e.target as HTMLElement).closest?.(".protota-context-menu")) return;
+    setContextMenu(null);
   };
 
   const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -383,6 +392,7 @@ export const App: React.FC = () => {
     <div
       style={{ display: "flex", flexDirection: "column", height: "100vh" }}
       onContextMenu={handleContextMenu}
+      onClickCapture={handleAppClick}
     >
       {/* Adwaita Toolbar View — frames the entire app */}
       <adw-toolbar-view style={{ flex: 1, display: "flex", flexDirection: "column" }}>

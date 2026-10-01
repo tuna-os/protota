@@ -3,8 +3,25 @@ import { useMockupStore } from '../store/mockupStore';
 
 interface Props { x: number; y: number; onClose: () => void }
 
+/** `<gtk-popover>` exposes `anchor` as a property, which React cannot set as an attribute. */
+type GtkPopoverElement = HTMLElement & { anchor: HTMLElement | null };
+
 export const ContextMenu: React.FC<Props> = ({ x, y, onClose }) => {
   const { deleteNode, selectedNodeId, undo, redo, screenSelected, selectedScreenId, deleteScreen } = useMockupStore();
+
+  const bindPopover = (el: GtkPopoverElement | null) => {
+    if (!el) return;
+    // Anchoring to <body> disables the element's own pointerdown light-dismiss,
+    // which would otherwise close the menu before the contextmenu toggle runs.
+    el.anchor = document.body;
+    // The element owns Escape (bound at the document in capture phase), so
+    // notify::open is the only way React learns the menu closed.
+    const onNotify = (e: Event) => {
+      if ((e as CustomEvent<{ open: boolean }>).detail?.open === false) onClose();
+    };
+    el.addEventListener('notify::open', onNotify);
+    return () => el.removeEventListener('notify::open', onNotify);
+  };
 
   const items = [
     { label: 'Undo', action: () => { undo(); onClose(); } },
@@ -17,21 +34,26 @@ export const ContextMenu: React.FC<Props> = ({ x, y, onClose }) => {
   ];
 
   return (
-    <div className="protota-context-menu" style={{
-      position: 'fixed', left: x, top: y, zIndex: 3000,
-      background: 'var(--popover-bg-color, #fff)', borderRadius: '8px',
-      boxShadow: '0 4px 16px rgba(0,0,6,0.18)', border: '1px solid var(--separator-color)',
-      minWidth: '160px', padding: '4px',
-    }}>
-      {items.map(item => (
-        <div key={item.label} onClick={item.action} style={{
-          padding: '6px 12px', borderRadius: '4px', cursor: 'pointer', fontSize: '13px',
-          color: item.danger ? 'var(--destructive-bg-color)' : 'inherit',
-        }} onMouseEnter={e => { e.currentTarget.style.background = 'var(--button-bg-color)'; }}
-           onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}>
-          {item.label}
-        </div>
-      ))}
+    <div className="protota-context-menu-anchor" style={{ left: x, top: y }}>
+      <gtk-popover
+        ref={bindPopover}
+        className="protota-context-menu"
+        menu=""
+        position="bottom"
+        align="start"
+        open
+      >
+        {items.map(item => (
+          <button
+            key={item.label}
+            type="button"
+            className={`adw-popover-item${item.danger ? ' danger' : ''}`}
+            onClick={item.action}
+          >
+            {item.label}
+          </button>
+        ))}
+      </gtk-popover>
     </div>
   );
 };

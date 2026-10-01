@@ -684,6 +684,22 @@ body,
   }
 }
 
+/* ---- Right-click context menu (a menu popover anchored at the cursor) ---- */
+.protota-context-menu-anchor {
+  position: fixed;
+  width: 0;
+  height: 0;
+  z-index: 2999;
+}
+
+.protota-context-menu {
+  min-width: 160px;
+}
+
+.protota-context-menu .danger {
+  color: var(--destructive-color, #e01b24);
+}
+
 /* ---- Dialog action buttons (Adw.Dialog-aligned) ---- */
 .protota-btn {
   box-sizing: border-box;

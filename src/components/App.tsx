@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import { persistDocumentSource, useMockupStore } from "../store/mockupStore";
 import { LayersPanel } from "./LayersPanel";
 import { WidgetPalette } from "./WidgetPalette";
@@ -21,6 +21,7 @@ import { useIsMobile } from "../hooks/useIsMobile";
 import { downloadPng, renderScreenToPng } from "../utils/pngExport";
 import { mockupToBlueprint } from "../utils/blueprint";
 import { settleRender } from "../utils/settle";
+import { findNodeById } from "../utils/treeHelpers";
 
 /** Single share implementation (tests/sharing.spec.ts): base64 of the UTF-8
  * document JSON in the URL hash. TextEncoder replaces the deprecated
@@ -104,12 +105,82 @@ export const App: React.FC = () => {
   const [showWriteback, setShowWriteback] = useState(false);
   const [showExportModal, setShowExportModal] = useState(false);
   const [showCommandPalette, setShowCommandPalette] = useState(false);
-  const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null);
+  const [contextMenu, setContextMenu] = useState<{
+    x: number; y: number; kind: "node" | "screen" | "canvas";
+  } | null>(null);
+  /** Row the context menu asked to rename, handed to the Layers panel. */
+  const [renameRequest, setRenameRequest] = useState<{ id: string; title: string } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // LayersPanel clears the request from an effect, so this identity must hold.
+  const clearRenameRequest = useCallback(() => setRenameRequest(null), []);
+
+  // Rename edits a row in place, so the panel has to be on screen — the canvas
+  // menu can ask for one while the drawer is closed or on the Widgets tab.
+  const handleRename = (id: string) => {
+    const screen = doc.screens.find((candidate) => candidate.id === id);
+    const node = screen ? null : findNodeById(doc.screens.map((candidate) => candidate.rootNode), id);
+    if (!screen && !node) return;
+    setLeftOpen(true);
+    setLeftTab("layers");
+    setRenameRequest({ id, title: screen?.title ?? node?.title ?? "" });
+  };
+
   const handleContextMenu = (e: React.MouseEvent) => {
+    const target = e.target as HTMLElement;
+    // Canvas and Layers own the editor's menu; header, preview chrome and the
+    // zoom bar keep the browser's native one.
+    const inCanvas = !!target.closest?.(".protota-canvas");
+    const inLayers = !!target.closest?.(".protota-layers");
+    if (!inCanvas && !inLayers) return;
+    if (inCanvas && target.closest(".protota-preview-overlay, .protota-zoom-bar, .protota-resize-handle, .protota-screen-delete-notice, .protota-add-affordance")) return;
     e.preventDefault();
-    setContextMenu({ x: e.clientX, y: e.clientY });
+    // Right-click selects what it lands on, so the menu acts on the target.
+    const store = useMockupStore.getState();
+    let kind: "node" | "screen" | "canvas";
+    if (inLayers) {
+      // Rows carry their own ids. Branching also keeps the shared
+      // `.protota-screen-label` from crossing the two surfaces.
+      const nodeId = target.closest("[data-node-id]")?.getAttribute("data-node-id") ?? null;
+      const screenId = target.closest("[data-screen-id]")?.getAttribute("data-screen-id") ?? null;
+      if (nodeId) {
+        // A multi-selection member keeps the whole selection (#79).
+        const ids = store.selectedNodeIds.includes(nodeId) ? store.selectedNodeIds : [nodeId];
+        store.selectNodes(ids, screenId ?? undefined);
+        kind = "node";
+      } else if (screenId) {
+        store.selectScreen(screenId);
+        kind = "screen";
+      } else {
+        store.selectNode(null);
+        kind = "canvas";
+      }
+    } else {
+      const nodeEl = target.closest("[data-node-id]");
+      const labelEl = target.closest(".protota-screen-label");
+      const screenEl = target.closest("[data-protota-flow-screen]");
+      const screenId = screenEl?.getAttribute("data-protota-flow-screen") ?? null;
+      if (nodeEl) {
+        store.selectNode(nodeEl.getAttribute("data-node-id"), screenId ?? undefined);
+        kind = "node";
+      } else if (labelEl) {
+        store.selectScreen(screenId);
+        kind = "screen";
+      } else {
+        store.selectNode(null);
+        kind = "canvas";
+      }
+    }
+    // Right-click dismisses an open menu rather than re-anchoring it.
+    setContextMenu((prev) => (prev ? null : { x: e.clientX, y: e.clientY, kind }));
+  };
+
+  // Capture so a child's stopPropagation cannot strand the menu open; on click,
+  // not pointerdown, so the click still reaches the canvas and selects.
+  const handleAppClick = (e: React.MouseEvent) => {
+    if (!contextMenu) return;
+    if ((e.target as HTMLElement).closest?.(".protota-context-menu")) return;
+    setContextMenu(null);
   };
 
   const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -383,6 +454,7 @@ export const App: React.FC = () => {
     <div
       style={{ display: "flex", flexDirection: "column", height: "100vh" }}
       onContextMenu={handleContextMenu}
+      onClickCapture={handleAppClick}
     >
       {/* Adwaita Toolbar View — frames the entire app */}
       <adw-toolbar-view style={{ flex: 1, display: "flex", flexDirection: "column" }}>
@@ -433,7 +505,9 @@ export const App: React.FC = () => {
                   </button>
                 ))}
               </div>
-              {leftTab === "layers" ? <LayersPanel /> : <WidgetPalette />}
+              {leftTab === "layers"
+                ? <LayersPanel renameRequest={renameRequest} onRenameConsumed={clearRenameRequest} />
+                : <WidgetPalette />}
             </aside>
           )}
 
@@ -485,7 +559,13 @@ export const App: React.FC = () => {
       <AddScreenModal isOpen={showAddScreenModal} onClose={() => setShowAddScreenModal(false)} />
 
       {contextMenu && (
-        <ContextMenu x={contextMenu.x} y={contextMenu.y} onClose={() => setContextMenu(null)} />
+        <ContextMenu
+          x={contextMenu.x}
+          y={contextMenu.y}
+          kind={contextMenu.kind}
+          onRename={handleRename}
+          onClose={() => setContextMenu(null)}
+        />
       )}
 
       <PresetGallery isOpen={showPresets} onClose={() => setShowPresets(false)} />

@@ -46,7 +46,14 @@ function findParentIdOf(root: AdwNode, nodeId: string): string | null {
   return null;
 }
 
-export const LayersPanel: React.FC = () => {
+interface Props {
+  /** The row the context menu asked to rename, or `null` when none is pending. */
+  renameRequest: { id: string; title: string } | null;
+  /** Clears `renameRequest` once the editor is open. Identity must be stable. */
+  onRenameConsumed: () => void;
+}
+
+export const LayersPanel: React.FC<Props> = ({ renameRequest, onRenameConsumed }) => {
   const {
     doc, selectedNodeId, selectedNodeIds, selectNode, toggleNodeSelection,
     selectNodes, updateNodeProps, moveNodeUp, moveNodeDown,
@@ -140,6 +147,16 @@ export const LayersPanel: React.FC = () => {
     // The input unmounts on the next render; hand focus back to the row.
     requestAnimationFrame(() => rowRefs.current.get(id)?.focus());
   };
+
+  // App owns the context menu but the editor lives here, so it hands the row
+  // over. A prop rather than a window event: the panel can still be unmounted
+  // when the canvas asks.
+  useEffect(() => {
+    if (!renameRequest) return;
+    setRenamingId(renameRequest.id);
+    setDraftTitle(renameRequest.title);
+    onRenameConsumed();
+  }, [renameRequest, onRenameConsumed]);
 
   const handleTreeKeyDown = (e: React.KeyboardEvent) => {
     if (renamingId) return; // The rename input owns the keyboard.
@@ -373,6 +390,7 @@ export const LayersPanel: React.FC = () => {
         tabIndex={node.id === focusableId ? 0 : -1}
         data-testid="layer-row"
         data-node-id={node.id}
+        data-screen-id={row.screenId}
         {...(hint ? { 'data-drop-position': hint } : {})}
         draggable={!isRenaming}
         style={{ marginLeft: `${depth * 14}px` }}
@@ -479,7 +497,14 @@ export const LayersPanel: React.FC = () => {
   // Rows render flat (indent via margin); screens group their own subtrees.
   let cursor = 0;
   return (
-    <div ref={treeRef} role="tree" aria-label="Layers" onKeyDown={handleTreeKeyDown} style={{ padding: '12px' }}>
+    <div
+      ref={treeRef}
+      className="protota-layers"
+      role="tree"
+      aria-label="Layers"
+      onKeyDown={handleTreeKeyDown}
+      style={{ padding: '12px' }}
+    >
       {doc.screens.map((screen) => {
         const screenRows: LayerRow[] = [];
         while (cursor < rows.length && rows[cursor].screenId === screen.id) {

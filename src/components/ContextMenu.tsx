@@ -27,21 +27,16 @@ export const ContextMenu: React.FC<Props> = ({ x, y, kind, onClose }) => {
     return () => el.removeEventListener('notify::open', onNotify);
   };
 
-  // The menu acts on whatever the right-click selected (see App's
-  // handleContextMenu), so items follow the selection's kind.
-  const history: { label: string; action: () => void; danger?: boolean }[] = [
-    { label: 'Undo', action: () => { undo(); onClose(); } },
-    { label: 'Redo', action: () => { redo(); onClose(); } },
-  ];
+  // Items follow the selection the right-click made (App's handleContextMenu).
+  // Undo/Redo are history, not object commands: only the empty-canvas menu,
+  // where nothing is selected, has anything else to offer.
   const items: { label: string; action: () => void; danger?: boolean }[] =
     kind === 'screen' && screenSelected && selectedScreenId
       ? [
-          ...history,
           { label: 'Delete Screen', action: () => { deleteScreen(selectedScreenId); onClose(); }, danger: true },
         ]
       : kind === 'node' && selectedNodeId
         ? [
-            ...history,
             { label: 'Cut', action: () => { cutNodes(selectedNodeIds); onClose(); } },
             { label: 'Copy', action: () => { copyNodes(selectedNodeIds); onClose(); } },
             { label: 'Paste', action: () => {
@@ -57,7 +52,8 @@ export const ContextMenu: React.FC<Props> = ({ x, y, kind, onClose }) => {
             { label: 'Delete', action: () => { deleteNode(selectedNodeId); onClose(); }, danger: true },
           ]
         : [
-            ...history,
+            { label: 'Undo', action: () => { undo(); onClose(); } },
+            { label: 'Redo', action: () => { redo(); onClose(); } },
             { label: 'Add Screen', action: () => { setShowAddScreenModal(true); onClose(); } },
           ];
 

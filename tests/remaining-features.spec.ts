@@ -32,6 +32,9 @@ test.describe('Remaining features (#9, #16, #18-#24)', () => {
     // Node menu offers node ops because the right-click selected the node.
     await expect(menu.getByRole('button', { name: 'Delete' })).toBeVisible();
     await expect(menu.getByRole('button', { name: 'Duplicate' })).toBeVisible();
+    // Undo/Redo are history, not object commands: only the no-selection menu has them.
+    await expect(menu.getByRole('button', { name: 'Undo' })).toHaveCount(0);
+    await expect(menu.getByRole('button', { name: 'Redo' })).toHaveCount(0);
 
     // Dismiss, then right-click the app header: no editor context menu there.
     await page.locator('.protota-canvas').click({ position: { x: 5, y: 5 } });

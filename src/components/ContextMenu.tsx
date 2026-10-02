@@ -1,12 +1,22 @@
 import React from 'react';
 import { useMockupStore } from '../store/mockupStore';
+import type { MenuItem } from './MenuData';
 
-interface Props { x: number; y: number; kind: 'node' | 'screen' | 'canvas'; onClose: () => void }
+/** A menu entry as this component renders it: `danger` tints the destructive one. */
+type ContextMenuItem = MenuItem & { danger?: boolean };
+
+interface Props {
+  x: number; y: number;
+  kind: 'node' | 'screen' | 'canvas';
+  /** Start renaming the right-clicked node or screen (its id). */
+  onRename: (id: string) => void;
+  onClose: () => void;
+}
 
 /** `<gtk-popover>` exposes `anchor` as a property, which React cannot set as an attribute. */
 type GtkPopoverElement = HTMLElement & { anchor: HTMLElement | null };
 
-export const ContextMenu: React.FC<Props> = ({ x, y, kind, onClose }) => {
+export const ContextMenu: React.FC<Props> = ({ x, y, kind, onRename, onClose }) => {
   const {
     deleteNode, selectedNodeId, undo, redo, screenSelected, selectedScreenId,
     deleteScreen, cutNodes, copyNodes, pasteNodes, duplicateNodes, selectNodes,
@@ -30,9 +40,10 @@ export const ContextMenu: React.FC<Props> = ({ x, y, kind, onClose }) => {
   // Items follow the selection the right-click made (App's handleContextMenu).
   // Undo/Redo are history, not object commands: only the empty-canvas menu,
   // where nothing is selected, has anything else to offer.
-  const items: { label: string; action: () => void; danger?: boolean }[] =
+  const items: ContextMenuItem[] =
     kind === 'screen' && screenSelected && selectedScreenId
       ? [
+          { label: 'Rename…', action: () => { onRename(selectedScreenId); onClose(); } },
           { label: 'Delete Screen', action: () => { deleteScreen(selectedScreenId); onClose(); }, danger: true },
         ]
       : kind === 'node' && selectedNodeId
@@ -49,6 +60,7 @@ export const ContextMenu: React.FC<Props> = ({ x, y, kind, onClose }) => {
                 if (created.length) selectNodes(created, selectedScreenId ?? undefined);
                 onClose();
               } },
+            { label: 'Rename…', action: () => { onRename(selectedNodeId); onClose(); } },
             { label: 'Delete', action: () => { deleteNode(selectedNodeId); onClose(); }, danger: true },
           ]
         : [

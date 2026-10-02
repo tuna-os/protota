@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import { persistDocumentSource, useMockupStore } from "../store/mockupStore";
 import { LayersPanel } from "./LayersPanel";
 import { WidgetPalette } from "./WidgetPalette";
@@ -21,6 +21,7 @@ import { useIsMobile } from "../hooks/useIsMobile";
 import { downloadPng, renderScreenToPng } from "../utils/pngExport";
 import { mockupToBlueprint } from "../utils/blueprint";
 import { settleRender } from "../utils/settle";
+import { findNodeById } from "../utils/treeHelpers";
 
 /** Single share implementation (tests/sharing.spec.ts): base64 of the UTF-8
  * document JSON in the URL hash. TextEncoder replaces the deprecated
@@ -107,7 +108,23 @@ export const App: React.FC = () => {
   const [contextMenu, setContextMenu] = useState<{
     x: number; y: number; kind: "node" | "screen" | "canvas";
   } | null>(null);
+  /** Row the context menu asked to rename, handed to the Layers panel. */
+  const [renameRequest, setRenameRequest] = useState<{ id: string; title: string } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // LayersPanel clears the request from an effect, so this identity must hold.
+  const clearRenameRequest = useCallback(() => setRenameRequest(null), []);
+
+  // Rename edits a row in place, so the panel has to be on screen — the canvas
+  // menu can ask for one while the drawer is closed or on the Widgets tab.
+  const handleRename = (id: string) => {
+    const screen = doc.screens.find((candidate) => candidate.id === id);
+    const node = screen ? null : findNodeById(doc.screens.map((candidate) => candidate.rootNode), id);
+    if (!screen && !node) return;
+    setLeftOpen(true);
+    setLeftTab("layers");
+    setRenameRequest({ id, title: screen?.title ?? node?.title ?? "" });
+  };
 
   const handleContextMenu = (e: React.MouseEvent) => {
     const target = e.target as HTMLElement;
@@ -488,7 +505,9 @@ export const App: React.FC = () => {
                   </button>
                 ))}
               </div>
-              {leftTab === "layers" ? <LayersPanel /> : <WidgetPalette />}
+              {leftTab === "layers"
+                ? <LayersPanel renameRequest={renameRequest} onRenameConsumed={clearRenameRequest} />
+                : <WidgetPalette />}
             </aside>
           )}
 
@@ -540,7 +559,13 @@ export const App: React.FC = () => {
       <AddScreenModal isOpen={showAddScreenModal} onClose={() => setShowAddScreenModal(false)} />
 
       {contextMenu && (
-        <ContextMenu x={contextMenu.x} y={contextMenu.y} kind={contextMenu.kind} onClose={() => setContextMenu(null)} />
+        <ContextMenu
+          x={contextMenu.x}
+          y={contextMenu.y}
+          kind={contextMenu.kind}
+          onRename={handleRename}
+          onClose={() => setContextMenu(null)}
+        />
       )}
 
       <PresetGallery isOpen={showPresets} onClose={() => setShowPresets(false)} />

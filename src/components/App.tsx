@@ -104,13 +104,35 @@ export const App: React.FC = () => {
   const [showWriteback, setShowWriteback] = useState(false);
   const [showExportModal, setShowExportModal] = useState(false);
   const [showCommandPalette, setShowCommandPalette] = useState(false);
-  const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null);
+  const [contextMenu, setContextMenu] = useState<{ x: number; y: number; kind: "node" | "screen" | "canvas" } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleContextMenu = (e: React.MouseEvent) => {
+    const target = e.target as HTMLElement;
+    // The canvas owns the only custom context menu. Header, panels, preview
+    // chrome and zoom bar keep the browser's native menu.
+    if (!target.closest?.(".protota-canvas")) return;
+    if (target.closest(".protota-preview-overlay, .protota-zoom-bar, .protota-resize-handle, .protota-screen-delete-notice, .protota-add-affordance")) return;
     e.preventDefault();
+    // Right-click selects what it lands on, so the menu acts on the target.
+    const nodeEl = target.closest("[data-node-id]");
+    const labelEl = target.closest(".protota-screen-label");
+    const screenEl = target.closest("[data-protota-flow-screen]");
+    const screenId = screenEl?.getAttribute("data-protota-flow-screen") ?? null;
+    const store = useMockupStore.getState();
+    let kind: "node" | "screen" | "canvas";
+    if (nodeEl) {
+      store.selectNode(nodeEl.getAttribute("data-node-id"), screenId ?? undefined);
+      kind = "node";
+    } else if (labelEl) {
+      store.selectScreen(screenId);
+      kind = "screen";
+    } else {
+      store.selectNode(null);
+      kind = "canvas";
+    }
     // Right-click dismisses an open menu rather than re-anchoring it.
-    setContextMenu((prev) => (prev ? null : { x: e.clientX, y: e.clientY }));
+    setContextMenu((prev) => (prev ? null : { x: e.clientX, y: e.clientY, kind }));
   };
 
   // Capture so a child's stopPropagation cannot strand the menu open; on click,
@@ -495,7 +517,7 @@ export const App: React.FC = () => {
       <AddScreenModal isOpen={showAddScreenModal} onClose={() => setShowAddScreenModal(false)} />
 
       {contextMenu && (
-        <ContextMenu x={contextMenu.x} y={contextMenu.y} onClose={() => setContextMenu(null)} />
+        <ContextMenu x={contextMenu.x} y={contextMenu.y} kind={contextMenu.kind} onClose={() => setContextMenu(null)} />
       )}
 
       <PresetGallery isOpen={showPresets} onClose={() => setShowPresets(false)} />

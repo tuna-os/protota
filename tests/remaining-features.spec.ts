@@ -29,6 +29,14 @@ test.describe('Remaining features (#9, #16, #18-#24)', () => {
     await window.click({ button: 'right' });
     const menu = page.locator('.protota-context-menu');
     await expect(menu).toBeVisible({ timeout: 3000 });
+    // Node menu offers node ops because the right-click selected the node.
+    await expect(menu.getByRole('button', { name: 'Delete' })).toBeVisible();
+    await expect(menu.getByRole('button', { name: 'Duplicate' })).toBeVisible();
+
+    // Dismiss, then right-click the app header: no editor context menu there.
+    await page.locator('.protota-canvas').click({ position: { x: 5, y: 5 } });
+    await page.locator('[data-testid="app-header-bar"]').click({ button: 'right' });
+    await expect(menu).toHaveCount(0);
   });
 
   test('#20 Undo button visible', async ({ page }) => {

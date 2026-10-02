@@ -373,6 +373,7 @@ export const LayersPanel: React.FC = () => {
         tabIndex={node.id === focusableId ? 0 : -1}
         data-testid="layer-row"
         data-node-id={node.id}
+        data-screen-id={row.screenId}
         {...(hint ? { 'data-drop-position': hint } : {})}
         draggable={!isRenaming}
         style={{ marginLeft: `${depth * 14}px` }}
@@ -479,7 +480,14 @@ export const LayersPanel: React.FC = () => {
   // Rows render flat (indent via margin); screens group their own subtrees.
   let cursor = 0;
   return (
-    <div ref={treeRef} role="tree" aria-label="Layers" onKeyDown={handleTreeKeyDown} style={{ padding: '12px' }}>
+    <div
+      ref={treeRef}
+      className="protota-layers"
+      role="tree"
+      aria-label="Layers"
+      onKeyDown={handleTreeKeyDown}
+      style={{ padding: '12px' }}
+    >
       {doc.screens.map((screen) => {
         const screenRows: LayerRow[] = [];
         while (cursor < rows.length && rows[cursor].screenId === screen.id) {

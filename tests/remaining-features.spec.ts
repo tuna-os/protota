@@ -39,6 +39,25 @@ test.describe('Remaining features (#9, #16, #18-#24)', () => {
     await expect(menu).toHaveCount(0);
   });
 
+  test('#19b Right-click on a layer row opens the context menu', async ({ page }) => {
+    const row = page.getByTestId('layer-row').first();
+    await expect(row).toBeVisible();
+    await row.click({ button: 'right' });
+
+    const menu = page.locator('.protota-context-menu');
+    await expect(menu).toBeVisible({ timeout: 3000 });
+    // The right-click selected the row, so the node ops act on it.
+    await expect(menu.getByRole('button', { name: 'Duplicate' })).toBeVisible();
+  });
+
+  test('#19c Right-click on a screen row opens the screen menu', async ({ page }) => {
+    await page.getByTestId('screen-row').first().click({ button: 'right' });
+
+    const menu = page.locator('.protota-context-menu');
+    await expect(menu).toBeVisible({ timeout: 3000 });
+    await expect(menu.getByRole('button', { name: 'Delete Screen' })).toBeVisible();
+  });
+
   test('#20 Undo button visible', async ({ page }) => {
     await expect(page.getByRole('button', { name: /undo/i })).toBeVisible();
   });

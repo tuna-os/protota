@@ -104,32 +104,55 @@ export const App: React.FC = () => {
   const [showWriteback, setShowWriteback] = useState(false);
   const [showExportModal, setShowExportModal] = useState(false);
   const [showCommandPalette, setShowCommandPalette] = useState(false);
-  const [contextMenu, setContextMenu] = useState<{ x: number; y: number; kind: "node" | "screen" | "canvas" } | null>(null);
+  const [contextMenu, setContextMenu] = useState<{
+    x: number; y: number; kind: "node" | "screen" | "canvas";
+  } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleContextMenu = (e: React.MouseEvent) => {
     const target = e.target as HTMLElement;
-    // The canvas owns the only custom context menu. Header, panels, preview
-    // chrome and zoom bar keep the browser's native menu.
-    if (!target.closest?.(".protota-canvas")) return;
-    if (target.closest(".protota-preview-overlay, .protota-zoom-bar, .protota-resize-handle, .protota-screen-delete-notice, .protota-add-affordance")) return;
+    // Canvas and Layers own the editor's menu; header, preview chrome and the
+    // zoom bar keep the browser's native one.
+    const inCanvas = !!target.closest?.(".protota-canvas");
+    const inLayers = !!target.closest?.(".protota-layers");
+    if (!inCanvas && !inLayers) return;
+    if (inCanvas && target.closest(".protota-preview-overlay, .protota-zoom-bar, .protota-resize-handle, .protota-screen-delete-notice, .protota-add-affordance")) return;
     e.preventDefault();
     // Right-click selects what it lands on, so the menu acts on the target.
-    const nodeEl = target.closest("[data-node-id]");
-    const labelEl = target.closest(".protota-screen-label");
-    const screenEl = target.closest("[data-protota-flow-screen]");
-    const screenId = screenEl?.getAttribute("data-protota-flow-screen") ?? null;
     const store = useMockupStore.getState();
     let kind: "node" | "screen" | "canvas";
-    if (nodeEl) {
-      store.selectNode(nodeEl.getAttribute("data-node-id"), screenId ?? undefined);
-      kind = "node";
-    } else if (labelEl) {
-      store.selectScreen(screenId);
-      kind = "screen";
+    if (inLayers) {
+      // Rows carry their own ids. Branching also keeps the shared
+      // `.protota-screen-label` from crossing the two surfaces.
+      const nodeId = target.closest("[data-node-id]")?.getAttribute("data-node-id") ?? null;
+      const screenId = target.closest("[data-screen-id]")?.getAttribute("data-screen-id") ?? null;
+      if (nodeId) {
+        // A multi-selection member keeps the whole selection (#79).
+        const ids = store.selectedNodeIds.includes(nodeId) ? store.selectedNodeIds : [nodeId];
+        store.selectNodes(ids, screenId ?? undefined);
+        kind = "node";
+      } else if (screenId) {
+        store.selectScreen(screenId);
+        kind = "screen";
+      } else {
+        store.selectNode(null);
+        kind = "canvas";
+      }
     } else {
-      store.selectNode(null);
-      kind = "canvas";
+      const nodeEl = target.closest("[data-node-id]");
+      const labelEl = target.closest(".protota-screen-label");
+      const screenEl = target.closest("[data-protota-flow-screen]");
+      const screenId = screenEl?.getAttribute("data-protota-flow-screen") ?? null;
+      if (nodeEl) {
+        store.selectNode(nodeEl.getAttribute("data-node-id"), screenId ?? undefined);
+        kind = "node";
+      } else if (labelEl) {
+        store.selectScreen(screenId);
+        kind = "screen";
+      } else {
+        store.selectNode(null);
+        kind = "canvas";
+      }
     }
     // Right-click dismisses an open menu rather than re-anchoring it.
     setContextMenu((prev) => (prev ? null : { x: e.clientX, y: e.clientY, kind }));

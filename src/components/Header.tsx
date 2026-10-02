@@ -159,13 +159,9 @@ const HeaderIconButton: React.FC<{
 );
 
 /**
- * The app's adw-header-bar. Start slot: Layers toggle + the labelled "Open"
- * menu button + Undo/Redo. End slot: the labelled "Export" menu button
- * (the former share/export/PNG header buttons, consolidated) + the
- * Flows/Diagnostics toolbar buttons (desktop-only, icon-only) + the app-menu
- * button (theme switcher + overflow) + the Properties toggle. Open/Export
- * render on every viewport — the old menu bar and the mobile-only hamburger
- * integration are gone.
+ * The app's adw-header-bar. Start slot: Layers toggle + "Open" menu +
+ * Undo/Redo. End slot: "Export" menu + Flows/Diagnostics toggles
+ * (desktop-only) + Properties toggle + app-menu button, always last.
  */
 export const Header: React.FC<HeaderProps> = ({
   leftOpen,
@@ -263,7 +259,7 @@ export const Header: React.FC<HeaderProps> = ({
           ariaLabel="Redo"
         />
       </div>
-      {/* End slot: Export menu + Flows/Diagnostics + app-menu button + Properties toggle */}
+      {/* End slot: Export menu + Flows/Diagnostics + Properties toggle + app-menu button */}
       <div slot="end" style={{ display: "flex", gap: "2px", alignItems: "center" }}>
         <LabeledMenuButton
           label="Export"
@@ -321,7 +317,6 @@ export const Header: React.FC<HeaderProps> = ({
             </HeaderIconButton>
           </>
         )}
-        <AppMenuButton />
         <HeaderIconButton
           icon={sidebarShowRightSymbolic}
           onClick={onToggleRight}
@@ -329,6 +324,7 @@ export const Header: React.FC<HeaderProps> = ({
           ariaLabel="Toggle Properties"
           active={rightOpen}
         />
+        <AppMenuButton />
       </div>
     </adw-header-bar>
   );

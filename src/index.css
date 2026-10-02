@@ -643,6 +643,14 @@ body,
   background-color: var(--button-active-color, rgba(0, 0, 6, 0.19));
 }
 
+/* Quiet toggles (Flows/Diagnostics in the header): state reads through
+   .dimmed alone, so the pressed state keeps the flat background instead of
+   the raised active fill. Scoped to :not(:hover) — the usual hover shade
+   still applies. */
+.adw-button.flat.active.protota-header-icon-button--quiet:not(:hover) {
+  background-color: transparent;
+}
+
 /* ---- Modal overlay (Adw.Dialog-aligned) ---- */
 .protota-modal-backdrop {
   position: fixed;

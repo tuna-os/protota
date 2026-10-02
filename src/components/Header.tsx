@@ -138,11 +138,14 @@ const HeaderIconButton: React.FC<{
   ariaLabel: string;
   className?: string;
   active?: boolean;
+  /** Toggle buttons dim while off (Adwaita's `.dimmed`), so the active
+   *  accent-less state reads as "this view is currently hidden". */
+  dimWhenInactive?: boolean;
   testId?: string;
   children?: React.ReactNode;
-}> = ({ icon, onClick, title, ariaLabel, className = "", active, testId, children }) => (
+}> = ({ icon, onClick, title, ariaLabel, className = "", active, dimWhenInactive, testId, children }) => (
   <button
-    className={`adw-button flat protota-header-icon-button${active ? " active" : ""}${className ? ` ${className}` : ""}`}
+    className={`adw-button flat protota-header-icon-button${active ? " active" : ""}${dimWhenInactive && !active ? " dimmed" : ""}${className ? ` ${className}` : ""}`}
     data-active={active ? "true" : undefined}
     onClick={onClick}
     title={title}
@@ -274,9 +277,11 @@ export const Header: React.FC<HeaderProps> = ({
             <HeaderIconButton
               icon={focusLegacySystraySymbolic}
               onClick={toggleShowFlows}
-              title="Toggle Screen Flows (Ctrl+;)"
+              title={`${showFlows ? "Disable" : "Enable"} Screen Flows (Ctrl+;)`}
               ariaLabel="Flows"
               active={showFlows}
+              dimWhenInactive
+              className="protota-header-icon-button--quiet"
             />
             {/* The @gjsify/adwaita-icons package does not ship diagnostics-symbolic
                 (upstream development category); the design's sanctioned fallback is
@@ -285,8 +290,10 @@ export const Header: React.FC<HeaderProps> = ({
               icon={toolsCheckSpellingSymbolic}
               onClick={handleToggleDiagnostics}
               ariaLabel="Diagnostics"
-              title={`Toggle Diagnostics${countable.length ? `: ${countable.length} issues` : ""} (Ctrl+')`}
+              title={`${diagnosticsEnabled ? "Disable" : "Enable"} Diagnostics${countable.length ? `: ${countable.length} issues` : ""} (Ctrl+')`}
               active={diagnosticsEnabled}
+              dimWhenInactive
+              className="protota-header-icon-button--quiet"
               testId="diagnostics-toggle"
             >
               {diagnosticsEnabled && countable.length > 0 && (

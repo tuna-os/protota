@@ -247,11 +247,13 @@ body,
 }
 
 /* ---- Selection chrome ---- */
+/* Inset outline: an outset outline is clipped by the window's scrolled,
+   overflow-hidden content, so a full-size box's highlight vanished. */
 .adw-node-wrapper.selected-outline {
   display: block;
   position: relative;
   outline: 2px solid var(--accent-bg-color, #3584e4);
-  outline-offset: 2px;
+  outline-offset: -2px;
   border-radius: 4px;
 }
 
@@ -261,7 +263,7 @@ body,
   display: block;
   position: relative;
   outline: 2px dashed var(--accent-bg-color, #3584e4);
-  outline-offset: 2px;
+  outline-offset: -2px;
   border-radius: 4px;
 }
 
@@ -682,6 +684,22 @@ body,
     opacity: 1;
     transform: translateY(0) scale(1);
   }
+}
+
+/* ---- Right-click context menu (a menu popover anchored at the cursor) ---- */
+.protota-context-menu-anchor {
+  position: fixed;
+  width: 0;
+  height: 0;
+  z-index: 2999;
+}
+
+.protota-context-menu {
+  min-width: 160px;
+}
+
+.protota-context-menu .danger {
+  color: var(--destructive-color, #e01b24);
 }
 
 /* ---- Dialog action buttons (Adw.Dialog-aligned) ---- */

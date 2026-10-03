@@ -6,8 +6,7 @@
  * and the serializer/export layer, as well as write-back helpers.
  */
 
-import type { AdwNode, AdwNodeType } from '../types/mockup';
-import { GTK_PROPERTY_DATA } from '../data/gtkProperties';
+import type { AdwNodeType } from '../types/mockup';
 
 // ============================================================================
 // Widget Type Mapping
@@ -353,41 +352,11 @@ const STYLE_CLASS_PROPERTIES: Record<string, string> = {
   'large-buttons': 'large-buttons',
 };
 
-const OBJECT_REFERENCE_PROPERTIES = new Set([
-  'child', 'menu_model', 'popover', 'pages', 'accept_focus',
-]);
-
 export const ANNOTATION_SLOTS = new Set([
   'use-markup', 'translatable', 'comments', 'context',
 ]);
 
 export const EXPORTED_FALSE_PROPERTIES = new Set(['autohide']);
-
-const STRING_PROPERTIES = new Set([
-  'name', 'title', 'subtitle', 'label', 'tooltip-text', 'markup',
-  'uri', 'placeholder-text', 'text', 'action-name', 'icon-name',
-  'css-classes', 'css-name', 'accessible-role', 'accessible-name',
-  'default-widget', 'focus-widget',
-]);
-
-const INTERNAL_PROPERTIES = new Set([
-  'parent', 'root', 'scale-factor', 'allocated-width', 'allocated-height',
-  'allocated-baseline', 'has-focus', 'is-focus', 'can-focus', 'has-default',
-  'receives-default', 'focus-on-click', 'can-target', 'has-tooltip',
-  'tooltip-markup', 'halign', 'valign', 'margin-top', 'margin-bottom',
-  'margin-start', 'margin-end', 'hexpand', 'vexpand', 'opacity',
-]);
-
-const propertyCache = new Map<string, Set<string>>();
-function propertiesOf(rawClassName: string): Set<string> | null {
-  if (propertyCache.has(rawClassName)) {
-    return propertyCache.get(rawClassName) ?? null;
-  }
-  const data = GTK_PROPERTY_DATA[canonicalClassName(rawClassName)];
-  const props = data ? new Set(data) : null;
-  propertyCache.set(rawClassName, props ?? new Set());
-  return props;
-}
 
 const LAYOUT_PROPERTIES = new Set(['column', 'row', 'column-span', 'row-span']);
 
@@ -403,7 +372,6 @@ export function isBlueprintLayoutProperty(name: string): boolean {
 
 /** Renderer key for a GTK property, specific to node type. */
 export function editorPropertyName(name: string, nodeType: AdwNodeType): string {
-  // title on button/label is rendered from the label property
   if ((name === 'label' || name === 'text' || name === 'title') && (nodeType === 'button' || nodeType === 'label')) {
     return 'title';
   }
@@ -414,7 +382,7 @@ export function editorPropertyName(name: string, nodeType: AdwNodeType): string 
 // Value Formatting
 // ============================================================================
 
-export function formatPropertyValue(name: string, value: unknown): string {
+export function formatPropertyValue(_name: string, value: unknown): string {
   if (value === null || value === undefined) return '';
   if (typeof value === 'string') {
     return escapeBlueprintString(value);
@@ -426,7 +394,7 @@ export function formatPropertyValue(name: string, value: unknown): string {
     return String(value);
   }
   if (Array.isArray(value)) {
-    return value.map((v) => formatPropertyValue(name, v)).join(' ');
+    return value.map((v) => formatPropertyValue(_name, v)).join(' ');
   }
   return String(value);
 }

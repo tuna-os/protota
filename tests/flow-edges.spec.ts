@@ -4,6 +4,9 @@ test.describe('Flow edges (#11)', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
     await page.waitForSelector('adw-window', { timeout: 10000 });
+    // First-run documents open with the drawers closed; the flow editor
+    // lives in the inspector, so open the right one.
+    await page.keyboard.press('Control+]');
   });
 
   test('Show Flows toggle exists in toolbar', async ({ page }) => {

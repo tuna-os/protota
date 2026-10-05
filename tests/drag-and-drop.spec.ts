@@ -90,6 +90,9 @@ async function html5Drag(
 test.beforeEach(async ({ page }) => {
   await page.goto('/');
   await page.waitForSelector('html[data-protota-ready]', { timeout: 15000 });
+  // First-run documents open with the drawers closed; open the left one
+  // for the Widgets palette these tests drag from.
+  await page.keyboard.press('Control+[');
 });
 
 test.describe('palette → canvas (HTML5 drag)', () => {

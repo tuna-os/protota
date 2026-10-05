@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
-import { persistDocumentSource, useMockupStore } from "../store/mockupStore";
+import { isStarterDocument, persistDocumentSource, useMockupStore } from "../store/mockupStore";
 import { LayersPanel } from "./LayersPanel";
 import { WidgetPalette } from "./WidgetPalette";
 import { ViewportCanvas } from "./ViewportCanvas";
@@ -87,12 +87,18 @@ export const App: React.FC = () => {
     diagnosticsEnabled,
   } = useMockupStore();
 
-  const [leftOpen, setLeftOpen] = useState(() =>
-    typeof window !== "undefined" ? window.innerWidth >= 768 : true,
-  );
-  const [rightOpen, setRightOpen] = useState(() =>
-    typeof window !== "undefined" ? window.innerWidth >= 768 : true,
-  );
+  // Panel defaults: both drawers start closed on mobile viewports, on a
+  // blank canvas, and on first start while the pristine starter template is
+  // shown. A real document — imported, opened, or the user's own edited work
+  // restored from persistence — opens both on desktop.
+  const panelsOpenAtStart = () => {
+    if (typeof window === "undefined") return true;
+    if (window.innerWidth < 768) return false;
+    const state = useMockupStore.getState();
+    return state.doc.screens.length > 0 && !isStarterDocument(state.doc);
+  };
+  const [leftOpen, setLeftOpen] = useState(panelsOpenAtStart);
+  const [rightOpen, setRightOpen] = useState(panelsOpenAtStart);
   /** Two-tab right drawer: Properties (inspector) | Diagnostics (design §5.1). */
   const [rightTab, setRightTab] = useState<"properties" | "diagnostics">("properties");
   /** Two-tab left drawer: Layers (tree) | Widgets (draggable palette, #79). */
@@ -229,13 +235,43 @@ export const App: React.FC = () => {
     );
   }, [doc.colorScheme]);
 
-  // Auto-close panels when the viewport transitions to mobile.
+  // Auto-close panels when the viewport transitions to mobile. Returning to
+  // a desktop viewport reopens them — unless the canvas is blank or the
+  // pristine starter template is up (the first-start case above). Runs only
+  // on viewport transitions, never on document edits.
+  const wasMobileRef = useRef(isMobile);
   useEffect(() => {
+    const wasMobile = wasMobileRef.current;
+    wasMobileRef.current = isMobile;
     if (isMobile) {
       setLeftOpen(false);
       setRightOpen(false);
+    } else if (wasMobile) {
+      const state = useMockupStore.getState();
+      if (state.doc.screens.length > 0 && !isStarterDocument(state.doc)) {
+        setLeftOpen(true);
+        setRightOpen(true);
+      }
     }
   }, [isMobile]);
+
+  // Blank canvas (New Project, or every screen deleted): close both drawers
+  // so the empty state owns the viewport. They reopen when the first screen
+  // arrives — same starter-template exception as the viewport rule.
+  const screenCount = doc.screens.length;
+  const prevScreenCountRef = useRef(screenCount);
+  useEffect(() => {
+    const prevCount = prevScreenCountRef.current;
+    prevScreenCountRef.current = screenCount;
+    if (prevCount === screenCount) return;
+    if (screenCount === 0) {
+      setLeftOpen(false);
+      setRightOpen(false);
+    } else if (prevCount === 0 && !isMobile && !isStarterDocument(useMockupStore.getState().doc)) {
+      setLeftOpen(true);
+      setRightOpen(true);
+    }
+  }, [screenCount, isMobile]);
 
   useEffect(() => {
     const onToggleLayers = () => setLeftOpen((v) => !v);

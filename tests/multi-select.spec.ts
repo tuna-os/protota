@@ -97,6 +97,9 @@ test.use({ viewport: { width: 1600, height: 900 } });
 test.beforeEach(async ({ page }) => {
   await page.goto('/');
   await page.waitForSelector('html[data-protota-ready]', { timeout: 15000 });
+  // First-run documents open with the drawers closed; the multi-select
+  // panel assertions need the Layers drawer open.
+  await page.keyboard.press('Control+[');
 });
 
 test.describe('ctrl-click multi-select on canvas', () => {

@@ -155,23 +155,27 @@ test.describe('Mobile topbar (#99)', () => {
   });
 });
 
-test.describe('Panel auto-close on mobile resize', () => {
-  test('resizing from desktop to mobile auto-closes Layers and Properties panels', async ({
+test.describe('Panel auto-close defaults', () => {
+  test('first start opens with both panels closed; desktop-to-mobile resize closes them again', async ({
     page,
   }) => {
-    // Start on desktop — panels open by default.
+    // Start on desktop with the pristine starter template: both drawers
+    // start closed.
     await page.setViewportSize({ width: 1280, height: 800 });
     await page.goto('/');
     await page.waitForSelector('adw-window', { timeout: 10000 });
 
-    // Both panels are visible on desktop.
+    await expect(page.getByTestId('left-tab-layers')).toHaveCount(0);
+    await expect(page.getByTestId('right-tab-properties')).toHaveCount(0);
+
+    // Open both via the header toggles.
+    await page.getByRole('button', { name: 'Toggle Layers' }).click();
+    await page.getByRole('button', { name: 'Toggle Properties' }).click();
     await expect(page.getByTestId('left-tab-layers')).toBeVisible();
     await expect(page.getByTestId('right-tab-properties')).toBeVisible();
 
-    // Resize to mobile — panels should auto-close.
+    // Resize to mobile — panels should auto-close again.
     await page.setViewportSize({ width: 390, height: 844 });
-
-    // Panels are removed from DOM when closed (not just hidden).
     await expect(page.getByTestId('left-tab-layers')).toHaveCount(0);
     await expect(page.getByTestId('right-tab-properties')).toHaveCount(0);
   });

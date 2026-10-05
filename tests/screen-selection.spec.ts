@@ -24,6 +24,9 @@ test.describe('Screen selection and deletion (#138)', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
     await page.waitForSelector('adw-window', { timeout: 10000 });
+    // First-run documents open with the drawers closed; the screen-row
+    // interactions need the Layers drawer open.
+    await page.keyboard.press('Control+[');
   });
 
   test('clicking the screen title selects the whole screen, distinct from node selection', async ({ page }) => {

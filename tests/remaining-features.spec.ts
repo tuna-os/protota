@@ -4,6 +4,10 @@ test.describe('Remaining features (#9, #16, #18-#24)', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
     await page.waitForSelector('adw-window', { timeout: 10000 });
+    // A first-run document opens with both drawers closed; these tests
+    // drive the Layers and inspector UIs, so slide them open.
+    await page.keyboard.press('Control+[');
+    await page.keyboard.press('Control+]');
   });
 
   test('#9 Code export command exists in the Export menu', async ({ page }) => {

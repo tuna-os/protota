@@ -137,6 +137,32 @@ export const ViewportCanvas: React.FC = () => {
     setZoom(zoom);
   }, []);
 
+  // Fit ALL screens (the whole surface: padding + labels + every screen)
+  // inside the visible canvas area and centre it. This is the bottom bar's
+  // Fit button and the initial view mode — measured from the laid-out DOM
+  // instead of the old constant-based estimate, which assumed desktop
+  // padding.
+  const handleZoomFit = useCallback(() => {
+    const el = canvasRef.current;
+    const surface = surfaceRef.current;
+    if (!el || !surface || docRef.current.screens.length === 0) return;
+    const canvasW = el.clientWidth;
+    const availH = el.clientHeight - CANVAS_BOTTOM_BAR_H;
+    const surfW = surface.offsetWidth;
+    const surfH = surface.offsetHeight;
+    if (surfW <= 0 || surfH <= 0) return;
+    const fitZoom = Math.min(canvasW / surfW, availH / surfH, 1.5);
+    setZoom(fitZoom);
+    // Centre the surface, correcting for its `safe center` layout offset
+    // (pinned to the left edge once wider than the canvas) and the `50% 0`
+    // transform origin; the old `x: 0` left wide content hanging off the
+    // right edge on narrow viewports.
+    setPan({
+      x: canvasW / 2 - surface.offsetLeft - surfW / 2,
+      y: (availH - surfH * fitZoom) / 2,
+    });
+  }, []);
+
   // --- Wheel handler (stable, reads from refs) ---
 
   useEffect(() => {
@@ -586,36 +612,34 @@ export const ViewportCanvas: React.FC = () => {
 
   // --- Initial view ---
   //
-  // One effect, one decision: on small viewports (the <=768px mobile
-  // breakpoint) fit-and-centre the primary screen so it is fully visible;
-  // otherwise the classic resetView. Runs once per loaded document (doc.id),
-  // not on every edit. The previous code had two racing mount effects — a
-  // mobile auto-fit followed by an unconditional resetView() that clobbered
-  // it, which is why narrow viewports loaded with the screen pushed off the
-  // right edge.
+  // One effect, one decision: every document opens in Fit All Screens mode —
+  // the same math as the bottom bar's Fit button — instead of 100% with the
+  // surface pinned to the top-left. Runs once per loaded document (doc.id),
+  // not on every edit, so the user's zoom is never clobbered mid-session.
+  // (An earlier iteration resetView()d on desktop and fit only the primary
+  // screen on mobile, with two racing mount effects; the single fit-all
+  // call subsumes both.)
   const initialFitDocId = useRef<string | null>(null);
   useEffect(() => {
-    const fitInitial = () => {
-      const el = canvasRef.current;
-      const screens = docRef.current.screens;
-      if (!el || screens.length === 0) return;
-      const primaryWidth = screens[0].width || 800;
-      if (window.innerWidth <= 768 && primaryWidth + 32 > el.clientWidth) {
-        fitScreenToView(0);
-      } else {
-        resetView();
-      }
-    };
     if (initialFitDocId.current !== doc.id) {
       initialFitDocId.current = doc.id;
-      fitInitial();
+      if (docRef.current.screens.length > 0) handleZoomFit();
     }
     const onResize = () => {
       if (window.innerWidth <= 768) fitScreenToView(focusedScreenIdxRef.current);
     };
     window.addEventListener('resize', onResize);
     return () => window.removeEventListener('resize', onResize);
-  }, [doc.id, fitScreenToView, resetView]);
+  }, [doc.id, handleZoomFit, fitScreenToView]);
+
+  // Adding the first screen to a blank canvas re-fits, so the new screen
+  // arrives framed wherever the empty canvas left pan/zoom.
+  const prevScreenCountRef = useRef(doc.screens.length);
+  useEffect(() => {
+    const wasBlank = prevScreenCountRef.current === 0;
+    prevScreenCountRef.current = doc.screens.length;
+    if (wasBlank && doc.screens.length > 0) handleZoomFit();
+  }, [doc.screens.length, handleZoomFit]);
 
   // --- Screen resize (#): drag handles on the screen frame ---
   //
@@ -844,29 +868,6 @@ export const ViewportCanvas: React.FC = () => {
     const newZ = Math.max(oldZ - 0.1, 0.3);
     setPan(zoomAtPoint(mx, my, oldZ, newZ, panRef.current, rect.width));
     setZoom(newZ);
-  }, []);
-
-  const handleZoomFit = useCallback(() => {
-    const el = canvasRef.current;
-    const surface = surfaceRef.current;
-    if (!el || !surface || docRef.current.screens.length === 0) return;
-    const canvasW = el.clientWidth;
-    const availH = el.clientHeight - CANVAS_BOTTOM_BAR_H;
-    // Measured surface bounds (padding + labels + every screen) instead of
-    // the old constant-based estimate, which assumed desktop padding.
-    const surfW = surface.offsetWidth;
-    const surfH = surface.offsetHeight;
-    if (surfW <= 0 || surfH <= 0) return;
-    const fitZoom = Math.min(canvasW / surfW, availH / surfH, 1.5);
-    setZoom(fitZoom);
-    // Centre the surface, correcting for its `safe center` layout offset
-    // (pinned to the left edge once wider than the canvas) and the `50% 0`
-    // transform origin; the old `x: 0` left wide content hanging off the
-    // right edge on narrow viewports.
-    setPan({
-      x: canvasW / 2 - surface.offsetLeft - surfW / 2,
-      y: (availH - surfH * fitZoom) / 2,
-    });
   }, []);
 
   // --- Stable Desktop/Phosh toggle callbacks ---

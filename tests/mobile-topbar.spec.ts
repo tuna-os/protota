@@ -192,4 +192,32 @@ test.describe('Panel auto-close defaults', () => {
     await page.keyboard.press('Escape');
     await expect(page.getByTestId('left-tab-layers')).toBeHidden();
   });
+
+  test('the desktop drawer layout persists across reloads once the document is real', async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await page.goto('/');
+    await page.waitForSelector('adw-window', { timeout: 10000 });
+
+    // Starter template: nothing persisted yet, both drawers closed.
+    await expect(page.getByTestId('left-tab-layers')).toBeHidden();
+
+    // Open only the left drawer, then make the document real — any mutation
+    // persists it and ends the starter state.
+    await page.keyboard.press('Control+[');
+    await expect(page.getByTestId('left-tab-layers')).toBeVisible();
+    await page.evaluate(() => {
+      /* eslint-disable @typescript-eslint/no-explicit-any */
+      const store = (window as any).__mockupStore;
+      const state = store.getState();
+      state.updateScreenProps(state.doc.screens[0].id, { title: 'Main Window' });
+    });
+
+    // After reload the saved layout wins: left open, right closed.
+    await page.reload();
+    await page.waitForSelector('adw-window', { timeout: 10000 });
+    await expect(page.getByTestId('left-tab-layers')).toBeVisible();
+    await expect(page.getByTestId('right-tab-properties')).toBeHidden();
+  });
 });

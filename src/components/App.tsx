@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import { isStarterDocument, persistDocumentSource, useMockupStore } from "../store/mockupStore";
+import { loadPanelState, savePanelState } from "../store/persistence";
 import { LayersPanel } from "./LayersPanel";
 import { WidgetPalette } from "./WidgetPalette";
 import { ViewportCanvas } from "./ViewportCanvas";
@@ -90,15 +91,21 @@ export const App: React.FC = () => {
   // Panel defaults: both drawers start closed on mobile viewports, on a
   // blank canvas, and on first start while the pristine starter template is
   // shown. A real document — imported, opened, or the user's own edited work
-  // restored from persistence — opens both on desktop.
+  // restored from persistence — opens both on desktop. Once the user has a
+  // real document their layout is persisted (below) and wins over the
+  // starter rule on the next load; mobile and blank stay contextual.
   const panelsOpenAtStart = () => {
-    if (typeof window === "undefined") return true;
-    if (window.innerWidth < 768) return false;
     const state = useMockupStore.getState();
-    return state.doc.screens.length > 0 && !isStarterDocument(state.doc);
+    if (typeof window === "undefined") return { left: true, right: true };
+    if (window.innerWidth < 768) return { left: false, right: false };
+    if (state.doc.screens.length === 0 || isStarterDocument(state.doc)) {
+      return { left: false, right: false };
+    }
+    return loadPanelState() ?? { left: true, right: true };
   };
-  const [leftOpen, setLeftOpen] = useState(panelsOpenAtStart);
-  const [rightOpen, setRightOpen] = useState(panelsOpenAtStart);
+  const [initialPanels] = useState(panelsOpenAtStart);
+  const [leftOpen, setLeftOpen] = useState(initialPanels.left);
+  const [rightOpen, setRightOpen] = useState(initialPanels.right);
   /** Two-tab right drawer: Properties (inspector) | Diagnostics (design §5.1). */
   const [rightTab, setRightTab] = useState<"properties" | "diagnostics">("properties");
   /** Two-tab left drawer: Layers (tree) | Widgets (draggable palette, #79). */
@@ -272,6 +279,15 @@ export const App: React.FC = () => {
       setRightOpen(true);
     }
   }, [screenCount, isMobile]);
+
+  // Persist the desktop drawer layout once the document is real. The mobile
+  // and blank-canvas auto-closes are contextual — they never overwrite the
+  // saved preference, and the pristine starter writes nothing, so a later
+  // import still gets the both-open default.
+  useEffect(() => {
+    if (isMobile || screenCount === 0 || isStarterDocument(doc)) return;
+    savePanelState({ left: leftOpen, right: rightOpen });
+  }, [leftOpen, rightOpen, isMobile, screenCount, doc]);
 
   useEffect(() => {
     const onToggleLayers = () => setLeftOpen((v) => !v);

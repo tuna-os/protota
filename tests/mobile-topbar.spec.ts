@@ -180,4 +180,16 @@ test.describe('Panel auto-close defaults', () => {
     await expect(page.getByTestId('left-tab-layers')).toBeHidden();
     await expect(page.getByTestId('right-tab-properties')).toBeHidden();
   });
+
+  test('Escape closes an open drawer on mobile', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto('/');
+    await page.waitForSelector('adw-window', { timeout: 10000 });
+
+    // Open the Layers drawer via the header toggle, then dismiss it.
+    await page.getByRole('button', { name: 'Toggle Layers' }).click();
+    await expect(page.getByTestId('left-tab-layers')).toBeVisible();
+    await page.keyboard.press('Escape');
+    await expect(page.getByTestId('left-tab-layers')).toBeHidden();
+  });
 });

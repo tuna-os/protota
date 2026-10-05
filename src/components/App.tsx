@@ -398,6 +398,13 @@ export const App: React.FC = () => {
         setShowCommandPalette(false);
         return;
       }
+      // Mobile drawers are transient surfaces: Escape dismisses them ahead
+      // of clearing the canvas selection.
+      if (e.key === "Escape" && isMobile && (leftOpen || rightOpen)) {
+        setLeftOpen(false);
+        setRightOpen(false);
+        return;
+      }
       if (e.key === "Escape") {
         selectNode(null);
         return;
@@ -484,6 +491,9 @@ export const App: React.FC = () => {
     toggleDiagnostics,
     toggleShowFlows,
     diagnosticsEnabled,
+    isMobile,
+    leftOpen,
+    rightOpen,
   ]);
 
   return (

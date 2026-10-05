@@ -235,6 +235,19 @@ body,
   display: none;
 }
 
+/* Reduced motion: skip the panel slide and scrim fade entirely. The
+   !important beats every transition declaration for these elements,
+   including the ones inside the mobile media query below. */
+@media (prefers-reduced-motion: reduce) {
+  .protota-left-panel,
+  .protota-right-panel,
+  .protota-panel--closed,
+  .protota-mobile-scrim,
+  .protota-mobile-scrim--closed {
+    transition: none !important;
+  }
+}
+
 /* ---- Canvas ---- */
 .protota-canvas {
   background-color: var(--view-bg-color, #ffffff);

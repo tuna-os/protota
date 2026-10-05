@@ -507,86 +507,95 @@ export const App: React.FC = () => {
           className="protota-workspace-container"
           style={{ display: "flex", flex: 1, overflow: "hidden", position: "relative" }}
         >
-          {/* Left Drawer (Layers) Backdrop on Mobile */}
-          {leftOpen && <div className="protota-mobile-scrim" onClick={() => setLeftOpen(false)} />}
+          {/* Left Drawer (Layers) Backdrop on Mobile. Always mounted like the
+              panels themselves so the fade transition can run; desktop CSS
+              keeps it display:none. */}
+          <div
+            className={`protota-mobile-scrim${leftOpen ? "" : " protota-mobile-scrim--closed"}`}
+            onClick={() => setLeftOpen(false)}
+          />
 
-          {/* Left Drawer (Layers) — Adwaita sidebar styling */}
-          {leftOpen && (
-            <aside
-              className="protota-panel protota-left-panel adw-sidebar-like"
-              style={{
-                width: "240px",
-                overflow: "auto",
-                display: "flex",
-                flexDirection: "column",
-              }}
+          {/* Left Drawer (Layers) — Adwaita sidebar styling. Always mounted:
+              the closed state slides it out of the flex row (index.css), so
+              the transition runs both ways and tab/scroll state survives a
+              close/reopen cycle. */}
+          <aside
+            className={`protota-panel protota-left-panel adw-sidebar-like${leftOpen ? "" : " protota-panel--closed"}`}
+            aria-hidden={!leftOpen}
+            style={{
+              width: "240px",
+              overflow: "auto",
+              display: "flex",
+              flexDirection: "column",
+            }}
+          >
+            {/* Two-tab segment: Layers | Widgets (#79) */}
+            <div
+              role="tablist"
+              aria-label="Left panel tabs"
+              style={{ display: "flex", gap: "4px", padding: "8px 8px 0 8px", flexShrink: 0 }}
             >
-              {/* Two-tab segment: Layers | Widgets (#79) */}
-              <div
-                role="tablist"
-                aria-label="Left panel tabs"
-                style={{ display: "flex", gap: "4px", padding: "8px 8px 0 8px", flexShrink: 0 }}
-              >
-                {(["layers", "widgets"] as const).map((tab) => (
-                  <button
-                    key={tab}
-                    role="tab"
-                    aria-selected={leftTab === tab}
-                    data-testid={`left-tab-${tab}`}
-                    className={`adw-button flat${leftTab === tab ? " active" : ""}`}
-                    onClick={() => setLeftTab(tab)}
-                    style={{ flex: 1, fontSize: "12px" }}
-                  >
-                    {tab === "layers" ? "Layers" : "Widgets"}
-                  </button>
-                ))}
-              </div>
-              {leftTab === "layers"
-                ? <LayersPanel renameRequest={renameRequest} onRenameConsumed={clearRenameRequest} />
-                : <WidgetPalette />}
-            </aside>
-          )}
+              {(["layers", "widgets"] as const).map((tab) => (
+                <button
+                  key={tab}
+                  role="tab"
+                  aria-selected={leftTab === tab}
+                  data-testid={`left-tab-${tab}`}
+                  className={`adw-button flat${leftTab === tab ? " active" : ""}`}
+                  onClick={() => setLeftTab(tab)}
+                  style={{ flex: 1, fontSize: "12px" }}
+                >
+                  {tab === "layers" ? "Layers" : "Widgets"}
+                </button>
+              ))}
+            </div>
+            {leftTab === "layers"
+              ? <LayersPanel renameRequest={renameRequest} onRenameConsumed={clearRenameRequest} />
+              : <WidgetPalette />}
+          </aside>
 
           {/* Center Canvas */}
           <ViewportCanvas />
 
           {/* Right Drawer (Inspector) Backdrop on Mobile */}
-          {rightOpen && <div className="protota-mobile-scrim" onClick={() => setRightOpen(false)} />}
+          <div
+            className={`protota-mobile-scrim${rightOpen ? "" : " protota-mobile-scrim--closed"}`}
+            onClick={() => setRightOpen(false)}
+          />
 
           {/* Right Drawer (Inspector) — Adwaita sidebar styling */}
-          {rightOpen && (
-            <aside
-              className="protota-panel protota-right-panel adw-sidebar-like"
-              style={{
-                width: "280px",
-                overflow: "auto",
-                display: "flex",
-                flexDirection: "column",
-              }}
+          <aside
+            className={`protota-panel protota-right-panel adw-sidebar-like${rightOpen ? "" : " protota-panel--closed"}`}
+            aria-hidden={!rightOpen}
+            style={{
+              width: "280px",
+              overflow: "auto",
+              display: "flex",
+              flexDirection: "column",
+            }}
+          >
+            {/* Two-tab segment: Properties | Diagnostics (design §5.1) */}
+            <div
+              role="tablist"
+              aria-label="Right panel tabs"
+              style={{ display: "flex", gap: "4px", padding: "8px 8px 0 8px", flexShrink: 0 }}
             >
-              {/* Two-tab segment: Properties | Diagnostics (design §5.1) */}
-              <div
-                role="tablist"
-                aria-label="Right panel tabs"
-                style={{ display: "flex", gap: "4px", padding: "8px 8px 0 8px", flexShrink: 0 }}
-              >
-                {(["properties", "diagnostics"] as const).map((tab) => (
-                  <button
-                    key={tab}
-                    role="tab"
-                    aria-selected={rightTab === tab}
-                    data-testid={`right-tab-${tab}`}
-                    className={`adw-button flat${rightTab === tab ? " active" : ""}`}
-                    onClick={() => setRightTab(tab)}
-                    style={{ flex: 1, fontSize: "12px" }}
-                  >
-                    {tab === "properties" ? "Properties" : "Diagnostics"}
-                  </button>
-                ))}
-              </div>
-              {rightTab === "properties" ? <InspectorPanel /> : <DiagnosticsPanel />}
-            </aside>
-          )}
+              {(["properties", "diagnostics"] as const).map((tab) => (
+                <button
+                  key={tab}
+                  role="tab"
+                  aria-selected={rightTab === tab}
+                  data-testid={`right-tab-${tab}`}
+                  className={`adw-button flat${rightTab === tab ? " active" : ""}`}
+                  onClick={() => setRightTab(tab)}
+                  style={{ flex: 1, fontSize: "12px" }}
+                >
+                  {tab === "properties" ? "Properties" : "Diagnostics"}
+                </button>
+              ))}
+            </div>
+            {rightTab === "properties" ? <InspectorPanel /> : <DiagnosticsPanel />}
+          </aside>
         </div>
       </adw-toolbar-view>
 

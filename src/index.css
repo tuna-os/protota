@@ -191,6 +191,50 @@ body,
   padding: var(--spacing-s, 9px) var(--spacing-m, 12px);
 }
 
+/* Editor side panels slide in/out like an Adw.OverlaySplitView reveal
+   instead of popping in and out of the flex row. The timing mirrors
+   adwaita-web's own sliding chrome (250ms, e.g. adw-bottom-sheet) and the
+   easing is the CSS spelling of adwaita-core's easeOutCubic — the core is
+   headless, so duration and curve live in the skin, matching how
+   adwaita-web itself does it. Panels stay mounted while closed — shifted
+   out by a negative margin equal to their width (translated on mobile,
+   where they are overlay drawers) — so tab and scroll state survive a
+   close/reopen cycle. `visibility` flips after the slide so a closed panel
+   leaves the tab order and the a11y tree. */
+.protota-left-panel,
+.protota-right-panel {
+  transition:
+    margin-left 250ms cubic-bezier(0.33, 1, 0.68, 1),
+    margin-right 250ms cubic-bezier(0.33, 1, 0.68, 1),
+    transform 250ms cubic-bezier(0.33, 1, 0.68, 1),
+    visibility 0s;
+}
+
+.protota-panel--closed {
+  visibility: hidden;
+  pointer-events: none;
+  transition:
+    margin-left 250ms cubic-bezier(0.33, 1, 0.68, 1),
+    margin-right 250ms cubic-bezier(0.33, 1, 0.68, 1),
+    transform 250ms cubic-bezier(0.33, 1, 0.68, 1),
+    visibility 0s 250ms;
+}
+
+/* Widths are set inline in App.tsx (240px / 280px); keep these in sync. */
+.protota-left-panel.protota-panel--closed {
+  margin-left: -240px;
+}
+
+.protota-right-panel.protota-panel--closed {
+  margin-right: -280px;
+}
+
+/* The drawer scrim is mobile-only; the media query below gives it a
+   position and a fade. */
+.protota-mobile-scrim {
+  display: none;
+}
+
 /* ---- Canvas ---- */
 .protota-canvas {
   background-color: var(--view-bg-color, #ffffff);
@@ -1376,11 +1420,25 @@ gtk-menu-button[data-testid="open-menu-button"] .adw-menu-button-popover {
   }
 
   .protota-mobile-scrim {
+    display: block;
     position: absolute;
     inset: 0;
     z-index: 40;
     background: var(--dialog-scrim-color, rgba(0, 0, 6, 0.32));
     backdrop-filter: blur(2px);
+    opacity: 1;
+    transition:
+      opacity 250ms cubic-bezier(0.33, 1, 0.68, 1),
+      visibility 0s;
+  }
+
+  .protota-mobile-scrim--closed {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition:
+      opacity 250ms cubic-bezier(0.33, 1, 0.68, 1),
+      visibility 0s 250ms;
   }
 
   .protota-panel {
@@ -1391,6 +1449,18 @@ gtk-menu-button[data-testid="open-menu-button"] .adw-menu-button-popover {
     width: 85vw !important;
     max-width: 320px !important;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+  }
+
+  /* Overlay drawers slide off-canvas instead of the desktop negative-margin
+     trick (they are out of flow, so margins would not reclaim anything). */
+  .protota-left-panel.protota-panel--closed {
+    margin-left: 0;
+    transform: translateX(-110%);
+  }
+
+  .protota-right-panel.protota-panel--closed {
+    margin-right: 0;
+    transform: translateX(110%);
   }
 
   .protota-left-panel {

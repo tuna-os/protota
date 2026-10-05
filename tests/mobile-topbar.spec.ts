@@ -160,13 +160,14 @@ test.describe('Panel auto-close defaults', () => {
     page,
   }) => {
     // Start on desktop with the pristine starter template: both drawers
-    // start closed.
+    // start closed (they stay mounted — hidden by the slide-out — so assert
+    // visibility, not DOM removal).
     await page.setViewportSize({ width: 1280, height: 800 });
     await page.goto('/');
     await page.waitForSelector('adw-window', { timeout: 10000 });
 
-    await expect(page.getByTestId('left-tab-layers')).toHaveCount(0);
-    await expect(page.getByTestId('right-tab-properties')).toHaveCount(0);
+    await expect(page.getByTestId('left-tab-layers')).toBeHidden();
+    await expect(page.getByTestId('right-tab-properties')).toBeHidden();
 
     // Open both via the header toggles.
     await page.getByRole('button', { name: 'Toggle Layers' }).click();
@@ -176,7 +177,7 @@ test.describe('Panel auto-close defaults', () => {
 
     // Resize to mobile — panels should auto-close again.
     await page.setViewportSize({ width: 390, height: 844 });
-    await expect(page.getByTestId('left-tab-layers')).toHaveCount(0);
-    await expect(page.getByTestId('right-tab-properties')).toHaveCount(0);
+    await expect(page.getByTestId('left-tab-layers')).toBeHidden();
+    await expect(page.getByTestId('right-tab-properties')).toBeHidden();
   });
 });

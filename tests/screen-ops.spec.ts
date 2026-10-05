@@ -21,6 +21,30 @@ test.describe('Screen duplication & context menu (#18, #19)', () => {
     expect(afterAdd).toBe(before + 1);
   });
 
+  test('a newly added screen is fit, centred, and focused', async ({ page }) => {
+    await page.getByRole('button', { name: /new screen|add screen/i }).click();
+    await page.getByRole('textbox').first().fill('Framed');
+    await page.getByRole('button', { name: /create/i }).click();
+
+    const frames = page.locator('[data-protota-flow-screen]');
+    await expect(frames).toHaveCount(2);
+
+    // The screen dropdown tracks the new screen.
+    await expect(page.locator('.protota-screen-dropdown .adw-drop-down-label')).toHaveText('2');
+
+    // The new screen is fully inside the canvas and horizontally centred.
+    const canvas = (await page.locator('.protota-canvas').boundingBox())!;
+    const second = (await frames.nth(1).boundingBox())!;
+    expect(second.x).toBeGreaterThanOrEqual(canvas.x);
+    expect(second.x + second.width).toBeLessThanOrEqual(canvas.x + canvas.width);
+    expect(second.y).toBeGreaterThanOrEqual(canvas.y);
+    expect(second.y + second.height).toBeLessThanOrEqual(canvas.y + canvas.height);
+    const centreDelta = Math.abs(
+      second.x + second.width / 2 - (canvas.x + canvas.width / 2),
+    );
+    expect(centreDelta).toBeLessThan(8);
+  });
+
   test('delete key removes selected element', async ({ page }) => {
     // Clicking the header bar selects the innermost node under the cursor —
     // its window-title, an adopted child of adw-header-bar's internal DOM.

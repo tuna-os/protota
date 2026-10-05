@@ -17,7 +17,7 @@ interface SeededIds {
 async function seedFlowDocument(page: Page): Promise<SeededIds> {
   await page.goto('/');
   await page.waitForSelector('adw-window', { timeout: 10000 });
-  return page.evaluate(() => {
+  const ids = await page.evaluate(() => {
     /* eslint-disable @typescript-eslint/no-explicit-any */
     const store = (window as any).__mockupStore;
     const state = store.getState();
@@ -51,6 +51,9 @@ async function seedFlowDocument(page: Page): Promise<SeededIds> {
     state.selectNode(null);
     return { homeId, detailsId };
   });
+  // Adding Details steals the canvas focus; the flow tests start from Home.
+  await page.getByTitle('Previous Screen').click();
+  return ids;
 }
 
 const historyLength = (page: Page) =>

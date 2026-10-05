@@ -44,6 +44,9 @@ test.describe('Screen selection and deletion (#138)', () => {
 
   test('Delete removes the selected screen and remaining screens auto-fill the space', async ({ page }) => {
     await addScreen(page, 'Second');
+    // Adding a screen auto-fits the new one; zoom back out so the first
+    // screen's title stays clickable.
+    await page.getByTitle('Fit All Screens').click();
     const secondId = await screens(page).nth(1).getAttribute('data-protota-flow-screen');
     const before = (await page.locator(`[data-protota-flow-screen="${secondId}"]`).boundingBox())!;
 

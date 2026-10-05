@@ -632,14 +632,20 @@ export const ViewportCanvas: React.FC = () => {
     return () => window.removeEventListener('resize', onResize);
   }, [doc.id, handleZoomFit, fitScreenToView]);
 
-  // Adding the first screen to a blank canvas re-fits, so the new screen
-  // arrives framed wherever the empty canvas left pan/zoom.
-  const prevScreenCountRef = useRef(doc.screens.length);
+  // A newly added screen gets framed and focused; removals and reorders
+  // leave view and focus alone.
+  const prevScreenIdsRef = useRef(doc.screens.map((s) => s.id));
   useEffect(() => {
-    const wasBlank = prevScreenCountRef.current === 0;
-    prevScreenCountRef.current = doc.screens.length;
-    if (wasBlank && doc.screens.length > 0) handleZoomFit();
-  }, [doc.screens.length, handleZoomFit]);
+    const prevIds = prevScreenIdsRef.current;
+    const nextIds = doc.screens.map((s) => s.id);
+    prevScreenIdsRef.current = nextIds;
+    if (nextIds.length <= prevIds.length) return;
+    const newIdx = nextIds.findIndex((id) => !prevIds.includes(id));
+    if (newIdx >= 0) {
+      setFocusedScreenIdx(newIdx);
+      fitScreenToView(newIdx);
+    }
+  }, [doc.screens, fitScreenToView]);
 
   // --- Screen resize (#): drag handles on the screen frame ---
   //

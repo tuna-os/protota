@@ -29,6 +29,9 @@ test.describe('Flow edges (#11)', () => {
     const dialog = page.locator('.protota-modal');
     await dialog.locator('input[type="text"]').fill('Details');
     await dialog.getByRole('button', { name: /create screen/i }).click();
+    // Adding a screen auto-fits the new one; zoom back out so the first
+    // screen is clickable too.
+    await page.getByTitle('Fit All Screens').click();
 
     // Select anything in the first screen; the inspector shows the flow editor.
     await page.locator('.protota-canvas adw-header-bar').first().click({ position: { x: 8, y: 8 } });

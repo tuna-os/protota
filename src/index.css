@@ -1622,6 +1622,12 @@ gtk-menu-button[data-testid="open-menu-button"] .adw-menu-button-popover {
   border-radius: 24px !important;
 }
 
+/* Phosh is a phone shell: windows have no minimize/maximize/close
+   decorations, so the preview drops the renderer's window controls. */
+.protota-phosh-phone-frame .protota-window-controls {
+  display: none;
+}
+
 @media (max-width: 480px) {
   .protota-preview-phone-frame adw-window {
     border-radius: 0 !important;

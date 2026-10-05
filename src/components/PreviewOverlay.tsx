@@ -190,10 +190,16 @@ export const PreviewOverlay: React.FC<PreviewOverlayProps> = ({
       {/* Same commit-phase containment as the canvas (#137): a crash inside
           the preview shows a card instead of blanking the overlay. */}
       <CanvasErrorBoundary resetKey={renderKey}>
+        {/* screenWidth/screenHeight unlock the primary-header-bar resolution
+            (and with it the window controls, like the canvas render) — the
+            phone frame then drops them via CSS, since a phone shell has no
+            window decorations. */}
         <AdwaitaRenderer
           key={renderKey}
           node={screen.rootNode}
           screenId={screen.id}
+          screenWidth={screen.width}
+          screenHeight={screen.height}
           overrides={overrides}
         />
       </CanvasErrorBoundary>

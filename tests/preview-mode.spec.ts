@@ -86,6 +86,10 @@ test.describe('Full-screen interactive preview', () => {
     // Editor chrome is hidden while previewing.
     await expect(page.locator('.protota-zoom-bar')).toBeHidden();
 
+    // A phone shell has no window decorations: the renderer's
+    // minimize/maximize/close controls are hidden in the phone frame.
+    await expect(overlay.locator('.protota-window-controls').first()).toBeHidden();
+
     // The floating exit chip closes the preview and the chrome returns.
     await page.getByTestId('preview-exit').click();
     await expect(overlay).toHaveCount(0);
@@ -104,6 +108,9 @@ test.describe('Full-screen interactive preview', () => {
     expect(box.width).toBe(viewport.width);
     expect(box.height).toBe(viewport.height);
     await expect(page.locator('.protota-zoom-bar')).toBeHidden();
+
+    // …while the desktop preview keeps its window decorations.
+    await expect(overlay.locator('.protota-window-controls').first()).toBeVisible();
 
     await page.getByTestId('preview-exit').click();
     await expect(overlay).toHaveCount(0);

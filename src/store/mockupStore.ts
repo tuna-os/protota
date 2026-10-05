@@ -40,8 +40,8 @@ const initialDocument: MockupDocument = {
       id: 'screen-1',
       title: 'Main Window',
       type: 'standard',
-      width: 900,
-      height: 650,
+      width: 800,
+      height: 600,
       rootNode: {
         id: uid('root'),
         type: 'window',

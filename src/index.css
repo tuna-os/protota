@@ -1611,6 +1611,15 @@ gtk-menu-button[data-testid="open-menu-button"] .adw-menu-button-popover {
   box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
   overflow: auto;
   position: relative;
+  /* Column flex so the status bar takes its 24px and the app gets the
+     rest — no permanent 24px scroll strip. */
+  display: flex;
+  flex-direction: column;
+}
+
+.protota-phosh-phone-frame > .adw-node-wrapper {
+  flex: 1;
+  min-height: 0;
 }
 
 .protota-preview-phone-frame {

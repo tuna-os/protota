@@ -131,16 +131,21 @@ export const PreviewOverlay: React.FC<PreviewOverlayProps> = ({
   }, []);
 
   // Active Adw.Breakpoints for the previewed screen (derived, non-mutating),
-  // with the ephemeral preview patches layered on top per node.
+  // with the ephemeral preview patches layered on top per node. The phone
+  // preview evaluates them at the frame's size (360×720, the Phone device
+  // preset) so adaptive layouts actually collapse — the desktop preview
+  // keeps the authored size.
   const overrides = useMemo(() => {
     if (!screen) return undefined;
-    const base = breakpointOverrides(screen.rootNode, screen.width, screen.height);
+    const width = mode === 'phone' ? 360 : screen.width;
+    const height = mode === 'phone' ? 720 : screen.height;
+    const base = breakpointOverrides(screen.rootNode, width, height);
     const merged: Record<string, Partial<AdwNode>> = { ...base };
     for (const [nodeId, patch] of Object.entries(previewState)) {
       merged[nodeId] = { ...merged[nodeId], ...patch };
     }
     return merged;
-  }, [screen, previewState]);
+  }, [screen, previewState, mode]);
 
   if (!screen) return null;
 
@@ -196,16 +201,16 @@ export const PreviewOverlay: React.FC<PreviewOverlayProps> = ({
       {/* Same commit-phase containment as the canvas (#137): a crash inside
           the preview shows a card instead of blanking the overlay. */}
       <CanvasErrorBoundary resetKey={renderKey}>
-        {/* screenWidth/screenHeight unlock the primary-header-bar resolution
-            (and with it the window controls, like the canvas render) — the
-            phone frame then drops them via CSS, since a phone shell has no
-            window decorations. */}
+        {/* screenWidth/screenHeight pin the desktop window to its authored
+            size and unlock primary-header-bar resolution (window controls).
+            The phone preview omits them on purpose: the app fills the frame
+            responsively, and a phone shell has no window chrome to resolve
+            anyway. */}
         <AdwaitaRenderer
           key={renderKey}
           node={screen.rootNode}
           screenId={screen.id}
-          screenWidth={screen.width}
-          screenHeight={screen.height}
+          {...(mode === 'desktop' ? { screenWidth: screen.width, screenHeight: screen.height } : {})}
           overrides={overrides}
         />
       </CanvasErrorBoundary>

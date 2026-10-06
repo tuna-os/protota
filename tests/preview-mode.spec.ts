@@ -93,6 +93,12 @@ test.describe('Full-screen interactive preview', () => {
     // minimize/maximize/close controls are hidden in the phone frame.
     await expect(overlay.locator('.protota-window-controls').first()).toBeHidden();
 
+    // The app fills the frame responsively — no fixed authored size
+    // pinning it wider than the phone.
+    const phoneFrame = overlay.locator('.protota-phosh-phone-frame');
+    const overflowX = await phoneFrame.evaluate((el) => el.scrollWidth - el.clientWidth);
+    expect(overflowX).toBeLessThanOrEqual(1);
+
     // Phosh status bar: wifi + bluetooth left, clock centred, silent +
     // charged battery right — preview chrome, not document content.
     const statusBar = overlay.getByTestId('phosh-status-bar');

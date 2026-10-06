@@ -166,7 +166,7 @@ OFFICIAL_SOURCE_ROOT=~/work/gnome-source-fixtures/gnome-calculator/src/ui \
   -e OFFICIAL_SOURCE_ROOT=/fixtures \
   -v "$PWD":/work:Z \
   -v ~/work/gnome-source-fixtures/gnome-calculator/src/ui:/fixtures:ro,Z \
-  -w /work mcr.microsoft.com/playwright:v1.62.0-noble npm run test:unit
+  -w /work mcr.microsoft.com/playwright:v1.63.0-noble npm run test:unit
 ```
 
 Then inspect the expanded `math-window.blp` token stream and parser cursor

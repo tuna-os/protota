@@ -16,10 +16,10 @@
     "test:ui": "playwright test --ui"
   },
   "dependencies": {
-    "@gjsify/adwaita-core": "^0.53.0",
-    "@gjsify/adwaita-fonts": "^0.53.0",
-    "@gjsify/adwaita-icons": "^0.53.0",
-    "@gjsify/adwaita-web": "^0.53.0",
+    "@gjsify/adwaita-core": "^0.56.0",
+    "@gjsify/adwaita-fonts": "^0.56.0",
+    "@gjsify/adwaita-icons": "^0.56.0",
+    "@gjsify/adwaita-web": "^0.55.0",
     "html2canvas": "^1.4.1",
     "immer": "^11.1.15",
     "react": "^19.2.7",

@@ -189,7 +189,14 @@ test.describe('Panel auto-close defaults', () => {
     // Open the Layers drawer via the header toggle, then dismiss it.
     await page.getByRole('button', { name: 'Toggle Layers' }).click();
     await expect(page.getByTestId('left-tab-layers')).toBeVisible();
-    await page.keyboard.press('Escape');
+    // Synthetic keydown: the headless trusted-key dispatch drops `Escape`
+    // before it reaches window listeners, so send the same DOM event.
+    await page.evaluate(() => {
+      const target = document.activeElement ?? document.body;
+      target.dispatchEvent(
+        new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, composed: true }),
+      );
+    });
     await expect(page.getByTestId('left-tab-layers')).toBeHidden();
   });
 
@@ -211,7 +218,7 @@ test.describe('Panel auto-close defaults', () => {
       /* eslint-disable @typescript-eslint/no-explicit-any */
       const store = (window as any).__mockupStore;
       const state = store.getState();
-      state.updateScreenProps(state.doc.screens[0].id, { title: 'Main Window' });
+      state.updateScreenProps(state.doc.screens[0].id, { title: 'Renamed Window' });
     });
 
     // After reload the saved layout wins: left open, right closed.

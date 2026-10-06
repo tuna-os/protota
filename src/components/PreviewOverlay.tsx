@@ -8,12 +8,18 @@ import type { AdwNode } from '../types/mockup';
 import { breakpointOverrides } from '../utils/breakpoints';
 import { windowCloseSymbolic } from '@gjsify/adwaita-icons/ui';
 import { goPreviousSymbolic } from '@gjsify/adwaita-icons/actions';
+import {
+  batteryLevel60ChargingSymbolic,
+  bluetoothActiveSymbolic,
+  networkWirelessSignalExcellentSymbolic,
+  notificationsDisabledSymbolic,
+} from '@gjsify/adwaita-icons/status';
 import { toDataUri } from '@gjsify/adwaita-icons/utils';
 
-const iconStyle = (svg: string): React.CSSProperties => ({
+const iconStyle = (svg: string, size = 14): React.CSSProperties => ({
   display: 'inline-block',
-  width: '14px',
-  height: '14px',
+  width: `${size}px`,
+  height: `${size}px`,
   maskImage: toDataUri(svg),
   WebkitMaskImage: toDataUri(svg),
   maskSize: 'contain',
@@ -244,7 +250,25 @@ export const PreviewOverlay: React.FC<PreviewOverlayProps> = ({
             {screenPicker}
           </div>
           <div className="protota-preview-chrome protota-preview-chrome--end">{exitChip}</div>
-          <div className="protota-phosh-phone-frame protota-preview-phone-frame">{rendered}</div>
+          <div className="protota-phosh-phone-frame protota-preview-phone-frame">
+            {/* Phosh status bar — preview chrome like the desktop mode's
+                GNOME top bar, never document content: wifi + bluetooth
+                left, clock centred, silent + charged battery right. */}
+            <div className="protota-phosh-status-bar" data-testid="phosh-status-bar">
+              <span className="protota-phosh-status-side">
+                <span style={iconStyle(networkWirelessSignalExcellentSymbolic, 12)} data-testid="phosh-status-wifi" />
+                <span style={iconStyle(bluetoothActiveSymbolic, 12)} data-testid="phosh-status-bluetooth" />
+              </span>
+              <span className="protota-phosh-status-clock">
+                {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+              </span>
+              <span className="protota-phosh-status-side">
+                <span style={iconStyle(notificationsDisabledSymbolic, 12)} data-testid="phosh-status-silent" />
+                <span style={iconStyle(batteryLevel60ChargingSymbolic, 12)} data-testid="phosh-status-battery" />
+              </span>
+            </div>
+            {rendered}
+          </div>
         </>
       )}
     </div>,

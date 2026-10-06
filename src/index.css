@@ -1636,13 +1636,55 @@ gtk-menu-button[data-testid="open-menu-button"] .adw-menu-button-popover {
 .protota-phosh-phone-frame adw-window {
   width: 100% !important;
   height: 100% !important;
-  border-radius: 24px !important;
+  /* Square top corners: the status bar owns the rounding against the
+     bezel's top edge; the window's bottom corners keep nesting it. */
+  border-radius: 0 0 24px 24px !important;
 }
 
 /* Phosh is a phone shell: windows have no minimize/maximize/close
    decorations, so the preview drops the renderer's window controls. */
 .protota-phosh-phone-frame .protota-window-controls {
   display: none;
+}
+
+/* Phosh status bar (preview chrome): wifi + bluetooth left, clock centred,
+   silent + charged battery right. Sticky so it stays pinned while the app
+   scrolls underneath; dark like the shell it imitates. */
+.protota-phosh-status-bar {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 24px;
+  padding: 0 12px;
+  background: #1e1e1e;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 24px 24px 0 0;
+}
+
+.protota-phosh-status-side {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Centred independently of the side groups' widths, like the shell's. */
+.protota-phosh-status-clock {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  font-weight: 700;
+}
+
+@media (max-width: 480px) {
+  /* Bezel-less full-viewport frame: no rounded corners anywhere. */
+  .protota-phosh-status-bar {
+    border-radius: 0;
+  }
 }
 
 @media (max-width: 480px) {

@@ -93,6 +93,18 @@ test.describe('Full-screen interactive preview', () => {
     // minimize/maximize/close controls are hidden in the phone frame.
     await expect(overlay.locator('.protota-window-controls').first()).toBeHidden();
 
+    // Phosh status bar: wifi + bluetooth left, clock centred, silent +
+    // charged battery right — preview chrome, not document content.
+    const statusBar = overlay.getByTestId('phosh-status-bar');
+    await expect(statusBar).toBeVisible();
+    await expect(statusBar.locator('.protota-phosh-status-clock')).toContainText(/\d{1,2}:\d{2}/);
+    const leftSide = statusBar.locator('.protota-phosh-status-side').first();
+    await expect(leftSide.getByTestId('phosh-status-wifi')).toBeVisible();
+    await expect(leftSide.getByTestId('phosh-status-bluetooth')).toBeVisible();
+    const rightSide = statusBar.locator('.protota-phosh-status-side').last();
+    await expect(rightSide.getByTestId('phosh-status-silent')).toBeVisible();
+    await expect(rightSide.getByTestId('phosh-status-battery')).toBeVisible();
+
     // The floating exit chip closes the preview and the chrome returns.
     await page.getByTestId('preview-exit').click();
     await expect(overlay).toHaveCount(0);
@@ -112,8 +124,10 @@ test.describe('Full-screen interactive preview', () => {
     expect(box.height).toBe(viewport.height);
     await expect(page.locator('.protota-zoom-bar')).toBeHidden();
 
-    // …while the desktop preview keeps its window decorations.
+    // …while the desktop preview keeps its window decorations and has no
+    // phone status bar.
     await expect(overlay.locator('.protota-window-controls').first()).toBeVisible();
+    await expect(overlay.getByTestId('phosh-status-bar')).toHaveCount(0);
 
     await page.getByTestId('preview-exit').click();
     await expect(overlay).toHaveCount(0);

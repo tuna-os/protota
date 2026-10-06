@@ -1656,6 +1656,14 @@ gtk-menu-button[data-testid="open-menu-button"] .adw-menu-button-popover {
   display: none;
 }
 
+/* Edge-to-edge like a maximized phone window: drop the subtle outline and
+   ring shadow adwaita-web gives adw-window to separate a floating desktop
+   window from its wallpaper. */
+.protota-phosh-phone-frame adw-window {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
 /* Phosh status bar (preview chrome): wifi + bluetooth left, clock centred,
    silent + charged battery right. Sticky so it stays pinned while the app
    scrolls underneath; dark like the shell it imitates. */

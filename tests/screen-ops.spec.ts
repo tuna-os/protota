@@ -45,6 +45,20 @@ test.describe('Screen duplication & context menu (#18, #19)', () => {
     expect(centreDelta).toBeLessThan(8);
   });
 
+  test('switching screens parks the focused screen at a tight top margin', async ({ page }) => {
+    await page.getByRole('button', { name: /new screen|add screen/i }).click();
+    await page.getByRole('textbox').first().fill('Second');
+    await page.getByRole('button', { name: /create/i }).click();
+
+    // Creating the screen focused it; switch back to the first.
+    await page.getByTitle('Previous Screen').click();
+
+    const canvas = (await page.locator('.protota-canvas').boundingBox())!;
+    const first = (await page.locator('[data-protota-flow-screen]').nth(0).boundingBox())!;
+    // Top margin is 10% of the canvas height.
+    expect(Math.abs(first.y - canvas.y - canvas.height * 0.1)).toBeLessThan(3);
+  });
+
   test('delete key removes selected element', async ({ page }) => {
     // Clicking the header bar selects the innermost node under the cursor —
     // its window-title, an adopted child of adw-header-bar's internal DOM.

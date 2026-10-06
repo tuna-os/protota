@@ -16,6 +16,10 @@ import { useTouchPanZoom, TOUCH_GESTURE_START_EVENT } from "../hooks/useTouchPan
 import { PreviewOverlay } from "./PreviewOverlay";
 
 const CANVAS_PADDING = 60;
+
+/** Rendered top margin for the focused screen after switching screens, as
+ *  a fraction of the canvas height — scales with the viewport. */
+const SCREEN_FOCUS_TOP_MARGIN_RATIO = 0.1;
 const CANVAS_GAP = 40;
 const CANVAS_BOTTOM_BAR_H = 48;
 /** Smallest usable screen edge — matches nothing in GNOME below a phone. */
@@ -821,9 +825,13 @@ export const ViewportCanvas: React.FC = () => {
     const currentZoom = zoomRef.current;
     const surfW = surface.offsetWidth;
     const cu = frame.offsetLeft + frame.offsetWidth / 2;
+    const cv = frame.offsetTop;
     setPan({
       x: el.clientWidth / 2 - surface.offsetLeft - surfW / 2 - (cu - surfW / 2) * currentZoom,
-      y: CANVAS_PADDING,
+      // Park the FRAME at the margin, not the surface: CANVAS_PADDING used
+      // to stack with the surface's own 60px padding, landing the screen
+      // ~120px below the canvas top.
+      y: el.clientHeight * SCREEN_FOCUS_TOP_MARGIN_RATIO - cv * currentZoom,
     });
   }, []);
 

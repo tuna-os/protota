@@ -128,6 +128,9 @@ test.describe("Slot-aware building", () => {
     await page.goto("/");
     await page.waitForSelector("adw-window", { timeout: 10000 });
 
+    // First-run documents open with both drawers closed; the slot selector
+    // lives in the right inspector drawer.
+    await page.keyboard.press('Control+]');
     // Select a widget inside a header bar; the inspector should offer the
     // header bar's start/title/end slots.
     await page.locator(".protota-canvas adw-window-title").first().click({ position: { x: 4, y: 4 } });
@@ -145,6 +148,9 @@ test.describe("Alignment controls", () => {
     await page.goto("/");
     await page.waitForSelector("adw-window", { timeout: 10000 });
 
+    // First-run documents open with both drawers closed; the alignment
+    // controls live in the right inspector drawer.
+    await page.keyboard.press('Control+]');
     await page.locator(".protota-canvas adw-header-bar").first().click({ position: { x: 8, y: 8 } });
     const controls = page.getByTestId("alignment-controls");
     await expect(controls).toBeVisible();

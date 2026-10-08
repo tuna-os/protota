@@ -5,7 +5,7 @@ import type { AdwNode } from '../types/mockup';
 import { findNodeById } from '../utils/treeHelpers';
 import { ICON_CATALOG, ICON_CATALOG_TOTAL } from '../data/iconCatalog';
 import { iconClass } from '../data/icons';
-import { ensureAdwIcon } from '../utils/adwIcons';
+import { ensureAdwIcons } from '../utils/adwIcons';
 
 interface Props {
   isOpen: boolean;
@@ -58,6 +58,12 @@ export const IconLibrary: React.FC<Props> = ({ isOpen, onClose }) => {
   const visibleCount = visible.reduce((sum, category) => sum + category.icons.length, 0);
 
   if (!isOpen) return null;
+
+  // Inject the mask rules so every catalog icon actually renders — the same
+  // registration the canvas renderer uses. Batched into one stylesheet write:
+  // a per-icon append re-parses the whole growing sheet each time, which cost
+  // seconds of blocked main thread for the full catalog (see ensureAdwIcons).
+  ensureAdwIcons(visible.flatMap((category) => category.icons));
 
   const handlePick = (name: string) => {
     // Always copy — the library doubles as a reference tool, exactly like
@@ -171,9 +177,6 @@ export const IconLibrary: React.FC<Props> = ({ isOpen, onClose }) => {
                 }}
               >
                 {category.icons.map((name) => {
-                  // Inject the mask rule so every catalog icon actually
-                  // renders — the same registration the canvas renderer uses.
-                  ensureAdwIcon(name);
                   const isCopied = copied === name;
                   return (
                     <button

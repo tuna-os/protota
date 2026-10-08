@@ -95,10 +95,14 @@ export const PreviewOverlay: React.FC<PreviewOverlayProps> = ({
 
   // An external jump (BottomBar screen focus while previewing) resets the
   // trail; our own navigate() already pushed the new id, so it is a no-op.
+  // Syncing an external prop to local navigation state: one intentional
+  // cascading render per screen change.
+  /* eslint-disable react/set-state-in-effect */
   useEffect(() => {
     setHistory((trail) => (trail[trail.length - 1] === screenId ? trail : [screenId]));
     setPreviewState({});
   }, [screenId]);
+  /* eslint-enable react/set-state-in-effect */
 
   // Prototype interaction contract for AdwaitaRenderer.
   const interaction = useMemo<PreviewInteraction>(() => ({

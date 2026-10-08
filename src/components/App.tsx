@@ -245,7 +245,9 @@ export const App: React.FC = () => {
   // Auto-close panels when the viewport transitions to mobile. Returning to
   // a desktop viewport reopens them — unless the canvas is blank or the
   // pristine starter template is up (the first-start case above). Runs only
-  // on viewport transitions, never on document edits.
+  // on viewport transitions, never on document edits: syncing viewport state
+  // to drawer state, one intentional cascading render per transition.
+  /* eslint-disable react/set-state-in-effect */
   const wasMobileRef = useRef(isMobile);
   useEffect(() => {
     const wasMobile = wasMobileRef.current;
@@ -261,10 +263,13 @@ export const App: React.FC = () => {
       }
     }
   }, [isMobile]);
+  /* eslint-enable react/set-state-in-effect */
 
   // Blank canvas (New Project, or every screen deleted): close both drawers
   // so the empty state owns the viewport. They reopen when the first screen
-  // arrives — same starter-template exception as the viewport rule.
+  // arrives — same starter-template exception as the viewport rule. Syncing
+  // document state to drawer state, one intentional cascade per count change.
+  /* eslint-disable react/set-state-in-effect */
   const screenCount = doc.screens.length;
   const prevScreenCountRef = useRef(screenCount);
   useEffect(() => {
@@ -279,6 +284,7 @@ export const App: React.FC = () => {
       setRightOpen(true);
     }
   }, [screenCount, isMobile]);
+  /* eslint-enable react/set-state-in-effect */
 
   // Persist the desktop drawer layout once the document is real. The mobile
   // and blank-canvas auto-closes are contextual — they never overwrite the

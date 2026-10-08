@@ -785,12 +785,15 @@ export const ViewportCanvas: React.FC = () => {
     setFlowPaths(paths);
   }, [doc, showFlows]);
 
-  // Clamp focusedScreenIdx when screens shrink (e.g. deletion)
+  // Clamp focusedScreenIdx when screens shrink (e.g. deletion): syncing
+  // document shape to local focus state, one intentional cascade per shrink.
+  /* eslint-disable react/set-state-in-effect */
   useEffect(() => {
     if (doc.screens.length > 0 && focusedScreenIdx >= doc.screens.length) {
       setFocusedScreenIdx(doc.screens.length - 1);
     }
   }, [doc.screens.length, focusedScreenIdx]);
+  /* eslint-enable react/set-state-in-effect */
 
   const activePhoshScreen = doc.screens.find((s) => s.id === phoshScreenId);
   const activeDesktopScreen = doc.screens.find((s) => s.id === desktopScreenId);

@@ -150,13 +150,17 @@ export const LayersPanel: React.FC<Props> = ({ renameRequest, onRenameConsumed }
 
   // App owns the context menu but the editor lives here, so it hands the row
   // over. A prop rather than a window event: the panel can still be unmounted
-  // when the canvas asks.
+  // when the canvas asks. Syncing the rename request prop to local editor
+  // state plus acknowledging consumption: intentionally cascading, fires once
+  // per request.
+  /* eslint-disable react/set-state-in-effect */
   useEffect(() => {
     if (!renameRequest) return;
     setRenamingId(renameRequest.id);
     setDraftTitle(renameRequest.title);
     onRenameConsumed();
   }, [renameRequest, onRenameConsumed]);
+  /* eslint-enable react/set-state-in-effect */
 
   const handleTreeKeyDown = (e: React.KeyboardEvent) => {
     if (renamingId) return; // The rename input owns the keyboard.

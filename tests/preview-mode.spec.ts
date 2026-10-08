@@ -270,6 +270,48 @@ test.describe('Full-screen interactive preview', () => {
     expect(statusBox.x + statusBox.width).toBeLessThanOrEqual(exitBox.x);
   });
 
+  test('workspace indicator caps at five with end-anchored pill', async ({ page }) => {
+    await seedFlowDocument(page);
+    // Grow to 6 screens; focus lands on the last one.
+    await page.evaluate(() => {
+      const store = (window as unknown as { __mockupStore: { getState: () => {
+        addScreen: (title: string, kind: string) => void;
+        selectNode: (id: null) => void;
+      } } }).__mockupStore.getState();
+      for (let i = 0; i < 4; i++) store.addScreen(`Extra ${i}`, 'standard');
+      store.selectNode(null);
+    });
+
+    await page.getByTitle('Toggle Desktop Preview').click();
+    const overlay = page.getByTestId('preview-overlay');
+    const topbar = overlay.locator('.protota-gnome-topbar');
+    const indicator = topbar.getByTestId('workspace-indicator');
+    const slots = indicator.locator(':scope > *');
+
+    // On the very last screen: 5 slots, pill on the end.
+    await expect(slots).toHaveCount(5);
+    await expect(indicator.locator(':scope > :last-child')).toHaveClass(/protota-workspace-pill/);
+
+    const jumpTo = async (name: RegExp) => {
+      await topbar.getByTestId('preview-screen-select').click();
+      const menu = page.getByTestId('preview-screen-menu');
+      await expect(menu).toBeVisible();
+      await menu.getByRole('menuitem', { name }).click();
+    };
+
+    // On the very first screen: still 5 slots, pill at the start.
+    await jumpTo(/^1: /);
+    await expect(slots).toHaveCount(5);
+    await expect(indicator.locator(':scope > :first-child')).toHaveClass(/protota-workspace-pill/);
+
+    // In the middle: pill interior, dots on both ends.
+    await jumpTo(/^3: /);
+    await expect(slots).toHaveCount(5);
+    await expect(indicator.locator(':scope > :first-child')).toHaveClass(/protota-workspace-dot/);
+    await expect(indicator.locator(':scope > :last-child')).toHaveClass(/protota-workspace-dot/);
+    await expect(indicator.locator('.protota-workspace-pill')).toHaveCount(1);
+  });
+
   test('switch toggles are ephemeral: visual state changes, document and undo do not', async ({ page }) => {
     await seedFlowDocument(page);
     const undoDepthBefore = await historyLength(page);

@@ -247,16 +247,31 @@ export const PreviewOverlay: React.FC<PreviewOverlayProps> = ({
 
   // Static workspace indicator (active screen as a pill, the rest as
   // filled dots) — a pure visual, the clock trigger owns the popover.
+  // Capped at 5 via a sliding window around the active screen, clamped to
+  // the ends — so the pill only lands on an end when the active screen is
+  // truly the first or last one.
+  const MAX_WORKSPACE_INDICATORS = 5;
+  const indicatorStart =
+    doc.screens.length <= MAX_WORKSPACE_INDICATORS
+      ? 0
+      : Math.min(
+          Math.max(activeScreenIdx - 2, 0),
+          doc.screens.length - MAX_WORKSPACE_INDICATORS,
+        );
+  const indicatorScreens = doc.screens.slice(
+    indicatorStart,
+    indicatorStart + MAX_WORKSPACE_INDICATORS,
+  );
   const workspaceIndicator = (
     <span
       className="protota-workspace-indicator"
       data-testid="workspace-indicator"
       aria-hidden="true"
     >
-      {doc.screens.map((candidate, index) => (
+      {indicatorScreens.map((candidate) => (
         <span
           key={candidate.id}
-          className={index === activeScreenIdx ? 'protota-workspace-pill' : 'protota-workspace-dot'}
+          className={candidate.id === screen.id ? 'protota-workspace-pill' : 'protota-workspace-dot'}
         />
       ))}
     </span>

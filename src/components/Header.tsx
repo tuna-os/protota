@@ -125,7 +125,12 @@ const LabeledMenuButton: React.FC<{
       btn.setAttribute("aria-label", label);
       if (tooltip) btn.setAttribute("title", tooltip);
     }
-  }, [items, label, icon]);
+  }, [
+	items,
+	label,
+	icon,
+	tooltip
+]);
 
   return <gtk-menu-button ref={btnRef} data-testid={testId} />;
 };

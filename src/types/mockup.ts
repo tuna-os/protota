@@ -441,3 +441,17 @@ export const SCREEN_DEFAULTS: Record<ScreenTemplateType, { width: number; height
   'status-page':     { width: 400,  height: 500 },
   empty:             { width: 800,  height: 600 },
 };
+
+/**
+ * Runtime guard for screen-template arguments. TypeScript covers the UI call
+ * sites, but console/agent callers bypass it — indexing SCREEN_DEFAULTS with
+ * an arbitrary string fails as `Cannot read properties of undefined` deep
+ * inside the store instead of at the call boundary.
+ */
+export function assertScreenTemplateType(type: string): asserts type is ScreenTemplateType {
+  if (!(type in SCREEN_DEFAULTS)) {
+    throw new Error(
+      `unknown screen template "${type}". Valid: ${Object.keys(SCREEN_DEFAULTS).join(', ')}`,
+    );
+  }
+}

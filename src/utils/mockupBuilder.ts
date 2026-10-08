@@ -23,7 +23,7 @@
  */
 
 import type { MockupDocument, AdwNode, AdwNodeType, ScreenTemplateType } from '../types/mockup';
-import { LEGAL_CHILDREN, LEGAL_SLOTS, SCREEN_DEFAULTS } from '../types/mockup';
+import { LEGAL_CHILDREN, LEGAL_SLOTS, SCREEN_DEFAULTS, assertScreenTemplateType } from '../types/mockup';
 import { blueprintBundleToDocument, type BlueprintSourceFile } from './blueprint';
 import { discoverAppSources, appBundleManifest, type AppFileMap } from './appDiscovery';
 import { fetchGitArchive } from './appIngest';
@@ -49,6 +49,7 @@ export class MockupBuilder {
 
   /** Add a new screen and set it as the current context. */
   addScreen(type: ScreenTemplateType, title: string): this {
+    assertScreenTemplateType(type);
     const defaults = SCREEN_DEFAULTS[type];
     const TEMPLATE_ROOT: Record<ScreenTemplateType, AdwNodeType> = {
       standard: 'window', 'view-switcher': 'window', preferences: 'preferences-dialog',

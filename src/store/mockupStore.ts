@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { produce } from 'immer';
 import type { MockupDocument, AdwNode, AdwNodeType, Screen } from '../types/mockup';
 import type { ScreenTemplateType } from '../types/mockup';
-import { SCREEN_DEFAULTS, LEGAL_CHILDREN } from '../types/mockup';
+import { SCREEN_DEFAULTS, LEGAL_CHILDREN, assertScreenTemplateType } from '../types/mockup';
 import type { Diagnostic, DiagnosticTier, QuickFix } from '../diagnostics/types';
 import { instanceKey } from '../diagnostics/types';
 import { runDiagnostics } from '../diagnostics/engine';
@@ -690,6 +690,7 @@ export const useMockupStore = create<MockupState>((set, get) => {
     },
 
     addScreen: (title, type) => {
+      assertScreenTemplateType(type);
       const defaults = SCREEN_DEFAULTS[type];
       const nextDoc = produce(get().doc, (draft) => {
         draft.screens.push({

@@ -272,7 +272,10 @@ test.describe('Full-screen interactive preview', () => {
 
   test('workspace indicator caps at five with end-anchored pill', async ({ page }) => {
     await seedFlowDocument(page);
-    // Grow to 6 screens; focus lands on the last one.
+    // Grow to 6 screens. Adding all four inside one evaluate is a single
+    // React batch, so the canvas focuses the FIRST new screen (its
+    // "newly added" effect matches one added id), not the last. Navigate
+    // explicitly below rather than assuming which one won focus.
     await page.evaluate(() => {
       const store = (window as unknown as { __mockupStore: { getState: () => {
         addScreen: (title: string, kind: string) => void;
@@ -288,16 +291,18 @@ test.describe('Full-screen interactive preview', () => {
     const indicator = topbar.getByTestId('workspace-indicator');
     const slots = indicator.locator(':scope > *');
 
-    // On the very last screen: 5 slots, pill on the end.
-    await expect(slots).toHaveCount(5);
-    await expect(indicator.locator(':scope > :last-child')).toHaveClass(/protota-workspace-pill/);
-
     const jumpTo = async (name: RegExp) => {
       await topbar.getByTestId('preview-screen-select').click();
       const menu = page.getByTestId('preview-screen-menu');
       await expect(menu).toBeVisible();
       await menu.getByRole('menuitem', { name }).click();
+      await expect(overlay).toHaveAttribute('data-preview-screen', /\w+/);
     };
+
+    // On the very last screen: 5 slots, pill on the end.
+    await jumpTo(/^6: /);
+    await expect(slots).toHaveCount(5);
+    await expect(indicator.locator(':scope > :last-child')).toHaveClass(/protota-workspace-pill/);
 
     // On the very first screen: still 5 slots, pill at the start.
     await jumpTo(/^1: /);

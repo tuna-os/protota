@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useEffectEvent, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useMockupStore } from '../store/mockupStore';
 import { AdwaitaRenderer } from './AdwaitaRenderer';
@@ -70,12 +70,28 @@ export const PreviewOverlay: React.FC<PreviewOverlayProps> = ({
     () => new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
   );
 
-  const screenIdRef = useRef(screenId);
-  screenIdRef.current = screenId;
-  const onScreenChangeRef = useRef(onScreenChange);
-  onScreenChangeRef.current = onScreenChange;
-  const onExitRef = useRef(onExit);
-  onExitRef.current = onExit;
+  // Navigation actions: honest deps (screenId, onScreenChange) so the
+  // preview context always drives the current screen.
+  const navigate = useCallback((targetId: string) => {
+    if (targetId === screenId) return;
+    setHistory((trail) => [...trail, targetId]);
+    setPreviewState({});
+    onScreenChange(targetId);
+  }, [screenId, onScreenChange]);
+
+  const goBack = useCallback(() => {
+    setHistory((trail) => {
+      if (trail.length < 2) return trail;
+      const next = trail.slice(0, -1);
+      onScreenChange(next[next.length - 1]);
+      return next;
+    });
+    setPreviewState({});
+  }, [onScreenChange]);
+
+  const handleExitKey = useEffectEvent(() => {
+    onExit();
+  });
 
   // An external jump (BottomBar screen focus while previewing) resets the
   // trail; our own navigate() already pushed the new id, so it is a no-op.
@@ -84,34 +100,17 @@ export const PreviewOverlay: React.FC<PreviewOverlayProps> = ({
     setPreviewState({});
   }, [screenId]);
 
-  const navigate = useCallback((targetId: string) => {
-    if (targetId === screenIdRef.current) return;
-    setHistory((trail) => [...trail, targetId]);
-    setPreviewState({});
-    onScreenChangeRef.current(targetId);
-  }, []);
-
-  const goBack = useCallback(() => {
-    setHistory((trail) => {
-      if (trail.length < 2) return trail;
-      const next = trail.slice(0, -1);
-      onScreenChangeRef.current(next[next.length - 1]);
-      return next;
-    });
-    setPreviewState({});
-  }, []);
-
   // Prototype interaction contract for AdwaitaRenderer.
   const interaction = useMemo<PreviewInteraction>(() => ({
     activate: () => {
       const edges = useMockupStore.getState().doc.edges;
-      const edge = edges.find((candidate) => candidate.sourceId === screenIdRef.current);
+      const edge = edges.find((candidate) => candidate.sourceId === screenId);
       if (edge) navigate(edge.targetId);
     },
     setNodeState: (nodeId, patch) => {
       setPreviewState((prev) => ({ ...prev, [nodeId]: { ...prev[nodeId], ...patch } }));
     },
-  }), [navigate]);
+  }), [navigate, screenId]);
 
   // While previewing: clear the editor selection (so Delete/Backspace can
   // never act on a node "through" the overlay) and flag the root so the
@@ -130,7 +129,7 @@ export const PreviewOverlay: React.FC<PreviewOverlayProps> = ({
       if (event.key !== 'Escape') return;
       event.preventDefault();
       event.stopPropagation();
-      onExitRef.current();
+      handleExitKey();
     };
     window.addEventListener('keydown', onKeyDown, true);
     return () => window.removeEventListener('keydown', onKeyDown, true);

@@ -1,4 +1,36 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, type Locator, type Page } from '@playwright/test';
+
+/**
+ * Read a box once the canvas has stopped moving.
+ *
+ * A new screen is framed by setting pan/zoom state, which the surface eases in
+ * over a 200ms CSS transition while the screen frame itself is still growing to
+ * its content's natural size. A boundingBox() taken in that window measures a
+ * mid-animation position, so both the containment and the centring assertion
+ * read whatever the transition happened to be at. Poll until two consecutive
+ * reads agree instead of guessing a sleep.
+ */
+async function settledBox(
+  locator: Locator,
+  page: Page,
+): Promise<{ x: number; y: number; width: number; height: number } | null> {
+  let previous = await locator.boundingBox();
+  for (let attempt = 0; attempt < 40; attempt++) {
+    await page.waitForTimeout(50);
+    const current = await locator.boundingBox();
+    if (
+      current && previous &&
+      Math.abs(current.x - previous.x) < 0.5 &&
+      Math.abs(current.y - previous.y) < 0.5 &&
+      Math.abs(current.width - previous.width) < 0.5 &&
+      Math.abs(current.height - previous.height) < 0.5
+    ) {
+      return current;
+    }
+    previous = current;
+  }
+  return previous!;
+}
 
 test.describe('Screen duplication & context menu (#18, #19)', () => {
   test.beforeEach(async ({ page }) => {
@@ -33,8 +65,8 @@ test.describe('Screen duplication & context menu (#18, #19)', () => {
     await expect(page.locator('.protota-screen-dropdown .adw-drop-down-label')).toHaveText('2');
 
     // The new screen is fully inside the canvas and horizontally centred.
-    const canvas = (await page.locator('.protota-canvas').boundingBox())!;
-    const second = (await frames.nth(1).boundingBox())!;
+    const canvas = (await settledBox(page.locator('.protota-canvas'), page))!;
+    const second = (await settledBox(frames.nth(1), page))!;
     expect(second.x).toBeGreaterThanOrEqual(canvas.x);
     expect(second.x + second.width).toBeLessThanOrEqual(canvas.x + canvas.width);
     expect(second.y).toBeGreaterThanOrEqual(canvas.y);
@@ -53,8 +85,8 @@ test.describe('Screen duplication & context menu (#18, #19)', () => {
     // Creating the screen focused it; switch back to the first.
     await page.getByTitle('Previous Screen').click();
 
-    const canvas = (await page.locator('.protota-canvas').boundingBox())!;
-    const first = (await page.locator('[data-protota-flow-screen]').nth(0).boundingBox())!;
+    const canvas = (await settledBox(page.locator('.protota-canvas'), page))!;
+    const first = (await settledBox(page.locator('[data-protota-flow-screen]').nth(0), page))!;
     // Top margin is 10% of the canvas height.
     expect(Math.abs(first.y - canvas.y - canvas.height * 0.1)).toBeLessThan(3);
   });

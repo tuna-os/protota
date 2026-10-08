@@ -101,7 +101,9 @@ export const PreviewOverlay: React.FC<PreviewOverlayProps> = ({
 
   // The screen switcher is a <gtk-menu-button>: its popover lists the
   // document's screens — the same portable-menu surface the header
-  // Open/Export menus use, not a native <select>.
+  // Open/Export menus use, not a native <select>. Trigger text differs per
+  // mode: desktop reads `time • Screen Title` (bold, centred in the shell
+  // bar); phone keeps just the title — no clock, no interpunct.
   // Activation comes back as a bubbling menu-item-activated CustomEvent with
   // {id} — the model cannot carry callbacks.
   const handleSwitcherActivate = useEffectEvent((id: string) => {
@@ -144,15 +146,18 @@ export const PreviewOverlay: React.FC<PreviewOverlayProps> = ({
         `Switch screen, current ${activeScreenIdx + 1} of ${doc.screens.length}: ${screen.title}`,
       );
       btn.setAttribute('title', 'Switch Screen');
-      const time = document.createElement('span');
-      time.textContent = clock;
-      const separator = document.createElement('span');
-      separator.setAttribute('aria-hidden', 'true');
-      // Non-breaking spaces: the bullet always keeps space on both sides.
-      separator.textContent = ' • ';
       const name = document.createElement('span');
       name.textContent = screen.title;
-      btn.append(time, separator, name);
+      if (mode === 'desktop') {
+        const time = document.createElement('span');
+        time.textContent = clock;
+        const separator = document.createElement('span');
+        separator.setAttribute('aria-hidden', 'true');
+        // Non-breaking spaces: the bullet always keeps space on both sides.
+        separator.textContent = ' • ';
+        btn.append(time, separator);
+      }
+      btn.append(name);
     }
     // Tag the skin's popover surface so tests can address it directly.
     // (Both triggers center their surface via CSS overrides scoped to the
@@ -161,7 +166,7 @@ export const PreviewOverlay: React.FC<PreviewOverlayProps> = ({
     if (popover) {
       popover.setAttribute('data-testid', 'preview-screen-menu');
     }
-  }, [doc.screens, screen, activeScreenIdx, clock]);
+  }, [doc.screens, screen, activeScreenIdx, clock, mode]);
 
   // An external jump (BottomBar screen focus while previewing) resets the
   // trail; our own navigate() already pushed the new id, so it is a no-op.
@@ -345,6 +350,8 @@ export const PreviewOverlay: React.FC<PreviewOverlayProps> = ({
         <>
           <div className="protota-preview-chrome protota-preview-chrome--start">
             {backChip}
+          </div>
+          <div className="protota-preview-chrome protota-preview-chrome--center">
             {screenPicker}
           </div>
           <div className="protota-preview-chrome protota-preview-chrome--end">{exitChip}</div>

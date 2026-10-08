@@ -99,6 +99,17 @@ test.describe('Full-screen interactive preview', () => {
     const overflowX = await phoneFrame.evaluate((el) => el.scrollWidth - el.clientWidth);
     expect(overflowX).toBeLessThanOrEqual(1);
 
+    // The floating chrome chips (screen title picker etc.) never overlap
+    // the phone — even after shrinking the browser window vertically.
+    const assertNoOverlap = async () => {
+      const chromeBox = (await overlay.locator('.protota-preview-chrome--start').boundingBox())!;
+      const frameBox = (await phoneFrame.boundingBox())!;
+      expect(frameBox.y).toBeGreaterThanOrEqual(chromeBox.y + chromeBox.height - 1);
+    };
+    await assertNoOverlap();
+    await page.setViewportSize({ width: 1000, height: 480 });
+    await assertNoOverlap();
+
     // Phosh status bar: wifi + bluetooth left, clock centred, silent +
     // charged battery right — preview chrome, not document content.
     const statusBar = overlay.getByTestId('phosh-status-bar');
@@ -170,12 +181,23 @@ test.describe('Full-screen interactive preview', () => {
     await overlay.getByTestId('preview-screen-select').click();
     const menu = page.getByTestId('preview-screen-menu');
     await expect(menu).toBeVisible();
-    // The surface stays inside the viewport under the left-anchored
-    // trigger — no cropping past the left edge.
+    // The surface stays inside the viewport under the trigger — no
+    // cropping past the left edge — and centers under it.
     const menuBox = (await menu.boundingBox())!;
     expect(menuBox.x).toBeGreaterThanOrEqual(0);
     const viewport = page.viewportSize()!;
     expect(menuBox.x + menuBox.width).toBeLessThanOrEqual(viewport.width);
+    // No clock or interpunct in the phone trigger: title only.
+    const picker = overlay.getByTestId('preview-screen-select');
+    await expect(picker).not.toContainText('•');
+    await expect(picker).not.toContainText(/\d{1,2}:\d{2}/);
+    // Centered in the preview header row.
+    const pickerBox = (await picker.boundingBox())!;
+    const pickerCenter = pickerBox.x + pickerBox.width / 2;
+    expect(Math.abs(pickerCenter - viewport.width / 2)).toBeLessThanOrEqual(3);
+    // And the popover centers under it rather than opening leftward.
+    const menuCenter = menuBox.x + menuBox.width / 2;
+    expect(Math.abs(menuCenter - pickerCenter)).toBeLessThanOrEqual(3);
     await menu.getByRole('menuitem', { name: /Details/ }).click();
     await expect(overlay).toHaveAttribute('data-preview-screen', detailsId);
   });

@@ -1851,6 +1851,11 @@ adw-header-bar adw-view-switcher > .adw-view-switcher-content {
 
 /* ---- GNOME Desktop shell top bar (preview chrome) ---- */
 .protota-gnome-topbar {
+  position: relative;
+  /* The shell sits above the previewed window: the clock's centring
+     transform traps the switcher popover in the topbar's stacking context,
+     so the bar itself needs a context that beats any mockup surface. */
+  z-index: 2000;
   height: 32px;
   background: #000000;
   color: #ffffff;
@@ -1860,6 +1865,76 @@ adw-header-bar adw-view-switcher > .adw-view-switcher-content {
   padding: 0 16px;
   font-size: 13px;
   user-select: none;
+}
+
+/* Absolutely-centred bold clock, independent of the side clusters' widths. */
+.protota-gnome-topbar-clock {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+/* Screen-switcher trigger: transparent on the dark shell bar — the
+   `time · title` text is drawn over it in the shell's bold white. */
+.protota-preview-overlay gtk-menu-button .adw-menu-button-button {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  padding: 6px 8px;
+  border-radius: 999px;
+  min-width: 0;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 700;
+  font-family: inherit;
+  white-space: nowrap;
+}
+.protota-preview-overlay gtk-menu-button .adw-menu-button-button:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+/* Slimmer clock trigger: less vertical padding so the clock section sits
+   lighter on the 32px bar. */
+.protota-gnome-topbar-clock gtk-menu-button .adw-menu-button-button {
+  padding: 2px 8px;
+}
+/* The switcher popover must float above the previewed window. */
+.protota-preview-overlay gtk-menu-button .adw-menu-button-popover {
+  z-index: 1000;
+}
+/* Center the surface under the clock trigger (desktop shell only — the
+   left-anchored phone trigger stays start-aligned). */
+.protota-gnome-topbar gtk-menu-button .adw-menu-button-popover {
+  left: 50%;
+  right: auto;
+  transform: translateX(-50%);
+}
+.protota-workspace-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.protota-workspace-pill {
+  width: 28px;
+  height: 8px;
+  border-radius: 999px;
+  background: #ffffff;
+}
+.protota-workspace-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.55);
+}
+
+/* System status section (wireless + bluetooth + battery) before the exit. */
+.protota-gnome-status-icons {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 10px 0 6px;
+  color: #ffffff;
 }
 
 .protota-gnome-window-frame {

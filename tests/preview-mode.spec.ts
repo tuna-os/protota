@@ -167,8 +167,85 @@ test.describe('Full-screen interactive preview', () => {
 
     await page.getByTitle('Toggle Phone Preview').click();
     const overlay = page.getByTestId('preview-overlay');
-    await overlay.getByTestId('preview-screen-select').selectOption(detailsId);
+    await overlay.getByTestId('preview-screen-select').click();
+    const menu = page.getByTestId('preview-screen-menu');
+    await expect(menu).toBeVisible();
+    // The surface stays inside the viewport under the left-anchored
+    // trigger — no cropping past the left edge.
+    const menuBox = (await menu.boundingBox())!;
+    expect(menuBox.x).toBeGreaterThanOrEqual(0);
+    const viewport = page.viewportSize()!;
+    expect(menuBox.x + menuBox.width).toBeLessThanOrEqual(viewport.width);
+    await menu.getByRole('menuitem', { name: /Details/ }).click();
     await expect(overlay).toHaveAttribute('data-preview-screen', detailsId);
+  });
+
+  test('desktop top bar mirrors the GNOME shell', async ({ page }) => {
+    const { detailsId } = await seedFlowDocument(page);
+
+    await page.getByTitle('Toggle Desktop Preview').click();
+    const overlay = page.getByTestId('preview-overlay');
+    const topbar = overlay.locator('.protota-gnome-topbar');
+    await expect(topbar).toBeVisible();
+    // The shell floats above the previewed window (regression guard: the
+    // switcher popover was rendering behind the window header bar).
+    await expect(topbar).toHaveCSS('z-index', '2000');
+
+    // Left: static workspace indicator — one pill for the active screen,
+    // filled dots for the rest — instead of the old "Activities" text.
+    await expect(topbar).not.toContainText('Activities');
+    const indicator = topbar.getByTestId('workspace-indicator');
+    await expect(indicator).toBeVisible();
+    const pill = indicator.locator('.protota-workspace-pill');
+    const dot = indicator.locator('.protota-workspace-dot');
+    await expect(pill).toHaveCount(1);
+    await expect(dot).toHaveCount(1);
+    await expect(pill).toHaveCSS('width', '28px');
+    await expect(pill).toHaveCSS('height', '8px');
+    await expect(dot).toHaveCSS('width', '8px');
+    await expect(dot).toHaveCSS('height', '8px');
+    await expect(dot).toHaveCSS('background-color', 'rgba(255, 255, 255, 0.55)');
+
+    // No step buttons: the clock owns screen switching now.
+    await expect(topbar.getByTestId('preview-prev-screen')).toHaveCount(0);
+    await expect(topbar.getByTestId('preview-next-screen')).toHaveCount(0);
+
+    // Center: the clock trigger shows `time • title`, is absolutely
+    // centred and bold.
+    const clock = topbar.getByTestId('desktop-clock');
+    await expect(clock).toContainText(/\d{1,2}:\d{2}/);
+    await expect(clock).toContainText('•');
+    await expect(clock).toHaveCSS('font-weight', '700');
+    const topbarBox = (await topbar.boundingBox())!;
+    const clockBox = (await clock.boundingBox())!;
+    const topbarCenter = topbarBox.x + topbarBox.width / 2;
+    const clockCenter = clockBox.x + clockBox.width / 2;
+    expect(Math.abs(clockCenter - topbarCenter)).toBeLessThanOrEqual(2);
+
+    // The clock is the switcher trigger: its Adwaita popover lists the
+    // screens and jumps on activation.
+    await topbar.getByTestId('preview-screen-select').click();
+    const menu = page.getByTestId('preview-screen-menu');
+    await expect(menu).toBeVisible();
+    // Desktop: the surface is centered under the clock trigger.
+    const triggerBox = (await topbar.getByTestId('preview-screen-select').boundingBox())!;
+    const menuBox = (await menu.boundingBox())!;
+    const triggerCenter = triggerBox.x + triggerBox.width / 2;
+    const menuCenter = menuBox.x + menuBox.width / 2;
+    expect(Math.abs(menuCenter - triggerCenter)).toBeLessThanOrEqual(3);
+    await expect(menu.getByRole('menuitem', { name: /Details/ })).toBeVisible();
+    await menu.getByRole('menuitem', { name: /Details/ }).click();
+    await expect(overlay).toHaveAttribute('data-preview-screen', detailsId);
+    await expect(clock).toContainText(/•\s*Details/);
+
+    // Right: system status section (wireless + bluetooth + battery) before
+    // the exit chip.
+    await expect(topbar.getByTestId('desktop-status-wireless')).toBeVisible();
+    await expect(topbar.getByTestId('desktop-status-bluetooth')).toBeVisible();
+    await expect(topbar.getByTestId('desktop-status-battery')).toBeVisible();
+    const statusBox = (await topbar.locator('.protota-gnome-status-icons').boundingBox())!;
+    const exitBox = (await topbar.getByTestId('preview-exit').boundingBox())!;
+    expect(statusBox.x + statusBox.width).toBeLessThanOrEqual(exitBox.x);
   });
 
   test('switch toggles are ephemeral: visual state changes, document and undo do not', async ({ page }) => {

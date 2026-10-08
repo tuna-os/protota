@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useEffectEvent, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useEffectEvent, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useMockupStore } from '../store/mockupStore';
 import { AdwaitaRenderer } from './AdwaitaRenderer';
@@ -8,6 +8,7 @@ import type { AdwNode } from '../types/mockup';
 import { breakpointOverrides } from '../utils/breakpoints';
 import { windowCloseSymbolic } from '@gjsify/adwaita-icons/ui';
 import { goPreviousSymbolic } from '@gjsify/adwaita-icons/actions';
+import type { AdwMenuNode } from '@gjsify/adwaita-web';
 import {
   batteryLevel60ChargingSymbolic,
   bluetoothActiveSymbolic,
@@ -15,6 +16,11 @@ import {
   notificationsDisabledSymbolic,
 } from '@gjsify/adwaita-icons/status';
 import { toDataUri } from '@gjsify/adwaita-icons/utils';
+
+/** `<gtk-menu-button>` surface for the preview screen switcher (portable menu model). */
+type ScreenSwitcherElement = HTMLElement & {
+  menuModel: AdwMenuNode[];
+};
 
 const iconStyle = (svg: string, size = 14): React.CSSProperties => ({
   display: 'inline-block',
@@ -93,6 +99,70 @@ export const PreviewOverlay: React.FC<PreviewOverlayProps> = ({
     onExit();
   });
 
+  // The screen switcher is a <gtk-menu-button>: its popover lists the
+  // document's screens — the same portable-menu surface the header
+  // Open/Export menus use, not a native <select>.
+  // Activation comes back as a bubbling menu-item-activated CustomEvent with
+  // {id} — the model cannot carry callbacks.
+  const handleSwitcherActivate = useEffectEvent((id: string) => {
+    onScreenChange(id);
+  });
+  const switcherRef = useRef<ScreenSwitcherElement>(null);
+  const activeScreenIdx = screen ? doc.screens.findIndex((c) => c.id === screen.id) : -1;
+
+  useEffect(() => {
+    const el = switcherRef.current;
+    if (!el) return;
+    const onActivate = (event: Event) => {
+      const id = (event as CustomEvent).detail?.id;
+      if (typeof id === 'string') handleSwitcherActivate(id);
+    };
+    el.addEventListener('menu-item-activated', onActivate);
+    return () => el.removeEventListener('menu-item-activated', onActivate);
+  }, []);
+
+  // Rebuild the menu model and redraw the clock trigger text whenever the
+  // screens or the active one change.
+  useEffect(() => {
+    const el = switcherRef.current;
+    if (!el || !screen) return;
+    el.menuModel = [{
+      kind: 'section',
+      items: doc.screens.map((candidate, index) => ({
+        kind: 'item' as const,
+        id: candidate.id,
+        label: `${index + 1}: ${candidate.title}`,
+      })),
+    }];
+    // The element's trigger is icon-only, so draw the label over it:
+    // desktop `time • title`, phone just the title.
+    const btn = el.querySelector<HTMLButtonElement>('.adw-menu-button-button');
+    if (btn) {
+      btn.replaceChildren();
+      btn.setAttribute(
+        'aria-label',
+        `Switch screen, current ${activeScreenIdx + 1} of ${doc.screens.length}: ${screen.title}`,
+      );
+      btn.setAttribute('title', 'Switch Screen');
+      const time = document.createElement('span');
+      time.textContent = clock;
+      const separator = document.createElement('span');
+      separator.setAttribute('aria-hidden', 'true');
+      // Non-breaking spaces: the bullet always keeps space on both sides.
+      separator.textContent = ' • ';
+      const name = document.createElement('span');
+      name.textContent = screen.title;
+      btn.append(time, separator, name);
+    }
+    // Tag the skin's popover surface so tests can address it directly.
+    // (Both triggers center their surface via CSS overrides scoped to the
+    // desktop topbar and the phone header cluster.)
+    const popover = el.querySelector('gtk-popover');
+    if (popover) {
+      popover.setAttribute('data-testid', 'preview-screen-menu');
+    }
+  }, [doc.screens, screen, activeScreenIdx, clock]);
+
   // An external jump (BottomBar screen focus while previewing) resets the
   // trail; our own navigate() already pushed the new id, so it is a no-op.
   // Syncing an external prop to local navigation state: one intentional
@@ -164,19 +234,27 @@ export const PreviewOverlay: React.FC<PreviewOverlayProps> = ({
   const renderKey = `${screen.id}:${history.length}`;
 
   const screenPicker = (
-    <select
-      className="protota-preview-chip protota-preview-screen-select"
+    <gtk-menu-button
+      ref={switcherRef}
       data-testid="preview-screen-select"
-      aria-label="Jump to screen"
-      value={screen.id}
-      onChange={(event) => onScreenChange(event.target.value)}
+    />
+  );
+
+  // Static workspace indicator (active screen as a pill, the rest as
+  // filled dots) — a pure visual, the clock trigger owns the popover.
+  const workspaceIndicator = (
+    <span
+      className="protota-workspace-indicator"
+      data-testid="workspace-indicator"
+      aria-hidden="true"
     >
       {doc.screens.map((candidate, index) => (
-        <option key={candidate.id} value={candidate.id}>
-          {index + 1}: {candidate.title}
-        </option>
+        <span
+          key={candidate.id}
+          className={index === activeScreenIdx ? 'protota-workspace-pill' : 'protota-workspace-dot'}
+        />
       ))}
-    </select>
+    </span>
   );
 
   const backChip = canGoBack ? (
@@ -236,14 +314,20 @@ export const PreviewOverlay: React.FC<PreviewOverlayProps> = ({
         <>
           <div className="protota-gnome-topbar">
             <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-              <span style={{ fontWeight: 700 }}>Activities</span>
+              {workspaceIndicator}
               {backChip}
+            </div>
+            <div className="protota-gnome-topbar-clock" data-testid="desktop-clock">
               {screenPicker}
             </div>
-            <div style={{ fontSize: '13px' }}>
-              {clock}
+            <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
+              <span className="protota-gnome-status-icons" aria-hidden="true">
+                <span style={iconStyle(networkWirelessSignalExcellentSymbolic)} data-testid="desktop-status-wireless" />
+                <span style={iconStyle(bluetoothActiveSymbolic)} data-testid="desktop-status-bluetooth" />
+                <span style={iconStyle(batteryLevel60ChargingSymbolic)} data-testid="desktop-status-battery" />
+              </span>
+              {exitChip}
             </div>
-            {exitChip}
           </div>
           <div className="protota-gnome-window-frame">
             <div

@@ -64,6 +64,12 @@ export const PreviewOverlay: React.FC<PreviewOverlayProps> = ({
   // view-switcher tap). Reset on every navigation and on exit.
   const [previewState, setPreviewState] = useState<Record<string, Partial<AdwNode>>>({});
 
+  // Static preview-chrome clock: computed once per mount so render stays pure
+  // and the React Compiler can optimize this component.
+  const [clock] = useState(
+    () => new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+  );
+
   const screenIdRef = useRef(screenId);
   screenIdRef.current = screenId;
   const onScreenChangeRef = useRef(onScreenChange);
@@ -232,7 +238,7 @@ export const PreviewOverlay: React.FC<PreviewOverlayProps> = ({
               {screenPicker}
             </div>
             <div style={{ fontSize: '13px' }}>
-              {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+              {clock}
             </div>
             {exitChip}
           </div>
@@ -265,7 +271,7 @@ export const PreviewOverlay: React.FC<PreviewOverlayProps> = ({
                 <span style={iconStyle(bluetoothActiveSymbolic, 12)} data-testid="phosh-status-bluetooth" />
               </span>
               <span className="protota-phosh-status-clock">
-                {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                {clock}
               </span>
               <span className="protota-phosh-status-side">
                 <span style={iconStyle(notificationsDisabledSymbolic, 12)} data-testid="phosh-status-silent" />

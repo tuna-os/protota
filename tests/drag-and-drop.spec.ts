@@ -7,18 +7,6 @@ import { test, expect, type Page, type Locator } from '@playwright/test';
  * elements — per docs/penpot-study.md §9.
  */
 
-interface NodeShape { id: string; type: string; title?: string; children?: NodeShape[] }
-
-interface StoreShape {
-  getState: () => {
-    doc: { screens: Array<{ id: string; rootNode: NodeShape }> };
-    historyIndex: number;
-    selectedNodeId: string | null;
-    addChildNode: (parentId: string, type: string) => string | null;
-    addScreen: (title: string, type: string) => void;
-  };
-}
-
 /** First node of a given type in the first screen, depth-first. */
 async function nodeIdByType(page: Page, type: string, screenIndex = 0): Promise<string> {
   return page.evaluate(([wantedType, index]) => {

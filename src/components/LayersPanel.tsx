@@ -495,7 +495,6 @@ export const LayersPanel: React.FC<Props> = ({ renameRequest, onRenameConsumed }
   };
 
   // Rows render flat (indent via margin); screens group their own subtrees.
-  let cursor = 0;
   return (
     <div
       ref={treeRef}
@@ -506,11 +505,7 @@ export const LayersPanel: React.FC<Props> = ({ renameRequest, onRenameConsumed }
       style={{ padding: '12px' }}
     >
       {doc.screens.map((screen) => {
-        const screenRows: LayerRow[] = [];
-        while (cursor < rows.length && rows[cursor].screenId === screen.id) {
-          screenRows.push(rows[cursor]);
-          cursor += 1;
-        }
+        const screenRows = rows.filter((row) => row.screenId === screen.id);
         return (
           <div key={screen.id} style={{ marginBottom: '16px' }}>
             {renderScreenRow(screen)}

@@ -64,6 +64,20 @@ export const ViewportCanvas: React.FC = () => {
   const panRef = useRef(pan);
   zoomRef.current = zoom;
   panRef.current = pan;
+
+  // Screen focus state — declared up here so the effects below (initial
+  // view, new-screen framing) can reference the setters and refs.
+  const [phoshScreenId, setPhoshScreenId] = useState<string | null>(null);
+  const [desktopScreenId, setDesktopScreenId] = useState<string | null>(null);
+  const [focusedScreenIdx, setFocusedScreenIdx] = useState(0);
+
+  const focusedScreenIdxRef = useRef(focusedScreenIdx);
+  focusedScreenIdxRef.current = focusedScreenIdx;
+  const desktopScreenIdRef = useRef(desktopScreenId);
+  desktopScreenIdRef.current = desktopScreenId;
+  const phoshScreenIdRef = useRef(phoshScreenId);
+  phoshScreenIdRef.current = phoshScreenId;
+
   const [isPanning, setIsPanning] = useState(false);
   const isPanningRef = useRef(false);
   const [spaceHeld, setSpaceHeld] = useState(false);
@@ -778,17 +792,6 @@ export const ViewportCanvas: React.FC = () => {
     setFlowPaths(paths);
   }, [doc, showFlows]);
 
-  const [phoshScreenId, setPhoshScreenId] = useState<string | null>(null);
-  const [desktopScreenId, setDesktopScreenId] = useState<string | null>(null);
-  const [focusedScreenIdx, setFocusedScreenIdx] = useState(0);
-
-  const focusedScreenIdxRef = useRef(focusedScreenIdx);
-  focusedScreenIdxRef.current = focusedScreenIdx;
-  const desktopScreenIdRef = useRef(desktopScreenId);
-  desktopScreenIdRef.current = desktopScreenId;
-  const phoshScreenIdRef = useRef(phoshScreenId);
-  phoshScreenIdRef.current = phoshScreenId;
-
   // Clamp focusedScreenIdx when screens shrink (e.g. deletion)
   useEffect(() => {
     if (doc.screens.length > 0 && focusedScreenIdx >= doc.screens.length) {
@@ -801,9 +804,10 @@ export const ViewportCanvas: React.FC = () => {
 
   // Memoized screen list for BottomBar — only recomputes when screen ids/titles change,
   // not on every node edit inside a screen.
+  const screensKey = doc.screens.map((s) => `${s.id}:${s.title}`).join('|');
   const screensForBottomBar = useMemo(
     () => doc.screens.map((s, i) => ({ id: s.id, title: `${i + 1}: ${s.title}` })),
-    [doc.screens.map((s) => `${s.id}:${s.title}`).join('|')], // eslint-disable-line react-hooks/exhaustive-deps
+    [screensKey], // eslint-disable-line react-hooks/exhaustive-deps
   );
 
   // --- Stable screen-focus callbacks (read from refs) ---
@@ -848,7 +852,7 @@ export const ViewportCanvas: React.FC = () => {
     } else {
       panToScreen(idx);
     }
-  }, [panToScreen]);
+  }, [panToScreen, setFocusedScreenIdx, setDesktopScreenId, setPhoshScreenId]);
 
   const handleFocusPrev = useCallback(() => {
     handleFocusScreen(focusedScreenIdxRef.current - 1);
@@ -912,7 +916,7 @@ export const ViewportCanvas: React.FC = () => {
     if (idx >= 0) setFocusedScreenIdx(idx);
     if (desktopScreenIdRef.current !== null) setDesktopScreenId(screenId);
     else if (phoshScreenIdRef.current !== null) setPhoshScreenId(screenId);
-  }, []);
+  }, [setFocusedScreenIdx, setDesktopScreenId, setPhoshScreenId]);
 
   const handleExitDesktop = useCallback(() => setDesktopScreenId(null), []);
   const handleExitPhone = useCallback(() => setPhoshScreenId(null), []);

@@ -1,7 +1,7 @@
 # Contributing to Protota
 
-Thanks for helping with **Protota** — the GNOME HIG-compliant mockup tool for
-Adwaita app UIs. Protota renders GTK4/Libadwaita from a typed widget tree using
+Thank you for your help with **Protota** — a mockup tool for Adwaita app UIs
+that obeys the GNOME HIG. Protota renders GTK4/Libadwaita from a typed widget tree using
 real [`@gjsify/adwaita-web`](https://github.com/gjsify/gjsify/tree/main/packages/web/adwaita-web) components,
 so mockups look *and behave* like real Adwaita.
 
@@ -11,10 +11,11 @@ so mockups look *and behave* like real Adwaita.
   foundation (pure browser webapp, no GJS/Node runtime), and the
   `MockupDocument` model.
 - **[AGENTS.md](AGENTS.md)** — how to work with Protota projects as an agent:
-  document format, editing surfaces, and the renderer contract.
-- **[docs/components.md](docs/components.md)** — every component Protota can
-  build with: the GTK class it exports as, named slots, editable properties,
-  and legal children. Generated from the code, so it cannot drift.
+  document format, edit surfaces, and the renderer contract.
+- **[docs/components.md](docs/components.md)** — every component that Protota
+  can build with. For each one: its GTK export class, named slots, editable
+  properties, and legal children. A script makes it from the code, so it
+  cannot drift.
 
 ## Project layout
 
@@ -41,10 +42,11 @@ npm test           # Playwright tests
 
 `just check` runs lint, unit tests, and build together.
 
-The renderer is **generic**: presets must not add app-specific rendering
-branches. Blueprint and GtkBuilder imports preserve supported tree structure
-and properties; unknown visual widgets must be reported explicitly so support
-can be added deliberately — never silently dropped.
+The renderer is **generic**: presets must not add branches for one app. An
+import of Blueprint or GtkBuilder keeps the tree structure and the properties
+that Protota supports. The import must report each unknown visual widget, so
+that a contributor can add support for it on purpose. It must never drop a
+widget silently.
 
 ## Making a change
 
@@ -52,7 +54,7 @@ can be added deliberately — never silently dropped.
    `git checkout -b fix/import-error` or `feat/preset-sidebar`.
 2. **Keep commits focused** and sign them with DCO:
    `git commit -s` (each commit carries a `Signed-off-by` trailer).
-3. **Run the checks** before pushing:
+3. **Run the checks** before you push:
 
    ```sh
    npx tsc -b          # typecheck — its own CI step, see #211
@@ -62,11 +64,11 @@ can be added deliberately — never silently dropped.
    npm test            # Playwright browser tests
    ```
 
-   `npx tsc -b` is worth running first: `npm run build` is `tsc -b && vite
-   build`, so it only typechecks what the build includes, while CI checks the
-   test sources too.
+   Run `npx tsc -b` first: `npm run build` is `tsc -b && vite build`, so it
+   only typechecks what the build includes, while CI checks the test sources
+   too.
 
-4. **Open a PR** describing what changed and why; link any related issue.
+4. **Open a PR**. Tell what changed and why, and link any related issue.
 
 ### If you touch the renderer or presets
 
@@ -77,7 +79,7 @@ can be added deliberately — never silently dropped.
 ### If you change docs
 
 - User-facing behavior belongs in `docs/` and the README.
-- The component catalog is generated — edit the source, not the generated
+- A script makes the component catalog — edit the source, not the output
   file.
 
 ## Code of conduct
@@ -88,7 +90,7 @@ Be respectful and constructive — see
 ## Questions?
 
 Open an issue. `CONTEXT.md` is the authoritative reference for design
-decisions; `AGENTS.md` covers the document model and editing surfaces.
+decisions; `AGENTS.md` covers the document model and edit surfaces.
 
 <!-- hive-contribute-plea: donated-compute appeal, keep in sync across repos -->
 ## Contribute compute — no code needed

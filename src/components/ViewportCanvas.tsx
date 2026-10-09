@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback, useEffect, useMemo } from "react";
+import React, { useState, useRef, useCallback, useEffect, useEffectEvent, useMemo } from "react";
 import { useMockupStore } from "../store/mockupStore";
 import { AdwaitaRenderer } from "./AdwaitaRenderer";
 import { CanvasErrorBoundary } from "./CanvasErrorBoundary";
@@ -16,6 +16,10 @@ import { useTouchPanZoom, TOUCH_GESTURE_START_EVENT } from "../hooks/useTouchPan
 import { PreviewOverlay } from "./PreviewOverlay";
 
 const CANVAS_PADDING = 60;
+
+/** Rendered top margin for the focused screen after switching screens, as
+ *  a fraction of the canvas height — scales with the viewport. */
+const SCREEN_FOCUS_TOP_MARGIN_RATIO = 0.1;
 const CANVAS_GAP = 40;
 const CANVAS_BOTTOM_BAR_H = 48;
 /** Smallest usable screen edge — matches nothing in GNOME below a phone. */
@@ -48,18 +52,15 @@ export const ViewportCanvas: React.FC = () => {
     screenDeleteNotice, clearScreenDeleteNotice,
   } = useMockupStore();
 
-  // Ref mirror of doc — lets stable callbacks read latest screens without re-creating
-  const docRef = useRef(doc);
-  docRef.current = doc;
-
   const [zoom, setZoom] = useState(1);
   const [pan, setPan] = useState({ x: 0, y: 0 });
 
-  // Ref versions so event handlers always read latest values without re-attaching
-  const zoomRef = useRef(zoom);
-  const panRef = useRef(pan);
-  zoomRef.current = zoom;
-  panRef.current = pan;
+  // Screen focus state. The gesture/focus handlers below are effect events,
+  // so they always read the latest state without re-subscribing listeners.
+  const [phoshScreenId, setPhoshScreenId] = useState<string | null>(null);
+  const [desktopScreenId, setDesktopScreenId] = useState<string | null>(null);
+  const [focusedScreenIdx, setFocusedScreenIdx] = useState(0);
+
   const [isPanning, setIsPanning] = useState(false);
   const isPanningRef = useRef(false);
   const [spaceHeld, setSpaceHeld] = useState(false);
@@ -69,35 +70,37 @@ export const ViewportCanvas: React.FC = () => {
   // Transformed canvas surface (also anchors the flow overlay further down).
   const surfaceRef = useRef<HTMLDivElement>(null);
 
-  // Two-finger pan + pinch zoom (touch only; self-contained hook).
+  // Two-finger pan + pinch zoom (touch only; self-contained hook). The hook
+  // mirrors its options each render, so passing zoom/pan by value always
+  // reads the latest at gesture time.
   const { isTouchGesturing, touchGestureActiveRef } = useTouchPanZoom({
     canvasRef,
     surfaceRef,
-    zoomRef,
-    panRef,
+    zoom,
+    pan,
     setPan,
     setZoom,
     minZoom: 0.3,
     maxZoom: 2.5,
   });
 
-  // --- Stable zoom helpers (read from refs, never re-create) ---
+  // --- Stable zoom helpers (effect events: stable identity, latest state) ---
 
-  const zoomAtCenter = useCallback((factor: number) => {
+  const zoomAtCenter = useEffectEvent((factor: number) => {
     const el = canvasRef.current;
     if (!el) return;
     const rect = el.getBoundingClientRect();
     const mx = rect.width / 2;
     const my = rect.height / 2;
-    const oldZ = zoomRef.current;
+    const oldZ = zoom;
     const newZ = Math.min(Math.max(oldZ * factor, 0.3), 2.5);
-    setPan(zoomAtPoint(mx, my, oldZ, newZ, panRef.current, rect.width));
+    setPan(zoomAtPoint(mx, my, oldZ, newZ, pan, rect.width));
     setZoom(newZ);
-  }, []);
+  });
 
   const resetView = useCallback(() => {
     const el = canvasRef.current;
-    if (!el || docRef.current.screens.length === 0) return;
+    if (!el || useMockupStore.getState().doc.screens.length === 0) return;
     setPan({ x: 0, y: CANVAS_PADDING });
     setZoom(1);
   }, []);
@@ -109,10 +112,10 @@ export const ViewportCanvas: React.FC = () => {
   // rightwards) and its `safe center` flex layout (the surface pins to the
   // canvas's left edge once wider than it). Ignoring them left the screen
   // pushed off the right edge on narrow viewports.
-  const fitScreenToView = useCallback((idx: number) => {
+  const fitScreenToView = useEffectEvent((idx: number) => {
     const el = canvasRef.current;
     const surface = surfaceRef.current;
-    const screens = docRef.current.screens;
+    const screens = useMockupStore.getState().doc.screens;
     if (!el || !surface || screens.length === 0) return;
     const clampedIdx = Math.max(0, Math.min(idx, screens.length - 1));
     const frame = surface.querySelectorAll<HTMLElement>("[data-protota-flow-screen]")[clampedIdx];
@@ -135,24 +138,49 @@ export const ViewportCanvas: React.FC = () => {
       y: (el.clientHeight - CANVAS_BOTTOM_BAR_H) / 2 - cv * zoom,
     });
     setZoom(zoom);
+  });
+
+  // Fit ALL screens (the whole surface: padding + labels + every screen)
+  // inside the visible canvas area and centre it. This is the bottom bar's
+  // Fit button and the initial view mode — measured from the laid-out DOM
+  // instead of the old constant-based estimate, which assumed desktop
+  // padding.
+  const handleZoomFit = useCallback(() => {
+    const el = canvasRef.current;
+    const surface = surfaceRef.current;
+    if (!el || !surface || useMockupStore.getState().doc.screens.length === 0) return;
+    const canvasW = el.clientWidth;
+    const availH = el.clientHeight - CANVAS_BOTTOM_BAR_H;
+    const surfW = surface.offsetWidth;
+    const surfH = surface.offsetHeight;
+    if (surfW <= 0 || surfH <= 0) return;
+    const fitZoom = Math.min(canvasW / surfW, availH / surfH, 1.5);
+    setZoom(fitZoom);
+    // Centre the surface, correcting for its `safe center` layout offset
+    // (pinned to the left edge once wider than the canvas) and the `50% 0`
+    // transform origin; the old `x: 0` left wide content hanging off the
+    // right edge on narrow viewports.
+    setPan({
+      x: canvasW / 2 - surface.offsetLeft - surfW / 2,
+      y: (availH - surfH * fitZoom) / 2,
+    });
   }, []);
 
-  // --- Wheel handler (stable, reads from refs) ---
+  // --- Wheel handler (effect event: stable identity, latest zoom/pan) ---
 
-  useEffect(() => {
+  const handleWheel = useEffectEvent((e: WheelEvent) => {
     const el = canvasRef.current;
     if (!el) return;
-    const handler = (e: WheelEvent) => {
-      const isOverCanvas = el.contains(e.target as Node);
+    const isOverCanvas = el.contains(e.target as Node);
       if ((e.ctrlKey || e.metaKey) && isOverCanvas) {
         e.preventDefault();
         const rect = el.getBoundingClientRect();
         const mx = e.clientX - rect.left;
         const my = e.clientY - rect.top;
         const factor = e.deltaY > 0 ? 0.9 : 1.1;
-        const oldZ = zoomRef.current;
+        const oldZ = zoom;
         const newZ = Math.min(Math.max(oldZ * factor, 0.3), 2.5);
-        setPan(zoomAtPoint(mx, my, oldZ, newZ, panRef.current, rect.width));
+        setPan(zoomAtPoint(mx, my, oldZ, newZ, pan, rect.width));
         setZoom(newZ);
       } else if (e.shiftKey && isOverCanvas) {
         e.preventDefault();
@@ -160,21 +188,25 @@ export const ViewportCanvas: React.FC = () => {
       } else if (!e.ctrlKey && !e.metaKey && !e.shiftKey) {
         setPan((p) => ({ x: p.x - e.deltaX, y: p.y - e.deltaY }));
       }
-    };
-    el.addEventListener("wheel", handler, { passive: false });
-    return () => el.removeEventListener("wheel", handler);
+  });
+
+  useEffect(() => {
+    const el = canvasRef.current;
+    if (!el) return;
+    el.addEventListener("wheel", handleWheel, { passive: false });
+    return () => el.removeEventListener("wheel", handleWheel);
   }, []);
 
-  // --- Mouse handlers (all stable via refs) ---
+  // --- Mouse handlers (stable callbacks with honest deps) ---
 
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     if (e.button === 1 || spaceDown.current) {
       e.preventDefault();
       isPanningRef.current = true;
       setIsPanning(true);
-      startPan.current = { x: e.clientX - panRef.current.x, y: e.clientY - panRef.current.y };
+      startPan.current = { x: e.clientX - pan.x, y: e.clientY - pan.y };
     }
-  }, []);
+  }, [pan]);
 
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
     if (isPanningRef.current) {
@@ -244,7 +276,7 @@ export const ViewportCanvas: React.FC = () => {
       if (drag?.kind !== "palette") return;
       e.preventDefault();
       const target = resolveDropTarget(
-        docRef.current, e.target as Element, e.clientX, e.clientY,
+        useMockupStore.getState().doc, e.target as Element, e.clientX, e.clientY,
         { draggedType: drag.widgetType },
       );
       if (e.dataTransfer) e.dataTransfer.dropEffect = target ? "copy" : "none";
@@ -287,7 +319,7 @@ export const ViewportCanvas: React.FC = () => {
   // A small movement threshold separates click from drag; pointer capture
   // keeps the gesture alive outside the screen frame; Escape cancels; the
   // drop commits one moveNode (one undo entry).
-  const handleNodePointerDown = useCallback((e: PointerEvent) => {
+  const handleNodePointerDown = useEffectEvent((e: PointerEvent) => {
     if (e.button !== 0 || spaceDown.current || isPanningRef.current) return;
     if (touchGestureActiveRef.current) return;
     const sourceEl = (e.target as Element).closest?.("[data-node-id]") as HTMLElement | null;
@@ -328,7 +360,7 @@ export const ViewportCanvas: React.FC = () => {
       const hit = document.elementFromPoint(ev.clientX, ev.clientY);
       const inCanvas = hit && canvasRef.current?.contains(hit);
       const target = inCanvas
-        ? resolveDropTarget(docRef.current, hit, ev.clientX, ev.clientY, {
+        ? resolveDropTarget(useMockupStore.getState().doc, hit, ev.clientX, ev.clientY, {
             draggedType: draggedType!,
             excludeNodeId: nodeId,
           })
@@ -387,14 +419,14 @@ export const ViewportCanvas: React.FC = () => {
     window.addEventListener("pointerup", onUp);
     window.addEventListener("keydown", onKeyDown, true);
     window.addEventListener(TOUCH_GESTURE_START_EVENT, onTouchGesture);
-  }, [touchGestureActiveRef]);
+  });
 
   useEffect(() => {
     const el = canvasRef.current;
     if (!el) return;
     el.addEventListener("pointerdown", handleNodePointerDown);
     return () => el.removeEventListener("pointerdown", handleNodePointerDown);
-  }, [handleNodePointerDown]);
+  }, []);
 
   // --- Rubber-band marquee (#79, penpot-study.md §3) ---
   //
@@ -408,7 +440,7 @@ export const ViewportCanvas: React.FC = () => {
   // other matches. Shift adds to the pre-gesture selection.
   const [marquee, setMarquee] = useState<{ left: number; top: number; width: number; height: number } | null>(null);
 
-  const handleMarqueePointerDown = useCallback((e: PointerEvent) => {
+  const handleMarqueePointerDown = useEffectEvent((e: PointerEvent) => {
     if (e.button !== 0 || spaceDown.current || isPanningRef.current) return;
     if (touchGestureActiveRef.current) return;
     const target = e.target as Element;
@@ -423,7 +455,7 @@ export const ViewportCanvas: React.FC = () => {
     const applySelection = (rect: { left: number; top: number; width: number; height: number }) => {
       const el = canvasRef.current;
       if (!el) return;
-      const doc = docRef.current;
+      const doc = useMockupStore.getState().doc;
       const right = rect.left + rect.width;
       const bottom = rect.top + rect.height;
       const rootIds = new Set(doc.screens.map((s) => s.rootNode.id));
@@ -477,7 +509,7 @@ export const ViewportCanvas: React.FC = () => {
       document.body.style.userSelect = "";
       setMarquee(null);
       if (gesture.active) {
-        const doc = docRef.current;
+        const doc = useMockupStore.getState().doc;
         const last = gesture.baseline[gesture.baseline.length - 1];
         const screen = last ? screenOf(doc.screens, last) : null;
         useMockupStore.getState().selectNodes(gesture.baseline, screen?.id);
@@ -501,14 +533,14 @@ export const ViewportCanvas: React.FC = () => {
     window.addEventListener("pointermove", onMove);
     window.addEventListener("pointerup", onUp);
     window.addEventListener(TOUCH_GESTURE_START_EVENT, onTouchGesture);
-  }, [touchGestureActiveRef]);
+  });
 
   useEffect(() => {
     const el = canvasRef.current;
     if (!el) return;
     el.addEventListener("pointerdown", handleMarqueePointerDown);
     return () => el.removeEventListener("pointerdown", handleMarqueePointerDown);
-  }, [handleMarqueePointerDown]);
+  }, []);
 
   // --- Keyboard: Escape + Space (pan mode) ---
 
@@ -566,7 +598,7 @@ export const ViewportCanvas: React.FC = () => {
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [zoomAtCenter, resetView]);
+  }, [resetView]);
 
   // --- Custom events: zoom from MenuBar — uses stable callbacks, no stale closure ---
 
@@ -582,40 +614,49 @@ export const ViewportCanvas: React.FC = () => {
       window.removeEventListener("protota:zoom-out", onZoomOut);
       window.removeEventListener("protota:zoom-reset", onZoomReset);
     };
-  }, [zoomAtCenter, resetView]);
+  }, [resetView]);
 
   // --- Initial view ---
   //
-  // One effect, one decision: on small viewports (the <=768px mobile
-  // breakpoint) fit-and-centre the primary screen so it is fully visible;
-  // otherwise the classic resetView. Runs once per loaded document (doc.id),
-  // not on every edit. The previous code had two racing mount effects — a
-  // mobile auto-fit followed by an unconditional resetView() that clobbered
-  // it, which is why narrow viewports loaded with the screen pushed off the
-  // right edge.
+  // One effect, one decision: every document opens in Fit All Screens mode —
+  // the same math as the bottom bar's Fit button — instead of 100% with the
+  // surface pinned to the top-left. Runs once per loaded document (doc.id),
+  // not on every edit, so the user's zoom is never clobbered mid-session.
+  // (An earlier iteration resetView()d on desktop and fit only the primary
+  // screen on mobile, with two racing mount effects; the single fit-all
+  // call subsumes both.)
   const initialFitDocId = useRef<string | null>(null);
+  // Refit the focused screen on narrow-viewport resizes; an effect event so
+  // the subscribed listener below never goes stale.
+  const fitFocusedScreen = useEffectEvent(() => {
+    fitScreenToView(focusedScreenIdx);
+  });
   useEffect(() => {
-    const fitInitial = () => {
-      const el = canvasRef.current;
-      const screens = docRef.current.screens;
-      if (!el || screens.length === 0) return;
-      const primaryWidth = screens[0].width || 800;
-      if (window.innerWidth <= 768 && primaryWidth + 32 > el.clientWidth) {
-        fitScreenToView(0);
-      } else {
-        resetView();
-      }
-    };
     if (initialFitDocId.current !== doc.id) {
       initialFitDocId.current = doc.id;
-      fitInitial();
+      if (useMockupStore.getState().doc.screens.length > 0) handleZoomFit();
     }
     const onResize = () => {
-      if (window.innerWidth <= 768) fitScreenToView(focusedScreenIdxRef.current);
+      if (window.innerWidth <= 768) fitFocusedScreen();
     };
     window.addEventListener('resize', onResize);
     return () => window.removeEventListener('resize', onResize);
-  }, [doc.id, fitScreenToView, resetView]);
+  }, [doc.id, handleZoomFit]);
+
+  // A newly added screen gets framed and focused; removals and reorders
+  // leave view and focus alone.
+  const prevScreenIdsRef = useRef(doc.screens.map((s) => s.id));
+  useEffect(() => {
+    const prevIds = prevScreenIdsRef.current;
+    const nextIds = doc.screens.map((s) => s.id);
+    prevScreenIdsRef.current = nextIds;
+    if (nextIds.length <= prevIds.length) return;
+    const newIdx = nextIds.findIndex((id) => !prevIds.includes(id));
+    if (newIdx >= 0) {
+      setFocusedScreenIdx(newIdx);
+      fitScreenToView(newIdx);
+    }
+  }, [doc.screens]);
 
   // --- Screen resize (#): drag handles on the screen frame ---
   //
@@ -634,10 +675,10 @@ export const ViewportCanvas: React.FC = () => {
     if (e.button !== 0) return;
     e.preventDefault();
     e.stopPropagation();
-    const screen = docRef.current.screens.find((s) => s.id === screenId);
+    const screen = useMockupStore.getState().doc.screens.find((s) => s.id === screenId);
     if (!screen) return;
     const start = { x: e.clientX, y: e.clientY, width: screen.width, height: screen.height };
-    const gestureZoom = zoomRef.current || 1;
+    const gestureZoom = zoom || 1;
     let latest = { width: screen.width, height: screen.height };
     let cancelled = false;
     resizingRef.current = true;
@@ -694,7 +735,7 @@ export const ViewportCanvas: React.FC = () => {
     window.addEventListener("pointerup", onUp);
     window.addEventListener("keydown", onKeyDown, true);
     window.addEventListener(TOUCH_GESTURE_START_EVENT, onTouchGesture);
-  }, []);
+  }, [zoom]);
 
   // Active Adw.Breakpoints + the property overrides their setters imply, per
   // screen, against the LIVE (preview-during-drag) dimensions. Derived state:
@@ -744,40 +785,33 @@ export const ViewportCanvas: React.FC = () => {
     setFlowPaths(paths);
   }, [doc, showFlows]);
 
-  const [phoshScreenId, setPhoshScreenId] = useState<string | null>(null);
-  const [desktopScreenId, setDesktopScreenId] = useState<string | null>(null);
-  const [focusedScreenIdx, setFocusedScreenIdx] = useState(0);
-
-  const focusedScreenIdxRef = useRef(focusedScreenIdx);
-  focusedScreenIdxRef.current = focusedScreenIdx;
-  const desktopScreenIdRef = useRef(desktopScreenId);
-  desktopScreenIdRef.current = desktopScreenId;
-  const phoshScreenIdRef = useRef(phoshScreenId);
-  phoshScreenIdRef.current = phoshScreenId;
-
-  // Clamp focusedScreenIdx when screens shrink (e.g. deletion)
+  // Clamp focusedScreenIdx when screens shrink (e.g. deletion): syncing
+  // document shape to local focus state, one intentional cascade per shrink.
+  /* eslint-disable react/set-state-in-effect */
   useEffect(() => {
     if (doc.screens.length > 0 && focusedScreenIdx >= doc.screens.length) {
       setFocusedScreenIdx(doc.screens.length - 1);
     }
   }, [doc.screens.length, focusedScreenIdx]);
+  /* eslint-enable react/set-state-in-effect */
 
   const activePhoshScreen = doc.screens.find((s) => s.id === phoshScreenId);
   const activeDesktopScreen = doc.screens.find((s) => s.id === desktopScreenId);
 
   // Memoized screen list for BottomBar — only recomputes when screen ids/titles change,
   // not on every node edit inside a screen.
+  const screensKey = doc.screens.map((s) => `${s.id}:${s.title}`).join('|');
   const screensForBottomBar = useMemo(
     () => doc.screens.map((s, i) => ({ id: s.id, title: `${i + 1}: ${s.title}` })),
-    [doc.screens.map((s) => `${s.id}:${s.title}`).join('|')], // eslint-disable-line react-hooks/exhaustive-deps
+    [screensKey], // eslint-disable-line react-hooks/exhaustive-deps
   );
 
-  // --- Stable screen-focus callbacks (read from refs) ---
+  // --- Screen-focus callbacks (stable callbacks with honest deps) ---
 
   const panToScreen = useCallback((idx: number) => {
     const el = canvasRef.current;
     const surface = surfaceRef.current;
-    const screens = docRef.current.screens;
+    const screens = useMockupStore.getState().doc.screens;
     if (!el || !surface || screens.length === 0) return;
     const clampedIdx = Math.max(0, Math.min(idx, screens.length - 1));
     const frame = surface.querySelectorAll<HTMLElement>("[data-protota-flow-screen]")[clampedIdx];
@@ -788,37 +822,41 @@ export const ViewportCanvas: React.FC = () => {
     // under `safe center` — when the surface is wider than the canvas it is
     // pinned to the left edge, not centred, so the old
     // `(surfaceW/2 - screenX - screenW/2) * zoom` formula drifted right.
-    const currentZoom = zoomRef.current;
+    const currentZoom = zoom;
     const surfW = surface.offsetWidth;
     const cu = frame.offsetLeft + frame.offsetWidth / 2;
+    const cv = frame.offsetTop;
     setPan({
       x: el.clientWidth / 2 - surface.offsetLeft - surfW / 2 - (cu - surfW / 2) * currentZoom,
-      y: CANVAS_PADDING,
+      // Park the FRAME at the margin, not the surface: CANVAS_PADDING used
+      // to stack with the surface's own 60px padding, landing the screen
+      // ~120px below the canvas top.
+      y: el.clientHeight * SCREEN_FOCUS_TOP_MARGIN_RATIO - cv * currentZoom,
     });
-  }, []);
+  }, [zoom]);
 
   const handleFocusScreen = useCallback((idx: number) => {
-    const screens = docRef.current.screens;
+    const screens = useMockupStore.getState().doc.screens;
     if (screens.length === 0) return;
     if (idx < 0 || idx >= screens.length) return;
     setFocusedScreenIdx(idx);
 
-    if (desktopScreenIdRef.current !== null) {
+    if (desktopScreenId !== null) {
       setDesktopScreenId(screens[idx].id);
-    } else if (phoshScreenIdRef.current !== null) {
+    } else if (phoshScreenId !== null) {
       setPhoshScreenId(screens[idx].id);
     } else {
       panToScreen(idx);
     }
-  }, [panToScreen]);
+  }, [desktopScreenId, phoshScreenId, panToScreen]);
 
   const handleFocusPrev = useCallback(() => {
-    handleFocusScreen(focusedScreenIdxRef.current - 1);
-  }, [handleFocusScreen]);
+    handleFocusScreen(focusedScreenIdx - 1);
+  }, [handleFocusScreen, focusedScreenIdx]);
 
   const handleFocusNext = useCallback(() => {
-    handleFocusScreen(focusedScreenIdxRef.current + 1);
-  }, [handleFocusScreen]);
+    handleFocusScreen(focusedScreenIdx + 1);
+  }, [handleFocusScreen, focusedScreenIdx]);
 
   // --- Stable BottomBar zoom callbacks (additive, distinct from keyboard multiplicative) ---
 
@@ -828,11 +866,11 @@ export const ViewportCanvas: React.FC = () => {
     const rect = el.getBoundingClientRect();
     const mx = rect.width / 2;
     const my = rect.height / 2;
-    const oldZ = zoomRef.current;
+    const oldZ = zoom;
     const newZ = Math.min(oldZ + 0.1, 2.5);
-    setPan(zoomAtPoint(mx, my, oldZ, newZ, panRef.current, rect.width));
+    setPan(zoomAtPoint(mx, my, oldZ, newZ, pan, rect.width));
     setZoom(newZ);
-  }, []);
+  }, [zoom, pan]);
 
   const handleZoomOut = useCallback(() => {
     const el = canvasRef.current;
@@ -840,34 +878,11 @@ export const ViewportCanvas: React.FC = () => {
     const rect = el.getBoundingClientRect();
     const mx = rect.width / 2;
     const my = rect.height / 2;
-    const oldZ = zoomRef.current;
+    const oldZ = zoom;
     const newZ = Math.max(oldZ - 0.1, 0.3);
-    setPan(zoomAtPoint(mx, my, oldZ, newZ, panRef.current, rect.width));
+    setPan(zoomAtPoint(mx, my, oldZ, newZ, pan, rect.width));
     setZoom(newZ);
-  }, []);
-
-  const handleZoomFit = useCallback(() => {
-    const el = canvasRef.current;
-    const surface = surfaceRef.current;
-    if (!el || !surface || docRef.current.screens.length === 0) return;
-    const canvasW = el.clientWidth;
-    const availH = el.clientHeight - CANVAS_BOTTOM_BAR_H;
-    // Measured surface bounds (padding + labels + every screen) instead of
-    // the old constant-based estimate, which assumed desktop padding.
-    const surfW = surface.offsetWidth;
-    const surfH = surface.offsetHeight;
-    if (surfW <= 0 || surfH <= 0) return;
-    const fitZoom = Math.min(canvasW / surfW, availH / surfH, 1.5);
-    setZoom(fitZoom);
-    // Centre the surface, correcting for its `safe center` layout offset
-    // (pinned to the left edge once wider than the canvas) and the `50% 0`
-    // transform origin; the old `x: 0` left wide content hanging off the
-    // right edge on narrow viewports.
-    setPan({
-      x: canvasW / 2 - surface.offsetLeft - surfW / 2,
-      y: (availH - surfH * fitZoom) / 2,
-    });
-  }, []);
+  }, [zoom, pan]);
 
   // --- Stable Desktop/Phosh toggle callbacks ---
 
@@ -875,38 +890,38 @@ export const ViewportCanvas: React.FC = () => {
     setDesktopScreenId((prev) => {
       if (prev) return null;
       setPhoshScreenId(null);
-      return docRef.current.screens[focusedScreenIdxRef.current]?.id || null;
+      return useMockupStore.getState().doc.screens[focusedScreenIdx]?.id || null;
     });
-  }, []);
+  }, [focusedScreenIdx]);
 
   const handleTogglePhone = useCallback(() => {
     setPhoshScreenId((prev) => {
       if (prev) return null;
       setDesktopScreenId(null);
-      return docRef.current.screens[focusedScreenIdxRef.current]?.id || null;
+      return useMockupStore.getState().doc.screens[focusedScreenIdx]?.id || null;
     });
-  }, []);
+  }, [focusedScreenIdx]);
 
-  // --- Preview overlay callbacks (stable via refs) ---
+  // --- Preview overlay callbacks ---
 
   // Screen changes from inside the preview (flow navigation, back, jump
   // picker) land here: whichever mode is live follows, and the canvas focus
   // index tracks it so exiting preview leaves the editor on the same screen.
   const handlePreviewScreenChange = useCallback((screenId: string) => {
-    const idx = docRef.current.screens.findIndex((s) => s.id === screenId);
+    const idx = useMockupStore.getState().doc.screens.findIndex((s) => s.id === screenId);
     if (idx >= 0) setFocusedScreenIdx(idx);
-    if (desktopScreenIdRef.current !== null) setDesktopScreenId(screenId);
-    else if (phoshScreenIdRef.current !== null) setPhoshScreenId(screenId);
-  }, []);
+    if (desktopScreenId !== null) setDesktopScreenId(screenId);
+    else if (phoshScreenId !== null) setPhoshScreenId(screenId);
+  }, [desktopScreenId, phoshScreenId]);
 
   const handleExitDesktop = useCallback(() => setDesktopScreenId(null), []);
   const handleExitPhone = useCallback(() => setPhoshScreenId(null), []);
 
   // Device-size preset from the bottom bar: one updateScreenProps → one undo.
   const handleApplySizePreset = useCallback((size: { width: number; height: number }) => {
-    const screen = docRef.current.screens[focusedScreenIdxRef.current];
+    const screen = useMockupStore.getState().doc.screens[focusedScreenIdx];
     if (screen) useMockupStore.getState().updateScreenProps(screen.id, size);
-  }, []);
+  }, [focusedScreenIdx]);
 
   const focusedScreen = doc.screens[Math.min(focusedScreenIdx, doc.screens.length - 1)] ?? null;
 

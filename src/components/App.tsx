@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
-import { persistDocumentSource, useMockupStore } from "../store/mockupStore";
+import { isStarterDocument, persistDocumentSource, useMockupStore } from "../store/mockupStore";
+import { loadPanelState, savePanelState } from "../store/persistence";
 import { LayersPanel } from "./LayersPanel";
 import { WidgetPalette } from "./WidgetPalette";
 import { ViewportCanvas } from "./ViewportCanvas";
@@ -87,12 +88,24 @@ export const App: React.FC = () => {
     diagnosticsEnabled,
   } = useMockupStore();
 
-  const [leftOpen, setLeftOpen] = useState(() =>
-    typeof window !== "undefined" ? window.innerWidth >= 768 : true,
-  );
-  const [rightOpen, setRightOpen] = useState(() =>
-    typeof window !== "undefined" ? window.innerWidth >= 768 : true,
-  );
+  // Panel defaults: both drawers start closed on mobile viewports, on a
+  // blank canvas, and on first start while the pristine starter template is
+  // shown. A real document — imported, opened, or the user's own edited work
+  // restored from persistence — opens both on desktop. Once the user has a
+  // real document their layout is persisted (below) and wins over the
+  // starter rule on the next load; mobile and blank stay contextual.
+  const panelsOpenAtStart = () => {
+    const state = useMockupStore.getState();
+    if (typeof window === "undefined") return { left: true, right: true };
+    if (window.innerWidth < 768) return { left: false, right: false };
+    if (state.doc.screens.length === 0 || isStarterDocument(state.doc)) {
+      return { left: false, right: false };
+    }
+    return loadPanelState() ?? { left: true, right: true };
+  };
+  const [initialPanels] = useState(panelsOpenAtStart);
+  const [leftOpen, setLeftOpen] = useState(initialPanels.left);
+  const [rightOpen, setRightOpen] = useState(initialPanels.right);
   /** Two-tab right drawer: Properties (inspector) | Diagnostics (design §5.1). */
   const [rightTab, setRightTab] = useState<"properties" | "diagnostics">("properties");
   /** Two-tab left drawer: Layers (tree) | Widgets (draggable palette, #79). */
@@ -229,13 +242,58 @@ export const App: React.FC = () => {
     );
   }, [doc.colorScheme]);
 
-  // Auto-close panels when the viewport transitions to mobile.
+  // Auto-close panels when the viewport transitions to mobile. Returning to
+  // a desktop viewport reopens them — unless the canvas is blank or the
+  // pristine starter template is up (the first-start case above). Runs only
+  // on viewport transitions, never on document edits: syncing viewport state
+  // to drawer state, one intentional cascading render per transition.
+  /* eslint-disable react/set-state-in-effect */
+  const wasMobileRef = useRef(isMobile);
   useEffect(() => {
+    const wasMobile = wasMobileRef.current;
+    wasMobileRef.current = isMobile;
     if (isMobile) {
       setLeftOpen(false);
       setRightOpen(false);
+    } else if (wasMobile) {
+      const state = useMockupStore.getState();
+      if (state.doc.screens.length > 0 && !isStarterDocument(state.doc)) {
+        setLeftOpen(true);
+        setRightOpen(true);
+      }
     }
   }, [isMobile]);
+  /* eslint-enable react/set-state-in-effect */
+
+  // Blank canvas (New Project, or every screen deleted): close both drawers
+  // so the empty state owns the viewport. They reopen when the first screen
+  // arrives — same starter-template exception as the viewport rule. Syncing
+  // document state to drawer state, one intentional cascade per count change.
+  /* eslint-disable react/set-state-in-effect */
+  const screenCount = doc.screens.length;
+  const prevScreenCountRef = useRef(screenCount);
+  useEffect(() => {
+    const prevCount = prevScreenCountRef.current;
+    prevScreenCountRef.current = screenCount;
+    if (prevCount === screenCount) return;
+    if (screenCount === 0) {
+      setLeftOpen(false);
+      setRightOpen(false);
+    } else if (prevCount === 0 && !isMobile && !isStarterDocument(useMockupStore.getState().doc)) {
+      setLeftOpen(true);
+      setRightOpen(true);
+    }
+  }, [screenCount, isMobile]);
+  /* eslint-enable react/set-state-in-effect */
+
+  // Persist the desktop drawer layout once the document is real. The mobile
+  // and blank-canvas auto-closes are contextual — they never overwrite the
+  // saved preference, and the pristine starter writes nothing, so a later
+  // import still gets the both-open default.
+  useEffect(() => {
+    if (isMobile || screenCount === 0 || isStarterDocument(doc)) return;
+    savePanelState({ left: leftOpen, right: rightOpen });
+  }, [leftOpen, rightOpen, isMobile, screenCount, doc]);
 
   useEffect(() => {
     const onToggleLayers = () => setLeftOpen((v) => !v);
@@ -362,6 +420,13 @@ export const App: React.FC = () => {
         setShowCommandPalette(false);
         return;
       }
+      // Mobile drawers are transient surfaces: Escape dismisses them ahead
+      // of clearing the canvas selection.
+      if (e.key === "Escape" && isMobile && (leftOpen || rightOpen)) {
+        setLeftOpen(false);
+        setRightOpen(false);
+        return;
+      }
       if (e.key === "Escape") {
         selectNode(null);
         return;
@@ -448,6 +513,9 @@ export const App: React.FC = () => {
     toggleDiagnostics,
     toggleShowFlows,
     diagnosticsEnabled,
+    isMobile,
+    leftOpen,
+    rightOpen,
   ]);
 
   return (
@@ -471,86 +539,95 @@ export const App: React.FC = () => {
           className="protota-workspace-container"
           style={{ display: "flex", flex: 1, overflow: "hidden", position: "relative" }}
         >
-          {/* Left Drawer (Layers) Backdrop on Mobile */}
-          {leftOpen && <div className="protota-mobile-scrim" onClick={() => setLeftOpen(false)} />}
+          {/* Left Drawer (Layers) Backdrop on Mobile. Always mounted like the
+              panels themselves so the fade transition can run; desktop CSS
+              keeps it display:none. */}
+          <div
+            className={`protota-mobile-scrim${leftOpen ? "" : " protota-mobile-scrim--closed"}`}
+            onClick={() => setLeftOpen(false)}
+          />
 
-          {/* Left Drawer (Layers) — Adwaita sidebar styling */}
-          {leftOpen && (
-            <aside
-              className="protota-panel protota-left-panel adw-sidebar-like"
-              style={{
-                width: "240px",
-                overflow: "auto",
-                display: "flex",
-                flexDirection: "column",
-              }}
+          {/* Left Drawer (Layers) — Adwaita sidebar styling. Always mounted:
+              the closed state slides it out of the flex row (index.css), so
+              the transition runs both ways and tab/scroll state survives a
+              close/reopen cycle. */}
+          <aside
+            className={`protota-panel protota-left-panel adw-sidebar-like${leftOpen ? "" : " protota-panel--closed"}`}
+            aria-hidden={!leftOpen}
+            style={{
+              width: "240px",
+              overflow: "auto",
+              display: "flex",
+              flexDirection: "column",
+            }}
+          >
+            {/* Two-tab segment: Layers | Widgets (#79) */}
+            <div
+              role="tablist"
+              aria-label="Left panel tabs"
+              style={{ display: "flex", gap: "4px", padding: "8px 8px 0 8px", flexShrink: 0 }}
             >
-              {/* Two-tab segment: Layers | Widgets (#79) */}
-              <div
-                role="tablist"
-                aria-label="Left panel tabs"
-                style={{ display: "flex", gap: "4px", padding: "8px 8px 0 8px", flexShrink: 0 }}
-              >
-                {(["layers", "widgets"] as const).map((tab) => (
-                  <button
-                    key={tab}
-                    role="tab"
-                    aria-selected={leftTab === tab}
-                    data-testid={`left-tab-${tab}`}
-                    className={`adw-button flat${leftTab === tab ? " active" : ""}`}
-                    onClick={() => setLeftTab(tab)}
-                    style={{ flex: 1, fontSize: "12px" }}
-                  >
-                    {tab === "layers" ? "Layers" : "Widgets"}
-                  </button>
-                ))}
-              </div>
-              {leftTab === "layers"
-                ? <LayersPanel renameRequest={renameRequest} onRenameConsumed={clearRenameRequest} />
-                : <WidgetPalette />}
-            </aside>
-          )}
+              {(["layers", "widgets"] as const).map((tab) => (
+                <button
+                  key={tab}
+                  role="tab"
+                  aria-selected={leftTab === tab}
+                  data-testid={`left-tab-${tab}`}
+                  className={`adw-button flat${leftTab === tab ? " active" : ""}`}
+                  onClick={() => setLeftTab(tab)}
+                  style={{ flex: 1, fontSize: "12px" }}
+                >
+                  {tab === "layers" ? "Layers" : "Widgets"}
+                </button>
+              ))}
+            </div>
+            {leftTab === "layers"
+              ? <LayersPanel renameRequest={renameRequest} onRenameConsumed={clearRenameRequest} />
+              : <WidgetPalette />}
+          </aside>
 
           {/* Center Canvas */}
           <ViewportCanvas />
 
           {/* Right Drawer (Inspector) Backdrop on Mobile */}
-          {rightOpen && <div className="protota-mobile-scrim" onClick={() => setRightOpen(false)} />}
+          <div
+            className={`protota-mobile-scrim${rightOpen ? "" : " protota-mobile-scrim--closed"}`}
+            onClick={() => setRightOpen(false)}
+          />
 
           {/* Right Drawer (Inspector) — Adwaita sidebar styling */}
-          {rightOpen && (
-            <aside
-              className="protota-panel protota-right-panel adw-sidebar-like"
-              style={{
-                width: "280px",
-                overflow: "auto",
-                display: "flex",
-                flexDirection: "column",
-              }}
+          <aside
+            className={`protota-panel protota-right-panel adw-sidebar-like${rightOpen ? "" : " protota-panel--closed"}`}
+            aria-hidden={!rightOpen}
+            style={{
+              width: "280px",
+              overflow: "auto",
+              display: "flex",
+              flexDirection: "column",
+            }}
+          >
+            {/* Two-tab segment: Properties | Diagnostics (design §5.1) */}
+            <div
+              role="tablist"
+              aria-label="Right panel tabs"
+              style={{ display: "flex", gap: "4px", padding: "8px 8px 0 8px", flexShrink: 0 }}
             >
-              {/* Two-tab segment: Properties | Diagnostics (design §5.1) */}
-              <div
-                role="tablist"
-                aria-label="Right panel tabs"
-                style={{ display: "flex", gap: "4px", padding: "8px 8px 0 8px", flexShrink: 0 }}
-              >
-                {(["properties", "diagnostics"] as const).map((tab) => (
-                  <button
-                    key={tab}
-                    role="tab"
-                    aria-selected={rightTab === tab}
-                    data-testid={`right-tab-${tab}`}
-                    className={`adw-button flat${rightTab === tab ? " active" : ""}`}
-                    onClick={() => setRightTab(tab)}
-                    style={{ flex: 1, fontSize: "12px" }}
-                  >
-                    {tab === "properties" ? "Properties" : "Diagnostics"}
-                  </button>
-                ))}
-              </div>
-              {rightTab === "properties" ? <InspectorPanel /> : <DiagnosticsPanel />}
-            </aside>
-          )}
+              {(["properties", "diagnostics"] as const).map((tab) => (
+                <button
+                  key={tab}
+                  role="tab"
+                  aria-selected={rightTab === tab}
+                  data-testid={`right-tab-${tab}`}
+                  className={`adw-button flat${rightTab === tab ? " active" : ""}`}
+                  onClick={() => setRightTab(tab)}
+                  style={{ flex: 1, fontSize: "12px" }}
+                >
+                  {tab === "properties" ? "Properties" : "Diagnostics"}
+                </button>
+              ))}
+            </div>
+            {rightTab === "properties" ? <InspectorPanel /> : <DiagnosticsPanel />}
+          </aside>
         </div>
       </adw-toolbar-view>
 

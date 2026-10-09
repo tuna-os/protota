@@ -191,6 +191,63 @@ body,
   padding: var(--spacing-s, 9px) var(--spacing-m, 12px);
 }
 
+/* Editor side panels slide in/out like an Adw.OverlaySplitView reveal
+   instead of popping in and out of the flex row. The timing mirrors
+   adwaita-web's own sliding chrome (250ms, e.g. adw-bottom-sheet) and the
+   easing is the CSS spelling of adwaita-core's easeOutCubic — the core is
+   headless, so duration and curve live in the skin, matching how
+   adwaita-web itself does it. Panels stay mounted while closed — shifted
+   out by a negative margin equal to their width (translated on mobile,
+   where they are overlay drawers) — so tab and scroll state survive a
+   close/reopen cycle. `visibility` flips after the slide so a closed panel
+   leaves the tab order and the a11y tree. */
+.protota-left-panel,
+.protota-right-panel {
+  transition:
+    margin-left 250ms cubic-bezier(0.33, 1, 0.68, 1),
+    margin-right 250ms cubic-bezier(0.33, 1, 0.68, 1),
+    transform 250ms cubic-bezier(0.33, 1, 0.68, 1),
+    visibility 0s;
+}
+
+.protota-panel--closed {
+  visibility: hidden;
+  pointer-events: none;
+  transition:
+    margin-left 250ms cubic-bezier(0.33, 1, 0.68, 1),
+    margin-right 250ms cubic-bezier(0.33, 1, 0.68, 1),
+    transform 250ms cubic-bezier(0.33, 1, 0.68, 1),
+    visibility 0s 250ms;
+}
+
+/* Widths are set inline in App.tsx (240px / 280px); keep these in sync. */
+.protota-left-panel.protota-panel--closed {
+  margin-left: -240px;
+}
+
+.protota-right-panel.protota-panel--closed {
+  margin-right: -280px;
+}
+
+/* The drawer scrim is mobile-only; the media query below gives it a
+   position and a fade. */
+.protota-mobile-scrim {
+  display: none;
+}
+
+/* Reduced motion: skip the panel slide and scrim fade entirely. The
+   !important beats every transition declaration for these elements,
+   including the ones inside the mobile media query below. */
+@media (prefers-reduced-motion: reduce) {
+  .protota-left-panel,
+  .protota-right-panel,
+  .protota-panel--closed,
+  .protota-mobile-scrim,
+  .protota-mobile-scrim--closed {
+    transition: none !important;
+  }
+}
+
 /* ---- Canvas ---- */
 .protota-canvas {
   background-color: var(--view-bg-color, #ffffff);
@@ -641,6 +698,14 @@ body,
 .adw-button.active,
 .adw-button.flat.active {
   background-color: var(--button-active-color, rgba(0, 0, 6, 0.19));
+}
+
+/* Quiet toggles (Flows/Diagnostics in the header): state reads through
+   .dimmed alone, so the pressed state keeps the flat background instead of
+   the raised active fill. Scoped to :not(:hover) — the usual hover shade
+   still applies. */
+.adw-button.flat.active.protota-header-icon-button--quiet:not(:hover) {
+  background-color: transparent;
 }
 
 /* ---- Modal overlay (Adw.Dialog-aligned) ---- */
@@ -1368,11 +1433,25 @@ gtk-menu-button[data-testid="open-menu-button"] .adw-menu-button-popover {
   }
 
   .protota-mobile-scrim {
+    display: block;
     position: absolute;
     inset: 0;
     z-index: 40;
     background: var(--dialog-scrim-color, rgba(0, 0, 6, 0.32));
     backdrop-filter: blur(2px);
+    opacity: 1;
+    transition:
+      opacity 250ms cubic-bezier(0.33, 1, 0.68, 1),
+      visibility 0s;
+  }
+
+  .protota-mobile-scrim--closed {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition:
+      opacity 250ms cubic-bezier(0.33, 1, 0.68, 1),
+      visibility 0s 250ms;
   }
 
   .protota-panel {
@@ -1383,6 +1462,18 @@ gtk-menu-button[data-testid="open-menu-button"] .adw-menu-button-popover {
     width: 85vw !important;
     max-width: 320px !important;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+  }
+
+  /* Overlay drawers slide off-canvas instead of the desktop negative-margin
+     trick (they are out of flow, so margins would not reclaim anything). */
+  .protota-left-panel.protota-panel--closed {
+    margin-left: 0;
+    transform: translateX(-110%);
+  }
+
+  .protota-right-panel.protota-panel--closed {
+    margin-right: 0;
+    transform: translateX(110%);
   }
 
   .protota-left-panel {
@@ -1452,12 +1543,21 @@ gtk-menu-button[data-testid="open-menu-button"] .adw-menu-button-popover {
   z-index: 1500;
   display: flex;
   flex-direction: column;
+  /* The overlay portals to <body>, outside #root's font scope — use the
+     installed Adwaita Sans explicitly instead of the browser default
+     serif. */
+  font-family: "Adwaita Sans";
 }
 
 .protota-preview-overlay--phone {
   background: rgba(10, 10, 12, 0.96);
   align-items: center;
   justify-content: center;
+  /* Reserve the floating chrome row (back chip + screen picker + exit):
+     the frame must never slide up underneath it on short viewports. */
+  padding-top: 48px;
+  padding-bottom: 16px;
+  box-sizing: border-box;
 }
 
 .protota-preview-overlay--desktop {
@@ -1476,6 +1576,7 @@ gtk-menu-button[data-testid="open-menu-button"] .adw-menu-button-popover {
 }
 .protota-preview-chrome--start { left: 12px; }
 .protota-preview-chrome--end { right: 12px; }
+.protota-preview-chrome--center { left: 50%; transform: translateX(-50%); }
 
 .protota-preview-chip {
   display: inline-flex;
@@ -1516,17 +1617,35 @@ gtk-menu-button[data-testid="open-menu-button"] .adw-menu-button-popover {
   box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
   overflow: auto;
   position: relative;
+  /* Column flex so the status bar takes its 24px and the app gets the
+     rest — no permanent 24px scroll strip. */
+  display: flex;
+  flex-direction: column;
+}
+
+.protota-phosh-phone-frame > .adw-node-wrapper {
+  flex: 1;
+  min-height: 0;
 }
 
 .protota-preview-phone-frame {
-  height: min(100dvh - 16px, 85vh + 200px);
-  max-height: calc(100dvh - 16px);
+  /* Leave room for the floating chrome row + bottom breathing space;
+     with the fixed aspect ratio the narrower width follows automatically. */
+  height: min(calc(100dvh - 72px), 85vh + 200px);
+  max-height: calc(100dvh - 72px);
   width: auto;
   aspect-ratio: 384 / 744; /* 360x720 screen + bezel */
-  max-width: 100vw;
+  max-width: calc(100vw - 24px);
 }
 
 @media (max-width: 480px) {
+  .protota-preview-overlay--phone {
+    /* Full-bleed already; the chips overlay the shell like a real phone's
+       notification tray would. */
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+
   .protota-preview-phone-frame {
     width: 100vw;
     height: 100dvh;
@@ -1541,7 +1660,63 @@ gtk-menu-button[data-testid="open-menu-button"] .adw-menu-button-popover {
 .protota-phosh-phone-frame adw-window {
   width: 100% !important;
   height: 100% !important;
-  border-radius: 24px !important;
+  /* Square top corners: the status bar owns the rounding against the
+     bezel's top edge; the window's bottom corners keep nesting it. */
+  border-radius: 0 0 24px 24px !important;
+}
+
+/* Phosh is a phone shell: windows have no minimize/maximize/close
+   decorations, so the preview drops the renderer's window controls. */
+.protota-phosh-phone-frame .protota-window-controls {
+  display: none;
+}
+
+/* Edge-to-edge like a maximized phone window: drop the subtle outline and
+   ring shadow adwaita-web gives adw-window to separate a floating desktop
+   window from its wallpaper. */
+.protota-phosh-phone-frame adw-window {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Phosh status bar (preview chrome): wifi + bluetooth left, clock centred,
+   silent + charged battery right. Sticky so it stays pinned while the app
+   scrolls underneath; dark like the shell it imitates. */
+.protota-phosh-status-bar {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 24px;
+  padding: 0 12px;
+  background: #1e1e1e;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 24px 24px 0 0;
+}
+
+.protota-phosh-status-side {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Centred independently of the side groups' widths, like the shell's. */
+.protota-phosh-status-clock {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  font-weight: 700;
+}
+
+@media (max-width: 480px) {
+  /* Bezel-less full-viewport frame: no rounded corners anywhere. */
+  .protota-phosh-status-bar {
+    border-radius: 0;
+  }
 }
 
 @media (max-width: 480px) {
@@ -1691,6 +1866,11 @@ adw-header-bar adw-view-switcher > .adw-view-switcher-content {
 
 /* ---- GNOME Desktop shell top bar (preview chrome) ---- */
 .protota-gnome-topbar {
+  position: relative;
+  /* The shell sits above the previewed window: the clock's centring
+     transform traps the switcher popover in the topbar's stacking context,
+     so the bar itself needs a context that beats any mockup surface. */
+  z-index: 2000;
   height: 32px;
   background: #000000;
   color: #ffffff;
@@ -1700,6 +1880,83 @@ adw-header-bar adw-view-switcher > .adw-view-switcher-content {
   padding: 0 16px;
   font-size: 13px;
   user-select: none;
+}
+
+/* Absolutely-centred bold clock, independent of the side clusters' widths. */
+.protota-gnome-topbar-clock {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+/* Screen-switcher trigger: transparent on the dark shell bar — the
+   `time · title` text is drawn over it in the shell's bold white. */
+.protota-preview-overlay gtk-menu-button .adw-menu-button-button {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  padding: 6px 8px;
+  border-radius: 999px;
+  min-width: 0;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 700;
+  font-family: inherit;
+  white-space: nowrap;
+}
+.protota-preview-overlay gtk-menu-button .adw-menu-button-button:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+/* Slimmer clock trigger: less vertical padding so the clock section sits
+   lighter on the 32px bar. */
+.protota-gnome-topbar-clock gtk-menu-button .adw-menu-button-button {
+  padding: 2px 8px;
+}
+/* The switcher popover must float above the previewed window. */
+.protota-preview-overlay gtk-menu-button .adw-menu-button-popover {
+  z-index: 1000;
+}
+/* Center the surface under the clock trigger (desktop shell only — the
+   left-anchored phone trigger stays start-aligned). */
+.protota-gnome-topbar gtk-menu-button .adw-menu-button-popover {
+  left: 50%;
+  right: auto;
+  transform: translateX(-50%);
+}
+/* Phone preview: the trigger sits in the header row's centered cluster, so
+   center the surface under it the same way. */
+.protota-preview-chrome--center gtk-menu-button .adw-menu-button-popover {
+  left: 50%;
+  right: auto;
+  transform: translateX(-50%);
+}
+.protota-workspace-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.protota-workspace-pill {
+  width: 28px;
+  height: 8px;
+  border-radius: 999px;
+  background: #ffffff;
+}
+.protota-workspace-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.55);
+}
+
+/* System status section (wireless + bluetooth + battery) before the exit. */
+.protota-gnome-status-icons {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 10px 0 6px;
+  color: #ffffff;
 }
 
 .protota-gnome-window-frame {

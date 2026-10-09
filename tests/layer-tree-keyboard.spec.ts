@@ -13,6 +13,8 @@ test.describe('Layer tree keyboard navigation (#79)', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
     await page.waitForSelector('adw-window', { timeout: 10000 });
+    // First-run documents open with the drawers closed; open Layers.
+    await page.keyboard.press('Control+[');
     await expect(rows(page).first()).toBeVisible();
   });
 

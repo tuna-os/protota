@@ -42,81 +42,16 @@ body,
   color-scheme: inherit;
 }
 
-/* ---- Adwaita Button (base class) ---- */
-.adw-button {
-  box-sizing: border-box;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  min-height: 34px;
-  min-width: 34px;
-  margin: 0;
-  padding: 4px 14px;
-  border: none;
-  border-radius: var(--button-radius, 9px);
-  background-color: var(--button-bg-color, rgba(0, 0, 6, 0.08));
-  color: var(--window-fg-color, rgba(0, 0, 6, 0.8));
-  font-family: var(--font-family, inherit);
-  font-size: var(--font-size-base, 11pt);
-  font-weight: 700;
-  line-height: 1;
-  cursor: pointer;
-  transition: background-color 0.1s ease;
-  user-select: none;
-}
-
-.adw-button:hover {
-  background-color: var(--button-hover-color, rgba(0, 0, 6, 0.13));
-}
-
-.adw-button:active {
-  background-color: var(--button-active-color, rgba(0, 0, 6, 0.19));
-}
-
-.adw-button:focus-visible {
-  outline: 2px solid var(--accent-color, #1c71d8);
-  outline-offset: 1px;
-}
-
-.adw-button:disabled {
-  opacity: 0.45;
-  cursor: default;
-}
-
-/* Flat button — no resting background */
-.adw-button.flat {
-  background-color: transparent;
-}
-
-.adw-button.flat:hover {
-  background-color: var(--button-hover-color, rgba(0, 0, 6, 0.13));
-}
-
-.adw-button.flat:active {
-  background-color: var(--button-active-color, rgba(0, 0, 6, 0.19));
-}
-
-/* Suggested action — accent/primary */
-.adw-button.suggested-action {
-  background-color: var(--accent-bg-color, #3584e4);
-  color: var(--accent-fg-color, #ffffff);
-}
-
-.adw-button.suggested-action:hover {
-  background-color: var(--accent-color, #1c71d8);
-}
+/* ---- Adwaita Button ----
+   Base, hover/active/focus/disabled, .flat, .suggested-action, .icon-only
+   and .circular are provided by adwaita-web (_button.scss) with identical
+   values; the former copies here were deleted as redundant. Only rules that
+   diverge from or add to upstream remain below. */
 
 /* Destructive action — red */
 .adw-button.destructive-action {
   background-color: var(--destructive-bg-color, #e01b24);
   color: var(--destructive-fg-color, #ffffff);
-}
-
-/* Icon-only — square icon button */
-.adw-button.icon-only {
-  padding: 0;
-  width: 34px;
 }
 
 /* Toolbar icon — masked SVG icon for button content */
@@ -131,13 +66,6 @@ body,
   mask-position: center;
   -webkit-mask-position: center;
   background-color: currentColor;
-}
-
-/* Circular — round icon button */
-.adw-button.circular {
-  padding: 0;
-  width: 34px;
-  border-radius: 9999px;
 }
 
 /* Linked group — segmented control */

@@ -1,4 +1,5 @@
 import type { MockupDocument, AdwNode, AdwNodeType, BreakpointSetter, ImportDiagnostic, Screen, ScreenTemplateType } from '../types/mockup';
+import { TEMPLATE_ROOT } from '../types/mockup';
 import { GTK_PROPERTY_DATA } from '../data/gtkProperties';
 import { enrichWithValaFacts } from './blueprintEnrichment';
 
@@ -1352,13 +1353,30 @@ function resolveWidgetVisibilityBindings(root: AdwNode): void {
 export function blueprintToDocument(code: string, title = 'Imported GNOME App'): MockupDocument {
   const { roots: allRoots, diagnostics } = blueprintImport(code);
   // Real UI files declare popovers, panels, and helper widgets as siblings of
-  // the window; when a window-like root exists, it is the document's screen.
-  const windowRoots = allRoots.filter(root =>
-    root.type === 'window' || root.type === 'dialog' || root.type === 'preferences-dialog' || root.type === 'about-dialog');
+  // the window; when a window-like root exists, the document's screens are those
+  // roots. The set is every window- or dialog-like root class the screen
+  // templates can produce rather than an ad-hoc list: `alert-dialog` was
+  // missing here, so a document whose last screen was an alert dialog exported
+  // an `Adw.AlertDialog` root and then DROPPED that whole screen on the way back
+  // in — silently, because `roots` was non-empty without it.
+  // `box` (the `empty` template's root) is deliberately excluded: a bare
+  // Gtk.Box sibling is a plausible helper widget, and keeping it would promote
+  // helpers to phantom screens. A lone box still imports via the fallback below.
+  const SCREEN_ROOT_TYPES = new Set<AdwNodeType>(
+    Object.values(TEMPLATE_ROOT).filter((type) => type !== 'box'),
+  );
+  const windowRoots = allRoots.filter(root => SCREEN_ROOT_TYPES.has(root.type));
   const roots = windowRoots.length ? windowRoots : allRoots;
   roots.forEach(resolveMultiLayoutViews);
   roots.forEach(resolveWidgetVisibilityBindings);
-  const inferType = (root: AdwNode): ScreenTemplateType => root.type === 'preferences-dialog' ? 'preferences' : root.type === 'dialog' ? 'dialog' : 'standard';
+  const inferType = (root: AdwNode): ScreenTemplateType =>
+    root.type === 'preferences-dialog' ? 'preferences'
+    : root.type === 'dialog' ? 'dialog'
+    : root.type === 'alert-dialog' ? 'alert-dialog'
+    : root.type === 'about-dialog' ? 'about'
+    : root.type === 'status-page' ? 'status-page'
+    : root.type === 'box' ? 'empty'
+    : 'standard';
   // Screen geometry comes from the source's own declaration when it has one
   // (default-width on windows, content-width on the Adw.Dialog family) —
   // this is also what carries an edited screen size across the Blueprint

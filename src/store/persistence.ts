@@ -7,6 +7,7 @@ const METADATA_STORAGE_KEY = 'protota_editor_metadata_v1';
 const LEGACY_STORAGE_KEY = 'protota_doc_v1';
 const IGNORES_STORAGE_KEY = 'protota_diagnostics_ignores_v1';
 const WINDOW_BUTTONS_STORAGE_KEY = 'protota_window_buttons_v1';
+const PANEL_STATE_STORAGE_KEY = 'protota_panels_v1';
 
 export interface PersistedIgnores {
   rules: string[];
@@ -52,6 +53,33 @@ export function loadWindowButtons(): WindowButtonsPreference {
 
 export function saveWindowButtons(preference: WindowButtonsPreference) {
   localStorage.setItem(WINDOW_BUTTONS_STORAGE_KEY, JSON.stringify(preference));
+}
+
+/**
+ * The user's desktop drawer layout — a personal setting like the window
+ * buttons preference, not document content. `null` when nothing was saved
+ * yet, so the first-start auto rules (App.tsx) still govern.
+ */
+export interface PanelState {
+  left: boolean;
+  right: boolean;
+}
+
+export function loadPanelState(): PanelState | null {
+  try {
+    const raw = localStorage.getItem(PANEL_STATE_STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw) as Partial<PanelState>;
+      if (typeof parsed.left === 'boolean' && typeof parsed.right === 'boolean') {
+        return { left: parsed.left, right: parsed.right };
+      }
+    }
+  } catch { /* corrupt cache means no saved layout */ }
+  return null;
+}
+
+export function savePanelState(state: PanelState) {
+  localStorage.setItem(PANEL_STATE_STORAGE_KEY, JSON.stringify(state));
 }
 
 /** Persist the UI as Blueprint; JSON is reserved for editor-only metadata. */

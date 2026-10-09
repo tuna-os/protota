@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { produce } from 'immer';
 import type { MockupDocument, AdwNode, AdwNodeType, Screen } from '../types/mockup';
 import type { ScreenTemplateType } from '../types/mockup';
-import { SCREEN_DEFAULTS, LEGAL_CHILDREN } from '../types/mockup';
+import { SCREEN_DEFAULTS, LEGAL_CHILDREN, assertScreenTemplateType } from '../types/mockup';
 import type { Diagnostic, DiagnosticTier, QuickFix } from '../diagnostics/types';
 import { instanceKey } from '../diagnostics/types';
 import { runDiagnostics } from '../diagnostics/engine';
@@ -40,8 +40,8 @@ const initialDocument: MockupDocument = {
       id: 'screen-1',
       title: 'Main Window',
       type: 'standard',
-      width: 900,
-      height: 650,
+      width: 800,
+      height: 600,
       rootNode: {
         id: uid('root'),
         type: 'window',
@@ -84,6 +84,16 @@ const initialDocument: MockupDocument = {
     },
   ],
 };
+
+/**
+ * True while the pristine starter template (the "Main Window / My GNOME App"
+ * document) is on screen. Every mutation goes through immer or a spread, and
+ * every persisted/imported document is rebuilt by blueprintToDocument, so a
+ * plain reference check is enough — undoing all the way back to history[0]
+ * legitimately counts as "starter" again. The shell's panel auto-close rules
+ * (App.tsx) key off this.
+ */
+export const isStarterDocument = (doc: MockupDocument): boolean => doc === initialDocument;
 
 /**
  * Create a HIG-compliant root node tree for each screen template type.
@@ -680,6 +690,7 @@ export const useMockupStore = create<MockupState>((set, get) => {
     },
 
     addScreen: (title, type) => {
+      assertScreenTemplateType(type);
       const defaults = SCREEN_DEFAULTS[type];
       const nextDoc = produce(get().doc, (draft) => {
         draft.screens.push({

@@ -244,7 +244,13 @@ test('a root size request never resizes the screen surface', async ({ page }) =>
 
   const surface = page.locator('[data-protota-render-surface="true"]');
   await expect(surface).toBeVisible();
-  const box = await surface.boundingBox();
-  expect(Math.round(box!.width), 'width must equal the screen, not the width request').toBe(410);
-  expect(Math.round(box!.height), 'height must equal the screen, not the height request').toBe(460);
+  // The canvas opens in Fit-All-Screens mode, so a boundingBox measure
+  // includes the zoom transform. Layout size (offsetWidth/Height) is the
+  // zoom-independent surface the screen node requested.
+  const layoutBox = await surface.evaluate((el) => ({
+    width: (el as HTMLElement).offsetWidth,
+    height: (el as HTMLElement).offsetHeight,
+  }));
+  expect(Math.round(layoutBox.width), 'width must equal the screen, not the width request').toBe(410);
+  expect(Math.round(layoutBox.height), 'height must equal the screen, not the height request').toBe(460);
 });

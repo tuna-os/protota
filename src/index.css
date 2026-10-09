@@ -1163,28 +1163,87 @@ html adw-status-page .adw-status-page-child {
   position: relative;
 }
 
+/* Div-rendered check button — mirrors adwaita-web's gtk-check-button indicator
+   (_checks.scss): 14px content + 3px padding, trough drawn as an inset shadow
+   (not a border), 6px radius, libadwaita's own check glyph. The renderer flips
+   the `active` attribute on click in preview, which is what these rules draw. */
 .protota-div-check-button {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 4px 6px;
-  font-size: 14px;
+  gap: 4px;
+  padding: 3px;
+  border-radius: 9px;
+  cursor: pointer;
+  user-select: none;
 }
 
 .protota-div-check-button::before {
   content: '';
   display: inline-block;
-  width: 16px;
-  height: 16px;
-  border: 1.5px solid var(--window-fg-color, rgba(0, 0, 6, 0.4));
-  border-radius: 4px;
+  flex-shrink: 0;
+  box-sizing: content-box;
+  width: 14px;
+  height: 14px;
+  padding: 3px;
+  border-radius: 6px;
+  box-shadow: inset 0 0 0 2px color-mix(in srgb, currentColor 15%, transparent);
   background-color: transparent;
+  transition:
+    background 200ms ease-out,
+    box-shadow 200ms ease-out;
+}
+
+@media (prefers-contrast: more) {
+  .protota-div-check-button:not([active])::before {
+    box-shadow: inset 0 0 0 2px color-mix(in srgb, currentColor 30%, transparent);
+  }
+}
+
+.protota-div-check-button:not([active]):hover::before {
+  box-shadow: inset 0 0 0 2px color-mix(in srgb, currentColor 20%, transparent);
+}
+
+@media (prefers-contrast: more) {
+  .protota-div-check-button:not([active]):hover::before {
+    box-shadow: inset 0 0 0 2px color-mix(in srgb, currentColor 60%, transparent);
+  }
+}
+
+.protota-div-check-button:not([active]):active::before {
+  background-color: color-mix(in srgb, currentColor 25%, transparent);
+  box-shadow: none;
+}
+
+@media (prefers-contrast: more) {
+  .protota-div-check-button:not([active]):active::before {
+    background-color: color-mix(in srgb, currentColor 60%, transparent);
+  }
 }
 
 .protota-div-check-button[active]::before {
   background-color: var(--accent-bg-color, #3584e4);
-  border-color: var(--accent-bg-color, #3584e4);
-  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%23fff' d='M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0z'/%3E%3C/svg%3E");
+  box-shadow: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14'%3E%3Cpath fill='%23ffffff' d='m 12.599609,2.1992188 a 1,1 0 0 0 -1.40039,0.2011718 L 5.890625,9.4765625 2.7070313,6.2929687 a 1,1 0 0 0 -1.4140626,0 1,1 0 0 0 0,1.4140625 l 4,3.9999998 A 1.0001,1.0001 0 0 0 6.8007812,11.599609 L 12.800781,3.5996094 A 1,1 0 0 0 12.599609,2.1992188 Z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 14px;
+}
+
+.protota-div-check-button[active]:hover::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14'%3E%3Cpath fill='%23ffffff' d='m 12.599609,2.1992188 a 1,1 0 0 0 -1.40039,0.2011718 L 5.890625,9.4765625 2.7070313,6.2929687 a 1,1 0 0 0 -1.4140626,0 1,1 0 0 0 0,1.4140625 l 4,3.9999998 A 1.0001,1.0001 0 0 0 6.8007812,11.599609 L 12.800781,3.5996094 A 1,1 0 0 0 12.599609,2.1992188 Z'/%3E%3C/svg%3E"), linear-gradient(
+    color-mix(in srgb, currentColor 10%, transparent),
+    color-mix(in srgb, currentColor 10%, transparent)
+  );
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 14px, auto;
+}
+
+.protota-div-check-button[active]:active::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14'%3E%3Cpath fill='%23ffffff' d='m 12.599609,2.1992188 a 1,1 0 0 0 -1.40039,0.2011718 L 5.890625,9.4765625 2.7070313,6.2929687 a 1,1 0 0 0 -1.4140626,0 1,1 0 0 0 0,1.4140625 l 4,3.9999998 A 1.0001,1.0001 0 0 0 6.8007812,11.599609 L 12.800781,3.5996094 A 1,1 0 0 0 12.599609,2.1992188 Z'/%3E%3C/svg%3E"), linear-gradient(rgb(0 0 6 / 20%), rgb(0 0 6 / 20%));
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 14px, auto;
 }
 
 .protota-div-list-box {

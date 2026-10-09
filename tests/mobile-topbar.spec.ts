@@ -128,6 +128,7 @@ test.describe('Mobile topbar (#99)', () => {
   }) => {
     await page.setViewportSize({ width: 1280, height: 800 });
     await page.goto('/');
+    await page.waitForSelector('adw-window', { timeout: 10000 });
 
     // Open/Export stay as labelled header buttons, Flows/Diagnostics stay as
     // icon toggles, and the hamburger (app-menu button) is present too — the

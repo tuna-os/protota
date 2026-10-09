@@ -49,7 +49,9 @@ test.describe('Live Blueprint syntax tier (BLP-L001)', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
     await page.waitForSelector('adw-window', { timeout: 10000 });
-    // Diagnostics are on by default (#161); open the panel's tab directly.
+    // Diagnostics are on by default (#161); first-run documents open with
+    // the drawers closed, so open the right one and select the tab.
+    await page.keyboard.press('Control+]');
     await page.getByTestId('right-tab-diagnostics').click();
     await expect(page.getByTestId('diagnostics-panel')).toBeVisible();
   });

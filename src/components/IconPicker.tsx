@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { ICON_CATALOG } from '../data/iconCatalog';
 import { iconClass } from '../data/icons';
-import { ensureAdwIcon } from '../utils/adwIcons';
+import { ensureAdwIcons } from '../utils/adwIcons';
 
 // The full installed icon set (module = category), so the picker offers —
 // and search covers — every icon that can actually render, not a curated
@@ -39,6 +39,13 @@ export const IconPicker: React.FC<Props> = ({ value, onChange }) => {
     : ICON_CATEGORIES;
 
   const displayValue = value ? value.replace(/-symbolic$/, '') : '';
+
+  // Inject the mask rules so every catalog icon renders in the grid — same
+  // registration the canvas renderer uses. Batched into one stylesheet write:
+  // a per-icon append re-parses the whole growing sheet each time (see
+  // ensureAdwIcons).
+  const shown = activeCat && !search ? filtered.filter((c) => c.label === activeCat) : filtered;
+  if (open) ensureAdwIcons(shown.flatMap((cat) => cat.icons));
 
   return (
     <div style={{ position: 'relative' }}>
@@ -136,10 +143,7 @@ export const IconPicker: React.FC<Props> = ({ value, onChange }) => {
 
           {/* Icon grid */}
           <div style={{ overflow: 'auto', flex: 1, padding: '6px' }}>
-            {(activeCat && !search
-              ? filtered.filter(c => c.label === activeCat)
-              : filtered
-            ).map(cat => (
+            {shown.map(cat => (
               <div key={cat.label} style={{ marginBottom: '4px' }}>
                 {!search && !activeCat && (
                   <div style={{
@@ -153,9 +157,6 @@ export const IconPicker: React.FC<Props> = ({ value, onChange }) => {
                   gap: '2px',
                 }}>
                   {cat.icons.map(name => {
-                    // Inject the mask rule so every catalog icon renders in
-                    // the grid — same registration the canvas renderer uses.
-                    ensureAdwIcon(name);
                     return (
                     <button
                       key={name}

@@ -77,8 +77,6 @@ export const AddChildChip: React.FC<Props> = ({ nodeId, nodeType, legalAdds, cen
 
   useEffect(() => {
     if (!open) return;
-    setSearch('');
-    setActiveIndex(0);
     const timer = setTimeout(() => inputRef.current?.focus(), 30);
     // Close on any pointer-down outside the chip + popover.
     const onPointerDown = (event: MouseEvent) => {
@@ -131,7 +129,16 @@ export const AddChildChip: React.FC<Props> = ({ nodeId, nodeType, legalAdds, cen
         title="Add child widget"
         aria-label="Add child widget"
         aria-expanded={open}
-        onClick={(e) => { e.stopPropagation(); setOpen((o) => !o); }}
+        onClick={(e) => {
+          e.stopPropagation();
+          // Reset the popover search here — the open transition — instead of
+          // in an effect, so no cascading render is needed.
+          if (!open) {
+            setSearch('');
+            setActiveIndex(0);
+          }
+          setOpen(!open);
+        }}
       >
         +
       </button>

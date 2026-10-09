@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { produce } from 'immer';
 import type { MockupDocument, AdwNode, AdwNodeType, Screen } from '../types/mockup';
 import type { ScreenTemplateType } from '../types/mockup';
-import { SCREEN_DEFAULTS, LEGAL_CHILDREN } from '../types/mockup';
+import { SCREEN_DEFAULTS, assertScreenTemplateType } from '../types/mockup';
 import type { Diagnostic, DiagnosticTier, QuickFix } from '../diagnostics/types';
 import { instanceKey } from '../diagnostics/types';
 import { runDiagnostics } from '../diagnostics/engine';
@@ -19,232 +19,28 @@ import {
   saveWindowButtons,
 } from './persistence';
 export { persistDocumentSource } from './persistence';
+export {
+  uid,
+  initialDocument,
+  isStarterDocument,
+  createRootNode,
+} from './templates';
+import {
+  uid,
+  initialDocument,
+  createRootNode,
+} from './templates';
+export {
+  findParentOf,
+  placeTreeAt,
+  withFreshIds,
+} from './treeOps';
+import {
+  placeTreeAt,
+  withFreshIds,
+} from './treeOps';
 
 const MAX_HISTORY = 50;
-
-function uid(prefix: string): string {
-  return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
-}
-
-/**
- * HIG-compliant initial document.
- * Standard app window: AdwApplicationWindow → AdwToolbarView → [HeaderBar + content].
- */
-const initialDocument: MockupDocument = {
-  id: 'doc-1',
-  title: 'Untitled GNOME App',
-  edges: [],
-  colorScheme: 'auto',
-  screens: [
-    {
-      id: 'screen-1',
-      title: 'Main Window',
-      type: 'standard',
-      width: 900,
-      height: 650,
-      rootNode: {
-        id: uid('root'),
-        type: 'window',
-        children: [
-          {
-            id: uid('toolbar'),
-            type: 'toolbar-view',
-            children: [
-              {
-                id: uid('hdr'),
-                type: 'header-bar',
-                title: 'My GNOME App',
-                children: [
-                  { id: uid('title'), type: 'window-title', title: 'My GNOME App' },
-                ],
-              },
-              {
-                id: uid('content'),
-                type: 'box',
-                orientation: 'vertical',
-                spacing: 12,
-                children: [
-                  {
-                    id: uid('clamp'),
-                    type: 'clamp',
-                    children: [
-                      {
-                        id: uid('label'),
-                        type: 'label',
-                        title: 'Welcome to your mockup. Select widgets from the palette to build your UI.',
-                      },
-                    ],
-                  },
-                ],
-              },
-            ],
-          },
-        ],
-      },
-    },
-  ],
-};
-
-/**
- * Create a HIG-compliant root node tree for each screen template type.
- */
-function createRootNode(type: ScreenTemplateType, title: string): AdwNode {
-  switch (type) {
-    // === Standard app window (from layout-recipes.md §5.2) ===
-    case 'standard':
-      return {
-        id: uid('root'), type: 'window',
-        children: [{
-          id: uid('toolbar'), type: 'toolbar-view',
-          children: [
-            { id: uid('hdr'), type: 'header-bar', title,
-              children: [{ id: uid('title'), type: 'window-title', title }],
-            },
-            { id: uid('content'), type: 'box', orientation: 'vertical', spacing: 12,
-              children: [{
-                id: uid('clamp'), type: 'clamp',
-                children: [{ id: uid('label'), type: 'label', title: 'Add content here.' }],
-              }],
-            },
-          ],
-        }],
-      };
-
-    // === ViewSwitcher app (from layout-recipes.md §5.3) ===
-    case 'view-switcher':
-      return {
-        id: uid('root'), type: 'window',
-        children: [{
-          id: uid('toolbar'), type: 'toolbar-view',
-          children: [
-            { id: uid('hdr'), type: 'header-bar',
-              children: [{ id: uid('switcher'), type: 'view-switcher' }],
-            },
-            { id: uid('stack'), type: 'view-stack',
-              children: [
-                { id: uid('page1'), type: 'box', orientation: 'vertical', spacing: 12,
-                  children: [{ id: uid('c1'), type: 'clamp',
-                    children: [{ id: uid('l1'), type: 'label', title: 'First View' }],
-                  }],
-                },
-                { id: uid('page2'), type: 'box', orientation: 'vertical', spacing: 12,
-                  children: [{ id: uid('c2'), type: 'clamp',
-                    children: [{ id: uid('l2'), type: 'label', title: 'Second View' }],
-                  }],
-                },
-              ],
-            },
-          ],
-        }],
-      };
-
-    // === Preferences dialog (from layout-recipes.md §5.1) ===
-    case 'preferences':
-      return {
-        id: uid('root'), type: 'preferences-dialog', title,
-        children: [{
-          id: uid('page'), type: 'preferences-page', title: 'General',
-          iconName: 'preferences-system-symbolic',
-          children: [{
-            id: uid('group'), type: 'preferences-group',
-            title: 'Behaviour', description: 'Configure app behaviour.',
-            children: [
-              { id: uid('switch1'), type: 'switch-row', title: 'Enable Feature', subtitle: 'Turns on core functionality', active: true },
-              { id: uid('combo1'), type: 'combo-row', title: 'Theme', subtitle: 'Select appearance' },
-            ],
-          }],
-        }],
-      };
-
-    // === Sidebar app ===
-    case 'sidebar':
-      return {
-        id: uid('root'), type: 'window',
-        children: [{
-          id: uid('toolbar'), type: 'toolbar-view',
-          children: [
-            { id: uid('hdr'), type: 'header-bar',
-              children: [{ id: uid('title'), type: 'window-title', title }],
-            },
-            { id: uid('split'), type: 'overlay-split',
-              children: [
-                { id: uid('sidebar'), type: 'box', orientation: 'vertical', spacing: 6,
-                  children: [
-                    { id: uid('sbtn1'), type: 'button', title: 'Item 1', flat: true },
-                    { id: uid('sbtn2'), type: 'button', title: 'Item 2', flat: true },
-                  ],
-                },
-                { id: uid('main-content'), type: 'clamp',
-                  children: [{ id: uid('l3'), type: 'label', title: 'Select an item from the sidebar.' }],
-                },
-              ],
-            },
-          ],
-        }],
-      };
-
-    // === Modal dialog ===
-    case 'dialog':
-      return {
-        id: uid('root'), type: 'dialog', title,
-        children: [{
-          id: uid('toolbar'), type: 'toolbar-view',
-          children: [
-            { id: uid('hdr'), type: 'header-bar', title },
-            { id: uid('body'), type: 'box', orientation: 'vertical', spacing: 18,
-              children: [
-                { id: uid('msg'), type: 'label', title: 'Dialog content goes here.' },
-                { id: uid('actions'), type: 'box', orientation: 'horizontal', spacing: 6,
-                  children: [
-                    { id: uid('cancel'), type: 'button', title: 'Cancel', flat: true },
-                    { id: uid('ok'), type: 'button', title: 'OK', suggested: true },
-                  ],
-                },
-              ],
-            },
-          ],
-        }],
-      };
-
-    // === Alert dialog (confirmation/error) ===
-    case 'alert-dialog':
-      return {
-        id: uid('root'), type: 'alert-dialog',
-        title: 'Are you sure?',
-        description: 'This action cannot be undone.',
-        children: [
-          { id: uid('cancel'), type: 'button', title: 'Cancel', flat: true },
-          { id: uid('confirm'), type: 'button', title: 'Delete', destructive: true },
-        ],
-      };
-
-    // === About dialog ===
-    case 'about':
-      return {
-        id: uid('root'), type: 'about-dialog',
-        title, description: 'A GNOME application',
-        iconName: 'application-x-executable',
-      };
-
-    // === Status page (empty/error/loading) ===
-    case 'status-page':
-      return {
-        id: uid('root'), type: 'status-page',
-        title: 'Nothing Here', description: 'Try adding content to get started.',
-        iconName: 'system-search-symbolic',
-        children: [
-          { id: uid('action'), type: 'button', title: 'Get Started', suggested: true },
-        ],
-      };
-
-    // === Blank canvas ===
-    case 'empty':
-      return {
-        id: uid('root'), type: 'box', orientation: 'vertical', spacing: 12,
-        children: [{ id: uid('label'), type: 'label', title: 'Blank canvas — add widgets.' }],
-      };
-  }
-}
 
 interface MockupState {
   doc: MockupDocument;
@@ -433,55 +229,6 @@ interface MockupState {
    * ONE undo snapshot, without touching the clipboard. Returns the new ids.
    */
   duplicateNodes: (nodeIds: string[]) => string[];
-}
-
-/** The container holding a node, so paste can fall back to placing beside it. */
-function findParentOf(root: AdwNode, nodeId: string): AdwNode | null {
-  if (root.children?.some((child) => child.id === nodeId)) return root;
-  for (const child of root.children ?? []) {
-    const found = findParentOf(child, nodeId);
-    if (found) return found;
-  }
-  return null;
-}
-
-/**
- * Legality resolution shared by paste and duplicate, applied to an immer
- * draft: prefer placing the tree INTO the target; fall back to BESIDE it
- * when the target cannot legally hold the tree but its parent can.
- * `besideOffset` is how many earlier trees of the same batch already landed
- * beside the target, so a sequential forest paste keeps clipboard order.
- * Returns where the tree landed, or null when it cannot legally land.
- */
-function placeTreeAt(
-  screens: Screen[], targetId: string, tree: AdwNode, besideOffset: number,
-): 'into' | 'beside' | null {
-  for (const screen of screens) {
-    const target = findNodeById([screen.rootNode], targetId);
-    if (!target) continue;
-    if ((LEGAL_CHILDREN[target.type] ?? []).includes(tree.type)) {
-      target.children = target.children ?? [];
-      target.children.push(tree);
-      return 'into';
-    }
-    const location = findNodeLocation(screen.rootNode, targetId);
-    const parent = location ? findParentOf(screen.rootNode, targetId) : null;
-    if (location && parent && (LEGAL_CHILDREN[parent.type] ?? []).includes(tree.type)) {
-      location.parentChildren.splice(location.index + 1 + besideOffset, 0, tree);
-      return 'beside';
-    }
-    return null;
-  }
-  return null;
-}
-
-/** A pasted subtree needs fresh ids, or two nodes would answer to one name. */
-function withFreshIds(node: AdwNode): AdwNode {
-  return {
-    ...node,
-    id: uid(node.type),
-    children: node.children?.map(withFreshIds),
-  };
 }
 
 export const useMockupStore = create<MockupState>((set, get) => {
@@ -680,6 +427,7 @@ export const useMockupStore = create<MockupState>((set, get) => {
     },
 
     addScreen: (title, type) => {
+      assertScreenTemplateType(type);
       const defaults = SCREEN_DEFAULTS[type];
       const nextDoc = produce(get().doc, (draft) => {
         draft.screens.push({

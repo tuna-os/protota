@@ -17,7 +17,7 @@
   },
   "dependencies": {
     "@gjsify/adwaita-core": "^0.58.0",
-    "@gjsify/adwaita-fonts": "^0.56.0",
+    "@gjsify/adwaita-fonts": "^0.58.0",
     "@gjsify/adwaita-icons": "^0.58.0",
     "@gjsify/adwaita-web": "^0.56.0",
     "html2canvas": "^1.4.1",

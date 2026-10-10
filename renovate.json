@@ -14,6 +14,13 @@
       "enabled": false
     },
     {
+      "description": "Update GJSify suite together",
+      "groupName": "GJSify Adwaita Suite",
+      "matchPackagePatterns": ["^@gjsify/"],
+      "groupSlug": "gjsify",
+      "enabled": true
+    }
+    {
       "description": "fedora base image major bumps are IGNORED (not even proposed): the fedora:46/rawhide image's dnf repos serve fc45-built packages with a keyring mismatch, breaking container builds. automerge:false alone did not stop renovate (tacklebox #209/#211); ignore prevents PR creation. Remove once the upstream image is consistent.",
       "matchDatasources": [
         "docker"
@@ -28,13 +35,6 @@
       ],
       "automerge": false,
       "enabled": false
-    },
-    {
-      "description": "@gjsify/adwaita-web >=0.32.0 breaks preset/icon rendering (Playwright: html[data-protota-ready] never appears, icon-library toBeVisible failures). Re-enabled once the app is adapted to the new API; tracked in the linked issue.",
-      "matchPackageNames": [
-        "@gjsify/adwaita-web"
-      ],
-      "allowedVersions": "<0.32.0"
     }
   ]
 }

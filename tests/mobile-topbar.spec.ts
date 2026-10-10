@@ -56,9 +56,10 @@ test.describe('Mobile topbar (#99)', () => {
     // Library + Show Shortcuts last — the same base app entries as desktop.
     // The old mobile-only Actions group (New Screen) is gone — New Screen
     // lives in the bottom bar. (Accessible names include keyboard shortcuts,
-    // e.g. "Show Shortcuts Ctrl+?"; the adw-menu-button renders items as
-    // role=menuitem.) Open/Export are icon-only header buttons on mobile, so
-    // Load Preset / Export / Share URL are not in the app-menu.
+    // e.g. "Show Shortcuts Ctrl+?"; the Protota-owned <gtk-popover> surface
+    // renders its rows as role=menuitem.) Open/Export are icon-only header
+    // buttons on mobile, so Load Preset / Export / Share URL are not in the
+    // app-menu.
     await expect(menu.getByRole('menuitem', { name: /icon library/i })).toBeVisible();
     await expect(menu.getByRole('menuitem', { name: /keyboard shortcuts/i })).toBeVisible();
     await expect(menu.getByRole('menuitem', { name: /enable screen flows/i })).toBeVisible();
@@ -127,6 +128,7 @@ test.describe('Mobile topbar (#99)', () => {
   }) => {
     await page.setViewportSize({ width: 1280, height: 800 });
     await page.goto('/');
+    await page.waitForSelector('adw-window', { timeout: 10000 });
 
     // Open/Export stay as labelled header buttons, Flows/Diagnostics stay as
     // icon toggles, and the hamburger (app-menu button) is present too — the
@@ -154,24 +156,76 @@ test.describe('Mobile topbar (#99)', () => {
   });
 });
 
-test.describe('Panel auto-close on mobile resize', () => {
-  test('resizing from desktop to mobile auto-closes Layers and Properties panels', async ({
+test.describe('Panel auto-close defaults', () => {
+  test('first start opens with both panels closed; desktop-to-mobile resize closes them again', async ({
     page,
   }) => {
-    // Start on desktop — panels open by default.
+    // Start on desktop with the pristine starter template: both drawers
+    // start closed (they stay mounted — hidden by the slide-out — so assert
+    // visibility, not DOM removal).
     await page.setViewportSize({ width: 1280, height: 800 });
     await page.goto('/');
     await page.waitForSelector('adw-window', { timeout: 10000 });
 
-    // Both panels are visible on desktop.
+    await expect(page.getByTestId('left-tab-layers')).toBeHidden();
+    await expect(page.getByTestId('right-tab-properties')).toBeHidden();
+
+    // Open both via the header toggles.
+    await page.getByRole('button', { name: 'Toggle Layers' }).click();
+    await page.getByRole('button', { name: 'Toggle Properties' }).click();
     await expect(page.getByTestId('left-tab-layers')).toBeVisible();
     await expect(page.getByTestId('right-tab-properties')).toBeVisible();
 
-    // Resize to mobile — panels should auto-close.
+    // Resize to mobile — panels should auto-close again.
     await page.setViewportSize({ width: 390, height: 844 });
+    await expect(page.getByTestId('left-tab-layers')).toBeHidden();
+    await expect(page.getByTestId('right-tab-properties')).toBeHidden();
+  });
 
-    // Panels are removed from DOM when closed (not just hidden).
-    await expect(page.getByTestId('left-tab-layers')).toHaveCount(0);
-    await expect(page.getByTestId('right-tab-properties')).toHaveCount(0);
+  test('Escape closes an open drawer on mobile', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto('/');
+    await page.waitForSelector('adw-window', { timeout: 10000 });
+
+    // Open the Layers drawer via the header toggle, then dismiss it.
+    await page.getByRole('button', { name: 'Toggle Layers' }).click();
+    await expect(page.getByTestId('left-tab-layers')).toBeVisible();
+    // Synthetic keydown: the headless trusted-key dispatch drops `Escape`
+    // before it reaches window listeners, so send the same DOM event.
+    await page.evaluate(() => {
+      const target = document.activeElement ?? document.body;
+      target.dispatchEvent(
+        new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, composed: true }),
+      );
+    });
+    await expect(page.getByTestId('left-tab-layers')).toBeHidden();
+  });
+
+  test('the desktop drawer layout persists across reloads once the document is real', async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await page.goto('/');
+    await page.waitForSelector('adw-window', { timeout: 10000 });
+
+    // Starter template: nothing persisted yet, both drawers closed.
+    await expect(page.getByTestId('left-tab-layers')).toBeHidden();
+
+    // Open only the left drawer, then make the document real — any mutation
+    // persists it and ends the starter state.
+    await page.keyboard.press('Control+[');
+    await expect(page.getByTestId('left-tab-layers')).toBeVisible();
+    await page.evaluate(() => {
+      /* eslint-disable @typescript-eslint/no-explicit-any */
+      const store = (window as any).__mockupStore;
+      const state = store.getState();
+      state.updateScreenProps(state.doc.screens[0].id, { title: 'Renamed Window' });
+    });
+
+    // After reload the saved layout wins: left open, right closed.
+    await page.reload();
+    await page.waitForSelector('adw-window', { timeout: 10000 });
+    await expect(page.getByTestId('left-tab-layers')).toBeVisible();
+    await expect(page.getByTestId('right-tab-properties')).toBeHidden();
   });
 });

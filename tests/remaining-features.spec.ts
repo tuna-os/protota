@@ -4,6 +4,10 @@ test.describe('Remaining features (#9, #16, #18-#24)', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
     await page.waitForSelector('adw-window', { timeout: 10000 });
+    // A first-run document opens with both drawers closed; these tests
+    // drive the Layers and inspector UIs, so slide them open.
+    await page.keyboard.press('Control+[');
+    await page.keyboard.press('Control+]');
   });
 
   test('#9 Code export command exists in the Export menu', async ({ page }) => {
@@ -29,6 +33,59 @@ test.describe('Remaining features (#9, #16, #18-#24)', () => {
     await window.click({ button: 'right' });
     const menu = page.locator('.protota-context-menu');
     await expect(menu).toBeVisible({ timeout: 3000 });
+    // Node menu offers node ops because the right-click selected the node.
+    await expect(menu.getByRole('button', { name: 'Delete' })).toBeVisible();
+    await expect(menu.getByRole('button', { name: 'Duplicate' })).toBeVisible();
+    // Undo/Redo are history, not object commands: only the no-selection menu has them.
+    await expect(menu.getByRole('button', { name: 'Undo' })).toHaveCount(0);
+    await expect(menu.getByRole('button', { name: 'Redo' })).toHaveCount(0);
+    await expect(menu.getByRole('button', { name: 'Rename…' })).toBeVisible();
+
+    // Dismiss, then right-click the app header: no editor context menu there.
+    await page.locator('.protota-canvas').click({ position: { x: 5, y: 5 } });
+    await page.locator('[data-testid="app-header-bar"]').click({ button: 'right' });
+    await expect(menu).toHaveCount(0);
+  });
+
+  test('#19b Right-click on a layer row shows the layer context menu', async ({ page }) => {
+    const row = page.getByTestId('layer-row').first();
+    await expect(row).toBeVisible();
+    await row.click({ button: 'right' });
+
+    const menu = page.locator('.protota-context-menu');
+    await expect(menu).toBeVisible({ timeout: 3000 });
+    // The node ops come from the shared menu, plus the rename entry.
+    await expect(menu.getByRole('button', { name: 'Duplicate' })).toBeVisible();
+    await expect(menu.getByRole('button', { name: 'Rename…' })).toBeVisible();
+    await expect(menu.getByRole('button', { name: 'Undo' })).toHaveCount(0);
+
+    // Rename… hands the inline editor back to that row.
+    await menu.getByRole('button', { name: 'Rename…' }).click();
+    await expect(page.getByTestId('layer-rename-input')).toBeVisible();
+  });
+
+  test('#19c Right-click on a screen row offers Rename and Delete Screen', async ({ page }) => {
+    await page.getByTestId('screen-row').first().click({ button: 'right' });
+
+    const menu = page.locator('.protota-context-menu');
+    await expect(menu).toBeVisible({ timeout: 3000 });
+    await expect(menu.getByRole('button', { name: 'Delete Screen' })).toBeVisible();
+
+    await menu.getByRole('button', { name: 'Rename…' }).click();
+    await expect(page.getByTestId('screen-rename-input')).toBeVisible();
+  });
+
+  test('#19d Canvas rename reveals the Layers panel and edits the row there', async ({ page }) => {
+    // The rename editor lives in the panel, so a canvas rename has to open it.
+    await page.getByTestId('left-tab-widgets').click();
+
+    await page.locator('.protota-canvas [data-node-id]').first().click({ button: 'right' });
+    const menu = page.locator('.protota-context-menu');
+    await expect(menu).toBeVisible({ timeout: 3000 });
+    await menu.getByRole('button', { name: 'Rename…' }).click();
+
+    await expect(page.getByTestId('left-tab-layers')).toHaveAttribute('aria-selected', 'true');
+    await expect(page.getByTestId('layer-rename-input')).toBeVisible();
   });
 
   test('#20 Undo button visible', async ({ page }) => {
@@ -71,6 +128,9 @@ test.describe("Slot-aware building", () => {
     await page.goto("/");
     await page.waitForSelector("adw-window", { timeout: 10000 });
 
+    // First-run documents open with both drawers closed; the slot selector
+    // lives in the right inspector drawer.
+    await page.keyboard.press('Control+]');
     // Select a widget inside a header bar; the inspector should offer the
     // header bar's start/title/end slots.
     await page.locator(".protota-canvas adw-window-title").first().click({ position: { x: 4, y: 4 } });
@@ -88,6 +148,9 @@ test.describe("Alignment controls", () => {
     await page.goto("/");
     await page.waitForSelector("adw-window", { timeout: 10000 });
 
+    // First-run documents open with both drawers closed; the alignment
+    // controls live in the right inspector drawer.
+    await page.keyboard.press('Control+]');
     await page.locator(".protota-canvas adw-header-bar").first().click({ position: { x: 8, y: 8 } });
     const controls = page.getByTestId("alignment-controls");
     await expect(controls).toBeVisible();

@@ -9,7 +9,7 @@ test.describe('Interactive canvas (#10)', () => {
   test.describe('Hover and active states', () => {
     test('buttons receive hover styles from adwaita-web CSS', async ({ page }) => {
       // Click the canvas to deselect, then find a button inside adw-window
-      const button = page.locator('adw-window adw-button').first();
+      const button = page.locator('adw-window gtk-button').first();
       // Buttons may not exist in default template; test that selector resolves
       const count = await button.count();
       if (count > 0) {
@@ -43,8 +43,9 @@ test.describe('Interactive canvas (#10)', () => {
       const zoomBar = page.locator('.protota-zoom-bar');
       await expect(zoomBar).toBeVisible();
 
-      // Zoom percentage display
-      await expect(zoomBar.getByText(/100%/)).toBeVisible();
+      // Zoom percentage display. The initial view is Fit All Screens, so the
+      // value is whatever the fit resolves to — a percentage, not 100%.
+      await expect(zoomBar.locator('.protota-zoom-percent')).toHaveText(/^\d+%$/);
 
       // Zoom buttons
       await expect(zoomBar.getByRole('button', { name: /zoom out/i })).toBeVisible();
@@ -94,7 +95,7 @@ test.describe('Interactive canvas (#10)', () => {
       await toolbarView.click();
       await expect(page.locator('.selected-outline').first()).toBeVisible({ timeout: 3000 });
 
-      const before = await page.locator('adw-toolbar-view adw-button').count();
+      const before = await page.locator('adw-toolbar-view gtk-button').count();
 
       // Open the popover from the chip
       await page.locator('.protota-add-chip').click();
@@ -117,11 +118,11 @@ test.describe('Interactive canvas (#10)', () => {
         .filter({ has: page.locator('.protota-add-popover-item-label', { hasText: /^Button$/ }) })
         .first().click();
       await expect(popover).toBeHidden();
-      await expect(page.locator('adw-toolbar-view adw-button')).toHaveCount(before + 1);
+      await expect(page.locator('adw-toolbar-view gtk-button')).toHaveCount(before + 1);
 
       // Undo removes the inserted child (same single-step history)
       await page.keyboard.press('Control+z');
-      await expect(page.locator('adw-toolbar-view adw-button')).toHaveCount(before);
+      await expect(page.locator('adw-toolbar-view gtk-button')).toHaveCount(before);
     });
 
     test('add popover supports keyboard navigation and Escape', async ({ page }) => {

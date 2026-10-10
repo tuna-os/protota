@@ -35,8 +35,6 @@ test.describe('Keyboard shortcuts (#14)', () => {
       await toolbarView.click();
       await expect(page.locator('.selected-outline').first()).toBeVisible({ timeout: 3000 });
 
-      // Count initial children
-      const parent = page.locator('adw-window').first();
       // Attempt delete — should delete the selected toolbar-view
       await page.keyboard.press('Delete');
 
@@ -107,16 +105,16 @@ test.describe('Keyboard shortcuts (#14)', () => {
       await expect(page.locator('.selected-outline').first()).toBeVisible({ timeout: 3000 });
 
       // Count buttons before
-      const before = await page.locator('adw-button').count();
+      const before = await page.locator('gtk-button').count();
 
       // Press B
       await page.keyboard.press('b');
 
       // Should have added a button
       await page.waitForTimeout(300);
-      const after = await page.locator('adw-button').count();
-      // The button may or may not be added depending on legal children
-      // This tests that the keyboard shortcut handler exists and doesn't crash
+      const after = await page.locator('gtk-button').count();
+      // The shortcut handler must exist and not crash; the count never drops.
+      expect(after).toBeGreaterThanOrEqual(before);
     });
   });
 

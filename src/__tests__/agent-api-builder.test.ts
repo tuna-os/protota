@@ -7,7 +7,8 @@
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import type { MockupDocument, Screen } from '../types/mockup';
-import { MockupBuilder, generateMockup, protota } from '../utils/agent-api';
+import { MockupBuilder, generateMockup } from '../utils/mockupBuilder';
+import { protota } from '../runtime/agentHandle';
 import { useMockupStore } from '../store/mockupStore';
 
 const backing = new Map<string, string>();

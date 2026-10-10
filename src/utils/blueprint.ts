@@ -1,12 +1,11 @@
 import type { MockupDocument, AdwNode, AdwNodeType, BreakpointSetter, ImportDiagnostic, Screen, ScreenTemplateType } from '../types/mockup';
-import { extractValaFacts, type ValaClassFacts } from './vala';
-import { extractCFacts, type CClassFacts } from './clang';
-import { extractPythonFacts } from './python';
+import { TEMPLATE_ROOT } from '../types/mockup';
 import { GTK_PROPERTY_DATA } from '../data/gtkProperties';
+import { enrichWithValaFacts } from './blueprintEnrichment';
 
 export type { ImportDiagnostic } from '../types/mockup';
 
-const CLASS_TO_WIDGET_MAP: Record<string, AdwNodeType> = {
+export const CLASS_TO_WIDGET_MAP: Record<string, AdwNodeType> = {
   'Adw.ApplicationWindow': 'window',
   'Adw.Window': 'window',
   'Adw.PreferencesDialog': 'preferences-dialog',
@@ -265,7 +264,7 @@ const NON_VISUAL_CLASS_PATTERN =
  * setters drive the adaptive behavior a live resize is supposed to show. It
  * survives import as a childless node the renderer skips.
  */
-function isBreakpointClass(rawClass: string): boolean {
+export function isBreakpointClass(rawClass: string): boolean {
   return rawClass === 'Breakpoint' || canonicalClassName(rawClass) === 'Adw.Breakpoint';
 }
 
@@ -355,7 +354,7 @@ export function widgetTypeForClass(rawClass: string): AdwNodeType | null {
 
 function indent(n: number): string { return '  '.repeat(n); }
 
-function escapeBlueprintString(value: string): string {
+export function escapeBlueprintString(value: string): string {
   return value.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\n/g, '\\n');
 }
 
@@ -524,7 +523,7 @@ function formatPropertyValue(name: string, value: unknown): string {
  * Slots GTK expresses as a child-type annotation (`[top]`) rather than as an
  * object-valued property (`content: Widget { }`).
  */
-const ANNOTATION_SLOTS = new Set([
+export const ANNOTATION_SLOTS = new Set([
   'top', 'bottom', 'start', 'end', 'title', 'prefix', 'suffix',
   // GtkOverlay's extra children and GtkListBox's placeholder are child types,
   // not properties: `overlay: Widget { }` is rejected outright.
@@ -826,7 +825,7 @@ export function mockupToBlueprint(doc: MockupDocument, options?: BlueprintExport
  * object references). We retain the widgets, scalar properties, and named
  * child slots that determine Libadwaita layout.
  */
-type BlueprintValue = string | number | boolean;
+export type BlueprintValue = string | number | boolean;
 
 interface Token {
   value: string;
@@ -918,18 +917,18 @@ function propertyNameForNode(name: string, nodeType: AdwNodeType): string {
 
 /** GtkBuilder spells classes as GObject names (`AdwActionRow`); Blueprint as
  * namespaced names (`Adw.ActionRow`). Both resolve to one canonical entry. */
-function canonicalClassName(rawClass: string): string {
+export function canonicalClassName(rawClass: string): string {
   // GtkSource must be tried before Gtk: `GtkSourceBuffer` is GtkSource.Buffer,
   // not a Gtk class called SourceBuffer.
   const gobject = /^(Adw|GtkSource|Gtk|Gio)([A-Z][A-Za-z0-9]*)$/.exec(rawClass);
   return gobject ? `${gobject[1]}.${gobject[2]}` : rawClass;
 }
 
-function isNonVisualClass(rawClass: string): boolean {
+export function isNonVisualClass(rawClass: string): boolean {
   return NON_VISUAL_CLASS_PATTERN.test(rawClass) || NON_VISUAL_CLASS_PATTERN.test(canonicalClassName(rawClass));
 }
 
-function makeNode(
+export function makeNode(
   rawClass: string,
   id: string,
   properties: Record<string, BlueprintValue>,
@@ -1018,7 +1017,7 @@ export function blueprintTemplateReferences(code: string): string[] {
   return [...references];
 }
 
-function parseBlueprintRoots(code: string, diagnostics: ImportDiagnostic[]): AdwNode[] {
+export function parseBlueprintRoots(code: string, diagnostics: ImportDiagnostic[]): AdwNode[] {
   const tokens = tokenizeBlueprint(code);
   let cursor = 0;
   let generatedId = 0;
@@ -1245,258 +1244,24 @@ function parseBlueprintRoots(code: string, diagnostics: ImportDiagnostic[]): Adw
 }
 
 // ---------------------------------------------------------------------------
-// GtkBuilder XML import
+// GtkBuilder XML import (delegated to blueprintBuilder.ts)
 // ---------------------------------------------------------------------------
 
-interface XmlElement {
-  tag: string;
-  attributes: Record<string, string>;
-  children: XmlElement[];
-  text: string;
-}
-
-function decodeXmlEntities(text: string): string {
-  return text
-    .replace(/&#x([0-9a-fA-F]+);/g, (_, hex: string) => String.fromCodePoint(parseInt(hex, 16)))
-    .replace(/&#(\d+);/g, (_, dec: string) => String.fromCodePoint(Number(dec)))
-    .replace(/&lt;/g, '<').replace(/&gt;/g, '>')
-    .replace(/&quot;/g, '"').replace(/&apos;/g, "'")
-    .replace(/&amp;/g, '&');
-}
-
-/** Minimal structural XML parser — elements, attributes, text, comments. */
-function parseXmlElements(code: string): XmlElement[] {
-  const roots: XmlElement[] = [];
-  const stack: XmlElement[] = [];
-  const tagPattern = /<!--[\s\S]*?-->|<!\[CDATA\[[\s\S]*?\]\]>|<\?[\s\S]*?\?>|<!DOCTYPE[^>]*>|<\/?[A-Za-z_][\w.:-]*(?:\s+[^<>]*?)?\/?>|[^<]+/g;
-  const attrPattern = /([\w.:-]+)\s*=\s*"([^"]*)"|([\w.:-]+)\s*=\s*'([^']*)'/g;
-  for (const match of code.matchAll(tagPattern)) {
-    const chunk = match[0];
-    if (chunk.startsWith('<!--') || chunk.startsWith('<?') || chunk.startsWith('<!DOCTYPE')) continue;
-    if (chunk.startsWith('<![CDATA[')) {
-      const parent = stack[stack.length - 1];
-      if (parent) parent.text += chunk.slice(9, -3);
-      continue;
-    }
-    if (!chunk.startsWith('<')) {
-      const parent = stack[stack.length - 1];
-      if (parent) parent.text += decodeXmlEntities(chunk);
-      continue;
-    }
-    if (chunk.startsWith('</')) { stack.pop(); continue; }
-    const tag = /^<([A-Za-z_][\w.:-]*)/.exec(chunk)![1];
-    const attributes: Record<string, string> = {};
-    for (const attr of chunk.matchAll(attrPattern)) {
-      attributes[attr[1] ?? attr[3]] = decodeXmlEntities(attr[2] ?? attr[4] ?? '');
-    }
-    const element: XmlElement = { tag, attributes, children: [], text: '' };
-    (stack[stack.length - 1]?.children ?? roots).push(element);
-    if (!chunk.endsWith('/>')) stack.push(element);
-  }
-  return roots;
-}
-
-function builderScalar(raw: string): BlueprintValue {
-  const text = raw.trim();
-  if (text === 'true' || text === 'True') return true;
-  if (text === 'false' || text === 'False') return false;
-  return /^-?\d+(\.\d+)?$/.test(text) ? Number(text) : text;
-}
-
-/**
- * Project a GtkBuilder <object>/<template> element to a renderer node.
- * Structure-preserving: child roles become slots, object-valued properties
- * become slotted children, style classes and layout properties project onto
- * the node, and unknown classes survive as explicit boundaries.
- */
-function builderElementToNode(
-  element: XmlElement,
-  diagnostics: ImportDiagnostic[],
-  nextId: () => string,
-): AdwNode | null {
-  const rawClass = element.tag === 'template'
-    ? element.attributes.parent ?? element.attributes.class ?? 'GtkWidget'
-    : element.attributes.class ?? 'GtkWidget';
-  if (isNonVisualClass(rawClass)) return null;
-  const id = element.attributes.id ?? nextId();
-  const properties: Record<string, BlueprintValue> = {};
-  const bindings: Record<string, string> = {};
-  const children: AdwNode[] = [];
-  const breakpoint = isBreakpointClass(rawClass);
-  let breakpointCondition: string | undefined;
-  const breakpointSetters: BreakpointSetter[] = [];
-
-  for (const child of element.children) {
-    if (breakpoint && child.tag === 'condition') {
-      breakpointCondition = child.text.trim();
-      continue;
-    }
-    if (breakpoint && child.tag === 'setter') {
-      const target = child.attributes.object;
-      const property = child.attributes.property;
-      if (target && property) {
-        const text = child.text.trim();
-        // An empty <setter/> unsets the property when the breakpoint applies.
-        breakpointSetters.push({
-          target,
-          property: property.replace(/_/g, '-'),
-          value: text === '' ? null : builderScalar(text),
-        });
-      }
-      continue;
-    }
-    if (child.tag === 'property') {
-      const name = child.attributes.name;
-      if (!name) continue;
-      const objectValue = child.children.find(inner => inner.tag === 'object');
-      if (objectValue) {
-        const node = builderElementToNode(objectValue, diagnostics, nextId);
-        if (node) children.push({ ...node, slot: name });
-      } else if (child.attributes['bind-source']) {
-        bindings[name] = `${child.attributes['bind-source']}.${child.attributes['bind-property'] ?? name}`;
-      } else {
-        properties[name] = builderScalar(child.text);
-      }
-      continue;
-    }
-    if (child.tag === 'binding') {
-      const name = child.attributes.name;
-      if (name) bindings[name] = child.text.trim() || 'expression';
-      continue;
-    }
-    if (child.tag === 'child') {
-      const slot = child.attributes.type;
-      for (const inner of child.children) {
-        if (inner.tag !== 'object' && inner.tag !== 'placeholder') continue;
-        if (inner.tag === 'placeholder') continue;
-        const node = builderElementToNode(inner, diagnostics, nextId);
-        if (node) children.push(slot ? { ...node, slot } : node);
-      }
-      continue;
-    }
-    if (child.tag === 'style') {
-      const styleNames: string[] = [];
-      for (const styleClass of child.children) {
-        const name = styleClass.attributes.name;
-        if (name) styleNames.push(name);
-        if (name === 'suggested-action') properties.suggested = true;
-        if (name === 'destructive-action') properties.destructive = true;
-        if (name === 'flat') properties.flat = true;
-        if (name === 'circular') properties.circular = true;
-      }
-      if (styleNames.length) properties.styleClasses = styleNames.join(' ');
-      continue;
-    }
-    if (child.tag === 'layout') {
-      for (const layoutProperty of child.children) {
-        const name = layoutProperty.attributes.name;
-        if (!name) continue;
-        properties[name] = builderScalar(layoutProperty.text);
-      }
-      continue;
-    }
-    // <signal>, <accessibility>, <attributes>, <items>… are non-structural.
-  }
-  if (breakpoint && breakpointCondition === undefined) return null;
-  const node = makeNode(rawClass, id, properties, bindings, children, diagnostics);
-  // A GtkBuilder template's concrete GType is its `class`, even though its
-  // renderer shape comes from `parent`. Preserve both facts: `type` remains
-  // the supported parent widget while sourceClass lets runtime matching join
-  // a presented composite dialog (ClocksAlarmSetupDialog) instead of
-  // incorrectly seeding it at the application's first toplevel window.
-  if (element.tag === 'template' && element.attributes.class) {
-    node.sourceClass = element.attributes.class;
-  }
-  if (breakpoint && breakpointCondition !== undefined) {
-    node.breakpointCondition = breakpointCondition;
-    if (breakpointSetters.length) node.breakpointSetters = breakpointSetters;
-  }
-  return node;
-}
-
-function parseGtkBuilderRoots(code: string, diagnostics: ImportDiagnostic[]): AdwNode[] {
-  let generatedId = 0;
-  const nextId = () => `imported-${++generatedId}`;
-  const roots: AdwNode[] = [];
-  const visit = (elements: XmlElement[]) => {
-    for (const element of elements) {
-      if (element.tag === 'interface') { visit(element.children); continue; }
-      if (element.tag === 'object' || element.tag === 'template') {
-        const node = builderElementToNode(element, diagnostics, nextId);
-        if (node) roots.push(node);
-      }
-      // <menu>, <requires>… are non-visual at the interface level.
-    }
-  };
-  visit(parseXmlElements(code));
-  return roots;
-}
-
-/**
- * GtkBuilder composite templates: an <object class="EditorPage"> instance
- * resolves against a <template class="EditorPage" parent="…"> defined in
- * another .ui file of the same bundle — the XML equivalent of Blueprint's
- * `$Class` template linking.
- */
-function collectBuilderTemplates(files: BlueprintSourceFile[], diagnostics: ImportDiagnostic[]): Map<string, AdwNode> {
-  const templates = new Map<string, AdwNode>();
-  let generatedId = 0;
-  const nextId = () => `template-imported-${++generatedId}`;
-  for (const file of files) {
-    if (!/<template[\s>]/.test(file.content)) continue;
-    const visit = (elements: XmlElement[]) => {
-      for (const element of elements) {
-        if (element.tag === 'interface') { visit(element.children); continue; }
-        if (element.tag !== 'template') continue;
-        const className = element.attributes.class;
-        if (!className) continue;
-        const node = builderElementToNode(element, diagnostics, nextId);
-        if (node) templates.set(className, node);
-      }
-    };
-    visit(parseXmlElements(file.content));
-  }
-  return templates;
-}
-
-function resolveBuilderTemplates(node: AdwNode, templates: Map<string, AdwNode>, seen: ReadonlySet<string>, resolved: Set<string>): void {
-  node.children?.forEach(child => resolveBuilderTemplates(child, templates, seen, resolved));
-  if (node.type !== 'custom-widget' || !node.sourceClass || node.children?.length) return;
-  const template = templates.get(node.sourceClass);
-  if (!template || seen.has(node.sourceClass)) return;
-  resolved.add(`${node.sourceClass}:${node.id}`);
-  const projected = structuredClone(template);
-  // GtkBuilder composite templates commonly bind an inner widget to a
-  // property supplied by the concrete instance, e.g. ClocksHeaderBar's
-  // `AdwViewSwitcher.stack <- ClocksHeaderBar.stack` while the instance sets
-  // `stack=stack`. Once the template is flattened there is no GObject owner
-  // left to perform that binding, so carry any source-known instance literal
-  // onto the projected child. Dynamic properties remain as bindings.
-  const resolveInstanceBindings = (projectedNode: AdwNode): void => {
-    for (const [targetProperty, expression] of Object.entries(projectedNode.bindings ?? {})) {
-      const reference = /^([A-Za-z_][A-Za-z0-9_]*)\.([A-Za-z0-9_-]+)$/.exec(expression);
-      if (!reference || reference[1] !== node.sourceClass) continue;
-      const sourceKey = editorPropertyName(reference[2], node.type);
-      const value = node[sourceKey];
-      if (value === undefined) continue;
-      projectedNode[editorPropertyName(targetProperty, projectedNode.type)] = value;
-      delete projectedNode.bindings![targetProperty];
-    }
-    if (projectedNode.bindings && Object.keys(projectedNode.bindings).length === 0) delete projectedNode.bindings;
-    projectedNode.children?.forEach(resolveInstanceBindings);
-  };
-  resolveInstanceBindings(projected);
-  node.type = projected.type;
-  node.children = projected.children ?? [];
-  if (node.title === node.sourceClass) delete node.title;
-  for (const [key, value] of Object.entries(projected)) {
-    if (key === 'id' || key === 'slot' || key === 'children' || node[key] !== undefined) continue;
-    node[key] = value;
-  }
-  const nested = new Set(seen);
-  nested.add(node.sourceClass!);
-  node.children?.forEach(child => resolveBuilderTemplates(child, templates, nested, resolved));
-}
+export {
+  type XmlElement,
+  decodeXmlEntities,
+  parseXmlElements,
+  builderScalar,
+  builderElementToNode,
+  parseGtkBuilderRoots,
+  collectBuilderTemplates,
+  resolveBuilderTemplates,
+} from './blueprintBuilder';
+import {
+  parseGtkBuilderRoots,
+  collectBuilderTemplates,
+  resolveBuilderTemplates,
+} from './blueprintBuilder';
 
 export interface BlueprintImportResult {
   roots: AdwNode[];
@@ -1588,13 +1353,30 @@ function resolveWidgetVisibilityBindings(root: AdwNode): void {
 export function blueprintToDocument(code: string, title = 'Imported GNOME App'): MockupDocument {
   const { roots: allRoots, diagnostics } = blueprintImport(code);
   // Real UI files declare popovers, panels, and helper widgets as siblings of
-  // the window; when a window-like root exists, it is the document's screen.
-  const windowRoots = allRoots.filter(root =>
-    root.type === 'window' || root.type === 'dialog' || root.type === 'preferences-dialog' || root.type === 'about-dialog');
+  // the window; when a window-like root exists, the document's screens are those
+  // roots. The set is every window- or dialog-like root class the screen
+  // templates can produce rather than an ad-hoc list: `alert-dialog` was
+  // missing here, so a document whose last screen was an alert dialog exported
+  // an `Adw.AlertDialog` root and then DROPPED that whole screen on the way back
+  // in — silently, because `roots` was non-empty without it.
+  // `box` (the `empty` template's root) is deliberately excluded: a bare
+  // Gtk.Box sibling is a plausible helper widget, and keeping it would promote
+  // helpers to phantom screens. A lone box still imports via the fallback below.
+  const SCREEN_ROOT_TYPES = new Set<AdwNodeType>(
+    Object.values(TEMPLATE_ROOT).filter((type) => type !== 'box'),
+  );
+  const windowRoots = allRoots.filter(root => SCREEN_ROOT_TYPES.has(root.type));
   const roots = windowRoots.length ? windowRoots : allRoots;
   roots.forEach(resolveMultiLayoutViews);
   roots.forEach(resolveWidgetVisibilityBindings);
-  const inferType = (root: AdwNode): ScreenTemplateType => root.type === 'preferences-dialog' ? 'preferences' : root.type === 'dialog' ? 'dialog' : 'standard';
+  const inferType = (root: AdwNode): ScreenTemplateType =>
+    root.type === 'preferences-dialog' ? 'preferences'
+    : root.type === 'dialog' ? 'dialog'
+    : root.type === 'alert-dialog' ? 'alert-dialog'
+    : root.type === 'about-dialog' ? 'about'
+    : root.type === 'status-page' ? 'status-page'
+    : root.type === 'box' ? 'empty'
+    : 'standard';
   // Screen geometry comes from the source's own declaration when it has one
   // (default-width on windows, content-width on the Adw.Dialog family) —
   // this is also what carries an edited screen size across the Blueprint
@@ -1715,7 +1497,7 @@ export function blueprintChildSource(node: AdwNode, depth: number, parentClassNa
   return `${indent(depth)}${slotName}: ${trimmed};\n`;
 }
 
-interface BlueprintTemplate {
+export interface BlueprintTemplate {
   className: string;
   body: string;
 }
@@ -1751,7 +1533,7 @@ function collectTemplates(files: BlueprintSourceFile[]): Map<string, BlueprintTe
   return templates;
 }
 
-function expandBundleTemplates(source: string, templates: Map<string, BlueprintTemplate>, stack: string[] = []): string {
+export function expandBundleTemplates(source: string, templates: Map<string, BlueprintTemplate>, stack: string[] = []): string {
   const reference = /\$([A-Za-z_][A-Za-z0-9_-]*)\s+([A-Za-z_][A-Za-z0-9_-]*)\s*\{/g;
   return source.replace(reference, (match, name: string, id: string) => {
     const template = templates.get(name);
@@ -1768,307 +1550,6 @@ function expandBundleTemplates(source: string, templates: Map<string, BlueprintT
       .replace(/\b(bind(?:-property)?)\s+template\./g, `$1 $${name}.`);
     return `${template.className} ${id} {${body}`;
   });
-}
-
-/**
- * Vala spellings that make the argument the receiver's sole child slot.
- * `set_parent` is C's spelling of the same fact for a plain GtkWidget
- * subclass: the widget parented directly onto the composite is its content.
- */
-const VALA_SELF_CHILD_METHODS = new Set(['set_child', 'set_content', 'child', 'content', 'set_parent']);
-
-function formatBlueprintValue(value: string | number | boolean): string {
-  return typeof value === 'string' ? `"${escapeBlueprintString(value)}"` : String(value);
-}
-
-/** `styles ["a", "b"]` for a fact target, or the empty string. */
-function factStyleClasses(facts: ValaClassFacts, target: string): string {
-  const names = (facts.styleClasses ?? [])
-    .filter(styleClass => styleClass.target === target)
-    .map(styleClass => `"${escapeBlueprintString(styleClass.name)}"`);
-  return names.length ? `styles [ ${names.join(', ')} ]` : '';
-}
-
-/**
- * Project a code-defined composite as Blueprint source, using only the
- * construction facts a language adapter discovered: the widget installed as
- * the class's own child, the children deterministically inserted into it, and
- * their literal properties. Classes whose declarative template exists in the
- * bundle are emitted as `$Template` references so normal template expansion
- * resolves their contents; everything else stays a boundary.
- */
-function valaCompositeSnippet(
-  facts: ValaClassFacts,
-  templates: Map<string, BlueprintTemplate>,
-): { snippet: string; projectedBaseClass?: string } | null {
-  const emitVariable = (variable: string): string | null => {
-    const constructedClass = facts.constructions[variable];
-    if (!constructedClass) return null;
-    // A popover parented in code is a popup surface allocated above the
-    // window, invisible until opened — the same reason the declarative
-    // parser filters `popover`-slot children out of the layout tree.
-    if (/Popover/.test(constructedClass)) return null;
-    const short = constructedClass.split('.').pop() ?? constructedClass;
-    if (templates.has(short)) return `$${short} ${variable} {}`;
-    const properties = facts.propertyAssignments
-      .filter(assignment => assignment.target === variable)
-      .map(assignment => `${assignment.property.replace(/_/g, '-')}: ${formatBlueprintValue(assignment.value)};`)
-      .join(' ');
-    const styles = factStyleClasses(facts, variable);
-    const children = facts.insertions
-      .filter(insertion => insertion.parent === variable)
-      .map(insertion => emitVariable(insertion.child))
-      .filter(Boolean)
-      .join(' ');
-    if (CLASS_TO_WIDGET_MAP[constructedClass] || CLASS_TO_WIDGET_MAP[short]) {
-      return `${constructedClass} ${variable} { ${properties} ${styles} ${children} }`;
-    }
-    // A nested code-defined class stays a boundary here; the enrichment walk
-    // revisits it with its own facts.
-    return `$${short} ${variable} {}`;
-  };
-
-  // A single self-installed child is the composite's whole content (the
-  // FullscreenBox/DragOverlay wrapper shape). With *several* self-installed
-  // children and a renderable declared base, the base projection below keeps
-  // all of them — an Overlay composite's set_child main child plus its
-  // add_overlay layers — where the sole-child shortcut would drop siblings.
-  const selfInsertions = facts.insertions.filter(insertion => insertion.parent === 'this');
-  // The same gate the base projection itself applies: a plain Gtk.Widget base
-  // names a custom-drawn widget and proves nothing renderable.
-  const canonicalDeclaredBase = facts.baseClass ? canonicalClassName(facts.baseClass) : null;
-  const baseIsRenderable = Boolean(
-    !facts.overridesSnapshot
-    && canonicalDeclaredBase && canonicalDeclaredBase !== 'Gtk.Widget' && canonicalDeclaredBase !== 'Widget'
-    && CLASS_TO_WIDGET_MAP[canonicalDeclaredBase],
-  );
-  if (!(selfInsertions.length > 1 && baseIsRenderable)) {
-    for (const insertion of selfInsertions) {
-      if (!VALA_SELF_CHILD_METHODS.has(insertion.method)) continue;
-      const snippet = emitVariable(insertion.child);
-      if (snippet) return { snippet };
-    }
-  }
-
-  // No sole-child root, but the composite may *be* its declared base widget:
-  // `struct _EditorPreferencesSwitch { AdwActionRow row; … }` adds a switch
-  // suffix to itself in init. Projecting the base class with the code-added
-  // children is a construction fact, not a guess — gated on the base being a
-  // real renderable library class. A plain Gtk.Widget base names a
-  // custom-drawn widget and proves nothing renderable, so it is excluded.
-  const base = facts.baseClass;
-  if (!base) return null;
-  // A snapshot-overriding class paints itself: its base-class chrome is not
-  // its appearance, so it stays an honest boundary (GcalWeekHourBar draws
-  // hour lines over the labels its GtkBox base carries).
-  if (facts.overridesSnapshot) return null;
-  const canonicalBase = canonicalClassName(base);
-  if (canonicalBase === 'Gtk.Widget' || canonicalBase === 'Widget' || !CLASS_TO_WIDGET_MAP[canonicalBase]) return null;
-  const selfChildren = facts.insertions
-    .filter(insertion => insertion.parent === 'this')
-    .map(insertion => {
-      const body = emitVariable(insertion.child);
-      if (!body) return null;
-      // adw_action_row_add_suffix places its child in the `[suffix]` slot.
-      const slot = insertion.method.replace(/^(add|set)_/, '');
-      return ANNOTATION_SLOTS.has(slot) ? `[${slot}] ${body}` : body;
-    })
-    .filter(Boolean)
-    .join(' ');
-  // A chromeless container base with no discovered children would project as
-  // an empty box that renders nothing — a boundary silently erased, when the
-  // subclass almost certainly populates itself at runtime. A base that draws
-  // its own chrome (a row, an entry) is that widget even when empty.
-  const CHROMELESS_CONTAINER_TYPES = new Set([
-    'bin', 'box', 'grid', 'center-box', 'clamp', 'stack', 'scrolled-window', 'overlay',
-    'list-box', 'wrap-box', 'overlay-split', 'toolbar-view',
-  ]);
-  if (!selfChildren && CHROMELESS_CONTAINER_TYPES.has(CLASS_TO_WIDGET_MAP[canonicalBase])) return null;
-  const selfProperties = facts.propertyAssignments
-    .filter(assignment => assignment.target === 'this')
-    .map(assignment => `${assignment.property.replace(/_/g, '-')}: ${formatBlueprintValue(assignment.value)};`)
-    .join(' ');
-  return {
-    snippet: `${canonicalBase} { ${selfProperties} ${factStyleClasses(facts, 'this')} ${selfChildren} }`,
-    projectedBaseClass: canonicalBase,
-  };
-}
-
-/**
- * C insertion calls carry their full symbol (`adw_action_row_add_suffix`);
- * the enrichment engine reasons in Vala's short spellings (`add_suffix`).
- */
-const C_METHOD_SUFFIXES = [
-  'set_parent', 'set_child', 'set_content', 'add_suffix', 'add_prefix',
-  'add_overlay', 'add_top_bar', 'add_bottom_bar', 'add_named', 'add_titled',
-  'add_child', 'append', 'prepend', 'attach', 'set_start_widget',
-  'set_end_widget', 'set_title_widget', 'set_extra_child',
-];
-function shortCMethod(method: string): string {
-  return C_METHOD_SUFFIXES.find(suffix => method === suffix || method.endsWith(`_${suffix}`)) ?? method;
-}
-
-/**
- * C and Vala describe construction differently but yield the same *facts*, so
- * both feed one enrichment engine rather than two parallel implementations.
- * Only the extraction is language-specific.
- */
-function valaShapeOfCFacts(facts: CClassFacts): ValaClassFacts {
-  return {
-    className: facts.className,
-    baseClass: facts.baseClass,
-    templateResource: facts.templateResource,
-    // C has no declared-default syntax; the template is the source of truth.
-    propertyDefaults: {},
-    constructions: facts.constructions,
-    insertions: facts.insertions.map(insertion => ({ ...insertion, method: shortCMethod(insertion.method) })),
-    propertyAssignments: facts.propertyAssignments,
-    styleClasses: facts.styleClasses,
-    overridesSnapshot: facts.overridesSnapshot,
-  };
-}
-
-/**
- * Phase 4 static enrichment: give code-defined boundaries their statically
- * discoverable contents. Structural only — facts come from language syntax,
- * never from application names or invented widgets.
- */
-function enrichWithValaFacts(doc: MockupDocument, valaFiles: BlueprintSourceFile[], templates: Map<string, BlueprintTemplate>, cFiles: BlueprintSourceFile[] = [], pythonFiles: BlueprintSourceFile[] = []): void {
-  const factsByClass = new Map<string, ValaClassFacts>();
-  for (const file of valaFiles) {
-    for (const facts of extractValaFacts(file.content)) factsByClass.set(facts.className, facts);
-  }
-  for (const file of cFiles) {
-    for (const facts of extractCFacts(file.content)) {
-      // A Vala definition wins if an app somehow has both.
-      if (!factsByClass.has(facts.className)) {
-        factsByClass.set(facts.className, valaShapeOfCFacts(facts));
-      }
-    }
-  }
-  for (const file of pythonFiles) {
-    for (const facts of extractPythonFacts(file.content)) {
-      if (!factsByClass.has(facts.className)) factsByClass.set(facts.className, facts);
-    }
-  }
-  if (!factsByClass.size) return;
-
-  /**
-   * A subclass of another *app-defined* class inherits that ancestor's
-   * construction facts: the ancestor's init runs for every instance, so its
-   * constructions/insertions are source evidence for the subclass too
-   * (EartagTagEditableLabel extends EartagEditableLabel, which builds an
-   * entry+label overlay). The chain resolves until a library base class.
-   */
-  const resolveBaseChain = (facts: ValaClassFacts, guard: ReadonlySet<string>): ValaClassFacts => {
-    const base = facts.baseClass;
-    if (!base || guard.has(facts.className)) return facts;
-    const ancestor = factsByClass.get(base) ?? factsByClass.get(base.split('.').pop() ?? base);
-    if (!ancestor || ancestor === facts) return facts;
-    const resolved = resolveBaseChain(ancestor, new Set([...guard, facts.className]));
-    return {
-      ...facts,
-      baseClass: resolved.baseClass,
-      overridesSnapshot: facts.overridesSnapshot || resolved.overridesSnapshot,
-      templateResource: facts.templateResource ?? resolved.templateResource,
-      propertyDefaults: { ...resolved.propertyDefaults, ...facts.propertyDefaults },
-      constructions: { ...resolved.constructions, ...facts.constructions },
-      insertions: [...resolved.insertions, ...facts.insertions],
-      propertyAssignments: [...resolved.propertyAssignments, ...facts.propertyAssignments],
-      styleClasses: [...(resolved.styleClasses ?? []), ...(facts.styleClasses ?? [])],
-    };
-  };
-  const diagnostics = doc.importDiagnostics ?? (doc.importDiagnostics = []);
-
-  const expandNode = (node: AdwNode, seen: ReadonlySet<string>): void => {
-    node.children?.forEach(child => expandNode(child, seen));
-    if (node.type !== 'custom-widget' || !node.sourceClass || node.children?.length) return;
-    const declaredFacts = factsByClass.get(node.sourceClass);
-    if (!declaredFacts || seen.has(node.sourceClass)) return;
-    const facts = resolveBaseChain(declaredFacts, new Set());
-    // Expand flags set in code are geometry evidence for the boundary itself.
-    for (const assignment of facts.propertyAssignments) {
-      if (assignment.target !== 'this' || assignment.value !== true) continue;
-      const projectFromCode = (property: 'vexpand' | 'hexpand') => {
-        node[property] = true;
-        // Record that code, not the declarative source, produced this fact so
-        // the boundary's geometry audit trail (#55) names the right layer.
-        (node.geometryOrigin ??= {})[property] = 'code';
-      };
-      if (assignment.property === 'vexpand' || assignment.property === 'vexpand_set') projectFromCode('vexpand');
-      if (assignment.property === 'hexpand' || assignment.property === 'hexpand_set') projectFromCode('hexpand');
-    }
-    const projection = valaCompositeSnippet(facts, templates);
-    if (!projection) return;
-    const childDiagnostics: ImportDiagnostic[] = [];
-    const roots = parseBlueprintRoots(expandBundleTemplates(projection.snippet, templates), childDiagnostics);
-    if (!roots.length) return;
-    if (projection.projectedBaseClass) {
-      // The composite *is* its declared base widget. The node becomes that
-      // widget — declared source properties (title, subtitle, visibility)
-      // win over code facts — and stops being an unresolved boundary. Child
-      // ids are namespaced per instance: eleven preference rows must not
-      // share a `toggle`.
-      const projected = roots[0];
-      const namespaceIds = (child: AdwNode): void => {
-        // Browser persistence immediately exports enriched documents back to
-        // Blueprint. Keep generated ids inside Blueprint's identifier grammar;
-        // a hyphen tokenizes as subtraction and made the app disappear on reload.
-        child.id = `${node.id}_${child.id}`.replace(/[^A-Za-z0-9_]/g, '_');
-        if (/^[0-9]/.test(child.id)) child.id = `node_${child.id}`;
-        child.children?.forEach(namespaceIds);
-      };
-      projected.children?.forEach(namespaceIds);
-      node.type = projected.type;
-      node.children = projected.children ?? [];
-      if (node.title === node.sourceClass) delete node.title;
-      for (const [key, value] of Object.entries(projected)) {
-        if (key === 'id' || key === 'slot' || key === 'children' || key === 'type' || node[key] !== undefined) continue;
-        node[key] = value;
-      }
-    } else {
-      node.children = roots;
-    }
-    diagnostics.push(...childDiagnostics, {
-      code: 'static-source-expansion',
-      sourceClass: node.sourceClass,
-      sourceId: node.id,
-      message: projection.projectedBaseClass
-        ? `${node.sourceClass} is a code-defined subclass of ${projection.projectedBaseClass}; resolved to its base widget with its code-constructed children.`
-        : `${node.sourceClass} composite discovered from Vala construction facts; contents projected from declarative templates in the source bundle.`,
-    });
-    const nested = new Set(seen);
-    nested.add(node.sourceClass);
-    (node.children ?? []).forEach(child => expandNode(child, nested));
-  };
-
-  // A binding to a template property with a declared literal default has a
-  // statically known initial value. Projecting it (e.g. `visible: bind
-  // $Class.box-visible` with `default = false`) is source evidence, not a
-  // guess; runtime state changes stay out of reach until a runtime profile.
-  const resolveBindingDefaults = (node: AdwNode): void => {
-    for (const [property, expression] of Object.entries(node.bindings ?? {})) {
-      const reference = /^\$([A-Za-z_][A-Za-z0-9_]*)\.([A-Za-z0-9_-]+)(\s+inverted)?$/.exec(expression);
-      if (!reference) continue;
-      const owner = factsByClass.get(reference[1]);
-      const declaredDefault = owner?.propertyDefaults[reference[2].replace(/-/g, '_')];
-      if (typeof declaredDefault !== 'boolean') continue;
-      const value = reference[3] ? !declaredDefault : declaredDefault;
-      if (property === 'visible' && node.visible === undefined) node.visible = value;
-    }
-    node.children?.forEach(resolveBindingDefaults);
-  };
-
-  doc.screens.forEach(screen => expandNode(screen.rootNode, new Set()));
-  doc.screens.forEach(screen => resolveBindingDefaults(screen.rootNode));
-  // An expanded composite is no longer an unresolved boundary.
-  const expandedKeys = new Set(
-    diagnostics.filter(d => d.code === 'static-source-expansion').map(d => `${d.sourceClass}:${d.sourceId}`),
-  );
-  doc.importDiagnostics = diagnostics.filter(d => !(
-    (d.code === 'template-not-in-bundle' || d.code === 'renderer-does-not-support-class') &&
-    expandedKeys.has(`${d.sourceClass}:${d.sourceId}`)
-  ));
 }
 
 /**

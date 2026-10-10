@@ -12,6 +12,11 @@ type GtkMenuButtonElement = HTMLElement & {
   menuModel: AdwMenuNode[];
 };
 
+/** The owned `<gtk-popover>`, typed only for its open-state subscription. */
+type GtkPopoverElement = HTMLElement & {
+  subscribe: (listener: (open: boolean) => void) => () => void;
+};
+
 type ThemeChoice = "auto" | "light" | "dark";
 
 const THEME_CHOICES: Array<{ choice: ThemeChoice; label: string; circleClass: string }> = [
@@ -149,6 +154,31 @@ export const AppMenuButton: React.FC = () => {
   const actionsRef = useRef<Record<string, () => void>>({});
   /** The model text last rendered, so a re-render only rebuilds when it changed. */
   const modelKeyRef = useRef<string | null>(null);
+  /** Latest theme state for the popover observer below (avoids re-subscribing). */
+  const colorSchemeRef = useRef<ThemeChoice>(colorScheme);
+  colorSchemeRef.current = colorScheme;
+  const setColorSchemeRef = useRef(setColorScheme);
+  setColorSchemeRef.current = setColorScheme;
+
+  // adwaita-web ≥0.57 re-renders the popover on every open (_refreshActions →
+  // PopoverMenuView.render() → replaceChildren()), which wipes the injected
+  // theme switcher that 0.56 left intact. The button subscribes to the popover
+  // in its connectedCallback, so this later subscription runs after the
+  // internal re-render — re-inject on open, re-sync when already present.
+  useEffect(() => {
+    const el = menuButtonRef.current;
+    const popover = el?.querySelector<GtkPopoverElement>("gtk-popover");
+    if (!el || !popover || typeof popover.subscribe !== "function") return;
+    return popover.subscribe((open) => {
+      if (!open) return;
+      const existing = popover.querySelector<HTMLElement>(":scope > .protota-theme-switcher");
+      if (existing) {
+        syncThemeSwitcher(existing, colorSchemeRef.current);
+        return;
+      }
+      injectThemeSwitcher(el, colorSchemeRef.current, (c) => setColorSchemeRef.current(c));
+    });
+  }, []);
 
   // Activation arrives as a bubbling menu-item-activated CustomEvent with
   // {id,label,path} — the model cannot carry callbacks.

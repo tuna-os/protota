@@ -4,7 +4,7 @@
  * render mode (which loads in-memory only; docs/render-api.md).
  */
 import type { MockupDocument } from '../types/mockup';
-import { blueprintBundleToDocument, type BlueprintSourceFile } from './blueprint';
+import { blueprintBundleToDocument, type BlueprintSourceFile } from './blueprintImport';
 
 export interface PresetMeta {
   id: string;

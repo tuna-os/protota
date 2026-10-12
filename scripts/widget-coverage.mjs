@@ -58,7 +58,7 @@ for (const checkout of checkouts) {
   }
 }
 
-const blueprintSource = readFileSync(join(repoRoot, 'src/utils/blueprint.ts'), 'utf8');
+const blueprintSource = readFileSync(join(repoRoot, 'src/utils/blueprintCodec.ts'), 'utf8');
 const mapSection = blueprintSource.slice(0, blueprintSource.indexOf('const WIDGET_CLASS_MAP'));
 const mapped = new Set([...mapSection.matchAll(/^\s*'?([A-Za-z][\w.]*)'?\s*:\s*'([a-z-]+)'/gm)].map((m) => m[1]));
 const rendererTypeOf = new Map([...mapSection.matchAll(/^\s*'?([A-Za-z][\w.]*)'?\s*:\s*'([a-z-]+)'/gm)].map((m) => [m[1], m[2]]));

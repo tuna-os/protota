@@ -24,7 +24,7 @@
 
 import type { MockupDocument, AdwNode, AdwNodeType, ScreenTemplateType } from '../types/mockup';
 import { LEGAL_CHILDREN, LEGAL_SLOTS, SCREEN_DEFAULTS, assertScreenTemplateType } from '../types/mockup';
-import { blueprintBundleToDocument, type BlueprintSourceFile } from './blueprint';
+import { blueprintBundleToDocument, type BlueprintSourceFile } from './blueprintImport';
 import { discoverAppSources, appBundleManifest, type AppFileMap } from './appDiscovery';
 import { fetchGitArchive } from './appIngest';
 

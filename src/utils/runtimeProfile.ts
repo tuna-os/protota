@@ -22,7 +22,7 @@
  */
 import type { AdwNode } from '../types/mockup';
 import type { GeometryFact } from './nodeGeometry';
-import { widgetClassForType, widgetTypeForClass } from './blueprint';
+import { widgetClassForType, widgetTypeForClass } from './blueprintCodec';
 
 export interface ProbeBounds { x: number; y: number; width: number; height: number }
 

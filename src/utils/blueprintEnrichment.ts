@@ -13,7 +13,7 @@ import {
   parseBlueprintRoots,
   type BlueprintSourceFile,
   type BlueprintTemplate,
-} from './blueprint';
+} from './blueprintImport';
 
 /**
  * Vala spellings that make the argument the receiver's sole child slot.

@@ -19,7 +19,7 @@ import {
   blueprintImport,
   blueprintTemplateReferences,
   type BlueprintSourceFile,
-} from './blueprint';
+} from './blueprintImport';
 
 /** Directories never walked/ingested — VCS internals and build output. */
 export const SKIP_DIRECTORIES = new Set([

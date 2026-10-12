@@ -1,6 +1,6 @@
 import React, { useRef, useState } from 'react';
 import { persistDocumentSource } from '../store/mockupStore';
-import { blueprintBundleToDocument } from '../utils/blueprint';
+import { blueprintBundleToDocument } from '../utils/blueprintImport';
 import {
   discoverAppSources,
   appBundleManifest,

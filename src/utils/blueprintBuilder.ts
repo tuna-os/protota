@@ -3,10 +3,9 @@ import {
   editorPropertyName,
   isBreakpointClass,
   isNonVisualClass,
-  makeNode,
   type BlueprintValue,
-  type BlueprintSourceFile,
-} from './blueprint';
+} from './blueprintCodec';
+import { makeNode, type BlueprintSourceFile } from './blueprintImport';
 
 export interface XmlElement {
   tag: string;

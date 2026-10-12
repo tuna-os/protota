@@ -9,6 +9,13 @@
 import type { AdwNodeType } from '../types/mockup';
 import { GTK_PROPERTY_DATA } from '../data/gtkProperties';
 
+/**
+ * A scalar Blueprint property value. Shared primitive for the parser/import
+ * side (blueprintImport.ts, blueprintBuilder.ts) and the serializer/export
+ * side (blueprintExport.ts).
+ */
+export type BlueprintValue = string | number | boolean;
+
 export const CLASS_TO_WIDGET_MAP: Record<string, AdwNodeType> = {
   'Adw.ApplicationWindow': 'window',
   'Adw.Window': 'window',

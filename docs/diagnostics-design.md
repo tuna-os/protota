@@ -22,7 +22,7 @@ build:
 | Store wiring | `src/store/mockupStore.ts` | `lintEnabled`, `violations`, `toggleLint()`; `pushSnapshot()` re-lints on every mutation while enabled |
 | Toggle UI | `src/components/TopBar.tsx` | "HIG Lint" toolbar button + Edit-menu item (Ctrl+.) |
 | Report UI | `src/components/AuditPanel.tsx` | bottom strip, max 5 items per severity, click-to-select |
-| Import diagnostics | `src/types/mockup.ts`, `src/utils/blueprint.ts` | `ImportDiagnostic` (`template-not-in-bundle`, `renderer-does-not-support-class`, `static-source-expansion`) recorded on `MockupDocument.importDiagnostics` during Blueprint/GtkBuilder import — currently **not shown anywhere** |
+| Import diagnostics | `src/types/mockup.ts`, `src/utils/blueprintImport.ts` | `ImportDiagnostic` (`template-not-in-bundle`, `renderer-does-not-support-class`, `static-source-expansion`) recorded on `MockupDocument.importDiagnostics` during Blueprint/GtkBuilder import — currently **not shown anywhere** |
 | Structural legality | `src/types/mockup.ts` | `LEGAL_CHILDREN` / `LEGAL_SLOTS` hard-block illegal nesting at edit time; the comment there explicitly says "HIG guidance belongs in the linter" |
 | HIG corpus | `docs/spec/reference/hig/*.md`, `docs/spec/tokens/*.md`, `docs/spec/reference/anti-patterns.md` | mirrored HIG pages + tokens extracted from audited GNOME apps (`docs/spec/audits/`) — the grounding source for every rule |
 
@@ -133,9 +133,11 @@ hatch is per-screen memoization keyed on the screen's `rootNode` identity
 
 "Blueprint LSP" needs unpacking. `blueprint-compiler` (and its LSP mode) is
 a Python program; Protota is a static browser app with **no backend and no
-Python**. Protota instead ships its own Blueprint/GtkBuilder reader-writer in
-`src/utils/blueprint.ts` (`blueprintImport`, `blueprintToDocument`,
-`mockupToBlueprint`). Three honest integration levels, in order:
+Python**. Protota instead ships its own Blueprint/GtkBuilder reader-writer:
+the reader (`blueprintImport`, `blueprintToDocument`) lives in
+`src/utils/blueprintImport.ts`, the writer (`mockupToBlueprint`) in
+`src/utils/blueprintExport.ts` (`src/utils/blueprint.ts` re-exports both
+for compatibility). Three honest integration levels, in order:
 
 1. **Now — surface what the importer already records.** Every
    `ImportDiagnostic` on `doc.importDiagnostics` becomes a

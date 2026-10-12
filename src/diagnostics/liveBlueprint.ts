@@ -15,7 +15,7 @@
  */
 import type { AdwNode, MockupDocument, Screen } from '../types/mockup';
 import type { Diagnostic } from './types';
-import { mockupToBlueprint } from '../utils/blueprint';
+import { mockupToBlueprint } from '../utils/blueprintExport';
 
 /** One parse error from blueprint_check.py; line/col are 1-based. */
 export interface WorkerSyntaxError {

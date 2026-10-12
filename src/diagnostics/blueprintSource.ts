@@ -8,7 +8,8 @@
  */
 import type { AdwNode, ImportDiagnostic, MockupDocument } from '../types/mockup';
 import type { Diagnostic, DiagnosticTier } from './types';
-import { blueprintToDocument, mockupToBlueprint } from '../utils/blueprint';
+import { blueprintToDocument } from '../utils/blueprintImport';
+import { mockupToBlueprint } from '../utils/blueprintExport';
 
 const CODE_MAP: Record<ImportDiagnostic['code'], { ruleId: string; tier: DiagnosticTier }> = {
   // A $Class reference had no template definition in the imported source.

@@ -20,7 +20,7 @@ import { IMPORT_FILE_INPUT_ID } from "./MenuData";
 import { setAdwaitaColorScheme } from "@gjsify/adwaita-core";
 import { useIsMobile } from "../hooks/useIsMobile";
 import { downloadPng, renderScreenToPng } from "../utils/pngExport";
-import { mockupToBlueprint } from "../utils/blueprint";
+import { mockupToBlueprint } from "../utils/blueprintExport";
 import { settleRender } from "../utils/settle";
 import { findNodeById } from "../utils/treeHelpers";
 

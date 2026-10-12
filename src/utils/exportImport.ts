@@ -1,6 +1,6 @@
 import type { MockupDocument, AdwNode } from '../types/mockup';
 import { getImageBlob, saveImageBlob } from '../services/imageStore';
-import { blueprintToDocument } from './blueprint';
+import { blueprintToDocument } from './blueprintImport';
 
 interface ExportPayload {
   version: number;

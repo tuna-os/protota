@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import type { MutableRefObject, RefObject } from "react";
+import type { RefObject } from "react";
 
 /**
  * Fired on `window` the moment a two-finger canvas gesture begins, so any
@@ -18,8 +18,8 @@ interface UseTouchPanZoomOptions {
   canvasRef: RefObject<HTMLDivElement | null>;
   /** The transformed surface (transform-origin `50% 0`, laid out with `safe center`). */
   surfaceRef: RefObject<HTMLDivElement | null>;
-  zoomRef: MutableRefObject<number>;
-  panRef: MutableRefObject<Point>;
+  zoom: number;
+  pan: Point;
   setPan: (pan: Point) => void;
   setZoom: (zoom: number) => void;
   minZoom: number;
@@ -59,7 +59,7 @@ interface GestureBaseline {
  */
 export function useTouchPanZoom(options: UseTouchPanZoomOptions): {
   isTouchGesturing: boolean;
-  touchGestureActiveRef: MutableRefObject<boolean>;
+  touchGestureActiveRef: RefObject<boolean>;
 } {
   const [isTouchGesturing, setIsTouchGesturing] = useState(false);
   const touchGestureActiveRef = useRef(false);
@@ -81,14 +81,12 @@ export function useTouchPanZoom(options: UseTouchPanZoomOptions): {
     };
 
     const beginGesture = () => {
-      const { surfaceRef, zoomRef, panRef } = optionsRef.current;
+      const { surfaceRef, zoom, pan } = optionsRef.current;
       const [a, b] = firstTwo();
       const rect = el.getBoundingClientRect();
       const surface = surfaceRef.current;
       const surfLeft = surface ? surface.offsetLeft : 0;
       const surfHalfW = surface ? surface.offsetWidth / 2 : 0;
-      const zoom = zoomRef.current;
-      const pan = panRef.current;
       const mx = (a.x + b.x) / 2 - rect.left;
       const my = (a.y + b.y) / 2 - rect.top;
       baseline = {

@@ -428,13 +428,30 @@ export const TEMPLATE_ROOT: Record<ScreenTemplateType, AdwNodeType> = {
  * HIG sizing defaults (from gnome-gui-spec tokens/sizing.md).
  */
 export const SCREEN_DEFAULTS: Record<ScreenTemplateType, { width: number; height: number }> = {
-  standard:          { width: 900,  height: 650 },
-  'view-switcher':   { width: 900,  height: 650 },
+  // 800×600 for the window templates: one of the BreakpointBar device
+  // presets, so a fresh screen matches a preset button instead of landing
+  // between two of them.
+  standard:          { width: 800,  height: 600 },
+  'view-switcher':   { width: 800,  height: 600 },
   preferences:       { width: 600,  height: 550 },
   sidebar:           { width: 1050, height: 700 },
   dialog:            { width: 500,  height: 400 },
   'alert-dialog':    { width: 360,  height: 200 },
   about:             { width: 420,  height: 400 },
   'status-page':     { width: 400,  height: 500 },
-  empty:             { width: 900,  height: 650 },
+  empty:             { width: 800,  height: 600 },
 };
+
+/**
+ * Runtime guard for screen-template arguments. TypeScript covers the UI call
+ * sites, but console/agent callers bypass it — indexing SCREEN_DEFAULTS with
+ * an arbitrary string fails as `Cannot read properties of undefined` deep
+ * inside the store instead of at the call boundary.
+ */
+export function assertScreenTemplateType(type: string): asserts type is ScreenTemplateType {
+  if (!(type in SCREEN_DEFAULTS)) {
+    throw new Error(
+      `unknown screen template "${type}". Valid: ${Object.keys(SCREEN_DEFAULTS).join(', ')}`,
+    );
+  }
+}

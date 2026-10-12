@@ -1,4 +1,5 @@
 import type { MockupDocument, AdwNode, AdwNodeType, BreakpointSetter, ImportDiagnostic, Screen, ScreenTemplateType } from '../types/mockup';
+import { TEMPLATE_ROOT } from '../types/mockup';
 import { GTK_PROPERTY_DATA } from '../data/gtkProperties';
 import { enrichWithValaFacts } from './blueprintEnrichment';
 
@@ -263,7 +264,7 @@ const NON_VISUAL_CLASS_PATTERN =
  * setters drive the adaptive behavior a live resize is supposed to show. It
  * survives import as a childless node the renderer skips.
  */
-function isBreakpointClass(rawClass: string): boolean {
+export function isBreakpointClass(rawClass: string): boolean {
   return rawClass === 'Breakpoint' || canonicalClassName(rawClass) === 'Adw.Breakpoint';
 }
 
@@ -824,7 +825,7 @@ export function mockupToBlueprint(doc: MockupDocument, options?: BlueprintExport
  * object references). We retain the widgets, scalar properties, and named
  * child slots that determine Libadwaita layout.
  */
-type BlueprintValue = string | number | boolean;
+export type BlueprintValue = string | number | boolean;
 
 interface Token {
   value: string;
@@ -923,11 +924,11 @@ export function canonicalClassName(rawClass: string): string {
   return gobject ? `${gobject[1]}.${gobject[2]}` : rawClass;
 }
 
-function isNonVisualClass(rawClass: string): boolean {
+export function isNonVisualClass(rawClass: string): boolean {
   return NON_VISUAL_CLASS_PATTERN.test(rawClass) || NON_VISUAL_CLASS_PATTERN.test(canonicalClassName(rawClass));
 }
 
-function makeNode(
+export function makeNode(
   rawClass: string,
   id: string,
   properties: Record<string, BlueprintValue>,
@@ -1243,258 +1244,24 @@ export function parseBlueprintRoots(code: string, diagnostics: ImportDiagnostic[
 }
 
 // ---------------------------------------------------------------------------
-// GtkBuilder XML import
+// GtkBuilder XML import (delegated to blueprintBuilder.ts)
 // ---------------------------------------------------------------------------
 
-interface XmlElement {
-  tag: string;
-  attributes: Record<string, string>;
-  children: XmlElement[];
-  text: string;
-}
-
-function decodeXmlEntities(text: string): string {
-  return text
-    .replace(/&#x([0-9a-fA-F]+);/g, (_, hex: string) => String.fromCodePoint(parseInt(hex, 16)))
-    .replace(/&#(\d+);/g, (_, dec: string) => String.fromCodePoint(Number(dec)))
-    .replace(/&lt;/g, '<').replace(/&gt;/g, '>')
-    .replace(/&quot;/g, '"').replace(/&apos;/g, "'")
-    .replace(/&amp;/g, '&');
-}
-
-/** Minimal structural XML parser — elements, attributes, text, comments. */
-function parseXmlElements(code: string): XmlElement[] {
-  const roots: XmlElement[] = [];
-  const stack: XmlElement[] = [];
-  const tagPattern = /<!--[\s\S]*?-->|<!\[CDATA\[[\s\S]*?\]\]>|<\?[\s\S]*?\?>|<!DOCTYPE[^>]*>|<\/?[A-Za-z_][\w.:-]*(?:\s+[^<>]*?)?\/?>|[^<]+/g;
-  const attrPattern = /([\w.:-]+)\s*=\s*"([^"]*)"|([\w.:-]+)\s*=\s*'([^']*)'/g;
-  for (const match of code.matchAll(tagPattern)) {
-    const chunk = match[0];
-    if (chunk.startsWith('<!--') || chunk.startsWith('<?') || chunk.startsWith('<!DOCTYPE')) continue;
-    if (chunk.startsWith('<![CDATA[')) {
-      const parent = stack[stack.length - 1];
-      if (parent) parent.text += chunk.slice(9, -3);
-      continue;
-    }
-    if (!chunk.startsWith('<')) {
-      const parent = stack[stack.length - 1];
-      if (parent) parent.text += decodeXmlEntities(chunk);
-      continue;
-    }
-    if (chunk.startsWith('</')) { stack.pop(); continue; }
-    const tag = /^<([A-Za-z_][\w.:-]*)/.exec(chunk)![1];
-    const attributes: Record<string, string> = {};
-    for (const attr of chunk.matchAll(attrPattern)) {
-      attributes[attr[1] ?? attr[3]] = decodeXmlEntities(attr[2] ?? attr[4] ?? '');
-    }
-    const element: XmlElement = { tag, attributes, children: [], text: '' };
-    (stack[stack.length - 1]?.children ?? roots).push(element);
-    if (!chunk.endsWith('/>')) stack.push(element);
-  }
-  return roots;
-}
-
-function builderScalar(raw: string): BlueprintValue {
-  const text = raw.trim();
-  if (text === 'true' || text === 'True') return true;
-  if (text === 'false' || text === 'False') return false;
-  return /^-?\d+(\.\d+)?$/.test(text) ? Number(text) : text;
-}
-
-/**
- * Project a GtkBuilder <object>/<template> element to a renderer node.
- * Structure-preserving: child roles become slots, object-valued properties
- * become slotted children, style classes and layout properties project onto
- * the node, and unknown classes survive as explicit boundaries.
- */
-function builderElementToNode(
-  element: XmlElement,
-  diagnostics: ImportDiagnostic[],
-  nextId: () => string,
-): AdwNode | null {
-  const rawClass = element.tag === 'template'
-    ? element.attributes.parent ?? element.attributes.class ?? 'GtkWidget'
-    : element.attributes.class ?? 'GtkWidget';
-  if (isNonVisualClass(rawClass)) return null;
-  const id = element.attributes.id ?? nextId();
-  const properties: Record<string, BlueprintValue> = {};
-  const bindings: Record<string, string> = {};
-  const children: AdwNode[] = [];
-  const breakpoint = isBreakpointClass(rawClass);
-  let breakpointCondition: string | undefined;
-  const breakpointSetters: BreakpointSetter[] = [];
-
-  for (const child of element.children) {
-    if (breakpoint && child.tag === 'condition') {
-      breakpointCondition = child.text.trim();
-      continue;
-    }
-    if (breakpoint && child.tag === 'setter') {
-      const target = child.attributes.object;
-      const property = child.attributes.property;
-      if (target && property) {
-        const text = child.text.trim();
-        // An empty <setter/> unsets the property when the breakpoint applies.
-        breakpointSetters.push({
-          target,
-          property: property.replace(/_/g, '-'),
-          value: text === '' ? null : builderScalar(text),
-        });
-      }
-      continue;
-    }
-    if (child.tag === 'property') {
-      const name = child.attributes.name;
-      if (!name) continue;
-      const objectValue = child.children.find(inner => inner.tag === 'object');
-      if (objectValue) {
-        const node = builderElementToNode(objectValue, diagnostics, nextId);
-        if (node) children.push({ ...node, slot: name });
-      } else if (child.attributes['bind-source']) {
-        bindings[name] = `${child.attributes['bind-source']}.${child.attributes['bind-property'] ?? name}`;
-      } else {
-        properties[name] = builderScalar(child.text);
-      }
-      continue;
-    }
-    if (child.tag === 'binding') {
-      const name = child.attributes.name;
-      if (name) bindings[name] = child.text.trim() || 'expression';
-      continue;
-    }
-    if (child.tag === 'child') {
-      const slot = child.attributes.type;
-      for (const inner of child.children) {
-        if (inner.tag !== 'object' && inner.tag !== 'placeholder') continue;
-        if (inner.tag === 'placeholder') continue;
-        const node = builderElementToNode(inner, diagnostics, nextId);
-        if (node) children.push(slot ? { ...node, slot } : node);
-      }
-      continue;
-    }
-    if (child.tag === 'style') {
-      const styleNames: string[] = [];
-      for (const styleClass of child.children) {
-        const name = styleClass.attributes.name;
-        if (name) styleNames.push(name);
-        if (name === 'suggested-action') properties.suggested = true;
-        if (name === 'destructive-action') properties.destructive = true;
-        if (name === 'flat') properties.flat = true;
-        if (name === 'circular') properties.circular = true;
-      }
-      if (styleNames.length) properties.styleClasses = styleNames.join(' ');
-      continue;
-    }
-    if (child.tag === 'layout') {
-      for (const layoutProperty of child.children) {
-        const name = layoutProperty.attributes.name;
-        if (!name) continue;
-        properties[name] = builderScalar(layoutProperty.text);
-      }
-      continue;
-    }
-    // <signal>, <accessibility>, <attributes>, <items>… are non-structural.
-  }
-  if (breakpoint && breakpointCondition === undefined) return null;
-  const node = makeNode(rawClass, id, properties, bindings, children, diagnostics);
-  // A GtkBuilder template's concrete GType is its `class`, even though its
-  // renderer shape comes from `parent`. Preserve both facts: `type` remains
-  // the supported parent widget while sourceClass lets runtime matching join
-  // a presented composite dialog (ClocksAlarmSetupDialog) instead of
-  // incorrectly seeding it at the application's first toplevel window.
-  if (element.tag === 'template' && element.attributes.class) {
-    node.sourceClass = element.attributes.class;
-  }
-  if (breakpoint && breakpointCondition !== undefined) {
-    node.breakpointCondition = breakpointCondition;
-    if (breakpointSetters.length) node.breakpointSetters = breakpointSetters;
-  }
-  return node;
-}
-
-function parseGtkBuilderRoots(code: string, diagnostics: ImportDiagnostic[]): AdwNode[] {
-  let generatedId = 0;
-  const nextId = () => `imported-${++generatedId}`;
-  const roots: AdwNode[] = [];
-  const visit = (elements: XmlElement[]) => {
-    for (const element of elements) {
-      if (element.tag === 'interface') { visit(element.children); continue; }
-      if (element.tag === 'object' || element.tag === 'template') {
-        const node = builderElementToNode(element, diagnostics, nextId);
-        if (node) roots.push(node);
-      }
-      // <menu>, <requires>… are non-visual at the interface level.
-    }
-  };
-  visit(parseXmlElements(code));
-  return roots;
-}
-
-/**
- * GtkBuilder composite templates: an <object class="EditorPage"> instance
- * resolves against a <template class="EditorPage" parent="…"> defined in
- * another .ui file of the same bundle — the XML equivalent of Blueprint's
- * `$Class` template linking.
- */
-function collectBuilderTemplates(files: BlueprintSourceFile[], diagnostics: ImportDiagnostic[]): Map<string, AdwNode> {
-  const templates = new Map<string, AdwNode>();
-  let generatedId = 0;
-  const nextId = () => `template-imported-${++generatedId}`;
-  for (const file of files) {
-    if (!/<template[\s>]/.test(file.content)) continue;
-    const visit = (elements: XmlElement[]) => {
-      for (const element of elements) {
-        if (element.tag === 'interface') { visit(element.children); continue; }
-        if (element.tag !== 'template') continue;
-        const className = element.attributes.class;
-        if (!className) continue;
-        const node = builderElementToNode(element, diagnostics, nextId);
-        if (node) templates.set(className, node);
-      }
-    };
-    visit(parseXmlElements(file.content));
-  }
-  return templates;
-}
-
-function resolveBuilderTemplates(node: AdwNode, templates: Map<string, AdwNode>, seen: ReadonlySet<string>, resolved: Set<string>): void {
-  node.children?.forEach(child => resolveBuilderTemplates(child, templates, seen, resolved));
-  if (node.type !== 'custom-widget' || !node.sourceClass || node.children?.length) return;
-  const template = templates.get(node.sourceClass);
-  if (!template || seen.has(node.sourceClass)) return;
-  resolved.add(`${node.sourceClass}:${node.id}`);
-  const projected = structuredClone(template);
-  // GtkBuilder composite templates commonly bind an inner widget to a
-  // property supplied by the concrete instance, e.g. ClocksHeaderBar's
-  // `AdwViewSwitcher.stack <- ClocksHeaderBar.stack` while the instance sets
-  // `stack=stack`. Once the template is flattened there is no GObject owner
-  // left to perform that binding, so carry any source-known instance literal
-  // onto the projected child. Dynamic properties remain as bindings.
-  const resolveInstanceBindings = (projectedNode: AdwNode): void => {
-    for (const [targetProperty, expression] of Object.entries(projectedNode.bindings ?? {})) {
-      const reference = /^([A-Za-z_][A-Za-z0-9_]*)\.([A-Za-z0-9_-]+)$/.exec(expression);
-      if (!reference || reference[1] !== node.sourceClass) continue;
-      const sourceKey = editorPropertyName(reference[2], node.type);
-      const value = node[sourceKey];
-      if (value === undefined) continue;
-      projectedNode[editorPropertyName(targetProperty, projectedNode.type)] = value;
-      delete projectedNode.bindings![targetProperty];
-    }
-    if (projectedNode.bindings && Object.keys(projectedNode.bindings).length === 0) delete projectedNode.bindings;
-    projectedNode.children?.forEach(resolveInstanceBindings);
-  };
-  resolveInstanceBindings(projected);
-  node.type = projected.type;
-  node.children = projected.children ?? [];
-  if (node.title === node.sourceClass) delete node.title;
-  for (const [key, value] of Object.entries(projected)) {
-    if (key === 'id' || key === 'slot' || key === 'children' || node[key] !== undefined) continue;
-    node[key] = value;
-  }
-  const nested = new Set(seen);
-  nested.add(node.sourceClass!);
-  node.children?.forEach(child => resolveBuilderTemplates(child, templates, nested, resolved));
-}
+export {
+  type XmlElement,
+  decodeXmlEntities,
+  parseXmlElements,
+  builderScalar,
+  builderElementToNode,
+  parseGtkBuilderRoots,
+  collectBuilderTemplates,
+  resolveBuilderTemplates,
+} from './blueprintBuilder';
+import {
+  parseGtkBuilderRoots,
+  collectBuilderTemplates,
+  resolveBuilderTemplates,
+} from './blueprintBuilder';
 
 export interface BlueprintImportResult {
   roots: AdwNode[];
@@ -1586,13 +1353,30 @@ function resolveWidgetVisibilityBindings(root: AdwNode): void {
 export function blueprintToDocument(code: string, title = 'Imported GNOME App'): MockupDocument {
   const { roots: allRoots, diagnostics } = blueprintImport(code);
   // Real UI files declare popovers, panels, and helper widgets as siblings of
-  // the window; when a window-like root exists, it is the document's screen.
-  const windowRoots = allRoots.filter(root =>
-    root.type === 'window' || root.type === 'dialog' || root.type === 'preferences-dialog' || root.type === 'about-dialog');
+  // the window; when a window-like root exists, the document's screens are those
+  // roots. The set is every window- or dialog-like root class the screen
+  // templates can produce rather than an ad-hoc list: `alert-dialog` was
+  // missing here, so a document whose last screen was an alert dialog exported
+  // an `Adw.AlertDialog` root and then DROPPED that whole screen on the way back
+  // in — silently, because `roots` was non-empty without it.
+  // `box` (the `empty` template's root) is deliberately excluded: a bare
+  // Gtk.Box sibling is a plausible helper widget, and keeping it would promote
+  // helpers to phantom screens. A lone box still imports via the fallback below.
+  const SCREEN_ROOT_TYPES = new Set<AdwNodeType>(
+    Object.values(TEMPLATE_ROOT).filter((type) => type !== 'box'),
+  );
+  const windowRoots = allRoots.filter(root => SCREEN_ROOT_TYPES.has(root.type));
   const roots = windowRoots.length ? windowRoots : allRoots;
   roots.forEach(resolveMultiLayoutViews);
   roots.forEach(resolveWidgetVisibilityBindings);
-  const inferType = (root: AdwNode): ScreenTemplateType => root.type === 'preferences-dialog' ? 'preferences' : root.type === 'dialog' ? 'dialog' : 'standard';
+  const inferType = (root: AdwNode): ScreenTemplateType =>
+    root.type === 'preferences-dialog' ? 'preferences'
+    : root.type === 'dialog' ? 'dialog'
+    : root.type === 'alert-dialog' ? 'alert-dialog'
+    : root.type === 'about-dialog' ? 'about'
+    : root.type === 'status-page' ? 'status-page'
+    : root.type === 'box' ? 'empty'
+    : 'standard';
   // Screen geometry comes from the source's own declaration when it has one
   // (default-width on windows, content-width on the Adw.Dialog family) —
   // this is also what carries an edited screen size across the Blueprint

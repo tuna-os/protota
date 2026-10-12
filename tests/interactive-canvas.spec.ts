@@ -43,8 +43,9 @@ test.describe('Interactive canvas (#10)', () => {
       const zoomBar = page.locator('.protota-zoom-bar');
       await expect(zoomBar).toBeVisible();
 
-      // Zoom percentage display
-      await expect(zoomBar.getByText(/100%/)).toBeVisible();
+      // Zoom percentage display. The initial view is Fit All Screens, so the
+      // value is whatever the fit resolves to — a percentage, not 100%.
+      await expect(zoomBar.locator('.protota-zoom-percent')).toHaveText(/^\d+%$/);
 
       // Zoom buttons
       await expect(zoomBar.getByRole('button', { name: /zoom out/i })).toBeVisible();

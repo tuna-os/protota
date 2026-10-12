@@ -15,12 +15,17 @@ export const CommandPalette: React.FC<Props> = ({ isOpen, onClose }) => {
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (isOpen) {
-      setSearch("");
-      const timer = setTimeout(() => inputRef.current?.focus(), 50);
-      return () => clearTimeout(timer);
-    }
+    if (!isOpen) return;
+    const timer = setTimeout(() => inputRef.current?.focus(), 50);
+    return () => clearTimeout(timer);
   }, [isOpen]);
+
+  // Reset on close — every close path funnels through here — instead of in
+  // an effect, so reopening always starts with a clean search.
+  const handleClose = () => {
+    setSearch("");
+    onClose();
+  };
 
   if (!isOpen) return null;
 
@@ -40,11 +45,11 @@ export const CommandPalette: React.FC<Props> = ({ isOpen, onClose }) => {
 
   const handleSelect = (type: AdwNodeType) => {
     if (selectedNodeId) addChildNode(selectedNodeId, type);
-    onClose();
+    handleClose();
   };
 
   return (
-    <div className="protota-modal-backdrop" onClick={onClose} style={{ zIndex: 2000 }}>
+    <div className="protota-modal-backdrop" onClick={handleClose} style={{ zIndex: 2000 }}>
       <div
         className="protota-command-palette"
         onClick={(e) => e.stopPropagation()}
@@ -76,7 +81,7 @@ export const CommandPalette: React.FC<Props> = ({ isOpen, onClose }) => {
               fontFamily: "inherit",
             }}
             onKeyDown={(e) => {
-              if (e.key === "Escape") onClose();
+              if (e.key === "Escape") handleClose();
               if (e.key === "Enter" && filtered.length > 0) handleSelect(filtered[0].type);
             }}
           />

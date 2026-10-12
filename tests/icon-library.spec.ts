@@ -81,6 +81,8 @@ test.describe('Icon library', () => {
     await page.getByRole('radio', { name: /status/i }).click();
     await page.getByRole('button', { name: /create screen/i }).click();
     await page.locator('adw-status-page').last().click();
+    // The icon trigger lives in the inspector, closed on a first-run document.
+    await page.keyboard.press('Control+]');
     await expect(page.locator('.protota-icon-trigger')).toBeVisible({ timeout: 5000 });
 
     await openLibrary(page);

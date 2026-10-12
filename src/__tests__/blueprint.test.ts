@@ -512,3 +512,71 @@ describe('Blueprint export long tail', () => {
     expect(exported).not.toContain('buffer:');
   });
 });
+
+describe('Blueprint screen round trip', () => {
+  const multiScreen: MockupDocument = {
+    id: 'multi', title: 'Multi', colorScheme: 'light', edges: [],
+    screens: [
+      {
+        id: 's1', title: 'Main', type: 'standard', width: 800, height: 600,
+        rootNode: { id: 'w', type: 'window', children: [] },
+      },
+      {
+        id: 's2', title: 'Confirm', type: 'alert-dialog', width: 460, height: 240,
+        rootNode: {
+          id: 'alert', type: 'alert-dialog', title: 'Uninstall?', description: 'Cannot be undone.',
+          children: [
+            { id: 'cancel', type: 'button', title: 'Cancel', flat: true },
+            { id: 'ok', type: 'button', title: 'Uninstall', destructive: true },
+          ],
+        },
+      },
+    ],
+  };
+
+  it('keeps an alert-dialog screen instead of dropping it', () => {
+    // Regression: the window-like root filter listed window/dialog/
+    // preferences-dialog/about-dialog but not alert-dialog (nor status-page).
+    // A document whose LAST screen was an alert dialog exported an
+    // Adw.AlertDialog root and then lost that whole screen on import —
+    // silently, because the other roots kept `roots` non-empty.
+    const imported = blueprintToDocument(mockupToBlueprint(multiScreen));
+    expect(imported.screens).toHaveLength(2);
+    expect(imported.screens.map((s) => s.rootNode.type)).toEqual(['window', 'alert-dialog']);
+  });
+
+  it('infers the screen template from the root type', () => {
+    const imported = blueprintToDocument(mockupToBlueprint(multiScreen));
+    expect(imported.screens.map((s) => s.type)).toEqual(['standard', 'alert-dialog']);
+  });
+
+  it('still filters a helper box sibling instead of promoting it to a screen', () => {
+    // `box` is the `empty` template's root but also a plausible helper widget;
+    // it stays out of the screen-root set so it cannot become a phantom screen.
+    const imported = blueprintToDocument([
+      'using Gtk 4.0;',
+      'using Adw 1;',
+      'Adw.ApplicationWindow window { content: Adw.ToolbarView {} }',
+      'Gtk.Box helper { Gtk.Button b { label: "x"; } }',
+    ].join('\n'));
+    expect(imported.screens).toHaveLength(1);
+    expect(imported.screens[0].rootNode.type).toBe('window');
+  });
+
+  it('still imports a lone box root via the no-screen-root fallback', () => {
+    const imported = blueprintToDocument([
+      'using Gtk 4.0;',
+      'using Adw 1;',
+      'Gtk.Box canvas { Gtk.Label l { label: "blank"; } }',
+    ].join('\n'));
+    expect(imported.screens).toHaveLength(1);
+    expect(imported.screens[0].rootNode.type).toBe('box');
+    expect(imported.screens[0].type).toBe('empty');
+  });
+
+  it('keeps the alert dialog\'s destructive response button destructive', () => {
+    const imported = blueprintToDocument(mockupToBlueprint(multiScreen));
+    const ok = imported.screens[1].rootNode.children?.[1];
+    expect(ok).toMatchObject({ type: 'button', title: 'Uninstall', destructive: true });
+  });
+});

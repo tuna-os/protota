@@ -43,6 +43,9 @@ test.describe('Diagnostics (#95)', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
     await page.waitForSelector('adw-window', { timeout: 10000 });
+    // First-run documents open with the drawers closed; open the right one
+    // for the diagnostics tab interactions.
+    await page.keyboard.press('Control+]');
   });
 
   test('toggle opens the diagnostics panel in the right drawer', async ({ page }) => {

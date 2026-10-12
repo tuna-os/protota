@@ -98,6 +98,10 @@ async function paletteDrag(
 test.beforeEach(async ({ page }) => {
   await page.goto('/');
   await page.waitForSelector('adw-window', { timeout: 15000 });
+  // First-run documents open with the drawers closed; these tests drive
+  // the Widgets palette and the inspector, so open both.
+  await page.keyboard.press('Control+[');
+  await page.keyboard.press('Control+]');
 });
 
 test.describe('inspector spacing-scale field', () => {

@@ -60,6 +60,17 @@ describe('MockupBuilder flow and import tooling', () => {
     expect(() => builder.connectScreens('Main', 'Nowhere')).toThrow(/unknown screen/);
     expect(() => builder.overrideNode('ghost', { visible: false })).toThrow(/no node/);
   });
+
+  it('rejects unknown screen templates loudly, without touching the doc', () => {
+    const builder = new MockupBuilder('Strict');
+    expect(() => builder.addScreen('window' as never, 'Oops')).toThrow(/unknown screen template "window"/);
+    expect(builder.build().screens).toHaveLength(0);
+
+    const before = useMockupStore.getState().doc.screens.length;
+    expect(() => useMockupStore.getState().addScreen('Oops', 'window' as never))
+      .toThrow(/unknown screen template "window"/);
+    expect(useMockupStore.getState().doc.screens).toHaveLength(before);
+  });
 });
 
 describe('MockupBuilder app import front door (#118)', () => {

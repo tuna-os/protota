@@ -14,7 +14,7 @@ export interface DeviceSizePreset {
   height: number;
 }
 
-export const DEVICE_SIZE_PRESETS: DeviceSizePreset[] = [
+const DEVICE_SIZE_PRESETS: DeviceSizePreset[] = [
   { label: 'Phone', width: 360, height: 720 },
   { label: '800×600', width: 800, height: 600 },
   { label: '1280×800', width: 1280, height: 800 },

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useEffectEvent, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useMockupStore } from '../store/mockupStore';
 import { AdwaitaRenderer } from './AdwaitaRenderer';
@@ -8,12 +8,24 @@ import type { AdwNode } from '../types/mockup';
 import { breakpointOverrides } from '../utils/breakpoints';
 import { windowCloseSymbolic } from '@gjsify/adwaita-icons/ui';
 import { goPreviousSymbolic } from '@gjsify/adwaita-icons/actions';
+import type { AdwMenuNode } from '@gjsify/adwaita-web';
+import {
+  batteryLevel60ChargingSymbolic,
+  bluetoothActiveSymbolic,
+  networkWirelessSignalExcellentSymbolic,
+  notificationsDisabledSymbolic,
+} from '@gjsify/adwaita-icons/status';
 import { toDataUri } from '@gjsify/adwaita-icons/utils';
 
-const iconStyle = (svg: string): React.CSSProperties => ({
+/** `<gtk-menu-button>` surface for the preview screen switcher (portable menu model). */
+type ScreenSwitcherElement = HTMLElement & {
+  menuModel: AdwMenuNode[];
+};
+
+const iconStyle = (svg: string, size = 14): React.CSSProperties => ({
   display: 'inline-block',
-  width: '14px',
-  height: '14px',
+  width: `${size}px`,
+  height: `${size}px`,
   maskImage: toDataUri(svg),
   WebkitMaskImage: toDataUri(svg),
   maskSize: 'contain',
@@ -58,48 +70,126 @@ export const PreviewOverlay: React.FC<PreviewOverlayProps> = ({
   // view-switcher tap). Reset on every navigation and on exit.
   const [previewState, setPreviewState] = useState<Record<string, Partial<AdwNode>>>({});
 
-  const screenIdRef = useRef(screenId);
-  screenIdRef.current = screenId;
-  const onScreenChangeRef = useRef(onScreenChange);
-  onScreenChangeRef.current = onScreenChange;
-  const onExitRef = useRef(onExit);
-  onExitRef.current = onExit;
+  // Static preview-chrome clock: computed once per mount so render stays pure
+  // and the React Compiler can optimize this component.
+  const [clock] = useState(
+    () => new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+  );
 
-  // An external jump (BottomBar screen focus while previewing) resets the
-  // trail; our own navigate() already pushed the new id, so it is a no-op.
-  useEffect(() => {
-    setHistory((trail) => (trail[trail.length - 1] === screenId ? trail : [screenId]));
-    setPreviewState({});
-  }, [screenId]);
-
+  // Navigation actions: honest deps (screenId, onScreenChange) so the
+  // preview context always drives the current screen.
   const navigate = useCallback((targetId: string) => {
-    if (targetId === screenIdRef.current) return;
+    if (targetId === screenId) return;
     setHistory((trail) => [...trail, targetId]);
     setPreviewState({});
-    onScreenChangeRef.current(targetId);
-  }, []);
+    onScreenChange(targetId);
+  }, [screenId, onScreenChange]);
 
   const goBack = useCallback(() => {
     setHistory((trail) => {
       if (trail.length < 2) return trail;
       const next = trail.slice(0, -1);
-      onScreenChangeRef.current(next[next.length - 1]);
+      onScreenChange(next[next.length - 1]);
       return next;
     });
     setPreviewState({});
+  }, [onScreenChange]);
+
+  const handleExitKey = useEffectEvent(() => {
+    onExit();
+  });
+
+  // The screen switcher is a <gtk-menu-button>: its popover lists the
+  // document's screens — the same portable-menu surface the header
+  // Open/Export menus use, not a native <select>. Trigger text differs per
+  // mode: desktop reads `time • Screen Title` (bold, centred in the shell
+  // bar); phone keeps just the title — no clock, no interpunct.
+  // Activation comes back as a bubbling menu-item-activated CustomEvent with
+  // {id} — the model cannot carry callbacks.
+  const handleSwitcherActivate = useEffectEvent((id: string) => {
+    onScreenChange(id);
+  });
+  const switcherRef = useRef<ScreenSwitcherElement>(null);
+  const activeScreenIdx = screen ? doc.screens.findIndex((c) => c.id === screen.id) : -1;
+
+  useEffect(() => {
+    const el = switcherRef.current;
+    if (!el) return;
+    const onActivate = (event: Event) => {
+      const id = (event as CustomEvent).detail?.id;
+      if (typeof id === 'string') handleSwitcherActivate(id);
+    };
+    el.addEventListener('menu-item-activated', onActivate);
+    return () => el.removeEventListener('menu-item-activated', onActivate);
   }, []);
+
+  // Rebuild the menu model and redraw the clock trigger text whenever the
+  // screens or the active one change.
+  useEffect(() => {
+    const el = switcherRef.current;
+    if (!el || !screen) return;
+    el.menuModel = [{
+      kind: 'section',
+      items: doc.screens.map((candidate, index) => ({
+        kind: 'item' as const,
+        id: candidate.id,
+        label: `${index + 1}: ${candidate.title}`,
+      })),
+    }];
+    // The element's trigger is icon-only, so draw the label over it:
+    // desktop `time • title`, phone just the title.
+    const btn = el.querySelector<HTMLButtonElement>('.adw-menu-button-button');
+    if (btn) {
+      btn.replaceChildren();
+      btn.setAttribute(
+        'aria-label',
+        `Switch screen, current ${activeScreenIdx + 1} of ${doc.screens.length}: ${screen.title}`,
+      );
+      btn.setAttribute('title', 'Switch Screen');
+      const name = document.createElement('span');
+      name.textContent = screen.title;
+      if (mode === 'desktop') {
+        const time = document.createElement('span');
+        time.textContent = clock;
+        const separator = document.createElement('span');
+        separator.setAttribute('aria-hidden', 'true');
+        // Non-breaking spaces: the bullet always keeps space on both sides.
+        separator.textContent = ' • ';
+        btn.append(time, separator);
+      }
+      btn.append(name);
+    }
+    // Tag the skin's popover surface so tests can address it directly.
+    // (Both triggers center their surface via CSS overrides scoped to the
+    // desktop topbar and the phone header cluster.)
+    const popover = el.querySelector('gtk-popover');
+    if (popover) {
+      popover.setAttribute('data-testid', 'preview-screen-menu');
+    }
+  }, [doc.screens, screen, activeScreenIdx, clock, mode]);
+
+  // An external jump (BottomBar screen focus while previewing) resets the
+  // trail; our own navigate() already pushed the new id, so it is a no-op.
+  // Syncing an external prop to local navigation state: one intentional
+  // cascading render per screen change.
+  /* eslint-disable react/set-state-in-effect */
+  useEffect(() => {
+    setHistory((trail) => (trail[trail.length - 1] === screenId ? trail : [screenId]));
+    setPreviewState({});
+  }, [screenId]);
+  /* eslint-enable react/set-state-in-effect */
 
   // Prototype interaction contract for AdwaitaRenderer.
   const interaction = useMemo<PreviewInteraction>(() => ({
     activate: () => {
       const edges = useMockupStore.getState().doc.edges;
-      const edge = edges.find((candidate) => candidate.sourceId === screenIdRef.current);
+      const edge = edges.find((candidate) => candidate.sourceId === screenId);
       if (edge) navigate(edge.targetId);
     },
     setNodeState: (nodeId, patch) => {
       setPreviewState((prev) => ({ ...prev, [nodeId]: { ...prev[nodeId], ...patch } }));
     },
-  }), [navigate]);
+  }), [navigate, screenId]);
 
   // While previewing: clear the editor selection (so Delete/Backspace can
   // never act on a node "through" the overlay) and flag the root so the
@@ -118,23 +208,28 @@ export const PreviewOverlay: React.FC<PreviewOverlayProps> = ({
       if (event.key !== 'Escape') return;
       event.preventDefault();
       event.stopPropagation();
-      onExitRef.current();
+      handleExitKey();
     };
     window.addEventListener('keydown', onKeyDown, true);
     return () => window.removeEventListener('keydown', onKeyDown, true);
   }, []);
 
   // Active Adw.Breakpoints for the previewed screen (derived, non-mutating),
-  // with the ephemeral preview patches layered on top per node.
+  // with the ephemeral preview patches layered on top per node. The phone
+  // preview evaluates them at the frame's size (360×720, the Phone device
+  // preset) so adaptive layouts actually collapse — the desktop preview
+  // keeps the authored size.
   const overrides = useMemo(() => {
     if (!screen) return undefined;
-    const base = breakpointOverrides(screen.rootNode, screen.width, screen.height);
+    const width = mode === 'phone' ? 360 : screen.width;
+    const height = mode === 'phone' ? 720 : screen.height;
+    const base = breakpointOverrides(screen.rootNode, width, height);
     const merged: Record<string, Partial<AdwNode>> = { ...base };
     for (const [nodeId, patch] of Object.entries(previewState)) {
       merged[nodeId] = { ...merged[nodeId], ...patch };
     }
     return merged;
-  }, [screen, previewState]);
+  }, [screen, previewState, mode]);
 
   if (!screen) return null;
 
@@ -144,19 +239,42 @@ export const PreviewOverlay: React.FC<PreviewOverlayProps> = ({
   const renderKey = `${screen.id}:${history.length}`;
 
   const screenPicker = (
-    <select
-      className="protota-preview-chip protota-preview-screen-select"
+    <gtk-menu-button
+      ref={switcherRef}
       data-testid="preview-screen-select"
-      aria-label="Jump to screen"
-      value={screen.id}
-      onChange={(event) => onScreenChange(event.target.value)}
+    />
+  );
+
+  // Static workspace indicator (active screen as a pill, the rest as
+  // filled dots) — a pure visual, the clock trigger owns the popover.
+  // Capped at 5 via a sliding window around the active screen, clamped to
+  // the ends — so the pill only lands on an end when the active screen is
+  // truly the first or last one.
+  const MAX_WORKSPACE_INDICATORS = 5;
+  const indicatorStart =
+    doc.screens.length <= MAX_WORKSPACE_INDICATORS
+      ? 0
+      : Math.min(
+          Math.max(activeScreenIdx - 2, 0),
+          doc.screens.length - MAX_WORKSPACE_INDICATORS,
+        );
+  const indicatorScreens = doc.screens.slice(
+    indicatorStart,
+    indicatorStart + MAX_WORKSPACE_INDICATORS,
+  );
+  const workspaceIndicator = (
+    <span
+      className="protota-workspace-indicator"
+      data-testid="workspace-indicator"
+      aria-hidden="true"
     >
-      {doc.screens.map((candidate, index) => (
-        <option key={candidate.id} value={candidate.id}>
-          {index + 1}: {candidate.title}
-        </option>
+      {indicatorScreens.map((candidate) => (
+        <span
+          key={candidate.id}
+          className={candidate.id === screen.id ? 'protota-workspace-pill' : 'protota-workspace-dot'}
+        />
       ))}
-    </select>
+    </span>
   );
 
   const backChip = canGoBack ? (
@@ -190,10 +308,16 @@ export const PreviewOverlay: React.FC<PreviewOverlayProps> = ({
       {/* Same commit-phase containment as the canvas (#137): a crash inside
           the preview shows a card instead of blanking the overlay. */}
       <CanvasErrorBoundary resetKey={renderKey}>
+        {/* screenWidth/screenHeight pin the desktop window to its authored
+            size and unlock primary-header-bar resolution (window controls).
+            The phone preview omits them on purpose: the app fills the frame
+            responsively, and a phone shell has no window chrome to resolve
+            anyway. */}
         <AdwaitaRenderer
           key={renderKey}
           node={screen.rootNode}
           screenId={screen.id}
+          {...(mode === 'desktop' ? { screenWidth: screen.width, screenHeight: screen.height } : {})}
           overrides={overrides}
         />
       </CanvasErrorBoundary>
@@ -210,14 +334,20 @@ export const PreviewOverlay: React.FC<PreviewOverlayProps> = ({
         <>
           <div className="protota-gnome-topbar">
             <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-              <span style={{ fontWeight: 700 }}>Activities</span>
+              {workspaceIndicator}
               {backChip}
+            </div>
+            <div className="protota-gnome-topbar-clock" data-testid="desktop-clock">
               {screenPicker}
             </div>
-            <div style={{ fontSize: '13px' }}>
-              {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+            <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
+              <span className="protota-gnome-status-icons" aria-hidden="true">
+                <span style={iconStyle(networkWirelessSignalExcellentSymbolic)} data-testid="desktop-status-wireless" />
+                <span style={iconStyle(bluetoothActiveSymbolic)} data-testid="desktop-status-bluetooth" />
+                <span style={iconStyle(batteryLevel60ChargingSymbolic)} data-testid="desktop-status-battery" />
+              </span>
+              {exitChip}
             </div>
-            {exitChip}
           </div>
           <div className="protota-gnome-window-frame">
             <div
@@ -235,10 +365,30 @@ export const PreviewOverlay: React.FC<PreviewOverlayProps> = ({
         <>
           <div className="protota-preview-chrome protota-preview-chrome--start">
             {backChip}
+          </div>
+          <div className="protota-preview-chrome protota-preview-chrome--center">
             {screenPicker}
           </div>
           <div className="protota-preview-chrome protota-preview-chrome--end">{exitChip}</div>
-          <div className="protota-phosh-phone-frame protota-preview-phone-frame">{rendered}</div>
+          <div className="protota-phosh-phone-frame protota-preview-phone-frame">
+            {/* Phosh status bar — preview chrome like the desktop mode's
+                GNOME top bar, never document content: wifi + bluetooth
+                left, clock centred, silent + charged battery right. */}
+            <div className="protota-phosh-status-bar" data-testid="phosh-status-bar">
+              <span className="protota-phosh-status-side">
+                <span style={iconStyle(networkWirelessSignalExcellentSymbolic, 12)} data-testid="phosh-status-wifi" />
+                <span style={iconStyle(bluetoothActiveSymbolic, 12)} data-testid="phosh-status-bluetooth" />
+              </span>
+              <span className="protota-phosh-status-clock">
+                {clock}
+              </span>
+              <span className="protota-phosh-status-side">
+                <span style={iconStyle(notificationsDisabledSymbolic, 12)} data-testid="phosh-status-silent" />
+                <span style={iconStyle(batteryLevel60ChargingSymbolic, 12)} data-testid="phosh-status-battery" />
+              </span>
+            </div>
+            {rendered}
+          </div>
         </>
       )}
     </div>,

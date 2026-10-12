@@ -27,6 +27,11 @@ export type { AppFileMap };
 /** Per-file size cap — UI sources are small; anything bigger is not one. */
 export const MAX_TEXT_FILE_BYTES = 2 * 1024 * 1024;
 
+/** Hard ceilings keep an untrusted archive from exhausting the browser tab. */
+export const MAX_ARCHIVE_INPUT_BYTES = 32 * 1024 * 1024;
+export const MAX_ARCHIVE_OUTPUT_BYTES = 64 * 1024 * 1024;
+export const MAX_ARCHIVE_ENTRIES = 10_000;
+
 const keepPath = (path: string): boolean =>
   path.length > 0 && !isIgnoredPath(path) && isDiscoveryRelevantPath(path);
 
@@ -120,16 +125,43 @@ export async function filesFromDataTransfer(dataTransfer: DataTransfer): Promise
 // Zip — minimal central-directory reader (stored + deflate)
 // ---------------------------------------------------------------------------
 
-async function decompress(bytes: Uint8Array, format: 'deflate-raw' | 'gzip'): Promise<Uint8Array> {
+async function decompress(
+  bytes: Uint8Array,
+  format: 'deflate-raw' | 'gzip',
+  maxOutputBytes: number,
+): Promise<Uint8Array> {
   const stream = new Blob([bytes as BlobPart]).stream()
     .pipeThrough(new DecompressionStream(format));
-  return new Uint8Array(await new Response(stream).arrayBuffer());
+  const reader = stream.getReader();
+  const chunks: Uint8Array[] = [];
+  let size = 0;
+  try {
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      size += value.byteLength;
+      if (size > maxOutputBytes) {
+        await reader.cancel();
+        throw new Error(`Archive expands beyond the ${maxOutputBytes}-byte safety limit.`);
+      }
+      chunks.push(value);
+    }
+  } finally {
+    reader.releaseLock();
+  }
+  const output = new Uint8Array(size);
+  let offset = 0;
+  for (const chunk of chunks) { output.set(chunk, offset); offset += chunk.byteLength; }
+  return output;
 }
 
 const utf8 = new TextDecoder();
 
 /** Parse a .zip archive fully in-page. */
 export async function filesFromZip(data: ArrayBuffer): Promise<AppFileMap> {
+  if (data.byteLength > MAX_ARCHIVE_INPUT_BYTES) {
+    throw new Error(`Archive exceeds the ${MAX_ARCHIVE_INPUT_BYTES}-byte input safety limit.`);
+  }
   const bytes = new Uint8Array(data);
   const view = new DataView(data);
   // End-of-central-directory record: scan back over the (bounded) comment.
@@ -140,9 +172,16 @@ export async function filesFromZip(data: ArrayBuffer): Promise<AppFileMap> {
   }
   if (eocd < 0) throw new Error('Not a ZIP file (no end-of-central-directory record found).');
   const entryCount = view.getUint16(eocd + 10, true);
+  if (entryCount > MAX_ARCHIVE_ENTRIES) {
+    throw new Error(`Archive contains more than ${MAX_ARCHIVE_ENTRIES} entries.`);
+  }
   let offset = view.getUint32(eocd + 16, true);
   const raw: AppFileMap = {};
+  let retainedBytes = 0;
   for (let index = 0; index < entryCount; index++) {
+    if (offset < 0 || offset + 46 > bytes.length) {
+      throw new Error('Corrupt ZIP central directory bounds.');
+    }
     if (view.getUint32(offset, true) !== 0x02014b50) {
       throw new Error('Corrupt ZIP central directory.');
     }
@@ -153,6 +192,9 @@ export async function filesFromZip(data: ArrayBuffer): Promise<AppFileMap> {
     const extraLength = view.getUint16(offset + 30, true);
     const commentLength = view.getUint16(offset + 32, true);
     const localOffset = view.getUint32(offset + 42, true);
+    if (offset + 46 + nameLength + extraLength + commentLength > bytes.length) {
+      throw new Error('Corrupt ZIP central directory bounds.');
+    }
     const name = utf8.decode(bytes.subarray(offset + 46, offset + 46 + nameLength));
     offset += 46 + nameLength + extraLength + commentLength;
     if (name.endsWith('/')) continue; // directory entry
@@ -160,18 +202,32 @@ export async function filesFromZip(data: ArrayBuffer): Promise<AppFileMap> {
     if (!isDiscoveryRelevantPath(name) || isIgnoredPath(normalizePosixPath(name))) continue;
     if (uncompressedSize > MAX_TEXT_FILE_BYTES) continue;
     // The local header repeats name/extra with possibly different lengths.
+    if (localOffset + 30 > bytes.length) {
+      throw new Error(`Corrupt ZIP local header bounds for ${name}.`);
+    }
     if (view.getUint32(localOffset, true) !== 0x04034b50) {
       throw new Error(`Corrupt ZIP local header for ${name}.`);
     }
     const localNameLength = view.getUint16(localOffset + 26, true);
     const localExtraLength = view.getUint16(localOffset + 28, true);
     const dataStart = localOffset + 30 + localNameLength + localExtraLength;
+    if (dataStart > bytes.length || compressedSize > bytes.length - dataStart) {
+      throw new Error(`Corrupt ZIP entry bounds for ${name}.`);
+    }
     const compressed = bytes.subarray(dataStart, dataStart + compressedSize);
+    let expanded: Uint8Array | null = null;
     if (method === 0) {
-      raw[name] = utf8.decode(compressed);
+      if (compressed.byteLength > MAX_TEXT_FILE_BYTES) continue;
+      expanded = compressed;
     } else if (method === 8) {
-      raw[name] = utf8.decode(await decompress(compressed, 'deflate-raw'));
+      expanded = await decompress(compressed, 'deflate-raw', MAX_TEXT_FILE_BYTES);
     } // other methods: skip — never seen in forge/checkout zips.
+    if (!expanded) continue;
+    retainedBytes += expanded.byteLength;
+    if (retainedBytes > MAX_ARCHIVE_OUTPUT_BYTES) {
+      throw new Error(`Archive content exceeds the ${MAX_ARCHIVE_OUTPUT_BYTES}-byte safety limit.`);
+    }
+    raw[name] = utf8.decode(expanded);
   }
   return finalizeMap(raw);
 }
@@ -182,8 +238,13 @@ export async function filesFromZip(data: ArrayBuffer): Promise<AppFileMap> {
 
 /** Parse an uncompressed tar stream. */
 export function filesFromTar(bytes: Uint8Array): AppFileMap {
+  if (bytes.byteLength > MAX_ARCHIVE_OUTPUT_BYTES) {
+    throw new Error(`Archive expands beyond the ${MAX_ARCHIVE_OUTPUT_BYTES}-byte safety limit.`);
+  }
   const raw: AppFileMap = {};
   let offset = 0;
+  let entryCount = 0;
+  let retainedBytes = 0;
   let pendingLongName: string | null = null;
   const cutAtNul = (text: string): string => {
     const nul = text.indexOf('\u0000');
@@ -192,6 +253,10 @@ export function filesFromTar(bytes: Uint8Array): AppFileMap {
   const cstr = (start: number, length: number): string =>
     cutAtNul(utf8.decode(bytes.subarray(start, start + length)));
   while (offset + 512 <= bytes.length) {
+    entryCount++;
+    if (entryCount > MAX_ARCHIVE_ENTRIES) {
+      throw new Error(`Archive contains more than ${MAX_ARCHIVE_ENTRIES} entries.`);
+    }
     const block = bytes.subarray(offset, offset + 512);
     if (block.every((byte) => byte === 0)) break; // end-of-archive
     const size = parseInt(cstr(offset + 124, 12).trim() || '0', 8) || 0;
@@ -200,6 +265,7 @@ export function filesFromTar(bytes: Uint8Array): AppFileMap {
     const prefix = cstr(offset + 345, 155);
     if (prefix) name = `${prefix}/${name}`;
     const dataStart = offset + 512;
+    if (size > bytes.length - dataStart) throw new Error(`Corrupt TAR entry bounds for ${name}.`);
     if (typeFlag === 'L') {
       // GNU long name: the *next* entry's real name.
       pendingLongName = cutAtNul(utf8.decode(bytes.subarray(dataStart, dataStart + size)));
@@ -209,6 +275,10 @@ export function filesFromTar(bytes: Uint8Array): AppFileMap {
       const normalized = normalizePosixPath(name);
       if (isRegular && size <= MAX_TEXT_FILE_BYTES
         && isDiscoveryRelevantPath(normalized) && !isIgnoredPath(normalized)) {
+        retainedBytes += size;
+        if (retainedBytes > MAX_ARCHIVE_OUTPUT_BYTES) {
+          throw new Error(`Archive content exceeds the ${MAX_ARCHIVE_OUTPUT_BYTES}-byte safety limit.`);
+        }
         raw[name] = utf8.decode(bytes.subarray(dataStart, dataStart + size));
       }
     }
@@ -219,11 +289,17 @@ export function filesFromTar(bytes: Uint8Array): AppFileMap {
 
 /** Parse a .tar.gz archive fully in-page. */
 export async function filesFromTarGz(data: ArrayBuffer): Promise<AppFileMap> {
-  return filesFromTar(await decompress(new Uint8Array(data), 'gzip'));
+  if (data.byteLength > MAX_ARCHIVE_INPUT_BYTES) {
+    throw new Error(`Archive exceeds the ${MAX_ARCHIVE_INPUT_BYTES}-byte input safety limit.`);
+  }
+  return filesFromTar(await decompress(new Uint8Array(data), 'gzip', MAX_ARCHIVE_OUTPUT_BYTES));
 }
 
 /** Dispatch an archive buffer by magic bytes: zip, tar.gz, or plain tar. */
 export async function filesFromArchive(data: ArrayBuffer): Promise<AppFileMap> {
+  if (data.byteLength > MAX_ARCHIVE_INPUT_BYTES) {
+    throw new Error(`Archive exceeds the ${MAX_ARCHIVE_INPUT_BYTES}-byte input safety limit.`);
+  }
   const bytes = new Uint8Array(data);
   if (bytes[0] === 0x50 && bytes[1] === 0x4b) return filesFromZip(data);
   if (bytes[0] === 0x1f && bytes[1] === 0x8b) return filesFromTarGz(data);
@@ -331,9 +407,43 @@ export async function fetchGitArchive(
       'Check the URL and ref — or download the repository as a .zip and drop it here.',
     );
   }
-  const files = await filesFromArchive(await response.arrayBuffer());
+  const declaredLength = Number(response.headers.get('content-length'));
+  if (Number.isFinite(declaredLength) && declaredLength > MAX_ARCHIVE_INPUT_BYTES) {
+    throw new Error(`Archive exceeds the ${MAX_ARCHIVE_INPUT_BYTES}-byte input safety limit.`);
+  }
+  const archive = response.body
+    ? await readStreamWithLimit(response.body, MAX_ARCHIVE_INPUT_BYTES)
+    : new Uint8Array(await response.arrayBuffer());
+  const files = await filesFromArchive(archive.buffer as ArrayBuffer);
   if (!Object.keys(files).length) {
     throw new Error('The archive downloaded fine but contained no .blp or .ui sources.');
   }
   return { files, request };
+}
+
+async function readStreamWithLimit(
+  stream: ReadableStream<Uint8Array>,
+  maxBytes: number,
+): Promise<Uint8Array> {
+  const reader = stream.getReader();
+  const chunks: Uint8Array[] = [];
+  let size = 0;
+  try {
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      size += value.byteLength;
+      if (size > maxBytes) {
+        await reader.cancel();
+        throw new Error(`Archive exceeds the ${maxBytes}-byte input safety limit.`);
+      }
+      chunks.push(value);
+    }
+  } finally {
+    reader.releaseLock();
+  }
+  const output = new Uint8Array(size);
+  let offset = 0;
+  for (const chunk of chunks) { output.set(chunk, offset); offset += chunk.byteLength; }
+  return output;
 }

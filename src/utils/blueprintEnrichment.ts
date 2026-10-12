@@ -7,6 +7,8 @@ import {
   canonicalClassName,
   CLASS_TO_WIDGET_MAP,
   escapeBlueprintString,
+} from './blueprintCodec';
+import {
   expandBundleTemplates,
   parseBlueprintRoots,
   type BlueprintSourceFile,

@@ -18,7 +18,8 @@ successful but visually useless.
 
 ## Current implementation
 
-- Blueprint and GtkBuilder import lives in `src/utils/blueprint.ts`.
+- Blueprint and GtkBuilder import lives in `src/utils/blueprintImport.ts`
+  (export back to Blueprint in `src/utils/blueprintExport.ts`).
 - Multi-file Blueprint template expansion is `blueprintBundleToDocument()`.
 - Unsupported `$Template instance { ... }` references become
   `Protota.CustomWidget` nodes, rendered as visibly striped, allocated

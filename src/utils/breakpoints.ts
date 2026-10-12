@@ -16,7 +16,7 @@
  * geometry overrides (utils/nodeGeometry.ts): the document is never mutated.
  */
 import type { AdwNode, BreakpointSetter } from '../types/mockup';
-import { editorPropertyName } from './blueprint';
+import { editorPropertyName } from './blueprintCodec';
 
 /** One parsed comparison of a breakpoint condition. */
 interface LengthCondition {

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useMockupStore } from '../store/mockupStore';
-import { mockupToBlueprint } from '../utils/blueprint';
+import { mockupToBlueprint } from '../utils/blueprintExport';
 import { generatePythonBindings, generateRustBindings, generateValaBindings, generateBroadwayScript } from '../utils/codeGenerator';
 
 interface Props {

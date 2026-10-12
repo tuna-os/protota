@@ -18,15 +18,14 @@
  * class. Class/type changes in the edited document are refused, not applied.
  */
 import type { AdwNode, MockupDocument } from '../types/mockup';
+import { blueprintBundleToDocument, type BlueprintSourceFile } from './blueprintImport';
+import { blueprintChildSource } from './blueprintExport';
 import {
-  blueprintBundleToDocument,
-  blueprintChildSource,
   blueprintPropertyCandidates,
   blueprintValueSource,
   blueprintStyleClassFor,
   isBlueprintLayoutProperty,
-  type BlueprintSourceFile,
-} from './blueprint';
+} from './blueprintCodec';
 
 // ---------------------------------------------------------------------------
 // Span-preserving Blueprint CST

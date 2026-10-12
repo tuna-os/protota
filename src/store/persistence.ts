@@ -1,5 +1,6 @@
 import type { MockupDocument } from '../types/mockup';
-import { blueprintToDocument, mockupToBlueprint } from '../utils/blueprint';
+import { blueprintToDocument } from '../utils/blueprintImport';
+import { mockupToBlueprint } from '../utils/blueprintExport';
 import { DEFAULT_WINDOW_BUTTONS, type WindowButtonsPreference } from '../utils/headerBarChrome';
 
 const BLUEPRINT_STORAGE_KEY = 'protota_blueprint_v1';

@@ -137,3 +137,6 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     });
   },
 }));
+
+// Re-export selection utilities so EditorStore consumers do not need a second import.
+export { toggleSelection, unionSelection } from '../utils/selection';

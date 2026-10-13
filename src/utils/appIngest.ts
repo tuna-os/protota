@@ -253,12 +253,12 @@ export function filesFromTar(bytes: Uint8Array): AppFileMap {
   const cstr = (start: number, length: number): string =>
     cutAtNul(utf8.decode(bytes.subarray(start, start + length)));
   while (offset + 512 <= bytes.length) {
+    const block = bytes.subarray(offset, offset + 512);
+    if (block.every((byte) => byte === 0)) break; // end-of-archive
     entryCount++;
     if (entryCount > MAX_ARCHIVE_ENTRIES) {
       throw new Error(`Archive contains more than ${MAX_ARCHIVE_ENTRIES} entries.`);
     }
-    const block = bytes.subarray(offset, offset + 512);
-    if (block.every((byte) => byte === 0)) break; // end-of-archive
     const size = parseInt(cstr(offset + 124, 12).trim() || '0', 8) || 0;
     const typeFlag = String.fromCharCode(block[156] || 0x30);
     let name = cstr(offset, 100);
@@ -413,7 +413,13 @@ export async function fetchGitArchive(
   }
   const archive = response.body
     ? await readStreamWithLimit(response.body, MAX_ARCHIVE_INPUT_BYTES)
-    : new Uint8Array(await response.arrayBuffer());
+    : await (async () => {
+        const buffer = await response.arrayBuffer();
+        if (buffer.byteLength > MAX_ARCHIVE_INPUT_BYTES) {
+          throw new Error(`Archive exceeds the ${MAX_ARCHIVE_INPUT_BYTES}-byte input safety limit.`);
+        }
+        return new Uint8Array(buffer);
+      })();
   const files = await filesFromArchive(archive.buffer as ArrayBuffer);
   if (!Object.keys(files).length) {
     throw new Error('The archive downloaded fine but contained no .blp or .ui sources.');

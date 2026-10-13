@@ -12,6 +12,8 @@ import {
   filesFromTar,
   filesFromTarGz,
   filesFromArchive,
+  MAX_ARCHIVE_INPUT_BYTES,
+  MAX_TEXT_FILE_BYTES,
   normalizeGitUrl,
   fetchGitArchive,
   stripCommonRoot,
@@ -136,6 +138,16 @@ describe('filesFromZip', () => {
   it('rejects non-zip data loudly', async () => {
     await expect(filesFromZip(new Uint8Array(64).buffer)).rejects.toThrow(/ZIP/);
   });
+
+  it('limits actual deflate output even when ZIP metadata understates it', async () => {
+    const zip = new Uint8Array(buildZip([
+      { name: 'repo/huge.blp', data: 'A'.repeat(MAX_TEXT_FILE_BYTES + 1), method: 8 },
+    ]));
+    const eocd = zip.length - 22;
+    const centralOffset = new DataView(zip.buffer).getUint32(eocd + 16, true);
+    new DataView(zip.buffer).setUint32(centralOffset + 24, 1, true);
+    await expect(filesFromZip(zip.buffer as ArrayBuffer)).rejects.toThrow(/expands beyond/);
+  });
 });
 
 describe('filesFromTar / filesFromTarGz', () => {
@@ -247,5 +259,13 @@ describe('fetchGitArchive (fetch mocked — no network in CI)', () => {
   it('reports HTTP errors with the status and the fallback', async () => {
     vi.stubGlobal('fetch', vi.fn(async () => new Response('nope', { status: 404 })));
     await expect(fetchGitArchive('https://github.com/o/missing')).rejects.toThrow(/404/);
+  });
+
+  it('rejects a declared oversized response before reading its body', async () => {
+    vi.stubGlobal('fetch', vi.fn(async () => new Response('ignored', {
+      status: 200,
+      headers: { 'content-length': String(MAX_ARCHIVE_INPUT_BYTES + 1) },
+    })));
+    await expect(fetchGitArchive('https://github.com/o/r')).rejects.toThrow(/input safety limit/);
   });
 });

@@ -42,6 +42,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   # Needs real GIR files (GTK4/libadwaita/GtkSourceView introspection data),
   # so this one runs in a Fedora container rather than plain ubuntu-latest.

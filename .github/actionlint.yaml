@@ -1,0 +1,6 @@
+# actionlint's built-in runner label list lags GitHub-hosted images.
+# ubuntu-26.04 is a valid GitHub-hosted runner; declare it so actionlint
+# doesn't reject it as unknown.
+self-hosted-runner:
+  labels:
+    - ubuntu-26.04

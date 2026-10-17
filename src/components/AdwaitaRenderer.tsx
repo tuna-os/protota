@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useCallback } from 'react';
+import React, { useRef, useEffect, useCallback, useEffectEvent } from 'react';
 import type { AdwNode } from '../types/mockup';
 import { LEGAL_CHILDREN } from '../types/mockup';
 import { useMockupStore } from '../store/mockupStore';
@@ -10,7 +10,7 @@ import {
 } from '../utils/nodeGeometry';
 import { headerBarControls, headerBarFallbackTitle } from '../utils/headerBarChrome';
 import { tabBarModel } from '../utils/tabBar';
-import { usePreview, type PreviewInteraction } from '../preview/PreviewContext';
+import { usePreview } from '../preview/PreviewContext';
 import { AddChildChip } from './AddChildChip';
 
 interface Props {
@@ -495,68 +495,67 @@ export const AdwaitaRenderer: React.FC<Props> = ({
   // keeps the innermost node's handler authoritative and suppresses the
   // canvas's deselect.
   const wrapperRef = useRef<HTMLDivElement>(null);
-  // Latest node/preview for the stable native listener below (node identity
-  // changes when a breakpoint patch applies; the listener must not re-attach).
-  const nodeRef = useRef(node);
-  nodeRef.current = node;
-  const previewRef = useRef<PreviewInteraction | null>(preview);
-  previewRef.current = preview;
-  useEffect(() => {
-    const wrapper = wrapperRef.current;
-    if (!wrapper) return;
-    const handleNativeClick = (event: MouseEvent) => {
-      const current = nodeRef.current;
-      const previewInteraction = previewRef.current;
-      if (previewInteraction) {
-        // Prototype mode: the click acts on the mockup. Handled types stop
-        // here; anything else bubbles up to the nearest interactive ancestor
-        // (e.g. a label inside a button). Unmodeled widgets do nothing.
-        const type = current.type;
-        if (type === 'view-switcher') {
-          event.stopPropagation();
-          const tab = (event.target as Element).closest?.('[data-preview-page]') as HTMLElement | null;
-          if (tab?.dataset.previewPage && tab.dataset.previewStack) {
-            previewInteraction.setNodeState(tab.dataset.previewStack, {
-              visibleChildName: tab.dataset.previewPage,
-            });
-          }
-          return;
-        }
-        if (type === 'switch-widget' || type === 'check-button') {
-          // Div-rendered toggles have no custom element behind them: flip
-          // the attribute the stylesheet draws from. DOM-only state — reset
-          // by the remount on navigation/exit, never stored.
-          event.stopPropagation();
-          elRef.current?.toggleAttribute('active');
-          return;
-        }
-        if (PREVIEW_ACTIVATION_TYPES.has(type) ||
-            (type === 'action-row' && current.activatable)) {
-          event.stopPropagation();
-          previewInteraction.activate(current);
-          return;
-        }
-        if (PREVIEW_LOCAL_TYPES.has(type)) {
-          // The custom element's own (ephemeral) behavior handles it.
-          event.stopPropagation();
-          return;
+  // The native listener is registered once, so it reads the latest node/preview
+  // through an effect event rather than a render-time binding: node identity
+  // changes when a breakpoint patch applies, and preview flips when the overlay
+  // opens, but neither should re-attach the listener.
+  const handleNativeClick = useEffectEvent((event: MouseEvent) => {
+    const current = node;
+    const previewInteraction = preview;
+    if (previewInteraction) {
+      // Prototype mode: the click acts on the mockup. Handled types stop
+      // here; anything else bubbles up to the nearest interactive ancestor
+      // (e.g. a label inside a button). Unmodeled widgets do nothing.
+      const type = current.type;
+      if (type === 'view-switcher') {
+        event.stopPropagation();
+        const tab = (event.target as Element).closest?.('[data-preview-page]') as HTMLElement | null;
+        if (tab?.dataset.previewPage && tab.dataset.previewStack) {
+          previewInteraction.setNodeState(tab.dataset.previewStack, {
+            visibleChildName: tab.dataset.previewPage,
+          });
         }
         return;
       }
-      // Clicks inside the quick-add affordance (the "+" chip and its
-      // popover) belong to its React handlers. stopPropagation here would
-      // keep the event from ever reaching React's root-delegated listener,
-      // so let these through untouched — the affordance stops synthetic
-      // propagation itself, which keeps the canvas deselect suppressed.
-      if ((event.target as Element).closest?.('.protota-add-affordance')) return;
-      event.stopPropagation();
-      // Ctrl/Cmd-click toggles multi-selection membership (#79, study §3).
-      if (event.ctrlKey || event.metaKey) toggleNodeSelection(node.id, screenId);
-      else selectNode(node.id, screenId);
-    };
+      if (type === 'switch-widget' || type === 'check-button') {
+        // Div-rendered toggles have no custom element behind them: flip
+        // the attribute the stylesheet draws from. DOM-only state — reset
+        // by the remount on navigation/exit, never stored.
+        event.stopPropagation();
+        elRef.current?.toggleAttribute('active');
+        return;
+      }
+      if (PREVIEW_ACTIVATION_TYPES.has(type) ||
+          (type === 'action-row' && current.activatable)) {
+        event.stopPropagation();
+        previewInteraction.activate(current);
+        return;
+      }
+      if (PREVIEW_LOCAL_TYPES.has(type)) {
+        // The custom element's own (ephemeral) behavior handles it.
+        event.stopPropagation();
+        return;
+      }
+      return;
+    }
+    // Clicks inside the quick-add affordance (the "+" chip and its
+    // popover) belong to its React handlers. stopPropagation here would
+    // keep the event from ever reaching React's root-delegated listener,
+    // so let these through untouched — the affordance stops synthetic
+    // propagation itself, which keeps the canvas deselect suppressed.
+    if ((event.target as Element).closest?.('.protota-add-affordance')) return;
+    event.stopPropagation();
+    // Ctrl/Cmd-click toggles multi-selection membership (#79, study §3).
+    if (event.ctrlKey || event.metaKey) toggleNodeSelection(node.id, screenId);
+    else selectNode(node.id, screenId);
+  });
+
+  useEffect(() => {
+    const wrapper = wrapperRef.current;
+    if (!wrapper) return;
     wrapper.addEventListener('click', handleNativeClick);
     return () => wrapper.removeEventListener('click', handleNativeClick);
-  }, [node.id, screenId, selectNode, toggleNodeSelection]);
+  }, []);
 
   // GTK visibility: a hidden widget takes no space and draws nothing — but it
   // must keep a stable DOM placeholder rather than render null. Several adw-*

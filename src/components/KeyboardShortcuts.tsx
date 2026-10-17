@@ -1,122 +1,121 @@
-import React from "react";
+import React, { useCallback, useEffect, useRef } from "react";
 
 interface Props {
   isOpen: boolean;
   onClose: () => void;
 }
 
-const kbdStyle: React.CSSProperties = {
-  background: "var(--button-bg-color, rgba(0,0,6,0.08))",
-  padding: "1px 6px",
-  borderRadius: "4px",
-  fontSize: "11px",
-  border: "1px solid var(--separator-color, rgba(0,0,6,0.12))",
+type AdwShortcutsDialogElement = HTMLElement & {
+  present: () => void;
+  close: () => void;
+  forceClose: () => void;
+  open: boolean;
 };
 
 const SHORTCUT_GROUPS = [
   {
     title: "Editing",
     items: [
-      { keys: "Ctrl+Z", label: "Undo" },
-      { keys: "Ctrl+Shift+Z", label: "Redo" },
-      { keys: "Delete", label: "Delete selected element" },
-      { keys: "Ctrl+↑", label: "Move element up" },
-      { keys: "Ctrl+↓", label: "Move element down" },
-      { keys: "Escape", label: "Deselect" },
+      { label: "Undo", accelerator: "<Control>Z" },
+      { label: "Redo", accelerator: "<Control><Shift>Z" },
+      { label: "Delete selected element", accelerator: "Delete" },
+      { label: "Move element up", accelerator: "<Control>Up" },
+      { label: "Move element down", accelerator: "<Control>Down" },
+      { label: "Deselect", accelerator: "Escape" },
     ],
   },
   {
     title: "View",
     items: [
-      { keys: "Ctrl+=", label: "Zoom in" },
-      { keys: "Ctrl+-", label: "Zoom out" },
-      { keys: "Ctrl+0", label: "Zoom to 100%" },
-      { keys: "Space+Drag", label: "Pan canvas" },
+      { label: "Zoom in", accelerator: "<Control>equal" },
+      { label: "Zoom out", accelerator: "<Control>minus" },
+      { label: "Zoom to 100%", accelerator: "<Control>0" },
+      { label: "Pan canvas", accelerator: "space", subtitle: "Drag" },
     ],
   },
   {
     title: "Quick Add",
     items: [
-      { keys: "B", label: "Add button" },
-      { keys: "T", label: "Add label" },
-      { keys: "L", label: "Add list box" },
-      { keys: "Ctrl+N", label: "New screen" },
+      { label: "Add button", accelerator: "b" },
+      { label: "Add label", accelerator: "t" },
+      { label: "Add list box", accelerator: "l" },
+      { label: "New screen", accelerator: "<Control>N" },
     ],
   },
   {
     title: "Interface",
     items: [
-      { keys: "Ctrl+[", label: "Toggle Layers Panel" },
-      { keys: "Ctrl+]", label: "Toggle Properties Panel" },
-      { keys: "Ctrl+;", label: "Toggle Screen Flows" },
-      { keys: "Ctrl+'", label: "Toggle Diagnostics" },
-      { keys: "Ctrl+/", label: "Toggle Preview Mode" },
-      { keys: "Ctrl+?", label: "Show this help" },
+      { label: "Toggle Layers Panel", accelerator: "<Control>bracketleft" },
+      { label: "Toggle Properties Panel", accelerator: "<Control>bracketright" },
+      { label: "Toggle Screen Flows", accelerator: "<Control>semicolon" },
+      { label: "Toggle Diagnostics", accelerator: "<Control>apostrophe" },
+      { label: "Toggle Preview Mode", accelerator: "<Control>slash" },
+      { label: "Show this help", accelerator: "<Control>question" },
     ],
   },
 ];
 
 export const KeyboardShortcuts: React.FC<Props> = ({ isOpen, onClose }) => {
-  if (!isOpen) return null;
+  const dialogRef = useRef<AdwShortcutsDialogElement | null>(null);
+
+  // The shortcuts dialog is a flat header bar over a scroller, so the shade
+  // under the header is Adwaita's top undershoot: it is drawn only once the
+  // list has been scrolled away from the top, not while it is at the start.
+  const syncScrolled = useCallback((dialog: AdwShortcutsDialogElement) => {
+    const content = dialog.querySelector<HTMLElement>(".adw-dialog-content");
+    dialog.toggleAttribute("data-scrolled", !!content && content.scrollTop > 0);
+  }, []);
+
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    if (!dialog) return;
+    if (isOpen) {
+      dialog.present();
+      syncScrolled(dialog);
+    } else {
+      dialog.forceClose();
+    }
+  }, [isOpen, syncScrolled]);
+
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    const content = dialog?.querySelector<HTMLElement>(".adw-dialog-content");
+    if (!dialog || !content) return;
+    const handleScroll = () => syncScrolled(dialog);
+    content.addEventListener("scroll", handleScroll, { passive: true });
+    return () => content.removeEventListener("scroll", handleScroll);
+  }, [syncScrolled]);
+
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    if (!dialog) return;
+    const handleClosed = () => onClose();
+    dialog.addEventListener("closed", handleClosed);
+    return () => dialog.removeEventListener("closed", handleClosed);
+  }, [onClose]);
 
   return (
-    <div
-      className="protota-modal-backdrop"
-      onClick={onClose}
+    <adw-shortcuts-dialog
+      ref={dialogRef as React.Ref<HTMLElement>}
+      title="Keyboard Shortcuts"
       data-testid="shortcuts-overlay"
+      content-width={520}
     >
-      <div
-        className="protota-modal"
-        onClick={(e) => e.stopPropagation()}
-        style={{ width: "520px", maxHeight: "80vh", overflow: "auto" }}
-      >
-        <h3 style={{ marginTop: 0 }}>Keyboard Shortcuts</h3>
-        <p style={{ fontSize: "12px", opacity: 0.65, marginBottom: "16px" }}>
-          Press <kbd style={kbdStyle}>Ctrl+?</kbd> to toggle this overlay.
-        </p>
-        {SHORTCUT_GROUPS.map((group) => (
-          <div key={group.title} style={{ marginBottom: "16px" }}>
-            <h4
-              style={{
-                fontSize: "11px",
-                textTransform: "uppercase",
-                opacity: 0.5,
-                margin: "0 0 6px 0",
-              }}
-            >
-              {group.title}
-            </h4>
+      {SHORTCUT_GROUPS.map((group) => (
+        <React.Fragment key={group.title}>
+          <adw-shortcuts-section title={group.title}>
             {group.items.map((item) => (
-              <div
-                key={item.keys}
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  padding: "4px 0",
-                  fontSize: "13px",
-                  borderBottom: "1px solid var(--separator-color, rgba(0,0,6,0.06))",
-                }}
-              >
-                <span>{item.label}</span>
-                <span style={{ fontFamily: "Adwaita Sans", fontSize: "12px", opacity: 0.7 }}>
-                  {item.keys
-                    .split(" ")
-                    .map((k) => (
-                      <kbd key={k} style={kbdStyle}>
-                        {k}
-                      </kbd>
-                    ))
-                    .reduce((prev, curr) => (
-                      <>
-                        {prev} {curr}
-                      </>
-                    ))}
-                </span>
-              </div>
+              <React.Fragment key={item.label}>
+                <adw-shortcuts-item
+                  title={item.label}
+                  accelerator={item.accelerator}
+                  subtitle={"subtitle" in item ? item.subtitle : undefined}
+                />
+              </React.Fragment>
             ))}
-          </div>
-        ))}
-      </div>
-    </div>
+          </adw-shortcuts-section>
+        </React.Fragment>
+      ))}
+    </adw-shortcuts-dialog>
   );
 };

@@ -12,6 +12,19 @@ declare module "react" {
       };
       "adw-window": HTMLAttributes<HTMLElement>;
       "adw-dialog": HTMLAttributes<HTMLElement>;
+      "adw-shortcuts-dialog": HTMLAttributes<HTMLElement> & RefAttributes<HTMLElement> & {
+        title?: string;
+        open?: boolean;
+        "content-width"?: number;
+      };
+      "adw-shortcuts-section": HTMLAttributes<HTMLElement> & {
+        title?: string;
+      };
+      "adw-shortcuts-item": HTMLAttributes<HTMLElement> & {
+        title?: string;
+        subtitle?: string;
+        accelerator?: string;
+      };
       "adw-preferences-dialog": HTMLAttributes<HTMLElement>;
       "adw-alert-dialog": HTMLAttributes<HTMLElement>;
       "adw-about-dialog": HTMLAttributes<HTMLElement>;

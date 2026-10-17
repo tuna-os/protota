@@ -14,6 +14,7 @@ import { activeBreakpoints, breakpointOverrides, type ActiveBreakpoint } from ".
 import type { AdwNode, AdwNodeType } from "../types/mockup";
 import { useTouchPanZoom, TOUCH_GESTURE_START_EVENT } from "../hooks/useTouchPanZoom";
 import { PreviewOverlay } from "./PreviewOverlay";
+import { SelectionOverlay } from "./SelectionOverlay";
 
 const CANVAS_PADDING = 60;
 
@@ -1116,6 +1117,13 @@ export const ViewportCanvas: React.FC = () => {
                   overrides={breakpointState[screen.id]?.overrides}
                 />
               </CanvasErrorBoundary>
+              {/* Primary-selection badge + "+" chip (#382): a sibling of the
+                  scroll content, so the chrome can never grow an ancestor
+                  scroller's scrollable overflow. Hidden behind the fullscreen
+                  preview, where all editor chrome disappears. */}
+              {!activeDesktopScreen && !activePhoshScreen && (
+                <SelectionOverlay screenId={screen.id} zoom={zoom} />
+              )}
               <div
                 data-resize-handle="right"
                 data-testid={`resize-right-${screen.id}`}

@@ -49,9 +49,12 @@ interface Props {
   legalAdds: AdwNodeType[];
   /** Empty container: center the chip over the node instead of the below-edge row position. */
   centered: boolean;
+  /** Screen-level overlay (#382) positions the affordance itself; the
+      in-flow default keeps the old below-edge row position. */
+  style?: React.CSSProperties;
 }
 
-export const AddChildChip: React.FC<Props> = ({ nodeId, nodeType, legalAdds, centered }) => {
+export const AddChildChip: React.FC<Props> = ({ nodeId, nodeType, legalAdds, centered, style }) => {
   const addChildNode = useMockupStore((s) => s.addChildNode);
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState('');
@@ -123,6 +126,7 @@ export const AddChildChip: React.FC<Props> = ({ nodeId, nodeType, legalAdds, cen
     <div
       ref={containerRef}
       className={`protota-add-affordance${centered ? ' protota-add-affordance--centered' : ''}`}
+      style={style}
     >
       <button
         className="protota-add-btn protota-add-chip"

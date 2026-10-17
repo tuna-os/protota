@@ -123,10 +123,95 @@ test.describe('Keyboard shortcuts (#14)', () => {
       await page.locator('body').click();
       await page.keyboard.press('Control+?');
 
+      // The host custom element only wraps the fixed scrim, so it has no box of
+      // its own — assert the visible surface instead.
       const overlay = page.locator('[data-testid="shortcuts-overlay"]');
-      await expect(overlay).toBeVisible({ timeout: 5000 });
+      const box = overlay.locator('.adw-dialog-box');
+      await expect(box).toBeVisible({ timeout: 5000 });
       await expect(overlay.getByText('Undo')).toBeVisible({ timeout: 3000 });
-      await expect(overlay.getByText('Ctrl+Z')).toBeVisible({ timeout: 3000 });
+      await expect(overlay.getByText('Ctrl').first()).toBeVisible({ timeout: 3000 });
+
+      // Desktop keeps the floating presentation: a card, not a full-bleed sheet.
+      await expect(overlay).toHaveAttribute('data-presentation', 'auto');
+      const rect = await box.boundingBox();
+      const viewport = page.viewportSize();
+      expect(rect).not.toBeNull();
+      expect(viewport).not.toBeNull();
+      expect(rect!.width).toBeLessThan(viewport!.width);
+    });
+
+    test('becomes a bottom sheet at phone width', async ({ page }) => {
+      await page.setViewportSize({ width: 390, height: 844 });
+      await page.goto('/');
+      await page.waitForSelector('adw-window', { timeout: 10000 });
+
+      await page.keyboard.press('Control+?');
+
+      const overlay = page.locator('[data-testid="shortcuts-overlay"]');
+      await expect(overlay).toHaveAttribute('data-presentation', 'auto');
+
+      // The auto presentation falls back to the bottom sheet at <=550px: the
+      // box is edge-to-edge and anchored to the bottom of the viewport.
+      const box = overlay.locator('.adw-dialog-box');
+      await expect(box).toBeVisible({ timeout: 5000 });
+      const rect = await box.boundingBox();
+      expect(rect).not.toBeNull();
+      expect(rect!.width).toBeGreaterThanOrEqual(389);
+      expect(rect!.y + rect!.height).toBeGreaterThanOrEqual(843);
+    });
+
+    test('shows the header shade only while the list is scrolled', async ({ page }) => {
+      await page.locator('body').click();
+      await page.keyboard.press('Control+?');
+
+      const overlay = page.locator('[data-testid="shortcuts-overlay"]');
+      const content = overlay.locator('.adw-dialog-content');
+      const header = overlay.locator('.adw-dialog-header');
+      await expect(overlay.locator('.adw-dialog-box')).toBeVisible({ timeout: 5000 });
+
+      const shade = () =>
+        header.evaluate((el) => getComputedStyle(el, '::after').backgroundImage);
+      const scrolled = () => overlay.evaluate((el) => el.hasAttribute('data-scrolled'));
+
+      // At the top the flat header bar has no undershoot shade.
+      expect(await scrolled()).toBe(false);
+      expect(await shade()).toBe('none');
+
+      // Scrolling under the bar draws it...
+      await content.evaluate((el) => {
+        el.scrollTop = 300;
+        el.dispatchEvent(new Event('scroll'));
+      });
+      expect(await scrolled()).toBe(true);
+      expect(await shade()).not.toBe('none');
+
+      // ...and returning to the top takes it away again.
+      await content.evaluate((el) => {
+        el.scrollTop = 0;
+        el.dispatchEvent(new Event('scroll'));
+      });
+      expect(await scrolled()).toBe(false);
+      expect(await shade()).toBe('none');
+    });
+
+    test('keeps the row subtitle beside the keycaps', async ({ page }) => {
+      await page.locator('body').click();
+      await page.keyboard.press('Control+?');
+
+      const overlay = page.locator('[data-testid="shortcuts-overlay"]');
+      await expect(overlay.locator('.adw-dialog-box')).toBeVisible({ timeout: 5000 });
+
+      // adwaita-web flattens the row into title/subtitle/label siblings, so the
+      // subtitle has to be pinned to the trailing group rather than centred.
+      const row = overlay.locator('adw-shortcuts-item').filter({ hasText: 'Pan canvas' });
+      const rowBox = await row.boundingBox();
+      const subtitle = await row.locator('.adw-shortcuts-item-subtitle').boundingBox();
+      const label = await row.locator('.adw-shortcuts-item-label').boundingBox();
+      expect(rowBox).not.toBeNull();
+      expect(subtitle).not.toBeNull();
+      expect(label).not.toBeNull();
+      expect(subtitle!.x).toBeGreaterThan(rowBox!.x + rowBox!.width * 0.5);
+      expect(subtitle!.x + subtitle!.width).toBeLessThanOrEqual(label!.x);
     });
   });
 });

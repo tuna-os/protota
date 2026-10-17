@@ -64,9 +64,13 @@ export function useTouchPanZoom(options: UseTouchPanZoomOptions): {
   const [isTouchGesturing, setIsTouchGesturing] = useState(false);
   const touchGestureActiveRef = useRef(false);
 
-  // Ref mirror so the stable listeners always read the latest options.
+  // Ref mirror so the stable listeners always read the latest options. The
+  // write stays off the render path; a pointer event cannot fire before the
+  // commit that this effect follows, and `useRef` seeds the first render.
   const optionsRef = useRef(options);
-  optionsRef.current = options;
+  useEffect(() => {
+    optionsRef.current = options;
+  });
 
   useEffect(() => {
     const el = optionsRef.current.canvasRef.current;

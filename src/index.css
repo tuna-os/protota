@@ -679,6 +679,213 @@ body,
   }
 }
 
+/* ---- adw-shortcuts-dialog base chrome ----
+   adwaita-web scopes <adw-dialog>'s chrome to the `adw-dialog` element selector
+   (_dialog.scss), but <adw-shortcuts-dialog> is a separate custom element that
+   subclasses AdwDialog in JS and never matches those tag-scoped rules.
+   Re-apply the identical chrome to the shortcuts tag so it keeps the adaptive
+   dialog chrome (floating on desktop, bottom sheet on phones) instead of an
+   unstyled full-width block.
+   Keep in sync with node_modules/@gjsify/adwaita-web/scss/_dialog.scss. */
+adw-shortcuts-dialog {
+  display: none;
+}
+adw-shortcuts-dialog.open {
+  display: block;
+}
+adw-shortcuts-dialog .adw-dialog-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 1050;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-l);
+  background-color: var(--dialog-scrim-color, rgba(0, 0, 6, 0.32));
+  animation: adw-dialog-fade-in 0.2s cubic-bezier(0, 0, 0.2, 1);
+}
+adw-shortcuts-dialog .adw-dialog-box {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  width: min(var(--adw-dialog-content-width, 360px), 100vw - 2 * var(--spacing-l));
+  max-height: min(var(--adw-dialog-content-height, 100vh), 100vh - 2 * var(--spacing-l));
+  overflow: hidden;
+  background-color: var(--window-bg-color);
+  color: var(--window-fg-color);
+  border-radius: var(--window-radius);
+  outline: 1px solid var(--separator-color);
+  outline-offset: -1px;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.05), 0 0 5px 2px rgba(0, 0, 6, 0.1), 0 0 14px 2px rgba(0, 0, 6, 0.03);
+  font-family: var(--font-family);
+  animation: adw-dialog-pop-in 0.2s cubic-bezier(0, 0, 0.2, 1);
+}
+adw-shortcuts-dialog .adw-dialog-box:focus {
+  outline: 1px solid var(--separator-color);
+}
+adw-shortcuts-dialog .adw-dialog-header {
+  display: flex;
+  align-items: center;
+  min-height: 47px;
+  padding: 0 6px;
+  flex-shrink: 0;
+}
+adw-shortcuts-dialog .adw-dialog-header-side {
+  display: flex;
+  align-items: center;
+  flex: 1 1 0;
+  min-width: 0;
+}
+adw-shortcuts-dialog .adw-dialog-header-side--end {
+  justify-content: flex-end;
+}
+adw-shortcuts-dialog .adw-dialog-title {
+  flex: 0 0 auto;
+  font-weight: bold;
+  font-size: var(--font-size-base);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: 0 6px;
+}
+adw-shortcuts-dialog .adw-dialog-close {
+  appearance: none;
+  border: none;
+  margin: 0;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border-radius: 50%;
+  /* Regular window-button disc rather than a bare ×: the base is
+     `--button-bg-color`, the same one Gtk.WindowControls draws on the icon
+     (_headerbar.scss), with the library's hover/active shades below. */
+  background-color: var(--button-bg-color);
+  color: var(--window-fg-color);
+  cursor: pointer;
+  position: relative;
+  flex: none;
+  transition: background-color 0.1s ease;
+}
+adw-shortcuts-dialog .adw-dialog-close::before, adw-shortcuts-dialog .adw-dialog-close::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 12px;
+  height: 1.5px;
+  background-color: currentColor;
+  border-radius: 1px;
+}
+adw-shortcuts-dialog .adw-dialog-close::before {
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+adw-shortcuts-dialog .adw-dialog-close::after {
+  transform: translate(-50%, -50%) rotate(-45deg);
+}
+adw-shortcuts-dialog .adw-dialog-close:hover {
+  background-color: var(--button-hover-color);
+}
+adw-shortcuts-dialog .adw-dialog-close:active {
+  background-color: var(--button-active-color);
+}
+adw-shortcuts-dialog .adw-dialog-close:focus-visible {
+  outline: 2px solid var(--accent-color);
+  outline-offset: 1px;
+}
+adw-shortcuts-dialog .adw-dialog-close.locked {
+  opacity: var(--dim-opacity);
+  cursor: default;
+}
+/* The high-contrast ring the window controls draw on their disc
+   (_headerbar.scss); the dialog close button needs it too. */
+@media (prefers-contrast: more) {
+  adw-shortcuts-dialog .adw-dialog-close {
+    box-shadow: inset 0 0 0 1px var(--border-color);
+  }
+}
+adw-shortcuts-dialog .adw-dialog-content {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding: var(--spacing-m) var(--spacing-l) var(--spacing-l);
+}
+adw-shortcuts-dialog .adw-dialog-header[hidden] + .adw-dialog-content {
+  padding-top: var(--spacing-l);
+}
+adw-shortcuts-dialog[data-presentation=bottom-sheet] .adw-dialog-scrim {
+  align-items: flex-end;
+  justify-content: stretch;
+  padding: 0;
+}
+adw-shortcuts-dialog[data-presentation=bottom-sheet] .adw-dialog-box {
+  width: 100%;
+  max-width: none;
+  border-top-left-radius: var(--window-radius);
+  border-top-right-radius: var(--window-radius);
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  animation: adw-dialog-slide-up 0.25s cubic-bezier(0, 0, 0.2, 1);
+}
+
+/* adwaita-web flattens a shortcut row into title/subtitle/label siblings under
+   `justify-content: space-between`, which strands the subtitle in the middle of
+   the row. Let the title absorb the slack instead, so the subtitle sits in the
+   trailing group beside the keycaps. */
+adw-shortcuts-item {
+  justify-content: flex-start;
+}
+adw-shortcuts-item .adw-shortcuts-item-title {
+  margin-right: auto;
+}
+adw-shortcuts-item .adw-shortcuts-item-subtitle {
+  /* The library's `3px` is the stacked title-box spacing; the subtitle is a row
+     item here, so it should centre on the row like the keycaps do. */
+  margin-top: 0;
+}
+
+@media (max-width: 550px) {
+  adw-shortcuts-dialog[data-presentation=auto] .adw-dialog-scrim {
+    align-items: flex-end;
+    justify-content: stretch;
+    padding: 0;
+  }
+  adw-shortcuts-dialog[data-presentation=auto] .adw-dialog-box {
+    width: 100%;
+    max-width: none;
+    border-top-left-radius: var(--window-radius);
+    border-top-right-radius: var(--window-radius);
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    animation: adw-dialog-slide-up 0.25s cubic-bezier(0, 0, 0.2, 1);
+  }
+}
+
+/* The shortcuts dialog's title bar is flat, like a real AdwHeaderBar over a
+   ToolbarView, so the shade under it is the top undershoot rather than a
+   permanent headerbar shadow: it appears only while the sections are scrolled
+   away from the top. `data-scrolled` is toggled from the content's scroll
+   position in KeyboardShortcuts.tsx. The 40px box and 4px fade are
+   @gjsify/adwaita-web's own `_scrolling.scss` undershoot metrics. */
+adw-shortcuts-dialog[data-scrolled] .adw-dialog-header {
+  position: relative;
+  z-index: 1;
+}
+adw-shortcuts-dialog[data-scrolled] .adw-dialog-header::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  height: 40px;
+  pointer-events: none;
+  box-shadow: inset 0 1px color-mix(in srgb, var(--shade-color, rgba(0, 0, 6, 0.07)) 75%, transparent);
+  background: linear-gradient(
+    to bottom,
+    color-mix(in srgb, var(--shade-color, rgba(0, 0, 6, 0.07)) 75%, transparent),
+    transparent 4px
+  );
+}
+
 /* ---- Right-click context menu (a menu popover anchored at the cursor) ---- */
 .protota-context-menu-anchor {
   position: fixed;

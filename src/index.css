@@ -254,16 +254,22 @@ body,
 }
 
 /* Screen-level selection overlay (#382): the type badge and "+" chip for the
-   primary selection, absolutely positioned over the screen frame from a
-   measured rect (see SelectionOverlay). A sibling of the scroll content, so
-   it never extends any ancestor scroller's scrollable overflow and is never
-   clipped at window edges. Pointer events pass through except on the chip. */
+   primary selection, in a canvas-level `position: fixed` layer measured from
+   the selected wrapper's box (the same box the outline draws on, so the
+   chrome sits exactly where the old in-wrapper placement put it). A sibling
+   of every scroll container, so it never extends any ancestor scroller's
+   scrollable overflow and is never clipped at window edges. Fixed (like the
+   marquee below) rather than inside the zoomed surface, whose transform
+   would trap the layer below the zoom bar. Pointer events pass through
+   except on the chip. At the popover layer (1000, as before): above the zoom
+   bar (100) so the add popover stays clickable, below the preview (1500)
+   and drag indicators (3000). */
 .protota-selection-overlay {
-  position: absolute;
+  position: fixed;
   inset: 0;
   overflow: visible;
   pointer-events: none;
-  z-index: 60;
+  z-index: 1000;
 }
 
 .protota-selection-overlay .protota-type-badge {

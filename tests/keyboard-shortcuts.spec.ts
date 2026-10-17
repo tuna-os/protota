@@ -193,6 +193,26 @@ test.describe('Keyboard shortcuts (#14)', () => {
       expect(await scrolled()).toBe(false);
       expect(await shade()).toBe('none');
     });
+
+    test('keeps the row subtitle beside the keycaps', async ({ page }) => {
+      await page.locator('body').click();
+      await page.keyboard.press('Control+?');
+
+      const overlay = page.locator('[data-testid="shortcuts-overlay"]');
+      await expect(overlay.locator('.adw-dialog-box')).toBeVisible({ timeout: 5000 });
+
+      // adwaita-web flattens the row into title/subtitle/label siblings, so the
+      // subtitle has to be pinned to the trailing group rather than centred.
+      const row = overlay.locator('adw-shortcuts-item').filter({ hasText: 'Pan canvas' });
+      const rowBox = await row.boundingBox();
+      const subtitle = await row.locator('.adw-shortcuts-item-subtitle').boundingBox();
+      const label = await row.locator('.adw-shortcuts-item-label').boundingBox();
+      expect(rowBox).not.toBeNull();
+      expect(subtitle).not.toBeNull();
+      expect(label).not.toBeNull();
+      expect(subtitle!.x).toBeGreaterThan(rowBox!.x + rowBox!.width * 0.5);
+      expect(subtitle!.x + subtitle!.width).toBeLessThanOrEqual(label!.x);
+    });
   });
 });
 

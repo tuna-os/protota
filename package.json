@@ -9,6 +9,7 @@
     "build": "tsc -b && vite build",
     "lint": "oxlint",
     "analyze": "react-doctor .",
+    "qa:tune": "node scripts/auto-qa-tuner.mjs",
     "preview": "vite preview",
     "generate:icon-catalog": "node scripts/generate-icon-catalog.mjs",
     "test": "playwright test",

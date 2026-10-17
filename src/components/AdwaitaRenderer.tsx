@@ -664,6 +664,22 @@ export const AdwaitaRenderer: React.FC<Props> = ({
         ? 'gtk-button'
         : TAG_MAP[node.type] || 'div';
   const attrs = nodeProps(node, inheritedSlot);
+  // adw-window derives min size from width/height attributes in 0.64.1.
+  const isWindowRoot = (node.type === 'window' || node.type === 'dialog' || isDialogRoot) && Boolean(screenWidth || preview);
+  if (isWindowRoot) {
+    if (screenWidth) {
+      attrs.width = String(screenWidth);
+      attrs['width-request'] = String(screenWidth);
+      if (screenHeight) {
+        attrs.height = String(screenHeight);
+        attrs['height-request'] = String(screenHeight);
+      }
+    } else {
+      // Responsive preview shell: no minimum, no opened size.
+      attrs['width-request'] = '0';
+      attrs['height-request'] = '0';
+    }
+  }
   // AdwHeaderBar with no title-widget shows the enclosing window's/dialog's
   // title centered (the compress dialog's heading comes from this fallback).
   // adw-header-bar only draws the title attribute when its center slot is

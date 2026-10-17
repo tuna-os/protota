@@ -756,7 +756,10 @@ adw-shortcuts-dialog .adw-dialog-close {
   height: 28px;
   padding: 0;
   border-radius: 50%;
-  background-color: transparent;
+  /* Regular window-button disc rather than a bare ×: the base is
+     `--button-bg-color`, the same one Gtk.WindowControls draws on the icon
+     (_headerbar.scss), with the library's hover/active shades below. */
+  background-color: var(--button-bg-color);
   color: var(--window-fg-color);
   cursor: pointer;
   position: relative;
@@ -793,6 +796,13 @@ adw-shortcuts-dialog .adw-dialog-close.locked {
   opacity: var(--dim-opacity);
   cursor: default;
 }
+/* The high-contrast ring the window controls draw on their disc
+   (_headerbar.scss); the dialog close button needs it too. */
+@media (prefers-contrast: more) {
+  adw-shortcuts-dialog .adw-dialog-close {
+    box-shadow: inset 0 0 0 1px var(--border-color);
+  }
+}
 adw-shortcuts-dialog .adw-dialog-content {
   flex: 1 1 auto;
   min-height: 0;
@@ -815,6 +825,22 @@ adw-shortcuts-dialog[data-presentation=bottom-sheet] .adw-dialog-box {
   border-bottom-left-radius: 0;
   border-bottom-right-radius: 0;
   animation: adw-dialog-slide-up 0.25s cubic-bezier(0, 0, 0.2, 1);
+}
+
+/* adwaita-web flattens a shortcut row into title/subtitle/label siblings under
+   `justify-content: space-between`, which strands the subtitle in the middle of
+   the row. Let the title absorb the slack instead, so the subtitle sits in the
+   trailing group beside the keycaps. */
+adw-shortcuts-item {
+  justify-content: flex-start;
+}
+adw-shortcuts-item .adw-shortcuts-item-title {
+  margin-right: auto;
+}
+adw-shortcuts-item .adw-shortcuts-item-subtitle {
+  /* The library's `3px` is the stacked title-box spacing; the subtitle is a row
+     item here, so it should centre on the row like the keycaps do. */
+  margin-top: 0;
 }
 
 @media (max-width: 550px) {

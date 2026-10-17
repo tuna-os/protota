@@ -52,9 +52,11 @@ interface Props {
   /** Screen-level overlay (#382) positions the affordance itself; the
       in-flow default keeps the old below-edge row position. */
   style?: React.CSSProperties;
+  /** Popover opens above the chip when it does not fit below (#382). */
+  above?: boolean;
 }
 
-export const AddChildChip: React.FC<Props> = ({ nodeId, nodeType, legalAdds, centered, style }) => {
+export const AddChildChip: React.FC<Props> = ({ nodeId, nodeType, legalAdds, centered, style, above }) => {
   const addChildNode = useMockupStore((s) => s.addChildNode);
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState('');
@@ -125,7 +127,7 @@ export const AddChildChip: React.FC<Props> = ({ nodeId, nodeType, legalAdds, cen
   return (
     <div
       ref={containerRef}
-      className={`protota-add-affordance${centered ? ' protota-add-affordance--centered' : ''}`}
+      className={`protota-add-affordance${centered ? ' protota-add-affordance--centered' : ''}${above ? ' protota-add-affordance--above' : ''}`}
       style={style}
     >
       <button

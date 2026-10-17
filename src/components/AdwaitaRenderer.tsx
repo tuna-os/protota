@@ -9,10 +9,7 @@ import {
 } from '../utils/nodeGeometry';
 import { headerBarControls, headerBarFallbackTitle } from '../utils/headerBarChrome';
 import { tabBarModel } from '../utils/tabBar';
-1: import { usePreview } from '../preview/PreviewContext';
-2:       // The "+" chip now lives in the screen-level SelectionOverlay (#382),
-      // outside every wrapper, so its clicks never reach this listener.
-      event.stopPropagation();
+import { usePreview } from '../preview/PreviewContext';
 
 interface Props {
   node: AdwNode;
@@ -544,7 +541,7 @@ export const AdwaitaRenderer: React.FC<Props> = ({
       // Ctrl/Cmd-click toggles multi-selection membership (#79, study §3).
       if (event.ctrlKey || event.metaKey) toggleNodeSelection(node.id, screenId);
       else selectNode(node.id, screenId);
-    };
+  });
 
   useEffect(() => {
     const wrapper = wrapperRef.current;

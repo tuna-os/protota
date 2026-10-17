@@ -401,6 +401,16 @@ body,
   transform: translateX(-50%);
 }
 
+/* The overlay is viewport-fixed, so ancestor scrolling can never reveal a
+   popover that opens below the fold (#382): flip it above the chip when the
+   room below fits less than the popover's full height. Standard menu
+   behavior; the canvas is overflow:hidden, so below-fold was unreachable
+   for pointer users too. */
+.protota-add-affordance--above .protota-add-popover {
+  top: auto;
+  bottom: calc(100% + 4px);
+}
+
 .protota-add-popover-search {
   border: none;
   border-bottom: 1px solid var(--separator-color, rgba(0, 0, 6, 0.12));

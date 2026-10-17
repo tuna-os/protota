@@ -11,6 +11,19 @@ interface Box {
   h: number;
 }
 
+interface OverlayGeom {
+  box: Box;
+  /** Popover opens above the chip: the room below fits less than its full
+      height and the room above fits more (#382). */
+  above: boolean;
+}
+
+/** Full popover height the flip decision reserves: max-height plus the
+    search row, common shortcuts, and the chip gap. */
+const POPOVER_ROOM = 320;
+/** "+" chip height for the flip decision (13px label + padding). */
+const CHIP_H = 24;
+
 /**
  * Screen-level selection chrome (#382): the type badge and "+" add chip for
  * the primary selection, in a canvas-level `position: fixed` overlay —
@@ -31,7 +44,7 @@ interface Box {
  * node is selected. That single mechanism follows zoom, pan, zoom-glide
  * transitions, inner scroller scrolls, resizes, and late layout shifts
  * (adw element upgrades, font loads) with no listener bookkeeping; the
- * guarded setBox below commits a re-render only when the rect moved, so an
+ * guarded setGeom below commits a re-render only when the rect moved, so an
  * idle selection costs one cheap rect read per frame and no DOM churn.
  *
  * The anchor is the selected node's WRAPPER box — the same box the outline
@@ -45,7 +58,7 @@ export const SelectionOverlay: React.FC = () => {
   const selectedNodeId = useMockupStore((s) => s.selectedNodeId);
   const doc = useMockupStore((s) => s.doc);
   const rootRef = useRef<HTMLDivElement>(null);
-  const [box, setBox] = useState<Box | null>(null);
+  const [geom, setGeom] = useState<OverlayGeom | null>(null);
 
   let node = null;
   for (const screen of doc.screens) {
@@ -60,10 +73,11 @@ export const SelectionOverlay: React.FC = () => {
   // frame reads the live layout.
   useLayoutEffect(() => {
     if (!node) {
-      setBox(null);
+      setGeom(null);
       return;
     }
     const id = node.id;
+    const empty = !node.children || node.children.length === 0;
     let raf = 0;
     let alive = true;
     const tick = () => {
@@ -75,17 +89,31 @@ export const SelectionOverlay: React.FC = () => {
       // the node box itself as a fallback.
       const anchor = target?.closest('.adw-node-wrapper') ?? target;
       if (!anchor) {
-        setBox(null);
+        setGeom(null);
       } else {
         const r = anchor.getBoundingClientRect();
         if (r.width === 0 && r.height === 0) {
-          setBox(null);
+          setGeom(null);
         } else {
-          const next: Box = { x: r.left, y: r.top, w: r.width, h: r.height };
-          setBox((prev) =>
+          // Chip edges in viewport px, mirroring chipStyle below: a
+          // populated node keeps the chip below the box, an empty one
+          // centers it over the box.
+          const chipTop = empty ? r.top + r.height / 2 - CHIP_H / 2 : r.bottom + 4;
+          const chipBottom = chipTop + CHIP_H;
+          const belowRoom = window.innerHeight - chipBottom;
+          // The overlay is viewport-fixed, so ancestor scrolling can never
+          // reveal a popover that opens below the fold: flip it above the
+          // chip when the room below fits less than its full height.
+          const above = belowRoom < POPOVER_ROOM && chipTop > belowRoom;
+          const next: OverlayGeom = {
+            box: { x: r.left, y: r.top, w: r.width, h: r.height },
+            above,
+          };
+          setGeom((prev) =>
             prev !== null &&
-            prev.x === next.x && prev.y === next.y &&
-            prev.w === next.w && prev.h === next.h
+            prev.above === next.above &&
+            prev.box.x === next.box.x && prev.box.y === next.box.y &&
+            prev.box.w === next.box.w && prev.box.h === next.box.h
               ? prev
               : next,
           );
@@ -100,7 +128,8 @@ export const SelectionOverlay: React.FC = () => {
     };
   }, [node]);
 
-  if (!node || !box) return <div ref={rootRef} className="protota-selection-overlay" aria-hidden="true" />;
+  if (!node || !geom) return <div ref={rootRef} className="protota-selection-overlay" aria-hidden="true" />;
+  const { box } = geom;
 
   const empty = !node.children || node.children.length === 0;
   // An empty container centers the chip in the wrapper row, as the old
@@ -124,6 +153,7 @@ export const SelectionOverlay: React.FC = () => {
           nodeType={node.type}
           legalAdds={legalAdds}
           centered={empty}
+          above={geom.above}
           style={chipStyle}
         />
       )}

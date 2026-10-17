@@ -225,8 +225,11 @@ body,
 /* Renderer wrappers are layout-transparent: the rendered widget element is
    the flex/grid item its parent lays out, so GTK expand, homogeneity, and
    attach semantics propagate through the tree instead of stopping at each
-   wrapper. A selected node re-materialises its wrapper so the outline,
-   type badge, and add-buttons have a positioned box to anchor to. */
+   wrapper. A selected node re-materialises its wrapper to a plain block so
+   the inset outline has a box to draw on (display: contents draws none).
+   The badge and "+" chip live in the screen-level .protota-selection-overlay
+   below (#382), never inside the wrapper, so no positioned anchor is needed
+   here — and nothing inside a scroller can grow its scrollable overflow. */
 .adw-node-wrapper {
   display: contents;
 }
@@ -236,7 +239,6 @@ body,
    overflow-hidden content, so a full-size box's highlight vanished. */
 .adw-node-wrapper.selected-outline {
   display: block;
-  position: relative;
   outline: 2px solid var(--accent-bg-color, #3584e4);
   outline-offset: -2px;
   border-radius: 4px;
@@ -246,10 +248,36 @@ body,
    visually distinct from the solid primary outline. */
 .adw-node-wrapper.multi-selected-outline {
   display: block;
-  position: relative;
   outline: 2px dashed var(--accent-bg-color, #3584e4);
   outline-offset: -2px;
   border-radius: 4px;
+}
+
+/* Screen-level selection overlay (#382): the type badge and "+" chip for the
+   primary selection, in a canvas-level `position: fixed` layer measured from
+   the selected wrapper's box (the same box the outline draws on, so the
+   chrome sits exactly where the old in-wrapper placement put it). A sibling
+   of every scroll container, so it never extends any ancestor scroller's
+   scrollable overflow and is never clipped at window edges. Fixed (like the
+   marquee below) rather than inside the zoomed surface, whose transform
+   would trap the layer below the zoom bar. Pointer events pass through
+   except on the chip. At the popover layer (1000, as before): above the zoom
+   bar (100) so the add popover stays clickable, below the preview (1500)
+   and drag indicators (3000). */
+.protota-selection-overlay {
+  position: fixed;
+  inset: 0;
+  overflow: visible;
+  pointer-events: none;
+  z-index: 1000;
+}
+
+.protota-selection-overlay .protota-type-badge {
+  pointer-events: none;
+}
+
+.protota-selection-overlay .protota-add-affordance {
+  pointer-events: auto;
 }
 
 /* Rubber-band marquee overlay (#79): fixed-positioned editor chrome. */
@@ -371,6 +399,16 @@ body,
 .protota-add-affordance--centered .protota-add-popover {
   left: 50%;
   transform: translateX(-50%);
+}
+
+/* The overlay is viewport-fixed, so ancestor scrolling can never reveal a
+   popover that opens below the fold (#382): flip it above the chip when the
+   room below fits less than the popover's full height. Standard menu
+   behavior; the canvas is overflow:hidden, so below-fold was unreachable
+   for pointer users too. */
+.protota-add-affordance--above .protota-add-popover {
+  top: auto;
+  bottom: calc(100% + 4px);
 }
 
 .protota-add-popover-search {

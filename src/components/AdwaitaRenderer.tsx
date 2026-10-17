@@ -1,6 +1,5 @@
 import React, { useRef, useEffect, useCallback, useEffectEvent } from 'react';
 import type { AdwNode } from '../types/mockup';
-import { LEGAL_CHILDREN } from '../types/mockup';
 import { useMockupStore } from '../store/mockupStore';
 import { ensureAdwIcon } from '../utils/adwIcons';
 import { filterDiagnostics, getDiagnosticsForNode, worstTier } from '../diagnostics/engine';
@@ -11,7 +10,6 @@ import {
 import { headerBarControls, headerBarFallbackTitle } from '../utils/headerBarChrome';
 import { tabBarModel } from '../utils/tabBar';
 import { usePreview } from '../preview/PreviewContext';
-import { AddChildChip } from './AddChildChip';
 
 interface Props {
   node: AdwNode;
@@ -421,7 +419,6 @@ export const AdwaitaRenderer: React.FC<Props> = ({
     : [];
   const diagnosticTier = worstTier(nodeDiagnostics);
 
-  const legalAdds = LEGAL_CHILDREN[node.type] || [];
   const elRef = useRef<HTMLElement>(null);
 
   // `Adw.ActionRow:activatable` is GETTER-ONLY in 0.52 (derived from
@@ -538,16 +535,12 @@ export const AdwaitaRenderer: React.FC<Props> = ({
       }
       return;
     }
-    // Clicks inside the quick-add affordance (the "+" chip and its
-    // popover) belong to its React handlers. stopPropagation here would
-    // keep the event from ever reaching React's root-delegated listener,
-    // so let these through untouched — the affordance stops synthetic
-    // propagation itself, which keeps the canvas deselect suppressed.
-    if ((event.target as Element).closest?.('.protota-add-affordance')) return;
-    event.stopPropagation();
-    // Ctrl/Cmd-click toggles multi-selection membership (#79, study §3).
-    if (event.ctrlKey || event.metaKey) toggleNodeSelection(node.id, screenId);
-    else selectNode(node.id, screenId);
+      // The "+" chip now lives in the screen-level SelectionOverlay (#382),
+      // outside every wrapper, so its clicks never reach this listener.
+      event.stopPropagation();
+      // Ctrl/Cmd-click toggles multi-selection membership (#79, study §3).
+      if (event.ctrlKey || event.metaKey) toggleNodeSelection(node.id, screenId);
+      else selectNode(node.id, screenId);
   });
 
   useEffect(() => {
@@ -886,19 +879,7 @@ export const AdwaitaRenderer: React.FC<Props> = ({
       ref={wrapperRef}
       slot={wrapperSlot(inheritedSlot, node.slot)}
       className={`adw-node-wrapper${isSelected ? ' selected-outline' : ''}${isMultiSelected ? ' multi-selected-outline' : ''}`}
-      style={{
-        // Normal wrappers are layout-transparent, but a handful of
-        // single-child container rules materialise them as flex conduits.
-        // Applying native absolute placement here as well as on the widget
-        // doubles every offset in those containers (a -1671px Week scroll
-        // position became -3342px). Placement belongs to the rendered
-        // widget; only selection chrome needs its own positioned anchor.
-        ...(isSelected || isMultiSelected ? { position: 'relative' } : {}),
-      }}
     >
-      {isSelected && (
-        <div className="protota-type-badge">{node.type}</div>
-      )}
 
       {React.createElement(tag, {
         key: hostKey,
@@ -949,20 +930,6 @@ export const AdwaitaRenderer: React.FC<Props> = ({
         ...(node.type === 'label' || node.type === 'inscription' || (node.type === 'custom-widget' && (!node.children || node.children.length === 0))
           ? [plainText(String(node.title || ''))]
           : []),
-      )}
-
-      {isSelected && legalAdds.length > 0 && (
-        // Compact quick-add: one "+" chip opening a searchable popover over
-        // the same LEGAL_CHILDREN data the old per-type pill row used. An
-        // empty container centers the chip over its (near-zero) box so the
-        // affordance stays discoverable; a populated one keeps the chip at
-        // the old pill-row position below the node.
-        <AddChildChip
-          nodeId={node.id}
-          nodeType={node.type}
-          legalAdds={legalAdds}
-          centered={!node.children || node.children.length === 0}
-        />
       )}
     </div>
   );

@@ -14,6 +14,7 @@ import { activeBreakpoints, breakpointOverrides, type ActiveBreakpoint } from ".
 import type { AdwNode, AdwNodeType } from "../types/mockup";
 import { useTouchPanZoom, TOUCH_GESTURE_START_EVENT } from "../hooks/useTouchPanZoom";
 import { PreviewOverlay } from "./PreviewOverlay";
+import { SelectionOverlay } from "./SelectionOverlay";
 
 const CANVAS_PADDING = 60;
 
@@ -1014,6 +1015,11 @@ export const ViewportCanvas: React.FC = () => {
           {screenDeleteNotice}
         </div>
       )}
+
+      {/* Primary-selection badge + "+" chip (#382): canvas-level fixed
+          editor chrome, hidden behind the fullscreen preview where all
+          editor chrome disappears. */}
+      {!activeDesktopScreen && !activePhoshScreen && <SelectionOverlay />}
 
       {/* Rubber-band marquee (#79): fixed-positioned editor chrome. */}
       {marquee && (

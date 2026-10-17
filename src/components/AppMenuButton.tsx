@@ -154,11 +154,6 @@ export const AppMenuButton: React.FC = () => {
   const actionsRef = useRef<Record<string, () => void>>({});
   /** The model text last rendered, so a re-render only rebuilds when it changed. */
   const modelKeyRef = useRef<string | null>(null);
-  /** Latest theme state for the popover observer below (avoids re-subscribing). */
-  const colorSchemeRef = useRef<ThemeChoice>(colorScheme);
-  colorSchemeRef.current = colorScheme;
-  const setColorSchemeRef = useRef(setColorScheme);
-  setColorSchemeRef.current = setColorScheme;
 
   // adwaita-web ≥0.57 re-renders the popover on every open (_refreshActions →
   // PopoverMenuView.render() → replaceChildren()), which wipes the injected
@@ -171,12 +166,15 @@ export const AppMenuButton: React.FC = () => {
     if (!el || !popover || typeof popover.subscribe !== "function") return;
     return popover.subscribe((open) => {
       if (!open) return;
+      // Read the theme from the store at call time: the subscription is
+      // registered once, so a render-time binding would go stale.
+      const { doc, setColorScheme: choose } = useMockupStore.getState();
       const existing = popover.querySelector<HTMLElement>(":scope > .protota-theme-switcher");
       if (existing) {
-        syncThemeSwitcher(existing, colorSchemeRef.current);
+        syncThemeSwitcher(existing, doc.colorScheme);
         return;
       }
-      injectThemeSwitcher(el, colorSchemeRef.current, (c) => setColorSchemeRef.current(c));
+      injectThemeSwitcher(el, doc.colorScheme, choose);
     });
   }, []);
 

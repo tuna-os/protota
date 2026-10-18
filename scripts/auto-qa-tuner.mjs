@@ -9,6 +9,10 @@
  * Reports are evaluated in argument order. Only the newest configured sample
  * window is used. The policy moves by one step per run, within fixed safety
  * bounds, so one unusual run cannot disable retries or hide a regression.
+ *
+ * Observations are printed, not committed: the retry count in
+ * .github/auto-qa-tuning.json only moves one step per run, so a run that
+ * suggests the same value leaves the file untouched and produces no diff.
  */
 import { readFileSync, renameSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
@@ -18,6 +22,28 @@ const repoRoot = join(dirname(fileURLToPath(import.meta.url)), '..');
 const defaultConfigPath = join(repoRoot, '.github', 'auto-qa-tuning.json');
 const terminalSuccesses = new Set(['passed', 'skipped']);
 const retryableFailures = new Set(['failed', 'timedOut', 'interrupted']);
+
+/**
+ * Playwright's `test.status` uses `expected`/`unexpected`/`flaky`/`skipped`,
+ * not test-result statuses. An empty `results` array means no attempt was
+ * recorded, which is not evidence of failure — map it onto the spec-level
+ * status rather than counting every such test as a hard failure.
+ */
+function terminalStatusOf(test) {
+  const lastStatus = test.results?.at(-1)?.status;
+  if (lastStatus !== undefined) return lastStatus;
+  switch (test.status) {
+    case 'expected':
+    case 'flaky':
+      return 'passed';
+    case 'unexpected':
+      return 'failed';
+    case 'skipped':
+      return 'skipped';
+    default:
+      return 'unknown';
+  }
+}
 
 function collectTests(suite, tests) {
   for (const spec of suite.specs ?? []) {
@@ -36,18 +62,32 @@ export function observationsFromReport(report) {
 
   return tests.map((test) => {
     const results = test.results ?? [];
-    const terminalStatus = results.at(-1)?.status ?? test.status ?? 'unknown';
+    const terminalStatus = terminalStatusOf(test);
+    // `flaky` at spec level means an earlier attempt failed. With no results
+    // to inspect, trust that flag instead of the reconstructed status.
+    const earlierFailure = results.length > 0
+      ? results.slice(0, -1).some((result) => retryableFailures.has(result.status))
+      : test.status === 'flaky';
     return {
       failed: !terminalSuccesses.has(terminalStatus),
-      flaky: terminalStatus === 'passed' && results
-        .slice(0, -1)
-        .some((result) => retryableFailures.has(result.status)),
+      flaky: terminalStatus === 'passed' && earlierFailure,
     };
   });
 }
 
+/** `slice(-0)` returns the whole array, so a zero window must be rejected. */
+function sampleWindowOf(policy) {
+  const window = policy?.sampleWindow;
+  if (!Number.isInteger(window) || window < 1) {
+    throw new Error(
+      `sampleWindow must be a positive integer, got ${JSON.stringify(window)}`,
+    );
+  }
+  return window;
+}
+
 export function tuneRetries(policy, observations) {
-  const sample = observations.slice(-policy.sampleWindow);
+  const sample = observations.slice(-sampleWindowOf(policy));
   const failed = sample.filter((observation) => observation.failed).length;
   const flaky = sample.filter((observation) => observation.flaky).length;
   const observedFlakeRate = sample.length === 0 ? 0 : flaky / sample.length;
@@ -80,39 +120,47 @@ export function tuneRetries(policy, observations) {
   };
 }
 
-function parseArguments(args) {
-  const configIndex = args.indexOf('--config');
-  if (configIndex === -1) {
-    return { configPath: defaultConfigPath, reportPaths: args };
-  }
-  const configPath = args[configIndex + 1];
-  if (!configPath) throw new Error('--config requires a path');
+function takeOption(args, name) {
+  const index = args.indexOf(name);
+  if (index === -1) return { value: null, rest: args };
+  const value = args[index + 1];
+  if (!value) throw new Error(`${name} requires a path`);
   return {
-    configPath,
-    reportPaths: args.filter((_, index) => index !== configIndex && index !== configIndex + 1),
+    value,
+    rest: args.filter((_, position) => position !== index && position !== index + 1),
   };
 }
 
 function main() {
-  const { configPath, reportPaths } = parseArguments(process.argv.slice(2));
+  const summary = takeOption(process.argv.slice(2), '--summary');
+  const config = takeOption(summary.rest, '--config');
+  const configPath = config.value ?? defaultConfigPath;
+  const reportPaths = config.rest;
   if (reportPaths.length === 0) {
     throw new Error('Pass at least one Playwright JSON report');
   }
 
-  const config = JSON.parse(readFileSync(configPath, 'utf8'));
-  if (config.schemaVersion !== 1 || !config.playwright?.retries) {
+  const policy = JSON.parse(readFileSync(configPath, 'utf8'));
+  if (policy.schemaVersion !== 1 || !policy.playwright?.retries) {
     throw new Error(`Unsupported Auto-QA policy in ${configPath}`);
   }
 
   const observations = reportPaths.flatMap((reportPath) =>
     observationsFromReport(JSON.parse(readFileSync(reportPath, 'utf8'))));
-  const result = tuneRetries(config.playwright, observations);
-  config.playwright.retries.current = result.retries;
-  config.playwright.lastObservation = result.summary;
+  const result = tuneRetries(policy.playwright, observations);
+  policy.playwright.retries.current = result.retries;
 
-  const temporaryPath = `${configPath}.tmp`;
-  writeFileSync(temporaryPath, `${JSON.stringify(config, null, 2)}\n`);
-  renameSync(temporaryPath, configPath);
+  // Write only when the retry count changes, so running the tuner on an
+  // unchanged tree leaves the committed policy byte-identical.
+  const serialised = `${JSON.stringify(policy, null, 2)}\n`;
+  if (serialised !== readFileSync(configPath, 'utf8')) {
+    const temporaryPath = `${configPath}.tmp`;
+    writeFileSync(temporaryPath, serialised);
+    renameSync(temporaryPath, configPath);
+  }
+  if (summary.value) {
+    writeFileSync(summary.value, `${JSON.stringify(result.summary, null, 2)}\n`);
+  }
   console.log(JSON.stringify(result.summary));
 }
 

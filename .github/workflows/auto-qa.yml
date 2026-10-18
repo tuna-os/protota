@@ -1,0 +1,105 @@
+name: Auto-QA Tuning
+
+# protota#297: the Playwright retry count in .github/auto-qa-tuning.json should
+# follow observed outcomes instead of a hand-picked constant. deploy.yml's test
+# job now writes a JSON report; this workflow reads the newest reports from
+# main, suggests the next retry value, and publishes the observation summary.
+#
+# The suggestion is advisory by design: this job never commits. Tuning moves
+# one step per run, so a human reviews the proposed step rather than handing
+# CI the ability to rewrite its own failure policy.
+
+on:
+  schedule:
+    # Once a day, after the nightly deploy run has finished.
+    - cron: '17 6 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
+jobs:
+  tune:
+    # The retry policy is a property of main; tuning from a PR would let a
+    # branch raise its own ceiling.
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+
+      - name: Download the newest Playwright JSON reports
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          mkdir -p artifacts/playwright
+          mapfile -t runs < <(gh api \
+            "repos/$REPOSITORY/actions/workflows/deploy.yml/runs?branch=main&status=success&per_page=3" \
+            --jq '.workflow_runs[].id' | head -n 3)
+          found=0
+          for run in "${runs[@]}"; do
+            if gh run download "$run" --repo "$REPOSITORY" \
+              --name playwright-json --dir "artifacts/playwright/$run"; then
+              found=$((found + 1))
+            else
+              echo "::warning::Run $run has no playwright-json artifact; skipping."
+            fi
+          done
+          if [ "$found" -eq 0 ]; then
+            echo "::error::No playwright-json artifact on recent successful main runs."
+            echo "::error::Check that deploy.yml's 'Run Playwright tests' step still uploads one."
+            exit 1
+          fi
+          ls -1 artifacts/playwright
+
+      - name: Suggest the next retry policy
+        run: |
+          # `gh run download` nests the uploaded file under
+          # <run>/playwright-report/, so locate each report by name. Run IDs are
+          # monotonic, so ascending numeric order is oldest-first; the tuner
+          # reads reports in argument order and windows from the tail, so the
+          # newest runs must come last.
+          mapfile -t reports < <(ls -1d artifacts/playwright/* \
+            | sort -t/ -k3,3n \
+            | while read -r run; do find "$run" -name playwright-report.json; done)
+          echo "Reports, oldest first: ${reports[*]}"
+          npm run qa:tune -- --summary artifacts/auto-qa-tuning-summary.json "${reports[@]}"
+
+      - name: Report the suggestion
+        run: |
+          node -e '
+            const { readFileSync, appendFileSync } = require("node:fs");
+            const summary = JSON.parse(
+              readFileSync("artifacts/auto-qa-tuning-summary.json", "utf8"),
+            );
+            const heading = `Retry policy: ${summary.previousRetries} -> ${summary.retries} (${summary.reason})`;
+            const detail = [
+              `- samples: ${summary.samples}`,
+              `- flaky: ${summary.flaky}`,
+              `- failed: ${summary.failed}`,
+              `- observed flake rate: ${(summary.observedFlakeRate * 100).toFixed(2)}%`,
+            ].join("\n");
+            appendFileSync(process.env.GITHUB_STEP_SUMMARY, `## ${heading}\n\n${detail}\n`);
+            console.log(`${heading}\n${detail}`);
+          '
+
+      - name: Upload the observation summary
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: auto-qa-tuning-summary
+          path: artifacts/auto-qa-tuning-summary.json
+          retention-days: 30

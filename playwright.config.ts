@@ -25,13 +25,20 @@ if (!Number.isInteger(retryPolicy.current)
   throw new Error('Invalid Playwright retry policy in .github/auto-qa-tuning.json');
 }
 
+// CI also emits a machine-readable report; auto-qa.yml reads it to tune the
+// retry count above. Local runs keep the HTML reporter only.
+const reportPath = process.env.PLAYWRIGHT_JSON_OUTPUT_FILE;
+const reporter = reportPath
+  ? [['html'], ['json', { outputFile: reportPath }]] as const
+  : 'html';
+
 export default defineConfig({
   testDir: './tests',
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? retryPolicy.current : 0,
   workers: process.env.CI ? 4 : undefined,
-  reporter: 'html',
+  reporter,
   // Broadway comparisons are review artifacts even when the measurement test
   // passes; retain their native, Protota, diff, and JSON outputs for CI.
   preserveOutput: 'always',

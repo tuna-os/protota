@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import type { RefObject } from 'react';
 import type { MockupDocument } from '../types/mockup';
 
-export interface FlowPath {
+interface FlowPath {
   id: string;
   d: string;
 }
@@ -15,10 +15,26 @@ export interface FlowFrameMetrics {
 }
 
 /**
- * Build cubic flow curves from the laid-out screen-frame geometry.
- *
- * The surface is measured before its transform, so the returned paths move
- * with the screens when ViewportCanvas pans or zooms the surface.
+ * The frame size laid out on the surface. Pass it as a dependency to
+ * re-measure during a resize drag, when the frames change size and the
+ * document does not.
+ */
+export interface FlowGeometry {
+  screenId: string;
+  width: number;
+  height: number;
+}
+
+interface UseFlowPathsOptions {
+  surfaceRef: RefObject<HTMLDivElement | null>;
+  doc: MockupDocument;
+  showFlows: boolean;
+  geometry: FlowGeometry | null;
+}
+
+/**
+ * Build cubic flow curves from the laid-out frame geometry. The surface is
+ * measured before its transform, so the curves pan and zoom with the screens.
  */
 export function buildFlowPaths(
   edges: MockupDocument['edges'],
@@ -47,16 +63,16 @@ export function buildFlowPaths(
 }
 
 /**
- * Measure the rendered screen frames and derive the paths shown by the flow
- * overlay. The document dependency intentionally mirrors ViewportCanvas's
- * previous effect: node edits can change frame geometry even when edges do
- * not change.
+ * Measure the rendered frames and derive the paths for the flow overlay.
+ * `doc` covers node edits that move frames. `geometry` covers size changes,
+ * which reach the frames during a drag and do not change the document.
  */
-export function useFlowPaths(
-  surfaceRef: RefObject<HTMLDivElement | null>,
-  doc: MockupDocument,
-  showFlows: boolean,
-): FlowPath[] {
+export function useFlowPaths({
+  surfaceRef,
+  doc,
+  showFlows,
+  geometry,
+}: UseFlowPathsOptions): FlowPath[] {
   const [flowPaths, setFlowPaths] = useState<FlowPath[]>([]);
 
   useEffect(() => {
@@ -76,7 +92,14 @@ export function useFlowPaths(
       });
     });
     setFlowPaths(buildFlowPaths(doc.edges, frames));
-  }, [doc, showFlows, surfaceRef]);
+  }, [
+    doc,
+    showFlows,
+    surfaceRef,
+    geometry?.screenId,
+    geometry?.width,
+    geometry?.height,
+  ]);
 
   return flowPaths;
 }

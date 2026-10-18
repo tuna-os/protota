@@ -760,7 +760,11 @@ export const ViewportCanvas: React.FC = () => {
 
   // Flow-edge geometry: measured from the laid-out screen frames, in the
   // surface's own (pre-transform) coordinates so arrows pan/zoom with it.
-  const flowPaths = useFlowPaths(surfaceRef, doc, showFlows);
+  const resizePreviewGeometry = useMemo(
+    () => resizePreview && { screenId: resizePreview.screenId, width: resizePreview.width, height: resizePreview.height },
+    [resizePreview],
+  );
+  const flowPaths = useFlowPaths({ surfaceRef, doc, showFlows, geometry: resizePreviewGeometry });
 
   // Clamp focusedScreenIdx when screens shrink (e.g. deletion): syncing
   // document shape to local focus state, one intentional cascade per shrink.

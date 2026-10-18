@@ -13,6 +13,7 @@ import { filterShallowest, screenOf, unionSelection } from "../utils/selection";
 import { activeBreakpoints, breakpointOverrides, type ActiveBreakpoint } from "../utils/breakpoints";
 import type { AdwNode, AdwNodeType } from "../types/mockup";
 import { useTouchPanZoom, TOUCH_GESTURE_START_EVENT } from "../hooks/useTouchPanZoom";
+import { useFlowPaths } from "../hooks/useFlowPaths";
 import { PreviewOverlay } from "./PreviewOverlay";
 import { SelectionOverlay } from "./SelectionOverlay";
 
@@ -759,32 +760,11 @@ export const ViewportCanvas: React.FC = () => {
 
   // Flow-edge geometry: measured from the laid-out screen frames, in the
   // surface's own (pre-transform) coordinates so arrows pan/zoom with it.
-  const [flowPaths, setFlowPaths] = useState<Array<{ id: string; d: string }>>([]);
-  useEffect(() => {
-    const surface = surfaceRef.current;
-    if (!surface || !showFlows || !doc.edges.length) { setFlowPaths([]); return; }
-    const frames = new Map<string, HTMLElement>();
-    surface.querySelectorAll<HTMLElement>('[data-protota-flow-screen]').forEach((element) => {
-      frames.set(element.dataset.prototaFlowScreen!, element);
-    });
-    const paths: Array<{ id: string; d: string }> = [];
-    for (const edge of doc.edges) {
-      const source = frames.get(edge.sourceId);
-      const target = frames.get(edge.targetId);
-      if (!source || !target) continue;
-      const sx = source.offsetLeft + (source.offsetLeft < target.offsetLeft ? source.offsetWidth : 0);
-      const sy = source.offsetTop + source.offsetHeight / 2;
-      const tx = target.offsetLeft + (source.offsetLeft < target.offsetLeft ? 0 : target.offsetWidth);
-      const ty = target.offsetTop + target.offsetHeight / 2;
-      const bend = Math.max(30, Math.abs(tx - sx) / 3);
-      const direction = source.offsetLeft < target.offsetLeft ? 1 : -1;
-      paths.push({
-        id: edge.id,
-        d: `M ${sx} ${sy} C ${sx + bend * direction} ${sy}, ${tx - bend * direction} ${ty}, ${tx} ${ty}`,
-      });
-    }
-    setFlowPaths(paths);
-  }, [doc, showFlows]);
+  const resizePreviewGeometry = useMemo(
+    () => resizePreview && { screenId: resizePreview.screenId, width: resizePreview.width, height: resizePreview.height },
+    [resizePreview],
+  );
+  const flowPaths = useFlowPaths({ surfaceRef, doc, showFlows, geometry: resizePreviewGeometry });
 
   // Clamp focusedScreenIdx when screens shrink (e.g. deletion): syncing
   // document shape to local focus state, one intentional cascade per shrink.

@@ -72,7 +72,12 @@ jobs:
         run: npx playwright install chromium --with-deps
 
       - name: Run Playwright tests
-        run: npm test
+        # The JSON report feeds auto-qa.yml, which tunes the retry policy from
+        # real outcomes (see .github/auto-qa-tuning.json). Setting the output
+        # path is what turns the json reporter on in playwright.config.ts.
+        run: npx playwright test
+        env:
+          PLAYWRIGHT_JSON_OUTPUT_FILE: artifacts/playwright-report.json
 
       - name: Upload test report
         if: always()
@@ -81,6 +86,28 @@ jobs:
           name: playwright-report
           path: playwright-report/
           retention-days: 7
+
+      - name: Check the Playwright JSON report was written
+        # upload-artifact only warns when a path is missing, so a broken or
+        # renamed reporter would silently starve auto-qa.yml of samples.
+        # Fail here instead, where the cause is obvious.
+        if: always()
+        run: |
+          if [ ! -s artifacts/playwright-report.json ]; then
+            echo "::error::artifacts/playwright-report.json is missing or empty."
+            echo "::error::Check PLAYWRIGHT_JSON_OUTPUT_FILE and the reporter list in playwright.config.ts."
+            exit 1
+          fi
+
+      - name: Upload Playwright JSON report
+        # Consumed by auto-qa.yml. Failed runs are uploaded too: a run with
+        # terminal failures is the sample that holds the retry policy.
+        if: always() && github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-json
+          path: artifacts/playwright-report.json
+          retention-days: 30
 
       - name: Upload test results
         if: always()

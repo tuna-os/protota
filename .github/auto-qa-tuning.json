@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "playwright": {
+    "comment": "sampleWindow and minimumSamples count test observations, not runs. One run adds one observation per test (~194 today), so 500 is about two and a half runs.",
+    "sampleWindow": 500,
+    "minimumSamples": 50,
+    "targetFlakeRate": 0.01,
+    "retries": {
+      "minimum": 1,
+      "maximum": 2,
+      "current": 2
+    }
+  }
+}

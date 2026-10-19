@@ -1,0 +1,140 @@
+name: Auto-QA Tuning
+
+# protota#297: tune the Playwright retry count from observed outcomes. Advisory
+# only — this job never commits, so a policy change still lands as a reviewed
+# diff.
+#
+# Failed runs are read on purpose: filtering to green runs hid the failures
+# that should hold the policy. With no sample the job stays green and raises an
+# error annotation, so silence never looks like a healthy no-op.
+
+on:
+  schedule:
+    # Once a day, after the nightly deploy run has finished.
+    - cron: '17 6 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
+jobs:
+  tune:
+    # The retry policy is a property of main; tuning from a PR would let a
+    # branch raise its own ceiling.
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+
+      - name: Download the newest Playwright JSON reports
+        id: reports
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          mkdir -p artifacts/playwright
+          # status=completed, not success: a run with terminal failures is the
+          # most informative sample. Scan up to 100 runs because a run that
+          # fails before Playwright carries no report.
+          mapfile -t entries < <(
+            for page in 1 2; do
+              gh api "repos/$REPOSITORY/actions/workflows/deploy.yml/runs?branch=main&status=completed&per_page=50&page=$page" \
+                --jq '.workflow_runs[] | "\(.id) \(.created_at)"'
+            done
+          )
+          found=0
+          scanned=0
+          skipped=0
+          newest=""
+          for entry in "${entries[@]}"; do
+            if [ "$found" -ge 3 ]; then break; fi
+            run=${entry%% *}
+            created=${entry#* }
+            scanned=$((scanned + 1))
+            if gh run download "$run" --repo "$REPOSITORY" \
+              --name playwright-json --dir "artifacts/playwright/$run" 2>/dev/null; then
+              found=$((found + 1))
+              if [ -z "$newest" ]; then newest=$created; fi
+            else
+              skipped=$((skipped + 1))
+            fi
+          done
+          echo "found=$found" >> "$GITHUB_OUTPUT"
+          echo "scanned=$scanned" >> "$GITHUB_OUTPUT"
+          echo "skipped=$skipped" >> "$GITHUB_OUTPUT"
+          echo "newest=$newest" >> "$GITHUB_OUTPUT"
+          echo "Scanned $scanned completed runs; $skipped had no playwright-json artifact."
+          if [ "$found" -eq 0 ]; then
+            # Not a policy signal, and the check stays green: the annotation is
+            # what makes the silence visible.
+            echo "::error title=Auto-QA tuning had no sample::Scanned $scanned completed deploy.yml runs on main; none carried a playwright-json artifact. The retry policy was not tuned. Runs that fail before Playwright starts produce no report."
+            exit 0
+          fi
+          echo "Newest sample: $newest"
+          ls -1 artifacts/playwright
+
+      - name: Suggest the next retry policy
+        if: steps.reports.outputs.found != '0' && steps.reports.outputs.found != ''
+        run: |
+          # Reports nest under <run>/playwright-report/. Oldest first, because
+          # the tuner windows from the tail of the argument list.
+          mapfile -t reports < <(ls -1d artifacts/playwright/* \
+            | sort -t/ -k3,3n \
+            | while read -r run; do find "$run" -name playwright-report.json; done)
+          echo "Reports, oldest first: ${reports[*]}"
+          npm run qa:tune -- --summary artifacts/auto-qa-tuning-summary.json "${reports[@]}"
+
+      - name: Report the suggestion
+        if: steps.reports.outputs.found != '0' && steps.reports.outputs.found != ''
+        env:
+          SCANNED: ${{ steps.reports.outputs.scanned }}
+          SKIPPED: ${{ steps.reports.outputs.skipped }}
+          NEWEST: ${{ steps.reports.outputs.newest }}
+        run: |
+          node -e '
+            const { readFileSync, appendFileSync } = require("node:fs");
+            const summary = JSON.parse(
+              readFileSync("artifacts/auto-qa-tuning-summary.json", "utf8"),
+            );
+            const ageDays = process.env.NEWEST
+              ? Math.floor((Date.now() - Date.parse(process.env.NEWEST)) / 86_400_000)
+              : null;
+            const heading = `Retry policy: ${summary.previousRetries} -> ${summary.retries} (${summary.reason})`;
+            const detail = [
+              `- samples: ${summary.samples}`,
+              `- flaky: ${summary.flaky}`,
+              `- failed: ${summary.failed}`,
+              `- observed flake rate: ${(summary.observedFlakeRate * 100).toFixed(2)}%`,
+              `- runs scanned: ${process.env.SCANNED} (${process.env.SKIPPED} without a report)`,
+              `- newest sample: ${ageDays === null ? "unknown" : `${ageDays} day(s) old`}`,
+            ].join("\n");
+            appendFileSync(process.env.GITHUB_STEP_SUMMARY, `## ${heading}\n\n${detail}\n`);
+            console.log(`${heading}\n${detail}`);
+            if (ageDays !== null && ageDays >= 14) {
+              console.log(
+                `::warning::The newest sample is ${ageDays} days old. Tuning from stale`
+                + " reports describes different code; treat this suggestion as advisory.",
+              );
+            }
+          '
+
+      - name: Upload the observation summary
+        if: always() && steps.reports.outputs.found != '0' && steps.reports.outputs.found != ''
+        uses: actions/upload-artifact@v7
+        with:
+          name: auto-qa-tuning-summary
+          path: artifacts/auto-qa-tuning-summary.json
+          retention-days: 30

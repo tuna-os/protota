@@ -87,9 +87,21 @@ jobs:
           path: playwright-report/
           retention-days: 7
 
+      - name: Check the Playwright JSON report was written
+        # upload-artifact only warns when a path is missing, so a broken or
+        # renamed reporter would silently starve auto-qa.yml of samples.
+        # Fail here instead, where the cause is obvious.
+        if: always()
+        run: |
+          if [ ! -s artifacts/playwright-report.json ]; then
+            echo "::error::artifacts/playwright-report.json is missing or empty."
+            echo "::error::Check PLAYWRIGHT_JSON_OUTPUT_FILE and the reporter list in playwright.config.ts."
+            exit 1
+          fi
+
       - name: Upload Playwright JSON report
-        # Consumed by auto-qa.yml; only a completed run has a meaningful
-        # retry/flake sample.
+        # Consumed by auto-qa.yml. Failed runs are uploaded too: a run with
+        # terminal failures is the sample that holds the retry policy.
         if: always() && github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: actions/upload-artifact@v7
         with:

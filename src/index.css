@@ -1629,7 +1629,11 @@ gtk-menu-button[data-testid="export-menu-button"] .adw-menu-button-popover {
   z-index: 1000;
 }
 
-gtk-menu-button[data-testid="open-menu-button"] .adw-menu-button-popover {
+/* [data-align] lifts this rule past the skin's `right: 0`
+   (`gtk-popover[data-position=bottom][data-align=end]`): both are (0,2,1),
+   and the skin's <style> is injected after our <link>, so it wins the tie in
+   a production build and stretches the surface to the trigger's width. */
+gtk-menu-button[data-testid="open-menu-button"] .adw-menu-button-popover[data-align="end"] {
   left: 0;
   right: auto;
 }

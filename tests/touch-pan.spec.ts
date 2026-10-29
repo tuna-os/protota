@@ -130,10 +130,10 @@ test.describe('Touch pan/zoom and small-viewport fit', () => {
       [{ x: 145, y: 400 }, { x: 245, y: 400 }],
       [{ x: 70, y: 400 }, { x: 320, y: 400 }],
     );
-    await expect
-      .poll(async () => (await surfaceMatrix(page)).scale)
-      .toBeGreaterThan(before.scale * 1.5);
+    // Settle before asserting: the surface animates (`transform 0.2s ease`),
+    // so a live read can catch an interpolated frame.
     const after = await settledMatrix(page);
+    expect(after.scale).toBeGreaterThan(before.scale * 1.5);
     expect(after.scale).toBeLessThanOrEqual(2.5); // existing zoom ceiling
     // Pinch updates the same zoom state the bottom-bar controls display.
     await expect(page.locator('.protota-zoom-bar')).toContainText(

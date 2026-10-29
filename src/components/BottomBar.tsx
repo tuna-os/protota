@@ -140,7 +140,9 @@ export const BottomBar: React.FC<BottomBarProps> = React.memo(
     useEffect(() => {
       const el = dropDownRef.current;
       if (!el) return;
-      el.model = screens.map((s) => ({ value: s.id, label: s.title }));
+      // gjsify ≥0.64.12 refuses plain-array models (real Gio.ListModel now);
+      // the JSON `model` attribute is the array spelling and splices on re-parse.
+      el.setAttribute("model", JSON.stringify(screens.map((s) => ({ value: s.id, label: s.title }))));
     }, [screens]);
 
     // Sync selected index from parent state → web component, then override

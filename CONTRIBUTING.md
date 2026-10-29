@@ -1,34 +1,21 @@
 # Contributing to Protota
 
-Thank you for your help with **Protota** — a mockup tool for Adwaita app UIs
-that obeys the GNOME HIG. Protota renders GTK4/Libadwaita from a typed widget tree using
-real [`@gjsify/adwaita-web`](https://github.com/gjsify/gjsify/tree/main/packages/web/adwaita-web) components,
-so mockups look *and behave* like real Adwaita.
+Thank you for your help with **Protota** — a mockup tool for Adwaita app UIs that obeys the GNOME HIG. Protota renders GTK4/Libadwaita from a typed widget tree using real [`@gjsify/adwaita-web`](https://github.com/gjsify/gjsify/tree/main/packages/web/adwaita-web) components, so mockups look *and behave* like real Adwaita.
 
 <!-- hive-contribute-plea: donated-compute appeal, keep in sync across repos -->
 ## Contribute compute — no code needed
 
 **[Donate time with your AI CLI](https://hub.tunaos.org/#contribute).**
 
-Your machine runs one task at a time using your signed-in AI coding CLI.
-The relay alternates between eligible **School** (OS) and **Reef** (apps)
-hives after each task. If one hive has no work, the other can continue.
+Your machine runs one task at a time using your signed-in AI coding CLI. The relay alternates between eligible **School** (OS) and **Reef** (apps) hives after each task. If one hive has no work, the other can continue.
 
-The guide covers prerequisites, verified `just` setup, credentials, provider
-costs, and how to stop with Ctrl+C. Your subscription quota or API charges apply.
-Never post account credentials or API keys in issues or pull requests.
+The guide covers prerequisites, verified `just` setup, credentials, provider costs, and how to stop with Ctrl+C. Your subscription quota or API charges apply. Never post account credentials or API keys in issues or pull requests.
 
 ## Before you start
 
-- **[CONTEXT.md](CONTEXT.md)** — the document of decisions: vision, tech
-  foundation (pure browser webapp, no GJS/Node runtime), and the
-  `MockupDocument` model.
-- **[AGENTS.md](AGENTS.md)** — how to work with Protota projects as an agent:
-  document format, edit surfaces, and the renderer contract.
-- **[docs/components.md](docs/components.md)** — every component that Protota
-  can build with. For each one: its GTK export class, named slots, editable
-  properties, and legal children. A script makes it from the code, so it
-  cannot drift.
+- **[CONTEXT.md](CONTEXT.md)** — the document of decisions: vision, tech foundation (pure browser webapp, no GJS/Node runtime), and the `MockupDocument` model.
+- **[AGENTS.md](AGENTS.md)** — how to work in this repo as an agent: renderer contract, verification commands, CI status reading, and merge rules.
+- **[docs/components.md](docs/components.md)** — every component that Protota can build with. For each one: its GTK export class, named slots, editable properties, and legal children. A script makes it from the code, so it cannot drift.
 
 ## Project layout
 
@@ -37,7 +24,7 @@ Never post account credentials or API keys in issues or pull requests.
 | `src/` | The app: widget tree, renderer, presets, Blueprint/GtkBuilder import/export |
 | `presets-src/` | Preset source files |
 | `docs/` | `components.md` (generated component catalog), `spec/` (vendored GNOME HIG/spec snapshot), and other docs |
-| `tests/` | Vitest unit tests (Blueprint/renderer conformance) |
+| `tests/` | Playwright browser tests (E2E); unit conformance tests live in `src/__tests__/` |
 | `public/` | Static assets |
 | `scripts/` | Build and maintenance scripts |
 
@@ -46,7 +33,7 @@ Never post account credentials or API keys in issues or pull requests.
 ```bash
 npm install
 npm run dev        # Vite dev server
-npx tsc -b         # TypeScript typecheck — CI runs this on every PR
+npx tsc -b         # TypeScript typecheck — CI runs this on every PR (not docs-only)
 npm run lint       # oxlint
 npm run build      # Production build → dist/
 npm run test:unit  # Blueprint/renderer conformance tests
@@ -55,18 +42,12 @@ npm test           # Playwright tests
 
 `just check` runs lint, unit tests, and build together.
 
-The renderer is **generic**: presets must not add branches for one app. An
-import of Blueprint or GtkBuilder keeps the tree structure and the properties
-that Protota supports. The import must report each unknown visual widget, so
-that a contributor can add support for it on purpose. It must never drop a
-widget silently.
+The renderer is **generic**: presets must not add branches for one app. An import of Blueprint or GtkBuilder keeps the tree structure and the properties that Protota supports. The import must report each unknown visual widget, so that a contributor can add support for it on purpose. It must never drop a widget silently.
 
 ## Making a change
 
-1. **Branch from `main`** — descriptive name, e.g.
-   `git checkout -b fix/import-error` or `feat/preset-sidebar`.
-2. **Keep commits focused** and sign them with DCO:
-   `git commit -s` (each commit carries a `Signed-off-by` trailer).
+1. **Branch from `main`** — descriptive name, e.g. `git checkout -b fix/import-error` or `feat/preset-sidebar`.
+2. **Keep commits focused** and sign them with DCO: `git commit -s` (each commit carries a `Signed-off-by` trailer).
 3. **Run the checks** before you push:
 
    ```sh
@@ -77,9 +58,7 @@ widget silently.
    npm test            # Playwright browser tests
    ```
 
-   Run `npx tsc -b` first: `npm run build` is `tsc -b && vite build`, so it
-   only typechecks what the build includes, while CI checks the test sources
-   too.
+   Run `npx tsc -b` first: `npm run build` is `tsc -b && vite build`, so it typechecks `src/**` (including `src/__tests__`) but not the `tests/**` Playwright specs — neither command catches a type error in a spec.
 
 4. **Open a PR**. Tell what changed and why, and link any related issue.
 
@@ -87,20 +66,17 @@ widget silently.
 
 - Keep the renderer generic (see above).
 - Re-generate `docs/components.md` if the component catalog changed.
-- Add conformance coverage in `tests/` for any new widget or property.
+- Add conformance coverage in `src/__tests__/` for any new widget or property; browser behaviour belongs in `tests/`.
 
 ### If you change docs
 
 - User-facing behavior belongs in `docs/` and the README.
-- A script makes the component catalog — edit the source, not the output
-  file.
+- A script makes the component catalog — edit the source, not the output file.
 
 ## Code of conduct
 
-Be respectful and constructive — see
-[CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) (Contributor Covenant 2.1).
+Be respectful and constructive — see [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) (Contributor Covenant 2.1).
 
 ## Questions?
 
-Open an issue. `CONTEXT.md` is the authoritative reference for design
-decisions; `AGENTS.md` covers the document model and edit surfaces.
+Open an issue. `CONTEXT.md` is the authoritative reference for design decisions; `AGENTS.md` covers the renderer contract and how to work in this repo.

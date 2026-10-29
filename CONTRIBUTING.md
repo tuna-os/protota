@@ -14,7 +14,7 @@ The guide covers prerequisites, verified `just` setup, credentials, provider cos
 ## Before you start
 
 - **[CONTEXT.md](CONTEXT.md)** — the document of decisions: vision, tech foundation (pure browser webapp, no GJS/Node runtime), and the `MockupDocument` model.
-- **[AGENTS.md](AGENTS.md)** — how to work in this repo as an agent: renderer contract, verification commands, CI status reading, and merge rules.
+- **[AGENTS.md](AGENTS.md)** — how to work in this repo as an agent: renderer contract, verification, CI status, and merge rules.
 - **[docs/components.md](docs/components.md)** — every component that Protota can build with. For each one: its GTK export class, named slots, editable properties, and legal children. A script makes it from the code, so it cannot drift.
 
 ## Project layout

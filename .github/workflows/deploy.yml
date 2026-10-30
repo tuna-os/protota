@@ -57,6 +57,9 @@ jobs:
 
       - run: npm ci
 
+      - name: Run linter
+        run: npm run lint
+
       - name: Typecheck
         # deploy's `npm run build` (tsc -b && vite build) is the only other
         # place types get checked, and deploy only runs on main pushes — a

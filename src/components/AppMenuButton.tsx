@@ -2,14 +2,14 @@ import React, { useEffect, useLayoutEffect, useRef } from "react";
 import { objectSelectSymbolic } from "@gjsify/adwaita-icons/actions";
 import { toDataUri } from "@gjsify/adwaita-icons/utils";
 import { useMockupStore } from "../store/mockupStore";
-import type { AdwMenuItem, AdwMenuNode } from "@gjsify/adwaita-web";
+import { buildMenu, type AdwMenuItem, type AdwMenuModel, type AdwMenuNode } from "@gjsify/adwaita-web";
 import type { WindowButtonsPreference } from "../utils/headerBarChrome";
 import { useIsMobile } from "../hooks/useIsMobile";
 import { useMenus } from "./MenuData";
 
-/** The `<gtk-menu-button>` surface, typed for the portable menu model. */
+/** The `<gtk-menu-button>` surface; `menuModel` is a real `Gio.MenuModel`. */
 type GtkMenuButtonElement = HTMLElement & {
-  menuModel: AdwMenuNode[];
+  menuModel: AdwMenuModel | null;
 };
 
 /** The owned `<gtk-popover>`, typed only for its open-state subscription. */
@@ -255,7 +255,7 @@ export const AppMenuButton: React.FC = () => {
       modelKeyRef.current = modelKey;
       actionsRef.current = actions;
       // Setting menuModel rebuilds the popover, so the switcher must follow it.
-      el.menuModel = model;
+      el.menuModel = buildMenu(model);
       injectThemeSwitcher(el, colorScheme, setColorScheme);
     } else {
       // The rows are unchanged (a theme pick only), so just move the selection.

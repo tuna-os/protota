@@ -10,7 +10,7 @@ import {
 import { panDownSymbolic, focusLegacySystraySymbolic } from "@gjsify/adwaita-icons/ui";
 import { folderOpenSymbolic } from "@gjsify/adwaita-icons/status";
 import { documentSendSymbolic } from "@gjsify/adwaita-icons/actions";
-import type { AdwMenuItem, AdwMenuNode } from "@gjsify/adwaita-web";
+import { buildMenu, type AdwMenuItem, type AdwMenuModel, type AdwMenuNode } from "@gjsify/adwaita-web";
 import { exportDocumentFile } from "../utils/exportImport";
 import { iconStyle } from "../utils/iconStyles";
 import { useIsMobile } from "../hooks/useIsMobile";
@@ -25,7 +25,7 @@ interface HeaderProps {
 }
 
 type AdwMenuButtonElement = HTMLElement & {
-  menuModel: AdwMenuNode[];
+  menuModel: AdwMenuModel | null;
   menuTitle: string;
 };
 
@@ -100,7 +100,7 @@ const LabeledMenuButton: React.FC<{
     // effect idempotent under StrictMode double-invocation. menuTitle is
     // deliberately left unset: setting it re-renders the trigger button and
     // wipes the label + chevron written below.
-    el.menuModel = model;
+    el.menuModel = buildMenu(model);
 
     const btn = el.querySelector<HTMLButtonElement>(".adw-menu-button-button");
     if (btn) {

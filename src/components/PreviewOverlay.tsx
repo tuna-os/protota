@@ -8,7 +8,7 @@ import type { AdwNode } from '../types/mockup';
 import { breakpointOverrides } from '../utils/breakpoints';
 import { windowCloseSymbolic } from '@gjsify/adwaita-icons/ui';
 import { goPreviousSymbolic } from '@gjsify/adwaita-icons/actions';
-import type { AdwMenuNode } from '@gjsify/adwaita-web';
+import { buildMenu, type AdwMenuModel } from '@gjsify/adwaita-web';
 import {
   batteryLevel60ChargingSymbolic,
   bluetoothActiveSymbolic,
@@ -17,9 +17,9 @@ import {
 } from '@gjsify/adwaita-icons/status';
 import { toDataUri } from '@gjsify/adwaita-icons/utils';
 
-/** `<gtk-menu-button>` surface for the preview screen switcher (portable menu model). */
+/** `<gtk-menu-button>` surface for the preview screen switcher; `menuModel` is a real `Gio.MenuModel`. */
 type ScreenSwitcherElement = HTMLElement & {
-  menuModel: AdwMenuNode[];
+  menuModel: AdwMenuModel | null;
 };
 
 const iconStyle = (svg: string, size = 14): React.CSSProperties => ({
@@ -128,14 +128,14 @@ export const PreviewOverlay: React.FC<PreviewOverlayProps> = ({
   useEffect(() => {
     const el = switcherRef.current;
     if (!el || !screen) return;
-    el.menuModel = [{
+    el.menuModel = buildMenu([{
       kind: 'section',
       items: doc.screens.map((candidate, index) => ({
         kind: 'item' as const,
         id: candidate.id,
         label: `${index + 1}: ${candidate.title}`,
       })),
-    }];
+    }]);
     // The element's trigger is icon-only, so draw the label over it:
     // desktop `time • title`, phone just the title.
     const btn = el.querySelector<HTMLButtonElement>('.adw-menu-button-button');

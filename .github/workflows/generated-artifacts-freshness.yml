@@ -64,7 +64,9 @@ jobs:
             gtksourceview5-devel \
           && dnf clean all
 
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Regenerate src/data/gtkProperties.ts
         run: node scripts/extract-gtk-properties.mjs > /tmp/gtkProperties.regenerated.ts
@@ -85,8 +87,10 @@ jobs:
   component-reference:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-node@v7
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7.1.0
         with:
           node-version: 26
           cache: npm

@@ -20,7 +20,9 @@ jobs:
   actionlint:
     runs-on: ubuntu-26.04
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
       - name: Validate GitHub Actions workflows
         # actionlint v1.7.12 (:latest resolved to this digest on 2026-10-31).
         # Pinned by digest so an upstream tag move cannot change CI (tunaOS#3229).

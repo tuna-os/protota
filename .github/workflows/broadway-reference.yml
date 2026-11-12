@@ -79,9 +79,11 @@ jobs:
             echo 'enabled=false' >> "$GITHUB_OUTPUT"
           fi
       - if: steps.select.outputs.enabled == 'true'
-        uses: actions/checkout@v7
+        uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
       - if: steps.select.outputs.enabled == 'true'
-        uses: actions/setup-node@v7
+        uses: actions/setup-node@v7.1.0
         with:
           node-version: 26
           cache: npm
@@ -89,7 +91,10 @@ jobs:
         run: npm ci
       - if: steps.select.outputs.enabled == 'true'
         name: Load app catalog entry
-        run: node scripts/broadway-app.mjs "${{ matrix.app }}" "${{ inputs.screen }}" >> "$GITHUB_ENV"
+        env:
+          REFERENCE_APP: ${{ matrix.app }}
+          REFERENCE_SCREEN: ${{ inputs.screen }}
+        run: node scripts/broadway-app.mjs "$REFERENCE_APP" "$REFERENCE_SCREEN" >> "$GITHUB_ENV"
       - if: steps.select.outputs.enabled == 'true'
         name: Clone official declarative UI source
         # Check out the catalog's pinned tag, not the upstream default branch.
@@ -161,7 +166,7 @@ jobs:
           docker logs protota-broadway-app 2>&1 | tail -100 || true
       - name: Upload reference captures
         if: always() && steps.select.outputs.enabled == 'true'
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@v7.0.2
         with:
           name: ${{ matrix.app }}-broadway-reference
           path: test-results/

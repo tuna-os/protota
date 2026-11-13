@@ -17,7 +17,7 @@ mockups look *and behave* like real Adwaita — not pixel replicas. Live at
 
 - Active development (commits daily); Playwright E2E suite in place.
 - **Recent landings**: npm v12.2.0, Playwright tag sync (#365), compute contributions invite (#342).
-- **1 active blocker** (P0): Broadway Reference Capture still red 5+ consecutive runs (#255).
+- **1 active blocker** (P0): Broadway Reference Capture still red on scheduled runs (#255 closed; tracked in #472).
 - **Q3 complete**: Community health files, E2E flakiness fixed, Adwaita conformance pass.
 - **Q3 tracker closed**: CI baseline adoption (#184) merged to main.
 
@@ -25,7 +25,7 @@ mockups look *and behave* like real Adwaita — not pixel replicas. Live at
 
 | Priority | Item | Tracking | Status |
 |----------|------|----------|--------|
-| P0 | Broadway Reference Capture — red 5+ consecutive runs (disks, text-editor apps) | #255 | 🔴 Open — CI blocker |
+| P0 | Broadway Reference Capture — red on scheduled runs (disks, text-editor apps) | #255 (closed), #472 | 🔴 Open — CI blocker (continues in #472) |
 | P1 | Diagnostics default-on with stable CI signal (Q4 gate) | — | 🟡 Pending |
 | P2 | gtk-office-suite / suite-common integration evaluation | — | 🟡 Pending |
 
@@ -47,11 +47,11 @@ mockups look *and behave* like real Adwaita — not pixel replicas. Live at
 
 **Theme**: Stabilize CI signal; unlock cross-team adoption.
 
-**Blocking issue**: Broadway Reference Capture (#255) must resolve before Q4 exit.
+**Blocking issue**: Broadway Reference Capture (#472, successor to closed #255) must resolve before Q4 exit.
 
 | Goal | Success Criterion | Owner | Status |
 |------|-------------------|-------|--------|
-| CI stability for nightly reference captures | disks + text-editor apps render consistently under Broadway | protota | 🔴 Blocked by #255 |
+| CI stability for nightly reference captures | disks + text-editor apps render consistently under Broadway | protota | 🔴 Blocked by #472 |
 | Diagnostics integration default-on | Observability metrics emitted and collected in workflow runs | protota | 🟡 Pending |
 | Suite-common design collaboration | Evaluation complete; roadmap/scope decision documented | (TBD) | 🟡 Pending |
 

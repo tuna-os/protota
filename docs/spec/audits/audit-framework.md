@@ -1,8 +1,10 @@
 # 12-Category HIG Compliance Audit Framework
 
-The canonical, agent-executable version of this framework lives in
-**[skills/hig-audit/SKILL.md](../skills/hig-audit/SKILL.md)** — start there.
-This file keeps the category rubric in full detail for deep audits.
+The canonical, agent-executable version of this framework is the upstream
+`hig-audit` skill (`skills/hig-audit/SKILL.md` in the gnome-gui-spec snapshot).
+That skill is not vendored here, per [README.md](../README.md#what-was-vendored-and-what-was-not),
+so this file is the copy that applies to Protota. It keeps the category rubric
+in full detail for deep audits.
 
 ## Audit Categories
 
@@ -32,8 +34,8 @@ This file keeps the category rubric in full detail for deep audits.
 
 Any agent harness works — each category is independent, so run them as
 parallel sub-agents where available. Give each sub-agent **only** its category
-row, the grep patterns from `skills/hig-audit/SKILL.md`, and the single
-reference file listed there. Do not hand sub-agents this whole repository.
+row, the grep patterns from the upstream `hig-audit` skill, and the single
+reference file that skill lists. Do not hand sub-agents this whole repository.
 
 Examples:
 

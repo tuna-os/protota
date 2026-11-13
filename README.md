@@ -56,7 +56,7 @@ never a plausible-but-wrong substitute.
 **[docs/components.md](docs/components.md)** lists every component Protota can
 build with — the GTK class it exports as, its named slots, editable properties,
 and legal children. A script makes it from the code, so it cannot drift.
-To regenerate it after changing component definitions, run
+To regenerate it after you change component definitions, run
 `npx tsx scripts/generate-component-reference.mjs`. The script imports `.ts`
 sources, so plain `node` fails with `ERR_MODULE_NOT_FOUND`; `npx tsx` is required.
 

@@ -33,7 +33,7 @@ Never use `background-image` for symbolic icons, it breaks theming. For runtime 
 - `npm run test:unit` runs import/export & renderer conformance tests
 - `npm test` runs Playwright suite
 - `npx tsc -b` typechecks `src/**` (including `src/__tests__`) but not `tests/**` specs, so neither `npm test` nor `npm run build` catches a type error in a spec
-- `npm run lint` (oxlint) is a documented pre-push check, but no CI job runs it (#473)
+- `npm run lint` runs oxlint; the `Test & Deploy` workflow runs it on every PR that changes more than Markdown, so a lint error fails the check (#507)
 - Manual **Broadway Reference Capture** workflow runs a real native GNOME app via GTK Broadway & uploads it beside matching Protota preset capture. Add apps through `tests/fixtures/gnome-app-catalog.json`; don't create a bespoke test harness per app.
 - Broadway has failed every scheduled run since 2026-08-03 (#472); dispatch it manually instead of waiting on the weekly matrix.
 

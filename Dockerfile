@@ -1,12 +1,12 @@
 # Multi-stage build: Node for build, nginx for serve
-FROM docker.io/library/node:26-alpine AS build
+FROM docker.io/library/node:26-alpine@sha256:6bd9ab43c0ec0190ca7b2d193906cb8b7edf6e7f4afa43ddeccd6452710bffb5 AS build
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci
 COPY . .
 RUN npm run build
 
-FROM docker.io/library/nginx:alpine
+FROM docker.io/library/nginx:alpine@sha256:fed7e14be83cbd2661a75cdc5b872d936cf155d46c327084d30b8df19ae88d72
 
 # Create writable temp dirs for nginx running as non-root (uid 101)
 RUN mkdir -p /var/cache/nginx/client_temp /var/cache/nginx/proxy_temp \

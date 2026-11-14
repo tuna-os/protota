@@ -22,6 +22,14 @@ for (const [exportName, svg] of Object.entries(icons)) {
 
 const registered = new Set<string>();
 
+/** `CSS.escape` for the tail of an identifier; the global is absent under Node. */
+function escapeCssIdentifier(text: string): string {
+  return text.replace(/[^\w-]/gu, (character) =>
+    /[\s\p{Cc}]/u.test(character)
+      ? `\\${character.codePointAt(0)!.toString(16)} `
+      : `\\${character}`);
+}
+
 /** The shared stylesheet that carries runtime icon rules, created on first use. */
 function runtimeSheet(): HTMLStyleElement {
   const existing = document.getElementById('protota-runtime-icons') as HTMLStyleElement | null;
@@ -42,10 +50,12 @@ function ruleForIcon(name: string): string | null {
   if (registered.has(name)) return null;
   registered.add(name);
   // Application icon names are reverse-DNS ("org.gnome.Weather"); their dots
-  // must be escaped or the selector reads as a chain of class names.
+  // must be escaped or the selector reads as a chain of class names. The name
+  // comes from the opened document, so every other character is escaped too:
+  // a comma or brace would otherwise extend this rule past its one class.
   // Two classes so the rule outranks element-scoped defaults such as
   // `adw-status-page .adw-status-page-icon { background-color: currentColor }`.
-  const selector = `.adw-icon.adw-icon--${name.replace(/[.:]/g, '\\$&')}`;
+  const selector = `.adw-icon.adw-icon--${escapeCssIdentifier(name)}`;
   const svg = catalog.get(name);
   if (svg) {
     const uri = toDataUri(svg);

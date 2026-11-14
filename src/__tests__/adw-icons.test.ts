@@ -169,6 +169,22 @@ describe('ensureAdwIcon', () => {
     expect(sheet!.textContent).toContain('.adw-icon--org\\.example\\.Calendar');
   });
 
+  it('keeps a name with selector or block syntax inside its one class', () => {
+    const hostile = ['x, *', 'x{} body{} y', 'x { ', 'a\nb', 'x/**/', 'x"y\'z', 'x\\, *'];
+    for (const name of hostile) ensureAdwIcon(name);
+    const sheet = document.getElementById('protota-runtime-icons') as FakeStyle | null;
+    const rules = sheet!.textContent.split('\n').filter(Boolean);
+    expect(rules).toHaveLength(hostile.length);
+    for (const rule of rules) {
+      // Drop escapes, then nothing but one class selector may precede the
+      // single declaration block.
+      const [selector, ...rest] = rule.replace(/\\[0-9a-f]+ |\\./gu, '_').split(' { ');
+      expect(selector).toMatch(/^\.adw-icon\.adw-icon--[\w-]+$/);
+      expect(rest).toHaveLength(1);
+      expect(rest[0]).toMatch(/^[^{}]*; }$/);
+    }
+  });
+
   it('emits a dashed placeholder for unknown icons', () => {
     ensureAdwIcon('org.unknown.App');
     const sheet = document.getElementById('protota-runtime-icons') as FakeStyle | null;

@@ -3,6 +3,7 @@ import { useMockupStore } from '../store/mockupStore';
 import { exportDocumentFile } from '../utils/exportImport';
 import { discoverAppSources, appBundleManifest, type AppDiscoveryResult } from '../utils/appDiscovery';
 import { planWriteback, unifiedDiff, type WritebackPlan } from '../utils/writeback';
+import { shellQuote, shellQuotePath } from '../utils/shellQuote';
 import {
   supportsDirectoryPicker,
   pickCheckoutDirectory,
@@ -52,9 +53,8 @@ export const ExportWritebackDialog: React.FC<Props> = ({ isOpen, onClose }) => {
   const copyResetRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const documentFileName = `${doc.title.toLowerCase().replace(/\s+/g, '-')}.mockup.json`;
-  const shellPath = (raw: string): string => (/[\s"'\\$`]/.test(raw) ? JSON.stringify(raw) : raw);
   const command = useMemo(
-    () => `npx tsx scripts/protota-writeback.mjs --checkout ${shellPath(checkoutPath.trim() || '~/src/my-app')} --document ${shellPath(documentFileName)}`,
+    () => `npx tsx scripts/protota-writeback.mjs --checkout ${shellQuotePath(checkoutPath.trim() || '~/src/my-app')} --document ${shellQuote(documentFileName)}`,
     [checkoutPath, documentFileName],
   );
 

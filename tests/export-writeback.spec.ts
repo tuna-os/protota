@@ -105,7 +105,7 @@ test.describe('Export → Patch into Checkout (write-back UX bridge)', () => {
     );
     // A path with spaces is shell-quoted.
     await page.getByTestId('writeback-checkout-path').fill('/home/me/My Apps/calc');
-    await expect(page.getByTestId('writeback-command')).toContainText('--checkout "/home/me/My Apps/calc"');
+    await expect(page.getByTestId('writeback-command')).toContainText("--checkout '/home/me/My Apps/calc'");
 
     // The --bpc container variant is one click away.
     await expect(page.getByTestId('writeback-copy-bpc')).toBeVisible();

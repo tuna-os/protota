@@ -105,6 +105,11 @@ npx tsx scripts/protota-writeback.mjs ~/src/app edited.mockup.json \
   --bpc 'podman run --rm -v {dir}:/blp:z localhost/bpc sh -c "blueprint-compiler compile /blp/{name}"'
 ```
 
+The file path reaches a `--bpc` command as text. Without placeholders the CLI
+appends it as one quoted word. With `{file}`, `{dir}` or `{name}`, a path that
+has characters a shell interprets (a space, a quote, `$`, `;` and the like) is
+not substituted: that file is reported as not compiled, and nothing runs.
+
 ## Browser paths — "Export → Patch into Checkout…"
 
 The write-back UX bridge (ADR 0001 Part 3 item 1). The editor's export

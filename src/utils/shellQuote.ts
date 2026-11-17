@@ -20,3 +20,15 @@ export function shellQuote(value: string): string {
 export function shellQuotePath(path: string): string {
   return path.startsWith('~/') ? `~/${shellQuote(path.slice(2))}` : shellQuote(path);
 }
+
+/**
+ * The host commands that compile the given checkout-relative Blueprint files,
+ * one per line. The paths are file names from the checkout, so each is one
+ * literal word, and `./` keeps a name that starts with `-` from reading as an
+ * option.
+ */
+export function blueprintCompileCommands(paths: readonly string[]): string {
+  return paths
+    .map((path) => `blueprint-compiler compile ${shellQuote(path.startsWith('-') ? `./${path}` : path)}`)
+    .join('\n');
+}

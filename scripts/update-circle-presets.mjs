@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { execSync } from 'node:child_process';
+import { execFileSync } from 'node:child_process';
 import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { blueprintBundleToDocument } from '../src/utils/blueprint.js';
@@ -19,7 +19,7 @@ for (const [id, app] of Object.entries(catalog)) {
 
   try {
     console.log(`Cloning ${app.sourceImport.repository}...`);
-    execSync(`git clone --depth 1 "${app.sourceImport.repository}" "${cloneDir}"`, { stdio: 'inherit' });
+    execFileSync('git', ['clone', '--depth', '1', '--', app.sourceImport.repository, cloneDir], { stdio: 'inherit' });
 
     let uiRoot = join(cloneDir, app.sourceImport.uiPath);
     
@@ -57,7 +57,7 @@ for (const [id, app] of Object.entries(catalog)) {
     }
 
     console.log(`Packaging source bundle for ${id} (entry: ${entry})...`);
-    execSync(`node scripts/source-package.mjs "${uiRoot}" "${entry}" "public/source-imports/${id}.source.json"`, { stdio: 'inherit' });
+    execFileSync('node', ['scripts/source-package.mjs', uiRoot, entry, `public/source-imports/${id}.source.json`], { stdio: 'inherit' });
 
     console.log(`Generating preset mockup for ${id}...`);
     const sourcePkg = JSON.parse(readFileSync(`public/source-imports/${id}.source.json`, 'utf8'));

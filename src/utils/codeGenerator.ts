@@ -1,6 +1,15 @@
 import type { MockupDocument } from '../types/mockup';
 
 /**
+ * The title as a resource path segment and file stem. The title comes from the
+ * open document and lands inside string literals and a shell script, so only
+ * letters, digits, `.`, `_` and `-` survive.
+ */
+function slug(title: string): string {
+  return title.toLowerCase().replace(/[^\p{L}\p{N}._-]+/gu, '-').replace(/^[-.]+|-+$/g, '') || 'app';
+}
+
+/**
  * Generates PyGObject (Python) code bindings with @Gtk.Template decorators and callbacks.
  */
 export function generatePythonBindings(doc: MockupDocument): string {
@@ -11,7 +20,7 @@ gi.require_version('Gtk', '4.0')
 gi.require_version('Adw', '1')
 from gi.repository import Gtk, Adw
 
-@Gtk.Template(resource_path='/${doc.title.toLowerCase().replace(/\s+/g, '-')}/window.ui')
+@Gtk.Template(resource_path='/${slug(doc.title)}/window.ui')
 class ${title}Window(Adw.ApplicationWindow):
     __gtype_name__ = '${title}Window'
 
@@ -42,7 +51,7 @@ mod imp {
     use super::*;
 
     #[derive(Debug, Default, CompositeTemplate)]
-    #[template(resource = "/${doc.title.toLowerCase().replace(/\s+/g, '-')}/window.ui")]
+    #[template(resource = "/${slug(doc.title)}/window.ui")]
     pub struct ${title}Window {
         #[template_child]
         pub header_bar: TemplateChild<adw::HeaderBar>,
@@ -83,7 +92,7 @@ glib::wrapper! {
 export function generateValaBindings(doc: MockupDocument): string {
   const title = doc.title.replace(/[^a-zA-Z0-9]/g, '');
 
-  return `[GtkTemplate (ui = "/${doc.title.toLowerCase().replace(/\s+/g, '-')}/window.ui")]
+  return `[GtkTemplate (ui = "/${slug(doc.title)}/window.ui")]
 public class ${title}Window : Adw.ApplicationWindow {
     [GtkChild]
     private unowned Adw.HeaderBar header_bar;
@@ -104,7 +113,7 @@ public class ${title}Window : Adw.ApplicationWindow {
  * Generates GTK Broadway web launcher bash script for native GTK C binary streaming.
  */
 export function generateBroadwayScript(doc: MockupDocument): string {
-  const name = doc.title.toLowerCase().replace(/\s+/g, '-');
+  const name = slug(doc.title);
   return `#!/usr/bin/env bash
 # Protota GTK Broadway Live Preview Stream Launcher
 

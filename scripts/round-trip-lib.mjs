@@ -25,6 +25,7 @@ import {
   SKIP_DIRECTORIES,
 } from '../src/utils/appDiscovery.ts';
 import { blueprintBundleToDocument } from '../src/utils/blueprint.ts';
+import { shellQuote } from '../src/utils/shellQuote.ts';
 
 export { blueprintBundleToDocument };
 
@@ -122,12 +123,22 @@ export function compileBlueprintFile(compiler, filePath) {
     if (compiler.kind === 'shell') {
       let command = compiler.command;
       if (/\{(file|dir|name)\}/.test(command)) {
+        // A placeholder can sit bare, in double quotes, or inside a nested
+        // `sh -c` string, and no one quoting is right for all three. The path
+        // carries the checkout's own file names, so one a shell would
+        // interpret is refused instead of pasted in.
+        if (shellQuote(absolute) !== absolute) {
+          return {
+            ok: false,
+            output: `not compiled: ${absolute} has characters a shell interprets, and the --bpc command takes the path as text. Rename the file, or validate with a blueprint-compiler on PATH.`,
+          };
+        }
         command = command
           .replaceAll('{file}', absolute)
           .replaceAll('{dir}', dirname(absolute))
           .replaceAll('{name}', basename(absolute));
       } else {
-        command = `${command} ${JSON.stringify(absolute)}`;
+        command = `${command} ${shellQuote(absolute)}`;
       }
       execSync(command, { stdio: ['ignore', 'pipe', 'pipe'] });
     } else {

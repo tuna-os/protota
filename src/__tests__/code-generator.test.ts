@@ -7,6 +7,8 @@
  * a typo here silently ships broken bindings.
  */
 import { describe, expect, it } from 'vitest';
+import { execFileSync } from 'node:child_process';
+import { tmpdir } from 'node:os';
 import {
   generateBroadwayScript,
   generatePythonBindings,
@@ -78,5 +80,49 @@ describe('generateBroadwayScript', () => {
   it('uses the dash-case name from the title', () => {
     const out = generateBroadwayScript(doc('Hello World'));
     expect(out).toContain('blueprint-compiler compile hello-world.blp -o hello-world.ui');
+  });
+});
+
+describe('a title from an opened file', () => {
+  // Each title closes the literal it lands in and adds code of its own.
+  const hostile = [
+    "x'+__import__('os').system('id')+'",
+    'x"; system("id"); "',
+    'x$(id)',
+    'x`id`',
+    'x;id;',
+    'x\\',
+  ];
+
+  it.each(hostile)('stays inside the Python string: %s', (title) => {
+    expect(generatePythonBindings(doc(title)))
+      .toMatch(/^@Gtk\.Template\(resource_path='\/[\p{L}\p{N}._-]+\/window\.ui'\)$/mu);
+  });
+
+  it.each(hostile)('stays inside the Rust and Vala strings: %s', (title) => {
+    expect(generateRustBindings(doc(title)))
+      .toMatch(/^ {4}#\[template\(resource = "\/[\p{L}\p{N}._-]+\/window\.ui"\)\]$/mu);
+    expect(generateValaBindings(doc(title)))
+      .toMatch(/^\[GtkTemplate \(ui = "\/[\p{L}\p{N}._-]+\/window\.ui"\)\]$/mu);
+  });
+
+  it.each(hostile)('reaches the launcher script as plain file names: %s', (title) => {
+    const script = generateBroadwayScript(doc(title));
+    const compile = script.split('\n').find((line) => line.startsWith('blueprint-compiler compile '))!;
+    // What a shell hands to the compiler, with `printf` standing in for it.
+    const seen = execFileSync('sh', ['-c', compile.replace('blueprint-compiler compile', "printf '%s\\n'")], {
+      encoding: 'utf8',
+      cwd: tmpdir(),
+      env: { PATH: process.env.PATH ?? '' },
+    }).trimEnd().split('\n');
+    expect(seen).toHaveLength(3);
+    expect(seen[0]).toMatch(/^[\p{L}\p{N}._-]+\.blp$/u);
+    expect(seen[1]).toBe('-o');
+    expect(seen[2]).toBe(seen[0].replace(/\.blp$/, '.ui'));
+  });
+
+  it('keeps letters and digits of any script, and falls back when none are left', () => {
+    expect(generateBroadwayScript(doc('Café Menü 2'))).toContain('blueprint-compiler compile café-menü-2.blp');
+    expect(generateBroadwayScript(doc('$()'))).toContain('blueprint-compiler compile app.blp -o app.ui');
   });
 });

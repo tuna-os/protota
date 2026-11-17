@@ -5,11 +5,11 @@
  * write-back → re-import loop.
  */
 import { describe, expect, it } from 'vitest';
-import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import {
-  discoverSources, bundleManifest, parseBlueprintCst, planWriteback, unifiedDiff,
+  discoverSources, bundleManifest, parseBlueprintCst, planWriteback, unifiedDiff, compileBlueprintFile,
 } from '../../scripts/round-trip-lib.mjs';
 import { blueprintBundleToDocument } from '../utils/blueprint';
 import type { AdwNode, MockupDocument } from '../types/mockup';
@@ -277,5 +277,66 @@ describe('unified diff', () => {
 
   it('returns an empty diff for identical inputs', () => {
     expect(unifiedDiff('same\n', 'same\n', 'x.blp')).toBe('');
+  });
+});
+
+describe('compiler command from --bpc', () => {
+  // A file name a cloned repository can carry: it runs `touch` if any shell
+  // reads it as code. The mark path travels in the environment because a file
+  // name cannot hold a slash.
+  const withHostileFile = (run: (file: string, mark: string) => void) => {
+    const root = mkdtempSync(join(tmpdir(), 'protota-bpc-'));
+    const mark = join(root, 'ran');
+    const file = join(root, 'window$(touch $PROTOTA_BPC_TEST_MARK).blp');
+    writeFileSync(file, 'using Gtk 4.0;\n');
+    process.env.PROTOTA_BPC_TEST_MARK = mark;
+    try {
+      run(file, mark);
+    } finally {
+      delete process.env.PROTOTA_BPC_TEST_MARK;
+      rmSync(root, { recursive: true, force: true });
+    }
+  };
+
+  it('appends the file as one literal word', () => {
+    withHostileFile((file, mark) => {
+      const result = compileBlueprintFile({ kind: 'shell', label: 'test', command: 'test -f' }, file);
+      expect(result).toEqual({ ok: true, output: '' });
+      expect(existsSync(mark)).toBe(false);
+    });
+  });
+
+  it('refuses to substitute a path a shell would interpret into a placeholder', () => {
+    for (const command of ['test -f {file}', 'test -d {dir} && test -n "{name}"', "sh -c 'test -n {name}'"]) {
+      withHostileFile((file, mark) => {
+        const result = compileBlueprintFile({ kind: 'shell', label: 'test', command }, file);
+        expect(result.ok).toBe(false);
+        expect(result.output).toContain('characters a shell interprets');
+        expect(existsSync(mark)).toBe(false);
+      });
+    }
+  });
+
+  it('still substitutes an ordinary path into every placeholder', () => {
+    const root = mkdtempSync(join(tmpdir(), 'protota-bpc-'));
+    try {
+      const file = join(root, 'window.blp');
+      writeFileSync(file, 'using Gtk 4.0;\n');
+      const command = 'test -f {file} && test -f {dir}/{name}';
+      expect(compileBlueprintFile({ kind: 'shell', label: 'test', command }, file)).toEqual({ ok: true, output: '' });
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+});
+
+describe('update-circle-presets', () => {
+  // The script clones the whole catalogue as soon as it is imported, so a test
+  // cannot drive it. Its file names come from those clones; this pins that it
+  // hands them to programs as arguments, never as shell text.
+  it('starts programs with argument arrays only', () => {
+    const source = readFileSync(new URL('../../scripts/update-circle-presets.mjs', import.meta.url), 'utf8');
+    expect(source).toMatch(/\bexecFileSync\(/);
+    expect(source).not.toMatch(/\bexec(Sync)?\(/);
   });
 });

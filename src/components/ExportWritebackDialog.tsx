@@ -3,7 +3,7 @@ import { useMockupStore } from '../store/mockupStore';
 import { exportDocumentFile } from '../utils/exportImport';
 import { discoverAppSources, appBundleManifest, type AppDiscoveryResult } from '../utils/appDiscovery';
 import { planWriteback, unifiedDiff, type WritebackPlan } from '../utils/writeback';
-import { shellQuote, shellQuotePath } from '../utils/shellQuote';
+import { blueprintCompileCommands, shellQuote, shellQuotePath } from '../utils/shellQuote';
 import {
   supportsDirectoryPicker,
   pickCheckoutDirectory,
@@ -134,10 +134,9 @@ export const ExportWritebackDialog: React.FC<Props> = ({ isOpen, onClose }) => {
         labels: plan.touched.filter((entry) => entry.path === path).map((entry) => entry.label),
       }))
     : [];
-  const validateCommands = touchedByFile
-    .filter(({ path }) => path.endsWith('.blp'))
-    .map(({ path }) => `blueprint-compiler compile ${path}`)
-    .join('\n');
+  const validateCommands = blueprintCompileCommands(
+    touchedByFile.map(({ path }) => path).filter((path) => path.endsWith('.blp')),
+  );
 
   return (
     <div className="protota-modal-backdrop" onClick={close}>

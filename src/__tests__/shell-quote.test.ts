@@ -7,7 +7,7 @@
 import { describe, expect, it } from 'vitest';
 import { execFileSync } from 'node:child_process';
 import { tmpdir } from 'node:os';
-import { shellQuote, shellQuotePath } from '../utils/shellQuote';
+import { blueprintCompileCommands, shellQuote, shellQuotePath } from '../utils/shellQuote';
 
 /** What `sh` passes to a program as the one argument written as `word`. */
 const argumentSeenBySh = (word: string, env: Record<string, string> = {}): string =>
@@ -63,5 +63,27 @@ describe('shellQuotePath', () => {
 
   it('quotes other paths as one word', () => {
     expect(shellQuotePath('/home/me/My Apps/calc')).toBe("'/home/me/My Apps/calc'");
+  });
+});
+
+describe('blueprintCompileCommands', () => {
+  it('writes one plain command per file', () => {
+    expect(blueprintCompileCommands(['src/window.blp', 'src/panel.blp']))
+      .toBe('blueprint-compiler compile src/window.blp\nblueprint-compiler compile src/panel.blp');
+    expect(blueprintCompileCommands([])).toBe('');
+  });
+
+  it.each([
+    'data/win$(echo run).blp',
+    'data/a;echo run;.blp',
+    'data/`echo run`.blp',
+    'data/my window.blp',
+  ])('passes a checkout file name as the literal text: %s', (path) => {
+    const word = blueprintCompileCommands([path]).slice('blueprint-compiler compile '.length);
+    expect(argumentSeenBySh(word)).toBe(path);
+  });
+
+  it('keeps a name that starts with a dash from reading as an option', () => {
+    expect(blueprintCompileCommands(['-o.blp'])).toBe('blueprint-compiler compile ./-o.blp');
   });
 });

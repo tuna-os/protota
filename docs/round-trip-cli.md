@@ -40,7 +40,13 @@ to stdout or `--out`.
 | `--out <file>` | write the bundle here instead of stdout |
 | `--with-code` | include `.vala`/`.c` sources for Phase 4 enrichment |
 | `--bpc <command>` | blueprint-compiler command; `{file}`, `{dir}`, `{name}` placeholders are substituted |
+| `--pinned-bpc` | validate with the checkout's own `subprojects/blueprint-compiler/blueprint-compiler.py` |
 | `--no-validate` | skip compiler validation explicitly |
+
+Validation uses the `--bpc` command, else `blueprint-compiler` on `PATH`.
+`--pinned-bpc` runs a program from the checkout, so the import does not use
+that copy unless you ask for it; it says so when it finds one and leaves it
+alone. Pass the switch only for a checkout you trust.
 
 Exit codes: `0` ok · `1` usage / nothing found / entry unresolvable ·
 `2` blueprint-compiler rejected a discovered file · `3` no

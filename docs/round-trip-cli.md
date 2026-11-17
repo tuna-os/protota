@@ -44,9 +44,9 @@ to stdout or `--out`.
 | `--no-validate` | skip compiler validation explicitly |
 
 Validation uses the `--bpc` command, else `blueprint-compiler` on `PATH`.
-`--pinned-bpc` runs a program from the checkout, so the import does not use
-that copy unless you ask for it; it says so when it finds one and leaves it
-alone. Pass the switch only for a checkout you trust.
+`--pinned-bpc` runs a program from the checkout, so the import uses that copy
+only on request. When the import finds a copy and does not use it, it tells
+you. Pass the switch only for a checkout you trust.
 
 Exit codes: `0` ok · `1` usage / nothing found / entry unresolvable ·
 `2` blueprint-compiler rejected a discovered file · `3` no

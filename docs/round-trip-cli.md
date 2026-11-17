@@ -106,9 +106,10 @@ npx tsx scripts/protota-writeback.mjs ~/src/app edited.mockup.json \
 ```
 
 The file path reaches a `--bpc` command as text. Without placeholders the CLI
-appends it as one quoted word. With `{file}`, `{dir}` or `{name}`, a path that
-has characters a shell interprets (a space, a quote, `$`, `;` and the like) is
-not substituted: that file is reported as not compiled, and nothing runs.
+appends it as one quoted word. With `{file}`, `{dir}` or `{name}`, the CLI
+refuses a path that a shell can interpret. Such a path has a space, a quote,
+`$`, `;` or a similar character. The CLI then reports that file as not
+compiled, and it runs no command.
 
 ## Browser paths — "Export → Patch into Checkout…"
 

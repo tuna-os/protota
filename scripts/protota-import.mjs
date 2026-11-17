@@ -12,6 +12,9 @@
  *   --with-code      include .vala/.c sources for Phase 4 enrichment
  *   --bpc <command>  blueprint-compiler command; {file}/{dir}/{name}
  *                    placeholders are substituted (podman invocations work)
+ *   --pinned-bpc     validate with the checkout's own
+ *                    subprojects/blueprint-compiler; this runs a program from
+ *                    the checkout, so it is off unless asked for
  *   --no-validate    skip compiler validation explicitly (parse checks and
  *                    the manifest still run)
  *
@@ -27,7 +30,8 @@
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import {
-  discoverSources, bundleManifest, resolveBlueprintCompiler, compileBlueprintFile, isDirectory,
+  discoverSources, bundleManifest, resolveBlueprintCompiler, pinnedBlueprintCompiler, compileBlueprintFile,
+  isDirectory,
 } from './round-trip-lib.mjs';
 
 const args = process.argv.slice(2);
@@ -48,12 +52,13 @@ const readSwitch = (name) => {
 const entryArg = readFlag('--entry');
 const outArg = readFlag('--out');
 const bpcArg = readFlag('--bpc');
+const pinnedBpc = readSwitch('--pinned-bpc');
 const withCode = readSwitch('--with-code');
 const noValidate = readSwitch('--no-validate');
 const sourceRootArg = args.find((argument) => !argument.startsWith('--'));
 
 if (!sourceRootArg || !isDirectory(sourceRootArg)) {
-  console.error('Usage: npx tsx scripts/protota-import.mjs <source-root> [--entry <path>] [--out <file>] [--with-code] [--bpc <command>] [--no-validate]');
+  console.error('Usage: npx tsx scripts/protota-import.mjs <source-root> [--entry <path>] [--out <file>] [--with-code] [--bpc <command>] [--pinned-bpc] [--no-validate]');
   process.exit(1);
 }
 
@@ -121,9 +126,14 @@ if (noValidate) {
   console.error('protota-import: compiler validation skipped (--no-validate).');
   process.exit(0);
 }
-const compiler = resolveBlueprintCompiler({ explicit: bpcArg, sourceRoot });
+// Import reads a checkout that may not be the user's own, so the compiler it
+// carries does not run unless --pinned-bpc asks for it.
+const compiler = resolveBlueprintCompiler({ explicit: bpcArg, sourceRoot, allowPinned: pinnedBpc });
+if (!pinnedBpc && !bpcArg && pinnedBlueprintCompiler(sourceRoot)) {
+  console.error('  note: the checkout has its own blueprint-compiler (subprojects/blueprint-compiler); it was not run. Pass --pinned-bpc to validate with it.');
+}
 if (!compiler) {
-  console.error('protota-import: NO blueprint-compiler available (checked --bpc, the checkout\'s pinned subproject, and PATH).');
+  console.error(`protota-import: NO blueprint-compiler available (checked --bpc${pinnedBpc ? ', the checkout\'s pinned subproject,' : ''} and PATH).`);
   console.error('protota-import: the bundle was written but is UNVALIDATED. Install blueprint-compiler, pass --bpc, or pass --no-validate to accept this.');
   process.exit(3);
 }

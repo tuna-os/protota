@@ -87,7 +87,8 @@ export interface BlueprintCompiler {
   label: string;
   command: string | string[];
 }
-export function resolveBlueprintCompiler(options?: { explicit?: string | null; sourceRoot?: string }): BlueprintCompiler | null;
+export function pinnedBlueprintCompiler(sourceRoot: string): string | null;
+export function resolveBlueprintCompiler(options?: { explicit?: string | null; sourceRoot?: string; allowPinned?: boolean }): BlueprintCompiler | null;
 export function compileBlueprintFile(compiler: BlueprintCompiler, filePath: string): { ok: boolean; output: string };
 
 export function isDirectory(path: string): boolean;

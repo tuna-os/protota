@@ -92,17 +92,26 @@ export {
 // blueprint-compiler resolution and validation
 // ---------------------------------------------------------------------------
 
+/** The checkout's own blueprint-compiler (meson subproject), or null. */
+export function pinnedBlueprintCompiler(sourceRoot) {
+  const pinned = join(sourceRoot, 'subprojects', 'blueprint-compiler', 'blueprint-compiler.py');
+  return existsSync(pinned) ? pinned : null;
+}
+
 /**
  * Resolve the validating compiler: an explicit --bpc command wins, then the
  * checkout's own pinned copy (meson subproject), then the host PATH. Null
  * means no validator is available — callers must surface that loudly (exit
  * code 3), never skip silently.
+ *
+ * The pinned copy is a program from the checkout. A caller that only reads a
+ * checkout it has no reason to trust passes `allowPinned: false`.
  */
-export function resolveBlueprintCompiler({ explicit, sourceRoot } = {}) {
+export function resolveBlueprintCompiler({ explicit, sourceRoot, allowPinned = true } = {}) {
   if (explicit) return { kind: 'shell', label: explicit, command: explicit };
-  if (sourceRoot) {
-    const pinned = join(sourceRoot, 'subprojects', 'blueprint-compiler', 'blueprint-compiler.py');
-    if (existsSync(pinned)) return { kind: 'exec', label: `${pinned} (project-pinned)`, command: ['python3', pinned] };
+  if (sourceRoot && allowPinned) {
+    const pinned = pinnedBlueprintCompiler(sourceRoot);
+    if (pinned) return { kind: 'exec', label: `${pinned} (project-pinned)`, command: ['python3', pinned] };
   }
   try {
     execFileSync('blueprint-compiler', ['--version'], { stdio: 'ignore' });

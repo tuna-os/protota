@@ -15,6 +15,7 @@
  * app-defined `$SomeWidget` can never be replaced by a Protota-invented
  * class. Class/type changes in the edited document are refused, not applied.
  */
+// oxlint-disable-next-line no-restricted-imports -- --bpc is a command line the user typed
 import { execFileSync, execSync } from 'node:child_process';
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { join, relative, resolve, dirname, basename } from 'node:path';

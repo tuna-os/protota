@@ -5,7 +5,7 @@ import {
   isNonVisualClass,
   type BlueprintValue,
 } from './blueprintCodec';
-import { makeNode, type BlueprintSourceFile } from './blueprintImport';
+import { expansionBudget, makeNode, spendNodes, type BlueprintSourceFile, type ExpansionBudget } from './blueprintImport';
 
 export interface XmlElement {
   tag: string;
@@ -23,14 +23,56 @@ export function decodeXmlEntities(text: string): string {
     .replace(/&amp;/g, '&');
 }
 
+const XML_SPANS = [['<!--', '-->'], ['<![CDATA[', ']]>'], ['<?', '?>'], ['<!DOCTYPE', '>']] as const;
+
+/**
+ * Split XML into comments, CDATA, instructions, tags and text runs. A `<`
+ * that opens none of them is dropped.
+ *
+ * Scanned by hand rather than with one pattern: a pattern searches the rest
+ * of the file again from every `<!--` or `<a ` that is never closed, so a
+ * file made of those costs time quadratic in its size.
+ */
+function* xmlChunks(code: string): Generator<string> {
+  const name = /[A-Za-z_][\w.:-]*/y;
+  const attributes = /[^<>]*/y;
+  // Terminators already known to be missing from the rest of the file.
+  const missing = new Set<string>();
+  const markupEnd = (start: number): number => {
+    for (const [open, close] of XML_SPANS) {
+      if (!code.startsWith(open, start)) continue;
+      const end = missing.has(close) ? -1 : code.indexOf(close, start + open.length);
+      if (end !== -1) return end + close.length;
+      missing.add(close);
+    }
+    name.lastIndex = code[start + 1] === '/' ? start + 2 : start + 1;
+    if (!name.test(code)) return -1;
+    const after = name.lastIndex;
+    if (code[after] === '>') return after + 1;
+    if (code[after] === '/' && code[after + 1] === '>') return after + 2;
+    if (after >= code.length || !/\s/.test(code[after])) return -1;
+    attributes.lastIndex = after + 1;
+    attributes.test(code);
+    return code[attributes.lastIndex] === '>' ? attributes.lastIndex + 1 : -1;
+  };
+  let index = 0;
+  while (index < code.length) {
+    let end = code[index] === '<' ? markupEnd(index) : code.indexOf('<', index);
+    if (code[index] === '<' && end === -1) { index++; continue; }
+    if (end === -1) end = code.length;
+    yield code.slice(index, end);
+    index = end;
+  }
+}
+
 /** Minimal structural XML parser — elements, attributes, text, comments. */
 export function parseXmlElements(code: string): XmlElement[] {
   const roots: XmlElement[] = [];
   const stack: XmlElement[] = [];
-  const tagPattern = /<!--[\s\S]*?-->|<!\[CDATA\[[\s\S]*?\]\]>|<\?[\s\S]*?\?>|<!DOCTYPE[^>]*>|<\/?[A-Za-z_][\w.:-]*(?:\s+[^<>]*?)?\/?>|[^<]+/g;
-  const attrPattern = /([\w.:-]+)\s*=\s*"([^"]*)"|([\w.:-]+)\s*=\s*'([^']*)'/g;
-  for (const match of code.matchAll(tagPattern)) {
-    const chunk = match[0];
+  // The lookbehind starts a name only at its first character; without it a
+  // long run of name characters is searched again from each one.
+  const attrPattern = /(?<![\w.:-])([\w.:-]+)\s*=\s*"([^"]*)"|(?<![\w.:-])([\w.:-]+)\s*=\s*'([^']*)'/g;
+  for (const chunk of xmlChunks(code)) {
     if (chunk.startsWith('<!--') || chunk.startsWith('<?') || chunk.startsWith('<!DOCTYPE')) continue;
     if (chunk.startsWith('<![CDATA[')) {
       const parent = stack[stack.length - 1];
@@ -218,12 +260,13 @@ export function collectBuilderTemplates(files: BlueprintSourceFile[], diagnostic
   return templates;
 }
 
-export function resolveBuilderTemplates(node: AdwNode, templates: Map<string, AdwNode>, seen: ReadonlySet<string>, resolved: Set<string>): void {
-  node.children?.forEach(child => resolveBuilderTemplates(child, templates, seen, resolved));
+export function resolveBuilderTemplates(node: AdwNode, templates: Map<string, AdwNode>, seen: ReadonlySet<string>, resolved: Set<string>, budget: ExpansionBudget = expansionBudget()): void {
+  node.children?.forEach(child => resolveBuilderTemplates(child, templates, seen, resolved, budget));
   if (node.type !== 'custom-widget' || !node.sourceClass || node.children?.length) return;
   const template = templates.get(node.sourceClass);
   if (!template || seen.has(node.sourceClass)) return;
   resolved.add(`${node.sourceClass}:${node.id}`);
+  spendNodes(budget, template);
   const projected = structuredClone(template);
   // GtkBuilder composite templates commonly bind an inner widget to a
   // property supplied by the concrete instance, e.g. ClocksHeaderBar's
@@ -254,5 +297,5 @@ export function resolveBuilderTemplates(node: AdwNode, templates: Map<string, Ad
   }
   const nested = new Set(seen);
   nested.add(node.sourceClass!);
-  node.children?.forEach(child => resolveBuilderTemplates(child, templates, nested, resolved));
+  node.children?.forEach(child => resolveBuilderTemplates(child, templates, nested, resolved, budget));
 }

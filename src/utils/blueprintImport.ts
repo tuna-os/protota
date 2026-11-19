@@ -474,8 +474,8 @@ export function blueprintToNode(code: string): AdwNode {
  * matches. Project the first declared layout — libadwaita's default — and
  * substitute its slots with the named children.
  */
-export function resolveMultiLayoutViews(node: AdwNode): void {
-  node.children?.forEach(resolveMultiLayoutViews);
+export function resolveMultiLayoutViews(node: AdwNode, budget: ExpansionBudget = expansionBudget()): void {
+  node.children?.forEach(child => resolveMultiLayoutViews(child, budget));
   if (node.sourceClass !== 'Adw.MultiLayoutView' || !node.children?.length) return;
   const layouts = node.children.filter(child => child.sourceClass === 'Adw.Layout');
   if (!layouts.length) return;
@@ -487,7 +487,11 @@ export function resolveMultiLayoutViews(node: AdwNode): void {
       if (child.sourceClass === 'Adw.LayoutSlot') {
         const slotName = String(child.id ?? '');
         const filler = fillers.find(candidate => candidate.slot === slotName || candidate.id === slotName);
-        if (filler) return { ...filler, slot: child.slot };
+        if (filler) {
+          // Every slot of that name shows the filler again.
+          spendNodes(budget, filler);
+          return { ...filler, slot: child.slot };
+        }
         return child;
       }
       substitute(child);
@@ -541,7 +545,8 @@ export function blueprintToDocument(code: string, title = 'Imported GNOME App'):
   );
   const windowRoots = allRoots.filter(root => SCREEN_ROOT_TYPES.has(root.type));
   const roots = windowRoots.length ? windowRoots : allRoots;
-  roots.forEach(resolveMultiLayoutViews);
+  const budget = expansionBudget();
+  roots.forEach(root => resolveMultiLayoutViews(root, budget));
   roots.forEach(resolveWidgetVisibilityBindings);
   const inferType = (root: AdwNode): ScreenTemplateType =>
     root.type === 'preferences-dialog' ? 'preferences'
@@ -608,6 +613,44 @@ export interface BlueprintTemplate {
   body: string;
 }
 
+/**
+ * What one import may add to the files it was given. A template, a code fact
+ * or a layout slot repeats its subtree at each reference, so references
+ * nested a few levels deep multiply: under a kilobyte of source describes
+ * more widgets than a tab can hold. The ingest ceilings (appIngest.ts) bound
+ * the files, not what the files expand to.
+ */
+export interface ExpansionBudget {
+  characters: number;
+  nodes: number;
+}
+
+export const MAX_EXPANDED_CHARACTERS = 4 * 1024 * 1024;
+export const MAX_EXPANDED_NODES = 50_000;
+
+export function expansionBudget(): ExpansionBudget {
+  return { characters: MAX_EXPANDED_CHARACTERS, nodes: MAX_EXPANDED_NODES };
+}
+
+const expansionLimit = () =>
+  new Error('The source expands beyond the import safety limit: its templates, code-built widgets or layout slots repeat each other too many times.');
+
+/** Charge source text an expansion wrote; throws once the import has grown too far. */
+export function spendCharacters(budget: ExpansionBudget, count: number): void {
+  budget.characters -= count;
+  if (budget.characters < 0) throw expansionLimit();
+}
+
+/**
+ * Charge a subtree an expansion is about to repeat. It stops at the limit, so
+ * a tree whose branches are shared costs no more than the budget to measure.
+ */
+export function spendNodes(budget: ExpansionBudget, node: AdwNode): void {
+  budget.nodes -= 1;
+  if (budget.nodes < 0) throw expansionLimit();
+  node.children?.forEach(child => spendNodes(budget, child));
+}
+
 export function closingBrace(source: string, openingIndex: number): number {
   let depth = 0;
   let quoted = false;
@@ -630,16 +673,21 @@ export function collectTemplates(files: BlueprintSourceFile[]): Map<string, Blue
   const templates = new Map<string, BlueprintTemplate>();
   const declaration = /template\s+\$([A-Za-z_][A-Za-z0-9_-]*)\s*:\s*([A-Za-z_.][A-Za-z0-9_.-]*)\s*\{/g;
   for (const file of files) {
-    for (const match of file.content.matchAll(declaration)) {
-      const openingIndex = (match.index || 0) + match[0].lastIndexOf('{');
+    declaration.lastIndex = 0;
+    let match: RegExpExecArray | null;
+    while ((match = declaration.exec(file.content))) {
+      const openingIndex = match.index + match[0].lastIndexOf('{');
       const end = closingBrace(file.content, openingIndex);
       templates.set(match[1], { className: match[2], body: file.content.slice(openingIndex + 1, end) });
+      // Blueprint declares templates at the top level only. Searching on
+      // inside the body would walk it again for each declaration nested there.
+      declaration.lastIndex = end + 1;
     }
   }
   return templates;
 }
 
-export function expandBundleTemplates(source: string, templates: Map<string, BlueprintTemplate>, stack: string[] = []): string {
+export function expandBundleTemplates(source: string, templates: Map<string, BlueprintTemplate>, stack: string[] = [], budget: ExpansionBudget = expansionBudget()): string {
   const reference = /\$([A-Za-z_][A-Za-z0-9_-]*)\s+([A-Za-z_][A-Za-z0-9_-]*)\s*\{/g;
   return source.replace(reference, (match, name: string, id: string) => {
     const template = templates.get(name);
@@ -652,8 +700,9 @@ export function expandBundleTemplates(source: string, templates: Map<string, Blu
     // Inside an inlined body, `template.` refers to this template's class.
     // Qualify it so bindings keep their owner through expansion; inner
     // templates already qualified theirs during their own expansion.
-    const body = expandBundleTemplates(template.body, templates, [...stack, name])
+    const body = expandBundleTemplates(template.body, templates, [...stack, name], budget)
       .replace(/\b(bind(?:-property)?)\s+template\./g, `$1 $${name}.`);
+    spendCharacters(budget, body.length);
     return `${template.className} ${id} {${body}`;
   });
 }
@@ -676,13 +725,14 @@ export function blueprintBundleToDocument(files: BlueprintSourceFile[], entryPat
   const documentTitle = title || entry.path.replace(/^.*\//, '').replace(/\.(blp|ui)$/i, '');
   let doc: MockupDocument;
   let builderTemplates: Map<string, AdwNode> | null = null;
+  const budget = expansionBudget();
   // A resolved composite instance is no longer an unresolved boundary,
   // whichever boundary code the parse assigned it.
   const resolveBuilderPass = () => {
     if (!builderTemplates?.size) return;
     const diagnostics = doc.importDiagnostics ?? (doc.importDiagnostics = []);
     const resolvedKeys = new Set<string>();
-    doc.screens.forEach(screen => resolveBuilderTemplates(screen.rootNode, builderTemplates!, new Set(), resolvedKeys));
+    doc.screens.forEach(screen => resolveBuilderTemplates(screen.rootNode, builderTemplates!, new Set(), resolvedKeys, budget));
     doc.importDiagnostics = diagnostics.filter(d => d.code === 'static-source-expansion' || !resolvedKeys.has(`${d.sourceClass}:${d.sourceId}`));
   };
   if (/\.ui$/i.test(entry.path)) {
@@ -692,14 +742,14 @@ export function blueprintBundleToDocument(files: BlueprintSourceFile[], entryPat
     builderTemplates = collectBuilderTemplates(declarativeFiles.filter(file => file !== entry), doc.importDiagnostics ?? (doc.importDiagnostics = []));
     resolveBuilderPass();
   } else {
-    doc = blueprintToDocument(expandBundleTemplates(entry.content, templates), documentTitle);
+    doc = blueprintToDocument(expandBundleTemplates(entry.content, templates, [], budget), documentTitle);
   }
   if (valaFiles.length || cFiles.length || pythonFiles.length) {
-    enrichWithValaFacts(doc, valaFiles, templates, cFiles, pythonFiles);
+    enrichWithValaFacts(doc, valaFiles, templates, cFiles, pythonFiles, budget);
     // Enrichment can introduce boundaries whose classes are .ui templates.
     resolveBuilderPass();
   }
   // Template resolution and enrichment can introduce MultiLayoutView bodies.
-  doc.screens.forEach(screen => resolveMultiLayoutViews(screen.rootNode));
+  doc.screens.forEach(screen => resolveMultiLayoutViews(screen.rootNode, budget));
   return doc;
 }

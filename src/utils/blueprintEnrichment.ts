@@ -10,9 +10,13 @@ import {
 } from './blueprintCodec';
 import {
   expandBundleTemplates,
+  expansionBudget,
   parseBlueprintRoots,
+  spendCharacters,
+  spendNodes,
   type BlueprintSourceFile,
   type BlueprintTemplate,
+  type ExpansionBudget,
 } from './blueprintImport';
 
 /**
@@ -45,6 +49,7 @@ function factStyleClasses(facts: ValaClassFacts, target: string): string {
 function valaCompositeSnippet(
   facts: ValaClassFacts,
   templates: Map<string, BlueprintTemplate>,
+  budget: ExpansionBudget,
 ): { snippet: string; projectedBaseClass?: string } | null {
   const emitVariable = (variable: string): string | null => {
     const constructedClass = facts.constructions[variable];
@@ -65,6 +70,8 @@ function valaCompositeSnippet(
       .map(insertion => emitVariable(insertion.child))
       .filter(Boolean)
       .join(' ');
+    // A widget inserted ten times is written ten times, at every level.
+    spendCharacters(budget, children.length);
     if (CLASS_TO_WIDGET_MAP[constructedClass] || CLASS_TO_WIDGET_MAP[short]) {
       return `${constructedClass} ${variable} { ${properties} ${styles} ${children} }`;
     }
@@ -178,7 +185,7 @@ function valaShapeOfCFacts(facts: CClassFacts): ValaClassFacts {
  * discoverable contents. Structural only — facts come from language syntax,
  * never from application names or invented widgets.
  */
-export function enrichWithValaFacts(doc: MockupDocument, valaFiles: BlueprintSourceFile[], templates: Map<string, BlueprintTemplate>, cFiles: BlueprintSourceFile[] = [], pythonFiles: BlueprintSourceFile[] = []): void {
+export function enrichWithValaFacts(doc: MockupDocument, valaFiles: BlueprintSourceFile[], templates: Map<string, BlueprintTemplate>, cFiles: BlueprintSourceFile[] = [], pythonFiles: BlueprintSourceFile[] = [], budget: ExpansionBudget = expansionBudget()): void {
   const factsByClass = new Map<string, ValaClassFacts>();
   for (const file of valaFiles) {
     for (const facts of extractValaFacts(file.content)) factsByClass.set(facts.className, facts);
@@ -243,11 +250,12 @@ export function enrichWithValaFacts(doc: MockupDocument, valaFiles: BlueprintSou
       if (assignment.property === 'vexpand' || assignment.property === 'vexpand_set') projectFromCode('vexpand');
       if (assignment.property === 'hexpand' || assignment.property === 'hexpand_set') projectFromCode('hexpand');
     }
-    const projection = valaCompositeSnippet(facts, templates);
+    const projection = valaCompositeSnippet(facts, templates, budget);
     if (!projection) return;
     const childDiagnostics: ImportDiagnostic[] = [];
-    const roots = parseBlueprintRoots(expandBundleTemplates(projection.snippet, templates), childDiagnostics);
+    const roots = parseBlueprintRoots(expandBundleTemplates(projection.snippet, templates, [], budget), childDiagnostics);
     if (!roots.length) return;
+    roots.forEach(root => spendNodes(budget, root));
     if (projection.projectedBaseClass) {
       // The composite *is* its declared base widget. The node becomes that
       // widget — declared source properties (title, subtitle, visibility)

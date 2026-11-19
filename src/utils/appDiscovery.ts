@@ -106,7 +106,9 @@ export function discoverAppSources(fileMap: AppFileMap): AppDiscoveryResult {
   const sortedPaths = [...onDisk].sort();
   for (const path of sortedPaths.filter((entry) => entry.endsWith('.gresource.xml'))) {
     const xml = contentOf.get(path)!;
-    for (const match of xml.matchAll(/<file[^>]*>([^<]+)<\/file>/g)) {
+    // `[^<>]`, not `[^>]`: a tag never holds `<`, and stopping there keeps a
+    // file of unclosed `<file` from being searched to its end once per tag.
+    for (const match of xml.matchAll(/<file[^<>]*>([^<]+)<\/file>/g)) {
       addCandidate(`${posixDirname(path)}/${match[1].trim()}`);
     }
   }
@@ -144,7 +146,7 @@ export function appBundleManifest(files: BlueprintSourceFile[]): AppBundleManife
     if (file.path.endsWith('.blp')) {
       for (const match of file.content.matchAll(/template\s+\$([A-Za-z_][A-Za-z0-9_-]*)/g)) declared.add(match[1]);
     } else {
-      for (const match of file.content.matchAll(/<template\s+[^>]*class="([^"]+)"/g)) declared.add(match[1]);
+      for (const match of file.content.matchAll(/<template\s[^<>]*class="([^"]+)"/g)) declared.add(match[1]);
     }
   }
   const entryCandidates: string[] = [];

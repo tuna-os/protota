@@ -2,6 +2,7 @@ import React, { useEffect, useLayoutEffect, useRef } from "react";
 import { objectSelectSymbolic } from "@gjsify/adwaita-icons/actions";
 import { toDataUri } from "@gjsify/adwaita-icons/utils";
 import { useMockupStore } from "../store/mockupStore";
+import { usePreferencesStore } from "../store/preferencesStore";
 import { buildMenu, type AdwMenuItem, type AdwMenuModel, type AdwMenuNode } from "@gjsify/adwaita-web";
 import type { WindowButtonsPreference } from "../utils/headerBarChrome";
 import { useIsMobile } from "../hooks/useIsMobile";
@@ -143,8 +144,8 @@ export const AppMenuButton: React.FC = () => {
   const { appMenuItems, handleToggleDiagnostics } = useMenus();
   const colorScheme = useMockupStore((s) => s.doc.colorScheme);
   const setColorScheme = useMockupStore((s) => s.setColorScheme);
-  const windowButtons = useMockupStore((s) => s.windowButtons);
-  const setWindowButtons = useMockupStore((s) => s.setWindowButtons);
+  const windowButtons = usePreferencesStore((s) => s.windowButtons);
+  const setWindowButtons = usePreferencesStore((s) => s.setWindowButtons);
   const showFlows = useMockupStore((s) => s.showFlows);
   const toggleShowFlows = useMockupStore((s) => s.toggleShowFlows);
   const diagnosticsEnabled = useMockupStore((s) => s.diagnosticsEnabled);

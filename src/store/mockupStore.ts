@@ -9,14 +9,11 @@ import { runDiagnostics } from '../diagnostics/engine';
 import { runRoundTripCheck } from '../diagnostics/blueprintSource';
 import { findNodeLocation, findNodeById } from '../utils/treeHelpers';
 import { toggleSelection, unionSelection, filterShallowest } from '../utils/selection';
-import type { WindowButtonsPreference } from '../utils/headerBarChrome';
 import {
   loadIgnores,
   loadPersistedDocument,
-  loadWindowButtons,
   persistDocumentSource,
   saveIgnores,
-  saveWindowButtons,
 } from './persistence';
 export { persistDocumentSource } from './persistence';
 export {
@@ -93,8 +90,6 @@ interface MockupState {
   ignoredRules: string[];
   /** `${ruleId}:${nodeId}` dismissals (persisted). */
   ignoredInstances: string[];
-  /** Window-buttons preference (persisted, #163): buttons set + position. */
-  windowButtons: WindowButtonsPreference;
   /** Flow-edge connectors between screens (#11) drawn on the canvas. */
   showFlows: boolean;
 
@@ -170,11 +165,6 @@ interface MockupState {
   ignoreInstance: (ruleId: string, nodeId: string) => void;
   /** Re-enable all rules and un-dismiss all instances. */
   clearIgnores: () => void;
-  /**
-   * Update the window-buttons preference (#163). Persisted to localStorage
-   * (editor state, like the theme picker), never part of the document.
-   */
-  setWindowButtons: (patch: Partial<WindowButtonsPreference>) => void;
   /** Apply a machine fix expressed as data over existing mutations (§6). */
   applyQuickFix: (d: Diagnostic) => void;
   /** Export round-trip check (BLP-E001); returns the diagnostics it stored. */
@@ -275,7 +265,6 @@ export const useMockupStore = create<MockupState>((set, get) => {
     liveBlueprintDiagnostics: [],
     tierFilters: { error: true, warning: true, suggestion: true },
     ...(() => { const ignores = loadIgnores(); return { ignoredRules: ignores.rules, ignoredInstances: ignores.instances }; })(),
-    windowButtons: loadWindowButtons(),
     showFlows: false,
 
     selectNode: (nodeId, screenId) =>
@@ -663,13 +652,6 @@ export const useMockupStore = create<MockupState>((set, get) => {
     clearIgnores: () => {
       saveIgnores({ rules: [], instances: [] });
       set({ ignoredRules: [], ignoredInstances: [] });
-    },
-
-    setWindowButtons: (patch) => {
-      const next: WindowButtonsPreference = { ...get().windowButtons, ...patch };
-      if (next.buttons === get().windowButtons.buttons && next.side === get().windowButtons.side) return;
-      saveWindowButtons(next);
-      set({ windowButtons: next });
     },
 
     applyQuickFix: (d) => {

@@ -1,6 +1,7 @@
 import React, { useRef, useEffect, useCallback, useEffectEvent } from 'react';
 import type { AdwNode } from '../types/mockup';
 import { useMockupStore } from '../store/mockupStore';
+import { usePreferencesStore } from '../store/preferencesStore';
 import { ensureAdwIcon } from '../utils/adwIcons';
 import { filterDiagnostics, getDiagnosticsForNode, worstTier } from '../diagnostics/engine';
 import {
@@ -398,8 +399,8 @@ export const AdwaitaRenderer: React.FC<Props> = ({
   const {
     selectedNodeId, selectedNodeIds, selectNode, toggleNodeSelection, doc,
     diagnosticsEnabled, diagnostics, tierFilters, ignoredRules, ignoredInstances,
-    windowButtons,
   } = useMockupStore();
+  const windowButtons = usePreferencesStore((s) => s.windowButtons);
   // Interactive preview (prototype mode): non-null inside the full-screen
   // preview overlay. All editing chrome is suppressed and clicks act on the
   // mockup instead of selecting.

@@ -6,7 +6,7 @@ RUN npm ci
 COPY . .
 RUN npm run build
 
-FROM docker.io/library/nginx:alpine@sha256:0563c36f94a6d3ec3584161b77859f740f7e20b4853f52c796a864ce6908e8ea
+FROM docker.io/library/nginx:alpine@sha256:fb4658584bd9a916ffb6f6e365f97c25cfdb2923801f551ea08356e695f14ff7
 
 # Create writable temp dirs for nginx running as non-root (uid 101)
 RUN mkdir -p /var/cache/nginx/client_temp /var/cache/nginx/proxy_temp \

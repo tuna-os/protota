@@ -1,79 +1,80 @@
 # Component Library — Widget Index
 
 > One widget = one file in [components/](components/). Read only the file you
-> need. Design values (spacing, typography, CSS classes, sizing) live in
+> need. Widgets marked "not yet documented" have no page yet; only
+> `popover.md` exists so far. Design values (spacing, typography, CSS classes, sizing) live in
 > [tokens/](tokens/).
 
 ## Windows & Chrome
 
 | Widget | File |
 |--------|------|
-| AdwApplicationWindow | [components/application-window.md](components/application-window.md) |
-| AdwHeaderBar | [components/header-bar.md](components/header-bar.md) |
-| AdwToolbarView | [components/toolbar-view.md](components/toolbar-view.md) |
-| GtkWindowHandle | [components/window-handle.md](components/window-handle.md) |
+| AdwApplicationWindow | not yet documented |
+| AdwHeaderBar | not yet documented |
+| AdwToolbarView | not yet documented |
+| GtkWindowHandle | not yet documented |
 
 ## Navigation
 
 | Widget | File |
 |--------|------|
-| AdwViewStack + AdwViewSwitcher | [components/view-stack.md](components/view-stack.md) |
-| AdwNavigationView + NavigationPage | [components/navigation-view.md](components/navigation-view.md) |
-| AdwOverlaySplitView (sidebar) | [components/overlay-split-view.md](components/overlay-split-view.md) |
-| AdwTabView + TabBar + TabOverview + TabButton | [components/tab-view.md](components/tab-view.md) |
-| AdwBottomSheet | [components/bottom-sheet.md](components/bottom-sheet.md) |
-| AdwFlap (deprecated) | [components/flap.md](components/flap.md) |
-| GtkStack (transitions) | [components/stack.md](components/stack.md) |
+| AdwViewStack + AdwViewSwitcher | not yet documented |
+| AdwNavigationView + NavigationPage | not yet documented |
+| AdwOverlaySplitView (sidebar) | not yet documented |
+| AdwTabView + TabBar + TabOverview + TabButton | not yet documented |
+| AdwBottomSheet | not yet documented |
+| AdwFlap (deprecated) | not yet documented |
+| GtkStack (transitions) | not yet documented |
 
 ## Adaptive Layout
 
 | Widget | File |
 |--------|------|
-| AdwBreakpoint + BreakpointBin | [components/breakpoint.md](components/breakpoint.md) |
-| AdwMultiLayoutView + Layout + LayoutSlot | [components/multi-layout-view.md](components/multi-layout-view.md) |
-| AdwClamp | [components/clamp.md](components/clamp.md) |
+| AdwBreakpoint + BreakpointBin | not yet documented |
+| AdwMultiLayoutView + Layout + LayoutSlot | not yet documented |
+| AdwClamp | not yet documented |
 
 ## Preferences & Rows
 
 | Widget | File |
 |--------|------|
-| AdwPreferencesPage + PreferencesGroup | [components/preferences-group.md](components/preferences-group.md) |
-| AdwActionRow (+ Switch, CheckButton radio, selectable subtitle) | [components/action-row.md](components/action-row.md) |
-| AdwSwitchRow | [components/switch-row.md](components/switch-row.md) |
-| AdwComboRow | [components/combo-row.md](components/combo-row.md) |
-| AdwSpinRow | [components/spin-row.md](components/spin-row.md) |
-| AdwButtonRow | [components/button-row.md](components/button-row.md) |
-| AdwExpanderRow | [components/expander-row.md](components/expander-row.md) |
+| AdwPreferencesPage + PreferencesGroup | not yet documented |
+| AdwActionRow (+ Switch, CheckButton radio, selectable subtitle) | not yet documented |
+| AdwSwitchRow | not yet documented |
+| AdwComboRow | not yet documented |
+| AdwSpinRow | not yet documented |
+| AdwButtonRow | not yet documented |
+| AdwExpanderRow | not yet documented |
 
 ## Controls & Menus
 
 | Widget | File |
 |--------|------|
-| GtkButton (all styles) | [components/button.md](components/button.md) |
-| AdwSplitButton | [components/split-button.md](components/split-button.md) |
-| GtkMenuButton + menu models | [components/menu.md](components/menu.md) |
+| GtkButton (all styles) | not yet documented |
+| AdwSplitButton | not yet documented |
+| GtkMenuButton + menu models | not yet documented |
 | GtkPopover | [components/popover.md](components/popover.md) |
-| GtkSearchEntry | [components/search-entry.md](components/search-entry.md) |
-| GtkShortcutController | [components/shortcut-controller.md](components/shortcut-controller.md) |
+| GtkSearchEntry | not yet documented |
+| GtkShortcutController | not yet documented |
 
 ## Feedback & Status
 
 | Widget | File |
 |--------|------|
-| AdwStatusPage | [components/status-page.md](components/status-page.md) |
-| AdwToast + ToastOverlay | [components/toast.md](components/toast.md) |
-| AdwSpinnerPaintable | [components/spinner-paintable.md](components/spinner-paintable.md) |
-| GtkRevealer | [components/revealer.md](components/revealer.md) |
+| AdwStatusPage | not yet documented |
+| AdwToast + ToastOverlay | not yet documented |
+| AdwSpinnerPaintable | not yet documented |
+| GtkRevealer | not yet documented |
 
 ## Text & Lists
 
 | Widget | File |
 |--------|------|
-| GtkInscription (text overflow) | [components/inscription.md](components/inscription.md) |
-| GtkCenterBox | [components/center-box.md](components/center-box.md) |
-| GtkFlowBox (wrapping grid) | [components/flow-box.md](components/flow-box.md) |
-| GtkListHeader (ListView sections) | [components/list-header.md](components/list-header.md) |
-| Filter/Flatten/Map list models | [components/list-models.md](components/list-models.md) |
+| GtkInscription (text overflow) | not yet documented |
+| GtkCenterBox | not yet documented |
+| GtkFlowBox (wrapping grid) | not yet documented |
+| GtkListHeader (ListView sections) | not yet documented |
+| Filter/Flatten/Map list models | not yet documented |
 
 ## Recipes
 

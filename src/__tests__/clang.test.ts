@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { extractCFacts } from '../utils/clang';
+import { extractCFacts, MAX_CALL_DEPTH, type CClassFacts } from '../utils/clang';
 
 // Fixtures use invented class names on purpose: the adapter must work from C
 // idioms alone, never from knowing what Nautilus happens to be called.
@@ -218,6 +218,69 @@ describe('extractCFacts', () => {
     const row = facts.find((f) => f.className === 'QuuxRow');
     expect(panel?.insertions.map((i) => i.child)).toEqual(['panel_child']);
     expect(row?.insertions.map((i) => i.child)).toEqual(['row_child']);
+  });
+
+  it('gives a function to the class with the longest matching prefix', () => {
+    const facts = extractCFacts(`
+      G_DEFINE_TYPE (QuuxPanel, quux_panel, GTK_TYPE_WIDGET);
+      G_DEFINE_TYPE (QuuxPanelRow, quux_panel_row, GTK_TYPE_BOX);
+      static void quux_panel_row_init (QuuxPanelRow *self) {
+        gtk_box_append (self->body, row_child);
+      }
+    `);
+    expect(facts.map((f) => f.insertions.map((i) => i.child))).toEqual([[], ['row_child']]);
+  });
+
+  it('reads a call in a nested block as part of its function', () => {
+    const facts = extractCFacts(`
+      G_DEFINE_TYPE (QuuxPanel, quux_panel, GTK_TYPE_WIDGET);
+      static void quux_panel_init (QuuxPanel *self) {
+        if (wide) {
+          for (i = 0; i < 2; i++) { gtk_box_append (self->body, inner); }
+        }
+        gtk_box_append (self->body, outer);
+      }
+    `);
+    expect(facts[0].insertions.map((i) => i.child)).toEqual(['inner', 'outer']);
+  });
+
+  it('reads an assignment only from the line of the call', () => {
+    const facts = extractCFacts(`
+      G_DEFINE_TYPE (QuuxPanel, quux_panel, GTK_TYPE_WIDGET);
+      static void quux_panel_init (QuuxPanel *self) {
+        self->a = gtk_label_new ("");
+        self->b = g_object_ref ( gtk_button_new () );
+        c == gtk_image_new ();
+        d =
+          gtk_entry_new ();
+      }
+    `);
+    expect(facts[0].constructions).toEqual({ a: 'Gtk.Label', b: 'Gtk.Button' });
+  });
+
+  it('takes the property after the first _set_ of a setter', () => {
+    const facts = extractCFacts(`
+      G_DEFINE_TYPE (QuuxPanel, quux_panel, GTK_TYPE_WIDGET);
+      static void quux_panel_init (QuuxPanel *self) {
+        gtk_quux_set_reset_on_set_focus (row, TRUE);
+      }
+    `);
+    expect(facts[0].propertyAssignments).toEqual([
+      { target: 'row', property: 'reset-on-set-focus', value: true },
+    ]);
+  });
+
+  it('does not read a call nested deeper than the limit', () => {
+    // Each level reads its whole argument text, so depth without a limit
+    // costs the square of the nesting (#578).
+    const nested = (depth: number): CClassFacts => extractCFacts(`
+      G_DEFINE_TYPE (QuuxPanel, quux_panel, GTK_TYPE_WIDGET);
+      static void quux_panel_init (QuuxPanel *self) {
+        ${'f ('.repeat(depth - 1)}gtk_widget_add_css_class (row, "deep")${')'.repeat(depth - 1)};
+      }
+    `)[0];
+    expect(nested(MAX_CALL_DEPTH).styleClasses).toEqual([{ target: 'row', name: 'deep' }]);
+    expect(nested(MAX_CALL_DEPTH + 1).styleClasses).toEqual([]);
   });
 
   it('returns nothing for a file that defines no GObject class', () => {

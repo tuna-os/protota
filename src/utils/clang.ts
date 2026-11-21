@@ -106,10 +106,27 @@ function classFromTypeMacro(macro: string): string | undefined {
   return `${camel(namespace)}${camel(rest)}`;
 }
 
+/**
+ * `fn` without its `_new` or `_new_from_x` ending, when it has one.
+ *
+ * The ending is lower case to the last character, so only that tail of the
+ * name is searched. A pattern here tried every `_new` against the whole rest
+ * of the name, which is quadratic on a name built from repeats (#578).
+ */
+function constructorBase(fn: string): string | undefined {
+  let tail = fn.length;
+  while (tail > 0 && /[a-z0-9_]/.test(fn[tail - 1])) tail -= 1;
+  for (let at = fn.indexOf('_new', tail); at !== -1; at = fn.indexOf('_new', at + 1)) {
+    const after = at + 4;
+    if (after === fn.length || (fn[after] === '_' && after + 1 < fn.length)) return fn.slice(0, at);
+  }
+  return undefined;
+}
+
 /** gtk_label_new → Gtk.Label; quux_list_row_new → QuuxListRow. */
 function classFromConstructor(fn: string): string | undefined {
-  const base = fn.replace(/_new(_[a-z0-9_]+)?$/, '');
-  if (base === fn) return undefined;
+  const base = constructorBase(fn);
+  if (base === undefined) return undefined;
   // Longest namespace wins, so gtk_source_view_new is not read as Gtk.SourceView.
   const namespace = Object.keys(WIDGET_NAMESPACES)
     .filter((ns) => base === ns || base.startsWith(`${ns}_`))
@@ -162,17 +179,17 @@ function stripComments(code: string): string {
 function splitArguments(text: string): string[] {
   const args: string[] = [];
   let depth = 0;
-  let current = '';
+  // Each argument is cut out whole. Adding one character at a time made a
+  // long argument list cost far more memory than its length (#578).
+  let start = 0;
   let index = 0;
   while (index < text.length) {
     const character = text[index];
     if (character === '"' || character === "'") {
       const quote = character;
-      current += character;
       index += 1;
       while (index < text.length) {
-        if (text[index] === '\\') { current += text.slice(index, index + 2); index += 2; continue; }
-        current += text[index];
+        if (text[index] === '\\') { index += 2; continue; }
         index += 1;
         if (text[index - 1] === quote) break;
       }
@@ -181,52 +198,110 @@ function splitArguments(text: string): string[] {
     if (character === '(') depth += 1;
     if (character === ')') depth -= 1;
     if (character === ',' && depth === 0) {
-      args.push(current.trim());
-      current = '';
-      index += 1;
-      continue;
+      args.push(text.slice(start, index).trim());
+      start = index + 1;
     }
-    current += character;
     index += 1;
   }
-  if (current.trim()) args.push(current.trim());
+  const rest = text.slice(start).trim();
+  if (rest) args.push(rest);
   return args;
 }
+
+/**
+ * For each `open` character, the index of the `close` that ends it, or -1
+ * when none does. One pass over the file, whatever the nesting.
+ */
+function matchPairs(code: string, open: string, close: string): Int32Array {
+  const partner = new Int32Array(code.length).fill(-1);
+  const pending: number[] = [];
+  for (let index = 0; index < code.length; index += 1) {
+    const character = code[index];
+    if (character === open) pending.push(index);
+    else if (character === close) {
+      const from = pending.pop();
+      if (from !== undefined) partner[from] = index;
+    }
+  }
+  return partner;
+}
+
+/** The name that ends at `end`: the word characters before it, less any leading digits. */
+function nameEndingAt(text: string, end: number): string | undefined {
+  let start = end;
+  while (start > 0 && /[A-Za-z0-9_]/.test(text[start - 1])) start -= 1;
+  while (start < end && /[0-9]/.test(text[start])) start += 1;
+  return start < end ? text.slice(start, end) : undefined;
+}
+
+/**
+ * The variable a call's result goes to, for `Type *var = call (...)` and
+ * `self->var = call (...)`.
+ *
+ * `g_object_ref_sink (…)` / `g_object_ref (…)` are transparent ownership
+ * wrappers — the GObject idiom for keeping a floating widget alive — so an
+ * assignment through one is still the same assignment.
+ *
+ * Read backwards from the call and never past the line start. A pattern over
+ * the line so far cost the square of a long line or a long word (#578).
+ */
+function assignedVariable(code: string, callStart: number): string | undefined {
+  let cursor = callStart;
+  const skipSpace = (): void => {
+    while (cursor > 0 && code[cursor - 1] !== '\n' && /\s/.test(code[cursor - 1])) cursor -= 1;
+  };
+  skipSpace();
+  if (code[cursor - 1] === '(') {
+    cursor -= 1;
+    skipSpace();
+    const wrapper = ['g_object_ref_sink', 'g_object_ref']
+      .find((name) => cursor >= name.length && code.startsWith(name, cursor - name.length));
+    if (!wrapper) return undefined;
+    cursor -= wrapper.length;
+    skipSpace();
+  }
+  if (code[cursor - 1] !== '=') return undefined;
+  cursor -= 1;
+  skipSpace();
+  return nameEndingAt(code, cursor);
+}
+
+/**
+ * Calls nested deeper than this inside other calls are not read. Each level
+ * reads its whole argument text, so N nested calls cost N² without a limit
+ * (#578). GTK code nests a handful: a cast, a constructor, a translation.
+ */
+export const MAX_CALL_DEPTH = 32;
 
 interface CCall {
   name: string;
   args: string[];
-  /** Text immediately before the call, for `Type *var = call (...)`. */
-  prefix: string;
+  /** The variable in `Type *var = call (...)`, when the call is assigned. */
+  assignedTo?: string;
   index: number;
 }
 
 /** Every `name (args)` call in source order. */
 function findCalls(code: string): CCall[] {
   const calls: CCall[] = [];
+  const closing = matchPairs(code, '(', ')');
+  /** Where each call around the current one closes, outermost first. */
+  const around: number[] = [];
   const pattern = /\b([A-Za-z_][A-Za-z0-9_]*)\s*\(/g;
   let match: RegExpExecArray | null;
   while ((match = pattern.exec(code))) {
     const open = match.index + match[0].length - 1;
-    let depth = 0;
-    let cursor = open;
-    while (cursor < code.length) {
-      if (code[cursor] === '(') depth += 1;
-      else if (code[cursor] === ')') {
-        depth -= 1;
-        if (depth === 0) break;
-      }
-      cursor += 1;
-    }
-    if (cursor >= code.length) continue;
-    const lineStart = code.lastIndexOf('\n', match.index) + 1;
+    const close = closing[open];
+    if (close === -1) continue;
+    while (around.length && around[around.length - 1] < open) around.pop();
+    around.push(close);
+    if (around.length > MAX_CALL_DEPTH) continue;
     calls.push({
       name: match[1],
-      args: splitArguments(code.slice(open + 1, cursor)),
-      prefix: code.slice(lineStart, match.index),
+      args: splitArguments(code.slice(open + 1, close)),
+      assignedTo: assignedVariable(code, match.index),
       index: match.index,
     });
-    pattern.lastIndex = open + 1;
   }
   return calls;
 }
@@ -261,30 +336,52 @@ function literalOf(expression: string): CLiteral | undefined {
   return undefined;
 }
 
-/** Byte ranges of each function body, with the function's name. */
-function findFunctionBodies(code: string): Array<{ name: string; start: number; end: number; instance?: string }> {
-  const bodies: Array<{ name: string; start: number; end: number; instance?: string }> = [];
-  const pattern = /\b([A-Za-z_][A-Za-z0-9_]*)\s*\(([^;{]*)\)\s*\{/g;
+interface CFunctionBody {
+  name: string;
+  start: number;
+  end: number;
+  instance?: string;
+}
+
+/**
+ * Byte ranges of each function body, with the function's name, in source
+ * order. A block inside a listed body is left out: a lookup by position takes
+ * the outermost body, so the list holds ranges that do not overlap.
+ *
+ * A header is `name (parameters) {`, with no `;` or `{` in the parameters.
+ */
+function findFunctionBodies(code: string): CFunctionBody[] {
+  const bodies: CFunctionBody[] = [];
+  const closing = matchPairs(code, '{', '}');
+  const pattern = /\b([A-Za-z_][A-Za-z0-9_]*)\s*\(/g;
+  const stopPattern = /[;{]/g;
+  // The first `;` or `{` after the parameters start, and the last character
+  // before it that is not whitespace. Both are kept across names and only
+  // move forward. One pattern for the whole header searched the rest of the
+  // file again from every name that no `;` or `{` followed (#578).
+  let stop = -1;
+  let last = -1;
+  let covered = -1;
   let match: RegExpExecArray | null;
   while ((match = pattern.exec(code))) {
-    const open = code.indexOf('{', match.index + match[0].length - 1);
-    let depth = 0;
-    let cursor = open;
-    while (cursor < code.length) {
-      if (code[cursor] === '{') depth += 1;
-      else if (code[cursor] === '}') {
-        depth -= 1;
-        if (depth === 0) break;
-      }
-      cursor += 1;
+    const parameters = match.index + match[0].length;
+    if (stop < parameters) {
+      stopPattern.lastIndex = parameters;
+      stop = stopPattern.exec(code)?.index ?? code.length;
+      last = stop - 1;
+      while (last >= parameters && /\s/.test(code[last])) last -= 1;
     }
+    if (code[stop] !== '{' || code[last] !== ')') continue;
+    const open = stop;
+    pattern.lastIndex = open + 1;
+    if (open < covered) continue;
+    covered = closing[open] === -1 ? code.length : closing[open];
     // The first parameter of a class-owned function is the instance. Its
     // name is the author's choice (`self`, `sidebar`, `entry`); recording it
     // lets facts normalise it to the language-neutral `this`.
-    const firstParameter = match[2].split(',')[0]?.trim() ?? '';
-    const instance = /([A-Za-z_][A-Za-z0-9_]*)\s*$/.exec(firstParameter)?.[1];
-    bodies.push({ name: match[1], start: open, end: cursor, instance });
-    pattern.lastIndex = open + 1;
+    const firstParameter = code.slice(parameters, last).split(',')[0]?.trim() ?? '';
+    const instance = nameEndingAt(firstParameter, firstParameter.length);
+    bodies.push({ name: match[1], start: open, end: covered, instance });
   }
   return bodies;
 }
@@ -297,14 +394,14 @@ export function extractCFacts(code: string): CClassFacts[] {
 
   // G_DEFINE_TYPE (Name, snake_prefix, BASE_TYPE) and its variants.
   const classes = new Map<string, CClassFacts>();
-  const prefixes: Array<{ prefix: string; className: string }> = [];
+  const classByPrefix = new Map<string, CClassFacts>();
   const definePattern =
     /\bG_DEFINE_(?:ABSTRACT_)?(?:FINAL_)?TYPE(?:_WITH_PRIVATE|_WITH_CODE)?\s*\(\s*([A-Za-z_][A-Za-z0-9_]*)\s*,\s*([a-z_][a-z0-9_]*)\s*,\s*([A-Za-z_][A-Za-z0-9_]*)/g;
   let define: RegExpExecArray | null;
   while ((define = definePattern.exec(source))) {
     const [, className, prefix, baseMacro] = define;
     if (classes.has(className)) continue;
-    classes.set(className, {
+    const facts: CClassFacts = {
       className,
       baseClass: classFromTypeMacro(baseMacro),
       templateChildren: [],
@@ -312,19 +409,38 @@ export function extractCFacts(code: string): CClassFacts[] {
       insertions: [],
       propertyAssignments: [],
       styleClasses: [],
-    });
-    prefixes.push({ prefix, className });
+    };
+    classes.set(className, facts);
+    if (!classByPrefix.has(prefix)) classByPrefix.set(prefix, facts);
   }
   if (!classes.size) return [];
 
   // Longest prefix first, so quux_panel_row_init is not read as quux_panel's.
-  prefixes.sort((a, b) => b.prefix.length - a.prefix.length);
+  // Only the lengths that some prefix has are tried, so a file of many
+  // classes does not cost a comparison per class for each function.
+  const prefixLengths = [...new Set([...classByPrefix.keys()].map((prefix) => prefix.length))]
+    .sort((a, b) => b - a);
+  const ownerOf = (name: string): CClassFacts | undefined => {
+    for (const length of prefixLengths) {
+      const facts = name[length] === '_' ? classByPrefix.get(name.slice(0, length)) : undefined;
+      if (facts) return facts;
+    }
+    return undefined;
+  };
   const bodies = findFunctionBodies(source);
+  const owners = bodies.map((body) => ownerOf(body.name));
   const contextAt = (index: number): { facts: CClassFacts; instance?: string } | undefined => {
-    const body = bodies.find((candidate) => index > candidate.start && index < candidate.end);
-    if (!body) return undefined;
-    const owner = prefixes.find(({ prefix }) => body.name.startsWith(`${prefix}_`));
-    const facts = owner ? classes.get(owner.className) : undefined;
+    // The bodies are in source order and do not overlap, so the one that can
+    // hold `index` is the last that starts before it.
+    let low = 0;
+    let high = bodies.length;
+    while (low < high) {
+      const middle = (low + high) >> 1;
+      if (bodies[middle].start < index) low = middle + 1;
+      else high = middle;
+    }
+    const body = bodies[low - 1];
+    const facts = body && index < body.end ? owners[low - 1] : undefined;
     return facts ? { facts, instance: body.instance } : undefined;
   };
   const classAt = (index: number): CClassFacts | undefined => contextAt(index)?.facts;
@@ -432,17 +548,12 @@ export function extractCFacts(code: string): CClassFacts[] {
     }
 
     // Construction: `Type *var = gtk_label_new (...)` or a bare assignment.
-    // `g_object_ref_sink (…)` / `g_object_ref (…)` are transparent ownership
-    // wrappers — the GObject idiom for keeping a floating widget alive — so an
-    // assignment through one is still the same construction fact.
-    const assignment = /([A-Za-z_][A-Za-z0-9_]*)\s*(?:->\s*([A-Za-z_][A-Za-z0-9_]*)\s*)?=\s*(?:g_object_ref_sink\s*\(\s*|g_object_ref\s*\(\s*)?$/
-      .exec(call.prefix);
-    if (assignment) {
-      const variable = assignment[2] ?? assignment[1];
+    const variable = call.assignedTo;
+    if (variable !== undefined) {
       let constructed: string | undefined;
       if (call.name === 'g_object_new') {
         constructed = call.args[0] ? classFromTypeMacro(call.args[0]) : undefined;
-      } else if (/_new(_[a-z0-9_]+)?$/.test(call.name)) {
+      } else {
         constructed = classFromConstructor(call.name);
       }
       if (constructed && !NON_WIDGET_PATTERN.test(constructed)) {
@@ -452,8 +563,10 @@ export function extractCFacts(code: string): CClassFacts[] {
     }
 
     // Literal property assignment: gtk_button_set_icon_name (b, "open").
-    const setter = /^([a-z][a-z0-9_]*?)_set_([a-z0-9_]+)$/.exec(call.name);
-    if (setter && call.args.length >= 2) {
+    // The property is what follows the first `_set_` of a lower-case name.
+    const setAt = /^[a-z][a-z0-9_]*$/.test(call.name) ? call.name.indexOf('_set_', 1) : -1;
+    const property = setAt === -1 ? '' : call.name.slice(setAt + '_set_'.length);
+    if (property && call.args.length >= 2) {
       const isWidgetCall = Object.keys(WIDGET_NAMESPACES)
         .some((ns) => call.name.startsWith(`${ns}_`));
       const target = normalize(bareName(call.args[0]));
@@ -461,7 +574,7 @@ export function extractCFacts(code: string): CClassFacts[] {
       if (isWidgetCall && target && value !== undefined) {
         facts.propertyAssignments.push({
           target,
-          property: setter[2].replace(/_/g, '-'),
+          property: property.replace(/_/g, '-'),
           value,
         });
       }

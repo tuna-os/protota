@@ -103,4 +103,17 @@ describe('agent proposals (#500)', () => {
     expect(events).toBe(1);
     protota.off('documentchange', cb);
   });
+
+  it('a rejected edge proposal leaves showFlows alone; accepting reveals flows', () => {
+    store().addScreen('Second', 'standard');
+    const [a, b] = store().doc.screens.map((sc) => sc.id);
+    useMockupStore.setState({ showFlows: false });
+    protota.propose(() => store().addEdge(a, b));
+    expect(store().showFlows).toBe(false);
+    protota.rejectProposal();
+    expect(store().showFlows).toBe(false);
+    protota.propose(() => store().addEdge(a, b));
+    expect(protota.acceptProposal()).toBe('accepted');
+    expect(store().showFlows).toBe(true);
+  });
 });

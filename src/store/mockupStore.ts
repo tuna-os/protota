@@ -636,6 +636,8 @@ export const useMockupStore = create<MockupState>((set, get) => {
         selectedScreenId: s.selectedScreenId,
         screenSelected: s.screenSelected,
         screenDeleteNotice: s.screenDeleteNotice,
+        // addEdge flips this; a rejected proposal must not leave it changed.
+        showFlows: s.showFlows,
       };
       transactionDepth += 1;
       try {
@@ -650,7 +652,8 @@ export const useMockupStore = create<MockupState>((set, get) => {
     commitCandidate: (base, candidate) => {
       if (get().doc !== base) return false;
       if (candidate === base) return true;
-      set(pushSnapshot(candidate));
+      // Accepting new flow edges reveals flows, as a direct addEdge would.
+      set({ ...pushSnapshot(candidate), ...(candidate.edges.length > base.edges.length ? { showFlows: true } : {}) });
       return true;
     },
 

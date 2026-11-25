@@ -112,7 +112,7 @@ a render service. You must use a headless browser. Local equivalent:
 
 `protota.transaction(fn)` applies edits directly. For edits a person should approve first, use `protota.propose(fn, label)`:
 
-- `fn` runs against the live store through the normal legality checks (an illegal edit throws and stages nothing), then the live document, selection, and undo history are restored. Nothing is persisted and no `documentchange` fires.
-- The result is a pending proposal with a per-screen summary (`protota.pendingProposal`) and a review card with a preview. `propose` returns `null` if `fn` changes nothing, and `handle.settled` resolves to `accepted`, `rejected`, `stale`, or `superseded`.
-- Accepting (card or `protota.acceptProposal()`) commits exactly the reviewed candidate as one undo step. Any committed edit, undo, or redo after staging makes the proposal stale and it is dropped, never applied; propose again to regenerate.
+- `fn` runs against the live store through the normal legality checks. An illegal edit throws and stages nothing. Then protota restores the live document, selection, and undo history. Protota does not save anything and no `documentchange` event fires.
+- The result is a proposal that waits for review. It has a per-screen summary (`protota.pendingProposal`) and a review card with a preview. `propose` returns `null` if `fn` changes nothing. `handle.settled` resolves to `accepted`, `rejected`, `stale`, or `superseded`.
+- To accept, use the card or `protota.acceptProposal()`. This commits exactly the reviewed candidate as one undo step. A committed edit, undo, or redo after you stage the proposal makes it stale. Protota drops a stale proposal and never applies it. Propose again to make a new one.
 - This is workflow consent, not a sandbox: in-page script can still call the store directly. It does not touch checkout files.

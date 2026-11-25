@@ -107,3 +107,12 @@ HTML shell only. A static host has no image endpoint, and never will without
 a render service. You must use a headless browser. Local equivalent:
 `npm run dev` and point the browser at
 `http://localhost:5173/protota/?render=1&…`.
+
+## Reviewing agent edits (`protota.propose`)
+
+`protota.transaction(fn)` applies edits directly. For edits a person should approve first, use `protota.propose(fn, label)`:
+
+- `fn` runs against the live store through the normal legality checks (an illegal edit throws and stages nothing), then the live document, selection, and undo history are restored. Nothing is persisted and no `documentchange` fires.
+- The result is a pending proposal with a per-screen summary (`protota.pendingProposal`) and a review card with a preview. `propose` returns `null` if `fn` changes nothing, and `handle.settled` resolves to `accepted`, `rejected`, `stale`, or `superseded`.
+- Accepting (card or `protota.acceptProposal()`) commits exactly the reviewed candidate as one undo step. Any committed edit, undo, or redo after staging makes the proposal stale and it is dropped, never applied; propose again to regenerate.
+- This is workflow consent, not a sandbox: in-page script can still call the store directly. It does not touch checkout files.

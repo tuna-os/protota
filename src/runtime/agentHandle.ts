@@ -13,6 +13,7 @@
 
 import type { MockupDocument } from '../types/mockup';
 import { useMockupStore } from '../store/mockupStore';
+import { propose, acceptProposal, rejectProposal, useProposalStore } from './proposals';
 import { resolveScreenshotTarget, type ScreenshotOptions } from '../utils/renderRequest';
 
 /**
@@ -114,6 +115,23 @@ export const protota = {
   transaction(fn: () => void): void {
     useMockupStore.getState().runInTransaction(fn);
   },
+
+  /**
+   * Opt-in review flow: stage `fn`'s edits as a proposal instead of applying
+   * them. The live document and undo history stay untouched until a person
+   * accepts (review card, or `acceptProposal()`); acceptance is ONE undo step
+   * and is refused if the document changed since. Returns null when `fn`
+   * changes nothing; throws when an edit is illegal. `transaction()` still
+   * applies edits directly.
+   */
+  propose,
+
+  /** Summary of the pending proposal, or null. */
+  get pendingProposal() {
+    return useProposalStore.getState().pending?.summary ?? null;
+  },
+  acceptProposal,
+  rejectProposal,
 
   /**
    * Capture ONE screen of the live document as a PNG blob, at the requested

@@ -157,6 +157,20 @@ interface MockupState {
    * undoable step) and then propagates.
    */
   runInTransaction: (fn: () => void) => void;
+  /**
+   * Run `fn` against the store and return the document it produces, then put
+   * the live document, selection, and undo history back exactly as they were.
+   * Every mutation inside `fn` goes through the usual legality checks, so an
+   * illegal edit throws here just as it would live. Nothing is persisted and
+   * no `documentchange` fires.
+   */
+  evaluateCandidate: (fn: () => void) => MockupDocument;
+  /**
+   * Commit an already-reviewed candidate as ONE undo step. Refused (returns
+   * false) unless the live document is still `base`, i.e. nothing, human or
+   * agent, has edited it since the candidate was evaluated.
+   */
+  commitCandidate: (base: MockupDocument, candidate: MockupDocument) => boolean;
   /** Direct theme picker (mobile overflow menu's 3-circle switcher). */
   setColorScheme: (scheme: MockupDocument['colorScheme']) => void;
   toggleDiagnostics: () => void;
@@ -610,6 +624,37 @@ export const useMockupStore = create<MockupState>((set, get) => {
         // accumulated document as exactly one history entry.
         if (after !== before) set(pushSnapshot(after));
       }
+    },
+
+    evaluateCandidate: (fn) => {
+      if (transactionDepth > 0) throw new Error('evaluateCandidate cannot run inside a transaction.');
+      const s = get();
+      const saved = {
+        doc: s.doc,
+        selectedNodeId: s.selectedNodeId,
+        selectedNodeIds: s.selectedNodeIds,
+        selectedScreenId: s.selectedScreenId,
+        screenSelected: s.screenSelected,
+        screenDeleteNotice: s.screenDeleteNotice,
+        // addEdge flips this; a rejected proposal must not leave it changed.
+        showFlows: s.showFlows,
+      };
+      transactionDepth += 1;
+      try {
+        fn();
+        return get().doc;
+      } finally {
+        transactionDepth -= 1;
+        set(saved);
+      }
+    },
+
+    commitCandidate: (base, candidate) => {
+      if (get().doc !== base) return false;
+      if (candidate === base) return true;
+      // Accepting new flow edges reveals flows, as a direct addEdge would.
+      set({ ...pushSnapshot(candidate), ...(candidate.edges.length > base.edges.length ? { showFlows: true } : {}) });
+      return true;
     },
 
     setShowAddScreenModal: (show) => set({ showAddScreenModal: show }),

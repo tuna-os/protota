@@ -14,6 +14,7 @@ import { ExportWritebackDialog } from "./ExportWritebackDialog";
 import { CommandPalette } from "./CommandPalette";
 import { KeyboardShortcuts } from "./KeyboardShortcuts";
 import { AddScreenModal } from "./AddScreenModal";
+import { ProposalReview } from "./ProposalReview";
 import { ExportModal } from "./ExportModal";
 import { Header } from "./Header";
 import { IMPORT_FILE_INPUT_ID } from "./MenuData";
@@ -650,6 +651,8 @@ export const App: React.FC = () => {
       <IconLibrary isOpen={showIconLibrary} onClose={() => setShowIconLibrary(false)} />
       <ImportAppDialog isOpen={showImportApp} onClose={() => setShowImportApp(false)} />
       <ExportWritebackDialog isOpen={showWriteback} onClose={() => setShowWriteback(false)} />
+
+      <ProposalReview />
 
       <CommandPalette isOpen={showCommandPalette} onClose={() => setShowCommandPalette(false)} />
 
